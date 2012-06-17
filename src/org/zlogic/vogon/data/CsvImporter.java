@@ -55,13 +55,17 @@ public class CsvImporter implements FileImporter {
 	for (int i = 0; i < line.length(); i++) {
 	    char c = line.charAt(i);
 	    String column = null;
+	    if(lastCommaPos>i)
+		continue;
 	    if (insideQuotes) {
 		if ((i + 1) < line.length()) {
 		    if (c == '\"' && line.charAt(i + 1) != '\"'){
-			column = line.substring(lastCommaPos + 2, i + 2).replace("\"\"", "\"");
+			column = line.substring(lastCommaPos + 1, i).replace("\"\"", "\"");
+			lastCommaPos = i+2;
 			insideQuotes = false;
 		    }else if(c != '\"' && line.charAt(i + 1) == '\"' && i+2==line.length()){
-			column = line.substring(lastCommaPos + 2, i + 1).replace("\"\"", "\"");
+			column = line.substring(lastCommaPos + 1, i + 1).replace("\"\"", "\"");
+			lastCommaPos = i+2;
 			insideQuotes = false;
 		    }
 		} else
