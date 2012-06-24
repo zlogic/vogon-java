@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation for importing data from CSV files
@@ -25,8 +27,10 @@ public class CsvImporter implements FileImporter {
      *
      * @param file The file to be imported
      * @return A new FinanceData object, initialized from the CSV file
-     * @throws VogonImportException In case of import errors (I/O, format, indexing etc.)
-     * @throws VogonImportLogicalException  In case of logical erors (without meaningful stack trace, just to show an error message) 
+     * @throws VogonImportException In case of import errors (I/O, format,
+     * indexing etc.)
+     * @throws VogonImportLogicalException In case of logical erors (without
+     * meaningful stack trace, just to show an error message)
      */
     @Override
     public FinanceData importFile(java.io.File file) throws VogonImportException, VogonImportLogicalException {
@@ -97,8 +101,10 @@ public class CsvImporter implements FileImporter {
 	    FinanceData result = new FinanceData(transactions, accounts);
 	    return result;
 	} catch (java.io.FileNotFoundException e) {
+	    Logger.getLogger(CsvImporter.class.getName()).log(Level.SEVERE, null, e);
 	    throw new VogonImportException(e);
 	} catch (java.io.IOException | java.text.ParseException e) {
+	    Logger.getLogger(CsvImporter.class.getName()).log(Level.SEVERE, null, e);
 	    throw new VogonImportException(e);
 	} catch (VogonImportLogicalException e) {
 	    throw new VogonImportLogicalException(e);

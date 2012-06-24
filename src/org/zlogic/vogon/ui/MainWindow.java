@@ -7,6 +7,8 @@ package org.zlogic.vogon.ui;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import org.zlogic.vogon.data.CsvImporter;
@@ -24,7 +26,7 @@ public class MainWindow extends javax.swing.JFrame {
     public MainWindow() {
 	initComponents();
 	//Restore settings
-	lastDirectory= preferenceStorage.get("lastDirectory", null)==null?null:new java.io.File(preferenceStorage.get("lastDirectory", null));
+	lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null : new java.io.File(preferenceStorage.get("lastDirectory", null));
     }
 
     /**
@@ -104,7 +106,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void jMenuItemImportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemImportActionPerformed
 	// Prepare file chooser dialog
-	JFileChooser fileChooser = new JFileChooser((lastDirectory!=null && lastDirectory.exists())?lastDirectory:null);
+	JFileChooser fileChooser = new JFileChooser((lastDirectory != null && lastDirectory.exists()) ? lastDirectory : null);
 	fileChooser.setMultiSelectionEnabled(false);
 	fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 	fileChooser.setDialogTitle(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("CHOOSE_FILES_TO_IMPORT"));
@@ -121,10 +123,12 @@ public class MainWindow extends javax.swing.JFrame {
 		FinanceData financeData = importer.importFile(selectedFile);
 		((TransactionsTableModel) jTable1.getModel()).setFinanceData(financeData);
 		((AccountsTableModel) jTable2.getModel()).setFinanceData(financeData);
-	    }catch (org.zlogic.vogon.data.VogonImportLogicalException e) {
-		JOptionPane.showMessageDialog(this, new MessageFormat(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("IMPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{e.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(e)}), java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("IMPORT_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
-	    } catch (Exception e) {
-		JOptionPane.showMessageDialog(this, new MessageFormat(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("IMPORT_EXCEPTION_DIALOG_TEXT_STACKTRACE")).format(new Object[]{e.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(e)}), java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("IMPORT_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
+	    } catch (org.zlogic.vogon.data.VogonImportLogicalException ex) {
+		Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+		JOptionPane.showMessageDialog(this, new MessageFormat(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("IMPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("IMPORT_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
+	    } catch (Exception ex) {
+		Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+		JOptionPane.showMessageDialog(this, new MessageFormat(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("IMPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("IMPORT_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
 	    }
 	}
     }//GEN-LAST:event_jMenuItemImportActionPerformed
@@ -184,5 +188,5 @@ public class MainWindow extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
     private File lastDirectory = null;
     protected java.util.prefs.Preferences preferenceStorage = java.util.prefs.Preferences.userNodeForPackage(MainWindow.class);
-    protected PreferencesWindow preferencesWindow=new PreferencesWindow();
+    protected PreferencesWindow preferencesWindow = new PreferencesWindow();
 }
