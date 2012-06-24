@@ -11,8 +11,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import org.zlogic.vogon.data.CsvImporter;
 import org.zlogic.vogon.data.FinanceData;
-import org.zlogic.vogon.data.VogonImportException;
-import org.zlogic.vogon.data.VogonImportLogicalException;
 
 /**
  *
@@ -25,6 +23,8 @@ public class MainWindow extends javax.swing.JFrame {
      */
     public MainWindow() {
 	initComponents();
+	//Restore settings
+	lastDirectory= preferenceStorage.get("lastDirectory", null)==null?null:new java.io.File(preferenceStorage.get("lastDirectory", null));
     }
 
     /**
@@ -95,7 +95,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void jMenuItemImportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemImportActionPerformed
 	// Prepare file chooser dialog
-	JFileChooser fileChooser = new JFileChooser(lastDirectory);
+	JFileChooser fileChooser = new JFileChooser((lastDirectory!=null && lastDirectory.exists())?lastDirectory:null);
 	fileChooser.setMultiSelectionEnabled(false);
 	fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 	fileChooser.setDialogTitle(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("CHOOSE_FILES_TO_IMPORT"));
@@ -104,6 +104,7 @@ public class MainWindow extends javax.swing.JFrame {
 	if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 	    File selectedFile = fileChooser.getSelectedFile();
 	    lastDirectory = selectedFile.isDirectory() ? selectedFile : selectedFile.getParentFile();
+	    preferenceStorage.put("lastDirectory", lastDirectory.toString());
 
 	    //Test code for printing data
 	    CsvImporter importer = new CsvImporter();
@@ -168,4 +169,5 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JTable jTable2;
     // End of variables declaration//GEN-END:variables
     private File lastDirectory = null;
+    protected java.util.prefs.Preferences preferenceStorage = java.util.prefs.Preferences.userNodeForPackage(MainWindow.class);
 }
