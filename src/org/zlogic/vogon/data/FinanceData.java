@@ -18,7 +18,7 @@ public class FinanceData {
      * Default constructor
      */
     public FinanceData(){
-	
+	this.transactions= new java.util.ArrayList<>();
     }
     /**
      * Constructs FinanceData from pre-populated arrays (e.g. when importing data)
@@ -30,10 +30,17 @@ public class FinanceData {
     }
     
     /**
-     * Prints all transactions to console for debugging purposes
+     * Returns a transaction at position i
+     * @param i The index
+     * @return A transaction
      */
-    public void printTransactions(){
-	for(FinanceTransaction transaction:transactions)
-	    System.out.println(transaction.toString());
+    public FinanceTransaction getTransaction(int i){
+	return transactions.get(i);
     }
+    
+    /**
+     * Returns the number of transactions
+     * @return The number of transactions
+     */
+    public int getNumTransactions(){ return transactions.size(); }
 }

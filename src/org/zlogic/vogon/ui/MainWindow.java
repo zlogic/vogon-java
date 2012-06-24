@@ -11,7 +11,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import org.zlogic.vogon.data.CsvImporter;
 import org.zlogic.vogon.data.FinanceData;
-import org.zlogic.vogon.data.Utils;
 
 /**
  *
@@ -35,13 +34,31 @@ public class MainWindow extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jTabbedPane1 = new javax.swing.JTabbedPane();
+        jPanel1 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
         jMenuBar = new javax.swing.JMenuBar();
         jMenuFile = new javax.swing.JMenu();
         jMenuItemImport = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle"); // NOI18N
+        setTitle(bundle.getString("MAINWINDOW_TITLE")); // NOI18N
+        setPreferredSize(new java.awt.Dimension(800, 600));
+        getContentPane().setLayout(new java.awt.GridLayout(1, 0));
+
+        jPanel1.setLayout(new java.awt.GridLayout(1, 0));
+
+        jTable1.setModel(new org.zlogic.vogon.ui.TransactionsTableModel());
+        jScrollPane1.setViewportView(jTable1);
+
+        jPanel1.add(jScrollPane1);
+
+        jTabbedPane1.addTab(bundle.getString("TRANSACTIONS"), jPanel1); // NOI18N
+
+        getContentPane().add(jTabbedPane1);
+
         jMenuFile.setText(bundle.getString("FILE")); // NOI18N
 
         jMenuItemImport.setText(bundle.getString("IMPORT...")); // NOI18N
@@ -56,17 +73,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         setJMenuBar(jMenuBar);
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 279, Short.MAX_VALUE)
-        );
-
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -75,9 +81,9 @@ public class MainWindow extends javax.swing.JFrame {
 	JFileChooser fileChooser = new JFileChooser(lastDirectory);
 	fileChooser.setMultiSelectionEnabled(false);
 	fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-	fileChooser.setDialogTitle(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("CHOOSE FILES TO IMPORT"));
+	fileChooser.setDialogTitle(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("CHOOSE_FILES_TO_IMPORT"));
 	//Prepare file chooser filter
-	fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("CSV FILES (COMMA-SEPARATED)"), "csv"));
+	fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("CSV_FILES_(COMMA-SEPARATED)"), "csv")); //NOI18N
 	if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 	    File selectedFile = fileChooser.getSelectedFile();
 	    lastDirectory = selectedFile.isDirectory() ? selectedFile : selectedFile.getParentFile();
@@ -86,9 +92,9 @@ public class MainWindow extends javax.swing.JFrame {
 	    CsvImporter importer = new CsvImporter();
 	    try {
 		FinanceData financeData = importer.importFile(selectedFile);
-		financeData.printTransactions();
+		((TransactionsTableModel)jTable1.getModel()).setFinanceData(financeData);
 	    } catch (Exception e) {
-		JOptionPane.showMessageDialog(this, new MessageFormat(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("IMPORT EXCEPTION DIALOG TEXT")).format(new Object[]{e.getLocalizedMessage()}), java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("IMPORT EXCEPTION DIALOG TITLE"), JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(this, new MessageFormat(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("IMPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{e.getLocalizedMessage()}), java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("IMPORT_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
 	    }
 	}
     }//GEN-LAST:event_jMenuItemImportActionPerformed
@@ -108,7 +114,7 @@ public class MainWindow extends javax.swing.JFrame {
 	 */
 	try {
 	    for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-		if ("Nimbus".equals(info.getName())) {
+		if ("Nimbus".equals(info.getName())) { //NOI18N
 		    javax.swing.UIManager.setLookAndFeel(info.getClassName());
 		    break;
 		}
@@ -133,6 +139,10 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuBar jMenuBar;
     private javax.swing.JMenu jMenuFile;
     private javax.swing.JMenuItem jMenuItemImport;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables
     private File lastDirectory = null;
 }
