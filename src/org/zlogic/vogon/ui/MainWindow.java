@@ -11,6 +11,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import org.zlogic.vogon.data.CsvImporter;
 import org.zlogic.vogon.data.FinanceData;
+import org.zlogic.vogon.data.VogonImportException;
+import org.zlogic.vogon.data.VogonImportLogicalException;
 
 /**
  *
@@ -38,6 +40,9 @@ public class MainWindow extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
+        jPanel2 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTable2 = new javax.swing.JTable();
         jMenuBar = new javax.swing.JMenuBar();
         jMenuFile = new javax.swing.JMenu();
         jMenuItemImport = new javax.swing.JMenuItem();
@@ -45,17 +50,29 @@ public class MainWindow extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle"); // NOI18N
         setTitle(bundle.getString("MAINWINDOW_TITLE")); // NOI18N
+        setLocationByPlatform(true);
         setPreferredSize(new java.awt.Dimension(800, 600));
         getContentPane().setLayout(new java.awt.GridLayout(1, 0));
 
         jPanel1.setLayout(new java.awt.GridLayout(1, 0));
 
         jTable1.setModel(new org.zlogic.vogon.ui.TransactionsTableModel());
+        jTable1.setFillsViewportHeight(true);
         jScrollPane1.setViewportView(jTable1);
 
         jPanel1.add(jScrollPane1);
 
         jTabbedPane1.addTab(bundle.getString("TRANSACTIONS"), jPanel1); // NOI18N
+
+        jPanel2.setLayout(new java.awt.GridLayout(1, 0));
+
+        jTable2.setModel(new org.zlogic.vogon.ui.AccountsTableModel());
+        jTable2.setFillsViewportHeight(true);
+        jScrollPane2.setViewportView(jTable2);
+
+        jPanel2.add(jScrollPane2);
+
+        jTabbedPane1.addTab(bundle.getString("ACCOUNTS"), jPanel2); // NOI18N
 
         getContentPane().add(jTabbedPane1);
 
@@ -92,9 +109,12 @@ public class MainWindow extends javax.swing.JFrame {
 	    CsvImporter importer = new CsvImporter();
 	    try {
 		FinanceData financeData = importer.importFile(selectedFile);
-		((TransactionsTableModel)jTable1.getModel()).setFinanceData(financeData);
+		((TransactionsTableModel) jTable1.getModel()).setFinanceData(financeData);
+		((AccountsTableModel) jTable2.getModel()).setFinanceData(financeData);
+	    }catch (org.zlogic.vogon.data.VogonImportLogicalException e) {
+		JOptionPane.showMessageDialog(this, new MessageFormat(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("IMPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{e.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(e)}), java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("IMPORT_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
 	    } catch (Exception e) {
-		JOptionPane.showMessageDialog(this, new MessageFormat(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("IMPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{e.getLocalizedMessage()}), java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("IMPORT_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(this, new MessageFormat(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("IMPORT_EXCEPTION_DIALOG_TEXT_STACKTRACE")).format(new Object[]{e.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(e)}), java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle").getString("IMPORT_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
 	    }
 	}
     }//GEN-LAST:event_jMenuItemImportActionPerformed
@@ -140,9 +160,12 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenu jMenuFile;
     private javax.swing.JMenuItem jMenuItemImport;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTable2;
     // End of variables declaration//GEN-END:variables
     private File lastDirectory = null;
 }
