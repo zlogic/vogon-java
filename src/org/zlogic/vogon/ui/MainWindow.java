@@ -46,6 +46,7 @@ public class MainWindow extends javax.swing.JFrame {
         jMenuBar = new javax.swing.JMenuBar();
         jMenuFile = new javax.swing.JMenu();
         jMenuItemImport = new javax.swing.JMenuItem();
+        jMenuItemPreferences = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/Bundle"); // NOI18N
@@ -76,15 +77,23 @@ public class MainWindow extends javax.swing.JFrame {
 
         getContentPane().add(jTabbedPane1);
 
-        jMenuFile.setText(bundle.getString("FILE")); // NOI18N
+        jMenuFile.setText(bundle.getString("MAINWINDOW_MENU_FILE")); // NOI18N
 
-        jMenuItemImport.setText(bundle.getString("IMPORT...")); // NOI18N
+        jMenuItemImport.setText(bundle.getString("MAINWINDOW_MENU_SETTINGS")); // NOI18N
         jMenuItemImport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemImportActionPerformed(evt);
             }
         });
         jMenuFile.add(jMenuItemImport);
+
+        jMenuItemPreferences.setText(bundle.getString("MAINWINDOW_MENU_PREFERENCES")); // NOI18N
+        jMenuItemPreferences.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemPreferencesActionPerformed(evt);
+            }
+        });
+        jMenuFile.add(jMenuItemPreferences);
 
         jMenuBar.add(jMenuFile);
 
@@ -119,6 +128,10 @@ public class MainWindow extends javax.swing.JFrame {
 	    }
 	}
     }//GEN-LAST:event_jMenuItemImportActionPerformed
+
+    private void jMenuItemPreferencesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemPreferencesActionPerformed
+	preferencesWindow.setVisible(true);
+    }//GEN-LAST:event_jMenuItemPreferencesActionPerformed
 
     /**
      * @param args the command line arguments
@@ -160,6 +173,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuBar jMenuBar;
     private javax.swing.JMenu jMenuFile;
     private javax.swing.JMenuItem jMenuItemImport;
+    private javax.swing.JMenuItem jMenuItemPreferences;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
@@ -170,4 +184,5 @@ public class MainWindow extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
     private File lastDirectory = null;
     protected java.util.prefs.Preferences preferenceStorage = java.util.prefs.Preferences.userNodeForPackage(MainWindow.class);
+    protected PreferencesWindow preferencesWindow=new PreferencesWindow();
 }
