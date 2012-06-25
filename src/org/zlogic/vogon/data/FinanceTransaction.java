@@ -32,7 +32,7 @@ public abstract class FinanceTransaction {
      * Returns the amount this transaction modifies an account E.g. how this
      * transaction increased or decreases the balance of a particular account
      *
-     * @param the account
+     * @param account The account on which to calculate this transaction's action
      * @return the amount an account is changed by this transaction
      */
     public abstract double getAccountAction(FinanceAccount account);

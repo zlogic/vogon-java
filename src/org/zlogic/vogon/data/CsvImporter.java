@@ -14,6 +14,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 /**
  * Implementation for importing data from CSV files
@@ -29,11 +32,14 @@ public class CsvImporter implements FileImporter {
      * @return A new FinanceData object, initialized from the CSV file
      * @throws VogonImportException In case of import errors (I/O, format,
      * indexing etc.)
-     * @throws VogonImportLogicalException In case of logical erors (without
+     * @throws VogonImportLogicalException In case of logical erorrs (without
      * meaningful stack trace, just to show an error message)
      */
     @Override
     public FinanceData importFile(java.io.File file) throws VogonImportException, VogonImportLogicalException {
+	EntityManagerFactory entityManagerFactory = new DatabaseManager().getPersistenceUnit();
+	EntityManager entityManager = entityManagerFactory.createEntityManager();
+	entityManager.getTransaction().begin();
 	try {
 	    ArrayList<FinanceTransaction> transactions = new ArrayList<>();
 	    ArrayList<FinanceAccount> accounts = new ArrayList<>();
@@ -46,8 +52,11 @@ public class CsvImporter implements FileImporter {
 		if (columnsHeader == null) {
 		    columnsHeader = columns;
 		    //Create accounts
-		    for (int i = 3; i < columns.length; i++)
-			accounts.add(new FinanceAccount(columns[i]));
+		    for (int i = 3; i < columns.length; i++) {
+			FinanceAccount account = new FinanceAccount(columns[i]);
+			accounts.add(account);
+			entityManager.persist(account);
+		    }
 		} else {
 		    //Count the transaction's total sum
 		    double sum = 0;
@@ -99,6 +108,11 @@ public class CsvImporter implements FileImporter {
 		}
 	    }
 	    FinanceData result = new FinanceData(transactions, accounts);
+
+	    entityManager.getTransaction().commit();
+	    entityManager.close();
+	    entityManagerFactory.close();
+
 	    return result;
 	} catch (java.io.FileNotFoundException e) {
 	    Logger.getLogger(CsvImporter.class.getName()).log(Level.SEVERE, null, e);
@@ -109,6 +123,7 @@ public class CsvImporter implements FileImporter {
 	} catch (VogonImportLogicalException e) {
 	    throw new VogonImportLogicalException(e);
 	}
+
     }
     private java.util.ResourceBundle i18nBundle = java.util.ResourceBundle.getBundle("org/zlogic/vogon/data/Bundle");
 }

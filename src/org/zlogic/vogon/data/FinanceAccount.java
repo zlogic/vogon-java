@@ -5,31 +5,47 @@
  */
 package org.zlogic.vogon.data;
 
+import java.io.Serializable;
+import javax.persistence.*;
+
 /**
  * Class for storing account data
  *
  * @author Dmitry Zolotukhin
  */
-public class FinanceAccount {
+@Entity
+public class FinanceAccount implements Serializable {
 
+    /**
+     * The account ID (only for persistence)
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    protected long id;
     /**
      * The account name
      */
     protected String name;
+
     /**
-     * Finance data reference for recalculating balance
+     * Creates an account
      */
-    protected FinanceData financeData;
+    public FinanceAccount() {
+    }
 
     /**
      * Creates an account
      *
      * @param name The account name
-     * @param financeData
      */
     public FinanceAccount(String name) {
 	this.name = name;
     }
+    /**
+     * Finance data reference for recalculating balance
+     */
+    @Transient
+    protected FinanceData financeData;
 
     /**
      * Returns the account name

@@ -18,6 +18,9 @@ public class AccountsTableModel extends AbstractTableModel {
 
     private FinanceData data = null;
 
+    /**
+     * Default constructor for AccountsTableModel
+     */
     public AccountsTableModel() {
     }
 

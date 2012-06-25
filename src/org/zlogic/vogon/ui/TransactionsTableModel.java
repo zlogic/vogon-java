@@ -17,6 +17,9 @@ public class TransactionsTableModel extends AbstractTableModel {
 
     private FinanceData data = null;
 
+    /**
+     * Default constructor for TransactionsTableModel
+     */
     public TransactionsTableModel() {
     }
 

@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import org.zlogic.vogon.data.CsvImporter;
+import org.zlogic.vogon.data.DatabaseManager;
 import org.zlogic.vogon.data.FinanceData;
 
 /**
@@ -55,6 +56,11 @@ public class MainWindow extends javax.swing.JFrame {
         setTitle(bundle.getString("MAINWINDOW_TITLE")); // NOI18N
         setLocationByPlatform(true);
         setPreferredSize(new java.awt.Dimension(800, 600));
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
         getContentPane().setLayout(new java.awt.GridLayout(1, 0));
 
         jPanel1.setLayout(new java.awt.GridLayout(1, 0));
@@ -137,6 +143,10 @@ public class MainWindow extends javax.swing.JFrame {
 	preferencesWindow.setVisible(true);
     }//GEN-LAST:event_jMenuItemPreferencesActionPerformed
 
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+	new DatabaseManager().shutdown();
+    }//GEN-LAST:event_formWindowClosing
+
     /**
      * @param args the command line arguments
      */
@@ -187,6 +197,12 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JTable jTable2;
     // End of variables declaration//GEN-END:variables
     private File lastDirectory = null;
+    /**
+     * Easy access to preference storage
+     */
     protected java.util.prefs.Preferences preferenceStorage = java.util.prefs.Preferences.userNodeForPackage(MainWindow.class);
+    /**
+     * Preference window
+     */
     protected PreferencesWindow preferencesWindow = new PreferencesWindow();
 }

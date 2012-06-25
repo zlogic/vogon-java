@@ -15,9 +15,12 @@ import java.util.HashMap;
  */
 public class ExpenseTransaction extends FinanceTransaction {
 
+    /**
+     * The transaction amount
+     */
     protected double amount;
     /**
-     * Contains the related account
+     * Contains the related accounts
      */
     protected HashMap<FinanceAccount, Double> accounts;
 
@@ -28,6 +31,8 @@ public class ExpenseTransaction extends FinanceTransaction {
      * @param tags The transaction tags
      * @param date The transaction's date
      * @param amount The transaction amount
+     * @param accounts The transaction's accounts in case this is a split
+     * transaction
      */
     public ExpenseTransaction(String description, String[] tags, Date date, double amount, HashMap<FinanceAccount, Double> accounts) {
 	this.description = description;

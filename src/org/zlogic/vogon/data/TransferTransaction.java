@@ -28,6 +28,16 @@ public class TransferTransaction extends FinanceTransaction {
      */
     protected HashMap<FinanceAccount, Double> to;
 
+    /**
+     * Constructor for a transfer transaction
+     *
+     * @param description The transaction description
+     * @param tags The transaction tags
+     * @param date The transaction date
+     * @param amount The transaction amount (withdrawn from source account)
+     * @param from The source account
+     * @param to The destination accounts and their amounts
+     */
     public TransferTransaction(String description, String[] tags, Date date, double amount, FinanceAccount from, HashMap<FinanceAccount, Double> to) {
 	this.description = description;
 	this.tags = tags;

@@ -12,17 +12,36 @@ package org.zlogic.vogon.data;
  */
 public class VogonImportLogicalException extends Exception {
 
+    /**
+     * Default constructor
+     */
     public VogonImportLogicalException() {
     }
 
+    /**
+     * Constructor based on a human-readable message
+     *
+     * @param message The message
+     */
     public VogonImportLogicalException(String message) {
 	super(message);
     }
 
+    /**
+     * Constructor based on a throwable object
+     *
+     * @param cause A throwable object
+     */
     public VogonImportLogicalException(Throwable cause) {
 	super(cause);
     }
 
+    /**
+     * Constructor based on a human-readable and throwable object
+     *
+     * @param message The message
+     * @param cause A throwable object
+     */
     public VogonImportLogicalException(String message, Throwable cause) {
 	super(message, cause);
     }
