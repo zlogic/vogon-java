@@ -28,6 +28,13 @@ public class MainWindow extends javax.swing.JFrame {
 	initComponents();
 	//Restore settings
 	lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null : new java.io.File(preferenceStorage.get("lastDirectory", null));
+
+	//Load data from DB
+
+	//TODO: use a better way
+	FinanceData financeData = new FinanceData();
+	((TransactionsTableModel) jTable1.getModel()).setFinanceData(financeData);
+	((AccountsTableModel) jTable2.getModel()).setFinanceData(financeData);
     }
 
     /**

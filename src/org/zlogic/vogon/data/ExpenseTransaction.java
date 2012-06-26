@@ -5,49 +5,59 @@
  */
 package org.zlogic.vogon.data;
 
+import java.io.Serializable;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import javax.persistence.Entity;
 
 /**
  * Implements an expense transaction
  *
  * @author Dmitry Zolotukhin
  */
-public class ExpenseTransaction extends FinanceTransaction {
+@Entity
+public class ExpenseTransaction extends FinanceTransaction implements Serializable {
 
     /**
      * The transaction amount
      */
     protected double amount;
+
     /**
-     * Contains the related accounts
+     * Default constructor for an expense transaction
      */
-    protected HashMap<FinanceAccount, Double> accounts;
+    public ExpenseTransaction() {
+    }
 
     /**
      * Constructor for an expense transaction
      *
      * @param description The transaction description
      * @param tags The transaction tags
-     * @param date The transaction's date
-     * @param amount The transaction amount
-     * @param accounts The transaction's accounts in case this is a split
-     * transaction
+     * @param date The transaction date
+     * @param components The expense components
      */
-    public ExpenseTransaction(String description, String[] tags, Date date, double amount, HashMap<FinanceAccount, Double> accounts) {
+    public ExpenseTransaction(String description, String[] tags, Date date, List<TransactionComponent> components) {
 	this.description = description;
 	this.tags = tags;
-	this.amount = amount;
-	this.date = date;
-	this.accounts = new HashMap<>();
-	this.accounts.putAll(accounts);
+	this.transactionDate = date;
+	this.components = new LinkedList<>();
+	this.components.addAll(components);
+
+	amount = 0;
+	for (TransactionComponent component : components)
+	    amount += component.getAmount();
     }
 
     @Override
     public double getAccountAction(FinanceAccount account) {
-	if (accounts.containsKey(account))
-	    return accounts.get(account);
-	return 0;
+	double sum = 0;
+	for (TransactionComponent component : components)
+	    if (component.getAccount().equals(account))
+		sum += component.getAmount();
+	return sum;
     }
 
     @Override
@@ -84,7 +94,11 @@ public class ExpenseTransaction extends FinanceTransaction {
      * @return the account
      */
     public FinanceAccount[] getAccounts() {
+	HashSet<FinanceAccount> accounts = new HashSet<>();
+	for (TransactionComponent component : components) {
+	    accounts.add(component.getAccount());
+	}
 	FinanceAccount[] accountsOut = new FinanceAccount[accounts.size()];
-	return accounts.keySet().toArray(accountsOut);
+	return accounts.toArray(accountsOut);
     }
 }

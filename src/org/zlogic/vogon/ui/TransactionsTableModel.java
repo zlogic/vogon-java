@@ -84,12 +84,23 @@ public class TransactionsTableModel extends AbstractTableModel {
 		    return builder.toString();
 		} else if (transaction.getClass() == TransferTransaction.class) {
 		    FinanceAccount[] toAccounts = ((TransferTransaction) transaction).getToAccounts();
+		    FinanceAccount[] fromAccounts = ((TransferTransaction) transaction).getFromAccounts();
 		    StringBuilder builder = new StringBuilder();
-		    builder.append((((TransferTransaction) transaction)).getFromAccount().getName());
-		    builder.append("->(");
-		    for (int i = 0; i < toAccounts.length; i++)
-			builder.append(i != 0 ? "," : "").append(toAccounts[i].getName());
-		    builder.append(")");
+		    if (fromAccounts.length > 1) {
+			builder.append("(");
+			for (int i = 0; i < fromAccounts.length; i++)
+			    builder.append(i != 0 ? "," : "").append(fromAccounts[i].getName());
+			builder.append(")");
+		    } else if (fromAccounts.length == 1)
+			builder.append(fromAccounts[0].getName());
+		    builder.append("->");
+		    if (toAccounts.length > 1) {
+			builder.append("(");
+			for (int i = 0; i < toAccounts.length; i++)
+			    builder.append(i != 0 ? "," : "").append(toAccounts[i].getName());
+			builder.append(")");
+		    } else if (toAccounts.length == 1)
+			builder.append(toAccounts[0].getName());
 		    return builder.toString();
 		} else
 		    return "";

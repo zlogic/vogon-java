@@ -10,13 +10,12 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 
 /**
  * Implementation for importing data from CSV files
@@ -32,7 +31,7 @@ public class CsvImporter implements FileImporter {
      * @return A new FinanceData object, initialized from the CSV file
      * @throws VogonImportException In case of import errors (I/O, format,
      * indexing etc.)
-     * @throws VogonImportLogicalException In case of logical erorrs (without
+     * @throws VogonImportLogicalException In case of logical errors (without
      * meaningful stack trace, just to show an error message)
      */
     @Override
@@ -53,9 +52,14 @@ public class CsvImporter implements FileImporter {
 		    columnsHeader = columns;
 		    //Create accounts
 		    for (int i = 3; i < columns.length; i++) {
-			FinanceAccount account = new FinanceAccount(columns[i]);
-			accounts.add(account);
-			entityManager.persist(account);
+			List<FinanceAccount> foundAccounts = entityManager.createQuery("SELECT a FROM FinanceAccount a WHERE a.name=:accountName").setParameter("accountName", columns[i]).getResultList();
+			if (!foundAccounts.isEmpty() && foundAccounts.get(0).getName().equals(columns[i])) {
+			    accounts.add(foundAccounts.get(0));
+			} else {
+			    FinanceAccount account = new FinanceAccount(columns[i]);
+			    entityManager.persist(account);
+			    accounts.add(account);
+			}
 		    }
 		} else {
 		    //Count the transaction's total sum
@@ -63,14 +67,16 @@ public class CsvImporter implements FileImporter {
 		    int sumNum = 0;
 		    boolean hasPositiveAmounts = false;
 		    boolean hasNegativeAmounts = false;
-		    HashMap<FinanceAccount, Double> accountAmounts = new HashMap<>();
+		    List<TransactionComponent> accountAmounts = new LinkedList<>();
 		    for (int i = 3; i < columns.length; i++)
 			if (!columns[i].isEmpty()) {
 			    double amount = Double.parseDouble(columns[i].replaceAll("[^ \\t]\\s+", "").replaceAll("[^0-9.-]", ""));
 			    if (amount == 0)
 				continue;
 			    sum += amount;
-			    accountAmounts.put(accounts.get(i - 3), amount);
+			    TransactionComponent newComponent = new TransactionComponent(accounts.get(i - 3), amount);
+			    entityManager.persist(newComponent);
+			    accountAmounts.add(newComponent);
 			    if (amount > 0)
 				hasPositiveAmounts = true;
 			    if (amount < 0)
@@ -83,24 +89,12 @@ public class CsvImporter implements FileImporter {
 		    Date date = new SimpleDateFormat("yyyy-MM-dd").parse(columns[1]);
 		    if ((hasPositiveAmounts || hasNegativeAmounts) && !(hasPositiveAmounts && hasNegativeAmounts)) {
 			//Expense transaction
-			transaction = new ExpenseTransaction(columns[0], tags, date, sum, accountAmounts);
+			transaction = new ExpenseTransaction(columns[0], tags, date, accountAmounts);
+			entityManager.persist(transaction);
 		    } else if (hasPositiveAmounts && hasNegativeAmounts) {
 			//Transfer/split transaction
-			if (sum != 0)
-			    throw new VogonImportLogicalException((new MessageFormat(i18nBundle.getString("CSV_TRANSFER_TRANSACTION_SUM_EXCEPTION"))).format(new Object[]{Utils.join(columns, ",")}));
-			FinanceAccount accountFrom = null;
-			double amountFrom = 0;
-			for (Map.Entry<FinanceAccount, Double> amount : accountAmounts.entrySet()) {
-			    if (amount.getValue() < 0) {
-				if (accountFrom == null) {
-				    accountFrom = amount.getKey();
-				    amountFrom = -amount.getValue();
-				} else
-				    throw new VogonImportLogicalException((new MessageFormat(i18nBundle.getString("CSV_TRANSFER_TRANSACTION_EXCEPTION"))).format(new Object[]{Utils.join(columns, ",")}));
-			    }
-			}
-			accountAmounts.remove(accountFrom);
-			transaction = new TransferTransaction(columns[0], tags, date, amountFrom, accountFrom, accountAmounts);
+			transaction = new TransferTransaction(columns[0], tags, date, accountAmounts);
+			entityManager.persist(transaction);
 		    } else {
 			throw new VogonImportLogicalException((new MessageFormat(i18nBundle.getString("CSV_TRANSFER_TRANSACTION_EXCEPTION"))).format(new Object[]{Utils.join(columns, ",")}));
 		    }

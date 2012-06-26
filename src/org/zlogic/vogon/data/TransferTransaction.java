@@ -6,27 +6,29 @@
 package org.zlogic.vogon.data;
 
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import javax.persistence.Entity;
 
 /**
  * Implements an expense transaction
  *
  * @author Dmitry Zolotukhin
  */
+@Entity
 public class TransferTransaction extends FinanceTransaction {
 
     /**
-     * Contains the transfer amount (from source account)
+     * Contains the transfer amount
      */
     protected double amount;
+
     /**
-     * Source account
+     * Default constructor for a transfer transaction
      */
-    protected FinanceAccount from;
-    /**
-     * Destination account and amounts
-     */
-    protected HashMap<FinanceAccount, Double> to;
+    public TransferTransaction() {
+    }
 
     /**
      * Constructor for a transfer transaction
@@ -34,34 +36,36 @@ public class TransferTransaction extends FinanceTransaction {
      * @param description The transaction description
      * @param tags The transaction tags
      * @param date The transaction date
-     * @param amount The transaction amount (withdrawn from source account)
-     * @param from The source account
-     * @param to The destination accounts and their amounts
+     * @param components The transfer components
      */
-    public TransferTransaction(String description, String[] tags, Date date, double amount, FinanceAccount from, HashMap<FinanceAccount, Double> to) {
+    public TransferTransaction(String description, String[] tags, Date date, List<TransactionComponent> components) {
 	this.description = description;
 	this.tags = tags;
-	this.date = date;
-	this.amount = amount;
-	this.from = from;
-	this.to = new HashMap<>();
-	this.to.putAll(to);
+	this.transactionDate = date;
+	this.components = new LinkedList<>();
+	this.components.addAll(components);
+
+
+	amount = 0;
+	for (TransactionComponent component : components)
+	    if (component.getAmount() > 0)
+		amount += component.getAmount();
     }
 
     @Override
     public double getAccountAction(FinanceAccount account) {
-	if (account == from)
-	    return -amount;
-	if (to.containsKey(account))
-	    return to.get(account);
-	return 0;
+	double sum = 0;
+	for (TransactionComponent component : components)
+	    if (component.getAccount().equals(account))
+		sum += component.getAmount();
+	return sum;
     }
 
     /*
      * Getters/setters
      */
     /**
-     * Returns the amount withdrawn from the source account
+     * Returns the amount withdrawn accountFrom the source account
      *
      * @return the transaction amount
      */
@@ -70,21 +74,30 @@ public class TransferTransaction extends FinanceTransaction {
     }
 
     /**
-     * Returns the account from which money was transferred
+     * Returns the account accountFrom which money was transferred
      *
      * @return the account
      */
-    public FinanceAccount getFromAccount() {
-	return from;
+    public FinanceAccount[] getFromAccounts() {
+	HashSet<FinanceAccount> accounts = new HashSet<>();
+	for (TransactionComponent component : components)
+	    if (component.getAmount() < 0)
+		accounts.add(component.getAccount());
+	FinanceAccount[] accountsOut = new FinanceAccount[accounts.size()];
+	return accounts.toArray(accountsOut);
     }
 
     /**
-     * Returns the accounts to which money was transferred
+     * Returns the accounts accountTo which money was transferred
      *
      * @return the accounts
      */
     public FinanceAccount[] getToAccounts() {
-	FinanceAccount[] accounts = new FinanceAccount[to.size()];
-	return to.keySet().toArray(accounts);
+	HashSet<FinanceAccount> accounts = new HashSet<>();
+	for (TransactionComponent component : components)
+	    if (component.getAmount() > 0)
+		accounts.add(component.getAccount());
+	FinanceAccount[] accountsOut = new FinanceAccount[accounts.size()];
+	return accounts.toArray(accountsOut);
     }
 }

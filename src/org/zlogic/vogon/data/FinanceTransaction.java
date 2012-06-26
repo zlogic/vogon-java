@@ -5,16 +5,26 @@
  */
 package org.zlogic.vogon.data;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import javax.persistence.*;
 
 /**
  * Interface for storing a single finance transaction
  *
  * @author Dmitry Zolotukhin
  */
-public abstract class FinanceTransaction {
+@Entity
+public abstract class FinanceTransaction implements Serializable {
 
+    /**
+     * The transaction ID (only for persistence)
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    protected long id;
     /**
      * Contains the expense description string
      */
@@ -23,16 +33,25 @@ public abstract class FinanceTransaction {
      * Contains the expense tags
      */
     protected String[] tags;
+    
+    /**
+     * Contains the related accounts and the transaction's distribution into them
+     */
+    @OneToMany
+    protected List<TransactionComponent> components;
+    
     /**
      * Contains the transaction date
      */
-    protected Date date;
+    @Temporal(javax.persistence.TemporalType.DATE)
+    protected Date transactionDate;
 
     /**
      * Returns the amount this transaction modifies an account E.g. how this
      * transaction increased or decreases the balance of a particular account
      *
-     * @param account The account on which to calculate this transaction's action
+     * @param account The account on which to calculate this transaction's
+     * action
      * @return the amount an account is changed by this transaction
      */
     public abstract double getAccountAction(FinanceAccount account);
@@ -81,15 +100,15 @@ public abstract class FinanceTransaction {
      * @return the transaction date
      */
     public Date getDate() {
-	return date;
+	return transactionDate;
     }
 
     /**
      * Sets the transaction date
      *
-     * @param date the date to set
+     * @param date The transaction date
      */
     public void setDate(Date date) {
-	this.date = date;
+	this.transactionDate = date;
     }
 }

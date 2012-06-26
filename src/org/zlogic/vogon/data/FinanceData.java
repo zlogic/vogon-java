@@ -6,6 +6,8 @@
 package org.zlogic.vogon.data;
 
 import java.util.Arrays;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 /**
  * Class for storing the complete finance data
@@ -17,11 +19,11 @@ public class FinanceData {
     /**
      * Contains all finance transactions
      */
-    protected java.util.ArrayList<FinanceTransaction> transactions;
+    protected java.util.List<FinanceTransaction> transactions;
     /**
      * Contains all accounts
      */
-    protected java.util.ArrayList<FinanceAccount> accounts;
+    protected java.util.List<FinanceAccount> accounts;
     /**
      * Contains a list of all tags (cached)
      */
@@ -31,8 +33,15 @@ public class FinanceData {
      * Default constructor
      */
     public FinanceData() {
-	this.transactions = new java.util.ArrayList<>();
-	this.accounts = new java.util.ArrayList<>();
+	transactions = new java.util.ArrayList<>();
+	accounts = new java.util.ArrayList<>();
+
+	EntityManagerFactory entityManagerFactory = new DatabaseManager().getPersistenceUnit();
+	EntityManager entityManager = entityManagerFactory.createEntityManager();
+	transactions = entityManager.createQuery("SELECT a FROM FinanceTransaction a").getResultList();
+	accounts = entityManager.createQuery("SELECT a FROM FinanceAccount a").getResultList();
+
+	setClassReferences();
     }
 
     /**
@@ -70,6 +79,7 @@ public class FinanceData {
 
     /**
      * Calculates the account balance from its transactions
+     *
      * @param account
      * @return
      */
