@@ -49,20 +49,10 @@ public class TransferTransaction extends FinanceTransaction {
 		this.components = new LinkedList<>();
 		this.components.addAll(components);
 
+		updateAmounts();
 
-		amount = 0;
 		for (TransactionComponent component : components)
-			if (component.getAmount() > 0)
-				amount += component.getAmount();
-	}
-
-	@Override
-	public double getAccountAction(FinanceAccount account) {
-		double sum = 0;
-		for (TransactionComponent component : components)
-			if (component.getAccount().equals(account))
-				sum += component.getAmount();
-		return sum;
+			component.getAccount().updateRawBalance(component.getRawAmount());
 	}
 
 	/*

@@ -38,7 +38,7 @@ public class TransactionComponent implements Serializable {
 	/**
 	 * The amount this component changes the account's balance
 	 */
-	protected Double amount;
+	protected Long amount;
 
 	/**
 	 * Default constructor for a transaction component
@@ -53,7 +53,7 @@ public class TransactionComponent implements Serializable {
 	 * @param amount The amount which this component modifies the account, can
 	 * be both negative and positive
 	 */
-	public TransactionComponent(FinanceAccount account, double amount) {
+	public TransactionComponent(FinanceAccount account, long amount) {
 		this.account = account;
 		this.amount = amount;
 	}
@@ -69,9 +69,20 @@ public class TransactionComponent implements Serializable {
 	}
 
 	/**
-	 * @return the amount
+	 * Returns the raw amount (should be divided by 100 to get the real amount)
+	 * 
+	 * @return the raw amount
 	 */
-	public Double getAmount() {
+	public Long getRawAmount() {
 		return amount;
+	}
+
+	/**
+	 * Returns the real amount
+	 * 
+	 * @return the raw amount
+	 */
+	public double getAmount() {
+		return amount/100.0D;
 	}
 }

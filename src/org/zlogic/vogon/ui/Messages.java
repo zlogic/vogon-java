@@ -4,6 +4,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.zlogic.vogon.ui.messages"; //$NON-NLS-1$
+	public static String MainWindow_Bad_Account_Substitute;
 	public static String MainWindow_File_Import_Dialog_CsvFilter;
 	public static String MainWindow_File_Import_Dialog_Header;
 	public static String MainWindow_shell_text;
@@ -19,6 +20,12 @@ public class Messages extends NLS {
 	public static String MainWindow_tblclmnAccount_text;
 	public static String MainWindow_tblclmnBalance_text;
 	public static String MainWindow_tblclmnAmount_text;
+	public static String MainWindow_btnAddAccount_text;
+	public static String MainWindow_btnDeleteAccount_text;
+	public static String MainWindow_Error_Importing_File;
+	public static String MainWindow_Error_Importing_File_Description;
+	public static String MainWindow_New_Account_Name;
+	public static String MainWindow_OK;
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Constructor

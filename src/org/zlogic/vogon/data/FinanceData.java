@@ -5,12 +5,12 @@
  */
 package org.zlogic.vogon.data;
 
-import java.util.Arrays;
+import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+
 
 /**
  * Class for storing the complete finance data
@@ -39,16 +39,13 @@ public class FinanceData {
 		transactions = new java.util.ArrayList<>();
 		accounts = new java.util.ArrayList<>();
 
-		EntityManagerFactory entityManagerFactory = new DatabaseManager().getPersistenceUnit();
-		EntityManager entityManager = entityManagerFactory.createEntityManager();
+		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
 		CriteriaQuery<FinanceAccount> accountsCriteriaQuery = criteriaBuilder.createQuery(FinanceAccount.class);
 		
 		transactions = entityManager.createQuery(transactionsCriteriaQuery).getResultList();
 		accounts = entityManager.createQuery(accountsCriteriaQuery).getResultList();
-
-		setClassReferences();
 	}
 
 	/**
@@ -63,40 +60,44 @@ public class FinanceData {
 		this.transactions.addAll(transactions);
 		this.accounts = new java.util.ArrayList<>();
 		this.accounts.addAll(accounts);
-		//Set class references
-		setClassReferences();
-		//Extract tags
 	}
+
 
 	/**
-	 * Sets the references (e.g. to this for accounts) for classes
+	 * Sets a new account name. Adds the account to the persistence if needed.
+	 * 
+	 * @param account The account to be updated
+	 * @param name The new account name
 	 */
-	private void setClassReferences() {
-		for (FinanceAccount account : this.accounts)
-			account.setFinanceData(this);
-	}
+	public void setAccountName(FinanceAccount account,String name){
+		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
+		entityManager.getTransaction().begin();
+		account.setName(name);
 
+		if(!entityManager.contains(account))
+			entityManager.persist(account);
+		entityManager.getTransaction().commit();
+	}
+	
 	/**
-	 * Updates tag list
+	 * Deletes an account (with all dependencies)
+	 * 
+	 * @param account The account to delete
 	 */
-	protected void updateTags() {
-		for (FinanceTransaction transaction : this.transactions)
-			tags.addAll(Arrays.asList(transaction.getTags()));
+	public void deleteAccount(FinanceAccount account){
+		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
+		entityManager.getTransaction().begin();
+		for(FinanceTransaction transaction : transactions){
+			List<TransactionComponent> components = transaction.getComponentsForAccount(account);
+			transaction.removeComponents(components);
+			for(TransactionComponent component:components)
+				entityManager.remove(component);
+		}
+		accounts.remove(account);
+		entityManager.remove(account);
+		entityManager.getTransaction().commit();
 	}
-
-	/**
-	 * Calculates the account balance from its transactions
-	 *
-	 * @param account The account to check balanse
-	 * @return The account's balance
-	 */
-	public double getActualBalance(FinanceAccount account) {
-		double balance = 0;
-		for (FinanceTransaction transaction : transactions)
-			balance += transaction.getAccountAction(account);
-		return balance;
-	}
-
+	
 	/*
 	 * Getters/setters
 	 */

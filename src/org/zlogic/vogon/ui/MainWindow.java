@@ -12,16 +12,27 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Menu;
@@ -38,8 +49,21 @@ import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransferTransaction;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+/**
+ * The main window class
+ * 
+ * @author Dmitry Zolotukhin
+ */
 public class MainWindow {
+
+	/**
+	 * The transactions table label provider implementation
+	 * 
+	 * @author Dmitry Zolotukhin
+	 */
 	private class TransactionsTableLabelProvider extends LabelProvider implements ITableLabelProvider {
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
@@ -53,74 +77,89 @@ public class MainWindow {
 				case 1:
 					return transaction.getDate().toString();
 				case 2:
-					return org.zlogic.vogon.data.Utils.join(transaction.getTags(), ",");
+					return org.zlogic.vogon.data.Utils.join(transaction.getTags(), ","); //$NON-NLS-1$
 				case 3:
 					if (transaction.getClass() == ExpenseTransaction.class)
-						return Double.toString(((ExpenseTransaction) transaction).getAmount());
+						return MessageFormat.format("{0,number,0.00}", new Object[]{((ExpenseTransaction) transaction).getAmount()}); //$NON-NLS-1$
 					else if (transaction.getClass() == TransferTransaction.class)
-						return Double.toString(((TransferTransaction) transaction).getAmount());
+						return MessageFormat.format("{0,number,0.00}", new Object[]{((TransferTransaction) transaction).getAmount()}); //$NON-NLS-1$
 				case 4:
 					if (transaction.getClass() == ExpenseTransaction.class) {
 						FinanceAccount[] accounts = ((ExpenseTransaction) transaction).getAccounts();
 						StringBuilder builder = new StringBuilder();
 						for (int i = 0; i < accounts.length; i++)
-							builder.append(i != 0 ? "," : "").append(accounts[i].getName());
+							builder.append(i != 0 ? "," : "").append(accounts[i].getName()); //$NON-NLS-1$ //$NON-NLS-2$
+						if(accounts.length==0)
+							builder.append(Messages.MainWindow_Bad_Account_Substitute);
 						return builder.toString();
 					} else if (transaction.getClass() == TransferTransaction.class) {
 						FinanceAccount[] toAccounts = ((TransferTransaction) transaction).getToAccounts();
 						FinanceAccount[] fromAccounts = ((TransferTransaction) transaction).getFromAccounts();
 						StringBuilder builder = new StringBuilder();
 						if (fromAccounts.length > 1) {
-							builder.append("(");
+							builder.append("("); //$NON-NLS-1$
 							for (int i = 0; i < fromAccounts.length; i++)
-								builder.append(i != 0 ? "," : "").append(fromAccounts[i].getName());
-							builder.append(")");
+								builder.append(i != 0 ? "," : "").append(fromAccounts[i].getName()); //$NON-NLS-1$ //$NON-NLS-2$
+							builder.append(")"); //$NON-NLS-1$
 						} else if (fromAccounts.length == 1)
 							builder.append(fromAccounts[0].getName());
-						builder.append("->");
+						else
+							builder.append(Messages.MainWindow_Bad_Account_Substitute);
+						builder.append("->"); //$NON-NLS-1$
 						if (toAccounts.length > 1) {
-							builder.append("(");
+							builder.append("("); //$NON-NLS-1$
 							for (int i = 0; i < toAccounts.length; i++)
-								builder.append(i != 0 ? "," : "").append(toAccounts[i].getName());
-							builder.append(")");
+								builder.append(i != 0 ? "," : "").append(toAccounts[i].getName()); //$NON-NLS-1$ //$NON-NLS-2$
+							builder.append(")"); //$NON-NLS-1$
 						} else if (toAccounts.length == 1)
 							builder.append(toAccounts[0].getName());
+						else
+							builder.append(Messages.MainWindow_Bad_Account_Substitute);
 						return builder.toString();
 					} else
-						return "";
+						return ""; //$NON-NLS-1$
 				}
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 	}
 
-
+	/**
+	 * The accounts table label provider implementation
+	 * 
+	 * @author Dmitry Zolotukhin
+	 */
 	private class AccountsTableLabelProvider extends LabelProvider implements ITableLabelProvider {
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
 		}
 		public String getColumnText(Object element, int columnIndex) {
-			
-
 			if(element instanceof FinanceAccount){
 				FinanceAccount account = (FinanceAccount)element;
 				switch (columnIndex) {
 				case 0:
 					return account.getName();
 				case 1:
-					return Double.toString(account.getActualBalance());
+					return MessageFormat.format("{0,number,0.00}", new Object[]{account.getBalance()}); //$NON-NLS-1$
 				}
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 	}
 
+	/**
+	 * The transactions content provider implementation
+	 * 
+	 * @author Dmitry Zolotukhin
+	 */
 	private static class TransactionsContentProvider implements IStructuredContentProvider {		
 		public Object[] getElements(Object inputElement) {
-			if(inputElement instanceof FinanceTransaction){
-				FinanceTransaction transaction = (FinanceTransaction) inputElement;
-				return new Object[]{transaction.getDescription(),transaction.getDate()};
-
+			if(inputElement instanceof FinanceData){
+				FinanceData financeData = (FinanceData)inputElement;
+				Object[] elements = new Object[financeData.getNumTransactions()];
+				for(int i=0;i<financeData.getNumTransactions();i++)
+					elements[i] = financeData.getTransaction(i);
+				return elements;
 			}else return new Object[]{};
 		}
 		public void dispose() {
@@ -128,13 +167,20 @@ public class MainWindow {
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 	}
-
+	
+	/**
+	 * The accounts content provider implementation
+	 * 
+	 * @author Dmitry Zolotukhin
+	 */
 	private static class AccountsContentProvider implements IStructuredContentProvider {		
 		public Object[] getElements(Object inputElement) {
-			if(inputElement instanceof FinanceAccount){
-				FinanceAccount account = (FinanceAccount) inputElement;
-				return new Object[]{account.getName(),account.getActualBalance()};
-
+			if(inputElement instanceof FinanceData){
+				FinanceData financeData = (FinanceData)inputElement;
+				Object[] elements = new Object[financeData.getNumAccounts()];
+				for(int i=0;i<financeData.getNumAccounts();i++)
+					elements[i] = financeData.getAccount(i);
+				return elements;
 			}else return new Object[]{};
 		}
 		public void dispose() {
@@ -143,19 +189,44 @@ public class MainWindow {
 		}
 	}
 
+	/**
+	 * The main window shell
+	 */
 	protected Shell shell;
 
+	/**
+	 * The last opened directory
+	 */
 	protected File lastDirectory = null;
 
+	/**
+	 * Java preference storage for this class
+	 */
 	protected java.util.prefs.Preferences preferenceStorage = java.util.prefs.Preferences.userNodeForPackage(MainWindow.class);
-	private Table tableTransactions;
 
-	protected TransactionsContentProvider transactionsContentProvider = new TransactionsContentProvider();
+	/**
+	 * An instance of the finance data class
+	 */
+	protected FinanceData financeData;
+	
+	/**
+	 * The transactions table
+	 */
+	private Table tableTransactions;
+	/**
+	 * The transactions table viewer
+	 */
 	private TableViewer transactionsTableViewer;
 
-	protected FinanceData financeData = new FinanceData();
-	private Table tableAccounts;
+	/**
+	 * The accounts table
+	 */
+	private Table accountsTable;
+	/**
+	 * The accounts table viewer
+	 */
 	private TableViewer accountsTableViewer;
+	private Button btnDeleteAccount;
 
 	/**
 	 * Launch the application.
@@ -186,16 +257,16 @@ public class MainWindow {
 				display.sleep();
 			}
 		}
-		financeData = null;
-		new DatabaseManager().shutdown();
+		DatabaseManager.getInstance().shutdown();
 	}
 
+	/**
+	 * Restores data from database and updates the tables
+	 */
 	protected void loadData(){
 		FinanceData financeData = new FinanceData();
-		for(int i=0;i<financeData.getNumTransactions();i++)
-			transactionsTableViewer.add(financeData.getTransaction(i));
-		for(int i=0;i<financeData.getNumAccounts();i++)
-			accountsTableViewer.add(financeData.getAccount(i));
+		transactionsTableViewer.setInput(financeData);
+		accountsTableViewer.setInput(financeData);
 	}
 
 	/**
@@ -235,30 +306,10 @@ public class MainWindow {
 
 		transactionsTableViewer = new TableViewer(tabFolder, SWT.BORDER | SWT.FULL_SELECTION);
 		tableTransactions = transactionsTableViewer.getTable();
-		tableTransactions.setLinesVisible(true);
 		tableTransactions.setHeaderVisible(true);
 		tbtmTransactions.setControl(tableTransactions);
 		transactionsTableViewer.setLabelProvider(new TransactionsTableLabelProvider());
-		transactionsTableViewer.setContentProvider(transactionsContentProvider);
-
-		TabItem tbtmAccounts = new TabItem(tabFolder, SWT.NONE);
-		tbtmAccounts.setText(Messages.MainWindow_tbtmAccounts_text);
-
-		accountsTableViewer = new TableViewer(tabFolder, SWT.BORDER | SWT.FULL_SELECTION);
-		tableAccounts = accountsTableViewer.getTable();
-		tableAccounts.setLinesVisible(true);
-		tableAccounts.setHeaderVisible(true);
-		tbtmAccounts.setControl(tableAccounts);
-
-		TableColumn tblclmnAccount = new TableColumn(tableAccounts, SWT.NONE);
-		tblclmnAccount.setWidth(100);
-		tblclmnAccount.setText(Messages.MainWindow_tblclmnAccount_text);
-
-		TableColumn tblclmnBalance = new TableColumn(tableAccounts, SWT.NONE);
-		tblclmnBalance.setWidth(100);
-		tblclmnBalance.setText(Messages.MainWindow_tblclmnBalance_text);
-		accountsTableViewer.setLabelProvider(new AccountsTableLabelProvider());
-		accountsTableViewer.setContentProvider(new AccountsContentProvider());
+		transactionsTableViewer.setContentProvider(new TransactionsContentProvider());
 
 		TableColumn tblclmnDescription = new TableColumn(tableTransactions, SWT.NONE);
 		tblclmnDescription.setWidth(100);
@@ -280,12 +331,110 @@ public class MainWindow {
 		tblclmnAccounts.setWidth(100);
 		tblclmnAccounts.setText(Messages.MainWindow_tblclmnAccounts_text);
 
+		TabItem tbtmAccounts = new TabItem(tabFolder, SWT.NONE);
+		tbtmAccounts.setText(Messages.MainWindow_tbtmAccounts_text);
 
+		Composite compositeAccounts = new Composite(tabFolder, SWT.NONE);
+		tbtmAccounts.setControl(compositeAccounts);
+		compositeAccounts.setLayout(new FormLayout());
+
+		Button btnAddAccount = new Button(compositeAccounts, SWT.NONE);
+		btnAddAccount.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				accountsTableViewer.add(new FinanceAccount(Messages.MainWindow_New_Account_Name));
+			}
+		});
+		FormData fd_btnAddAccount = new FormData();
+		fd_btnAddAccount.right = new FormAttachment(100);
+		fd_btnAddAccount.top = new FormAttachment(0);
+		btnAddAccount.setLayoutData(fd_btnAddAccount);
+		btnAddAccount.setText(Messages.MainWindow_btnAddAccount_text);
+		
+		btnDeleteAccount = new Button(compositeAccounts, SWT.NONE);
+		btnDeleteAccount.setEnabled(false);
+		btnDeleteAccount.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				FinanceAccount account = (FinanceAccount)accountsTableViewer.getElementAt(accountsTable.getSelectionIndex());
+				FinanceData financeData = (FinanceData)accountsTableViewer.getInput();
+				if(account!=null && financeData!=null){
+					accountsTableViewer.remove(account);
+					financeData.deleteAccount(account);
+					updateTransactions();
+				}
+			}
+		});
+		FormData fd_btnDeleteAccount = new FormData();
+		fd_btnDeleteAccount.top = new FormAttachment(btnAddAccount, 0, SWT.TOP);
+		fd_btnDeleteAccount.right = new FormAttachment(btnAddAccount, -6);
+		btnDeleteAccount.setLayoutData(fd_btnDeleteAccount);
+		btnDeleteAccount.setText(Messages.MainWindow_btnDeleteAccount_text);
+
+		Composite compositeAccountsTable = new Composite(compositeAccounts, SWT.EMBEDDED);
+		FormData fd_compositeAccountsTable = new FormData();
+		fd_compositeAccountsTable.top = new FormAttachment(btnAddAccount, 6);
+		fd_compositeAccountsTable.left = new FormAttachment(0);
+		fd_compositeAccountsTable.bottom = new FormAttachment(100);
+		fd_compositeAccountsTable.right = new FormAttachment(100);
+		compositeAccountsTable.setLayoutData(fd_compositeAccountsTable);
+		TableColumnLayout tcl_compositeAccountsTable = new TableColumnLayout();
+		compositeAccountsTable.setLayout(tcl_compositeAccountsTable);
+
+		accountsTableViewer = new TableViewer(compositeAccountsTable, SWT.BORDER | SWT.FULL_SELECTION);
+		accountsTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent arg0) {
+				btnDeleteAccount.setEnabled(!arg0.getSelection().isEmpty());
+			}
+		});
+		accountsTable = accountsTableViewer.getTable();
+		accountsTable.setHeaderVisible(true);
+
+		TableViewerColumn tableViewerColumn = new TableViewerColumn(accountsTableViewer, SWT.NONE);
+		tableViewerColumn.setEditingSupport(new EditingSupport(accountsTableViewer) {
+			protected boolean canEdit(Object element) {
+				return element instanceof FinanceAccount;
+			}
+			protected CellEditor getCellEditor(Object element) {
+				if(element instanceof FinanceAccount)
+					return (CellEditor)new TextCellEditor(accountsTable);
+				else
+					return null;
+			}
+			protected Object getValue(Object element) {
+				if(element instanceof FinanceAccount){
+					return ((FinanceAccount)element).getName();
+				}else
+					return null;
+			}
+			protected void setValue(Object element, Object value) {
+				FinanceData financeData = (FinanceData)accountsTableViewer.getInput();
+				if(element instanceof FinanceAccount && value instanceof String && financeData!=null){
+					financeData.setAccountName((FinanceAccount)element, (String)value);
+				}
+				accountsTableViewer.update(element, null);
+				updateTransactions();
+			}
+		});
+		TableColumn tblclmnAccount = tableViewerColumn.getColumn();
+		tcl_compositeAccountsTable.setColumnData(tblclmnAccount, new ColumnWeightData(60));
+		tblclmnAccount.setText(Messages.MainWindow_tblclmnAccount_text);
+
+		TableViewerColumn tableViewerColumn_1 = new TableViewerColumn(accountsTableViewer, SWT.NONE);
+		TableColumn tblclmnBalance = tableViewerColumn_1.getColumn();
+		tblclmnBalance.setAlignment(SWT.RIGHT);
+		tcl_compositeAccountsTable.setColumnData(tblclmnBalance, new ColumnWeightData(30));
+		tblclmnBalance.setText(Messages.MainWindow_tblclmnBalance_text);
+		accountsTableViewer.setLabelProvider(new AccountsTableLabelProvider());
+		accountsTableViewer.setContentProvider(new AccountsContentProvider());
 	}
 
+	/**
+	 * Displays the import dialog and performs import of files
+	 */
 	protected void showImportDialog() {
 		if (lastDirectory == null)
-			lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null	: new java.io.File(preferenceStorage.get("lastDirectory",null));
+			lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null	: new java.io.File(preferenceStorage.get("lastDirectory",null)); //$NON-NLS-1$ //$NON-NLS-2$
 
 		FileDialog importCsvFileDialog = new FileDialog(shell, SWT.OPEN);
 		importCsvFileDialog.setText(Messages.MainWindow_File_Import_Dialog_Header);
@@ -298,25 +447,30 @@ public class MainWindow {
 		if ((filename = importCsvFileDialog.open()) != null) {
 			java.io.File selectedFile = new java.io.File(filename);
 			lastDirectory = selectedFile.isDirectory() ? selectedFile : selectedFile.getParentFile();
-			preferenceStorage.put("lastDirectory", lastDirectory.toString());
+			preferenceStorage.put("lastDirectory", lastDirectory.toString()); //$NON-NLS-1$
 
 			// Test code for printing data
 			CsvImporter importer = new CsvImporter();
 			try {
-				FinanceData financeData = importer.importFile(selectedFile);
-				for (int i = 0; i < financeData.getNumTransactions(); i++) 
-					transactionsTableViewer.add(financeData.getTransaction(i));
-				for(int i=0;i<financeData.getNumAccounts();i++)
-					accountsTableViewer.add(financeData.getAccount(i));
+				financeData = importer.importFile(selectedFile);
+				transactionsTableViewer.setInput(financeData);
+				accountsTableViewer.setInput(financeData);
 			} catch (org.zlogic.vogon.data.VogonImportLogicalException ex) {
 				Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE,null, ex);
-				MessageDialog dialog = new MessageDialog(shell,"Error importing file",null,new MessageFormat("An error has occurred while importing the file: {0}").format(new Object[] { ex.getMessage() }),MessageDialog.ERROR, new String[] { "OK" }, 0);
+				MessageDialog dialog = new MessageDialog(shell,Messages.MainWindow_Error_Importing_File,null,new MessageFormat(Messages.MainWindow_Error_Importing_File_Description).format(new Object[] { ex.getMessage() }),MessageDialog.ERROR, new String[] { Messages.MainWindow_OK }, 0);
 				dialog.open();
 			} catch (Exception ex) {
 				Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE,null, ex);
-				MessageDialog dialog = new MessageDialog(shell,"Error importing file",null,new MessageFormat("An error has occurred while importing the file: {0}").format(new Object[] { ex.getMessage() }),MessageDialog.ERROR, new String[] { "OK" }, 0);
+				MessageDialog dialog = new MessageDialog(shell,Messages.MainWindow_Error_Importing_File,null,new MessageFormat(Messages.MainWindow_Error_Importing_File_Description).format(new Object[] { ex.getMessage() }),MessageDialog.ERROR, new String[] { Messages.MainWindow_OK }, 0);
 				dialog.open();
 			}
 		}
+	}
+
+	/**
+	 * Updates the transactions table when data changes
+	 */
+	protected void updateTransactions() {
+		transactionsTableViewer.refresh(true);
 	}
 }
