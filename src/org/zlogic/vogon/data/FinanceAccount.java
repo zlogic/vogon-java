@@ -6,7 +6,12 @@
 package org.zlogic.vogon.data;
 
 import java.io.Serializable;
-import javax.persistence.*;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Transient;
 
 /**
  * Class for storing account data
@@ -15,65 +20,68 @@ import javax.persistence.*;
  */
 @Entity
 public class FinanceAccount implements Serializable {
+	/**
+	 * Version UID
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
+	 * The account ID (only for persistence)
+	 */
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	protected long id;
+	/**
+	 * The account name
+	 */
+	protected String name;
 
-    /**
-     * The account ID (only for persistence)
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected long id;
-    /**
-     * The account name
-     */
-    protected String name;
+	/**
+	 * Creates an account
+	 */
+	public FinanceAccount() {
+	}
 
-    /**
-     * Creates an account
-     */
-    public FinanceAccount() {
-    }
+	/**
+	 * Creates an account
+	 *
+	 * @param name The account name
+	 */
+	public FinanceAccount(String name) {
+		this.name = name;
+	}
+	/**
+	 * Finance data reference for recalculating balance
+	 */
+	@Transient
+	protected FinanceData financeData;
 
-    /**
-     * Creates an account
-     *
-     * @param name The account name
-     */
-    public FinanceAccount(String name) {
-	this.name = name;
-    }
-    /**
-     * Finance data reference for recalculating balance
-     */
-    @Transient
-    protected FinanceData financeData;
+	/**
+	 * Returns the account name
+	 *
+	 * @return The account name
+	 */
+	public String getName() {
+		return name;
+	}
 
-    /**
-     * Returns the account name
-     *
-     * @return The account name
-     */
-    public String getName() {
-	return name;
-    }
+	/**
+	 * Calculates and returns the actual (latest) account balance
+	 *
+	 * @return The actual account balance
+	 */
+	public double getActualBalance() {
+		if (financeData == null)
+			return Double.NaN;
 
-    /**
-     * Calculates and returns the actual (latest) account balance
-     *
-     * @return The actual account balance
-     */
-    public double getActualBalance() {
-	if (financeData == null)
-	    return Double.NaN;
+		return financeData.getActualBalance(this);
+	}
 
-	return financeData.getActualBalance(this);
-    }
-
-    /**
-     * Sets the finance data reference for account operations
-     *
-     * @param financeData The finance data reference
-     */
-    public void setFinanceData(FinanceData financeData) {
-	this.financeData = financeData;
-    }
+	/**
+	 * Sets the finance data reference for account operations
+	 *
+	 * @param financeData The finance data reference
+	 */
+	public void setFinanceData(FinanceData financeData) {
+		this.financeData = financeData;
+	}
 }
