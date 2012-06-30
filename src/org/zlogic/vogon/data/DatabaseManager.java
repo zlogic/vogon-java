@@ -45,7 +45,7 @@ public class DatabaseManager {
 		return;
 	    //Check if DB is Derby
 	    boolean shutdownDerbyManually = false;
-	    java.util.Map<String, Object> persistenceProperties = getPersistenceUnit().getProperties();
+	    java.util.Map<String, Object> persistenceProperties = getPersistenceUnit().createEntityManager().getProperties();
 	    if (persistenceProperties.containsKey("javax.persistence.jdbc.driver")) {
 		Object jdbcDriverValue = persistenceProperties.get("javax.persistence.jdbc.driver");
 		String jdbcDriverString = jdbcDriverValue.getClass() != String.class ? "" : (String) jdbcDriverValue;

@@ -12,7 +12,7 @@ package org.zlogic.vogon.data;
  */
 public class VogonImportLogicalException extends Exception {
 
-    /**
+	/**
      * Default constructor
      */
     public VogonImportLogicalException() {
