@@ -9,6 +9,8 @@ import java.util.Arrays;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 
 /**
  * Class for storing the complete finance data
@@ -39,8 +41,12 @@ public class FinanceData {
 
 		EntityManagerFactory entityManagerFactory = new DatabaseManager().getPersistenceUnit();
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
-		transactions = entityManager.createQuery("SELECT a FROM FinanceTransaction a").getResultList();
-		accounts = entityManager.createQuery("SELECT a FROM FinanceAccount a").getResultList();
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
+		CriteriaQuery<FinanceAccount> accountsCriteriaQuery = criteriaBuilder.createQuery(FinanceAccount.class);
+		
+		transactions = entityManager.createQuery(transactionsCriteriaQuery).getResultList();
+		accounts = entityManager.createQuery(accountsCriteriaQuery).getResultList();
 
 		setClassReferences();
 	}

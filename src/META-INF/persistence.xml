@@ -7,6 +7,7 @@
     <class>org.zlogic.vogon.data.FinanceTransaction</class>
     <class>org.zlogic.vogon.data.TransactionComponent</class>
     <class>org.zlogic.vogon.data.TransferTransaction</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:derby:Vogon;create=true"/>
       <property name="javax.persistence.jdbc.password" value=""/>
