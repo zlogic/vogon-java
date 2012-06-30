@@ -15,7 +15,13 @@ import java.util.logging.Logger;
  */
 public class DatabaseManager {
 
+	/**
+	 * True if this database manager is terminated
+	 */
 	private Boolean terminated = false;
+	/**
+	 * Locker object for terminated field
+	 */
 	final private Boolean terminatedMutex = true;
 
 	/**

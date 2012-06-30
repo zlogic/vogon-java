@@ -70,6 +70,7 @@ public abstract class FinanceTransaction implements Serializable {
 	 */
 	/**
 	 * Adds a tag
+	 * @param tag the tag to add
 	 */
 	void addTag(String tag) {
 		tags = Arrays.copyOf(tags, tags.length + 1);

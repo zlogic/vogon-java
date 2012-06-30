@@ -87,8 +87,8 @@ public class FinanceData {
 	/**
 	 * Calculates the account balance from its transactions
 	 *
-	 * @param account
-	 * @return
+	 * @param account The account to check balanse
+	 * @return The account's balance
 	 */
 	public double getActualBalance(FinanceAccount account) {
 		double balance = 0;
