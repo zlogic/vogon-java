@@ -16,6 +16,10 @@ import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -55,8 +59,17 @@ public class CsvImporter implements FileImporter {
 				if (columnsHeader == null) {
 					columnsHeader = columns;
 					//Create accounts
+
+					
 					for (int i = 3; i < columns.length; i++) {
-						List<FinanceAccount> foundAccounts = entityManager.createQuery("SELECT a FROM FinanceAccount a WHERE a.name=:accountName").setParameter("accountName", columns[i]).getResultList(); //$NON-NLS-1$ //$NON-NLS-2$
+						// Try searching existing account in database
+						CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+						CriteriaQuery<FinanceAccount> accountsCriteriaQuery = criteriaBuilder.createQuery(FinanceAccount.class);
+						Root<FinanceAccount> acc = accountsCriteriaQuery.from(FinanceAccount.class);
+						Predicate condition = criteriaBuilder.equal(acc.get(FinanceAccount_.name), columns[i]);
+						accountsCriteriaQuery.where(condition);
+						List<FinanceAccount> foundAccounts = entityManager.createQuery(accountsCriteriaQuery).getResultList();
+						
 						if (!foundAccounts.isEmpty() && foundAccounts.get(0).getName().equals(columns[i])) {
 							accounts.add(foundAccounts.get(0));
 						} else {
