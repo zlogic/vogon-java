@@ -8,6 +8,7 @@ package org.zlogic.vogon.data;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -56,18 +57,66 @@ public abstract class FinanceTransaction implements Serializable {
 	protected Date transactionDate;
 
 	/**
-	 * Returns the amount this transaction modifies an account E.g. how this
-	 * transaction increased or decreases the balance of a particular account
-	 *
-	 * @param account The account on which to calculate this transaction's
-	 * action
-	 * @return the amount an account is changed by this transaction
+	 * The transaction amount
 	 */
-	public abstract double getAccountAction(FinanceAccount account);
+	protected long amount;
+
+	/**
+	 * Updates the transaction's amount from its components
+	 */
+	public void updateAmounts(){
+		amount = 0;
+		for (TransactionComponent component : components)
+			amount += component.getRawAmount();
+	}
+
+	/**
+	 * Returns a list of all components associated with an account
+	 * 
+	 * @param account The account to search
+	 * @return The list of transaction components associated with the searched account
+	 */
+	public List<TransactionComponent> getComponentsForAccount(FinanceAccount account) {
+		LinkedList<TransactionComponent> foundComponents = new LinkedList<>();
+		for (TransactionComponent component : components)
+			if(component.getAccount()==account)
+				foundComponents.add(component);
+		return foundComponents;
+	}
+
+	/**
+	 * Delete the listed components
+	 * 
+	 * @param components the components to delete
+	 */
+	public void removeComponents(List<TransactionComponent> components){
+		this.components.removeAll(components);
+		updateAmounts();
+	}
 
 	/*
 	 * Getters/setters
 	 */
+
+	/**
+	 * Returns the raw amount (should be divided by 100 to get the real amount)
+	 *
+	 * @return the transaction amount
+	 */
+	public double getRawAmount() {
+		return amount;
+	}
+
+	/**
+	 * Returns the transaction amount
+	 *
+	 * @return the transaction amount
+	 */
+	public double getAmount() {
+		return amount/100.0D;
+	}
+
+
 	/**
 	 * Adds a tag
 	 * @param tag the tag to add

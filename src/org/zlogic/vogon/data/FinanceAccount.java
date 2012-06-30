@@ -34,7 +34,17 @@ public class FinanceAccount implements Serializable {
 	 * The account name
 	 */
 	protected String name;
+	
+	/**
+	 * The account balance
+	 */
+	protected Long balance;
 
+	/**
+	 * Synchronized object for access to account balance
+	 */
+	@Transient
+	private final Boolean balanceLock = true;
 	/**
 	 * Creates an account
 	 */
@@ -48,13 +58,33 @@ public class FinanceAccount implements Serializable {
 	 */
 	public FinanceAccount(String name) {
 		this.name = name;
+		this.balance = 0L;
 	}
-	/**
-	 * Finance data reference for recalculating balance
-	 */
-	@Transient
-	protected FinanceData financeData;
 
+	/**
+	 * Returns the raw balance (should be divided by 100 to get the real amount)
+	 * 
+	 * @return the raw balance
+	 */
+	public long getRawBalance(){
+		return balance;
+	}
+	
+	/**
+	 * Updates the raw balance by adding a value
+	 * 
+	 * @param addAmount the amount to add (can be added)
+	 */
+	public void updateRawBalance(long addAmount){
+		synchronized(balanceLock){
+			balance += addAmount;
+		}
+	}
+	
+	/*
+	 * Getters/setters
+	 */
+	
 	/**
 	 * Returns the account name
 	 *
@@ -65,23 +95,22 @@ public class FinanceAccount implements Serializable {
 	}
 
 	/**
-	 * Calculates and returns the actual (latest) account balance
+	 * Sets the account name
 	 *
-	 * @return The actual account balance
+	 * @param name The account name
 	 */
-	public double getActualBalance() {
-		if (financeData == null)
-			return Double.NaN;
-
-		return financeData.getActualBalance(this);
+	public void setName(String name) {
+		if(name.isEmpty())
+			return;
+		this.name = name;
 	}
-
+	
 	/**
-	 * Sets the finance data reference for account operations
-	 *
-	 * @param financeData The finance data reference
+	 * Returns the balance as double
+	 * 
+	 * @return the balance
 	 */
-	public void setFinanceData(FinanceData financeData) {
-		this.financeData = financeData;
+	public double getBalance(){
+		return balance/100.0D;
 	}
 }

@@ -15,7 +15,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -42,8 +41,7 @@ public class CsvImporter implements FileImporter {
 	 */
 	@Override
 	public FinanceData importFile(java.io.File file) throws VogonImportException, VogonImportLogicalException {
-		EntityManagerFactory entityManagerFactory = new DatabaseManager().getPersistenceUnit();
-		EntityManager entityManager = entityManagerFactory.createEntityManager();
+		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
 		entityManager.getTransaction().begin();
 		try {
 			ArrayList<FinanceTransaction> transactions = new ArrayList<>();
@@ -87,7 +85,7 @@ public class CsvImporter implements FileImporter {
 							double amount = Double.parseDouble(columns[i].replaceAll("[^ \\t]\\s+", "").replaceAll("[^0-9.-]", "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 							if (amount == 0)
 								continue;
-							TransactionComponent newComponent = new TransactionComponent(accounts.get(i - 3), amount);
+							TransactionComponent newComponent = new TransactionComponent(accounts.get(i - 3), (long)(amount*100));
 							entityManager.persist(newComponent);
 							accountAmounts.add(newComponent);
 							if (amount > 0)
@@ -118,9 +116,6 @@ public class CsvImporter implements FileImporter {
 			FinanceData result = new FinanceData(transactions, accounts);
 
 			entityManager.getTransaction().commit();
-			entityManager.close();
-			entityManagerFactory.close();
-
 			return result;
 		} catch (java.io.FileNotFoundException e) {
 			Logger.getLogger(CsvImporter.class.getName()).log(Level.SEVERE, null, e);

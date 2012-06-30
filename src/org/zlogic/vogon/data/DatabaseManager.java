@@ -23,13 +23,39 @@ public class DatabaseManager {
 	 * Locker object for terminated field
 	 */
 	final private Boolean terminatedMutex = true;
+	
+	/**
+	 * EntityManager factory instance
+	 */
+	protected javax.persistence.EntityManagerFactory entityManagerFactory;
+	
+	/**
+	 * EntityManager instance
+	 */
+	protected javax.persistence.EntityManager entityManager;
+	
+	/**
+	 * Singleton instance of this class
+	 */
+	static DatabaseManager instance = new DatabaseManager();
 
 	/**
 	 * Default constructor for DatabaseManager
 	 */
-	public DatabaseManager() {
+	protected DatabaseManager() {
+		entityManagerFactory = javax.persistence.Persistence.createEntityManagerFactory("VogonPU");
+		entityManager = entityManagerFactory.createEntityManager();
 	}
 
+	/**
+	 * Returns the singleton instance of DatabaseManager
+	 * 
+	 * @return The instance of DatabaseManager
+	 */
+	public static DatabaseManager getInstance(){
+		return instance;
+	}
+	
 	/**
 	 * Returns the persistence unit for this package
 	 *
@@ -37,7 +63,18 @@ public class DatabaseManager {
 	 */
 	public javax.persistence.EntityManagerFactory getPersistenceUnit() {
 		synchronized (terminatedMutex) {
-			return terminated ? null : javax.persistence.Persistence.createEntityManagerFactory("VogonPU");
+			return terminated ? null : entityManagerFactory;
+		}
+	}
+	
+	/**
+	 * Returns the entity manager for this package
+	 *
+	 * @return The persistence unit's EntityManager instance
+	 */
+	public javax.persistence.EntityManager getEntityManager() {
+		synchronized (terminatedMutex) {
+			return terminated ? null : entityManager;
 		}
 	}
 
@@ -51,7 +88,7 @@ public class DatabaseManager {
 				return;
 			//Check if DB is Derby
 			boolean shutdownDerbyManually = false;
-			java.util.Map<String, Object> persistenceProperties = getPersistenceUnit().createEntityManager().getProperties();
+			java.util.Map<String, Object> persistenceProperties = entityManager.getProperties();
 			if (persistenceProperties.containsKey("javax.persistence.jdbc.driver")) {
 				Object jdbcDriverValue = persistenceProperties.get("javax.persistence.jdbc.driver");
 				String jdbcDriverString = jdbcDriverValue.getClass() != String.class ? "" : (String) jdbcDriverValue;
@@ -68,6 +105,7 @@ public class DatabaseManager {
 					}
 				}
 			}
+			getPersistenceUnit().close();
 			terminated = true;
 		}
 	}

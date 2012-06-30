@@ -24,10 +24,6 @@ public class ExpenseTransaction extends FinanceTransaction implements Serializab
 	 * Version UID
 	 */
 	private static final long serialVersionUID = 1L;
-	/**
-	 * The transaction amount
-	 */
-	protected double amount;
 
 	/**
 	 * Default constructor for an expense transaction
@@ -50,48 +46,17 @@ public class ExpenseTransaction extends FinanceTransaction implements Serializab
 		this.components = new LinkedList<>();
 		this.components.addAll(components);
 
-		amount = 0;
+		updateAmounts();
+		
 		for (TransactionComponent component : components)
-			amount += component.getAmount();
+			component.getAccount().updateRawBalance(component.getRawAmount());
 	}
 
-	@Override
-	public double getAccountAction(FinanceAccount account) {
-		double sum = 0;
-		for (TransactionComponent component : components)
-			if (component.getAccount().equals(account))
-				sum += component.getAmount();
-		return sum;
-	}
-
-	@Override
-	public java.lang.String toString() {
-		java.text.MessageFormat form = new java.text.MessageFormat("{0} <{1}> {2} {3,number,#.##}");
-		Object[] objects = {getDescription(), getTags().toString(), getDate(), getAmount()};
-		return form.format(objects);
-	}
 
 	/*
 	 * Getters/setters
 	 */
-	/**
-	 * Returns the transaction amount
-	 *
-	 * @return the transaction amount
-	 */
-	public double getAmount() {
-		return amount;
-	}
-
-	/**
-	 * Sets the transaction amount
-	 *
-	 * @param amount the amount to set
-	 */
-	public void setAmount(double amount) {
-		this.amount = amount;
-	}
-
+	
 	/**
 	 * Returns the account
 	 *
