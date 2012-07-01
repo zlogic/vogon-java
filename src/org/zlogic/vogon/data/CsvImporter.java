@@ -98,7 +98,8 @@ public class CsvImporter implements FileImporter {
 							double amount = Double.parseDouble(columns[i].replaceAll("[^ \\t]\\s+", "").replaceAll("[^0-9.-]", "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 							if (amount == 0)
 								continue;
-							accountAmounts.put(accounts.get(i - 3), (long)(amount*100));
+							amount = Math.round(amount*100);
+							accountAmounts.put(accounts.get(i - 3), (long)(amount));
 							if (amount > 0)
 								hasPositiveAmounts = true;
 							if (amount < 0)
