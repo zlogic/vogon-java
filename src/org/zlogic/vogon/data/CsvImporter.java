@@ -9,8 +9,11 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,7 +61,7 @@ public class CsvImporter implements FileImporter {
 					columnsHeader = columns;
 					//Create accounts
 
-					
+
 					for (int i = 3; i < columns.length; i++) {
 						// Try searching existing account in database
 						CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -67,7 +70,7 @@ public class CsvImporter implements FileImporter {
 						Predicate condition = criteriaBuilder.equal(acc.get(FinanceAccount_.name), columns[i]);
 						accountsCriteriaQuery.where(condition);
 						List<FinanceAccount> foundAccounts = entityManager.createQuery(accountsCriteriaQuery).getResultList();
-						
+
 						if (!foundAccounts.isEmpty() && foundAccounts.get(0).getName().equals(columns[i])) {
 							accounts.add(foundAccounts.get(0));
 						} else {
@@ -79,15 +82,13 @@ public class CsvImporter implements FileImporter {
 				} else {
 					boolean hasPositiveAmounts = false;
 					boolean hasNegativeAmounts = false;
-					List<TransactionComponent> accountAmounts = new LinkedList<>();
+					Map<FinanceAccount,Long> accountAmounts = new HashMap<>();
 					for (int i = 3; i < columns.length; i++)
 						if (!columns[i].isEmpty()) {
 							double amount = Double.parseDouble(columns[i].replaceAll("[^ \\t]\\s+", "").replaceAll("[^0-9.-]", "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 							if (amount == 0)
 								continue;
-							TransactionComponent newComponent = new TransactionComponent(accounts.get(i - 3), (long)(amount*100));
-							entityManager.persist(newComponent);
-							accountAmounts.add(newComponent);
+							accountAmounts.put(accounts.get(i - 3), (long)(amount*100));
 							if (amount > 0)
 								hasPositiveAmounts = true;
 							if (amount < 0)
@@ -99,21 +100,32 @@ public class CsvImporter implements FileImporter {
 					Date date = new SimpleDateFormat("yyyy-MM-dd").parse(columns[1]); //$NON-NLS-1$
 					if ((hasPositiveAmounts || hasNegativeAmounts) && !(hasPositiveAmounts && hasNegativeAmounts)) {
 						//Expense transaction
-						transaction = new ExpenseTransaction(columns[0], tags, date, accountAmounts);
+						transaction = new ExpenseTransaction(columns[0], tags, date);
 						entityManager.persist(transaction);
 					} else if (hasPositiveAmounts && hasNegativeAmounts) {
 						//Transfer/split transaction
-						transaction = new TransferTransaction(columns[0], tags, date, accountAmounts);
+						transaction = new TransferTransaction(columns[0], tags, date);
 						entityManager.persist(transaction);
 					} else {
 						reader.close();
 						throw new VogonImportLogicalException((new MessageFormat(Messages.CsvImporter_Transaction_Too_Complex)).format(new Object[]{Utils.join(columns, ",")})); //$NON-NLS-2$
 					}
+
+					//Add components
+					List<TransactionComponent> components = new LinkedList<>();
+					for(Entry<FinanceAccount, Long> amount : accountAmounts.entrySet()){
+						TransactionComponent newComponent = new TransactionComponent(amount.getKey(),transaction,amount.getValue());
+						entityManager.persist(newComponent);
+						components.add(newComponent);
+					}
+					transaction.addComponents(components);
 					transactions.add(transaction);
 				}
 			}
 			reader.close();
 			FinanceData result = new FinanceData(transactions, accounts);
+
+			entityManager.persist(result);
 
 			entityManager.getTransaction().commit();
 			return result;

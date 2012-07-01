@@ -16,6 +16,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Temporal;
 
 /**
@@ -33,7 +34,7 @@ public abstract class FinanceTransaction implements Serializable {
 	 * The transaction ID (only for persistence)
 	 */
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	protected long id;
 	/**
 	 * Contains the expense description string
@@ -48,6 +49,7 @@ public abstract class FinanceTransaction implements Serializable {
 	 * Contains the related accounts and the transaction's distribution into them
 	 */
 	@OneToMany
+	@OrderBy("id ASC")
 	protected List<TransactionComponent> components;
 
 	/**
@@ -62,13 +64,64 @@ public abstract class FinanceTransaction implements Serializable {
 	protected long amount;
 
 	/**
+	 * Adds component to this account
+	 * 
+	 * @param component the component to add
+	 */
+	public void addComponent(TransactionComponent component){
+		this.components.add(component);
+		updateAmounts();
+
+		if(component.getAccount()!=null)
+			component.getAccount().updateRawBalance(component.getRawAmount());
+	}
+
+	/**
+	 * Adds components to this account
+	 * 
+	 * @param components the components to add
+	 */
+	public void addComponents(List<TransactionComponent> components){
+		this.components.addAll(components);
+		updateAmounts();
+
+		for (TransactionComponent component : components)
+			component.getAccount().updateRawBalance(component.getRawAmount());
+	}
+
+	/**
+	 * Removes a transaction component
+	 * 
+	 * @param component the component to be removed
+	 */
+	public void removeComponent(TransactionComponent component) {
+		if(!components.contains(component))
+			return;
+		component.getAccount().updateRawBalance(-component.getRawAmount());
+		component.setAccount(null);
+		component.setTransaction(null);
+		components.remove(component);
+		updateAmounts();
+	}
+
+	/**
+	 * Removes all transaction components
+	 * 
+	 */
+	public void removeAllComponents() {
+		for(TransactionComponent component : components){
+			component.getAccount().updateRawBalance(-component.getRawAmount());
+			component.setAccount(null);
+			component.setTransaction(null);
+		}
+		components.clear();
+		updateAmounts();
+	}
+
+	/**
 	 * Updates the transaction's amount from its components
 	 */
-	public void updateAmounts(){
-		amount = 0;
-		for (TransactionComponent component : components)
-			amount += component.getRawAmount();
-	}
+	public abstract void updateAmounts();
 
 	/**
 	 * Returns a list of all components associated with an account
@@ -82,6 +135,57 @@ public abstract class FinanceTransaction implements Serializable {
 			if(component.getAccount()==account)
 				foundComponents.add(component);
 		return foundComponents;
+	}
+
+	/**
+	 * Returns a list of all components
+	 * 
+	 * @return The list of all transaction components
+	 */
+	public List<TransactionComponent> getComponents() {
+		LinkedList<TransactionComponent> foundComponents = new LinkedList<>();
+		foundComponents.addAll(components);
+		return foundComponents;
+	}
+
+	/**
+	 * Sets a new amount for a component and updates the transaction and account balance
+	 * 
+	 * @param component the component to be updated
+	 * @param amount the new amount
+	 */
+	public void updateComponentRawAmount(TransactionComponent component,long amount) {
+		if(!components.contains(component))
+			return;
+		long deltaAmount = amount-component.getRawAmount();
+		component.setRawAmount(amount);
+		updateAmounts();
+		if(component.getAccount()!=null)
+			component.getAccount().updateRawBalance(deltaAmount);
+	}
+
+	/**
+	 * Sets a new account for a component and updates the account balance
+	 * 
+	 * @param component the component to be updated
+	 * @param account the new account
+	 */
+	public void updateComponentAccount(TransactionComponent component,FinanceAccount account) {
+		if(!components.contains(component))
+			return;
+		if(component.getAccount()!=null)
+			component.getAccount().updateRawBalance(-component.getRawAmount());
+		component.setAccount(account);
+		component.getAccount().updateRawBalance(component.getRawAmount());
+	}
+
+	/**
+	 * Returns the number of components
+	 * 
+	 * @return The number of components in this transaction
+	 */
+	public int getComponentsCount() {
+		return components.size();
 	}
 
 	/**
@@ -151,6 +255,15 @@ public abstract class FinanceTransaction implements Serializable {
 	 */
 	public String[] getTags() {
 		return tags;
+	}
+
+	/**
+	 * Sets the transaction's tags
+	 *
+	 * @param tags the new transaction's tags
+	 */
+	public void setTags(String[] tags) {
+		this.tags = tags;
 	}
 
 	/**

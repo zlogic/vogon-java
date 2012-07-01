@@ -28,13 +28,13 @@ public class FinanceAccount implements Serializable {
 	 * The account ID (only for persistence)
 	 */
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	protected long id;
 	/**
 	 * The account name
 	 */
 	protected String name;
-	
+
 	/**
 	 * The account balance
 	 */
@@ -69,7 +69,7 @@ public class FinanceAccount implements Serializable {
 	public long getRawBalance(){
 		return balance;
 	}
-	
+
 	/**
 	 * Updates the raw balance by adding a value
 	 * 
@@ -80,11 +80,11 @@ public class FinanceAccount implements Serializable {
 			balance += addAmount;
 		}
 	}
-	
+
 	/*
 	 * Getters/setters
 	 */
-	
+
 	/**
 	 * Returns the account name
 	 *
@@ -104,7 +104,7 @@ public class FinanceAccount implements Serializable {
 			return;
 		this.name = name;
 	}
-	
+
 	/**
 	 * Returns the balance as double
 	 * 
