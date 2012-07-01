@@ -9,7 +9,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 
 import javax.persistence.Entity;
 
@@ -39,24 +38,26 @@ public class ExpenseTransaction extends FinanceTransaction implements Serializab
 	 * @param date The transaction date
 	 * @param components The expense components
 	 */
-	public ExpenseTransaction(String description, String[] tags, Date date, List<TransactionComponent> components) {
+	public ExpenseTransaction(String description, String[] tags, Date date) {
 		this.description = description;
 		this.tags = tags;
 		this.transactionDate = date;
 		this.components = new LinkedList<>();
-		this.components.addAll(components);
-
-		updateAmounts();
-		
-		for (TransactionComponent component : components)
-			component.getAccount().updateRawBalance(component.getRawAmount());
 	}
 
+	/**
+	 * Updates the transaction's amount from its components
+	 */
+	public void updateAmounts(){
+		amount = 0;
+		for (TransactionComponent component : components)
+			amount += component.getRawAmount();
+	}
 
 	/*
 	 * Getters/setters
 	 */
-	
+
 	/**
 	 * Returns the account
 	 *

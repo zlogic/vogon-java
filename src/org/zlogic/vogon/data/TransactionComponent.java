@@ -35,6 +35,13 @@ public class TransactionComponent implements Serializable {
 	 */
 	@ManyToOne
 	protected FinanceAccount account;
+
+	/**
+	 * The transaction
+	 */
+	@ManyToOne
+	protected FinanceTransaction transaction;
+
 	/**
 	 * The amount this component changes the account's balance
 	 */
@@ -53,8 +60,9 @@ public class TransactionComponent implements Serializable {
 	 * @param amount The amount which this component modifies the account, can
 	 * be both negative and positive
 	 */
-	public TransactionComponent(FinanceAccount account, long amount) {
+	public TransactionComponent(FinanceAccount account, FinanceTransaction transaction, long amount) {
 		this.account = account;
+		this.transaction = transaction;
 		this.amount = amount;
 	}
 
@@ -62,10 +70,39 @@ public class TransactionComponent implements Serializable {
 	 * Getters/setters
 	 */
 	/**
+	 * Returns the associated account
+	 * 
 	 * @return the account
 	 */
 	public FinanceAccount getAccount() {
 		return account;
+	}
+
+	/**
+	 * Sets the associated account
+	 * 
+	 * @param account the account to set
+	 */
+	public void setAccount(FinanceAccount account) {
+		this.account = account;
+	}
+
+	/**
+	 * Returns the associated transaction
+	 * 
+	 * @return the transaction
+	 */
+	public FinanceTransaction getTransaction() {
+		return transaction;
+	}
+
+	/**
+	 * Sets the associated transaction
+	 * 
+	 * @param transaction the account to set
+	 */
+	public void setTransaction(FinanceTransaction transaction) {
+		this.transaction = transaction;
 	}
 
 	/**
@@ -75,6 +112,16 @@ public class TransactionComponent implements Serializable {
 	 */
 	public Long getRawAmount() {
 		return amount;
+	}
+
+	/**
+	 * Sets a new raw amount (should be divided by 100 to get the real amount)
+	 * Also updates the account balance
+	 * 
+	 * @param amount the new raw amount
+	 */
+	public void setRawAmount(long amount) {
+		this.amount = amount;
 	}
 
 	/**

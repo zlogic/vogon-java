@@ -8,7 +8,6 @@ package org.zlogic.vogon.data;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 
 import javax.persistence.Entity;
 
@@ -23,10 +22,6 @@ public class TransferTransaction extends FinanceTransaction {
 	 * Version UID
 	 */
 	private static final long serialVersionUID = 1L;
-	/**
-	 * Contains the transfer amount
-	 */
-	protected double amount;
 
 	/**
 	 * Default constructor for a transfer transaction
@@ -42,31 +37,40 @@ public class TransferTransaction extends FinanceTransaction {
 	 * @param date The transaction date
 	 * @param components The transfer components
 	 */
-	public TransferTransaction(String description, String[] tags, Date date, List<TransactionComponent> components) {
+	public TransferTransaction(String description, String[] tags, Date date) {
 		this.description = description;
 		this.tags = tags;
 		this.transactionDate = date;
 		this.components = new LinkedList<>();
-		this.components.addAll(components);
+	}
 
-		updateAmounts();
+	/**
+	 * Updates the transaction's amount from its components
+	 */
+	public void updateAmounts(){
+		long amountPositive = 0, amountNegative=0;
+		for (TransactionComponent component : components){
+			amountPositive += component.getRawAmount()>0? component.getRawAmount() : 0;
+			amountNegative += component.getRawAmount()<0? component.getRawAmount() : 0;
+		}
+		amount = amountPositive>-amountNegative?amountPositive:-amountNegative;
+	}
 
+	/**
+	 * Returns if the amount is OK (e.g. sum is zero)
+	 * 
+	 * @return true if amount is OK
+	 */
+	public boolean isAmountOk(){
+		long amount = 0;
 		for (TransactionComponent component : components)
-			component.getAccount().updateRawBalance(component.getRawAmount());
+			amount += component.getRawAmount();
+		return amount == 0;
 	}
 
 	/*
 	 * Getters/setters
 	 */
-	/**
-	 * Returns the amount withdrawn accountFrom the source account
-	 *
-	 * @return the transaction amount
-	 */
-	public double getAmount() {
-		return amount;
-	}
-
 	/**
 	 * Returns the account accountFrom which money was transferred
 	 *
