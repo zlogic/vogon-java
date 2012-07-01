@@ -79,7 +79,7 @@ public class TransferTransaction extends FinanceTransaction {
 	public FinanceAccount[] getFromAccounts() {
 		HashSet<FinanceAccount> accounts = new HashSet<>();
 		for (TransactionComponent component : components)
-			if (component.getAmount() < 0)
+			if (component.getRawAmount() < 0)
 				accounts.add(component.getAccount());
 		FinanceAccount[] accountsOut = new FinanceAccount[accounts.size()];
 		return accounts.toArray(accountsOut);
@@ -93,7 +93,7 @@ public class TransferTransaction extends FinanceTransaction {
 	public FinanceAccount[] getToAccounts() {
 		HashSet<FinanceAccount> accounts = new HashSet<>();
 		for (TransactionComponent component : components)
-			if (component.getAmount() > 0)
+			if (component.getRawAmount() > 0)
 				accounts.add(component.getAccount());
 		FinanceAccount[] accountsOut = new FinanceAccount[accounts.size()];
 		return accounts.toArray(accountsOut);
