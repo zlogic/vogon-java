@@ -45,6 +45,16 @@ public class CsvImporter implements FileImporter {
 	@Override
 	public FinanceData importFile(java.io.File file) throws VogonImportException, VogonImportLogicalException {
 		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
+
+		//Remove old instances of FinanceData
+		{
+			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+			CriteriaQuery<FinanceData> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceData.class);
+			List <FinanceData> oldFinanceDataList = entityManager.createQuery(transactionsCriteriaQuery).getResultList();
+			for(FinanceData financeData : oldFinanceDataList)
+				entityManager.remove(financeData);
+		}
+
 		entityManager.getTransaction().begin();
 		try {
 			ArrayList<FinanceTransaction> transactions = new ArrayList<>();
