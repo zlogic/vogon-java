@@ -373,6 +373,23 @@ public class FinanceData {
 		entityManager.remove(account);
 		entityManager.getTransaction().commit();
 	}
+	
+	/**
+	 * Recalculates an account's balance based on its transactions
+	 * 
+	 * @param account the account to be updated
+	 */
+	public void refreshAccountBalance(FinanceAccount account){
+		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
+		entityManager.getTransaction().begin();
+		account.updateRawBalance(-account.getRawBalance());
+		for(FinanceTransaction transaction:transactions){
+			for(TransactionComponent component:transaction.getComponentsForAccount(account)){
+				account.updateRawBalance(component.getRawAmount());
+			}
+		}
+		entityManager.getTransaction().commit();
+	}
 
 	/*
 	 * Getters/setters
