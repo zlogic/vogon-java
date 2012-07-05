@@ -195,7 +195,7 @@ public class FinanceData {
 		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
 		entityManager.getTransaction().begin();
 
-		transaction.updateComponentRawAmount(component,(long)(newAmount*100));
+		transaction.updateComponentRawAmount(component,(long)Math.round(newAmount*100));
 
 		if(!transactions.contains(transaction)){
 			transactions.add(transaction);
@@ -258,9 +258,9 @@ public class FinanceData {
 		entityManager.getTransaction().begin();
 
 		if(component.getTransaction().getComponents().contains(component))
-			component.getTransaction().updateComponentRawAmount(component,(long)(newAmount*100));
+			component.getTransaction().updateComponentRawAmount(component,(long)Math.round(newAmount*100));
 		else{
-			component.setRawAmount((long)(newAmount*100));
+			component.setRawAmount((long)Math.round(newAmount*100));
 			component.getTransaction().addComponent(component);
 		}
 
