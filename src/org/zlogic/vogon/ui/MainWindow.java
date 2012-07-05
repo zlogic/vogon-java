@@ -629,6 +629,8 @@ public class MainWindow {
 				TransactionComponent component = new TransactionComponent(null, newTransaction, 0);
 				newTransaction.addComponent(component);
 				transactionsTreeViewer.add(transactionsTreeViewer.getInput(), newTransaction);
+				transactionsTreeViewer.reveal(newTransaction);
+				transactionsTreeViewer.setSelection(new StructuredSelection(newTransaction), true);
 			}
 		});
 		FormData fd_btnAddExpenseTransaction = new FormData();
@@ -646,6 +648,8 @@ public class MainWindow {
 				newTransaction.addComponent(componentFrom);
 				newTransaction.addComponent(componentTo);
 				transactionsTreeViewer.add(transactionsTreeViewer.getInput(), newTransaction);
+				transactionsTreeViewer.reveal(newTransaction);
+				transactionsTreeViewer.setSelection(new StructuredSelection(newTransaction), true);
 			}
 		});
 		fd_btnAddExpenseTransaction.right = new FormAttachment(btnAddTransferTransaction, -6);
@@ -667,12 +671,14 @@ public class MainWindow {
 					if(selectedObject instanceof FinanceTransaction){
 						TransactionComponent component = new TransactionComponent(null,(FinanceTransaction)selectedObject,0);
 						transactionsTreeViewer.add(selectedObject,component);
+						transactionsTreeViewer.reveal(component);
 						transactionsTreeViewer.setSelection(new StructuredSelection(component), true);
 					}
 					if(selectedObject instanceof TransactionComponent){
 						FinanceTransaction updateTransaction = ((TransactionComponent)selectedObject).getTransaction();
 						TransactionComponent component = new TransactionComponent(null,updateTransaction,0);
 						transactionsTreeViewer.add(updateTransaction,component);
+						transactionsTreeViewer.reveal(component);
 						transactionsTreeViewer.setSelection(new StructuredSelection(component), true);
 					}
 				}
@@ -730,6 +736,7 @@ public class MainWindow {
 			public void widgetSelected(SelectionEvent e) {
 				FinanceAccount newAccount = new FinanceAccount(Messages.MainWindow_New_Account_Name);
 				accountsTableViewer.add(newAccount);
+				accountsTableViewer.reveal(newAccount);
 				accountsTableViewer.setSelection(new StructuredSelection(newAccount), true);
 			}
 		});
