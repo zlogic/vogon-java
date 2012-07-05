@@ -120,7 +120,7 @@ public class MainWindow {
 								builder.append(i != 0 ? "," : "").append(fromAccounts[i].getName()); //$NON-NLS-1$ //$NON-NLS-2$
 							builder.append(")"); //$NON-NLS-1$
 						} else if (fromAccounts.length == 1)
-							builder.append(fromAccounts[0].getName());
+							builder.append(fromAccounts[0]!=null?fromAccounts[0].getName():Messages.MainWindow_Bad_Account_Substitute);
 						else
 							builder.append(Messages.MainWindow_Bad_Account_Substitute);
 						builder.append("->"); //$NON-NLS-1$
@@ -130,7 +130,7 @@ public class MainWindow {
 								builder.append(i != 0 ? "," : "").append(toAccounts[i].getName()); //$NON-NLS-1$ //$NON-NLS-2$
 							builder.append(")"); //$NON-NLS-1$
 						} else if (toAccounts.length == 1)
-							builder.append(toAccounts[0].getName());
+							builder.append(toAccounts[0]!=null?toAccounts[0].getName():Messages.MainWindow_Bad_Account_Substitute);
 						else
 							builder.append(Messages.MainWindow_Bad_Account_Substitute);
 						return builder.toString();
@@ -598,14 +598,14 @@ public class MainWindow {
 			protected void setValue(Object element, Object value) {
 				try {
 					FinanceData financeData = (FinanceData)transactionsTreeViewer.getInput();
-					if(value instanceof Integer && element instanceof ExpenseTransaction && ((ExpenseTransaction)element).getComponentsCount()<=1){
+					if(value instanceof Integer && (Integer)value!=-1 && element instanceof ExpenseTransaction && ((ExpenseTransaction)element).getComponentsCount()<=1){
 						financeData.setTransactionAccount((ExpenseTransaction)element, financeData.getAccount((Integer)value));
 						transactionsTreeViewer.update(element, null);
 						for(TransactionComponent component : ((ExpenseTransaction)element).getComponents())
 							transactionsTreeViewer.update(component, null);
 						updateAccounts();
 					}
-					if(value instanceof Integer && element instanceof TransactionComponent){
+					if(value instanceof Integer && (Integer)value!=-1 && element instanceof TransactionComponent){
 						financeData.setTransactionComponentAccount((TransactionComponent)element, financeData.getAccount((Integer)value));
 						transactionsTreeViewer.update(element, null);
 						transactionsTreeViewer.update(((TransactionComponent)element).getTransaction(), null);
@@ -832,6 +832,22 @@ public class MainWindow {
 		tblclmnBalance.setAlignment(SWT.RIGHT);
 		tcl_compositeAccountsTable.setColumnData(tblclmnBalance, new ColumnWeightData(30));
 		tblclmnBalance.setText(Messages.MainWindow_tblclmnBalance_text);
+		
+		Button btnRecalculateBalance = new Button(compositeAccounts, SWT.NONE);
+		btnRecalculateBalance.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				FinanceData financeData = (FinanceData)accountsTableViewer.getInput();
+				for(int i=0;i<financeData.getNumAccounts();i++)
+					financeData.refreshAccountBalance(financeData.getAccount(i));
+				updateAccounts();
+			}
+		});
+		FormData fd_btnRecalculateBalance = new FormData();
+		fd_btnRecalculateBalance.bottom = new FormAttachment(btnAddAccount, 0, SWT.BOTTOM);
+		fd_btnRecalculateBalance.right = new FormAttachment(btnDeleteAccount, -6);
+		btnRecalculateBalance.setLayoutData(fd_btnRecalculateBalance);
+		btnRecalculateBalance.setText(Messages.MainWindow_btnRecalculateBalance_text);
 		accountsTableViewer.setLabelProvider(new AccountsTableLabelProvider());
 		accountsTableViewer.setContentProvider(new AccountsContentProvider());
 	}
