@@ -37,7 +37,7 @@ public class CsvImporter implements FileImporter {
 	 * The input CSV file
 	 */
 	protected File inputFile;
-	
+
 	/**
 	 * Creates an instance of the CSV Importer
 	 * 
@@ -46,7 +46,7 @@ public class CsvImporter implements FileImporter {
 	public CsvImporter(File inputFile){
 		this.inputFile = inputFile;
 	}
-	
+
 	/**
 	 * Parses and imports a CSV file
 	 *
@@ -58,8 +58,8 @@ public class CsvImporter implements FileImporter {
 	public FinanceData importFile() throws VogonImportException, VogonImportLogicalException {
 
 		try {
-			ArrayList<FinanceTransaction> transactions = new ArrayList<>();
-			ArrayList<FinanceAccount> accounts = new ArrayList<>();
+			List<FinanceTransaction> transactions = new ArrayList<>();
+			List<FinanceAccount> accounts = new ArrayList<>();
 			CSVReader reader = new CSVReader(new java.io.InputStreamReader(new java.io.FileInputStream(inputFile),"UTF8")); //$NON-NLS-1$
 			String[] columns;
 			String[] columnsHeader = null;
