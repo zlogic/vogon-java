@@ -8,6 +8,7 @@ package org.zlogic.vogon.ui;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -70,7 +71,6 @@ import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
 import org.zlogic.vogon.data.TransferTransaction;
 
-import com.ibm.icu.text.NumberFormat;
 
 /**
  * The main window class
