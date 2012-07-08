@@ -181,15 +181,6 @@ public abstract class FinanceTransaction implements Serializable {
 	}
 
 	/**
-	 * Returns the number of components
-	 * 
-	 * @return The number of components in this transaction
-	 */
-	public int getComponentsCount() {
-		return components.size();
-	}
-
-	/**
 	 * Delete the listed components
 	 * 
 	 * @param components the components to delete
