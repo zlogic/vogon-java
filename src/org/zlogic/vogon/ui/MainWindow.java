@@ -11,6 +11,7 @@ import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -153,7 +154,7 @@ public class MainWindow {
 		public Color getBackground(Object element, int column) {
 			if(element instanceof FinanceTransaction){
 				FinanceTransaction transaction = (FinanceTransaction)element;
-				if(column==0 && transaction.getComponentsCount()==0)
+				if(column==0 && transaction.getComponents().isEmpty())
 					return new Color(Display.getCurrent(), 255, 0, 0);
 				if(column==3 && transaction instanceof TransferTransaction && !((TransferTransaction)transaction).isAmountOk())
 					return new Color(Display.getCurrent(), 255, 0, 0);
@@ -221,10 +222,7 @@ public class MainWindow {
 		public Object[] getElements(Object arg0) {
 			if(arg0 instanceof FinanceData){
 				FinanceData financeData = (FinanceData)arg0;
-				Object[] elements = new Object[financeData.getNumTransactions()];
-				for(int i=0;i<financeData.getNumTransactions();i++)
-					elements[i] = financeData.getTransaction(i);
-				return elements;
+				return financeData.getTransactions().toArray();
 			}else return new Object[]{};
 		}
 
@@ -238,7 +236,7 @@ public class MainWindow {
 		@Override
 		public boolean hasChildren(Object arg0) {
 			if(arg0 instanceof FinanceTransaction){
-				return ((FinanceTransaction)arg0).getComponentsCount()>0;
+				return ((FinanceTransaction)arg0).getComponents().size()>0;
 			}
 			return false;
 		}
@@ -253,10 +251,7 @@ public class MainWindow {
 		public Object[] getElements(Object inputElement) {
 			if(inputElement instanceof FinanceData){
 				FinanceData financeData = (FinanceData)inputElement;
-				Object[] elements = new Object[financeData.getNumAccounts()];
-				for(int i=0;i<financeData.getNumAccounts();i++)
-					elements[i] = financeData.getAccount(i);
-				return elements;
+				return financeData.getAccounts().toArray();
 			}else return new Object[]{};
 		}
 		public void dispose() {
@@ -381,8 +376,8 @@ public class MainWindow {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FinanceData financeData = (FinanceData)accountsTableViewer.getInput();
-				for(int i=0;i<financeData.getNumAccounts();i++)
-					financeData.refreshAccountBalance(financeData.getAccount(i));
+				for(FinanceAccount account : financeData.getAccounts())
+					financeData.refreshAccountBalance(account);
 				updateAccounts();
 			}
 		});
@@ -537,7 +532,7 @@ public class MainWindow {
 		TreeViewerColumn treeViewerColumn_3 = new TreeViewerColumn(transactionsTreeViewer, SWT.NONE);
 		treeViewerColumn_3.setEditingSupport(new EditingSupport(transactionsTreeViewer) {
 			protected boolean canEdit(Object element) {
-				return (element instanceof ExpenseTransaction && ((ExpenseTransaction)element).getComponentsCount()<=1)
+				return (element instanceof ExpenseTransaction && ((ExpenseTransaction)element).getComponents().size()<=1)
 						|| (element instanceof TransactionComponent);
 			}
 			protected CellEditor getCellEditor(Object element) {
@@ -556,7 +551,7 @@ public class MainWindow {
 			protected void setValue(Object element, Object value) {
 				try {
 					FinanceData financeData = (FinanceData)transactionsTreeViewer.getInput();
-					if(value instanceof String && element instanceof ExpenseTransaction && ((ExpenseTransaction)element).getComponentsCount()<=1){
+					if(value instanceof String && element instanceof ExpenseTransaction && ((ExpenseTransaction)element).getComponents().size()<=1){
 						try {
 							double amount = NumberFormat.getInstance().parse((String)value).doubleValue();
 							financeData.setTransactionAmount((ExpenseTransaction)element, amount);
@@ -595,23 +590,26 @@ public class MainWindow {
 		TreeViewerColumn treeViewerColumn_4 = new TreeViewerColumn(transactionsTreeViewer, SWT.NONE);
 		treeViewerColumn_4.setEditingSupport(new EditingSupport(transactionsTreeViewer) {
 			protected boolean canEdit(Object element) {
-				return (element instanceof ExpenseTransaction && ((ExpenseTransaction)element).getComponentsCount()<=1)
+				return (element instanceof ExpenseTransaction && ((ExpenseTransaction)element).getComponents().size()<=1)
 						|| (element instanceof TransactionComponent);
 			}
 			protected CellEditor getCellEditor(Object element) {
 				if(element instanceof ExpenseTransaction || element instanceof TransactionComponent){
 					FinanceData financeData = (FinanceData)transactionsTreeViewer.getInput();
-					String[] accounts = new String[financeData.getNumAccounts()];
-					for(int i=0;i<accounts.length;i++)
-						accounts[i] = financeData.getAccount(i).getName();
-					return (CellEditor)new ComboBoxCellEditor(transactionsTree,accounts);
+					List<FinanceAccount> accounts = financeData.getAccounts();
+					List<String> accountsItemList = new LinkedList<>();
+					for(FinanceAccount account : accounts)
+						accountsItemList.add(account.getName());
+					String[] accountsItemArray = new String[accountsItemList.size()];
+					accountsItemArray = accountsItemList.toArray(accountsItemArray);
+					return (CellEditor)new ComboBoxCellEditor(transactionsTree,accountsItemArray);
 				}else
 					return null;
 			}
 			protected Object getValue(Object element) {
 				FinanceData financeData = (FinanceData)transactionsTreeViewer.getInput();
 				FinanceAccount accountToFind = null;
-				if(element instanceof ExpenseTransaction && ((ExpenseTransaction)element).getComponentsCount()<=1){
+				if(element instanceof ExpenseTransaction && ((ExpenseTransaction)element).getComponents().size()<=1){
 					FinanceAccount[] accounts = ((ExpenseTransaction)element).getAccounts();
 					accountToFind = accounts.length==1?accounts[0]:null;
 				}
@@ -619,23 +617,21 @@ public class MainWindow {
 					accountToFind = ((TransactionComponent)element).getAccount();
 				}
 				if(accountToFind!=null)
-					for(int i=0;i<financeData.getNumAccounts();i++)
-						if(financeData.getAccount(i)==accountToFind)
-							return i;
+					return financeData.getAccounts().indexOf(accountToFind);
 				return -1;
 			}
 			protected void setValue(Object element, Object value) {
 				try {
 					FinanceData financeData = (FinanceData)transactionsTreeViewer.getInput();
-					if(value instanceof Integer && (Integer)value!=-1 && element instanceof ExpenseTransaction && ((ExpenseTransaction)element).getComponentsCount()<=1){
-						financeData.setTransactionAccount((ExpenseTransaction)element, financeData.getAccount((Integer)value));
+					if(value instanceof Integer && (Integer)value!=-1 && element instanceof ExpenseTransaction && ((ExpenseTransaction)element).getComponents().size()<=1){
+						financeData.setTransactionAccount((ExpenseTransaction)element, financeData.getAccounts().get((Integer)value));
 						transactionsTreeViewer.update(element, null);
 						for(TransactionComponent component : ((ExpenseTransaction)element).getComponents())
 							transactionsTreeViewer.update(component, null);
 						updateAccounts();
 					}
 					if(value instanceof Integer && (Integer)value!=-1 && element instanceof TransactionComponent){
-						financeData.setTransactionComponentAccount((TransactionComponent)element, financeData.getAccount((Integer)value));
+						financeData.setTransactionComponentAccount((TransactionComponent)element, financeData.getAccounts().get((Integer)value));
 						transactionsTreeViewer.update(element, null);
 						transactionsTreeViewer.update(((TransactionComponent)element).getTransaction(), null);
 						updateAccounts();

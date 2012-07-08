@@ -238,7 +238,7 @@ public class FinanceData {
 	 * @param newAmount The new amount
 	 */
 	public void setTransactionAmount(ExpenseTransaction transaction,double newAmount){
-		if(transaction.getComponentsCount()!=1)
+		if(transaction.getComponents().isEmpty())
 			return;
 
 		TransactionComponent component = transaction.getComponents().get(0);
@@ -261,7 +261,7 @@ public class FinanceData {
 	 * @param newAccount The new account
 	 */
 	public void setTransactionAccount(ExpenseTransaction transaction,FinanceAccount newAccount){
-		if(transaction.getComponentsCount()!=1)
+		if(transaction.getComponents().isEmpty())
 			return;
 
 		TransactionComponent component = transaction.getComponents().get(0);
@@ -455,40 +455,18 @@ public class FinanceData {
 	 * Getters/setters
 	 */
 	/**
-	 * Returns a transaction at position i
-	 *
-	 * @param i The index
-	 * @return A transaction
+	 * Returns the list of accounts
+	 * @return the list of accounts
 	 */
-	public FinanceTransaction getTransaction(int i) {
-		return transactions.get(i);
+	public List<FinanceAccount> getAccounts(){
+		return accounts;
 	}
-
+	
 	/**
-	 * Returns the number of transactions
-	 *
-	 * @return The number of transactions
+	 * Returns the list of transactions
+	 * @return the list of transactions
 	 */
-	public int getNumTransactions() {
-		return transactions.size();
-	}
-
-	/**
-	 * Returns an account at position i
-	 *
-	 * @param i The index
-	 * @return An account
-	 */
-	public FinanceAccount getAccount(int i) {
-		return accounts.get(i);
-	}
-
-	/**
-	 * Returns the number of accounts
-	 *
-	 * @return The number of accounts
-	 */
-	public int getNumAccounts() {
-		return accounts.size();
+	public List<FinanceTransaction> getTransactions(){
+		return transactions;
 	}
 }
