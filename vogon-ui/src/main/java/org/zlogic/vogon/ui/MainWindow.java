@@ -70,6 +70,7 @@ import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
 import org.zlogic.vogon.data.TransferTransaction;
+import org.zlogic.vogon.data.XmlExporter;
 
 
 /**
@@ -163,7 +164,6 @@ public class MainWindow {
 		}
 		@Override
 		public Color getForeground(Object element, int column) {
-			// TODO Auto-generated method stub
 			return null;
 		}
 	}
@@ -361,6 +361,15 @@ public class MainWindow {
 			}
 		});
 		mntmImport.setText(Messages.MainWindow_mntmImport_text);
+		
+		MenuItem mntmExport = new MenuItem(menu_1, SWT.NONE);
+		mntmExport.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				showExportDialog();
+			}
+		});
+		mntmExport.setText(Messages.MainWindow_mntmExport_text);
 
 		MenuItem mntmPreferences = new MenuItem(menu_1, SWT.NONE);
 		mntmPreferences.setText(Messages.MainWindow_mntmPreferences_text);
@@ -888,6 +897,42 @@ public class MainWindow {
 				transactionsTreeViewer.setInput(financeData);
 				accountsTableViewer.setInput(financeData);
 			} catch (org.zlogic.vogon.data.VogonImportLogicalException ex) {
+				Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE,null, ex);
+				MessageDialog dialog = new MessageDialog(shell,Messages.MainWindow_Error_Importing_File,null,new MessageFormat(Messages.MainWindow_Error_Importing_File_Description).format(new Object[] { ex.getMessage() }),MessageDialog.ERROR, new String[] { Messages.MainWindow_OK }, 0);
+				dialog.open();
+			} catch (Exception ex) {
+				Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE,null, ex);
+				MessageDialog dialog = new MessageDialog(shell,Messages.MainWindow_Error_Importing_File,null,new MessageFormat(Messages.MainWindow_Error_Importing_File_Description).format(new Object[] { ex.getMessage() }),MessageDialog.ERROR, new String[] { Messages.MainWindow_OK }, 0);
+				dialog.open();
+			}
+		}
+	}
+	
+	/**
+	 * Shows the export dialog
+	 */
+	protected void showExportDialog() {
+		if (lastDirectory == null)
+			lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null	: new java.io.File(preferenceStorage.get("lastDirectory",null)); //$NON-NLS-1$ //$NON-NLS-2$
+
+		FileDialog exportCsvFileDialog = new FileDialog(shell, SWT.SAVE);
+		exportCsvFileDialog.setText(Messages.MainWindow_File_Export_Dialog_Header);
+		exportCsvFileDialog.setFilterExtensions(new String[] { "*.xml" }); //$NON-NLS-1$
+		exportCsvFileDialog.setFilterNames(new String[] { Messages.MainWindow_File_Export_Dialog_XmlFilter });
+		if (lastDirectory != null)
+			exportCsvFileDialog.setFilterPath(lastDirectory.getAbsolutePath());
+
+		String filename = null;
+		if ((filename = exportCsvFileDialog.open()) != null) {
+			java.io.File selectedFile = new java.io.File(filename);
+			lastDirectory = selectedFile.isDirectory() ? selectedFile : selectedFile.getParentFile();
+			preferenceStorage.put("lastDirectory", lastDirectory.toString()); //$NON-NLS-1$
+
+			// Test code for printing data
+			XmlExporter exporter = new XmlExporter(selectedFile);
+			try {
+				financeData.exportData(exporter);
+			} catch (org.zlogic.vogon.data.VogonExportException ex) {
 				Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE,null, ex);
 				MessageDialog dialog = new MessageDialog(shell,Messages.MainWindow_Error_Importing_File,null,new MessageFormat(Messages.MainWindow_Error_Importing_File_Description).format(new Object[] { ex.getMessage() }),MessageDialog.ERROR, new String[] { Messages.MainWindow_OK }, 0);
 				dialog.open();

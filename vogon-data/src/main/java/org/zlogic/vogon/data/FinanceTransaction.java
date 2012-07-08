@@ -199,7 +199,7 @@ public abstract class FinanceTransaction implements Serializable {
 	 *
 	 * @return the transaction amount
 	 */
-	public double getRawAmount() {
+	public long getRawAmount() {
 		return amount;
 	}
 

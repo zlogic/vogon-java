@@ -31,6 +31,19 @@
 					<target>1.7</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<resources>
+						<resource>
+							<directory>src/main/java</directory>
+							<includes>
+								<include>**/*.properties</include>
+							</includes>
+						</resource>
+					</resources>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

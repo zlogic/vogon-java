@@ -57,9 +57,9 @@ public class FinanceData {
 	/**
 	 * Imports and persists data into this instance by using the output of the specified FileImporter
 	 * 
-	 * @param importer A configured FileImported instance
-	 * @throws VogonImportLogicalException 
-	 * @throws VogonImportException 
+	 * @param importer A configured FileImporter instance
+	 * @throws VogonImportException In case of import errors (I/O, format, indexing etc.)
+	 * @throws VogonImportLogicalException In case of logical errors (without meaningful stack trace, just to show an error message)
 	 */
 	public void importData(FileImporter importer) throws VogonImportException, VogonImportLogicalException{
 		FinanceData newFinanceData = importer.importFile();
@@ -83,6 +83,16 @@ public class FinanceData {
 		transactions.addAll(newFinanceData.transactions);
 		
 		entityManager.getTransaction().commit();
+	}
+	
+	/**
+	 * Exports data by using the specified FileExporter
+	 * 
+	 * @param exporter A configured FileExporter instance
+	 * @throws VogonExportException In case of export errors (I/O, format, indexing etc.)
+	 */
+	public void exportData(FileExporter exporter) throws VogonExportException{
+		exporter.exportFile(this);
 	}
 	
 	/**
