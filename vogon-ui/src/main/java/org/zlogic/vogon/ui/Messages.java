@@ -5,6 +5,8 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.zlogic.vogon.ui.messages"; //$NON-NLS-1$
 	public static String MainWindow_Bad_Account_Substitute;
+	public static String MainWindow_File_Export_Dialog_Header;
+	public static String MainWindow_File_Export_Dialog_XmlFilter;
 	public static String MainWindow_File_Import_Dialog_CsvFilter;
 	public static String MainWindow_File_Import_Dialog_Header;
 	public static String MainWindow_shell_text;
@@ -35,6 +37,7 @@ public class Messages extends NLS {
 	public static String MainWindow_mntmRecalculateBalance_text;
 	public static String MainWindow_mntmTools_text;
 	public static String MainWindow_mntmCleanupDb_text;
+	public static String MainWindow_mntmExport_text;
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Constructor

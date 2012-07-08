@@ -51,10 +51,8 @@ public class CsvImporter implements FileImporter {
 	 * Parses and imports a CSV file
 	 *
 	 * @return A new FinanceData object, initialized from the CSV file
-	 * @throws VogonImportException In case of import errors (I/O, format,
-	 * indexing etc.)
-	 * @throws VogonImportLogicalException In case of logical errors (without
-	 * meaningful stack trace, just to show an error message)
+	 * @throws VogonImportException In case of import errors (I/O, format, indexing etc.)
+	 * @throws VogonImportLogicalException In case of logical errors (without meaningful stack trace, just to show an error message)
 	 */
 	@Override
 	public FinanceData importFile() throws VogonImportException, VogonImportLogicalException {
