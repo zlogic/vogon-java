@@ -191,7 +191,6 @@ public class MainWindow {
 	}
 
 
-
 	/**
 	 * The transactions content provider implementation
 	 * 
@@ -336,7 +335,7 @@ public class MainWindow {
 	 * Restores data from database and updates the tables
 	 */
 	protected void loadData(){
-		FinanceData financeData = FinanceData.restoreFromDatabase();
+		financeData = FinanceData.restoreFromDatabase();
 		transactionsTreeViewer.setInput(financeData);
 		accountsTableViewer.setInput(financeData);
 	}
@@ -353,11 +352,11 @@ public class MainWindow {
 		Menu menu = new Menu(shell, SWT.BAR);
 		shell.setMenuBar(menu);
 
-		MenuItem mntmNewSubmenu = new MenuItem(menu, SWT.CASCADE);
-		mntmNewSubmenu.setText(Messages.MainWindow_mntmNewSubmenu_text);
+		MenuItem mntmFile = new MenuItem(menu, SWT.CASCADE);
+		mntmFile.setText(Messages.MainWindow_mntmNewSubmenu_text);
 
-		Menu menu_1 = new Menu(mntmNewSubmenu);
-		mntmNewSubmenu.setMenu(menu_1);
+		Menu menu_1 = new Menu(mntmFile);
+		mntmFile.setMenu(menu_1);
 
 		MenuItem mntmImport = new MenuItem(menu_1, SWT.NONE);
 		mntmImport.addSelectionListener(new SelectionAdapter() {
@@ -370,6 +369,36 @@ public class MainWindow {
 
 		MenuItem mntmPreferences = new MenuItem(menu_1, SWT.NONE);
 		mntmPreferences.setText(Messages.MainWindow_mntmPreferences_text);
+		
+		MenuItem mntmTools = new MenuItem(menu, SWT.CASCADE);
+		mntmTools.setText(Messages.MainWindow_mntmTools_text);
+		
+		Menu menu_2 = new Menu(mntmTools);
+		mntmTools.setMenu(menu_2);
+		
+		MenuItem mntmRecalculateBalance = new MenuItem(menu_2, SWT.NONE);
+		mntmRecalculateBalance.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				FinanceData financeData = (FinanceData)accountsTableViewer.getInput();
+				for(int i=0;i<financeData.getNumAccounts();i++)
+					financeData.refreshAccountBalance(financeData.getAccount(i));
+				updateAccounts();
+			}
+		});
+		mntmRecalculateBalance.setText(Messages.MainWindow_mntmRecalculateBalance_text);
+		
+		MenuItem mntmCleanupDb = new MenuItem(menu_2, SWT.NONE);
+		mntmCleanupDb.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				FinanceData financeData = (FinanceData)accountsTableViewer.getInput();
+				financeData.cleanup();
+				updateAccounts();
+				updateTransactions();
+			}
+		});
+		mntmCleanupDb.setText(Messages.MainWindow_mntmCleanupDb_text);
 
 		TabFolder tabFolder = new TabFolder(shell, SWT.NONE);
 
@@ -832,22 +861,6 @@ public class MainWindow {
 		tblclmnBalance.setAlignment(SWT.RIGHT);
 		tcl_compositeAccountsTable.setColumnData(tblclmnBalance, new ColumnWeightData(30));
 		tblclmnBalance.setText(Messages.MainWindow_tblclmnBalance_text);
-		
-		Button btnRecalculateBalance = new Button(compositeAccounts, SWT.NONE);
-		btnRecalculateBalance.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				FinanceData financeData = (FinanceData)accountsTableViewer.getInput();
-				for(int i=0;i<financeData.getNumAccounts();i++)
-					financeData.refreshAccountBalance(financeData.getAccount(i));
-				updateAccounts();
-			}
-		});
-		FormData fd_btnRecalculateBalance = new FormData();
-		fd_btnRecalculateBalance.bottom = new FormAttachment(btnAddAccount, 0, SWT.BOTTOM);
-		fd_btnRecalculateBalance.right = new FormAttachment(btnDeleteAccount, -6);
-		btnRecalculateBalance.setLayoutData(fd_btnRecalculateBalance);
-		btnRecalculateBalance.setText(Messages.MainWindow_btnRecalculateBalance_text);
 		accountsTableViewer.setLabelProvider(new AccountsTableLabelProvider());
 		accountsTableViewer.setContentProvider(new AccountsContentProvider());
 	}
@@ -873,9 +886,9 @@ public class MainWindow {
 			preferenceStorage.put("lastDirectory", lastDirectory.toString()); //$NON-NLS-1$
 
 			// Test code for printing data
-			CsvImporter importer = new CsvImporter();
+			CsvImporter importer = new CsvImporter(selectedFile);
 			try {
-				financeData = importer.importFile(selectedFile);
+				financeData.importData(importer);
 				transactionsTreeViewer.setInput(financeData);
 				accountsTableViewer.setInput(financeData);
 			} catch (org.zlogic.vogon.data.VogonImportLogicalException ex) {

@@ -110,7 +110,8 @@ public abstract class FinanceTransaction implements Serializable {
 	 */
 	public void removeAllComponents() {
 		for(TransactionComponent component : components){
-			component.getAccount().updateRawBalance(-component.getRawAmount());
+			if(component.getAccount()!=null)
+				component.getAccount().updateRawBalance(-component.getRawAmount());
 			component.setAccount(null);
 			component.setTransaction(null);
 		}

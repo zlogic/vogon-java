@@ -36,7 +36,6 @@ public class ExpenseTransaction extends FinanceTransaction implements Serializab
 	 * @param description The transaction description
 	 * @param tags The transaction tags
 	 * @param date The transaction date
-	 * @param components The expense components
 	 */
 	public ExpenseTransaction(String description, String[] tags, Date date) {
 		this.description = description;
