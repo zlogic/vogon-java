@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>vogon</name>
+	<name>vogon-distribution</name>
 	<comment></comment>
 	<projects>
+		<project>vogon</project>
 		<project>vogon-data</project>
-		<project>vogon-distribution</project>
 		<project>vogon-ui</project>
 	</projects>
 	<buildSpec>
@@ -20,7 +20,7 @@
 		</buildCommand>
 	</buildSpec>
 	<natures>
-		<nature>org.eclipse.m2e.core.maven2Nature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>org.eclipse.m2e.core.maven2Nature</nature>
 	</natures>
 </projectDescription>
