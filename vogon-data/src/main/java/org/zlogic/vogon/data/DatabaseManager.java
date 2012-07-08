@@ -23,17 +23,17 @@ public class DatabaseManager {
 	 * Locker object for terminated field
 	 */
 	final private Boolean terminatedMutex = true;
-	
+
 	/**
 	 * EntityManager factory instance
 	 */
 	protected javax.persistence.EntityManagerFactory entityManagerFactory;
-	
+
 	/**
 	 * EntityManager instance
 	 */
 	protected javax.persistence.EntityManager entityManager;
-	
+
 	/**
 	 * Singleton instance of this class
 	 */
@@ -55,7 +55,7 @@ public class DatabaseManager {
 	public static DatabaseManager getInstance(){
 		return instance;
 	}
-	
+
 	/**
 	 * Returns the persistence unit for this package
 	 *
@@ -66,7 +66,7 @@ public class DatabaseManager {
 			return terminated ? null : entityManagerFactory;
 		}
 	}
-	
+
 	/**
 	 * Returns the entity manager for this package
 	 *

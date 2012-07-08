@@ -65,26 +65,26 @@ public class FinanceData {
 		FinanceData newFinanceData = importer.importFile();
 
 		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
-		
+
 		entityManager.getTransaction().begin();
-		
+
 		for(FinanceTransaction transaction : newFinanceData.transactions){
 			entityManager.persist(transaction);
 			for(TransactionComponent component : transaction.getComponents())
 				entityManager.persist(component);
 		}
-		
+
 		for(FinanceAccount account : newFinanceData.accounts)
 			if(!entityManager.contains(account)){
 				entityManager.persist(account);
 				accounts.add(account);
 			}
-		
+
 		transactions.addAll(newFinanceData.transactions);
-		
+
 		entityManager.getTransaction().commit();
 	}
-	
+
 	/**
 	 * Exports data by using the specified FileExporter
 	 * 
@@ -94,7 +94,7 @@ public class FinanceData {
 	public void exportData(FileExporter exporter) throws VogonExportException{
 		exporter.exportFile(this);
 	}
-	
+
 	/**
 	 * Restores all data from the persistence database
 	 * 
@@ -126,7 +126,7 @@ public class FinanceData {
 	 * @param transactions Array of financial transactions
 	 * @param accounts Array of accounts
 	 */
-	public FinanceData(java.util.ArrayList<FinanceTransaction> transactions, java.util.ArrayList<FinanceAccount> accounts) {
+	public FinanceData(List<FinanceTransaction> transactions, List<FinanceAccount> accounts) {
 		this.transactions = new java.util.LinkedList<>();
 		this.transactions.addAll(transactions);
 		this.accounts = new java.util.LinkedList<>();
@@ -145,14 +145,14 @@ public class FinanceData {
 	protected void persistenceAddAccount(FinanceAccount account,EntityManager entityManager){
 		if(account==null)
 			return;
-		
+
 		if(!accounts.contains(account))
 			accounts.add(account);
 
 		if(!entityManager.contains(account))
 			entityManager.persist(account);
 	}
-	
+
 	/**
 	 * Internal helper function
 	 * Adds a transaction to the list & persists it and its components (if necessary)
@@ -165,7 +165,7 @@ public class FinanceData {
 	protected void persistenceAddTransaction(FinanceTransaction transaction,EntityManager entityManager){
 		if(transaction==null)
 			return;
-		
+
 		if(!transactions.contains(transaction)){
 			transactions.add(transaction);
 			for(TransactionComponent component : transaction.getComponents())
@@ -189,7 +189,7 @@ public class FinanceData {
 		account.setName(name);
 
 		persistenceAddAccount(account,entityManager);
-		
+
 		entityManager.getTransaction().commit();
 	}
 
@@ -286,7 +286,7 @@ public class FinanceData {
 			entityManager.persist(component);
 
 		persistenceAddAccount(newAccount,entityManager);
-		
+
 		entityManager.getTransaction().commit();
 	}
 
@@ -396,7 +396,7 @@ public class FinanceData {
 		entityManager.remove(account);
 		entityManager.getTransaction().commit();
 	}
-	
+
 	/**
 	 * Recalculates an account's balance based on its transactions
 	 * 
@@ -413,7 +413,7 @@ public class FinanceData {
 		}
 		entityManager.getTransaction().commit();
 	}
-	
+
 	/**
 	 * Deletes all orphaned transactions, accounts and transaction components
 	 */
@@ -424,7 +424,7 @@ public class FinanceData {
 		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
 		CriteriaQuery<FinanceAccount> accountsCriteriaQuery = criteriaBuilder.createQuery(FinanceAccount.class);
 		CriteriaQuery<TransactionComponent> componentsCriteriaQuery = criteriaBuilder.createQuery(TransactionComponent.class);
-		
+
 		//Get all data from DB
 		List<FinanceTransaction> transactionsDB = entityManager.createQuery(transactionsCriteriaQuery).getResultList();
 		List<FinanceAccount> accountsDB = entityManager.createQuery(accountsCriteriaQuery).getResultList();
@@ -438,7 +438,7 @@ public class FinanceData {
 
 		transactions.removeAll(transactionsDB);
 		accounts.removeAll(accountsDB);
-		
+
 		entityManager.getTransaction().begin();
 		for(FinanceTransaction transaction : transactionsDB){
 			for(TransactionComponent component : transaction.getComponents())
@@ -447,17 +447,17 @@ public class FinanceData {
 			transaction.removeAllComponents();
 			entityManager.remove(transaction);
 		}
-		
+
 		for(FinanceAccount account : accountsDB)
 			entityManager.remove(account);
-		
+
 		for(TransactionComponent component : componentsDB){
 			if(component.getTransaction()!=null)
 				component.getTransaction().removeComponent(component);
 			component.setTransaction(null);
 			entityManager.remove(component);
 		}
-		
+
 		entityManager.getTransaction().commit();
 	}
 
@@ -471,7 +471,7 @@ public class FinanceData {
 	public List<FinanceAccount> getAccounts(){
 		return accounts;
 	}
-	
+
 	/**
 	 * Returns the list of transactions
 	 * @return the list of transactions

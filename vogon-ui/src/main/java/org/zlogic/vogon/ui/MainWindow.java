@@ -65,12 +65,15 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.zlogic.vogon.data.CsvImporter;
 import org.zlogic.vogon.data.DatabaseManager;
 import org.zlogic.vogon.data.ExpenseTransaction;
+import org.zlogic.vogon.data.FileImporter;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
 import org.zlogic.vogon.data.TransferTransaction;
+import org.zlogic.vogon.data.VogonImportLogicalException;
 import org.zlogic.vogon.data.XmlExporter;
+import org.zlogic.vogon.data.XmlImporter;
 
 
 /**
@@ -361,7 +364,7 @@ public class MainWindow {
 			}
 		});
 		mntmImport.setText(Messages.MainWindow_mntmImport_text);
-		
+
 		MenuItem mntmExport = new MenuItem(menu_1, SWT.NONE);
 		mntmExport.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -373,13 +376,13 @@ public class MainWindow {
 
 		MenuItem mntmPreferences = new MenuItem(menu_1, SWT.NONE);
 		mntmPreferences.setText(Messages.MainWindow_mntmPreferences_text);
-		
+
 		MenuItem mntmTools = new MenuItem(menu, SWT.CASCADE);
 		mntmTools.setText(Messages.MainWindow_mntmTools_text);
-		
+
 		Menu menu_2 = new Menu(mntmTools);
 		mntmTools.setMenu(menu_2);
-		
+
 		MenuItem mntmRecalculateBalance = new MenuItem(menu_2, SWT.NONE);
 		mntmRecalculateBalance.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -391,7 +394,7 @@ public class MainWindow {
 			}
 		});
 		mntmRecalculateBalance.setText(Messages.MainWindow_mntmRecalculateBalance_text);
-		
+
 		MenuItem mntmCleanupDb = new MenuItem(menu_2, SWT.NONE);
 		mntmCleanupDb.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -877,22 +880,28 @@ public class MainWindow {
 		if (lastDirectory == null)
 			lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null	: new java.io.File(preferenceStorage.get("lastDirectory",null)); //$NON-NLS-1$ //$NON-NLS-2$
 
-		FileDialog importCsvFileDialog = new FileDialog(shell, SWT.OPEN);
-		importCsvFileDialog.setText(Messages.MainWindow_File_Import_Dialog_Header);
-		importCsvFileDialog.setFilterExtensions(new String[] { "*.csv" }); //$NON-NLS-1$
-		importCsvFileDialog.setFilterNames(new String[] { Messages.MainWindow_File_Import_Dialog_CsvFilter });
+		FileDialog importFileDialog = new FileDialog(shell, SWT.OPEN);
+		importFileDialog.setText(Messages.MainWindow_File_Import_Dialog_Header);
+		importFileDialog.setFilterExtensions(new String[] { "*.xml","*.csv" }); //$NON-NLS-1$
+		importFileDialog.setFilterNames(new String[] { Messages.MainWindow_File_Dialog_XmlFilter,Messages.MainWindow_File_Dialog_CsvFilter });
 		if (lastDirectory != null)
-			importCsvFileDialog.setFilterPath(lastDirectory.getAbsolutePath());
+			importFileDialog.setFilterPath(lastDirectory.getAbsolutePath());
 
 		String filename = null;
-		if ((filename = importCsvFileDialog.open()) != null) {
+		if ((filename = importFileDialog.open()) != null) {
 			java.io.File selectedFile = new java.io.File(filename);
 			lastDirectory = selectedFile.isDirectory() ? selectedFile : selectedFile.getParentFile();
 			preferenceStorage.put("lastDirectory", lastDirectory.toString()); //$NON-NLS-1$
 
 			// Test code for printing data
-			CsvImporter importer = new CsvImporter(selectedFile);
+			FileImporter importer = null;
+			if(importFileDialog.getFilterIndex()==0)
+				importer= new XmlImporter(selectedFile);
+			else if(importFileDialog.getFilterIndex()==1)
+				importer= new CsvImporter(selectedFile);
 			try {
+				if(importer==null)
+					throw new VogonImportLogicalException("Unknown file type");
 				financeData.importData(importer);
 				transactionsTreeViewer.setInput(financeData);
 				accountsTableViewer.setInput(financeData);
@@ -907,7 +916,7 @@ public class MainWindow {
 			}
 		}
 	}
-	
+
 	/**
 	 * Shows the export dialog
 	 */
@@ -918,7 +927,7 @@ public class MainWindow {
 		FileDialog exportCsvFileDialog = new FileDialog(shell, SWT.SAVE);
 		exportCsvFileDialog.setText(Messages.MainWindow_File_Export_Dialog_Header);
 		exportCsvFileDialog.setFilterExtensions(new String[] { "*.xml" }); //$NON-NLS-1$
-		exportCsvFileDialog.setFilterNames(new String[] { Messages.MainWindow_File_Export_Dialog_XmlFilter });
+		exportCsvFileDialog.setFilterNames(new String[] { Messages.MainWindow_File_Dialog_XmlFilter });
 		if (lastDirectory != null)
 			exportCsvFileDialog.setFilterPath(lastDirectory.getAbsolutePath());
 

@@ -56,24 +56,23 @@ public class XmlExporter implements FileExporter {
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder;
 			docBuilder = docFactory.newDocumentBuilder();
-			
+
 			// Top element (FinanceData)
 			Document doc = docBuilder.newDocument();
 			Element rootElement = doc.createElement("VogonFinanceData");
 			doc.appendChild(rootElement);
-			
+
 			//Accounts node
 			Element accountsElement = doc.createElement("Accounts");
 			rootElement.appendChild(accountsElement);
-			
+
 			//Transactions node
 			Element transactionsElement = doc.createElement("Transactions");
 			rootElement.appendChild(transactionsElement);
-			
+
 			//Accounts list
 			for(FinanceAccount account : financeData.getAccounts()){
 				Element accountElement = doc.createElement("Account");
-				accountElement.setAttribute("Type", account.getClass().getSimpleName());
 				accountElement.setAttribute("Id",Long.toString(account.id));
 				accountElement.setAttribute("Name", account.getName());
 				//accountElement.setAttribute("Balance", Long.toString(account.getRawBalance()));
@@ -91,7 +90,7 @@ public class XmlExporter implements FileExporter {
 				//Tags list
 				for(String tag : transaction.getTags()){
 					Element tagElement = doc.createElement("Tag");
-					tagElement.setAttribute("Name", tag);
+					tagElement.setTextContent(tag);
 					transactionElement.appendChild(tagElement);
 				}
 				//Transaction components list
@@ -112,7 +111,7 @@ public class XmlExporter implements FileExporter {
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			DOMSource source = new DOMSource(doc);
 			StreamResult result = new StreamResult(outputFile);
-	 
+
 			transformer.transform(source, result);
 		} catch (ParserConfigurationException | TransformerException e) {
 			Logger.getLogger(CsvImporter.class.getName()).log(Level.SEVERE, null, e);
