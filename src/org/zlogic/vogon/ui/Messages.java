@@ -32,7 +32,9 @@ public class Messages extends NLS {
 	public static String MainWindow_btnAddComponent_text;
 	public static String MainWindow_btnDeleteSelection_text;
 	public static String MainWindow_btnAddTransferTransaction_text;
-	public static String MainWindow_btnRecalculateBalance_text;
+	public static String MainWindow_mntmRecalculateBalance_text;
+	public static String MainWindow_mntmTools_text;
+	public static String MainWindow_mntmCleanupDb_text;
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Constructor

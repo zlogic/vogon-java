@@ -55,6 +55,37 @@ public class FinanceData {
 	}
 
 	/**
+	 * Imports and persists data into this instance by using the output of the specified FileImporter
+	 * 
+	 * @param importer A configured FileImported instance
+	 * @throws VogonImportLogicalException 
+	 * @throws VogonImportException 
+	 */
+	public void importData(FileImporter importer) throws VogonImportException, VogonImportLogicalException{
+		FinanceData newFinanceData = importer.importFile();
+
+		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
+		
+		entityManager.getTransaction().begin();
+		
+		for(FinanceTransaction transaction : newFinanceData.transactions){
+			entityManager.persist(transaction);
+			for(TransactionComponent component : transaction.getComponents())
+				entityManager.persist(component);
+		}
+		
+		for(FinanceAccount account : newFinanceData.accounts)
+			if(!entityManager.contains(account)){
+				entityManager.persist(account);
+				accounts.add(account);
+			}
+		
+		transactions.addAll(newFinanceData.transactions);
+		
+		entityManager.getTransaction().commit();
+	}
+	
+	/**
 	 * Restores all data from the persistence database
 	 * 
 	 * @return The restored FinanceData instance
@@ -92,6 +123,49 @@ public class FinanceData {
 		this.accounts.addAll(accounts);
 	}
 
+	/**
+	 * Internal helper function
+	 * Adds an account to the list & persists it (if necessary)
+	 * Safe to call even if the account already exists
+	 * Should only be called from an started transaction
+	 * 
+	 * @param account the account to be added
+	 * @param entityManager the entity manager
+	 */
+	protected void persistenceAddAccount(FinanceAccount account,EntityManager entityManager){
+		if(account==null)
+			return;
+		
+		if(!accounts.contains(account))
+			accounts.add(account);
+
+		if(!entityManager.contains(account))
+			entityManager.persist(account);
+	}
+	
+	/**
+	 * Internal helper function
+	 * Adds a transaction to the list & persists it and its components (if necessary)
+	 * Safe to call even if the transaction already exists
+	 * Should only be called from an started transaction
+	 * 
+	 * @param transaction the transaction to be added
+	 * @param entityManager the entity manager
+	 */
+	protected void persistenceAddTransaction(FinanceTransaction transaction,EntityManager entityManager){
+		if(transaction==null)
+			return;
+		
+		if(!transactions.contains(transaction)){
+			transactions.add(transaction);
+			for(TransactionComponent component : transaction.getComponents())
+				if(!entityManager.contains(component))
+					entityManager.persist(component);
+		}
+
+		if(!entityManager.contains(transaction))
+			entityManager.persist(transaction);
+	}
 
 	/**
 	 * Sets a new account name. Adds the account to the persistence if needed.
@@ -104,11 +178,8 @@ public class FinanceData {
 		entityManager.getTransaction().begin();
 		account.setName(name);
 
-		if(!accounts.contains(account))
-			accounts.add(account);
-
-		if(!entityManager.contains(account))
-			entityManager.persist(account);
+		persistenceAddAccount(account,entityManager);
+		
 		entityManager.getTransaction().commit();
 	}
 
@@ -123,15 +194,8 @@ public class FinanceData {
 		entityManager.getTransaction().begin();
 		transaction.setTags(tags);
 
-		if(!transactions.contains(transaction)){
-			transactions.add(transaction);
-			for(TransactionComponent component : transaction.getComponents())
-				if(!entityManager.contains(component))
-					entityManager.persist(component);
-		}
+		persistenceAddTransaction(transaction,entityManager);
 
-		if(!entityManager.contains(transaction))
-			entityManager.persist(transaction);
 		entityManager.getTransaction().commit();
 	}
 
@@ -139,22 +203,15 @@ public class FinanceData {
 	 * Sets a new date for a transaction
 	 * 
 	 * @param transaction The transaction to be updated
-	 * @param tags The new date
+	 * @param date The new date
 	 */
 	public void setTransactionDate(FinanceTransaction transaction,Date date){
 		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
 		entityManager.getTransaction().begin();
 		transaction.setDate(date);
 
-		if(!transactions.contains(transaction)){
-			transactions.add(transaction);
-			for(TransactionComponent component : transaction.getComponents())
-				if(!entityManager.contains(component))
-					entityManager.persist(component);
-		}
+		persistenceAddTransaction(transaction,entityManager);
 
-		if(!entityManager.contains(transaction))
-			entityManager.persist(transaction);
 		entityManager.getTransaction().commit();
 	}
 
@@ -169,15 +226,8 @@ public class FinanceData {
 		entityManager.getTransaction().begin();
 		transaction.setDescription(description);
 
-		if(!transactions.contains(transaction)){
-			transactions.add(transaction);
-			for(TransactionComponent component : transaction.getComponents())
-				if(!entityManager.contains(component))
-					entityManager.persist(component);
-		}
+		persistenceAddTransaction(transaction,entityManager);
 
-		if(!entityManager.contains(transaction))
-			entityManager.persist(transaction);
 		entityManager.getTransaction().commit();
 	}
 
@@ -197,15 +247,7 @@ public class FinanceData {
 
 		transaction.updateComponentRawAmount(component,(long)Math.round(newAmount*100));
 
-		if(!transactions.contains(transaction)){
-			transactions.add(transaction);
-			for(TransactionComponent component_ : transaction.getComponents())
-				if(!entityManager.contains(component_))
-					entityManager.persist(component_);
-		}
-
-		if(!entityManager.contains(transaction))
-			entityManager.persist(transaction);
+		persistenceAddTransaction(transaction,entityManager);
 
 		if(!entityManager.contains(component))
 			entityManager.persist(component);
@@ -228,21 +270,13 @@ public class FinanceData {
 
 		transaction.updateComponentAccount(component,newAccount);
 
-		if(!transactions.contains(transaction)){
-			transactions.add(transaction);
-			for(TransactionComponent component_ : transaction.getComponents())
-				if(!entityManager.contains(component_))
-					entityManager.persist(component_);
-		}
-
-		if(!entityManager.contains(transaction))
-			entityManager.persist(transaction);
+		persistenceAddTransaction(transaction,entityManager);
 
 		if(!entityManager.contains(component))
 			entityManager.persist(component);
 
-		if(!entityManager.contains(newAccount))
-			entityManager.persist(newAccount);
+		persistenceAddAccount(newAccount,entityManager);
+		
 		entityManager.getTransaction().commit();
 	}
 
@@ -264,15 +298,7 @@ public class FinanceData {
 			component.getTransaction().addComponent(component);
 		}
 
-		if(!transactions.contains(component.getTransaction())){
-			transactions.add(component.getTransaction());
-			for(TransactionComponent component_ : component.getTransaction().getComponents())
-				if(!entityManager.contains(component_))
-					entityManager.persist(component_);
-		}
-
-		if(!entityManager.contains(component.getTransaction()))
-			entityManager.persist(component.getTransaction());
+		persistenceAddTransaction(component.getTransaction(),entityManager);
 
 		if(!entityManager.contains(component))
 			entityManager.persist(component);
@@ -296,39 +322,26 @@ public class FinanceData {
 			component.getTransaction().addComponent(component);
 		}
 
-		if(!transactions.contains(component.getTransaction())){
-			transactions.add(component.getTransaction());
-			for(TransactionComponent component_ : component.getTransaction().getComponents())
-				if(!entityManager.contains(component_))
-					entityManager.persist(component_);
-		}
 
-		if(!entityManager.contains(component.getTransaction()))
-			entityManager.persist(component.getTransaction());
+		persistenceAddTransaction(component.getTransaction(),entityManager);
 
 		if(!entityManager.contains(component))
 			entityManager.persist(component);
 
-		if(!entityManager.contains(newAccount))
-			entityManager.persist(newAccount);
+		persistenceAddAccount(newAccount,entityManager);
 		entityManager.getTransaction().commit();
 	}
 
 	/**
 	 * Deletes a transaction component (with all dependencies)
 	 * 
-	 * @param account The transaction to delete
+	 * @param component The transaction component to delete
 	 */
 	public void deleteTransactionComponent(TransactionComponent component){
 		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
 		entityManager.getTransaction().begin();
 
-		if(!transactions.contains(component.getTransaction())){
-			transactions.add(component.getTransaction());
-			for(TransactionComponent component_ : component.getTransaction().getComponents())
-				if(!entityManager.contains(component_))
-					entityManager.persist(component_);
-		}
+		persistenceAddTransaction(component.getTransaction(),entityManager);
 
 		component.getTransaction().removeComponent(component);
 
@@ -339,7 +352,7 @@ public class FinanceData {
 	/**
 	 * Deletes a transaction (with all dependencies)
 	 * 
-	 * @param account The transaction to delete
+	 * @param transaction The transaction to delete
 	 */
 	public void deleteTransaction(FinanceTransaction transaction){
 		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
@@ -388,6 +401,53 @@ public class FinanceData {
 				account.updateRawBalance(component.getRawAmount());
 			}
 		}
+		entityManager.getTransaction().commit();
+	}
+	
+	/**
+	 * Deletes all orphaned transactions, accounts and transaction components
+	 */
+	public void cleanup(){
+		//TODO: test this!!
+		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
+		CriteriaQuery<FinanceAccount> accountsCriteriaQuery = criteriaBuilder.createQuery(FinanceAccount.class);
+		CriteriaQuery<TransactionComponent> componentsCriteriaQuery = criteriaBuilder.createQuery(TransactionComponent.class);
+		
+		//Get all data from DB
+		List<FinanceTransaction> transactionsDB = entityManager.createQuery(transactionsCriteriaQuery).getResultList();
+		List<FinanceAccount> accountsDB = entityManager.createQuery(accountsCriteriaQuery).getResultList();
+		List<TransactionComponent> componentsDB = entityManager.createQuery(componentsCriteriaQuery).getResultList();
+
+		//Remove OK items from list
+		transactionsDB.removeAll(transactions);
+		accountsDB.removeAll(accounts);
+		for(FinanceTransaction transaction : transactions)
+			componentsDB.removeAll(transaction.getComponents());
+
+		transactions.removeAll(transactionsDB);
+		accounts.removeAll(accountsDB);
+		
+		entityManager.getTransaction().begin();
+		for(FinanceTransaction transaction : transactionsDB){
+			for(TransactionComponent component : transaction.getComponents())
+				entityManager.remove(component);
+			componentsDB.removeAll(transaction.getComponents());
+			transaction.removeAllComponents();
+			entityManager.remove(transaction);
+		}
+		
+		for(FinanceAccount account : accountsDB)
+			entityManager.remove(account);
+		
+		for(TransactionComponent component : componentsDB){
+			if(component.getTransaction()!=null)
+				component.getTransaction().removeComponent(component);
+			component.setTransaction(null);
+			entityManager.remove(component);
+		}
+		
 		entityManager.getTransaction().commit();
 	}
 

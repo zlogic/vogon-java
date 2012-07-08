@@ -5,6 +5,7 @@
  */
 package org.zlogic.vogon.data;
 
+import java.io.File;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,9 +34,22 @@ import au.com.bytecode.opencsv.CSVReader;
 public class CsvImporter implements FileImporter {
 
 	/**
+	 * The input CSV file
+	 */
+	protected File inputFile;
+	
+	/**
+	 * Creates an instance of the CSV Importer
+	 * 
+	 * @param inputFile The input file to read
+	 */
+	public CsvImporter(File inputFile){
+		this.inputFile = inputFile;
+	}
+	
+	/**
 	 * Parses and imports a CSV file
 	 *
-	 * @param file The file to be imported
 	 * @return A new FinanceData object, initialized from the CSV file
 	 * @throws VogonImportException In case of import errors (I/O, format,
 	 * indexing etc.)
@@ -43,23 +57,12 @@ public class CsvImporter implements FileImporter {
 	 * meaningful stack trace, just to show an error message)
 	 */
 	@Override
-	public FinanceData importFile(java.io.File file) throws VogonImportException, VogonImportLogicalException {
-		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
+	public FinanceData importFile() throws VogonImportException, VogonImportLogicalException {
 
-		//Remove old instances of FinanceData
-		{
-			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-			CriteriaQuery<FinanceData> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceData.class);
-			List <FinanceData> oldFinanceDataList = entityManager.createQuery(transactionsCriteriaQuery).getResultList();
-			for(FinanceData financeData : oldFinanceDataList)
-				entityManager.remove(financeData);
-		}
-
-		entityManager.getTransaction().begin();
 		try {
 			ArrayList<FinanceTransaction> transactions = new ArrayList<>();
 			ArrayList<FinanceAccount> accounts = new ArrayList<>();
-			CSVReader reader = new CSVReader(new java.io.InputStreamReader(new java.io.FileInputStream(file),"UTF8")); //$NON-NLS-1$
+			CSVReader reader = new CSVReader(new java.io.InputStreamReader(new java.io.FileInputStream(inputFile),"UTF8")); //$NON-NLS-1$
 			String[] columns;
 			String[] columnsHeader = null;
 			while ((columns = reader.readNext()) != null) {
@@ -70,7 +73,7 @@ public class CsvImporter implements FileImporter {
 				if (columnsHeader == null) {
 					columnsHeader = columns;
 					//Create accounts
-
+					EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
 
 					for (int i = 3; i < columns.length; i++) {
 						// Try searching existing account in database
@@ -85,7 +88,6 @@ public class CsvImporter implements FileImporter {
 							accounts.add(foundAccounts.get(0));
 						} else {
 							FinanceAccount account = new FinanceAccount(columns[i]);
-							entityManager.persist(account);
 							accounts.add(account);
 						}
 					}
@@ -112,11 +114,9 @@ public class CsvImporter implements FileImporter {
 					if ((hasPositiveAmounts || hasNegativeAmounts) && !(hasPositiveAmounts && hasNegativeAmounts)) {
 						//Expense transaction
 						transaction = new ExpenseTransaction(columns[0], tags, date);
-						entityManager.persist(transaction);
 					} else if (hasPositiveAmounts && hasNegativeAmounts) {
 						//Transfer/split transaction
 						transaction = new TransferTransaction(columns[0], tags, date);
-						entityManager.persist(transaction);
 					} else {
 						reader.close();
 						throw new VogonImportLogicalException((new MessageFormat(Messages.CsvImporter_Transaction_Too_Complex)).format(new Object[]{Utils.join(columns, ",")})); //$NON-NLS-2$
@@ -126,7 +126,6 @@ public class CsvImporter implements FileImporter {
 					List<TransactionComponent> components = new LinkedList<>();
 					for(Entry<FinanceAccount, Long> amount : accountAmounts.entrySet()){
 						TransactionComponent newComponent = new TransactionComponent(amount.getKey(),transaction,amount.getValue());
-						entityManager.persist(newComponent);
 						components.add(newComponent);
 					}
 					transaction.addComponents(components);
@@ -135,10 +134,6 @@ public class CsvImporter implements FileImporter {
 			}
 			reader.close();
 			FinanceData result = new FinanceData(transactions, accounts);
-
-			entityManager.persist(result);
-
-			entityManager.getTransaction().commit();
 			return result;
 		} catch (java.io.FileNotFoundException e) {
 			Logger.getLogger(CsvImporter.class.getName()).log(Level.SEVERE, null, e);

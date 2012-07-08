@@ -35,7 +35,6 @@ public class TransferTransaction extends FinanceTransaction {
 	 * @param description The transaction description
 	 * @param tags The transaction tags
 	 * @param date The transaction date
-	 * @param components The transfer components
 	 */
 	public TransferTransaction(String description, String[] tags, Date date) {
 		this.description = description;
