@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.layout.TreeColumnLayout;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
@@ -29,6 +30,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableColorProvider;
+import org.eclipse.jface.viewers.ITableFontProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -44,6 +46,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
@@ -88,9 +91,11 @@ public class MainWindow {
 	 * @author Dmitry Zolotukhin
 	 */
 	private class TransactionsTableLabelProvider extends LabelProvider implements ITableLabelProvider,ITableColorProvider  {
+		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
 		}
+		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			if(element instanceof FinanceTransaction){
 				FinanceTransaction transaction = (FinanceTransaction)element;
@@ -176,10 +181,12 @@ public class MainWindow {
 	 * 
 	 * @author Dmitry Zolotukhin
 	 */
-	private class AccountsTableLabelProvider extends LabelProvider implements ITableLabelProvider {
+	private class AccountsTableLabelProvider extends LabelProvider implements ITableLabelProvider,ITableFontProvider {
+		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
 		}
+		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			if(element instanceof FinanceAccount){
 				FinanceAccount account = (FinanceAccount)element;
@@ -189,8 +196,23 @@ public class MainWindow {
 				case 1:
 					return MessageFormat.format("{0,number,0.00}", new Object[]{account.getBalance()}); //$NON-NLS-1$
 				}
+			}else if(element instanceof Double){
+				Double totalBalance = (Double)element;
+				switch (columnIndex){
+				case 0:
+					return Messages.MainWindow_Total;
+				case 1:
+					return MessageFormat.format("{0,number,0.00}", new Object[]{totalBalance}); //$NON-NLS-1$
+				}
 			}
 			return ""; //$NON-NLS-1$
+		}
+		@Override
+		public Font getFont(Object element, int columnIndex) {
+			if(element instanceof Double){
+				return JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
+			}
+			return null;
 		}
 	}
 
@@ -251,14 +273,21 @@ public class MainWindow {
 	 * @author Dmitry Zolotukhin
 	 */
 	private static class AccountsContentProvider implements IStructuredContentProvider {		
+		@Override
 		public Object[] getElements(Object inputElement) {
 			if(inputElement instanceof FinanceData){
 				FinanceData financeData = (FinanceData)inputElement;
-				return financeData.getAccounts().toArray();
+				List<FinanceAccount> accounts = financeData.getAccounts();
+				Object[] accountsArray = new Object[accounts.size()+1];
+				accountsArray = accounts.toArray(accountsArray);
+				accountsArray[accountsArray.length-1] = financeData.getTotalBalance();
+				return accountsArray;
 			}else return new Object[]{};
 		}
+		@Override
 		public void dispose() {
 		}
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 	}
@@ -429,6 +458,7 @@ public class MainWindow {
 
 		transactionsTreeViewer = new TreeViewer(compositeTransactionsTree, SWT.BORDER | SWT.FULL_SELECTION);
 		transactionsTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent arg0) {
 				btnDeleteTransaction.setEnabled(!arg0.getSelection().isEmpty());
 				btnAddComponent.setEnabled(!arg0.getSelection().isEmpty());
@@ -439,20 +469,24 @@ public class MainWindow {
 
 		TreeViewerColumn treeViewerColumn = new TreeViewerColumn(transactionsTreeViewer, SWT.NONE);
 		treeViewerColumn.setEditingSupport(new EditingSupport(transactionsTreeViewer) {
+			@Override
 			protected boolean canEdit(Object element) {
 				return element instanceof FinanceTransaction;
 			}
+			@Override
 			protected CellEditor getCellEditor(Object element) {
 				if(element instanceof FinanceTransaction){
-					return (CellEditor)new TextCellEditor(transactionsTree);
+					return new TextCellEditor(transactionsTree);
 				}else
 					return null;
 			}
+			@Override
 			protected Object getValue(Object element) {
 				if(element instanceof FinanceTransaction)
 					return ((FinanceTransaction)element).getDescription();
 				return null;
 			}
+			@Override
 			protected void setValue(Object element, Object value) {
 				try {
 					FinanceData financeData = (FinanceData)transactionsTreeViewer.getInput();
@@ -471,27 +505,31 @@ public class MainWindow {
 
 		TreeViewerColumn treeViewerColumn_1 = new TreeViewerColumn(transactionsTreeViewer, SWT.NONE);
 		treeViewerColumn_1.setEditingSupport(new EditingSupport(transactionsTreeViewer) {
+			@Override
 			protected boolean canEdit(Object element) {
 				return element instanceof FinanceTransaction;
 			}
+			@Override
 			protected CellEditor getCellEditor(Object element) {
 				if(element instanceof FinanceTransaction){
-					return (CellEditor)new TextCellEditor(transactionsTree);
+					return new TextCellEditor(transactionsTree);
 				}else
 					return null;
 			}
+			@Override
 			protected Object getValue(Object element) {
 				if(element instanceof FinanceTransaction)
 					return MessageFormat.format("{0,date,yyyy-MM-dd}", new Object[]{((FinanceTransaction)element).getDate()}); //$NON-NLS-1$
 				return null;
 			}
+			@Override
 			protected void setValue(Object element, Object value) {
 				try {
 					FinanceData financeData = (FinanceData)transactionsTreeViewer.getInput();
 					if(element instanceof FinanceTransaction && value instanceof String && financeData!=null){
 						SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); //$NON-NLS-1$
 						try {
-							financeData.setTransactionDate((FinanceTransaction)element, dateFormat.parse((String)value)); //$NON-NLS-1$;
+							financeData.setTransactionDate((FinanceTransaction)element, dateFormat.parse((String)value)); //;
 						} catch (ParseException ex) {
 							//TODO: warn user?
 							Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE,null, ex);
@@ -510,20 +548,24 @@ public class MainWindow {
 
 		TreeViewerColumn treeViewerColumn_2 = new TreeViewerColumn(transactionsTreeViewer, SWT.NONE);
 		treeViewerColumn_2.setEditingSupport(new EditingSupport(transactionsTreeViewer) {
+			@Override
 			protected boolean canEdit(Object element) {
 				return element instanceof FinanceTransaction;
 			}
+			@Override
 			protected CellEditor getCellEditor(Object element) {
 				if(element instanceof FinanceTransaction){
-					return (CellEditor)new TextCellEditor(transactionsTree);
+					return new TextCellEditor(transactionsTree);
 				}else
 					return null;
 			}
+			@Override
 			protected Object getValue(Object element) {
 				if(element instanceof FinanceTransaction)
 					return org.zlogic.vogon.data.Utils.join(((FinanceTransaction)element).getTags(), ","); //$NON-NLS-1$;
 				return null;
 			}
+			@Override
 			protected void setValue(Object element, Object value) {
 				try {
 					FinanceData financeData = (FinanceData)transactionsTreeViewer.getInput();
@@ -543,16 +585,19 @@ public class MainWindow {
 
 		TreeViewerColumn treeViewerColumn_3 = new TreeViewerColumn(transactionsTreeViewer, SWT.NONE);
 		treeViewerColumn_3.setEditingSupport(new EditingSupport(transactionsTreeViewer) {
+			@Override
 			protected boolean canEdit(Object element) {
 				return (element instanceof ExpenseTransaction && ((ExpenseTransaction)element).getComponents().size()<=1)
 						|| (element instanceof TransactionComponent);
 			}
+			@Override
 			protected CellEditor getCellEditor(Object element) {
 				if(element instanceof FinanceTransaction || element instanceof TransactionComponent){
-					return (CellEditor)new TextCellEditor(transactionsTree);
+					return new TextCellEditor(transactionsTree);
 				}else
 					return null;
 			}
+			@Override
 			protected Object getValue(Object element) {
 				if(element instanceof FinanceTransaction)
 					return MessageFormat.format("{0,number,0.00}", new Object[]{((FinanceTransaction)element).getAmount()}); //$NON-NLS-1$
@@ -560,6 +605,7 @@ public class MainWindow {
 					return MessageFormat.format("{0,number,0.00}", new Object[]{((TransactionComponent)element).getAmount()}); //$NON-NLS-1$
 				return null;
 			}
+			@Override
 			protected void setValue(Object element, Object value) {
 				try {
 					FinanceData financeData = (FinanceData)transactionsTreeViewer.getInput();
@@ -601,10 +647,12 @@ public class MainWindow {
 
 		TreeViewerColumn treeViewerColumn_4 = new TreeViewerColumn(transactionsTreeViewer, SWT.NONE);
 		treeViewerColumn_4.setEditingSupport(new EditingSupport(transactionsTreeViewer) {
+			@Override
 			protected boolean canEdit(Object element) {
 				return (element instanceof ExpenseTransaction && ((ExpenseTransaction)element).getComponents().size()<=1)
 						|| (element instanceof TransactionComponent);
 			}
+			@Override
 			protected CellEditor getCellEditor(Object element) {
 				if(element instanceof ExpenseTransaction || element instanceof TransactionComponent){
 					FinanceData financeData = (FinanceData)transactionsTreeViewer.getInput();
@@ -614,10 +662,11 @@ public class MainWindow {
 						accountsItemList.add(account.getName());
 					String[] accountsItemArray = new String[accountsItemList.size()];
 					accountsItemArray = accountsItemList.toArray(accountsItemArray);
-					return (CellEditor)new ComboBoxCellEditor(transactionsTree,accountsItemArray);
+					return new ComboBoxCellEditor(transactionsTree,accountsItemArray);
 				}else
 					return null;
 			}
+			@Override
 			protected Object getValue(Object element) {
 				FinanceData financeData = (FinanceData)transactionsTreeViewer.getInput();
 				FinanceAccount accountToFind = null;
@@ -632,6 +681,7 @@ public class MainWindow {
 					return financeData.getAccounts().indexOf(accountToFind);
 				return -1;
 			}
+			@Override
 			protected void setValue(Object element, Object value) {
 				try {
 					FinanceData financeData = (FinanceData)transactionsTreeViewer.getInput();
@@ -822,6 +872,7 @@ public class MainWindow {
 
 		accountsTableViewer = new TableViewer(compositeAccountsTable, SWT.BORDER | SWT.FULL_SELECTION);
 		accountsTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent arg0) {
 				btnDeleteAccount.setEnabled(!arg0.getSelection().isEmpty());
 			}
@@ -831,21 +882,25 @@ public class MainWindow {
 
 		TableViewerColumn tableViewerColumn = new TableViewerColumn(accountsTableViewer, SWT.NONE);
 		tableViewerColumn.setEditingSupport(new EditingSupport(accountsTableViewer) {
+			@Override
 			protected boolean canEdit(Object element) {
 				return element instanceof FinanceAccount;
 			}
+			@Override
 			protected CellEditor getCellEditor(Object element) {
 				if(element instanceof FinanceAccount)
-					return (CellEditor)new TextCellEditor(accountsTable);
+					return new TextCellEditor(accountsTable);
 				else
 					return null;
 			}
+			@Override
 			protected Object getValue(Object element) {
 				if(element instanceof FinanceAccount){
 					return ((FinanceAccount)element).getName();
 				}else
 					return null;
 			}
+			@Override
 			protected void setValue(Object element, Object value) {
 				try {
 					FinanceData financeData = (FinanceData)accountsTableViewer.getInput();

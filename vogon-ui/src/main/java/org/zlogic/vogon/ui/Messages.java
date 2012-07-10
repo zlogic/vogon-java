@@ -38,6 +38,7 @@ public class Messages extends NLS {
 	public static String MainWindow_mntmTools_text;
 	public static String MainWindow_mntmCleanupDb_text;
 	public static String MainWindow_mntmExport_text;
+	public static String MainWindow_Total;
 	public static String MainWindow_Unknown_File_Type;
 	////////////////////////////////////////////////////////////////////////////
 	//

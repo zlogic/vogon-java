@@ -47,6 +47,7 @@ public class ExpenseTransaction extends FinanceTransaction implements Serializab
 	/**
 	 * Updates the transaction's amount from its components
 	 */
+	@Override
 	public void updateAmounts(){
 		amount = 0;
 		for (TransactionComponent component : components)

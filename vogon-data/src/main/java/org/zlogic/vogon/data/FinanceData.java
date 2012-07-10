@@ -55,6 +55,19 @@ public class FinanceData {
 	}
 
 	/**
+	 * Constructs FinanceData from pre-populated arrays (e.g. when importing data)
+	 *
+	 * @param transactions Array of financial transactions
+	 * @param accounts Array of accounts
+	 */
+	public FinanceData(List<FinanceTransaction> transactions, List<FinanceAccount> accounts) {
+		this.transactions = new java.util.LinkedList<>();
+		this.transactions.addAll(transactions);
+		this.accounts = new java.util.LinkedList<>();
+		this.accounts.addAll(accounts);
+	}
+
+	/**
 	 * Imports and persists data into this instance by using the output of the specified FileImporter
 	 * 
 	 * @param importer A configured FileImporter instance
@@ -120,20 +133,6 @@ public class FinanceData {
 	}
 
 	/**
-	 * Constructs FinanceData from pre-populated arrays (e.g. when importing
-	 * data)
-	 *
-	 * @param transactions Array of financial transactions
-	 * @param accounts Array of accounts
-	 */
-	public FinanceData(List<FinanceTransaction> transactions, List<FinanceAccount> accounts) {
-		this.transactions = new java.util.LinkedList<>();
-		this.transactions.addAll(transactions);
-		this.accounts = new java.util.LinkedList<>();
-		this.accounts.addAll(accounts);
-	}
-
-	/**
 	 * Internal helper function
 	 * Adds an account to the list & persists it (if necessary)
 	 * Safe to call even if the account already exists
@@ -142,7 +141,7 @@ public class FinanceData {
 	 * @param account the account to be added
 	 * @param entityManager the entity manager
 	 */
-	protected void persistenceAddAccount(FinanceAccount account,EntityManager entityManager){
+	protected void persistenceAdd(FinanceAccount account,EntityManager entityManager){
 		if(account==null)
 			return;
 
@@ -162,7 +161,7 @@ public class FinanceData {
 	 * @param transaction the transaction to be added
 	 * @param entityManager the entity manager
 	 */
-	protected void persistenceAddTransaction(FinanceTransaction transaction,EntityManager entityManager){
+	protected void persistenceAdd(FinanceTransaction transaction,EntityManager entityManager){
 		if(transaction==null)
 			return;
 
@@ -178,6 +177,18 @@ public class FinanceData {
 	}
 
 	/**
+	 * Returns the total balance for all accounts
+	 * 
+	 * @return the total balance
+	 */
+	public double getTotalBalance(){
+		long totalBalance = 0;
+		for(FinanceAccount account : accounts)
+			totalBalance += account.getRawBalance();
+		return totalBalance/100.0;
+	}
+
+	/**
 	 * Sets a new account name. Adds the account to the persistence if needed.
 	 * 
 	 * @param account The account to be updated
@@ -188,7 +199,7 @@ public class FinanceData {
 		entityManager.getTransaction().begin();
 		account.setName(name);
 
-		persistenceAddAccount(account,entityManager);
+		persistenceAdd(account,entityManager);
 
 		entityManager.getTransaction().commit();
 	}
@@ -204,7 +215,7 @@ public class FinanceData {
 		entityManager.getTransaction().begin();
 		transaction.setTags(tags);
 
-		persistenceAddTransaction(transaction,entityManager);
+		persistenceAdd(transaction,entityManager);
 
 		entityManager.getTransaction().commit();
 	}
@@ -220,7 +231,7 @@ public class FinanceData {
 		entityManager.getTransaction().begin();
 		transaction.setDate(date);
 
-		persistenceAddTransaction(transaction,entityManager);
+		persistenceAdd(transaction,entityManager);
 
 		entityManager.getTransaction().commit();
 	}
@@ -236,7 +247,7 @@ public class FinanceData {
 		entityManager.getTransaction().begin();
 		transaction.setDescription(description);
 
-		persistenceAddTransaction(transaction,entityManager);
+		persistenceAdd(transaction,entityManager);
 
 		entityManager.getTransaction().commit();
 	}
@@ -255,9 +266,9 @@ public class FinanceData {
 		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
 		entityManager.getTransaction().begin();
 
-		transaction.updateComponentRawAmount(component,(long)Math.round(newAmount*100));
+		transaction.updateComponentRawAmount(component,Math.round(newAmount*100));
 
-		persistenceAddTransaction(transaction,entityManager);
+		persistenceAdd(transaction,entityManager);
 
 		if(!entityManager.contains(component))
 			entityManager.persist(component);
@@ -280,12 +291,12 @@ public class FinanceData {
 
 		transaction.updateComponentAccount(component,newAccount);
 
-		persistenceAddTransaction(transaction,entityManager);
+		persistenceAdd(transaction,entityManager);
 
 		if(!entityManager.contains(component))
 			entityManager.persist(component);
 
-		persistenceAddAccount(newAccount,entityManager);
+		persistenceAdd(newAccount,entityManager);
 
 		entityManager.getTransaction().commit();
 	}
@@ -302,13 +313,13 @@ public class FinanceData {
 		entityManager.getTransaction().begin();
 
 		if(component.getTransaction().getComponents().contains(component))
-			component.getTransaction().updateComponentRawAmount(component,(long)Math.round(newAmount*100));
+			component.getTransaction().updateComponentRawAmount(component,Math.round(newAmount*100));
 		else{
-			component.setRawAmount((long)Math.round(newAmount*100));
+			component.setRawAmount(Math.round(newAmount*100));
 			component.getTransaction().addComponent(component);
 		}
 
-		persistenceAddTransaction(component.getTransaction(),entityManager);
+		persistenceAdd(component.getTransaction(),entityManager);
 
 		if(!entityManager.contains(component))
 			entityManager.persist(component);
@@ -333,12 +344,12 @@ public class FinanceData {
 		}
 
 
-		persistenceAddTransaction(component.getTransaction(),entityManager);
+		persistenceAdd(component.getTransaction(),entityManager);
 
 		if(!entityManager.contains(component))
 			entityManager.persist(component);
 
-		persistenceAddAccount(newAccount,entityManager);
+		persistenceAdd(newAccount,entityManager);
 		entityManager.getTransaction().commit();
 	}
 
@@ -351,7 +362,7 @@ public class FinanceData {
 		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
 		entityManager.getTransaction().begin();
 
-		persistenceAddTransaction(component.getTransaction(),entityManager);
+		persistenceAdd(component.getTransaction(),entityManager);
 
 		component.getTransaction().removeComponent(component);
 
