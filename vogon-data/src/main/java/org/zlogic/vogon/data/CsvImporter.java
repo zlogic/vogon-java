@@ -66,7 +66,7 @@ public class CsvImporter implements FileImporter {
 			while ((columns = reader.readNext()) != null) {
 				if (columns.length < 5){
 					reader.close();
-					throw new VogonImportLogicalException((new MessageFormat(Messages.CsvImporter_CSV_Format_Exception)).format(new Object[]{Utils.join(columns, ",")})); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-1$
+					throw new VogonImportLogicalException((new MessageFormat(Messages.CsvImporter_CSV_Format_Exception)).format(new Object[]{Utils.join(columns, ",")})); //$NON-NLS-1$ 
 				}
 				if (columnsHeader == null) {
 					columnsHeader = columns;
@@ -117,7 +117,7 @@ public class CsvImporter implements FileImporter {
 						transaction = new TransferTransaction(columns[0], tags, date);
 					} else {
 						reader.close();
-						throw new VogonImportLogicalException((new MessageFormat(Messages.CsvImporter_Transaction_Too_Complex)).format(new Object[]{Utils.join(columns, ",")})); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-1$
+						throw new VogonImportLogicalException((new MessageFormat(Messages.CsvImporter_Transaction_Too_Complex)).format(new Object[]{Utils.join(columns, ",")})); //$NON-NLS-1$ 
 					}
 
 					//Add components

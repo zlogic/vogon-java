@@ -46,6 +46,7 @@ public class TransferTransaction extends FinanceTransaction {
 	/**
 	 * Updates the transaction's amount from its components
 	 */
+	@Override
 	public void updateAmounts(){
 		long amountPositive = 0, amountNegative=0;
 		for (TransactionComponent component : components){
