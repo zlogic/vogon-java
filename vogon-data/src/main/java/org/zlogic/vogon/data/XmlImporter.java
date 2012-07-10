@@ -77,17 +77,17 @@ public class XmlImporter implements FileImporter {
 
 			//Get root node
 			Node rootNode = doc.getFirstChild();
-			if(rootNode==null || !rootNode.getNodeName().equals("VogonFinanceData"))
-				throw new VogonImportLogicalException("Missing VogonFinanceData node in XML");
+			if(rootNode==null || !rootNode.getNodeName().equals("VogonFinanceData")) //$NON-NLS-1$
+				throw new VogonImportLogicalException(Messages.XmlImporter_Error_Missing_VogonFinanceData_node_in_XML);
 
 			Node currentNode = null;
 
 			//Iterate through root children
 			Node accountsNode = null, transactionsNode = null;
 			for(currentNode=rootNode.getFirstChild();currentNode!=null;currentNode=currentNode.getNextSibling()){
-				if(currentNode.getNodeName().equals("Accounts"))
+				if(currentNode.getNodeName().equals("Accounts")) //$NON-NLS-1$
 					accountsNode = currentNode;
-				if(currentNode.getNodeName().equals("Transactions"))
+				if(currentNode.getNodeName().equals("Transactions")) //$NON-NLS-1$
 					transactionsNode = currentNode;
 			}
 
@@ -99,8 +99,8 @@ public class XmlImporter implements FileImporter {
 
 				//Extract attributes from XML
 				NamedNodeMap attributes = currentNode.getAttributes();
-				String accountName = attributes.getNamedItem("Name").getNodeValue();
-				long accountId = Long.parseLong(attributes.getNamedItem("Id").getNodeValue());
+				String accountName = attributes.getNamedItem("Name").getNodeValue(); //$NON-NLS-1$
+				long accountId = Long.parseLong(attributes.getNamedItem("Id").getNodeValue()); //$NON-NLS-1$
 				//long accountBalance = Long.parseLong(attributes.getNamedItem("Balance").getNodeValue());
 
 				//Search existing accounts in DB
@@ -129,12 +129,12 @@ public class XmlImporter implements FileImporter {
 
 				//Extract attributes from XML
 				NamedNodeMap attributes = currentNode.getAttributes();
-				String transactionType = attributes.getNamedItem("Type").getNodeValue();
-				long transactionId = Long.parseLong(attributes.getNamedItem("Id").getNodeValue());
-				String transactionDescription = attributes.getNamedItem("Description").getNodeValue();
+				String transactionType = attributes.getNamedItem("Type").getNodeValue(); //$NON-NLS-1$
+				long transactionId = Long.parseLong(attributes.getNamedItem("Id").getNodeValue()); //$NON-NLS-1$
+				String transactionDescription = attributes.getNamedItem("Description").getNodeValue(); //$NON-NLS-1$
 				//String transactionAmount = attributes.getNamedItem("Amount").getNodeValue();
-				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-				Date transactionDate = dateFormat.parse(attributes.getNamedItem("Date").getNodeValue());
+				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); //$NON-NLS-1$
+				Date transactionDate = dateFormat.parse(attributes.getNamedItem("Date").getNodeValue()); //$NON-NLS-1$
 
 
 
@@ -153,14 +153,14 @@ public class XmlImporter implements FileImporter {
 				for(childNode=currentNode.getFirstChild();childNode!=null;childNode=childNode.getNextSibling()){
 					if(childNode.getNodeType()!=Node.ELEMENT_NODE)
 						continue;
-					if(childNode.getNodeName().equals("Tag")){
+					if(childNode.getNodeName().equals("Tag")){ //$NON-NLS-1$
 						String tag = childNode.getTextContent();
 						tagsList.add(tag);
-					}else if(childNode.getNodeName().equals("Component")){
+					}else if(childNode.getNodeName().equals("Component")){ //$NON-NLS-1$
 						//long componentId = Long.parseLong(childNode.getAttributes().getNamedItem("Id").getNodeValue());
-						long componentAccountId =  Long.parseLong(childNode.getAttributes().getNamedItem("Account").getNodeValue());
-						long componentAmount = Long.parseLong(childNode.getAttributes().getNamedItem("Amount").getNodeValue());
-						long componentTransactionId = Long.parseLong(childNode.getAttributes().getNamedItem("Transaction").getNodeValue());
+						long componentAccountId =  Long.parseLong(childNode.getAttributes().getNamedItem("Account").getNodeValue()); //$NON-NLS-1$
+						long componentAmount = Long.parseLong(childNode.getAttributes().getNamedItem("Amount").getNodeValue()); //$NON-NLS-1$
+						long componentTransactionId = Long.parseLong(childNode.getAttributes().getNamedItem("Transaction").getNodeValue()); //$NON-NLS-1$
 						TransactionComponent component = new TransactionComponent(accountsMap.get(componentAccountId),transactionsMap.get(componentTransactionId),componentAmount);
 						transaction.addComponent(component);
 					}
@@ -189,13 +189,13 @@ public class XmlImporter implements FileImporter {
 			throw new VogonImportException(e);
 		} catch (NullPointerException e){
 			Logger.getLogger(XmlImporter.class.getName()).log(Level.SEVERE, null, e);
-			throw new VogonImportLogicalException("Missing data from XML", e);
+			throw new VogonImportLogicalException(Messages.XmlImporter_Error_Missing_data_from_XML, e);
 		} catch (DOMException e) {
 			Logger.getLogger(XmlImporter.class.getName()).log(Level.SEVERE, null, e);
 			throw new VogonImportException(e);
 		} catch (ParseException e) {
 			Logger.getLogger(XmlImporter.class.getName()).log(Level.SEVERE, null, e);
-			throw new VogonImportLogicalException("Invalid data format", e);
+			throw new VogonImportLogicalException(Messages.XmlImporter_Error_Invalid_data_format, e);
 		}
 
 	}

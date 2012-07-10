@@ -59,47 +59,47 @@ public class XmlExporter implements FileExporter {
 
 			// Top element (FinanceData)
 			Document doc = docBuilder.newDocument();
-			Element rootElement = doc.createElement("VogonFinanceData");
+			Element rootElement = doc.createElement("VogonFinanceData"); //$NON-NLS-1$
 			doc.appendChild(rootElement);
 
 			//Accounts node
-			Element accountsElement = doc.createElement("Accounts");
+			Element accountsElement = doc.createElement("Accounts"); //$NON-NLS-1$
 			rootElement.appendChild(accountsElement);
 
 			//Transactions node
-			Element transactionsElement = doc.createElement("Transactions");
+			Element transactionsElement = doc.createElement("Transactions"); //$NON-NLS-1$
 			rootElement.appendChild(transactionsElement);
 
 			//Accounts list
 			for(FinanceAccount account : financeData.getAccounts()){
-				Element accountElement = doc.createElement("Account");
-				accountElement.setAttribute("Id",Long.toString(account.id));
-				accountElement.setAttribute("Name", account.getName());
+				Element accountElement = doc.createElement("Account"); //$NON-NLS-1$
+				accountElement.setAttribute("Id",Long.toString(account.id)); //$NON-NLS-1$
+				accountElement.setAttribute("Name", account.getName()); //$NON-NLS-1$
 				//accountElement.setAttribute("Balance", Long.toString(account.getRawBalance()));
 				accountsElement.appendChild(accountElement);
 			}
 
 			//Transactions list
 			for(FinanceTransaction transaction : financeData.getTransactions()){
-				Element transactionElement = doc.createElement("Transaction");
-				transactionElement.setAttribute("Type", transaction.getClass().getSimpleName());
-				transactionElement.setAttribute("Id",Long.toString(transaction.id));
-				transactionElement.setAttribute("Description",transaction.getDescription());
+				Element transactionElement = doc.createElement("Transaction"); //$NON-NLS-1$
+				transactionElement.setAttribute("Type", transaction.getClass().getSimpleName()); //$NON-NLS-1$
+				transactionElement.setAttribute("Id",Long.toString(transaction.id)); //$NON-NLS-1$
+				transactionElement.setAttribute("Description",transaction.getDescription()); //$NON-NLS-1$
 				//transactionElement.setAttribute("Amount", Long.toString(transaction.getRawAmount()));
-				transactionElement.setAttribute("Date", MessageFormat.format("{0,date,yyyy-MM-dd}", new Object[]{transaction.getDate()})); //$NON-NLS-1$
+				transactionElement.setAttribute("Date", MessageFormat.format("{0,date,yyyy-MM-dd}", new Object[]{transaction.getDate()})); //$NON-NLS-1$ //$NON-NLS-2$
 				//Tags list
 				for(String tag : transaction.getTags()){
-					Element tagElement = doc.createElement("Tag");
+					Element tagElement = doc.createElement("Tag"); //$NON-NLS-1$
 					tagElement.setTextContent(tag);
 					transactionElement.appendChild(tagElement);
 				}
 				//Transaction components list
 				for(TransactionComponent component : transaction.getComponents()){
-					Element compomentElement = doc.createElement("Component");
-					compomentElement.setAttribute("Id",Long.toString(component.id));
-					compomentElement.setAttribute("Account", Long.toString(component.getAccount().id));
-					compomentElement.setAttribute("Amount", Long.toString(component.getRawAmount()));
-					compomentElement.setAttribute("Transaction",Long.toString(component.getTransaction().id));
+					Element compomentElement = doc.createElement("Component"); //$NON-NLS-1$
+					compomentElement.setAttribute("Id",Long.toString(component.id)); //$NON-NLS-1$
+					compomentElement.setAttribute("Account", Long.toString(component.getAccount().id)); //$NON-NLS-1$
+					compomentElement.setAttribute("Amount", Long.toString(component.getRawAmount())); //$NON-NLS-1$
+					compomentElement.setAttribute("Transaction",Long.toString(component.getTransaction().id)); //$NON-NLS-1$
 					transactionElement.appendChild(compomentElement);
 				}
 				transactionsElement.appendChild(transactionElement);
@@ -108,7 +108,7 @@ public class XmlExporter implements FileExporter {
 			// Write the content into XML file
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
 			DOMSource source = new DOMSource(doc);
 			StreamResult result = new StreamResult(outputFile);
 

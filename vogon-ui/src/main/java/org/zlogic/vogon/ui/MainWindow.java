@@ -882,7 +882,7 @@ public class MainWindow {
 
 		FileDialog importFileDialog = new FileDialog(shell, SWT.OPEN);
 		importFileDialog.setText(Messages.MainWindow_File_Import_Dialog_Header);
-		importFileDialog.setFilterExtensions(new String[] { "*.xml","*.csv" }); //$NON-NLS-1$
+		importFileDialog.setFilterExtensions(new String[] { "*.xml","*.csv" }); //$NON-NLS-1$ //$NON-NLS-2$
 		importFileDialog.setFilterNames(new String[] { Messages.MainWindow_File_Dialog_XmlFilter,Messages.MainWindow_File_Dialog_CsvFilter });
 		if (lastDirectory != null)
 			importFileDialog.setFilterPath(lastDirectory.getAbsolutePath());
@@ -901,7 +901,7 @@ public class MainWindow {
 				importer= new CsvImporter(selectedFile);
 			try {
 				if(importer==null)
-					throw new VogonImportLogicalException("Unknown file type");
+					throw new VogonImportLogicalException(Messages.MainWindow_Unknown_File_Type);
 				financeData.importData(importer);
 				transactionsTreeViewer.setInput(financeData);
 				accountsTableViewer.setInput(financeData);

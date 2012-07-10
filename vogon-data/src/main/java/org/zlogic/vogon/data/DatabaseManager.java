@@ -43,7 +43,7 @@ public class DatabaseManager {
 	 * Default constructor for DatabaseManager
 	 */
 	protected DatabaseManager() {
-		entityManagerFactory = javax.persistence.Persistence.createEntityManagerFactory("VogonPU");
+		entityManagerFactory = javax.persistence.Persistence.createEntityManagerFactory("VogonPU"); //$NON-NLS-1$
 		entityManager = entityManagerFactory.createEntityManager();
 	}
 
@@ -89,18 +89,18 @@ public class DatabaseManager {
 			//Check if DB is Derby
 			boolean shutdownDerbyManually = false;
 			java.util.Map<String, Object> persistenceProperties = entityManager.getProperties();
-			if (persistenceProperties.containsKey("javax.persistence.jdbc.driver")) {
-				Object jdbcDriverValue = persistenceProperties.get("javax.persistence.jdbc.driver");
-				String jdbcDriverString = jdbcDriverValue.getClass() != String.class ? "" : (String) jdbcDriverValue;
-				if (jdbcDriverString.contains("org.apache.derby.jdbc.EmbeddedDriver"))
+			if (persistenceProperties.containsKey("javax.persistence.jdbc.driver")) { //$NON-NLS-1$
+				Object jdbcDriverValue = persistenceProperties.get("javax.persistence.jdbc.driver"); //$NON-NLS-1$
+				String jdbcDriverString = jdbcDriverValue.getClass() != String.class ? "" : (String) jdbcDriverValue; //$NON-NLS-1$
+				if (jdbcDriverString.contains("org.apache.derby.jdbc.EmbeddedDriver")) //$NON-NLS-1$
 					shutdownDerbyManually = true;
 			}
 			if (shutdownDerbyManually) {
 				//Shutdown Derby
 				try {
-					java.sql.DriverManager.getConnection("jdbc:derby:;shutdown=true");
+					java.sql.DriverManager.getConnection("jdbc:derby:;shutdown=true"); //$NON-NLS-1$
 				} catch (java.sql.SQLException ex) {
-					if (!ex.getSQLState().equals("XJ015")) {
+					if (!ex.getSQLState().equals("XJ015")) { //$NON-NLS-1$
 						Logger.getLogger(DatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
