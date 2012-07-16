@@ -5,8 +5,11 @@
  */
 package org.zlogic.vogon.data;
 
+import java.util.Currency;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -43,10 +46,23 @@ public class FinanceData {
 	 */
 	@OneToMany
 	protected java.util.List<FinanceAccount> accounts;
+
+	/**
+	 * Contains exchange rates
+	 */
+	@OneToMany
+	@OrderBy("source ASC,destination ASC")
+	protected java.util.List<CurrencyRate> exchangeRates;
+
 	/**
 	 * Contains a list of all tags (cached)
 	 */
 	protected java.util.Set<String> tags;
+
+	/**
+	 * Preferred currency code
+	 */
+	protected String defaultCurrency;
 
 	/**
 	 * Default constructor
@@ -59,12 +75,17 @@ public class FinanceData {
 	 *
 	 * @param transactions Array of financial transactions
 	 * @param accounts Array of accounts
+	 * @param exchangeRates List of exchange rates between curencies
+	 * @param defaultCurrency The default currency
 	 */
-	public FinanceData(List<FinanceTransaction> transactions, List<FinanceAccount> accounts) {
-		this.transactions = new java.util.LinkedList<>();
+	public FinanceData(List<FinanceTransaction> transactions, List<FinanceAccount> accounts,List<CurrencyRate> exchangeRates,Currency defaultCurrency) {
+		this.transactions = new LinkedList<>();
 		this.transactions.addAll(transactions);
-		this.accounts = new java.util.LinkedList<>();
+		this.accounts = new LinkedList<>();
 		this.accounts.addAll(accounts);
+		this.exchangeRates = new LinkedList<>();
+		this.exchangeRates.addAll(exchangeRates);
+		this.defaultCurrency = (defaultCurrency!=null?defaultCurrency:Currency.getInstance(Locale.getDefault())).getCurrencyCode();
 	}
 
 	/**
@@ -93,7 +114,23 @@ public class FinanceData {
 				accounts.add(account);
 			}
 
+		for(CurrencyRate rate : newFinanceData.exchangeRates)
+			if(!entityManager.contains(rate)){
+				entityManager.persist(rate);
+				exchangeRates.add(rate);
+			}
+
 		transactions.addAll(newFinanceData.transactions);
+
+		populateCurrencies();
+		if((defaultCurrency!=null && !getCurrencies().contains(Currency.getInstance(defaultCurrency))) || (defaultCurrency==null && newFinanceData.defaultCurrency != null)){
+			String systemDefaultCurrency = Currency.getInstance(Locale.getDefault()).getCurrencyCode();
+			if(newFinanceData.getCurrencies().contains(systemDefaultCurrency))
+				defaultCurrency = systemDefaultCurrency;
+			else
+				defaultCurrency = (newFinanceData.defaultCurrency!=null && !newFinanceData.defaultCurrency.isEmpty())?newFinanceData.defaultCurrency:systemDefaultCurrency;
+		}else
+			defaultCurrency = Currency.getInstance(Locale.getDefault()).getCurrencyCode();
 
 		entityManager.getTransaction().commit();
 	}
@@ -150,6 +187,8 @@ public class FinanceData {
 
 		if(!entityManager.contains(account))
 			entityManager.persist(account);
+		
+		populateCurrencies();
 	}
 
 	/**
@@ -177,15 +216,76 @@ public class FinanceData {
 	}
 
 	/**
-	 * Returns the total balance for all accounts
+	 * Returns the total balance for all accounts with a specific currency
 	 * 
+	 * @param currency the currency (or null if the balance should be calculated for all currencies)
 	 * @return the total balance
 	 */
-	public double getTotalBalance(){
+	public double getTotalBalance(Currency currency){
 		long totalBalance = 0;
 		for(FinanceAccount account : accounts)
-			totalBalance += account.getRawBalance();
+			if(account.getCurrency()==currency)
+				totalBalance += account.getRawBalance();
+			else if(currency==null)
+				totalBalance += Math.round(account.getBalance()*getExchangeRate(account.getCurrency(), getDefaultCurrency())*100);
 		return totalBalance/100.0;
+	}
+
+	/**
+	 * Returns the list of all currencies used in this instance
+	 * 
+	 * @return the list of used currencies
+	 */
+	public List<Currency> getCurrencies(){
+		List<Currency> currencies = new LinkedList<>();
+		for(CurrencyRate rate : exchangeRates){
+			if(!currencies.contains(rate.getSource()))
+				currencies.add(rate.getSource());
+			if(!currencies.contains(rate.getDestination()))
+				currencies.add(rate.getDestination());
+		}
+		return currencies;
+	}
+
+	/**
+	 * Automatically creates missing currency exchange rates
+	 * Should only be called from an started transaction
+	 */
+	protected void populateCurrencies(){
+		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
+
+		//Search for missing currencies
+		List <CurrencyRate> usedRates = new LinkedList<>();
+		for(FinanceAccount account1 : accounts){
+			for(FinanceAccount account2 : accounts){
+				if(account1.getCurrency()!=account2.getCurrency()){
+					CurrencyRate rateFrom = null, rateTo = null;
+					for(CurrencyRate rate : exchangeRates){
+						if(rate.getSource()==account1.getCurrency() && rate.getDestination()==account2.getCurrency())
+							rateFrom = rate;
+						if(rate.getDestination()==account1.getCurrency() && rate.getSource()==account2.getCurrency())
+							rateTo = rate;
+					}
+					if(rateFrom==null){
+						CurrencyRate rate = new CurrencyRate(account1.getCurrency(), account2.getCurrency(), 1.0);
+						entityManager.persist(rate);
+						exchangeRates.add(rate);
+						usedRates.add(rate);
+					}else
+						usedRates.add(rateFrom);
+					if(rateTo==null){
+						CurrencyRate rate = new CurrencyRate(account2.getCurrency(), account1.getCurrency(), 1.0);
+						entityManager.persist(rate);
+						exchangeRates.add(rate);
+						usedRates.add(rate);
+					}else
+						usedRates.add(rateTo);
+				}
+			}
+		}
+
+		//Remove orphaned currencies
+		exchangeRates.retainAll(usedRates);
 	}
 
 	/**
@@ -200,6 +300,24 @@ public class FinanceData {
 		account.setName(name);
 
 		persistenceAdd(account,entityManager);
+
+		entityManager.getTransaction().commit();
+	}
+
+	/**
+	 * Sets a new account currency. Adds the account to the persistence if needed.
+	 * 
+	 * @param account The account to be updated
+	 * @param currency The new account currency
+	 */
+	public void setAccountCurrency(FinanceAccount account,Currency currency){
+		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
+		entityManager.getTransaction().begin();
+		account.setCurrency(currency);
+
+		persistenceAdd(account,entityManager);
+
+		populateCurrencies();
 
 		entityManager.getTransaction().commit();
 	}
@@ -354,6 +472,72 @@ public class FinanceData {
 	}
 
 	/**
+	 * Sets the new exchange rate
+	 * 
+	 * @param rate The currency rate to be modified
+	 * @param newRate The new exchange rate
+	 */
+	public void setExchangeRate(CurrencyRate rate,double newRate){
+		if(!exchangeRates.contains(rate))
+			return;
+		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
+		entityManager.getTransaction().begin();
+
+		rate.setExchangeRate(newRate);
+
+		entityManager.getTransaction().commit();
+	}
+
+
+	/**
+	 * Sets the default currency
+	 * 
+	 * @param defaultCurrency The new default currency
+	 */
+	public void setDefaultCurrency(Currency defaultCurrency){
+		if(defaultCurrency==null)
+			return;
+
+		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
+		entityManager.getTransaction().begin();
+		this.defaultCurrency = defaultCurrency.getCurrencyCode();
+		entityManager.getTransaction().commit();
+	}
+
+	/**
+	 * Returns an exchange rate for a pair of currencies
+	 * 
+	 * @param source The source currency
+	 * @param destination The target currency
+	 * @return The source=>target exchange rate
+	 */
+	public double getExchangeRate(Currency source, Currency destination){
+		if(source==destination)
+			return 1.0;
+		for(CurrencyRate rate : exchangeRates){
+			if(rate.getSource()==source && rate.getDestination()==destination)
+				return rate.getExchangeRate();
+		}
+		return Double.NaN;
+	}
+
+	/**
+	 * Returns the transaction amount converted to a specific currency
+	 * 
+	 * @param transaction The transaction
+	 * @param currency The target currency
+	 * @return The transaction amount, converted to the target currency
+	 */
+	public double getAmountInCurrency(FinanceTransaction transaction,Currency currency){
+		double amount = 0;
+		for(TransactionComponent component : transaction.getComponents()){
+			double rate = getExchangeRate(component.getAccount()!=null?component.getAccount().getCurrency():null, currency);
+			amount += rate*component.getAmount();
+		}
+		return amount;
+	}
+
+	/**
 	 * Deletes a transaction component (with all dependencies)
 	 * 
 	 * @param component The transaction component to delete
@@ -405,6 +589,9 @@ public class FinanceData {
 		}
 		accounts.remove(account);
 		entityManager.remove(account);
+		
+		populateCurrencies();
+		
 		entityManager.getTransaction().commit();
 	}
 
@@ -429,7 +616,6 @@ public class FinanceData {
 	 * Deletes all orphaned transactions, accounts and transaction components
 	 */
 	public void cleanup(){
-		//TODO: test this!!
 		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
@@ -469,6 +655,8 @@ public class FinanceData {
 			entityManager.remove(component);
 		}
 
+		populateCurrencies();
+
 		entityManager.getTransaction().commit();
 	}
 
@@ -489,5 +677,24 @@ public class FinanceData {
 	 */
 	public List<FinanceTransaction> getTransactions(){
 		return transactions;
+	}
+
+	/**
+	 * Returns the list of currency rates
+	 * @return the list of currency rates
+	 */
+	public List<CurrencyRate> getCurrencyRates(){
+		return exchangeRates;
+	}
+
+	/**
+	 * Returns the default currency
+	 * @return the default currency
+	 */
+	public Currency getDefaultCurrency(){
+		if(defaultCurrency!=null)
+			return Currency.getInstance(defaultCurrency);
+		else
+			return null;
 	}
 }

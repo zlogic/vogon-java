@@ -17,6 +17,7 @@ public class Messages extends NLS {
 	public static String MainWindow_tbtmAccounts_text;
 	public static String MainWindow_tblclmnAccount_text;
 	public static String MainWindow_tblclmnBalance_text;
+	public static String MainWindow_tblclmnCurrency_text;
 	public static String MainWindow_btnAddAccount_text;
 	public static String MainWindow_btnDeleteAccount_text;
 	public static String MainWindow_Error_Importing_File;
@@ -34,12 +35,19 @@ public class Messages extends NLS {
 	public static String MainWindow_btnAddComponent_text;
 	public static String MainWindow_btnDeleteSelection_text;
 	public static String MainWindow_btnAddTransferTransaction_text;
+	public static String MainWindow_Currency_Converted;
 	public static String MainWindow_mntmRecalculateBalance_text;
 	public static String MainWindow_mntmTools_text;
 	public static String MainWindow_mntmCleanupDb_text;
 	public static String MainWindow_mntmExport_text;
-	public static String MainWindow_Total;
 	public static String MainWindow_Unknown_File_Type;
+	public static String MainWindow_tbtmCurrencies_text;
+	public static String MainWindow_lblDefaultCurrency_text;
+	public static String MainWindow_tblclmnSourceCurrency_text;
+	public static String MainWindow_tblclmnDestinationCurrency_text;
+	public static String MainWindow_tblclmnExchangeRate_text;
+	public static String MainWindow_Total_All_Accounts;
+	public static String MainWindow_Total_Currency;
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Constructor

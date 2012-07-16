@@ -8,7 +8,7 @@ package org.zlogic.vogon.data;
 /**
  * Various helper utilities
  *
- * @author Zlogic
+ * @author Dmitry Zolotukhin
  */
 public class Utils {
 

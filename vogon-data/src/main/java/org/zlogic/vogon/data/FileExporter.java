@@ -18,5 +18,5 @@ public interface FileExporter {
 	 * @param financeData the data to be exported
 	 * @throws VogonExportException In case of any import errors (I/O, format etc.)
 	 */
-	public void exportFile(FinanceData financedata) throws VogonExportException;
+	public void exportFile(FinanceData financeData) throws VogonExportException;
 }
