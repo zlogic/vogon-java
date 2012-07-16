@@ -9,6 +9,7 @@ import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -68,6 +69,7 @@ public class XmlImporter implements FileImporter {
 
 			List<FinanceTransaction> transactionsList = new ArrayList<>();
 			List<FinanceAccount> accountsList = new ArrayList<>();
+			List<CurrencyRate> currencyList = new ArrayList<>();
 
 			//Read XML
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -83,13 +85,18 @@ public class XmlImporter implements FileImporter {
 			Node currentNode = null;
 
 			//Iterate through root children
-			Node accountsNode = null, transactionsNode = null;
+			Node accountsNode = null, currenciesNode = null, transactionsNode = null;
 			for(currentNode=rootNode.getFirstChild();currentNode!=null;currentNode=currentNode.getNextSibling()){
 				if(currentNode.getNodeName().equals("Accounts")) //$NON-NLS-1$
 					accountsNode = currentNode;
+				if(currentNode.getNodeName().equals("Currencies")) //$NON-NLS-1$
+					currenciesNode = currentNode;
 				if(currentNode.getNodeName().equals("Transactions")) //$NON-NLS-1$
 					transactionsNode = currentNode;
 			}
+
+			//Process default properties
+			String defaultCurrency = rootNode.getAttributes().getNamedItem("DefaultCurrency").getNodeValue(); //$NON-NLS-1$
 
 			//Process accounts
 			EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
@@ -101,6 +108,7 @@ public class XmlImporter implements FileImporter {
 				NamedNodeMap attributes = currentNode.getAttributes();
 				String accountName = attributes.getNamedItem("Name").getNodeValue(); //$NON-NLS-1$
 				long accountId = Long.parseLong(attributes.getNamedItem("Id").getNodeValue()); //$NON-NLS-1$
+				String currency = attributes.getNamedItem("Currency")!=null?attributes.getNamedItem("Currency").getNodeValue():null; //$NON-NLS-1$ //$NON-NLS-2$
 				//long accountBalance = Long.parseLong(attributes.getNamedItem("Balance").getNodeValue());
 
 				//Search existing accounts in DB
@@ -116,9 +124,38 @@ public class XmlImporter implements FileImporter {
 					accountsMap.put(foundAccounts.get(0).id,foundAccounts.get(0));
 					accountsList.add(foundAccounts.get(0));
 				} else {
-					FinanceAccount account = new FinanceAccount(accountName);
+					FinanceAccount account = new FinanceAccount(accountName,currency!=null?Currency.getInstance(currency):null);
 					accountsMap.put(accountId,account);
 					accountsList.add(account);
+				}
+			}
+
+			//Process currencies
+			for(currentNode=currenciesNode.getFirstChild();currentNode!=null;currentNode=currentNode.getNextSibling()){
+				if(currentNode.getNodeType()!=Node.ELEMENT_NODE)
+					continue;
+
+				//Extract attributes from XML
+				NamedNodeMap attributes = currentNode.getAttributes();
+				String sourceCurrencyName = attributes.getNamedItem("Source").getNodeValue(); //$NON-NLS-1$
+				String destinationCurrencyName = attributes.getNamedItem("Destination").getNodeValue(); //$NON-NLS-1$
+				double exchangeRate = Double.parseDouble(attributes.getNamedItem("Rate").getNodeValue()); //$NON-NLS-1$
+
+				//Search existing currency rates in DB
+				CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+				CriteriaQuery<CurrencyRate> currencyCriteriaQuery = criteriaBuilder.createQuery(CurrencyRate.class);
+				Root<CurrencyRate> rate = currencyCriteriaQuery.from(CurrencyRate.class);
+				Predicate sourceCondition = criteriaBuilder.equal(rate.get(CurrencyRate_.source), sourceCurrencyName);
+				Predicate destinationCondition = criteriaBuilder.equal(rate.get(CurrencyRate_.destination), destinationCurrencyName);
+				currencyCriteriaQuery.where(criteriaBuilder.and(sourceCondition,destinationCondition));
+				List<CurrencyRate> foundCurrencyRates = entityManager.createQuery(currencyCriteriaQuery).getResultList();
+
+				//Match by currency source and destination
+				if (!foundCurrencyRates.isEmpty() && foundCurrencyRates.get(0).getSource().equals(sourceCurrencyName) && foundCurrencyRates.get(0).getDestination().equals(destinationCurrencyName)) {
+					currencyList.add(foundCurrencyRates.get(0));
+				} else {
+					CurrencyRate currencyRate = new CurrencyRate(Currency.getInstance(sourceCurrencyName), Currency.getInstance(destinationCurrencyName), exchangeRate);
+					currencyList.add(currencyRate);
 				}
 			}
 
@@ -171,7 +208,7 @@ public class XmlImporter implements FileImporter {
 				transaction.setTags(tagsArray);
 			}
 
-			FinanceData result = new FinanceData(transactionsList, accountsList);
+			FinanceData result = new FinanceData(transactionsList, accountsList, currencyList, Currency.getInstance(defaultCurrency));
 			return result;
 		} catch (java.io.FileNotFoundException e) {
 			Logger.getLogger(XmlImporter.class.getName()).log(Level.SEVERE, null, e);

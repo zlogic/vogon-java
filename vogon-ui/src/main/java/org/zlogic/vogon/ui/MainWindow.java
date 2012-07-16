@@ -11,6 +11,9 @@ import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Currency;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,9 +56,11 @@ import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
@@ -66,6 +71,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.zlogic.vogon.data.CsvImporter;
+import org.zlogic.vogon.data.CurrencyRate;
 import org.zlogic.vogon.data.DatabaseManager;
 import org.zlogic.vogon.data.ExpenseTransaction;
 import org.zlogic.vogon.data.FileImporter;
@@ -107,10 +113,24 @@ public class MainWindow {
 				case 2:
 					return org.zlogic.vogon.data.Utils.join(transaction.getTags(), ","); //$NON-NLS-1$
 				case 3:
-					if (transaction.getClass() == ExpenseTransaction.class)
-						return MessageFormat.format("{0,number,0.00}", new Object[]{((ExpenseTransaction) transaction).getAmount()}); //$NON-NLS-1$
-					else if (transaction.getClass() == TransferTransaction.class)
-						return MessageFormat.format("{0,number,0.00}", new Object[]{((TransferTransaction) transaction).getAmount()}); //$NON-NLS-1$
+					List<Currency> transactionCurrencies = new LinkedList<>();
+					for(TransactionComponent component : transaction.getComponents())
+						if(component.getAccount()!=null && !transactionCurrencies.contains(component.getAccount().getCurrency()))
+							transactionCurrencies.add(component.getAccount().getCurrency());
+					double amount = Double.NaN;
+					String currencyString;
+					if(transactionCurrencies.size()==1){
+						amount = transaction.getAmount();
+						currencyString = transactionCurrencies.get(0).getCurrencyCode();
+					} else {
+						amount = financeData.getAmountInCurrency(transaction, financeData.getDefaultCurrency());
+						currencyString = financeData.getDefaultCurrency().getCurrencyCode();
+					}
+					if(new Double(amount).isNaN()){
+						currencyString = "";
+						amount = 0;
+					}
+					return MessageFormat.format("{0,number,0.00} {1}{2}", new Object[]{amount,currencyString,transactionCurrencies.size()==1?"":Messages.MainWindow_Currency_Converted}); //$NON-NLS-1$ //$NON-NLS-2$
 				case 4:
 					if (transaction.getClass() == ExpenseTransaction.class) {
 						FinanceAccount[] accounts = ((ExpenseTransaction) transaction).getAccounts();
@@ -151,7 +171,10 @@ public class MainWindow {
 				TransactionComponent component = (TransactionComponent)element;
 				switch (columnIndex) {
 				case 3:
-					return MessageFormat.format("{0,number,0.00}", new Object[]{component.getAmount()}); //$NON-NLS-1$
+					if(component.getAccount()!=null)
+						return MessageFormat.format("{0,number,0.00} {1}", new Object[]{component.getAmount(),component.getAccount().getCurrency().getSymbol()}); //$NON-NLS-1$
+					else
+						return MessageFormat.format("{0,number,0.00}", new Object[]{component.getAmount()}); //$NON-NLS-1$
 				case 4:
 					return component.getAccount()!=null?component.getAccount().getName():Messages.MainWindow_Bad_Account_Substitute;
 				}
@@ -195,27 +218,58 @@ public class MainWindow {
 					return account.getName();
 				case 1:
 					return MessageFormat.format("{0,number,0.00}", new Object[]{account.getBalance()}); //$NON-NLS-1$
+				case 2:
+					return account.getCurrency().getDisplayName(); 
 				}
-			}else if(element instanceof Double){
-				Double totalBalance = (Double)element;
+			}else if(element instanceof AccountsContentProvider.ReportingAccount){
+				AccountsContentProvider.ReportingAccount reportingAccount = (AccountsContentProvider.ReportingAccount)element;
 				switch (columnIndex){
 				case 0:
-					return Messages.MainWindow_Total;
+					return reportingAccount.getName();
 				case 1:
-					return MessageFormat.format("{0,number,0.00}", new Object[]{totalBalance}); //$NON-NLS-1$
+					return MessageFormat.format("{0,number,0.00}", new Object[]{reportingAccount.getAmount()}); //$NON-NLS-1$
+				case 2:
+					return reportingAccount.getCurrency().getDisplayName(); 
 				}
 			}
 			return ""; //$NON-NLS-1$
 		}
 		@Override
 		public Font getFont(Object element, int columnIndex) {
-			if(element instanceof Double){
+			if(element instanceof AccountsContentProvider.ReportingAccount){
 				return JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
 			}
 			return null;
 		}
 	}
 
+	/**
+	 * The currencies table label provider implementation
+	 * 
+	 * @author Dmitry Zolotukhin
+	 *
+	 */
+	private class CurrenciesTableLabelProvider extends LabelProvider implements ITableLabelProvider {
+		@Override
+		public Image getColumnImage(Object element, int columnIndex) {
+			return null;
+		}
+		@Override
+		public String getColumnText(Object element, int columnIndex) {
+			if(element instanceof CurrencyRate){
+				CurrencyRate rate = (CurrencyRate)element;
+				switch(columnIndex){
+				case 0:
+					return rate.getSource().getDisplayName();
+				case 1:
+					return rate.getDestination().getDisplayName();
+				case 2:
+					return MessageFormat.format("{0,number,0.0000}", new Object[]{rate.getExchangeRate()}); //$NON-NLS-1$
+				}
+			}
+			return ""; //$NON-NLS-1$
+		}
+	}
 
 	/**
 	 * The transactions content provider implementation
@@ -272,16 +326,65 @@ public class MainWindow {
 	 * 
 	 * @author Dmitry Zolotukhin
 	 */
-	private static class AccountsContentProvider implements IStructuredContentProvider {		
+	private static class AccountsContentProvider implements IStructuredContentProvider {
+		public class ReportingAccount{
+			protected String name;
+			protected double amount;
+			protected Currency currency;
+			public ReportingAccount(String name, double amount, Currency currency){
+				this.name = name;
+				this.amount = amount;
+				this.currency = currency;
+			}
+			public String getName() {
+				return name;
+			}
+			public double getAmount() {
+				return amount;
+			}
+			public Currency getCurrency() {
+				return currency;
+			}
+		}
+
 		@Override
 		public Object[] getElements(Object inputElement) {
 			if(inputElement instanceof FinanceData){
 				FinanceData financeData = (FinanceData)inputElement;
-				List<FinanceAccount> accounts = financeData.getAccounts();
-				Object[] accountsArray = new Object[accounts.size()+1];
+				List<Object> accounts = new LinkedList<>();
+				accounts.addAll(financeData.getAccounts());
+				for(Currency currency : financeData.getCurrencies())
+					accounts.add(new ReportingAccount(MessageFormat.format(Messages.MainWindow_Total_Currency,new Object[]{currency.getCurrencyCode()}),financeData.getTotalBalance(currency),currency));
+				if(financeData.getDefaultCurrency()!=null)
+					accounts.add(new ReportingAccount(MessageFormat.format(Messages.MainWindow_Total_All_Accounts,new Object[]{financeData.getDefaultCurrency().getCurrencyCode()}),financeData.getTotalBalance(null),financeData.getDefaultCurrency()));
+				Object[] accountsArray = new Object[accounts.size()];
 				accountsArray = accounts.toArray(accountsArray);
-				accountsArray[accountsArray.length-1] = financeData.getTotalBalance();
 				return accountsArray;
+			}else return new Object[]{};
+		}
+		@Override
+		public void dispose() {
+		}
+		@Override
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		}
+	}
+
+	/**
+	 * The currencies content provider implementation
+	 * 
+	 * @author Dmitry Zolotukhin
+	 *
+	 */
+	private static class CurrenciesContentProvider implements IStructuredContentProvider {
+		@Override
+		public Object[] getElements(Object inputElement) {
+			if(inputElement instanceof FinanceData){
+				FinanceData financeData = (FinanceData)inputElement;
+				List<CurrencyRate> rates = financeData.getCurrencyRates();
+				Object[] ratesArray = new Object[rates.size()];
+				ratesArray = rates.toArray(ratesArray);
+				return ratesArray;
 			}else return new Object[]{};
 		}
 		@Override
@@ -311,24 +414,28 @@ public class MainWindow {
 	 * An instance of the finance data class
 	 */
 	protected FinanceData financeData;
-
 	/**
-	 * The accounts table
+	 * The transactions tree viewer
 	 */
-	private Table accountsTable;
+	private TreeViewer transactionsTreeViewer;
 	/**
 	 * The accounts table viewer
 	 */
 	private TableViewer accountsTableViewer;
+
+	/**
+	 * The currencies table viewer
+	 */
+	private TableViewer currenciesTableViewer;
 	private Button btnDeleteAccount;
-	private TreeViewer transactionsTreeViewer;
-	private Tree transactionsTree;
 	private Button btnDeleteTransaction;
 	private Button btnAddComponent;
+	private Table currenciesTable;
+	private Combo comboCurrencies;
 
 	/**
 	 * Launch the application.
-	 * @param args
+	 * @param args the application arguments
 	 */
 	public static void main(String[] args) {
 		try {
@@ -365,6 +472,8 @@ public class MainWindow {
 		financeData = FinanceData.restoreFromDatabase();
 		transactionsTreeViewer.setInput(financeData);
 		accountsTableViewer.setInput(financeData);
+		currenciesTableViewer.setInput(financeData);
+		updateDefaultCurrencyCombo();
 	}
 
 	/**
@@ -449,7 +558,6 @@ public class MainWindow {
 		FormData fd_compositeTransactionsTree = new FormData();
 		fd_compositeTransactionsTree.bottom = new FormAttachment(100);
 		fd_compositeTransactionsTree.right = new FormAttachment(100);
-		fd_compositeTransactionsTree.top = new FormAttachment(0, 35);
 		fd_compositeTransactionsTree.left = new FormAttachment(0);
 		compositeTransactionsTree.setLayoutData(fd_compositeTransactionsTree);
 
@@ -464,11 +572,11 @@ public class MainWindow {
 				btnAddComponent.setEnabled(!arg0.getSelection().isEmpty());
 			}
 		});
-		transactionsTree = transactionsTreeViewer.getTree();
+		Tree transactionsTree = transactionsTreeViewer.getTree();
 		transactionsTree.setHeaderVisible(true);
 
-		TreeViewerColumn treeViewerColumn = new TreeViewerColumn(transactionsTreeViewer, SWT.NONE);
-		treeViewerColumn.setEditingSupport(new EditingSupport(transactionsTreeViewer) {
+		TreeViewerColumn treeViewerColumnTransactionDescription = new TreeViewerColumn(transactionsTreeViewer, SWT.NONE);
+		treeViewerColumnTransactionDescription.setEditingSupport(new EditingSupport(transactionsTreeViewer) {
 			@Override
 			protected boolean canEdit(Object element) {
 				return element instanceof FinanceTransaction;
@@ -476,7 +584,7 @@ public class MainWindow {
 			@Override
 			protected CellEditor getCellEditor(Object element) {
 				if(element instanceof FinanceTransaction){
-					return new TextCellEditor(transactionsTree);
+					return new TextCellEditor(transactionsTreeViewer.getTree());
 				}else
 					return null;
 			}
@@ -499,12 +607,12 @@ public class MainWindow {
 				}
 			}
 		});
-		TreeColumn trclmnDescription = treeViewerColumn.getColumn();
+		TreeColumn trclmnDescription = treeViewerColumnTransactionDescription.getColumn();
 		tcl_compositeTransactionsTree.setColumnData(trclmnDescription, new ColumnWeightData(50));
 		trclmnDescription.setText(Messages.MainWindow_trclmnDescription_text);
 
-		TreeViewerColumn treeViewerColumn_1 = new TreeViewerColumn(transactionsTreeViewer, SWT.NONE);
-		treeViewerColumn_1.setEditingSupport(new EditingSupport(transactionsTreeViewer) {
+		TreeViewerColumn treeViewerColumnTransactionDate = new TreeViewerColumn(transactionsTreeViewer, SWT.NONE);
+		treeViewerColumnTransactionDate.setEditingSupport(new EditingSupport(transactionsTreeViewer) {
 			@Override
 			protected boolean canEdit(Object element) {
 				return element instanceof FinanceTransaction;
@@ -512,7 +620,7 @@ public class MainWindow {
 			@Override
 			protected CellEditor getCellEditor(Object element) {
 				if(element instanceof FinanceTransaction){
-					return new TextCellEditor(transactionsTree);
+					return new TextCellEditor(transactionsTreeViewer.getTree());
 				}else
 					return null;
 			}
@@ -542,12 +650,12 @@ public class MainWindow {
 				}
 			}
 		});
-		TreeColumn trclmnDate = treeViewerColumn_1.getColumn();
+		TreeColumn trclmnDate = treeViewerColumnTransactionDate.getColumn();
 		tcl_compositeTransactionsTree.setColumnData(trclmnDate,  new ColumnWeightData(15));
 		trclmnDate.setText(Messages.MainWindow_trclmnDate_text);
 
-		TreeViewerColumn treeViewerColumn_2 = new TreeViewerColumn(transactionsTreeViewer, SWT.NONE);
-		treeViewerColumn_2.setEditingSupport(new EditingSupport(transactionsTreeViewer) {
+		TreeViewerColumn treeViewerColumnTransactionTags = new TreeViewerColumn(transactionsTreeViewer, SWT.NONE);
+		treeViewerColumnTransactionTags.setEditingSupport(new EditingSupport(transactionsTreeViewer) {
 			@Override
 			protected boolean canEdit(Object element) {
 				return element instanceof FinanceTransaction;
@@ -555,7 +663,7 @@ public class MainWindow {
 			@Override
 			protected CellEditor getCellEditor(Object element) {
 				if(element instanceof FinanceTransaction){
-					return new TextCellEditor(transactionsTree);
+					return new TextCellEditor(transactionsTreeViewer.getTree());
 				}else
 					return null;
 			}
@@ -579,12 +687,12 @@ public class MainWindow {
 				}
 			}
 		});
-		TreeColumn trclmnTags = treeViewerColumn_2.getColumn();
+		TreeColumn trclmnTags = treeViewerColumnTransactionTags.getColumn();
 		tcl_compositeTransactionsTree.setColumnData(trclmnTags,  new ColumnWeightData(15));
 		trclmnTags.setText(Messages.MainWindow_trclmnTags_text);
 
-		TreeViewerColumn treeViewerColumn_3 = new TreeViewerColumn(transactionsTreeViewer, SWT.NONE);
-		treeViewerColumn_3.setEditingSupport(new EditingSupport(transactionsTreeViewer) {
+		TreeViewerColumn treeViewerColumnTransactionAmount = new TreeViewerColumn(transactionsTreeViewer, SWT.NONE);
+		treeViewerColumnTransactionAmount.setEditingSupport(new EditingSupport(transactionsTreeViewer) {
 			@Override
 			protected boolean canEdit(Object element) {
 				return (element instanceof ExpenseTransaction && ((ExpenseTransaction)element).getComponents().size()<=1)
@@ -593,7 +701,7 @@ public class MainWindow {
 			@Override
 			protected CellEditor getCellEditor(Object element) {
 				if(element instanceof FinanceTransaction || element instanceof TransactionComponent){
-					return new TextCellEditor(transactionsTree);
+					return new TextCellEditor(transactionsTreeViewer.getTree());
 				}else
 					return null;
 			}
@@ -640,13 +748,13 @@ public class MainWindow {
 				}
 			}
 		});
-		TreeColumn trclmnAmount = treeViewerColumn_3.getColumn();
+		TreeColumn trclmnAmount = treeViewerColumnTransactionAmount.getColumn();
 		trclmnAmount.setAlignment(SWT.RIGHT);
 		tcl_compositeTransactionsTree.setColumnData(trclmnAmount,  new ColumnWeightData(15));
 		trclmnAmount.setText(Messages.MainWindow_trclmnAmount_text);
 
-		TreeViewerColumn treeViewerColumn_4 = new TreeViewerColumn(transactionsTreeViewer, SWT.NONE);
-		treeViewerColumn_4.setEditingSupport(new EditingSupport(transactionsTreeViewer) {
+		TreeViewerColumn treeViewerColumnTransactionAccount = new TreeViewerColumn(transactionsTreeViewer, SWT.NONE);
+		treeViewerColumnTransactionAccount.setEditingSupport(new EditingSupport(transactionsTreeViewer) {
 			@Override
 			protected boolean canEdit(Object element) {
 				return (element instanceof ExpenseTransaction && ((ExpenseTransaction)element).getComponents().size()<=1)
@@ -662,7 +770,7 @@ public class MainWindow {
 						accountsItemList.add(account.getName());
 					String[] accountsItemArray = new String[accountsItemList.size()];
 					accountsItemArray = accountsItemList.toArray(accountsItemArray);
-					return new ComboBoxCellEditor(transactionsTree,accountsItemArray);
+					return new ComboBoxCellEditor(transactionsTreeViewer.getTree(),accountsItemArray);
 				}else
 					return null;
 			}
@@ -704,11 +812,12 @@ public class MainWindow {
 				}
 			}
 		});
-		TreeColumn trclmnAccounts = treeViewerColumn_4.getColumn();
+		TreeColumn trclmnAccounts = treeViewerColumnTransactionAccount.getColumn();
 		tcl_compositeTransactionsTree.setColumnData(trclmnAccounts,  new ColumnWeightData(15));
 		trclmnAccounts.setText(Messages.MainWindow_trclmnAccounts_text);
 
 		Button btnAddExpenseTransaction = new Button(compositeTransactions, SWT.NONE);
+		fd_compositeTransactionsTree.top = new FormAttachment(btnAddExpenseTransaction, 6);
 		btnAddExpenseTransaction.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -741,8 +850,8 @@ public class MainWindow {
 		});
 		fd_btnAddExpenseTransaction.right = new FormAttachment(btnAddTransferTransaction, -6);
 		FormData fd_btnAddTransferTransaction = new FormData();
+		fd_btnAddTransferTransaction.right = new FormAttachment(100);
 		fd_btnAddTransferTransaction.top = new FormAttachment(0);
-		fd_btnAddTransferTransaction.right = new FormAttachment(compositeTransactionsTree, 0, SWT.RIGHT);
 		btnAddTransferTransaction.setLayoutData(fd_btnAddTransferTransaction);
 		btnAddTransferTransaction.setText(Messages.MainWindow_btnAddTransferTransaction_text);
 
@@ -821,8 +930,8 @@ public class MainWindow {
 		btnAddAccount.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				FinanceAccount newAccount = new FinanceAccount(Messages.MainWindow_New_Account_Name);
-				accountsTableViewer.add(newAccount);
+				FinanceAccount newAccount = new FinanceAccount(Messages.MainWindow_New_Account_Name,null);
+				accountsTableViewer.insert(newAccount,((FinanceData)accountsTableViewer.getInput()).getAccounts().size());
 				accountsTableViewer.reveal(newAccount);
 				accountsTableViewer.setSelection(new StructuredSelection(newAccount), true);
 			}
@@ -848,6 +957,9 @@ public class MainWindow {
 							accountsTableViewer.remove(account);
 							financeData.deleteAccount(account);
 							updateTransactions();
+							accountsTableViewer.setInput(accountsTableViewer.getInput());
+							updateCurrencies();
+							updateDefaultCurrencyCombo();
 						}
 					}
 				}
@@ -877,11 +989,12 @@ public class MainWindow {
 				btnDeleteAccount.setEnabled(!arg0.getSelection().isEmpty());
 			}
 		});
-		accountsTable = accountsTableViewer.getTable();
+
+		Table accountsTable = accountsTableViewer.getTable();
 		accountsTable.setHeaderVisible(true);
 
-		TableViewerColumn tableViewerColumn = new TableViewerColumn(accountsTableViewer, SWT.NONE);
-		tableViewerColumn.setEditingSupport(new EditingSupport(accountsTableViewer) {
+		TableViewerColumn tableViewerColumnAccountName = new TableViewerColumn(accountsTableViewer, SWT.NONE);
+		tableViewerColumnAccountName.setEditingSupport(new EditingSupport(accountsTableViewer) {
 			@Override
 			protected boolean canEdit(Object element) {
 				return element instanceof FinanceAccount;
@@ -889,7 +1002,7 @@ public class MainWindow {
 			@Override
 			protected CellEditor getCellEditor(Object element) {
 				if(element instanceof FinanceAccount)
-					return new TextCellEditor(accountsTable);
+					return new TextCellEditor(accountsTableViewer.getTable());
 				else
 					return null;
 			}
@@ -909,23 +1022,188 @@ public class MainWindow {
 					}
 					accountsTableViewer.update(element, null);
 					updateTransactions();
+					accountsTableViewer.setInput(accountsTableViewer.getInput());
+					updateCurrencies();
+					updateDefaultCurrencyCombo();
 				} catch (Exception ex) {
 					//TODO: warn user?
 					Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE,null, ex);
 				}
 			}
 		});
-		TableColumn tblclmnAccount = tableViewerColumn.getColumn();
+		TableColumn tblclmnAccount = tableViewerColumnAccountName.getColumn();
 		tcl_compositeAccountsTable.setColumnData(tblclmnAccount, new ColumnWeightData(60));
 		tblclmnAccount.setText(Messages.MainWindow_tblclmnAccount_text);
 
-		TableViewerColumn tableViewerColumn_1 = new TableViewerColumn(accountsTableViewer, SWT.NONE);
-		TableColumn tblclmnBalance = tableViewerColumn_1.getColumn();
+		TableViewerColumn tableViewerColumnAccountBalance = new TableViewerColumn(accountsTableViewer, SWT.NONE);
+		TableColumn tblclmnBalance = tableViewerColumnAccountBalance.getColumn();
 		tblclmnBalance.setAlignment(SWT.RIGHT);
 		tcl_compositeAccountsTable.setColumnData(tblclmnBalance, new ColumnWeightData(30));
 		tblclmnBalance.setText(Messages.MainWindow_tblclmnBalance_text);
+
+		TableViewerColumn tableViewerColumnAccountCurrency = new TableViewerColumn(accountsTableViewer, SWT.NONE);
+		tableViewerColumnAccountCurrency.setEditingSupport(new EditingSupport(accountsTableViewer) {
+			private List<Currency> currencies = null;
+			@Override
+			protected boolean canEdit(Object element) {
+				return element instanceof FinanceAccount;
+			}
+			@Override
+			protected CellEditor getCellEditor(Object element) {
+				if(element instanceof FinanceAccount){
+					if(currencies==null){
+						class CurrencyComparator implements Comparator<Currency>{
+							@Override
+							public int compare(Currency o1, Currency o2) {
+								return o1.getDisplayName().compareTo(o2.getDisplayName());
+							}
+						}
+						currencies = new LinkedList<>();
+						for(Currency currency : Currency.getAvailableCurrencies())
+							currencies.add(currency);
+						Collections.sort(currencies, new CurrencyComparator());
+					}
+					List<String> currencyNames = new LinkedList<>();
+					for(Currency currency : currencies)
+						currencyNames.add(currency.getDisplayName());
+					String[] currenciesArray = new String[currencyNames.size()];
+					currenciesArray = currencyNames.toArray(currenciesArray);
+					return new ComboBoxCellEditor(accountsTableViewer.getTable(),currenciesArray);
+				}else
+					return null;
+			}
+			@Override
+			protected Object getValue(Object element) {
+				if(element instanceof FinanceAccount && currencies!=null){
+					return currencies.indexOf(((FinanceAccount)element).getCurrency());
+				}else
+					return null;
+			}
+			@Override
+			protected void setValue(Object element, Object value) {
+				try {
+					if(value instanceof Integer && (Integer)value!=-1 && element instanceof FinanceAccount){
+						financeData.setAccountCurrency((FinanceAccount)element,currencies.get((Integer)value));
+						accountsTableViewer.update(element, null);
+						updateTransactions();
+						accountsTableViewer.setInput(accountsTableViewer.getInput());
+						updateCurrencies();
+						updateDefaultCurrencyCombo();
+					}
+				} catch (Exception ex) {
+					//TODO: warn user?
+					Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE,null, ex);
+				}
+			}
+		});
+		TableColumn tblclmnCurrency = tableViewerColumnAccountCurrency.getColumn();
+		tcl_compositeAccountsTable.setColumnData(tblclmnCurrency, new ColumnWeightData(30));
+		tblclmnCurrency.setText(Messages.MainWindow_tblclmnCurrency_text);
+
+
 		accountsTableViewer.setLabelProvider(new AccountsTableLabelProvider());
 		accountsTableViewer.setContentProvider(new AccountsContentProvider());
+
+		TabItem tbtmCurrencies = new TabItem(tabFolder, SWT.NONE);
+		tbtmCurrencies.setText(Messages.MainWindow_tbtmCurrencies_text);
+
+		Composite compositeCurrencies = new Composite(tabFolder, SWT.NONE);
+		tbtmCurrencies.setControl(compositeCurrencies);
+		compositeCurrencies.setLayout(new FormLayout());
+
+		Label lblDefaultCurrency = new Label(compositeCurrencies, SWT.NONE);
+		FormData fd_lblDefaultCurrency = new FormData();
+		lblDefaultCurrency.setLayoutData(fd_lblDefaultCurrency);
+		lblDefaultCurrency.setText(Messages.MainWindow_lblDefaultCurrency_text);
+
+		comboCurrencies = new Combo(compositeCurrencies, SWT.NONE);
+		comboCurrencies.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for(Currency currency : financeData.getCurrencies())
+					if(comboCurrencies.getText().equals(currency.getDisplayName())){
+						financeData.setDefaultCurrency(currency);
+						updateAccounts();
+						updateDefaultCurrencyCombo();
+						break;
+					}
+			}
+		});
+		fd_lblDefaultCurrency.top = new FormAttachment(comboCurrencies, 3, SWT.TOP);
+		fd_lblDefaultCurrency.right = new FormAttachment(comboCurrencies, -6);
+		FormData fd_comboCurrencies = new FormData();
+		fd_comboCurrencies.right = new FormAttachment(100);
+		fd_comboCurrencies.top = new FormAttachment(0);
+
+		Composite compositeCurrenciesTable = new Composite(compositeCurrencies, SWT.NONE);
+		FormData fd_compositeCurrenciesTable = new FormData();
+		fd_compositeCurrenciesTable.right = new FormAttachment(comboCurrencies, 0, SWT.RIGHT);
+		fd_compositeCurrenciesTable.left = new FormAttachment(0);
+		fd_compositeCurrenciesTable.top = new FormAttachment(comboCurrencies, 6);
+		fd_compositeCurrenciesTable.bottom = new FormAttachment(100);
+		compositeCurrenciesTable.setLayoutData(fd_compositeCurrenciesTable);
+		TableColumnLayout tcl_compositeCurrenciesTable = new TableColumnLayout();
+		compositeCurrenciesTable.setLayout(tcl_compositeCurrenciesTable);
+
+		currenciesTableViewer = new TableViewer(compositeCurrenciesTable, SWT.BORDER | SWT.FULL_SELECTION);
+		currenciesTable = currenciesTableViewer.getTable();
+		currenciesTable.setHeaderVisible(true);
+		currenciesTable.setLinesVisible(true);
+
+		TableViewerColumn tableViewerColumnCurrencySource = new TableViewerColumn(currenciesTableViewer, SWT.NONE);
+		TableColumn tblclmnSourceCurrency = tableViewerColumnCurrencySource.getColumn();
+		tcl_compositeCurrenciesTable.setColumnData(tblclmnSourceCurrency, new ColumnWeightData(40));
+		tblclmnSourceCurrency.setText(Messages.MainWindow_tblclmnSourceCurrency_text);
+
+		TableViewerColumn tableViewerColumnCurrencyDestination = new TableViewerColumn(currenciesTableViewer, SWT.NONE);
+		TableColumn tblclmnDestinationCurrency = tableViewerColumnCurrencyDestination.getColumn();
+		tcl_compositeCurrenciesTable.setColumnData(tblclmnDestinationCurrency, new ColumnWeightData(40));
+		tblclmnDestinationCurrency.setText(Messages.MainWindow_tblclmnDestinationCurrency_text);
+
+		TableViewerColumn tableViewerColumnCurrencyExchangeRate = new TableViewerColumn(currenciesTableViewer, SWT.NONE);
+		tableViewerColumnCurrencyExchangeRate.setEditingSupport(new EditingSupport(currenciesTableViewer) {
+			@Override
+			protected boolean canEdit(Object element) {
+				return element instanceof CurrencyRate;
+			}
+			@Override
+			protected CellEditor getCellEditor(Object element) {
+				if(element instanceof CurrencyRate){
+					return new TextCellEditor(currenciesTableViewer.getTable());
+				}else
+					return null;
+			}
+			@Override
+			protected Object getValue(Object element) {
+				if(element instanceof CurrencyRate){
+					return MessageFormat.format("{0,number,0.0000}", new Object[]{((CurrencyRate)element).getExchangeRate()}); //$NON-NLS-1$
+				}else
+					return null;
+			}
+			@Override
+			protected void setValue(Object element, Object value) {
+				if(value instanceof String && element instanceof CurrencyRate){
+					try {
+						double rate = NumberFormat.getInstance().parse((String)value).doubleValue();
+						financeData.setExchangeRate((CurrencyRate)element, rate);
+					} catch (ParseException ex) {
+						//TODO: warn user?
+						Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE,null, ex);
+					}
+					currenciesTableViewer.update(element, null);
+					updateAccounts();
+					updateTransactions();
+				}
+			}
+		});
+		TableColumn tblclmnExchangeRate = tableViewerColumnCurrencyExchangeRate.getColumn();
+		tcl_compositeCurrenciesTable.setColumnData(tblclmnExchangeRate, new ColumnWeightData(20));
+		tblclmnExchangeRate.setText(Messages.MainWindow_tblclmnExchangeRate_text);
+		currenciesTableViewer.setContentProvider(new CurrenciesContentProvider());
+		currenciesTableViewer.setLabelProvider(new CurrenciesTableLabelProvider());
+
+
+		comboCurrencies.setLayoutData(fd_comboCurrencies);
 	}
 
 	/**
@@ -960,6 +1238,8 @@ public class MainWindow {
 				financeData.importData(importer);
 				transactionsTreeViewer.setInput(financeData);
 				accountsTableViewer.setInput(financeData);
+				currenciesTableViewer.setInput(financeData);
+				updateDefaultCurrencyCombo();
 			} catch (org.zlogic.vogon.data.VogonImportLogicalException ex) {
 				Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE,null, ex);
 				MessageDialog dialog = new MessageDialog(shell,Messages.MainWindow_Error_Importing_File,null,new MessageFormat(Messages.MainWindow_Error_Importing_File_Description).format(new Object[] { ex.getMessage() }),MessageDialog.ERROR, new String[] { Messages.MainWindow_OK }, 0);
@@ -1020,5 +1300,23 @@ public class MainWindow {
 	 */
 	protected void updateAccounts() {
 		accountsTableViewer.refresh(true);
+	}
+
+	/**
+	 * Updates the currencies table when data changes
+	 */
+	protected void updateCurrencies() {
+		currenciesTableViewer.refresh(true);
+	}
+
+	/**
+	 * Updates the default currency combo box
+	 */
+	protected void updateDefaultCurrencyCombo(){
+		List<Currency> currencies = financeData.getCurrencies();
+		for(Currency currency : currencies)
+			comboCurrencies.add(currency.getDisplayName());
+		if(financeData.getDefaultCurrency()!=null)
+			comboCurrencies.select(currencies.indexOf(financeData.getDefaultCurrency()));
 	}
 }

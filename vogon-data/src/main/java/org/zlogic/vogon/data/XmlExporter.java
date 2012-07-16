@@ -26,7 +26,7 @@ import org.w3c.dom.Element;
 /**
  * Implementation for exporting data to XML files
  * 
- * @author Zlogic
+ * @author Dmitry Zolotukhin
  */
 public class XmlExporter implements FileExporter {
 
@@ -62,9 +62,16 @@ public class XmlExporter implements FileExporter {
 			Element rootElement = doc.createElement("VogonFinanceData"); //$NON-NLS-1$
 			doc.appendChild(rootElement);
 
+			//Set global parameters
+			rootElement.setAttribute("DefaultCurrency", financeData.getDefaultCurrency().getCurrencyCode()); //$NON-NLS-1$
+
 			//Accounts node
 			Element accountsElement = doc.createElement("Accounts"); //$NON-NLS-1$
 			rootElement.appendChild(accountsElement);
+
+			//Currencies node
+			Element currenciesElement = doc.createElement("Currencies"); //$NON-NLS-1$
+			rootElement.appendChild(currenciesElement);
 
 			//Transactions node
 			Element transactionsElement = doc.createElement("Transactions"); //$NON-NLS-1$
@@ -75,8 +82,18 @@ public class XmlExporter implements FileExporter {
 				Element accountElement = doc.createElement("Account"); //$NON-NLS-1$
 				accountElement.setAttribute("Id",Long.toString(account.id)); //$NON-NLS-1$
 				accountElement.setAttribute("Name", account.getName()); //$NON-NLS-1$
+				accountElement.setAttribute("Currency", account.getCurrency().getCurrencyCode()); //$NON-NLS-1$
 				//accountElement.setAttribute("Balance", Long.toString(account.getRawBalance()));
 				accountsElement.appendChild(accountElement);
+			}
+
+			//Currencies list
+			for(CurrencyRate rate : financeData.getCurrencyRates()){
+				Element currencyElement = doc.createElement("CurrencyRate"); //$NON-NLS-1$
+				currencyElement.setAttribute("Source", rate.getSource().getCurrencyCode()); //$NON-NLS-1$
+				currencyElement.setAttribute("Destination", rate.getDestination().getCurrencyCode()); //$NON-NLS-1$
+				currencyElement.setAttribute("Rate",Double.toString(rate.getExchangeRate())); //$NON-NLS-1$
+				currenciesElement.appendChild(currencyElement);
 			}
 
 			//Transactions list

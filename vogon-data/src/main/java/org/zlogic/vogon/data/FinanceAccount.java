@@ -6,12 +6,13 @@
 package org.zlogic.vogon.data;
 
 import java.io.Serializable;
+import java.util.Currency;
+import java.util.Locale;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 
 /**
  * Class for storing account data
@@ -41,10 +42,10 @@ public class FinanceAccount implements Serializable {
 	protected Long balance;
 
 	/**
-	 * Synchronized object for access to account balance
+	 * The account currency
 	 */
-	@Transient
-	private final Boolean balanceLock = true;
+	protected String currency;
+
 	/**
 	 * Creates an account
 	 */
@@ -55,10 +56,12 @@ public class FinanceAccount implements Serializable {
 	 * Creates an account
 	 *
 	 * @param name The account name
+	 * @param currency The account currency
 	 */
-	public FinanceAccount(String name) {
+	public FinanceAccount(String name,Currency currency) {
 		this.name = name;
 		this.balance = 0L;
+		this.currency = (currency!=null?currency:Currency.getInstance(Locale.getDefault())).getCurrencyCode();
 	}
 
 	/**
@@ -76,7 +79,7 @@ public class FinanceAccount implements Serializable {
 	 * @param addAmount the amount to add (can be added)
 	 */
 	public void updateRawBalance(long addAmount){
-		synchronized(balanceLock){
+		synchronized(this){
 			balance += addAmount;
 		}
 	}
@@ -84,7 +87,6 @@ public class FinanceAccount implements Serializable {
 	/*
 	 * Getters/setters
 	 */
-
 	/**
 	 * Returns the account name
 	 *
@@ -103,6 +105,27 @@ public class FinanceAccount implements Serializable {
 		if(name.isEmpty())
 			return;
 		this.name = name;
+	}
+
+	/**
+	 * Returns the account currency
+	 *
+	 * @return The account currency
+	 */
+	public Currency getCurrency() {
+		Currency currency = Currency.getInstance(this.currency);
+		return currency!=null?currency:Currency.getInstance(Locale.getDefault());
+	}
+
+	/**
+	 * Sets the account currency
+	 *
+	 * @param currency The account currency
+	 */
+	public void setCurrency(Currency currency) {
+		if(currency==null)
+			return;
+		this.currency = currency.getCurrencyCode();
 	}
 
 	/**

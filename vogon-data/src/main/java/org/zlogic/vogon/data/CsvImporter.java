@@ -85,7 +85,7 @@ public class CsvImporter implements FileImporter {
 						if (!foundAccounts.isEmpty() && foundAccounts.get(0).getName().equals(columns[i])) {
 							accounts.add(foundAccounts.get(0));
 						} else {
-							FinanceAccount account = new FinanceAccount(columns[i]);
+							FinanceAccount account = new FinanceAccount(columns[i],null);
 							accounts.add(account);
 						}
 					}
@@ -131,7 +131,7 @@ public class CsvImporter implements FileImporter {
 				}
 			}
 			reader.close();
-			FinanceData result = new FinanceData(transactions, accounts);
+			FinanceData result = new FinanceData(transactions, accounts,new LinkedList<CurrencyRate>(),null);
 			return result;
 		} catch (java.io.FileNotFoundException e) {
 			Logger.getLogger(CsvImporter.class.getName()).log(Level.SEVERE, null, e);
