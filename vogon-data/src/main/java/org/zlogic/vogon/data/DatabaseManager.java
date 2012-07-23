@@ -19,10 +19,6 @@ public class DatabaseManager {
 	 * True if this database manager is terminated
 	 */
 	private Boolean terminated = false;
-	/**
-	 * Locker object for terminated field
-	 */
-	final private Boolean terminatedMutex = true;
 
 	/**
 	 * EntityManager factory instance
@@ -62,19 +58,19 @@ public class DatabaseManager {
 	 * @return The persistence unit's EntityManagerFactory
 	 */
 	public javax.persistence.EntityManagerFactory getPersistenceUnit() {
-		synchronized (terminatedMutex) {
+		synchronized (this) {
 			return terminated ? null : entityManagerFactory;
 		}
 	}
 
 	/**
-	 * Returns the entity manager for this package
+	 * Returns a new entity manager for this package
 	 *
-	 * @return The persistence unit's EntityManager instance
+	 * @return A new EntityManager for the persistence unit
 	 */
-	public javax.persistence.EntityManager getEntityManager() {
-		synchronized (terminatedMutex) {
-			return terminated ? null : entityManager;
+	public javax.persistence.EntityManager createEntityManager() {
+		synchronized (this) {
+			return terminated ? null : entityManagerFactory.createEntityManager();
 		}
 	}
 
@@ -83,7 +79,7 @@ public class DatabaseManager {
 	 * non-standard shutdown sequence.
 	 */
 	public void shutdown() {
-		synchronized (terminatedMutex) {
+		synchronized (this) {
 			if (terminated)
 				return;
 			//Check if DB is Derby
