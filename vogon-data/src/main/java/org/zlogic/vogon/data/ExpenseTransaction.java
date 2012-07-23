@@ -27,7 +27,7 @@ public class ExpenseTransaction extends FinanceTransaction implements Serializab
 	/**
 	 * Default constructor for an expense transaction
 	 */
-	public ExpenseTransaction() {
+	protected ExpenseTransaction() {
 	}
 
 	/**

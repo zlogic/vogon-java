@@ -11,15 +11,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
-import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 
 /**
@@ -27,31 +22,19 @@ import javax.persistence.criteria.CriteriaQuery;
  *
  * @author Dmitry Zolotukhin
  */
-@Entity
 public class FinanceData {
-	/**
-	 * The transaction ID (only for persistence)
-	 */
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	protected long id;
 	/**
 	 * Contains all finance transactions
 	 */
-	@OneToMany
-	@OrderBy("transactionDate ASC,id ASC")
 	protected java.util.List<FinanceTransaction> transactions;
 	/**
 	 * Contains all accounts
 	 */
-	@OneToMany
 	protected java.util.List<FinanceAccount> accounts;
 
 	/**
 	 * Contains exchange rates
 	 */
-	@OneToMany
-	@OrderBy("source ASC,destination ASC")
 	protected java.util.List<CurrencyRate> exchangeRates;
 
 	/**
@@ -67,7 +50,8 @@ public class FinanceData {
 	/**
 	 * Default constructor
 	 */
-	public FinanceData() {
+	protected FinanceData() {
+		defaultCurrency = Currency.getInstance(Locale.getDefault()).getCurrencyCode();
 	}
 
 	/**
@@ -151,22 +135,44 @@ public class FinanceData {
 	 * @return The restored FinanceData instance
 	 */
 	public static FinanceData restoreFromDatabase(){
+		FinanceData financeData = new FinanceData();
+		financeData.accounts = financeData.getAccountsFromDatabase();
+		financeData.transactions = financeData.getTransactionsFromDatabase();
+		financeData.exchangeRates = financeData.getCurrencyRatesFromDatabase();
+		return financeData;
+	}
+
+	public List<FinanceTransaction> getTransactionsFromDatabase(){
 		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<FinanceData> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceData.class);
+		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
+		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
+		transactionsCriteriaQuery.orderBy(
+				criteriaBuilder.asc(tr.get("transactionDate")),
+				criteriaBuilder.asc(tr.get("id"))
+				);
 
-		List <FinanceData> data = entityManager.createQuery(transactionsCriteriaQuery).getResultList();
+		return entityManager.createQuery(transactionsCriteriaQuery).getResultList();
+	}
+	
+	public List<FinanceAccount> getAccountsFromDatabase(){
+		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<FinanceAccount> accountsCriteriaQuery = criteriaBuilder.createQuery(FinanceAccount.class);
 
-		if(data.isEmpty()){
-			FinanceData newFinanceData = new FinanceData();
-			newFinanceData.transactions = new java.util.LinkedList<>();
-			newFinanceData.accounts = new java.util.LinkedList<>();
-			entityManager.getTransaction().begin();
-			entityManager.persist(newFinanceData);
-			entityManager.getTransaction().commit();
-			return newFinanceData;
-		}else
-			return data.get(0);
+		return entityManager.createQuery(accountsCriteriaQuery).getResultList();
+	}
+	
+	public List<CurrencyRate> getCurrencyRatesFromDatabase(){
+		EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<CurrencyRate> exchangeRatesCriteriaQuery = criteriaBuilder.createQuery(CurrencyRate.class);
+		Root<CurrencyRate> er = exchangeRatesCriteriaQuery.from(CurrencyRate.class);
+		exchangeRatesCriteriaQuery.orderBy(
+				criteriaBuilder.asc(er.get("source")),
+				criteriaBuilder.asc(er.get("destination"))
+				);
+		return entityManager.createQuery(exchangeRatesCriteriaQuery).getResultList();
 	}
 
 	/**

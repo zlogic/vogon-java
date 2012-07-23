@@ -48,7 +48,7 @@ public class CurrencyRate implements Serializable {
 	/**
 	 * Creates a currency exchange rate
 	 */
-	public CurrencyRate() {
+	protected CurrencyRate() {
 	}
 	/**
 	 * Creates a currency exchange rate

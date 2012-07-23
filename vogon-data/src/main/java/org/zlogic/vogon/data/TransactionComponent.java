@@ -50,7 +50,7 @@ public class TransactionComponent implements Serializable {
 	/**
 	 * Default constructor for a transaction component
 	 */
-	public TransactionComponent() {
+	protected TransactionComponent() {
 	}
 
 	/**
