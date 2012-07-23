@@ -7,7 +7,6 @@
     <class>org.zlogic.vogon.data.FinanceTransaction</class>
     <class>org.zlogic.vogon.data.TransactionComponent</class>
     <class>org.zlogic.vogon.data.TransferTransaction</class>
-    <class>org.zlogic.vogon.data.FinanceData</class>
     <class>org.zlogic.vogon.data.CurrencyRate</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>

@@ -49,7 +49,7 @@ public class FinanceAccount implements Serializable {
 	/**
 	 * Creates an account
 	 */
-	public FinanceAccount() {
+	protected FinanceAccount() {
 	}
 
 	/**

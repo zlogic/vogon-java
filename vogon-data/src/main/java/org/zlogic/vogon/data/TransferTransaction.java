@@ -26,7 +26,7 @@ public class TransferTransaction extends FinanceTransaction {
 	/**
 	 * Default constructor for a transfer transaction
 	 */
-	public TransferTransaction() {
+	protected TransferTransaction() {
 	}
 
 	/**
