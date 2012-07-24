@@ -1200,7 +1200,8 @@ public class MainWindow {
 				if(value instanceof String && element instanceof CurrencyRate){
 					try {
 						double rate = NumberFormat.getInstance().parse((String)value).doubleValue();
-						financeData.setExchangeRate((CurrencyRate)element, rate);
+						((CurrencyRate)element).setExchangeRate(rate);
+						financeData.updateExchangeRate((CurrencyRate)element);
 					} catch (ParseException ex) {
 						//TODO: warn user?
 						Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE,null, ex);
