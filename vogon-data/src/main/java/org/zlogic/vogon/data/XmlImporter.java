@@ -98,14 +98,14 @@ public class XmlImporter implements FileImporter {
 
 				CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 				CriteriaQuery<Preferences> accountsCriteriaQuery = criteriaBuilder.createQuery(Preferences.class);
-				List<Preferences> foundPreferences = entityManager.createQuery(accountsCriteriaQuery).getResultList();
+				Preferences foundPreferences = entityManager.createQuery(accountsCriteriaQuery).getSingleResult();
 
-				if(foundPreferences.isEmpty()){
+				if(foundPreferences == null){
 					Preferences preferences = new Preferences();
 					entityManager.persist(preferences);
 					preferences.setDefaultCurrency(Currency.getInstance(defaultCurrency));
-				} else if(foundPreferences.get(0).getDefaultCurrency()==null){
-					foundPreferences.get(0).setDefaultCurrency(Currency.getInstance(defaultCurrency));
+				} else if(foundPreferences.getDefaultCurrency()==null){
+					foundPreferences.setDefaultCurrency(Currency.getInstance(defaultCurrency));
 				}
 			}
 
@@ -127,11 +127,11 @@ public class XmlImporter implements FileImporter {
 				Root<FinanceAccount> acc = accountsCriteriaQuery.from(FinanceAccount.class);
 				Predicate condition = criteriaBuilder.equal(acc.get(FinanceAccount_.name), accountName);
 				accountsCriteriaQuery.where(condition);
-				List<FinanceAccount> foundAccounts = entityManager.createQuery(accountsCriteriaQuery).getResultList();
+				FinanceAccount foundAccount = entityManager.createQuery(accountsCriteriaQuery).getSingleResult();
 
 				//Match by account name
-				if (!foundAccounts.isEmpty() && foundAccounts.get(0).getName().equals(accountName)) {
-					accountsMap.put(accountId,foundAccounts.get(0));
+				if (foundAccount!=null && foundAccount.getName().equals(accountName)) {
+					accountsMap.put(accountId,foundAccount);
 				} else {
 					FinanceAccount account = new FinanceAccount(accountName,currency!=null?Currency.getInstance(currency):null);
 					accountsMap.put(accountId,account);
@@ -157,10 +157,10 @@ public class XmlImporter implements FileImporter {
 				Predicate sourceCondition = criteriaBuilder.equal(rate.get(CurrencyRate_.source), sourceCurrencyName);
 				Predicate destinationCondition = criteriaBuilder.equal(rate.get(CurrencyRate_.destination), destinationCurrencyName);
 				currencyCriteriaQuery.where(criteriaBuilder.and(sourceCondition,destinationCondition));
-				List<CurrencyRate> foundCurrencyRates = entityManager.createQuery(currencyCriteriaQuery).getResultList();
+				CurrencyRate foundCurrencyRate = entityManager.createQuery(currencyCriteriaQuery).getSingleResult();
 
 				//Match by currency source and destination
-				if (foundCurrencyRates.isEmpty() || !(foundCurrencyRates.get(0).getSource().getCurrencyCode().equals(sourceCurrencyName) && foundCurrencyRates.get(0).getDestination().getCurrencyCode().equals(destinationCurrencyName))) {
+				if (foundCurrencyRate == null || !(foundCurrencyRate.getSource().getCurrencyCode().equals(sourceCurrencyName) && foundCurrencyRate.getDestination().getCurrencyCode().equals(destinationCurrencyName))) {
 					CurrencyRate currencyRate = new CurrencyRate(Currency.getInstance(sourceCurrencyName), Currency.getInstance(destinationCurrencyName), exchangeRate);
 					entityManager.persist(currencyRate);
 				}
@@ -179,8 +179,6 @@ public class XmlImporter implements FileImporter {
 				//String transactionAmount = attributes.getNamedItem("Amount").getNodeValue();
 				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); //$NON-NLS-1$
 				Date transactionDate = dateFormat.parse(attributes.getNamedItem("Date").getNodeValue()); //$NON-NLS-1$
-
-
 
 				//Create transaction instance
 				FinanceTransaction transaction = null;

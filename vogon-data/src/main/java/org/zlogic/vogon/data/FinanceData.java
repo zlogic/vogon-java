@@ -161,15 +161,14 @@ public class FinanceData {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Preferences> exchangeRatesCriteriaQuery = criteriaBuilder.createQuery(Preferences.class);
-		List<Preferences> listPreferences = entityManager.createQuery(exchangeRatesCriteriaQuery).getResultList();
-		if(listPreferences.isEmpty()){
-			Preferences preferences = new Preferences();
+		Preferences preferences = entityManager.createQuery(exchangeRatesCriteriaQuery).getSingleResult();
+		if(preferences==null){
+			preferences = new Preferences();
 			entityManager.getTransaction().begin();
 			entityManager.persist(preferences);
 			entityManager.getTransaction().commit();
-			return preferences;
 		}
-		return listPreferences.get(0);
+		return preferences;
 	}
 
 	protected Currency getDefaultCurrencyFromDatabase(){
@@ -626,63 +625,58 @@ public class FinanceData {
 	 * @param account the account to be updated
 	 */
 	public void refreshAccountBalance(FinanceAccount account){
-		EntityManager entityManager = currentEntityManager;
-		entityManager.getTransaction().begin();
-		account.updateRawBalance(-account.getRawBalance());
-		for(FinanceTransaction transaction:transactions){
-			for(TransactionComponent component:transaction.getComponentsForAccount(account)){
-				account.updateRawBalance(component.getRawAmount());
+		//Request all transactions from database
+		EntityManager tempEntityManager = DatabaseManager.getInstance().createEntityManager();
+		CriteriaBuilder criteriaBuilder = tempEntityManager.getCriteriaBuilder();
+		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
+		FinanceAccount tempAccount = tempEntityManager.find(FinanceAccount.class, account.id);
+		
+		//TODO: add paging here
+		tempEntityManager.getTransaction().begin();
+		tempAccount.updateRawBalance(-tempAccount.getRawBalance());
+		for(FinanceTransaction transaction:tempEntityManager.createQuery(transactionsCriteriaQuery).getResultList()){
+			for(TransactionComponent component:transaction.getComponentsForAccount(tempAccount)){
+				tempAccount.updateRawBalance(component.getRawAmount());
 			}
 		}
-		entityManager.getTransaction().commit();
+		tempEntityManager.getTransaction().commit();
+		
+		currentEntityManager.refresh(account);
+		
+		tempEntityManager.close();
 	}
 
 	/**
 	 * Deletes all orphaned transactions, accounts and transaction components
 	 */
 	public void cleanup(){
-		EntityManager entityManager = currentEntityManager;
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
-		CriteriaQuery<FinanceAccount> accountsCriteriaQuery = criteriaBuilder.createQuery(FinanceAccount.class);
+		EntityManager tempEntityManager = DatabaseManager.getInstance().createEntityManager();
+		CriteriaBuilder criteriaBuilder = tempEntityManager.getCriteriaBuilder();
 		CriteriaQuery<TransactionComponent> componentsCriteriaQuery = criteriaBuilder.createQuery(TransactionComponent.class);
 
+		tempEntityManager.getTransaction().begin();
+		
 		//Get all data from DB
-		List<FinanceTransaction> transactionsDB = entityManager.createQuery(transactionsCriteriaQuery).getResultList();
-		List<FinanceAccount> accountsDB = entityManager.createQuery(accountsCriteriaQuery).getResultList();
-		List<TransactionComponent> componentsDB = entityManager.createQuery(componentsCriteriaQuery).getResultList();
+		List<TransactionComponent> componentsDB = tempEntityManager.createQuery(componentsCriteriaQuery).getResultList();
 
 		//Remove OK items from list
-		transactionsDB.removeAll(transactions);
-		accountsDB.removeAll(accounts);
 		for(FinanceTransaction transaction : transactions)
 			componentsDB.removeAll(transaction.getComponents());
-
-		transactions.removeAll(transactionsDB);
-		accounts.removeAll(accountsDB);
-
-		entityManager.getTransaction().begin();
-		for(FinanceTransaction transaction : transactionsDB){
-			for(TransactionComponent component : transaction.getComponents())
-				entityManager.remove(component);
-			componentsDB.removeAll(transaction.getComponents());
-			transaction.removeAllComponents();
-			entityManager.remove(transaction);
-		}
-
-		for(FinanceAccount account : accountsDB)
-			entityManager.remove(account);
-
+		
+		//Remove anything that still exists
 		for(TransactionComponent component : componentsDB){
 			if(component.getTransaction()!=null)
 				component.getTransaction().removeComponent(component);
 			component.setTransaction(null);
-			entityManager.remove(component);
+			tempEntityManager.remove(component);
 		}
 
-		populateCurrencies();
+		tempEntityManager.getTransaction().commit();
+		tempEntityManager.close();
 
-		entityManager.getTransaction().commit();
+		currentEntityManager.getTransaction().begin();
+		populateCurrencies();
+		currentEntityManager.getTransaction().commit();
 	}
 
 	/*

@@ -80,10 +80,10 @@ public class CsvImporter implements FileImporter {
 						Root<FinanceAccount> acc = accountsCriteriaQuery.from(FinanceAccount.class);
 						Predicate condition = criteriaBuilder.equal(acc.get(FinanceAccount_.name), columns[i]);
 						accountsCriteriaQuery.where(condition);
-						List<FinanceAccount> foundAccounts = entityManager.createQuery(accountsCriteriaQuery).getResultList();
+						FinanceAccount foundAccount = entityManager.createQuery(accountsCriteriaQuery).getSingleResult();
 
-						if (!foundAccounts.isEmpty() && foundAccounts.get(0).getName().equals(columns[i])) {
-							accounts.add(foundAccounts.get(0));
+						if (foundAccount!=null && foundAccount.getName().equals(columns[i])) {
+							accounts.add(foundAccount);
 						} else {
 							FinanceAccount account = new FinanceAccount(columns[i],null);
 							entityManager.persist(account);
