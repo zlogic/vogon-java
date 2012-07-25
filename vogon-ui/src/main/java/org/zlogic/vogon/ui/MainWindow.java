@@ -55,6 +55,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -496,7 +497,7 @@ public class MainWindow {
 	 */
 	protected void createContents() {
 		shell = new Shell();
-		shell.setSize(550, 440);
+		shell.setSize(900, 580);
 		shell.setText(Messages.MainWindow_shell_text);
 		shell.setLayout(new FillLayout(SWT.HORIZONTAL));
 
@@ -831,8 +832,18 @@ public class MainWindow {
 		tcl_compositeTransactionsTree.setColumnData(trclmnAccounts,  new ColumnWeightData(15));
 		trclmnAccounts.setText(Messages.MainWindow_trclmnAccounts_text);
 
-		Button btnAddExpenseTransaction = new Button(compositeTransactions, SWT.NONE);
-		fd_compositeTransactionsTree.top = new FormAttachment(btnAddExpenseTransaction, 6);
+		Composite compositeTransactionsButtons = new Composite(compositeTransactions, SWT.NONE);
+		fd_compositeTransactionsTree.top = new FormAttachment(compositeTransactionsButtons);
+		RowLayout rl_compositeTransactionsButtons = new RowLayout(SWT.HORIZONTAL);
+		rl_compositeTransactionsButtons.center = true;
+		compositeTransactionsButtons.setLayout(rl_compositeTransactionsButtons);
+		FormData fd_compositeTransactionsButtons = new FormData();
+		fd_compositeTransactionsButtons.left = new FormAttachment(0);
+		fd_compositeTransactionsButtons.right = new FormAttachment(100);
+		compositeTransactionsButtons.setLayoutData(fd_compositeTransactionsButtons);
+
+		Button btnAddExpenseTransaction = new Button(compositeTransactionsButtons, SWT.NONE);
+		fd_compositeTransactionsButtons.top = new FormAttachment(0);
 		btnAddExpenseTransaction.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -844,12 +855,9 @@ public class MainWindow {
 				transactionsTreeViewer.setSelection(new StructuredSelection(newTransaction), true);
 			}
 		});
-		FormData fd_btnAddExpenseTransaction = new FormData();
-		fd_btnAddExpenseTransaction.top = new FormAttachment(0);
-		btnAddExpenseTransaction.setLayoutData(fd_btnAddExpenseTransaction);
 		btnAddExpenseTransaction.setText(Messages.MainWindow_btnAddTransaction_text);
 
-		Button btnAddTransferTransaction = new Button(compositeTransactions, SWT.NONE);
+		Button btnAddTransferTransaction = new Button(compositeTransactionsButtons, SWT.NONE);
 		btnAddTransferTransaction.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -863,14 +871,9 @@ public class MainWindow {
 				transactionsTreeViewer.setSelection(new StructuredSelection(newTransaction), true);
 			}
 		});
-		fd_btnAddExpenseTransaction.right = new FormAttachment(btnAddTransferTransaction, -6);
-		FormData fd_btnAddTransferTransaction = new FormData();
-		fd_btnAddTransferTransaction.right = new FormAttachment(100);
-		fd_btnAddTransferTransaction.top = new FormAttachment(0);
-		btnAddTransferTransaction.setLayoutData(fd_btnAddTransferTransaction);
 		btnAddTransferTransaction.setText(Messages.MainWindow_btnAddTransferTransaction_text);
 
-		btnAddComponent = new Button(compositeTransactions, SWT.NONE);
+		btnAddComponent = new Button(compositeTransactionsButtons, SWT.NONE);
 		btnAddComponent.setEnabled(false);
 		btnAddComponent.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -895,13 +898,9 @@ public class MainWindow {
 				}
 			}
 		});
-		FormData fd_btnAddComponent = new FormData();
-		fd_btnAddComponent.top = new FormAttachment(btnAddExpenseTransaction, 0, SWT.TOP);
-		fd_btnAddComponent.right = new FormAttachment(btnAddExpenseTransaction, -6);
-		btnAddComponent.setLayoutData(fd_btnAddComponent);
 		btnAddComponent.setText(Messages.MainWindow_btnAddComponent_text);
 
-		btnDeleteTransaction = new Button(compositeTransactions, SWT.NONE);
+		btnDeleteTransaction = new Button(compositeTransactionsButtons, SWT.NONE);
 		btnDeleteTransaction.setEnabled(false);
 		btnDeleteTransaction.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -926,10 +925,6 @@ public class MainWindow {
 				}
 			}
 		});
-		FormData fd_btnDeleteTransaction = new FormData();
-		fd_btnDeleteTransaction.top = new FormAttachment(btnAddExpenseTransaction, 0, SWT.TOP);
-		fd_btnDeleteTransaction.right = new FormAttachment(btnAddComponent, -6);
-		btnDeleteTransaction.setLayoutData(fd_btnDeleteTransaction);
 		btnDeleteTransaction.setText(Messages.MainWindow_btnDeleteSelection_text);
 		transactionsTreeViewer.setLabelProvider(new TransactionsTableLabelProvider());
 		transactionsTreeViewer.setContentProvider(new TransactionsContentProvider());
@@ -941,57 +936,10 @@ public class MainWindow {
 		tbtmAccounts.setControl(compositeAccounts);
 		compositeAccounts.setLayout(new FormLayout());
 
-		Button btnAddAccount = new Button(compositeAccounts, SWT.NONE);
-		btnAddAccount.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				FinanceAccount newAccount = new FinanceAccount(Messages.MainWindow_New_Account_Name,null);
-				accountsTableViewer.insert(newAccount,((FinanceData)accountsTableViewer.getInput()).getAccounts().size());
-				accountsTableViewer.reveal(newAccount);
-				accountsTableViewer.setSelection(new StructuredSelection(newAccount), true);
-			}
-		});
-		FormData fd_btnAddAccount = new FormData();
-		fd_btnAddAccount.right = new FormAttachment(100);
-		fd_btnAddAccount.top = new FormAttachment(0);
-		btnAddAccount.setLayoutData(fd_btnAddAccount);
-		btnAddAccount.setText(Messages.MainWindow_btnAddAccount_text);
-
-		btnDeleteAccount = new Button(compositeAccounts, SWT.NONE);
-		btnDeleteAccount.setEnabled(false);
-		btnDeleteAccount.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				ISelection selection = accountsTableViewer.getSelection();
-				if(selection instanceof IStructuredSelection){
-					Object selectedObject = ((IStructuredSelection)selection).getFirstElement();
-					if(selectedObject instanceof FinanceAccount){
-						FinanceAccount account = (FinanceAccount)selectedObject;
-						FinanceData financeData = (FinanceData)accountsTableViewer.getInput();
-						if(account!=null && financeData!=null){
-							accountsTableViewer.remove(account);
-							financeData.deleteAccount(account);
-							updateTransactions();
-							accountsTableViewer.setInput(accountsTableViewer.getInput());
-							updateCurrencies();
-							updateDefaultCurrencyCombo();
-						}
-					}
-				}
-
-			}
-		});
-		FormData fd_btnDeleteAccount = new FormData();
-		fd_btnDeleteAccount.top = new FormAttachment(btnAddAccount, 0, SWT.TOP);
-		fd_btnDeleteAccount.right = new FormAttachment(btnAddAccount, -6);
-		btnDeleteAccount.setLayoutData(fd_btnDeleteAccount);
-		btnDeleteAccount.setText(Messages.MainWindow_btnDeleteAccount_text);
-
 		Composite compositeAccountsTable = new Composite(compositeAccounts, SWT.EMBEDDED);
 		FormData fd_compositeAccountsTable = new FormData();
-		fd_compositeAccountsTable.top = new FormAttachment(btnAddAccount, 6);
-		fd_compositeAccountsTable.left = new FormAttachment(0);
 		fd_compositeAccountsTable.bottom = new FormAttachment(100);
+		fd_compositeAccountsTable.left = new FormAttachment(0);
 		fd_compositeAccountsTable.right = new FormAttachment(100);
 		compositeAccountsTable.setLayoutData(fd_compositeAccountsTable);
 		TableColumnLayout tcl_compositeAccountsTable = new TableColumnLayout();
@@ -1115,6 +1063,55 @@ public class MainWindow {
 		tcl_compositeAccountsTable.setColumnData(tblclmnCurrency, new ColumnWeightData(30));
 		tblclmnCurrency.setText(Messages.MainWindow_tblclmnCurrency_text);
 
+		Composite compositeAccountsButtons = new Composite(compositeAccounts, SWT.NONE);
+		RowLayout rl_compositeAccountsButtons = new RowLayout(SWT.HORIZONTAL);
+		rl_compositeAccountsButtons.center = true;
+		compositeAccountsButtons.setLayout(rl_compositeAccountsButtons);
+		fd_compositeAccountsTable.top = new FormAttachment(compositeAccountsButtons);
+		FormData fd_compositeAccountsButtons = new FormData();
+		fd_compositeAccountsButtons.left = new FormAttachment(0);
+		fd_compositeAccountsButtons.right = new FormAttachment(100);
+		fd_compositeAccountsButtons.top = new FormAttachment(0);
+		compositeAccountsButtons.setLayoutData(fd_compositeAccountsButtons);
+
+		Button btnAddAccount = new Button(compositeAccountsButtons, SWT.NONE);
+		btnAddAccount.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				FinanceAccount newAccount = new FinanceAccount(Messages.MainWindow_New_Account_Name,null);
+				accountsTableViewer.insert(newAccount,((FinanceData)accountsTableViewer.getInput()).getAccounts().size());
+				accountsTableViewer.reveal(newAccount);
+				accountsTableViewer.setSelection(new StructuredSelection(newAccount), true);
+			}
+		});
+		btnAddAccount.setText(Messages.MainWindow_btnAddAccount_text);
+
+		btnDeleteAccount = new Button(compositeAccountsButtons, SWT.NONE);
+		btnDeleteAccount.setEnabled(false);
+		btnDeleteAccount.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ISelection selection = accountsTableViewer.getSelection();
+				if(selection instanceof IStructuredSelection){
+					Object selectedObject = ((IStructuredSelection)selection).getFirstElement();
+					if(selectedObject instanceof FinanceAccount){
+						FinanceAccount account = (FinanceAccount)selectedObject;
+						FinanceData financeData = (FinanceData)accountsTableViewer.getInput();
+						if(account!=null && financeData!=null){
+							accountsTableViewer.remove(account);
+							financeData.deleteAccount(account);
+							updateTransactions();
+							accountsTableViewer.setInput(accountsTableViewer.getInput());
+							updateCurrencies();
+							updateDefaultCurrencyCombo();
+						}
+					}
+				}
+
+			}
+		});
+		btnDeleteAccount.setText(Messages.MainWindow_btnDeleteAccount_text);
+
 
 		accountsTableViewer.setLabelProvider(new AccountsTableLabelProvider());
 		accountsTableViewer.setContentProvider(new AccountsContentProvider());
@@ -1126,12 +1123,20 @@ public class MainWindow {
 		tbtmCurrencies.setControl(compositeCurrencies);
 		compositeCurrencies.setLayout(new FormLayout());
 
-		Label lblDefaultCurrency = new Label(compositeCurrencies, SWT.NONE);
-		FormData fd_lblDefaultCurrency = new FormData();
-		lblDefaultCurrency.setLayoutData(fd_lblDefaultCurrency);
+		Composite compositeCurrenciesButtons = new Composite(compositeCurrencies, SWT.NONE);
+		RowLayout rl_compositeCurrenciesButtons = new RowLayout(SWT.HORIZONTAL);
+		rl_compositeCurrenciesButtons.center = true;
+		compositeCurrenciesButtons.setLayout(rl_compositeCurrenciesButtons);
+		FormData fd_compositeCurrenciesButtons = new FormData();
+		fd_compositeCurrenciesButtons.top = new FormAttachment(0);
+		fd_compositeCurrenciesButtons.right = new FormAttachment(100);
+		fd_compositeCurrenciesButtons.left = new FormAttachment(0);
+		compositeCurrenciesButtons.setLayoutData(fd_compositeCurrenciesButtons);
+
+		Label lblDefaultCurrency = new Label(compositeCurrenciesButtons, SWT.NONE);
 		lblDefaultCurrency.setText(Messages.MainWindow_lblDefaultCurrency_text);
 
-		comboCurrencies = new Combo(compositeCurrencies, SWT.NONE);
+		comboCurrencies = new Combo(compositeCurrenciesButtons, SWT.NONE);
 		comboCurrencies.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -1144,17 +1149,12 @@ public class MainWindow {
 					}
 			}
 		});
-		fd_lblDefaultCurrency.top = new FormAttachment(comboCurrencies, 3, SWT.TOP);
-		fd_lblDefaultCurrency.right = new FormAttachment(comboCurrencies, -6);
-		FormData fd_comboCurrencies = new FormData();
-		fd_comboCurrencies.right = new FormAttachment(100);
-		fd_comboCurrencies.top = new FormAttachment(0);
 
 		Composite compositeCurrenciesTable = new Composite(compositeCurrencies, SWT.NONE);
 		FormData fd_compositeCurrenciesTable = new FormData();
-		fd_compositeCurrenciesTable.right = new FormAttachment(comboCurrencies, 0, SWT.RIGHT);
+		fd_compositeCurrenciesTable.top = new FormAttachment(compositeCurrenciesButtons);
+		fd_compositeCurrenciesTable.right = new FormAttachment(100);
 		fd_compositeCurrenciesTable.left = new FormAttachment(0);
-		fd_compositeCurrenciesTable.top = new FormAttachment(comboCurrencies, 6);
 		fd_compositeCurrenciesTable.bottom = new FormAttachment(100);
 		compositeCurrenciesTable.setLayoutData(fd_compositeCurrenciesTable);
 		TableColumnLayout tcl_compositeCurrenciesTable = new TableColumnLayout();
@@ -1216,9 +1216,6 @@ public class MainWindow {
 		tblclmnExchangeRate.setText(Messages.MainWindow_tblclmnExchangeRate_text);
 		currenciesTableViewer.setContentProvider(new CurrenciesContentProvider());
 		currenciesTableViewer.setLabelProvider(new CurrenciesTableLabelProvider());
-
-
-		comboCurrencies.setLayoutData(fd_comboCurrencies);
 	}
 
 	/**
