@@ -27,10 +27,6 @@ public class FinanceData {
 	 * Contains all finance transactions
 	 */
 	protected java.util.List<FinanceTransaction> transactions;
-	/**
-	 * Contains all accounts
-	 */
-	protected java.util.List<FinanceAccount> accounts;
 
 	/**
 	 * Contains a list of all tags (cached)
@@ -66,11 +62,7 @@ public class FinanceData {
 
 		restoreFromDatabase();
 
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		entityManager.getTransaction().begin();
 		populateCurrencies();
-		entityManager.getTransaction().commit();
-		entityManager.close();
 		if(!getCurrencies().contains(defaultCurrency))
 			if(getCurrencies().size()>0)
 				setDefaultCurrency(getCurrencies().contains(Currency.getInstance(Locale.getDefault()))?Currency.getInstance(Locale.getDefault()):getCurrencies().get(0));
@@ -95,7 +87,6 @@ public class FinanceData {
 		if(currentEntityManager!=null)
 			currentEntityManager.close();
 		currentEntityManager = DatabaseManager.getInstance().createEntityManager();
-		accounts = getAccountsFromDatabase();
 		transactions = getTransactionsFromDatabase();
 		defaultCurrency = getDefaultCurrencyFromDatabase();
 	}
@@ -197,11 +188,8 @@ public class FinanceData {
 	protected void persistenceAdd(FinanceAccount account,EntityManager entityManager){
 		if(account==null)
 			return;
-
-		if(!accounts.contains(account))
-			accounts.add(account);
-
-		if(!entityManager.contains(account))
+		
+		if(entityManager.find(FinanceAccount.class,account.id)==null)
 			entityManager.persist(account);
 
 		populateCurrencies();
@@ -239,7 +227,7 @@ public class FinanceData {
 	 */
 	public double getTotalBalance(Currency currency){
 		long totalBalance = 0;
-		for(FinanceAccount account : accounts)
+		for(FinanceAccount account : getAccountsFromDatabase())
 			if(account.getCurrency()==currency)
 				totalBalance += account.getRawBalance();
 			else if(currency==null)
@@ -274,25 +262,34 @@ public class FinanceData {
 		//Search for missing currencies
 		List <CurrencyRate> usedRates = new LinkedList<>();
 		List <CurrencyRate> exchangeRates = getCurrencyRatesFromDatabase();
-		for(FinanceAccount account1 : accounts){
-			for(FinanceAccount account2 : accounts){
-				if(account1.getCurrency()!=account2.getCurrency()){
+		
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<String> accountCurrenciesCriteriaQuery = criteriaBuilder.createQuery(String.class);
+		Root<FinanceAccount> acc = accountCurrenciesCriteriaQuery.from(FinanceAccount.class);
+		accountCurrenciesCriteriaQuery.select(acc.get(FinanceAccount_.currency));
+		accountCurrenciesCriteriaQuery.groupBy(acc.get(FinanceAccount_.currency));
+		List<String> accountCurrencies = entityManager.createQuery(accountCurrenciesCriteriaQuery).getResultList();
+		
+		for(String currency1Code : accountCurrencies){
+			for(String currency2Code : accountCurrencies){
+				Currency currency1 = Currency.getInstance(currency1Code), currency2 = Currency.getInstance(currency2Code);
+				if(currency1!=currency2){
 					CurrencyRate rateFrom = null, rateTo = null;
 					for(CurrencyRate rate : exchangeRates){
-						if(rate.getSource()==account1.getCurrency() && rate.getDestination()==account2.getCurrency())
+						if(rate.getSource()==currency1 && rate.getDestination()==currency2)
 							rateFrom = rate;
-						if(rate.getDestination()==account1.getCurrency() && rate.getSource()==account2.getCurrency())
+						if(rate.getDestination()==currency1 && rate.getSource()==currency2)
 							rateTo = rate;
 					}
 					if(rateFrom==null){
-						CurrencyRate rate = new CurrencyRate(account1.getCurrency(), account2.getCurrency(), 1.0);
+						CurrencyRate rate = new CurrencyRate(currency1, currency2, 1.0);
 						entityManager.persist(rate);
 						exchangeRates.add(rate);
 						usedRates.add(rate);
 					}else if(!usedRates.contains(rateFrom))
 						usedRates.add(rateFrom);
 					if(rateTo==null){
-						CurrencyRate rate = new CurrencyRate(account2.getCurrency(), account1.getCurrency(), 1.0);
+						CurrencyRate rate = new CurrencyRate(currency2, currency1, 1.0);
 						entityManager.persist(rate);
 						exchangeRates.add(rate);
 						usedRates.add(rate);
@@ -313,37 +310,22 @@ public class FinanceData {
 	}
 
 	/**
-	 * Sets a new account name. Adds the account to the persistence if needed.
+	 * Updates the account in database. Adds the account to the persistence if needed.
 	 * 
 	 * @param account The account to be updated
-	 * @param name The new account name
 	 */
-	public void setAccountName(FinanceAccount account,String name){
-		EntityManager entityManager = currentEntityManager;
+	public void updateAccount(FinanceAccount account){
+		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-		account.setName(name);
 
 		persistenceAdd(account,entityManager);
+		
+		entityManager.merge(account);
 
 		entityManager.getTransaction().commit();
-	}
-
-	/**
-	 * Sets a new account currency. Adds the account to the persistence if needed.
-	 * 
-	 * @param account The account to be updated
-	 * @param currency The new account currency
-	 */
-	public void setAccountCurrency(FinanceAccount account,Currency currency){
-		EntityManager entityManager = currentEntityManager;
-		entityManager.getTransaction().begin();
-		account.setCurrency(currency);
-
-		persistenceAdd(account,entityManager);
-
+		entityManager.close();
+		
 		populateCurrencies();
-
-		entityManager.getTransaction().commit();
 	}
 
 	/**
@@ -545,13 +527,14 @@ public class FinanceData {
 	public double getExchangeRate(Currency source, Currency destination){
 		if(source==destination)
 			return 1.0;
-		EntityManager entityManager = currentEntityManager;
+		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Double> exchangeRatesCriteriaQuery = criteriaBuilder.createQuery(Double.class);
 		Root<CurrencyRate> er = exchangeRatesCriteriaQuery.from(CurrencyRate.class);
 		exchangeRatesCriteriaQuery.select(er.get(CurrencyRate_.exchangeRate));
 		exchangeRatesCriteriaQuery.where(criteriaBuilder.equal(er.get(CurrencyRate_.source),source.getCurrencyCode()),criteriaBuilder.equal(er.get(CurrencyRate_.source),source.getCurrencyCode()));
 		List<Double> results = entityManager.createQuery(exchangeRatesCriteriaQuery).getResultList();
+		entityManager.close();
 		return results.isEmpty()?Double.NaN:results.get(0);
 	}
 
@@ -613,20 +596,29 @@ public class FinanceData {
 	 * @param account The account to delete
 	 */
 	public void deleteAccount(FinanceAccount account){
-		EntityManager entityManager = currentEntityManager;
+		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
+		
+
+		int deleted = entityManager.createQuery("DELETE from TransactionComponent component WHERE component.account = :acc").setParameter("acc", account).executeUpdate();
+		
+		/*
 		for(FinanceTransaction transaction : transactions){
 			List<TransactionComponent> components = transaction.getComponentsForAccount(account);
 			transaction.removeComponents(components);
 			for(TransactionComponent component:components)
 				entityManager.remove(component);
 		}
-		accounts.remove(account);
-		entityManager.remove(account);
+		*/
+		
+		account = entityManager.find(FinanceAccount.class,account.id);
+		if(account!=null)
+			entityManager.remove(account);
 
-		populateCurrencies();
 
 		entityManager.getTransaction().commit();
+		entityManager.close();
+		populateCurrencies();
 	}
 
 	/**
@@ -663,12 +655,10 @@ public class FinanceData {
 
 		//Remove OK items from list
 		transactionsDB.removeAll(transactions);
-		accountsDB.removeAll(accounts);
 		for(FinanceTransaction transaction : transactions)
 			componentsDB.removeAll(transaction.getComponents());
 
 		transactions.removeAll(transactionsDB);
-		accounts.removeAll(accountsDB);
 
 		entityManager.getTransaction().begin();
 		for(FinanceTransaction transaction : transactionsDB){
@@ -689,9 +679,10 @@ public class FinanceData {
 			entityManager.remove(component);
 		}
 
-		populateCurrencies();
 
 		entityManager.getTransaction().commit();
+		
+		populateCurrencies();
 	}
 
 	/*
@@ -702,7 +693,7 @@ public class FinanceData {
 	 * @return the list of accounts
 	 */
 	public List<FinanceAccount> getAccounts(){
-		return accounts;
+		return getAccountsFromDatabase();
 	}
 
 	/**

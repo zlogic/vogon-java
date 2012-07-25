@@ -1033,7 +1033,8 @@ public class MainWindow {
 				try {
 					FinanceData financeData = (FinanceData)accountsTableViewer.getInput();
 					if(element instanceof FinanceAccount && value instanceof String && financeData!=null){
-						financeData.setAccountName((FinanceAccount)element, (String)value);
+						((FinanceAccount)element).setName((String)value);
+						financeData.updateAccount((FinanceAccount)element);
 					}
 					accountsTableViewer.update(element, null);
 					updateTransactions();
@@ -1098,7 +1099,8 @@ public class MainWindow {
 			protected void setValue(Object element, Object value) {
 				try {
 					if(value instanceof Integer && (Integer)value!=-1 && element instanceof FinanceAccount){
-						financeData.setAccountCurrency((FinanceAccount)element,currencies.get((Integer)value));
+						((FinanceAccount)element).setCurrency(currencies.get((Integer)value));
+						financeData.updateAccount((FinanceAccount)element);
 						accountsTableViewer.update(element, null);
 						updateTransactions();
 						accountsTableViewer.setInput(accountsTableViewer.getInput());
