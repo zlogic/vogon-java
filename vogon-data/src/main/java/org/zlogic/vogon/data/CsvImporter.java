@@ -50,15 +50,16 @@ public class CsvImporter implements FileImporter {
 	/**
 	 * Parses and imports a CSV file
 	 *
-	 * @return A new FinanceData object, initialized from the CSV file
 	 * @throws VogonImportException In case of import errors (I/O, format, indexing etc.)
 	 * @throws VogonImportLogicalException In case of logical errors (without meaningful stack trace, just to show an error message)
 	 */
 	@Override
-	public FinanceData importFile() throws VogonImportException, VogonImportLogicalException {
+	public void importFile() throws VogonImportException, VogonImportLogicalException {
 
 		try {
-			List<FinanceTransaction> transactions = new ArrayList<>();
+			EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
+			entityManager.getTransaction().begin();
+
 			List<FinanceAccount> accounts = new ArrayList<>();
 			CSVReader reader = new CSVReader(new java.io.InputStreamReader(new java.io.FileInputStream(inputFile),"UTF8")); //$NON-NLS-1$
 			String[] columns;
@@ -71,7 +72,6 @@ public class CsvImporter implements FileImporter {
 				if (columnsHeader == null) {
 					columnsHeader = columns;
 					//Create accounts
-					EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
 
 					for (int i = 3; i < columns.length; i++) {
 						// Try searching existing account in database
@@ -86,6 +86,7 @@ public class CsvImporter implements FileImporter {
 							accounts.add(foundAccounts.get(0));
 						} else {
 							FinanceAccount account = new FinanceAccount(columns[i],null);
+							entityManager.persist(account);
 							accounts.add(account);
 						}
 					}
@@ -124,15 +125,17 @@ public class CsvImporter implements FileImporter {
 					List<TransactionComponent> components = new LinkedList<>();
 					for(Entry<FinanceAccount, Long> amount : accountAmounts.entrySet()){
 						TransactionComponent newComponent = new TransactionComponent(amount.getKey(),transaction,amount.getValue());
+						entityManager.persist(newComponent);
 						components.add(newComponent);
 					}
 					transaction.addComponents(components);
-					transactions.add(transaction);
+					entityManager.persist(transaction);
 				}
 			}
 			reader.close();
-			FinanceData result = new FinanceData(transactions, accounts,new LinkedList<CurrencyRate>(),null);
-			return result;
+
+			entityManager.getTransaction().commit();
+			entityManager.close();
 		} catch (java.io.FileNotFoundException e) {
 			Logger.getLogger(CsvImporter.class.getName()).log(Level.SEVERE, null, e);
 			throw new VogonImportException(e);

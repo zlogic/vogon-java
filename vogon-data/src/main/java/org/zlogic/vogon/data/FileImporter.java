@@ -15,9 +15,8 @@ public interface FileImporter {
 	/**
 	 * Imports a file containing financial transactions
 	 *
-	 * @return The financial transactions as a FinanceData class
 	 * @throws VogonImportException In case of any import errors (I/O, format etc.)
 	 * @throws VogonImportLogicalException In case of any logical errors (such as an incorrect number of columns)
 	 */
-	public FinanceData importFile() throws VogonImportException, VogonImportLogicalException;
+	public void importFile() throws VogonImportException, VogonImportLogicalException;
 }

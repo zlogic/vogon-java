@@ -8,7 +8,6 @@ package org.zlogic.vogon.data;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
@@ -57,19 +56,17 @@ public class XmlImporter implements FileImporter {
 	/**
 	 * Parses and imports a CSV file
 	 *
-	 * @return A new FinanceData object, initialized from the CSV file
 	 * @throws VogonImportException In case of import errors (I/O, format, indexing etc.)
 	 * @throws VogonImportLogicalException In case of logical errors (without meaningful stack trace, just to show an error message)
 	 */
 	@Override
-	public FinanceData importFile() throws VogonImportException, VogonImportLogicalException {
+	public void importFile() throws VogonImportException, VogonImportLogicalException {
 		try {
+			EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
+			entityManager.getTransaction().begin();
+
 			Map<Long,FinanceTransaction> transactionsMap = new HashMap<>();
 			Map<Long,FinanceAccount> accountsMap = new HashMap<>();
-
-			List<FinanceTransaction> transactionsList = new ArrayList<>();
-			List<FinanceAccount> accountsList = new ArrayList<>();
-			List<CurrencyRate> currencyList = new ArrayList<>();
 
 			//Read XML
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -96,10 +93,23 @@ public class XmlImporter implements FileImporter {
 			}
 
 			//Process default properties
-			String defaultCurrency = rootNode.getAttributes().getNamedItem("DefaultCurrency").getNodeValue(); //$NON-NLS-1$
+			{
+				String defaultCurrency = rootNode.getAttributes().getNamedItem("DefaultCurrency").getNodeValue(); //$NON-NLS-1$
+
+				CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+				CriteriaQuery<Preferences> accountsCriteriaQuery = criteriaBuilder.createQuery(Preferences.class);
+				List<Preferences> foundPreferences = entityManager.createQuery(accountsCriteriaQuery).getResultList();
+
+				if(foundPreferences.isEmpty()){
+					Preferences preferences = new Preferences();
+					entityManager.persist(preferences);
+					preferences.setDefaultCurrency(Currency.getInstance(defaultCurrency));
+				} else if(foundPreferences.get(0).getDefaultCurrency()==null){
+					foundPreferences.get(0).setDefaultCurrency(Currency.getInstance(defaultCurrency));
+				}
+			}
 
 			//Process accounts
-			EntityManager entityManager = DatabaseManager.getInstance().getEntityManager();
 			for(currentNode=accountsNode.getFirstChild();currentNode!=null;currentNode=currentNode.getNextSibling()){
 				if(currentNode.getNodeType()!=Node.ELEMENT_NODE)
 					continue;
@@ -121,12 +131,11 @@ public class XmlImporter implements FileImporter {
 
 				//Match by account name
 				if (!foundAccounts.isEmpty() && foundAccounts.get(0).getName().equals(accountName)) {
-					accountsMap.put(foundAccounts.get(0).id,foundAccounts.get(0));
-					accountsList.add(foundAccounts.get(0));
+					accountsMap.put(accountId,foundAccounts.get(0));
 				} else {
 					FinanceAccount account = new FinanceAccount(accountName,currency!=null?Currency.getInstance(currency):null);
 					accountsMap.put(accountId,account);
-					accountsList.add(account);
+					entityManager.persist(account);
 				}
 			}
 
@@ -151,11 +160,9 @@ public class XmlImporter implements FileImporter {
 				List<CurrencyRate> foundCurrencyRates = entityManager.createQuery(currencyCriteriaQuery).getResultList();
 
 				//Match by currency source and destination
-				if (!foundCurrencyRates.isEmpty() && foundCurrencyRates.get(0).getSource().equals(sourceCurrencyName) && foundCurrencyRates.get(0).getDestination().equals(destinationCurrencyName)) {
-					currencyList.add(foundCurrencyRates.get(0));
-				} else {
+				if (foundCurrencyRates.isEmpty() || !(foundCurrencyRates.get(0).getSource().getCurrencyCode().equals(sourceCurrencyName) && foundCurrencyRates.get(0).getDestination().getCurrencyCode().equals(destinationCurrencyName))) {
 					CurrencyRate currencyRate = new CurrencyRate(Currency.getInstance(sourceCurrencyName), Currency.getInstance(destinationCurrencyName), exchangeRate);
-					currencyList.add(currencyRate);
+					entityManager.persist(currencyRate);
 				}
 			}
 
@@ -182,7 +189,7 @@ public class XmlImporter implements FileImporter {
 				else if(transactionType.equals(TransferTransaction.class.getSimpleName()))
 					transaction = new TransferTransaction(transactionDescription, null, transactionDate);
 				transactionsMap.put(transactionId, transaction);
-				transactionsList.add(transaction);
+				entityManager.persist(transaction);
 
 				//Extract transaction tags and components from XML
 				List<String> tagsList = new LinkedList<>();
@@ -199,6 +206,7 @@ public class XmlImporter implements FileImporter {
 						long componentAmount = Long.parseLong(childNode.getAttributes().getNamedItem("Amount").getNodeValue()); //$NON-NLS-1$
 						long componentTransactionId = Long.parseLong(childNode.getAttributes().getNamedItem("Transaction").getNodeValue()); //$NON-NLS-1$
 						TransactionComponent component = new TransactionComponent(accountsMap.get(componentAccountId),transactionsMap.get(componentTransactionId),componentAmount);
+						entityManager.persist(component);
 						transaction.addComponent(component);
 					}
 				}
@@ -206,10 +214,10 @@ public class XmlImporter implements FileImporter {
 				String[] tagsArray = new String[tagsList.size()];
 				tagsArray = tagsList.toArray(tagsArray);
 				transaction.setTags(tagsArray);
-			}
 
-			FinanceData result = new FinanceData(transactionsList, accountsList, currencyList, Currency.getInstance(defaultCurrency));
-			return result;
+			}
+			entityManager.getTransaction().commit();
+			entityManager.close();
 		} catch (java.io.FileNotFoundException e) {
 			Logger.getLogger(XmlImporter.class.getName()).log(Level.SEVERE, null, e);
 			throw new VogonImportException(e);
