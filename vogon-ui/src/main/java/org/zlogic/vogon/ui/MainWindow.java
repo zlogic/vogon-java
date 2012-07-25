@@ -427,10 +427,25 @@ public class MainWindow {
 	 * The currencies table viewer
 	 */
 	private TableViewer currenciesTableViewer;
+	/**
+	 * The "Delete account" button
+	 */
 	private Button btnDeleteAccount;
+	/**
+	 * The "Delete transaction" button
+	 */
 	private Button btnDeleteTransaction;
+	/**
+	 * The "Add transaction component" button
+	 */
 	private Button btnAddComponent;
+	/**
+	 * The currencies table
+	 */
 	private Table currenciesTable;
+	/**
+	 * The preferred currency selection box
+	 */
 	private Combo comboCurrencies;
 
 	/**
@@ -469,7 +484,7 @@ public class MainWindow {
 	 * Restores data from database and updates the tables
 	 */
 	protected void loadData(){
-		financeData = FinanceData.restoreFromDatabase();
+		financeData = new FinanceData();
 		transactionsTreeViewer.setInput(financeData);
 		accountsTableViewer.setInput(financeData);
 		currenciesTableViewer.setInput(financeData);
@@ -1313,6 +1328,7 @@ public class MainWindow {
 	 * Updates the default currency combo box
 	 */
 	protected void updateDefaultCurrencyCombo(){
+		comboCurrencies.removeAll();
 		List<Currency> currencies = financeData.getCurrencies();
 		for(Currency currency : currencies)
 			comboCurrencies.add(currency.getDisplayName());
