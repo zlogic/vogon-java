@@ -68,7 +68,6 @@ public class ExpenseTransaction extends FinanceTransaction implements Serializab
 		for (TransactionComponent component : components) {
 			accounts.add(component.getAccount());
 		}
-		FinanceAccount[] accountsOut = new FinanceAccount[accounts.size()];
-		return accounts.toArray(accountsOut);
+		return accounts.toArray(new FinanceAccount[0]);
 	}
 }

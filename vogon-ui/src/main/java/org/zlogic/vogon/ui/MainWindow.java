@@ -291,9 +291,7 @@ public class MainWindow {
 		public Object[] getChildren(Object arg0) {
 			if(arg0 instanceof FinanceTransaction){
 				List<TransactionComponent> componentsList = ((FinanceTransaction)arg0).getComponents();
-				Object[] components = new Object[componentsList.size()];
-				components = componentsList.toArray(components);
-				return components;
+				return componentsList.toArray();
 			}
 			return null;
 		}
@@ -358,9 +356,7 @@ public class MainWindow {
 					accounts.add(new ReportingAccount(MessageFormat.format(Messages.MainWindow_Total_Currency,new Object[]{currency.getCurrencyCode()}),financeData.getTotalBalance(currency),currency));
 				if(financeData.getDefaultCurrency()!=null)
 					accounts.add(new ReportingAccount(MessageFormat.format(Messages.MainWindow_Total_All_Accounts,new Object[]{financeData.getDefaultCurrency().getCurrencyCode()}),financeData.getTotalBalance(null),financeData.getDefaultCurrency()));
-				Object[] accountsArray = new Object[accounts.size()];
-				accountsArray = accounts.toArray(accountsArray);
-				return accountsArray;
+				return accounts.toArray();
 			}else return new Object[]{};
 		}
 		@Override
@@ -383,9 +379,7 @@ public class MainWindow {
 			if(inputElement instanceof FinanceData){
 				FinanceData financeData = (FinanceData)inputElement;
 				List<CurrencyRate> rates = financeData.getCurrencyRates();
-				Object[] ratesArray = new Object[rates.size()];
-				ratesArray = rates.toArray(ratesArray);
-				return ratesArray;
+				return rates.toArray();
 			}else return new Object[]{};
 		}
 		@Override
@@ -784,9 +778,7 @@ public class MainWindow {
 					List<String> accountsItemList = new LinkedList<>();
 					for(FinanceAccount account : accounts)
 						accountsItemList.add(account.getName());
-					String[] accountsItemArray = new String[accountsItemList.size()];
-					accountsItemArray = accountsItemList.toArray(accountsItemArray);
-					return new ComboBoxCellEditor(transactionsTreeViewer.getTree(),accountsItemArray);
+					return new ComboBoxCellEditor(transactionsTreeViewer.getTree(),accountsItemList.toArray(new String[0]));
 				}else
 					return null;
 			}
@@ -1029,9 +1021,7 @@ public class MainWindow {
 					List<String> currencyNames = new LinkedList<>();
 					for(Currency currency : currencies)
 						currencyNames.add(currency.getDisplayName());
-					String[] currenciesArray = new String[currencyNames.size()];
-					currenciesArray = currencyNames.toArray(currenciesArray);
-					return new ComboBoxCellEditor(accountsTableViewer.getTable(),currenciesArray);
+					return new ComboBoxCellEditor(accountsTableViewer.getTable(),currencyNames.toArray(new String[0]));
 				}else
 					return null;
 			}
