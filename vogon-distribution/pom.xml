@@ -7,7 +7,7 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>vogon-distribution</artifactId>
-	<name>vogon-distribution</name>
+	<name>Vogon :: Distribution</name>
 	<packaging>pom</packaging>
 	<dependencies>
 		<dependency>

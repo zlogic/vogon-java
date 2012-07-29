@@ -9,7 +9,6 @@ import java.io.File;
 import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -19,7 +18,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -59,64 +57,64 @@ public class XmlExporter implements FileExporter {
 
 			// Top element (FinanceData)
 			Document doc = docBuilder.newDocument();
-			Element rootElement = doc.createElement("VogonFinanceData"); //$NON-NLS-1$
+			Element rootElement = doc.createElement("VogonFinanceData"); //NOI18N
 			doc.appendChild(rootElement);
 
 			//Set global parameters
-			rootElement.setAttribute("DefaultCurrency", financeData.getDefaultCurrency().getCurrencyCode()); //$NON-NLS-1$
+			rootElement.setAttribute("DefaultCurrency", financeData.getDefaultCurrency().getCurrencyCode()); //NOI18N
 
 			//Accounts node
-			Element accountsElement = doc.createElement("Accounts"); //$NON-NLS-1$
+			Element accountsElement = doc.createElement("Accounts"); //NOI18N
 			rootElement.appendChild(accountsElement);
 
 			//Currencies node
-			Element currenciesElement = doc.createElement("Currencies"); //$NON-NLS-1$
+			Element currenciesElement = doc.createElement("Currencies"); //NOI18N
 			rootElement.appendChild(currenciesElement);
 
 			//Transactions node
-			Element transactionsElement = doc.createElement("Transactions"); //$NON-NLS-1$
+			Element transactionsElement = doc.createElement("Transactions"); //NOI18N
 			rootElement.appendChild(transactionsElement);
 
 			//Accounts list
 			for(FinanceAccount account : financeData.getAccounts()){
-				Element accountElement = doc.createElement("Account"); //$NON-NLS-1$
-				accountElement.setAttribute("Id",Long.toString(account.id)); //$NON-NLS-1$
-				accountElement.setAttribute("Name", account.getName()); //$NON-NLS-1$
-				accountElement.setAttribute("Currency", account.getCurrency().getCurrencyCode()); //$NON-NLS-1$
+				Element accountElement = doc.createElement("Account"); //NOI18N
+				accountElement.setAttribute("Id",Long.toString(account.id)); //NOI18N
+				accountElement.setAttribute("Name", account.getName()); //NOI18N
+				accountElement.setAttribute("Currency", account.getCurrency().getCurrencyCode()); //NOI18N
 				//accountElement.setAttribute("Balance", Long.toString(account.getRawBalance()));
 				accountsElement.appendChild(accountElement);
 			}
 
 			//Currencies list
 			for(CurrencyRate rate : financeData.getCurrencyRates()){
-				Element currencyElement = doc.createElement("CurrencyRate"); //$NON-NLS-1$
-				currencyElement.setAttribute("Source", rate.getSource().getCurrencyCode()); //$NON-NLS-1$
-				currencyElement.setAttribute("Destination", rate.getDestination().getCurrencyCode()); //$NON-NLS-1$
-				currencyElement.setAttribute("Rate",Double.toString(rate.getExchangeRate())); //$NON-NLS-1$
+				Element currencyElement = doc.createElement("CurrencyRate"); //NOI18N
+				currencyElement.setAttribute("Source", rate.getSource().getCurrencyCode()); //NOI18N
+				currencyElement.setAttribute("Destination", rate.getDestination().getCurrencyCode()); //NOI18N
+				currencyElement.setAttribute("Rate",Double.toString(rate.getExchangeRate())); //NOI18N
 				currenciesElement.appendChild(currencyElement);
 			}
 
 			//Transactions list
 			for(FinanceTransaction transaction : financeData.getTransactions()){
-				Element transactionElement = doc.createElement("Transaction"); //$NON-NLS-1$
-				transactionElement.setAttribute("Type", transaction.getClass().getSimpleName()); //$NON-NLS-1$
-				transactionElement.setAttribute("Id",Long.toString(transaction.id)); //$NON-NLS-1$
-				transactionElement.setAttribute("Description",transaction.getDescription()); //$NON-NLS-1$
+				Element transactionElement = doc.createElement("Transaction"); //NOI18N
+				transactionElement.setAttribute("Type", transaction.getClass().getSimpleName()); //NOI18N
+				transactionElement.setAttribute("Id",Long.toString(transaction.id)); //NOI18N
+				transactionElement.setAttribute("Description",transaction.getDescription()); //NOI18N
 				//transactionElement.setAttribute("Amount", Long.toString(transaction.getRawAmount()));
-				transactionElement.setAttribute("Date", MessageFormat.format("{0,date,yyyy-MM-dd}", new Object[]{transaction.getDate()})); //$NON-NLS-1$ //$NON-NLS-2$
+				transactionElement.setAttribute("Date", MessageFormat.format("{0,date,yyyy-MM-dd}", new Object[]{transaction.getDate()})); //NOI18N
 				//Tags list
 				for(String tag : transaction.getTags()){
-					Element tagElement = doc.createElement("Tag"); //$NON-NLS-1$
+					Element tagElement = doc.createElement("Tag"); //NOI18N
 					tagElement.setTextContent(tag);
 					transactionElement.appendChild(tagElement);
 				}
 				//Transaction components list
 				for(TransactionComponent component : transaction.getComponents()){
-					Element compomentElement = doc.createElement("Component"); //$NON-NLS-1$
-					compomentElement.setAttribute("Id",Long.toString(component.id)); //$NON-NLS-1$
-					compomentElement.setAttribute("Account", Long.toString(component.getAccount().id)); //$NON-NLS-1$
-					compomentElement.setAttribute("Amount", Long.toString(component.getRawAmount())); //$NON-NLS-1$
-					compomentElement.setAttribute("Transaction",Long.toString(component.getTransaction().id)); //$NON-NLS-1$
+					Element compomentElement = doc.createElement("Component"); //NOI18N
+					compomentElement.setAttribute("Id",Long.toString(component.id)); //NOI18N
+					compomentElement.setAttribute("Account", Long.toString(component.getAccount().id)); //NOI18N
+					compomentElement.setAttribute("Amount", Long.toString(component.getRawAmount())); //NOI18N
+					compomentElement.setAttribute("Transaction",Long.toString(component.getTransaction().id)); //NOI18N
 					transactionElement.appendChild(compomentElement);
 				}
 				transactionsElement.appendChild(transactionElement);
@@ -125,7 +123,7 @@ public class XmlExporter implements FileExporter {
 			// Write the content into XML file
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //NOI18N
 			DOMSource source = new DOMSource(doc);
 			StreamResult result = new StreamResult(outputFile);
 

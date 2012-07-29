@@ -5,6 +5,7 @@
  */
 package org.zlogic.vogon.data;
 
+import au.com.bytecode.opencsv.CSVReader;
 import java.io.File;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -15,16 +16,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-
-import au.com.bytecode.opencsv.CSVReader;
 
 /**
  * Implementation for importing data from CSV files
@@ -32,6 +31,7 @@ import au.com.bytecode.opencsv.CSVReader;
  * @author Dmitry Zolotukhin
  */
 public class CsvImporter implements FileImporter {
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/data/messages");
 
 	/**
 	 * The input CSV file
@@ -61,13 +61,13 @@ public class CsvImporter implements FileImporter {
 			entityManager.getTransaction().begin();
 
 			List<FinanceAccount> accounts = new ArrayList<>();
-			CSVReader reader = new CSVReader(new java.io.InputStreamReader(new java.io.FileInputStream(inputFile),"UTF8")); //$NON-NLS-1$
+			CSVReader reader = new CSVReader(new java.io.InputStreamReader(new java.io.FileInputStream(inputFile),"UTF8")); //NOI18N
 			String[] columns;
 			String[] columnsHeader = null;
 			while ((columns = reader.readNext()) != null) {
 				if (columns.length < 5){
 					reader.close();
-					throw new VogonImportLogicalException((new MessageFormat(Messages.CsvImporter_CSV_Format_Exception)).format(new Object[]{Utils.join(columns, ",")})); //$NON-NLS-1$ 
+					throw new VogonImportLogicalException((new MessageFormat(messages.getString("CsvImporter_CSV_Format_Exception"))).format(new Object[]{Utils.join(columns, ",")}));  //NOI18N
 				}
 				if (columnsHeader == null) {
 					columnsHeader = columns;
@@ -80,7 +80,10 @@ public class CsvImporter implements FileImporter {
 						Root<FinanceAccount> acc = accountsCriteriaQuery.from(FinanceAccount.class);
 						Predicate condition = criteriaBuilder.equal(acc.get(FinanceAccount_.name), columns[i]);
 						accountsCriteriaQuery.where(condition);
-						FinanceAccount foundAccount = entityManager.createQuery(accountsCriteriaQuery).getSingleResult();
+						FinanceAccount foundAccount = null;
+						try {
+							foundAccount = entityManager.createQuery(accountsCriteriaQuery).getSingleResult();
+						} catch (javax.persistence.NoResultException ex) {}
 
 						if (foundAccount!=null && foundAccount.getName().equals(columns[i])) {
 							accounts.add(foundAccount);
@@ -96,7 +99,7 @@ public class CsvImporter implements FileImporter {
 					Map<FinanceAccount,Long> accountAmounts = new HashMap<>();
 					for (int i = 3; i < columns.length; i++)
 						if (!columns[i].isEmpty()) {
-							double amount = Double.parseDouble(columns[i].replaceAll("[^ \\t]\\s+", "").replaceAll("[^0-9.-]", "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+							double amount = Double.parseDouble(columns[i].replaceAll("[^ \\t]\\s+", "").replaceAll("[^0-9.-]", "")); //NOI18N
 							if (amount == 0)
 								continue;
 							amount = Math.round(amount*100);
@@ -107,9 +110,9 @@ public class CsvImporter implements FileImporter {
 								hasNegativeAmounts = true;
 						}
 					//Split tags
-					String[] tags = columns[2].split(","); //$NON-NLS-1$
+					String[] tags = columns[2].split(","); //NOI18N
 					FinanceTransaction transaction = null;
-					Date date = new SimpleDateFormat("yyyy-MM-dd").parse(columns[1]); //$NON-NLS-1$
+					Date date = new SimpleDateFormat("yyyy-MM-dd").parse(columns[1]); //NOI18N
 					if ((hasPositiveAmounts || hasNegativeAmounts) && !(hasPositiveAmounts && hasNegativeAmounts)) {
 						//Expense transaction
 						transaction = new ExpenseTransaction(columns[0], tags, date);
@@ -118,7 +121,7 @@ public class CsvImporter implements FileImporter {
 						transaction = new TransferTransaction(columns[0], tags, date);
 					} else {
 						reader.close();
-						throw new VogonImportLogicalException((new MessageFormat(Messages.CsvImporter_Transaction_Too_Complex)).format(new Object[]{Utils.join(columns, ",")})); //$NON-NLS-1$ 
+						throw new VogonImportLogicalException((new MessageFormat(messages.getString("CsvImporter_Transaction_Too_Complex"))).format(new Object[]{Utils.join(columns, ",")})); //NOI18N
 					}
 
 					//Add components

@@ -7,7 +7,6 @@ package org.zlogic.vogon.data;
 
 import java.util.Currency;
 import java.util.Map;
-
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -23,7 +22,7 @@ import javax.persistence.Transient;
 @Entity
 public class Preferences {
 	@Transient
-	private static String CURRENCY = "Currency";
+	private static String CURRENCY = "Currency"; //NOI18N
 	/**
 	 * The preferences ID (only for persistence)
 	 */
@@ -37,6 +36,9 @@ public class Preferences {
 	@ElementCollection
 	Map<String,String> preferences;
 	
+	/**
+	 * Default constructor
+	 */
 	protected Preferences(){}
 	
 	/**
@@ -45,7 +47,7 @@ public class Preferences {
 	 * @return the default currency
 	 */
 	public Currency getDefaultCurrency(){
-		if(preferences.containsKey(CURRENCY))
+		if(preferences!=null && preferences.containsKey(CURRENCY))
 			return Currency.getInstance(preferences.get(CURRENCY));
 		return null;
 	}

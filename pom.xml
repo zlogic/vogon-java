@@ -7,7 +7,7 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>top</name>
+  <name>Vogon :: Top</name>
 
   <modules>
   	<module>vogon-data</module>
