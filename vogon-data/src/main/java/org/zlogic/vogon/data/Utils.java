@@ -38,9 +38,9 @@ public class Utils {
 	 */
 	static public String join(String[] parts, String separator) {
 		if (parts.length == 0)
-			return ""; //$NON-NLS-1$
+			return ""; //NOI18N
 		StringBuilder builder = new StringBuilder();
-		String sep = ""; //$NON-NLS-1$
+		String sep = ""; //NOI18N
 		for (String part : parts) {
 			builder.append(sep);
 			builder.append(part);

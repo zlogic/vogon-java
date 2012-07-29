@@ -14,9 +14,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -25,7 +25,6 @@ import javax.persistence.criteria.Root;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -38,6 +37,7 @@ import org.xml.sax.SAXException;
  * @author Dmitry Zolotukhin
  */
 public class XmlImporter implements FileImporter {
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/data/messages");
 
 	/**
 	 * The input CSV file
@@ -76,29 +76,33 @@ public class XmlImporter implements FileImporter {
 
 			//Get root node
 			Node rootNode = doc.getFirstChild();
-			if(rootNode==null || !rootNode.getNodeName().equals("VogonFinanceData")) //$NON-NLS-1$
-				throw new VogonImportLogicalException(Messages.XmlImporter_Error_Missing_VogonFinanceData_node_in_XML);
+			if(rootNode==null || !rootNode.getNodeName().equals("VogonFinanceData")) //NOI18N
+				throw new VogonImportLogicalException(messages.getString("XmlImporter_Error_Missing_VogonFinanceData_node_in_XML"));
 
 			Node currentNode = null;
 
 			//Iterate through root children
 			Node accountsNode = null, currenciesNode = null, transactionsNode = null;
 			for(currentNode=rootNode.getFirstChild();currentNode!=null;currentNode=currentNode.getNextSibling()){
-				if(currentNode.getNodeName().equals("Accounts")) //$NON-NLS-1$
+				if(currentNode.getNodeName().equals("Accounts")) //NOI18N
 					accountsNode = currentNode;
-				if(currentNode.getNodeName().equals("Currencies")) //$NON-NLS-1$
+				if(currentNode.getNodeName().equals("Currencies")) //NOI18N
 					currenciesNode = currentNode;
-				if(currentNode.getNodeName().equals("Transactions")) //$NON-NLS-1$
+				if(currentNode.getNodeName().equals("Transactions")) //NOI18N
 					transactionsNode = currentNode;
 			}
 
 			//Process default properties
 			{
-				String defaultCurrency = rootNode.getAttributes().getNamedItem("DefaultCurrency").getNodeValue(); //$NON-NLS-1$
+				String defaultCurrency = rootNode.getAttributes().getNamedItem("DefaultCurrency").getNodeValue(); //NOI18N
 
 				CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-				CriteriaQuery<Preferences> accountsCriteriaQuery = criteriaBuilder.createQuery(Preferences.class);
-				Preferences foundPreferences = entityManager.createQuery(accountsCriteriaQuery).getSingleResult();
+				CriteriaQuery<Preferences> preferencesCriteriaQuery = criteriaBuilder.createQuery(Preferences.class);
+				Root<Preferences> prf = preferencesCriteriaQuery.from(Preferences.class);
+				Preferences foundPreferences = null;
+				try{
+					foundPreferences = entityManager.createQuery(preferencesCriteriaQuery).getSingleResult();
+				}catch(javax.persistence.NoResultException ex){}
 
 				if(foundPreferences == null){
 					Preferences preferences = new Preferences();
@@ -116,9 +120,9 @@ public class XmlImporter implements FileImporter {
 
 				//Extract attributes from XML
 				NamedNodeMap attributes = currentNode.getAttributes();
-				String accountName = attributes.getNamedItem("Name").getNodeValue(); //$NON-NLS-1$
-				long accountId = Long.parseLong(attributes.getNamedItem("Id").getNodeValue()); //$NON-NLS-1$
-				String currency = attributes.getNamedItem("Currency")!=null?attributes.getNamedItem("Currency").getNodeValue():null; //$NON-NLS-1$ //$NON-NLS-2$
+				String accountName = attributes.getNamedItem("Name").getNodeValue(); //NOI18N
+				long accountId = Long.parseLong(attributes.getNamedItem("Id").getNodeValue()); //NOI18N
+				String currency = attributes.getNamedItem("Currency")!=null?attributes.getNamedItem("Currency").getNodeValue():null; //NOI18N
 				//long accountBalance = Long.parseLong(attributes.getNamedItem("Balance").getNodeValue());
 
 				//Search existing accounts in DB
@@ -127,7 +131,10 @@ public class XmlImporter implements FileImporter {
 				Root<FinanceAccount> acc = accountsCriteriaQuery.from(FinanceAccount.class);
 				Predicate condition = criteriaBuilder.equal(acc.get(FinanceAccount_.name), accountName);
 				accountsCriteriaQuery.where(condition);
-				FinanceAccount foundAccount = entityManager.createQuery(accountsCriteriaQuery).getSingleResult();
+				FinanceAccount foundAccount = null;
+				try{
+					foundAccount = entityManager.createQuery(accountsCriteriaQuery).getSingleResult();
+				}catch(javax.persistence.NoResultException ex){}
 
 				//Match by account name
 				if (foundAccount!=null && foundAccount.getName().equals(accountName)) {
@@ -146,9 +153,9 @@ public class XmlImporter implements FileImporter {
 
 				//Extract attributes from XML
 				NamedNodeMap attributes = currentNode.getAttributes();
-				String sourceCurrencyName = attributes.getNamedItem("Source").getNodeValue(); //$NON-NLS-1$
-				String destinationCurrencyName = attributes.getNamedItem("Destination").getNodeValue(); //$NON-NLS-1$
-				double exchangeRate = Double.parseDouble(attributes.getNamedItem("Rate").getNodeValue()); //$NON-NLS-1$
+				String sourceCurrencyName = attributes.getNamedItem("Source").getNodeValue(); //NOI18N
+				String destinationCurrencyName = attributes.getNamedItem("Destination").getNodeValue(); //NOI18N
+				double exchangeRate = Double.parseDouble(attributes.getNamedItem("Rate").getNodeValue()); //NOI18N
 
 				//Search existing currency rates in DB
 				CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -157,7 +164,10 @@ public class XmlImporter implements FileImporter {
 				Predicate sourceCondition = criteriaBuilder.equal(rate.get(CurrencyRate_.source), sourceCurrencyName);
 				Predicate destinationCondition = criteriaBuilder.equal(rate.get(CurrencyRate_.destination), destinationCurrencyName);
 				currencyCriteriaQuery.where(criteriaBuilder.and(sourceCondition,destinationCondition));
-				CurrencyRate foundCurrencyRate = entityManager.createQuery(currencyCriteriaQuery).getSingleResult();
+				CurrencyRate foundCurrencyRate = null;
+				try{
+					foundCurrencyRate = entityManager.createQuery(currencyCriteriaQuery).getSingleResult();
+				}catch(javax.persistence.NoResultException ex){}
 
 				//Match by currency source and destination
 				if (foundCurrencyRate == null || !(foundCurrencyRate.getSource().getCurrencyCode().equals(sourceCurrencyName) && foundCurrencyRate.getDestination().getCurrencyCode().equals(destinationCurrencyName))) {
@@ -173,12 +183,12 @@ public class XmlImporter implements FileImporter {
 
 				//Extract attributes from XML
 				NamedNodeMap attributes = currentNode.getAttributes();
-				String transactionType = attributes.getNamedItem("Type").getNodeValue(); //$NON-NLS-1$
-				long transactionId = Long.parseLong(attributes.getNamedItem("Id").getNodeValue()); //$NON-NLS-1$
-				String transactionDescription = attributes.getNamedItem("Description").getNodeValue(); //$NON-NLS-1$
+				String transactionType = attributes.getNamedItem("Type").getNodeValue(); //NOI18N
+				long transactionId = Long.parseLong(attributes.getNamedItem("Id").getNodeValue()); //NOI18N
+				String transactionDescription = attributes.getNamedItem("Description").getNodeValue(); //NOI18N
 				//String transactionAmount = attributes.getNamedItem("Amount").getNodeValue();
-				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); //$NON-NLS-1$
-				Date transactionDate = dateFormat.parse(attributes.getNamedItem("Date").getNodeValue()); //$NON-NLS-1$
+				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); //NOI18N
+				Date transactionDate = dateFormat.parse(attributes.getNamedItem("Date").getNodeValue()); //NOI18N
 
 				//Create transaction instance
 				FinanceTransaction transaction = null;
@@ -195,14 +205,14 @@ public class XmlImporter implements FileImporter {
 				for(childNode=currentNode.getFirstChild();childNode!=null;childNode=childNode.getNextSibling()){
 					if(childNode.getNodeType()!=Node.ELEMENT_NODE)
 						continue;
-					if(childNode.getNodeName().equals("Tag")){ //$NON-NLS-1$
+					if(childNode.getNodeName().equals("Tag")){ //NOI18N
 						String tag = childNode.getTextContent();
 						tagsList.add(tag);
-					}else if(childNode.getNodeName().equals("Component")){ //$NON-NLS-1$
+					}else if(childNode.getNodeName().equals("Component")){ //NOI18N
 						//long componentId = Long.parseLong(childNode.getAttributes().getNamedItem("Id").getNodeValue());
-						long componentAccountId =  Long.parseLong(childNode.getAttributes().getNamedItem("Account").getNodeValue()); //$NON-NLS-1$
-						long componentAmount = Long.parseLong(childNode.getAttributes().getNamedItem("Amount").getNodeValue()); //$NON-NLS-1$
-						long componentTransactionId = Long.parseLong(childNode.getAttributes().getNamedItem("Transaction").getNodeValue()); //$NON-NLS-1$
+						long componentAccountId =  Long.parseLong(childNode.getAttributes().getNamedItem("Account").getNodeValue()); //NOI18N
+						long componentAmount = Long.parseLong(childNode.getAttributes().getNamedItem("Amount").getNodeValue()); //NOI18N
+						long componentTransactionId = Long.parseLong(childNode.getAttributes().getNamedItem("Transaction").getNodeValue()); //NOI18N
 						TransactionComponent component = new TransactionComponent(accountsMap.get(componentAccountId),transactionsMap.get(componentTransactionId),componentAmount);
 						entityManager.persist(component);
 						transaction.addComponent(component);
@@ -229,13 +239,13 @@ public class XmlImporter implements FileImporter {
 			throw new VogonImportException(e);
 		} catch (NullPointerException e){
 			Logger.getLogger(XmlImporter.class.getName()).log(Level.SEVERE, null, e);
-			throw new VogonImportLogicalException(Messages.XmlImporter_Error_Missing_data_from_XML, e);
+			throw new VogonImportLogicalException(messages.getString("XmlImporter_Error_Missing_data_from_XML"), e);
 		} catch (DOMException e) {
 			Logger.getLogger(XmlImporter.class.getName()).log(Level.SEVERE, null, e);
 			throw new VogonImportException(e);
 		} catch (ParseException e) {
 			Logger.getLogger(XmlImporter.class.getName()).log(Level.SEVERE, null, e);
-			throw new VogonImportLogicalException(Messages.XmlImporter_Error_Invalid_data_format, e);
+			throw new VogonImportLogicalException(messages.getString("XmlImporter_Error_Invalid_data_format"), e);
 		}
 
 	}

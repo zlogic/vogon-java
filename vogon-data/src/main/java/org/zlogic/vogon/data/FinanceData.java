@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -131,6 +130,7 @@ public class FinanceData {
 		EntityManager entityManager = currentEntityManager;
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<FinanceAccount> accountsCriteriaQuery = criteriaBuilder.createQuery(FinanceAccount.class);
+		Root<FinanceAccount> acc = accountsCriteriaQuery.from(FinanceAccount.class);
 
 		return entityManager.createQuery(accountsCriteriaQuery).getResultList();
 	}
@@ -160,8 +160,12 @@ public class FinanceData {
 	public Preferences getPreferencesFromDatabase(){
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<Preferences> exchangeRatesCriteriaQuery = criteriaBuilder.createQuery(Preferences.class);
-		Preferences preferences = entityManager.createQuery(exchangeRatesCriteriaQuery).getSingleResult();
+		CriteriaQuery<Preferences> preferencesCriteriaQuery = criteriaBuilder.createQuery(Preferences.class);
+		Root<Preferences> prf = preferencesCriteriaQuery.from(Preferences.class);
+		Preferences preferences = null;
+		try{
+			preferences = entityManager.createQuery(preferencesCriteriaQuery).getSingleResult();
+		}catch(javax.persistence.NoResultException ex){}
 		if(preferences==null){
 			preferences = new Preferences();
 			entityManager.getTransaction().begin();
@@ -171,6 +175,11 @@ public class FinanceData {
 		return preferences;
 	}
 
+	/**
+	 * Retrieves the default currency from the database
+	 * 
+	 * @return the default currency stored in the database, or the system locale currency
+	 */
 	protected Currency getDefaultCurrencyFromDatabase(){
 		Preferences preferences = getPreferencesFromDatabase();
 		Currency currency = preferences.getDefaultCurrency();
@@ -629,6 +638,7 @@ public class FinanceData {
 		EntityManager tempEntityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = tempEntityManager.getCriteriaBuilder();
 		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
+		Root<FinanceTransaction> ftr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 		FinanceAccount tempAccount = tempEntityManager.find(FinanceAccount.class, account.id);
 		
 		//TODO: add paging here
@@ -653,6 +663,7 @@ public class FinanceData {
 		EntityManager tempEntityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = tempEntityManager.getCriteriaBuilder();
 		CriteriaQuery<TransactionComponent> componentsCriteriaQuery = criteriaBuilder.createQuery(TransactionComponent.class);
+		Root<TransactionComponent> trc = componentsCriteriaQuery.from(TransactionComponent.class);
 
 		tempEntityManager.getTransaction().begin();
 		
