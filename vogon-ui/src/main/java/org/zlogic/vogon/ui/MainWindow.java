@@ -129,7 +129,7 @@ public class MainWindow {
 					}
 					if(new Double(amount).isNaN()){
 						currencyString = "";
-						amount = 0;
+						amount = transaction.getAmount();
 					}
 					return MessageFormat.format("{0,number,0.00} {1}{2}", new Object[]{amount,currencyString,transactionCurrencies.size()==1?"":Messages.MainWindow_Currency_Converted}); //$NON-NLS-1$ //$NON-NLS-2$
 				case 4:
