@@ -81,8 +81,7 @@ public class TransferTransaction extends FinanceTransaction {
 		for (TransactionComponent component : components)
 			if (component.getRawAmount() < 0)
 				accounts.add(component.getAccount());
-		FinanceAccount[] accountsOut = new FinanceAccount[accounts.size()];
-		return accounts.toArray(accountsOut);
+		return accounts.toArray(new FinanceAccount[0]);
 	}
 
 	/**
@@ -95,7 +94,6 @@ public class TransferTransaction extends FinanceTransaction {
 		for (TransactionComponent component : components)
 			if (component.getRawAmount() > 0)
 				accounts.add(component.getAccount());
-		FinanceAccount[] accountsOut = new FinanceAccount[accounts.size()];
-		return accounts.toArray(accountsOut);
+		return accounts.toArray(new FinanceAccount[0]);
 	}
 }

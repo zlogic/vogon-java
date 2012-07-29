@@ -209,10 +209,7 @@ public class XmlImporter implements FileImporter {
 					}
 				}
 
-				String[] tagsArray = new String[tagsList.size()];
-				tagsArray = tagsList.toArray(tagsArray);
-				transaction.setTags(tagsArray);
-
+				transaction.setTags(tagsList.toArray(new String[0]));
 			}
 			entityManager.getTransaction().commit();
 			entityManager.close();
