@@ -21,6 +21,7 @@ import javax.persistence.Transient;
  */
 @Entity
 public class Preferences {
+
 	@Transient
 	private static String CURRENCY = "Currency"; //NOI18N
 	/**
@@ -29,35 +30,35 @@ public class Preferences {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	protected long id;
-	
 	/**
 	 * Preferences collection in string form
 	 */
 	@ElementCollection
-	Map<String,String> preferences;
-	
+	Map<String, String> preferences;
+
 	/**
 	 * Default constructor
 	 */
-	protected Preferences(){}
-	
+	protected Preferences() {
+	}
+
 	/**
 	 * Returns the default (preferred) currency
-	 * 
+	 *
 	 * @return the default currency
 	 */
-	public Currency getDefaultCurrency(){
-		if(preferences!=null && preferences.containsKey(CURRENCY))
+	public Currency getDefaultCurrency() {
+		if (preferences != null && preferences.containsKey(CURRENCY))
 			return Currency.getInstance(preferences.get(CURRENCY));
 		return null;
 	}
-	
+
 	/**
 	 * Sets the default (preferred) currency
-	 * 
+	 *
 	 * @param currency the new preferred currency
 	 */
-	public void setDefaultCurrency(Currency currency){
+	public void setDefaultCurrency(Currency currency) {
 		preferences.put(CURRENCY, currency.getCurrencyCode());
 	}
 }

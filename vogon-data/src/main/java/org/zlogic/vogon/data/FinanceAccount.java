@@ -20,6 +20,7 @@ import javax.persistence.Id;
  */
 @Entity
 public class FinanceAccount implements Serializable {
+
 	/**
 	 * Version UID
 	 */
@@ -34,12 +35,10 @@ public class FinanceAccount implements Serializable {
 	 * The account name
 	 */
 	protected String name;
-
 	/**
 	 * The account balance
 	 */
 	protected Long balance;
-
 	/**
 	 * The account currency
 	 */
@@ -57,28 +56,28 @@ public class FinanceAccount implements Serializable {
 	 * @param name The account name
 	 * @param currency The account currency
 	 */
-	public FinanceAccount(String name,Currency currency) {
+	public FinanceAccount(String name, Currency currency) {
 		this.name = name;
 		this.balance = 0L;
-		this.currency = (currency!=null?currency:Currency.getInstance(Locale.getDefault())).getCurrencyCode();
+		this.currency = (currency != null ? currency : Currency.getInstance(Locale.getDefault())).getCurrencyCode();
 	}
 
 	/**
 	 * Returns the raw balance (should be divided by 100 to get the real amount)
-	 * 
+	 *
 	 * @return the raw balance
 	 */
-	public long getRawBalance(){
+	public long getRawBalance() {
 		return balance;
 	}
 
 	/**
 	 * Updates the raw balance by adding a value
-	 * 
+	 *
 	 * @param addAmount the amount to add (can be added)
 	 */
-	public void updateRawBalance(long addAmount){
-		synchronized(this){
+	public void updateRawBalance(long addAmount) {
+		synchronized (this) {
 			balance += addAmount;
 		}
 	}
@@ -101,7 +100,7 @@ public class FinanceAccount implements Serializable {
 	 * @param name The account name
 	 */
 	public void setName(String name) {
-		if(name.isEmpty())
+		if (name.isEmpty())
 			return;
 		this.name = name;
 	}
@@ -113,7 +112,7 @@ public class FinanceAccount implements Serializable {
 	 */
 	public Currency getCurrency() {
 		Currency currency = Currency.getInstance(this.currency);
-		return currency!=null?currency:Currency.getInstance(Locale.getDefault());
+		return currency != null ? currency : Currency.getInstance(Locale.getDefault());
 	}
 
 	/**
@@ -122,17 +121,17 @@ public class FinanceAccount implements Serializable {
 	 * @param currency The account currency
 	 */
 	public void setCurrency(Currency currency) {
-		if(currency==null)
+		if (currency == null)
 			return;
 		this.currency = currency.getCurrencyCode();
 	}
 
 	/**
 	 * Returns the balance as double
-	 * 
+	 *
 	 * @return the balance
 	 */
-	public double getBalance(){
-		return balance/100.0D;
+	public double getBalance() {
+		return balance / 100.0D;
 	}
 }

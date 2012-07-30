@@ -11,10 +11,12 @@ package org.zlogic.vogon.data;
  * @author Dmitry Zolotukhin
  */
 public class VogonImportException extends Exception {
+
 	/**
 	 * Version UID
 	 */
 	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Default constructor
 	 */

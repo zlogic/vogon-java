@@ -18,6 +18,7 @@ import javax.persistence.Entity;
  */
 @Entity
 public class ExpenseTransaction extends FinanceTransaction implements Serializable {
+
 	/**
 	 * Version UID
 	 */
@@ -47,7 +48,7 @@ public class ExpenseTransaction extends FinanceTransaction implements Serializab
 	 * Updates the transaction's amount from its components
 	 */
 	@Override
-	public void updateAmounts(){
+	public void updateAmounts() {
 		amount = 0;
 		for (TransactionComponent component : components)
 			amount += component.getRawAmount();
@@ -56,7 +57,6 @@ public class ExpenseTransaction extends FinanceTransaction implements Serializab
 	/*
 	 * Getters/setters
 	 */
-
 	/**
 	 * Returns the account
 	 *

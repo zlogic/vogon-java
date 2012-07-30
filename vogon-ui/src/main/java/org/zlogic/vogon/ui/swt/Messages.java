@@ -1,9 +1,9 @@
-package org.zlogic.vogon.ui;
+package org.zlogic.vogon.ui.swt;
 
 import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
-	private static final String BUNDLE_NAME = "org.zlogic.vogon.ui.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.zlogic.vogon.ui.swt.messages"; //$NON-NLS-1$
 	public static String MainWindow_Bad_Account_Substitute;
 	public static String MainWindow_File_Export_Dialog_Header;
 	public static String MainWindow_File_Dialog_XmlFilter;
