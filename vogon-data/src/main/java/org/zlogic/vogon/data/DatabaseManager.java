@@ -19,17 +19,14 @@ public class DatabaseManager {
 	 * True if this database manager is terminated
 	 */
 	private Boolean terminated = false;
-
 	/**
 	 * EntityManager factory instance
 	 */
 	protected javax.persistence.EntityManagerFactory entityManagerFactory;
-
 	/**
 	 * EntityManager instance
 	 */
 	protected javax.persistence.EntityManager entityManager;
-
 	/**
 	 * Singleton instance of this class
 	 */
@@ -45,10 +42,10 @@ public class DatabaseManager {
 
 	/**
 	 * Returns the singleton instance of DatabaseManager
-	 * 
+	 *
 	 * @return The instance of DatabaseManager
 	 */
-	public static DatabaseManager getInstance(){
+	public static DatabaseManager getInstance() {
 		return instance;
 	}
 

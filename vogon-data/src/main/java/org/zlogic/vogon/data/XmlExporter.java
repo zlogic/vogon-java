@@ -23,7 +23,7 @@ import org.w3c.dom.Element;
 
 /**
  * Implementation for exporting data to XML files
- * 
+ *
  * @author Dmitry Zolotukhin
  */
 public class XmlExporter implements FileExporter {
@@ -35,17 +35,19 @@ public class XmlExporter implements FileExporter {
 
 	/**
 	 * Creates an instance of the XML Exporter
-	 * 
+	 *
 	 * @param outputFile The output file to write
 	 */
-	public XmlExporter(File outputFile){
+	public XmlExporter(File outputFile) {
 		this.outputFile = outputFile;
 	}
+
 	/**
 	 * Exports data into an XML file
-	 * 
+	 *
 	 * @param financeData the data to be exported
-	 * @throws VogonExportException In case of any import errors (I/O, format etc.) 
+	 * @throws VogonExportException In case of any import errors (I/O, format
+	 * etc.)
 	 */
 	@Override
 	public void exportFile(FinanceData financeData) throws VogonExportException {
@@ -76,9 +78,9 @@ public class XmlExporter implements FileExporter {
 			rootElement.appendChild(transactionsElement);
 
 			//Accounts list
-			for(FinanceAccount account : financeData.getAccounts()){
+			for (FinanceAccount account : financeData.getAccounts()) {
 				Element accountElement = doc.createElement("Account"); //NOI18N
-				accountElement.setAttribute("Id",Long.toString(account.id)); //NOI18N
+				accountElement.setAttribute("Id", Long.toString(account.id)); //NOI18N
 				accountElement.setAttribute("Name", account.getName()); //NOI18N
 				accountElement.setAttribute("Currency", account.getCurrency().getCurrencyCode()); //NOI18N
 				//accountElement.setAttribute("Balance", Long.toString(account.getRawBalance()));
@@ -86,35 +88,35 @@ public class XmlExporter implements FileExporter {
 			}
 
 			//Currencies list
-			for(CurrencyRate rate : financeData.getCurrencyRates()){
+			for (CurrencyRate rate : financeData.getCurrencyRates()) {
 				Element currencyElement = doc.createElement("CurrencyRate"); //NOI18N
 				currencyElement.setAttribute("Source", rate.getSource().getCurrencyCode()); //NOI18N
 				currencyElement.setAttribute("Destination", rate.getDestination().getCurrencyCode()); //NOI18N
-				currencyElement.setAttribute("Rate",Double.toString(rate.getExchangeRate())); //NOI18N
+				currencyElement.setAttribute("Rate", Double.toString(rate.getExchangeRate())); //NOI18N
 				currenciesElement.appendChild(currencyElement);
 			}
 
 			//Transactions list
-			for(FinanceTransaction transaction : financeData.getTransactions()){
+			for (FinanceTransaction transaction : financeData.getTransactions()) {
 				Element transactionElement = doc.createElement("Transaction"); //NOI18N
 				transactionElement.setAttribute("Type", transaction.getClass().getSimpleName()); //NOI18N
-				transactionElement.setAttribute("Id",Long.toString(transaction.id)); //NOI18N
-				transactionElement.setAttribute("Description",transaction.getDescription()); //NOI18N
+				transactionElement.setAttribute("Id", Long.toString(transaction.id)); //NOI18N
+				transactionElement.setAttribute("Description", transaction.getDescription()); //NOI18N
 				//transactionElement.setAttribute("Amount", Long.toString(transaction.getRawAmount()));
 				transactionElement.setAttribute("Date", MessageFormat.format("{0,date,yyyy-MM-dd}", new Object[]{transaction.getDate()})); //NOI18N
 				//Tags list
-				for(String tag : transaction.getTags()){
+				for (String tag : transaction.getTags()) {
 					Element tagElement = doc.createElement("Tag"); //NOI18N
 					tagElement.setTextContent(tag);
 					transactionElement.appendChild(tagElement);
 				}
 				//Transaction components list
-				for(TransactionComponent component : transaction.getComponents()){
+				for (TransactionComponent component : transaction.getComponents()) {
 					Element compomentElement = doc.createElement("Component"); //NOI18N
-					compomentElement.setAttribute("Id",Long.toString(component.id)); //NOI18N
+					compomentElement.setAttribute("Id", Long.toString(component.id)); //NOI18N
 					compomentElement.setAttribute("Account", Long.toString(component.getAccount().id)); //NOI18N
 					compomentElement.setAttribute("Amount", Long.toString(component.getRawAmount())); //NOI18N
-					compomentElement.setAttribute("Transaction",Long.toString(component.getTransaction().id)); //NOI18N
+					compomentElement.setAttribute("Transaction", Long.toString(component.getTransaction().id)); //NOI18N
 					transactionElement.appendChild(compomentElement);
 				}
 				transactionsElement.appendChild(transactionElement);
@@ -133,5 +135,4 @@ public class XmlExporter implements FileExporter {
 			throw new VogonExportException(e);
 		}
 	}
-
 }

@@ -19,6 +19,7 @@ import javax.persistence.ManyToOne;
  */
 @Entity
 public class TransactionComponent implements Serializable {
+
 	/**
 	 * Version UID
 	 */
@@ -34,13 +35,11 @@ public class TransactionComponent implements Serializable {
 	 */
 	@ManyToOne
 	protected FinanceAccount account;
-
 	/**
 	 * The transaction
 	 */
 	@ManyToOne
 	protected FinanceTransaction transaction;
-
 	/**
 	 * The amount this component changes the account's balance
 	 */
@@ -57,7 +56,8 @@ public class TransactionComponent implements Serializable {
 	 *
 	 * @param account The account
 	 * @param transaction The transaction
-	 * @param amount The amount which this component modifies the account, can be both negative and positive
+	 * @param amount The amount which this component modifies the account, can
+	 * be both negative and positive
 	 */
 	public TransactionComponent(FinanceAccount account, FinanceTransaction transaction, long amount) {
 		this.account = account;
@@ -70,7 +70,7 @@ public class TransactionComponent implements Serializable {
 	 */
 	/**
 	 * Returns the associated account
-	 * 
+	 *
 	 * @return the account
 	 */
 	public FinanceAccount getAccount() {
@@ -79,7 +79,7 @@ public class TransactionComponent implements Serializable {
 
 	/**
 	 * Sets the associated account
-	 * 
+	 *
 	 * @param account the account to set
 	 */
 	public void setAccount(FinanceAccount account) {
@@ -88,7 +88,7 @@ public class TransactionComponent implements Serializable {
 
 	/**
 	 * Returns the associated transaction
-	 * 
+	 *
 	 * @return the transaction
 	 */
 	public FinanceTransaction getTransaction() {
@@ -97,7 +97,7 @@ public class TransactionComponent implements Serializable {
 
 	/**
 	 * Sets the associated transaction
-	 * 
+	 *
 	 * @param transaction the account to set
 	 */
 	public void setTransaction(FinanceTransaction transaction) {
@@ -106,7 +106,7 @@ public class TransactionComponent implements Serializable {
 
 	/**
 	 * Returns the raw amount (should be divided by 100 to get the real amount)
-	 * 
+	 *
 	 * @return the raw amount
 	 */
 	public Long getRawAmount() {
@@ -116,7 +116,7 @@ public class TransactionComponent implements Serializable {
 	/**
 	 * Sets a new raw amount (should be divided by 100 to get the real amount)
 	 * Also updates the account balance
-	 * 
+	 *
 	 * @param amount the new raw amount
 	 */
 	public void setRawAmount(long amount) {
@@ -125,10 +125,10 @@ public class TransactionComponent implements Serializable {
 
 	/**
 	 * Returns the real amount
-	 * 
+	 *
 	 * @return the raw amount
 	 */
 	public double getAmount() {
-		return amount/100.0D;
+		return amount / 100.0D;
 	}
 }

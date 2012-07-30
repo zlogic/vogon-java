@@ -17,6 +17,7 @@ import javax.persistence.Entity;
  */
 @Entity
 public class TransferTransaction extends FinanceTransaction {
+
 	/**
 	 * Version UID
 	 */
@@ -46,21 +47,21 @@ public class TransferTransaction extends FinanceTransaction {
 	 * Updates the transaction's amount from its components
 	 */
 	@Override
-	public void updateAmounts(){
-		long amountPositive = 0, amountNegative=0;
-		for (TransactionComponent component : components){
-			amountPositive += component.getRawAmount()>0? component.getRawAmount() : 0;
-			amountNegative += component.getRawAmount()<0? component.getRawAmount() : 0;
+	public void updateAmounts() {
+		long amountPositive = 0, amountNegative = 0;
+		for (TransactionComponent component : components) {
+			amountPositive += component.getRawAmount() > 0 ? component.getRawAmount() : 0;
+			amountNegative += component.getRawAmount() < 0 ? component.getRawAmount() : 0;
 		}
-		amount = amountPositive>-amountNegative?amountPositive:-amountNegative;
+		amount = amountPositive > -amountNegative ? amountPositive : -amountNegative;
 	}
 
 	/**
 	 * Returns if the amount is OK (e.g. sum is zero)
-	 * 
+	 *
 	 * @return true if amount is OK
 	 */
-	public boolean isAmountOk(){
+	public boolean isAmountOk() {
 		long amount = 0;
 		for (TransactionComponent component : components)
 			amount += component.getRawAmount();
