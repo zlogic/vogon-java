@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.zlogic.vogon</groupId>
 		<artifactId>top</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.0.2-SNAPSHOT</version>
 	</parent>
 	<artifactId>vogon-ui</artifactId>
 	<name>Vogon :: UI</name>
@@ -42,168 +42,10 @@
 		</plugins>
 	</build>
 
-	<profiles>
-		<!-- Windows -->
-		<profile>
-			<id>swt-win32-x86</id>
-			<activation>
-				<os>
-					<family>windows</family>
-					<arch>x86</arch>
-				</os>
-			</activation>
-			<properties>
-				<swt.artifactId>org.eclipse.swt.win32.win32.x86</swt.artifactId>
-			</properties>
-		</profile>
-
-		<profile>
-			<id>swt-win32-x86_64</id>
-			<activation>
-				<os>
-					<family>windows</family>
-					<arch>x86_64</arch>
-				</os>
-			</activation>
-			<properties>
-				<swt.artifactId>org.eclipse.swt.win32.win32.x86_64</swt.artifactId>
-			</properties>
-		</profile>
-		<profile>
-			<id>swt-win32-amd64</id>
-			<activation>
-				<os>
-					<family>windows</family>
-					<arch>amd64</arch>
-				</os>
-			</activation>
-			<properties>
-				<swt.artifactId>org.eclipse.swt.win32.win32.x86_64</swt.artifactId>
-			</properties>
-		</profile>
-
-		<!-- Linux -->
-		<profile>
-			<id>swt-linux-x86</id>
-			<activation>
-				<os>
-					<name>linux</name>
-					<arch>x86</arch>
-				</os>
-			</activation>
-			<properties>
-				<swt.artifactId>org.eclipse.swt.gtk.linux.x86</swt.artifactId>
-			</properties>
-		</profile>
-		<profile>
-			<id>swt-linux-x86_64</id>
-			<activation>
-				<os>
-					<name>linux</name>
-					<arch>x86_64</arch>
-				</os>
-			</activation>
-			<properties>
-				<swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
-			</properties>
-		</profile>
-		<profile>
-			<id>swt-linux-amd64</id>
-			<activation>
-				<os>
-					<name>linux</name>
-					<arch>amd64</arch>
-				</os>
-			</activation>
-			<properties>
-				<swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
-			</properties>
-		</profile>
-
-		<!-- Mac -->
-		<profile>
-			<id>swt-macosx-x86</id>
-			<activation>
-				<os>
-					<name>mac os x</name>
-					<arch>x86</arch>
-				</os>
-			</activation>
-			<properties>
-				<swt.artifactId>org.eclipse.swt.cocoa.macosx</swt.artifactId>
-			</properties>
-		</profile>
-		<profile>
-			<id>swt-macosx-x86_64</id>
-			<activation>
-				<os>
-					<name>mac os x</name>
-					<arch>x86_64</arch>
-				</os>
-			</activation>
-			<properties>
-				<swt.artifactId>org.eclipse.swt.cocoa.macosx.x86_64</swt.artifactId>
-			</properties>
-		</profile>
-		<profile>
-			<id>swt-macosx-amd64</id>
-			<activation>
-				<os>
-					<name>mac os x</name>
-					<arch>amd64</arch>
-				</os>
-			</activation>
-			<properties>
-				<swt.artifactId>swt-cocoa-macosx-x86_64</swt.artifactId>
-			</properties>
-		</profile>
-
-		<!-- Solaris -->
-		<profile>
-			<id>swt-solaris-x86</id>
-			<activation>
-				<os>
-					<name>solaris</name>
-					<arch>x86</arch>
-				</os>
-			</activation>
-			<properties>
-				<swt.artifactId>org.eclipse.swt.gtk.solaris.x86</swt.artifactId>
-			</properties>
-		</profile>
-		<profile>
-			<id>swt-solaris-sparc</id>
-			<activation>
-				<os>
-					<name>solaris</name>
-					<arch>sparc</arch>
-				</os>
-			</activation>
-			<properties>
-				<swt.artifactId>org.eclipse.swt.gtk.solaris.sparc</swt.artifactId>
-			</properties>
-		</profile>
-	</profiles>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.zlogic.vogon.data</groupId>
 			<artifactId>vogon-data</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.swt</groupId>
-			<artifactId>${swt.artifactId}</artifactId>
-			<version>3.8</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse</groupId>
-			<artifactId>jface</artifactId>
-			<version>3.3.0-I20070606-0010</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.osgi</groupId>
-			<artifactId>org.eclipse.osgi</artifactId>
-			<version>3.6.0.v20100517</version>
 		</dependency>
 	</dependencies>
 	<groupId>org.zlogic.vogon.ui</groupId>
@@ -212,7 +54,7 @@
 			<dependency>
 				<groupId>org.zlogic.vogon.data</groupId>
 				<artifactId>vogon-data</artifactId>
-				<version>0.0.1-SNAPSHOT</version>
+				<version>${parent.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

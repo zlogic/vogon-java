@@ -5,7 +5,10 @@
  */
 package org.zlogic.vogon.ui;
 
+import javax.swing.JComponent;
+import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
 import org.zlogic.vogon.data.*;
 
 /**
@@ -14,7 +17,7 @@ import org.zlogic.vogon.data.*;
  * @author Dmitry Zolotukhin
  */
 public class TransactionsTableModel extends AbstractTableModel {
-
+    private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
     private FinanceData data = null;
 
     /**
@@ -110,7 +113,23 @@ public class TransactionsTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int c) {
-	return getValueAt(0, c).getClass();
+		switch(c){
+	    case 0:
+		return String.class;
+	    case 1:
+		return String.class;
+	    case 2:
+		return String.class;
+	    case 3:
+		return Double.class;
+	    case 4:
+		return String.class;
+		}
+		return null;
     }
-    private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
+		
+	@Override
+	public boolean isCellEditable(int row, int col){
+		return true;
+	}
 }

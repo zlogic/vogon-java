@@ -7,15 +7,18 @@ package org.zlogic.vogon.ui;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.Enumeration;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.table.TableColumn;
 import org.zlogic.vogon.data.CsvImporter;
 import org.zlogic.vogon.data.DatabaseManager;
 import org.zlogic.vogon.data.FileImporter;
 import org.zlogic.vogon.data.FinanceData;
+import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.VogonImportLogicalException;
 import org.zlogic.vogon.data.XmlImporter;
 
@@ -35,8 +38,10 @@ public class MainWindow extends javax.swing.JFrame {
 		lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null : new java.io.File(preferenceStorage.get("lastDirectory", null)); //NOI18N
 
 		//Load data from DB
-		((TransactionsTableModel) jTable1.getModel()).setFinanceData(financeData);
-		((AccountsTableModel) jTable2.getModel()).setFinanceData(financeData);
+		((TransactionsTableModel) jTableTransactions.getModel()).setFinanceData(financeData);
+		((AccountsTableModel) jTableAccounts.getModel()).setFinanceData(financeData);
+		jTableTransactions.getColumnModel().getColumn(0).setCellRenderer(new TransactionEditor());
+		jTableTransactions.getColumnModel().getColumn(0).setCellEditor(new TransactionEditor());
 	}
 
 	/**
@@ -49,15 +54,33 @@ public class MainWindow extends javax.swing.JFrame {
     private void initComponents() {
 
         jTabbedPane1 = new javax.swing.JTabbedPane();
-        jPanel1 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
-        jPanel2 = new javax.swing.JPanel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        jPanelTransactions = new javax.swing.JPanel();
+        jPanelTransactionControls = new javax.swing.JPanel();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
+        jScrollPaneTransactions = new javax.swing.JScrollPane();
+        jTableTransactions = new javax.swing.JTable();
+        jPanelAccounts = new javax.swing.JPanel();
+        jPanelAccountsControls = new javax.swing.JPanel();
+        jButton5 = new javax.swing.JButton();
+        jButton6 = new javax.swing.JButton();
+        jScrollPaneAccounts = new javax.swing.JScrollPane();
+        jTableAccounts = new javax.swing.JTable();
+        jPanelCurrencies = new javax.swing.JPanel();
+        jPanelCurrenciesControls = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jComboBox1 = new javax.swing.JComboBox();
+        jScrollPaneCurrencies = new javax.swing.JScrollPane();
+        jTableCurrencies = new javax.swing.JTable();
         jMenuBar = new javax.swing.JMenuBar();
         jMenuFile = new javax.swing.JMenu();
         jMenuItemImport = new javax.swing.JMenuItem();
+        jMenuItemExport = new javax.swing.JMenuItem();
+        jMenuTools = new javax.swing.JMenu();
+        jMenuItemRecalculateBalance = new javax.swing.JMenuItem();
+        jMenuItemCleanupDB = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages"); // NOI18N
@@ -71,31 +94,90 @@ public class MainWindow extends javax.swing.JFrame {
         });
         getContentPane().setLayout(new java.awt.GridLayout(1, 0));
 
-        jPanel1.setLayout(new java.awt.GridLayout(1, 0));
+        jPanelTransactions.setLayout(new java.awt.BorderLayout());
 
-        jTable1.setModel(new org.zlogic.vogon.ui.TransactionsTableModel());
-        jTable1.setFillsViewportHeight(true);
-        jScrollPane1.setViewportView(jTable1);
+        jPanelTransactionControls.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        jPanel1.add(jScrollPane1);
+        jButton1.setText("Add income/expense transaction");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        jPanelTransactionControls.add(jButton1);
 
-        jTabbedPane1.addTab(bundle.getString("TRANSACTIONS"), jPanel1); // NOI18N
+        jButton2.setText("Add transfer transaction");
+        jPanelTransactionControls.add(jButton2);
 
-        jPanel2.setLayout(new java.awt.GridLayout(1, 0));
+        jButton3.setText("Add component");
+        jPanelTransactionControls.add(jButton3);
 
-        jTable2.setModel(new org.zlogic.vogon.ui.AccountsTableModel());
-        jTable2.setFillsViewportHeight(true);
-        jScrollPane2.setViewportView(jTable2);
+        jButton4.setText("Delete selection");
+        jPanelTransactionControls.add(jButton4);
 
-        jPanel2.add(jScrollPane2);
+        jPanelTransactions.add(jPanelTransactionControls, java.awt.BorderLayout.NORTH);
 
-        jTabbedPane1.addTab(bundle.getString("ACCOUNTS"), jPanel2); // NOI18N
+        jTableTransactions.setModel(new TransactionsTableModel());
+        jScrollPaneTransactions.setViewportView(jTableTransactions);
+
+        jPanelTransactions.add(jScrollPaneTransactions, java.awt.BorderLayout.CENTER);
+
+        jTabbedPane1.addTab(messages.getString("TRANSACTIONS"), jPanelTransactions); // NOI18N
+
+        jPanelAccounts.setLayout(new java.awt.BorderLayout());
+
+        jPanelAccountsControls.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jButton5.setText("Add account");
+        jPanelAccountsControls.add(jButton5);
+
+        jButton6.setText("Delete account");
+        jPanelAccountsControls.add(jButton6);
+
+        jPanelAccounts.add(jPanelAccountsControls, java.awt.BorderLayout.NORTH);
+
+        jTableAccounts.setModel(new org.zlogic.vogon.ui.AccountsTableModel());
+        jTableAccounts.setFillsViewportHeight(true);
+        jScrollPaneAccounts.setViewportView(jTableAccounts);
+
+        jPanelAccounts.add(jScrollPaneAccounts, java.awt.BorderLayout.CENTER);
+
+        jTabbedPane1.addTab(messages.getString("ACCOUNTS"), jPanelAccounts); // NOI18N
+
+        jPanelCurrencies.setLayout(new java.awt.BorderLayout());
+
+        jPanelCurrenciesControls.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel1.setText("Default currency");
+        jPanelCurrenciesControls.add(jLabel1);
+
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jPanelCurrenciesControls.add(jComboBox1);
+
+        jPanelCurrencies.add(jPanelCurrenciesControls, java.awt.BorderLayout.NORTH);
+
+        jTableCurrencies.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
+            },
+            new String [] {
+                "Source currency", "Destination currency", "Exchange rate"
+            }
+        ));
+        jScrollPaneCurrencies.setViewportView(jTableCurrencies);
+
+        jPanelCurrencies.add(jScrollPaneCurrencies, java.awt.BorderLayout.CENTER);
+
+        jTabbedPane1.addTab("Currencies", jPanelCurrencies);
 
         getContentPane().add(jTabbedPane1);
 
-        jMenuFile.setText(bundle.getString("MAINWINDOW_MENU_FILE")); // NOI18N
+        jMenuFile.setText(messages.getString("MAINWINDOW_MENU_FILE")); // NOI18N
 
-        jMenuItemImport.setText(bundle.getString("MAINWINDOW_MENU_SETTINGS")); // NOI18N
+        jMenuItemImport.setText(messages.getString("MAINWINDOW_MENU_SETTINGS")); // NOI18N
         jMenuItemImport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemImportActionPerformed(evt);
@@ -103,7 +185,20 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jMenuFile.add(jMenuItemImport);
 
+        jMenuItemExport.setText(messages.getString("EXPORT")); // NOI18N
+        jMenuFile.add(jMenuItemExport);
+
         jMenuBar.add(jMenuFile);
+
+        jMenuTools.setText(messages.getString("TOOLS")); // NOI18N
+
+        jMenuItemRecalculateBalance.setText(messages.getString("RECALCULATE_BALANCE")); // NOI18N
+        jMenuTools.add(jMenuItemRecalculateBalance);
+
+        jMenuItemCleanupDB.setText(messages.getString("CLEANUP_DB")); // NOI18N
+        jMenuTools.add(jMenuItemCleanupDB);
+
+        jMenuBar.add(jMenuTools);
 
         setJMenuBar(jMenuBar);
 
@@ -134,8 +229,8 @@ public class MainWindow extends javax.swing.JFrame {
 				if (importer == null)
 					throw new VogonImportLogicalException(messages.getString("UNKNOWN_FILE_TYPE"));
 				financeData.importData(importer);
-				((TransactionsTableModel) jTable1.getModel()).setFinanceData(financeData);
-				((AccountsTableModel) jTable2.getModel()).setFinanceData(financeData);
+				((TransactionsTableModel) jTableTransactions.getModel()).setFinanceData(financeData);
+				((AccountsTableModel) jTableAccounts.getModel()).setFinanceData(financeData);
 			} catch (org.zlogic.vogon.data.VogonImportLogicalException ex) {
 				Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
 				JOptionPane.showMessageDialog(this, new MessageFormat(messages.getString("IMPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), messages.getString("IMPORT_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
@@ -149,6 +244,10 @@ public class MainWindow extends javax.swing.JFrame {
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
 		DatabaseManager.getInstance().shutdown();
     }//GEN-LAST:event_formWindowClosing
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton1ActionPerformed
 
 	/**
 	 * @param args the command line arguments
@@ -186,16 +285,34 @@ public class MainWindow extends javax.swing.JFrame {
 		});
 	}
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
+    private javax.swing.JComboBox jComboBox1;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JMenuBar jMenuBar;
     private javax.swing.JMenu jMenuFile;
+    private javax.swing.JMenuItem jMenuItemCleanupDB;
+    private javax.swing.JMenuItem jMenuItemExport;
     private javax.swing.JMenuItem jMenuItemImport;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JMenuItem jMenuItemRecalculateBalance;
+    private javax.swing.JMenu jMenuTools;
+    private javax.swing.JPanel jPanelAccounts;
+    private javax.swing.JPanel jPanelAccountsControls;
+    private javax.swing.JPanel jPanelCurrencies;
+    private javax.swing.JPanel jPanelCurrenciesControls;
+    private javax.swing.JPanel jPanelTransactionControls;
+    private javax.swing.JPanel jPanelTransactions;
+    private javax.swing.JScrollPane jScrollPaneAccounts;
+    private javax.swing.JScrollPane jScrollPaneCurrencies;
+    private javax.swing.JScrollPane jScrollPaneTransactions;
     private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTable2;
+    private javax.swing.JTable jTableAccounts;
+    private javax.swing.JTable jTableCurrencies;
+    private javax.swing.JTable jTableTransactions;
     // End of variables declaration//GEN-END:variables
 	/**
 	 * Last opened directory
