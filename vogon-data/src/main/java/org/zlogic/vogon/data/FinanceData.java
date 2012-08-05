@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import javax.persistence.EntityManager;
+import javax.persistence.Transient;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -352,6 +353,22 @@ public class FinanceData {
 	}
 
 	/**
+	 * Adds a new transaction
+	 *
+	 * @param transaction the transaction to be added
+	 */
+	public void createTransaction(FinanceTransaction transaction) {
+		EntityManager entityManager = currentEntityManager;
+		entityManager.getTransaction().begin();
+
+		persistenceAdd(transaction, entityManager);
+
+		entityManager.getTransaction().commit();
+
+		fireTransactionCreated(transaction);
+	}
+
+	/**
 	 * Sets new tags for a transaction
 	 *
 	 * @param transaction The transaction to be updated
@@ -365,6 +382,8 @@ public class FinanceData {
 		persistenceAdd(transaction, entityManager);
 
 		entityManager.getTransaction().commit();
+
+		fireTransactionUpdated(transaction);
 	}
 
 	/**
@@ -381,6 +400,8 @@ public class FinanceData {
 		persistenceAdd(transaction, entityManager);
 
 		entityManager.getTransaction().commit();
+
+		fireTransactionUpdated(transaction);
 	}
 
 	/**
@@ -397,6 +418,8 @@ public class FinanceData {
 		persistenceAdd(transaction, entityManager);
 
 		entityManager.getTransaction().commit();
+
+		fireTransactionUpdated(transaction);
 	}
 
 	/**
@@ -421,6 +444,8 @@ public class FinanceData {
 		if (!entityManager.contains(component))
 			entityManager.persist(component);
 		entityManager.getTransaction().commit();
+
+		fireTransactionUpdated(transaction);
 	}
 
 	/**
@@ -448,6 +473,8 @@ public class FinanceData {
 		persistenceAdd(newAccount, entityManager);
 
 		entityManager.getTransaction().commit();
+
+		fireTransactionUpdated(transaction);
 	}
 
 	/**
@@ -472,6 +499,8 @@ public class FinanceData {
 		if (!entityManager.contains(component))
 			entityManager.persist(component);
 		entityManager.getTransaction().commit();
+
+		fireTransactionUpdated(component.getTransaction());
 	}
 
 	/**
@@ -499,6 +528,8 @@ public class FinanceData {
 
 		persistenceAdd(newAccount, entityManager);
 		entityManager.getTransaction().commit();
+
+		fireTransactionUpdated(component.getTransaction());
 	}
 
 	/**
@@ -516,6 +547,8 @@ public class FinanceData {
 		rate.setExchangeRate(newRate);
 
 		entityManager.getTransaction().commit();
+
+		fireTransactionsUpdated();
 	}
 
 	/**
@@ -536,6 +569,8 @@ public class FinanceData {
 		entityManager.getTransaction().begin();
 		entityManager.merge(preferences);
 		entityManager.getTransaction().commit();
+
+		fireTransactionsUpdated();
 	}
 
 	/**
@@ -586,6 +621,8 @@ public class FinanceData {
 
 		entityManager.remove(component);
 		entityManager.getTransaction().commit();
+
+		fireTransactionUpdated(component.getTransaction());
 	}
 
 	/**
@@ -605,6 +642,8 @@ public class FinanceData {
 
 		entityManager.remove(transaction);
 		entityManager.getTransaction().commit();
+
+		fireTransactionDeleted(transaction);
 	}
 
 	/**
@@ -627,6 +666,8 @@ public class FinanceData {
 		populateCurrencies();
 
 		entityManager.getTransaction().commit();
+
+		fireTransactionsUpdated();
 	}
 
 	/**
@@ -689,6 +730,8 @@ public class FinanceData {
 		currentEntityManager.getTransaction().begin();
 		populateCurrencies();
 		currentEntityManager.getTransaction().commit();
+
+		fireTransactionsUpdated();
 	}
 
 	/*
@@ -731,5 +774,132 @@ public class FinanceData {
 			return defaultCurrency;
 		else
 			return null;
+	}
+
+	/*
+	 * Assigned event listeners
+	 */
+	/**
+	 * Listener for transaction created events
+	 */
+	public interface TransactionCreatedEventListener {
+
+		/**
+		 * A transaction created callback
+		 *
+		 * @param newTransaction the transaction that was created
+		 */
+		void transactionCreated(FinanceTransaction newTransaction);
+	}
+
+	/**
+	 * Listener for transaction updated events
+	 */
+	public interface TransactionUpdatedEventListener {
+
+		/**
+		 * A transaction updated callback
+		 *
+		 * @param updatedTransaction the transaction that was updated
+		 */
+		void transactionUpdated(FinanceTransaction updatedTransaction);
+
+		/**
+		 * A transaction updated handler (all transactions have been updated)
+		 */
+		void transactionsUpdated();
+	}
+
+	/**
+	 * Listener for transaction deleted events
+	 */
+	public interface TransactionDeletedEventListener {
+
+		/**
+		 * A transaction deleted callback
+		 *
+		 * @param deletedTransaction the deleted transaction
+		 */
+		void transactionDeleted(FinanceTransaction deletedTransaction);
+	}
+	/**
+	 * List of transaction created listeners
+	 */
+	@Transient
+	protected List<TransactionCreatedEventListener> transactionCreatedListeners = new LinkedList<>();
+	/**
+	 * List of transaction updated listeners
+	 */
+	@Transient
+	protected List<TransactionUpdatedEventListener> transactionUpdatedListeners = new LinkedList<>();
+	/**
+	 * List of transaction deleted listeners
+	 */
+	@Transient
+	protected List<TransactionDeletedEventListener> transactionDeletedListeners = new LinkedList<>();
+
+	/**
+	 * Dispatches a transaction updated event
+	 *
+	 * @param editedTransaction the transaction that was updated
+	 */
+	protected void fireTransactionUpdated(FinanceTransaction editedTransaction) {
+		for (TransactionUpdatedEventListener listener : transactionUpdatedListeners)
+			listener.transactionUpdated(editedTransaction);
+	}
+
+	/**
+	 * Dispatches a transactions updated (all transactions were updated)
+	 */
+	protected void fireTransactionsUpdated() {
+		for (TransactionUpdatedEventListener listener : transactionUpdatedListeners)
+			listener.transactionsUpdated();
+	}
+
+	/**
+	 * Dispatches a transaction created event
+	 *
+	 * @param newTransaction the transaction that was created
+	 */
+	protected void fireTransactionCreated(FinanceTransaction newTransaction) {
+		for (TransactionCreatedEventListener listener : transactionCreatedListeners)
+			listener.transactionCreated(newTransaction);
+	}
+
+	/**
+	 * Dispatches a transaction deleted event
+	 *
+	 * @param deletedTransaction the transaction that was deleted
+	 */
+	protected void fireTransactionDeleted(FinanceTransaction deletedTransaction) {
+		for (TransactionDeletedEventListener listener : transactionDeletedListeners)
+			listener.transactionDeleted(deletedTransaction);
+	}
+
+	/**
+	 * Adds a new listener for transaction created events
+	 *
+	 * @param listener the listener
+	 */
+	public void addTransactionCreatedListener(TransactionCreatedEventListener listener) {
+		transactionCreatedListeners.add(listener);
+	}
+
+	/**
+	 * Adds a new listener for transaction updated events
+	 *
+	 * @param listener the listener
+	 */
+	public void addTransactionUpdatedListener(TransactionUpdatedEventListener listener) {
+		transactionUpdatedListeners.add(listener);
+	}
+
+	/**
+	 * Adds a new listener for transaction deleted events
+	 *
+	 * @param listener the listener
+	 */
+	public void addTransactionDeletedListener(TransactionUpdatedEventListener listener) {
+		transactionUpdatedListeners.add(listener);
 	}
 }
