@@ -7,6 +7,8 @@ package org.zlogic.vogon.ui;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.Currency;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,10 +18,14 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.zlogic.vogon.data.CsvImporter;
 import org.zlogic.vogon.data.DatabaseManager;
+import org.zlogic.vogon.data.FileExporter;
 import org.zlogic.vogon.data.FileImporter;
+import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
+import org.zlogic.vogon.data.VogonExportException;
 import org.zlogic.vogon.data.VogonImportLogicalException;
+import org.zlogic.vogon.data.XmlExporter;
 import org.zlogic.vogon.data.XmlImporter;
 
 /**
@@ -45,6 +51,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		//Load data from DB
 		((TransactionsTableModel) jTableTransactions.getModel()).setFinanceData(financeData);
 		((AccountsTableModel) jTableAccounts.getModel()).setFinanceData(financeData);
+		((CurrenciesTableModel) jTableCurrencies.getModel()).setFinanceData(financeData);
 		transactionEditor.setFinanceData(financeData);
 		transactionEditor.updateAccountsCombo();
 		financeData.addTransactionCreatedListener((TransactionsTableModel) jTableTransactions.getModel());
@@ -61,7 +68,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 			}
 		});
 
-
+		updateCurrencyCombo();
 	}
 
 	/**
@@ -75,7 +82,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanelTransactions = new javax.swing.JPanel();
-        jSplitPane1 = new javax.swing.JSplitPane();
+        jSplitPaneTransactions = new javax.swing.JSplitPane();
         transactionEditor = new org.zlogic.vogon.ui.TransactionEditor();
         jPanelTransactionsList = new javax.swing.JPanel();
         jPanelTransactionControls = new javax.swing.JPanel();
@@ -84,14 +91,14 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
         jTableTransactions = new javax.swing.JTable();
         jPanelAccounts = new javax.swing.JPanel();
         jPanelAccountsControls = new javax.swing.JPanel();
-        jButton5 = new javax.swing.JButton();
-        jButton6 = new javax.swing.JButton();
+        jButtonAddAccount = new javax.swing.JButton();
+        jButtonDeleteAccount = new javax.swing.JButton();
         jScrollPaneAccounts = new javax.swing.JScrollPane();
         jTableAccounts = new javax.swing.JTable();
         jPanelCurrencies = new javax.swing.JPanel();
         jPanelCurrenciesControls = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox();
+        jLabelDefaultCurrency = new javax.swing.JLabel();
+        jComboBoxDefaultCurrency = new javax.swing.JComboBox();
         jScrollPaneCurrencies = new javax.swing.JScrollPane();
         jTableCurrencies = new javax.swing.JTable();
         jMenuBar = new javax.swing.JMenuBar();
@@ -116,8 +123,8 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
         jPanelTransactions.setLayout(new java.awt.BorderLayout());
 
-        jSplitPane1.setDividerLocation(300);
-        jSplitPane1.setTopComponent(transactionEditor);
+        jSplitPaneTransactions.setDividerLocation(300);
+        jSplitPaneTransactions.setTopComponent(transactionEditor);
 
         jPanelTransactionsList.setLayout(new java.awt.BorderLayout());
 
@@ -140,9 +147,9 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
         jPanelTransactionsList.add(jScrollPaneTransactions, java.awt.BorderLayout.CENTER);
 
-        jSplitPane1.setBottomComponent(jPanelTransactionsList);
+        jSplitPaneTransactions.setBottomComponent(jPanelTransactionsList);
 
-        jPanelTransactions.add(jSplitPane1, java.awt.BorderLayout.CENTER);
+        jPanelTransactions.add(jSplitPaneTransactions, java.awt.BorderLayout.CENTER);
 
         jTabbedPane1.addTab(messages.getString("TRANSACTIONS"), jPanelTransactions); // NOI18N
 
@@ -150,11 +157,11 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
         jPanelAccountsControls.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        jButton5.setText("Add account");
-        jPanelAccountsControls.add(jButton5);
+        jButtonAddAccount.setText("Add account");
+        jPanelAccountsControls.add(jButtonAddAccount);
 
-        jButton6.setText("Delete account");
-        jPanelAccountsControls.add(jButton6);
+        jButtonDeleteAccount.setText("Delete account");
+        jPanelAccountsControls.add(jButtonDeleteAccount);
 
         jPanelAccounts.add(jPanelAccountsControls, java.awt.BorderLayout.NORTH);
 
@@ -170,25 +177,16 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
         jPanelCurrenciesControls.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        jLabel1.setText("Default currency");
-        jPanelCurrenciesControls.add(jLabel1);
+        jLabelDefaultCurrency.setLabelFor(jComboBoxDefaultCurrency);
+        jLabelDefaultCurrency.setText("Default currency");
+        jPanelCurrenciesControls.add(jLabelDefaultCurrency);
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jPanelCurrenciesControls.add(jComboBox1);
+        jPanelCurrenciesControls.add(jComboBoxDefaultCurrency);
 
         jPanelCurrencies.add(jPanelCurrenciesControls, java.awt.BorderLayout.NORTH);
 
-        jTableCurrencies.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null}
-            },
-            new String [] {
-                "Source currency", "Destination currency", "Exchange rate"
-            }
-        ));
+        jTableCurrencies.setModel(new CurrenciesTableModel());
+        jTableCurrencies.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPaneCurrencies.setViewportView(jTableCurrencies);
 
         jPanelCurrencies.add(jScrollPaneCurrencies, java.awt.BorderLayout.CENTER);
@@ -199,7 +197,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
         jMenuFile.setText(messages.getString("MAINWINDOW_MENU_FILE")); // NOI18N
 
-        jMenuItemImport.setText(messages.getString("MAINWINDOW_MENU_SETTINGS")); // NOI18N
+        jMenuItemImport.setText(messages.getString("MAINWINDOW_MENU_IMPORT")); // NOI18N
         jMenuItemImport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemImportActionPerformed(evt);
@@ -208,6 +206,11 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
         jMenuFile.add(jMenuItemImport);
 
         jMenuItemExport.setText(messages.getString("EXPORT")); // NOI18N
+        jMenuItemExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemExportActionPerformed(evt);
+            }
+        });
         jMenuFile.add(jMenuItemExport);
 
         jMenuBar.add(jMenuFile);
@@ -215,9 +218,19 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
         jMenuTools.setText(messages.getString("TOOLS")); // NOI18N
 
         jMenuItemRecalculateBalance.setText(messages.getString("RECALCULATE_BALANCE")); // NOI18N
+        jMenuItemRecalculateBalance.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemRecalculateBalanceActionPerformed(evt);
+            }
+        });
         jMenuTools.add(jMenuItemRecalculateBalance);
 
         jMenuItemCleanupDB.setText(messages.getString("CLEANUP_DB")); // NOI18N
+        jMenuItemCleanupDB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemCleanupDBActionPerformed(evt);
+            }
+        });
         jMenuTools.add(jMenuItemCleanupDB);
 
         jMenuBar.add(jMenuTools);
@@ -234,14 +247,15 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fileChooser.setDialogTitle(messages.getString("CHOOSE_FILES_TO_IMPORT"));
 		//Prepare file chooser filter
-		fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(messages.getString("CSV_FILES_(COMMA-SEPARATED)"), "csv")); //NOI18N
+		fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(messages.getString("XML_FILES"), "xml"));//NOI18N
+		fileChooser.addChoosableFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(messages.getString("CSV_FILES_(COMMA-SEPARATED)"), "csv"));//NOI18N
 		if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 			File selectedFile = fileChooser.getSelectedFile();
 			lastDirectory = selectedFile.isDirectory() ? selectedFile : selectedFile.getParentFile();
 			preferenceStorage.put("lastDirectory", lastDirectory.toString()); //NOI18N
 
 			//Test code for printing data
-			FileImporter importer = new CsvImporter(selectedFile);
+			FileImporter importer = null;
 
 			if (fileChooser.getFileFilter().getDescription().equals(messages.getString("CSV_FILES_(COMMA-SEPARATED)")))
 				importer = new CsvImporter(selectedFile);
@@ -280,6 +294,45 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		}
     }//GEN-LAST:event_jButtonDeleteTransactionActionPerformed
 
+    private void jMenuItemExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExportActionPerformed
+		// Prepare file chooser dialog
+		JFileChooser fileChooser = new JFileChooser((lastDirectory != null && lastDirectory.exists()) ? lastDirectory : null);
+		fileChooser.setMultiSelectionEnabled(false);
+		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		fileChooser.setDialogTitle(messages.getString("CHOOSE_FILES_TO_EXPORT"));
+		//Prepare file chooser filter
+		fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(messages.getString("XML_FILES"), "xml"));//NOI18N
+		if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+			File selectedFile = fileChooser.getSelectedFile();
+			lastDirectory = selectedFile.isDirectory() ? selectedFile : selectedFile.getParentFile();
+			preferenceStorage.put("lastDirectory", lastDirectory.toString()); //NOI18N
+
+			//Test code for printing data
+			FileExporter exporter = null;
+
+			if (fileChooser.getFileFilter().getDescription().equals(messages.getString("XML_FILES")))
+				exporter = new XmlExporter(selectedFile);
+			try {
+				financeData.exportData(exporter);
+			} catch (VogonExportException ex) {
+				Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+				JOptionPane.showMessageDialog(this, new MessageFormat(messages.getString("EXPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), messages.getString("EXPORT_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
+			}
+		}
+    }//GEN-LAST:event_jMenuItemExportActionPerformed
+
+    private void jMenuItemRecalculateBalanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemRecalculateBalanceActionPerformed
+		for (FinanceAccount account : financeData.getAccounts())
+			financeData.refreshAccountBalance(account);
+		updateAccounts();
+    }//GEN-LAST:event_jMenuItemRecalculateBalanceActionPerformed
+
+    private void jMenuItemCleanupDBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemCleanupDBActionPerformed
+		financeData.cleanup();
+		updateAccounts();
+		updateTransactions();
+    }//GEN-LAST:event_jMenuItemCleanupDBActionPerformed
+
 	/**
 	 * @param args the command line arguments
 	 */
@@ -316,11 +369,11 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		});
 	}
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton5;
-    private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButtonAddAccount;
+    private javax.swing.JButton jButtonDeleteAccount;
     private javax.swing.JButton jButtonDeleteTransaction;
-    private javax.swing.JComboBox jComboBox1;
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JComboBox jComboBoxDefaultCurrency;
+    private javax.swing.JLabel jLabelDefaultCurrency;
     private javax.swing.JMenuBar jMenuBar;
     private javax.swing.JMenu jMenuFile;
     private javax.swing.JMenuItem jMenuItemCleanupDB;
@@ -338,7 +391,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
     private javax.swing.JScrollPane jScrollPaneAccounts;
     private javax.swing.JScrollPane jScrollPaneCurrencies;
     private javax.swing.JScrollPane jScrollPaneTransactions;
-    private javax.swing.JSplitPane jSplitPane1;
+    private javax.swing.JSplitPane jSplitPaneTransactions;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTable jTableAccounts;
     private javax.swing.JTable jTableCurrencies;
@@ -363,5 +416,25 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		int newTransactionIndex = financeData.getTransactions().indexOf(newTransaction);
 		jTableTransactions.getSelectionModel().setSelectionInterval(newTransactionIndex, newTransactionIndex);
 		jTableTransactions.scrollRectToVisible(jTableTransactions.getCellRect(newTransactionIndex, 0, true));
+	}
+
+	protected void updateAccounts() {
+		((AccountsTableModel) jTableAccounts.getModel()).fireTableDataChanged();
+	}
+
+	protected void updateTransactions() {
+		transactionEditor.editTransaction(null);
+		((TransactionsTableModel) jTableTransactions.getModel()).fireTableDataChanged();
+	}
+
+	protected void updateCurrencyCombo() {
+		List<Currency> currencies = financeData.getCurrencies();
+		jComboBoxDefaultCurrency.removeAllItems();
+		for (Object currency : ((CurrenciesTableModel) jTableCurrencies.getModel()).getCurrenciesComboList())
+			jComboBoxDefaultCurrency.addItem(currency);
+		if (financeData.getDefaultCurrency() != null)
+			jComboBoxDefaultCurrency.setSelectedItem(((CurrenciesTableModel) jTableCurrencies.getModel()).getDefaultCurrency());
+		else
+			jComboBoxDefaultCurrency.setSelectedItem(-1);
 	}
 }

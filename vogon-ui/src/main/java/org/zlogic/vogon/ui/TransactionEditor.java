@@ -24,7 +24,8 @@ import org.zlogic.vogon.data.TransferTransaction;
 import org.zlogic.vogon.data.Utils;
 
 /**
- *
+ * Transaction editor form. Interacts with model directly.
+ * 
  * @author Zlogic
  */
 public class TransactionEditor extends javax.swing.JPanel {

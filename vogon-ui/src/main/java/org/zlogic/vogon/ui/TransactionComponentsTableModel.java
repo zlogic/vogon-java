@@ -13,7 +13,7 @@ import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
 
 /**
- *
+ * Transaction components table model class
  * @author Zlogic
  */
 public class TransactionComponentsTableModel extends AbstractTableModel {

@@ -14,7 +14,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="jMenuItemImport">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="MAINWINDOW_MENU_SETTINGS" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="MAINWINDOW_MENU_IMPORT" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
                 </Property>
               </Properties>
               <Events>
@@ -27,6 +27,9 @@
                   <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="EXPORT" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemExportActionPerformed"/>
+              </Events>
             </MenuItem>
           </SubComponents>
         </Menu>
@@ -43,6 +46,9 @@
                   <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="RECALCULATE_BALANCE" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemRecalculateBalanceActionPerformed"/>
+              </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="jMenuItemCleanupDB">
               <Properties>
@@ -50,6 +56,9 @@
                   <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="CLEANUP_DB" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemCleanupDBActionPerformed"/>
+              </Events>
             </MenuItem>
           </SubComponents>
         </Menu>
@@ -109,7 +118,7 @@
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout"/>
           <SubComponents>
-            <Container class="javax.swing.JSplitPane" name="jSplitPane1">
+            <Container class="javax.swing.JSplitPane" name="jSplitPaneTransactions">
               <Properties>
                 <Property name="dividerLocation" type="int" value="300"/>
               </Properties>
@@ -213,12 +222,12 @@
                 <Property name="alignment" type="int" value="0"/>
               </Layout>
               <SubComponents>
-                <Component class="javax.swing.JButton" name="jButton5">
+                <Component class="javax.swing.JButton" name="jButtonAddAccount">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Add account"/>
                   </Properties>
                 </Component>
-                <Component class="javax.swing.JButton" name="jButton6">
+                <Component class="javax.swing.JButton" name="jButtonDeleteAccount">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Delete account"/>
                   </Properties>
@@ -271,20 +280,18 @@
                 <Property name="alignment" type="int" value="0"/>
               </Layout>
               <SubComponents>
-                <Component class="javax.swing.JLabel" name="jLabel1">
+                <Component class="javax.swing.JLabel" name="jLabelDefaultCurrency">
                   <Properties>
+                    <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
+                      <ComponentRef name="jComboBoxDefaultCurrency"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="Default currency"/>
                   </Properties>
                 </Component>
-                <Component class="javax.swing.JComboBox" name="jComboBox1">
+                <Component class="javax.swing.JComboBox" name="jComboBoxDefaultCurrency">
                   <Properties>
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                      <StringArray count="4">
-                        <StringItem index="0" value="Item 1"/>
-                        <StringItem index="1" value="Item 2"/>
-                        <StringItem index="2" value="Item 3"/>
-                        <StringItem index="3" value="Item 4"/>
-                      </StringArray>
+                      <StringArray count="0"/>
                     </Property>
                   </Properties>
                 </Component>
@@ -301,12 +308,11 @@
               <SubComponents>
                 <Component class="javax.swing.JTable" name="jTableCurrencies">
                   <Properties>
-                    <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-                      <Table columnCount="3" rowCount="4">
-                        <Column editable="true" title="Source currency" type="java.lang.Object"/>
-                        <Column editable="true" title="Destination currency" type="java.lang.Object"/>
-                        <Column editable="true" title="Exchange rate" type="java.lang.Object"/>
-                      </Table>
+                    <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                      <Connection code="new CurrenciesTableModel()" type="code"/>
+                    </Property>
+                    <Property name="selectionModel" type="javax.swing.ListSelectionModel" editor="org.netbeans.modules.form.editors2.JTableSelectionModelEditor">
+                      <JTableSelectionModel selectionMode="0"/>
                     </Property>
                   </Properties>
                 </Component>
