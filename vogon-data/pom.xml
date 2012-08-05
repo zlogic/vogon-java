@@ -13,13 +13,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
-	<repositories>
-		<repository>
-			<id>Eclipse Sonatype</id>
-			<url>http://maven.eclipse.org/nexus/content/repositories/Sonatype/</url>
-		</repository>
-	</repositories>
-
 	<build>
 		<resources>
 			<resource>
