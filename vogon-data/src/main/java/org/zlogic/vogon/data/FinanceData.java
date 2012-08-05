@@ -703,17 +703,22 @@ public class FinanceData {
 	 */
 	public void cleanup() {
 		EntityManager tempEntityManager = DatabaseManager.getInstance().createEntityManager();
-		CriteriaBuilder criteriaBuilder = tempEntityManager.getCriteriaBuilder();
-		CriteriaQuery<TransactionComponent> componentsCriteriaQuery = criteriaBuilder.createQuery(TransactionComponent.class);
+		CriteriaBuilder componentCriteriaBuilder = tempEntityManager.getCriteriaBuilder();
+		CriteriaQuery<TransactionComponent> componentsCriteriaQuery = componentCriteriaBuilder.createQuery(TransactionComponent.class);
 		Root<TransactionComponent> trc = componentsCriteriaQuery.from(TransactionComponent.class);
+
+		CriteriaBuilder transactionCriteriaBuilder = tempEntityManager.getCriteriaBuilder();
+		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = transactionCriteriaBuilder.createQuery(FinanceTransaction.class);
+		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 
 		tempEntityManager.getTransaction().begin();
 
 		//Get all data from DB
 		List<TransactionComponent> componentsDB = tempEntityManager.createQuery(componentsCriteriaQuery).getResultList();
+		List<FinanceTransaction> transactionsDB = tempEntityManager.createQuery(transactionsCriteriaQuery).getResultList();
 
 		//Remove OK items from list
-		for (FinanceTransaction transaction : transactions)
+		for (FinanceTransaction transaction : transactionsDB)
 			componentsDB.removeAll(transaction.getComponents());
 
 		//Remove anything that still exists
@@ -731,6 +736,8 @@ public class FinanceData {
 		populateCurrencies();
 		currentEntityManager.getTransaction().commit();
 
+		restoreFromDatabase();
+		
 		fireTransactionsUpdated();
 	}
 
