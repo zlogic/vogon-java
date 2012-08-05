@@ -6,24 +6,38 @@
 package org.zlogic.vogon.ui;
 
 import java.awt.Component;
-import java.util.EventObject;
-import javax.swing.JComponent;
+import java.text.MessageFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.AbstractCellEditor;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
 import javax.swing.JTable;
-import javax.swing.event.CellEditorListener;
 import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
+import org.zlogic.vogon.data.ExpenseTransaction;
+import org.zlogic.vogon.data.FinanceData;
+import org.zlogic.vogon.data.FinanceTransaction;
+import org.zlogic.vogon.data.TransferTransaction;
+import org.zlogic.vogon.data.Utils;
 
 /**
  *
  * @author Zlogic
  */
-public class TransactionEditor extends javax.swing.JPanel implements TableCellRenderer, TableCellEditor {
-
+public class TransactionEditor extends javax.swing.JPanel {
 	/**
 	 * Creates new form TransactionEditor
 	 */
 	public TransactionEditor() {
 		initComponents();
+		initCustomComponents();
+	}
+
+	private void initCustomComponents() {
+		resetInput();
 	}
 
 	/**
@@ -35,90 +49,228 @@ public class TransactionEditor extends javax.swing.JPanel implements TableCellRe
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jFormattedTextField1 = new javax.swing.JFormattedTextField();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList();
+        jButtonNewExpenseIncome = new javax.swing.JButton();
+        jButtonNewTransfer = new javax.swing.JButton();
+        jLabelName = new javax.swing.JLabel();
+        jTextFieldName = new javax.swing.JTextField();
+        jLabelTags = new javax.swing.JLabel();
+        jTextFieldTags = new javax.swing.JTextField();
+        jLabelDate = new javax.swing.JLabel();
+        jFormattedTextFieldDate = new javax.swing.JFormattedTextField();
+        jButtonAddComponent = new javax.swing.JButton();
+        jButtonDeleteComponent = new javax.swing.JButton();
+        jScrollPaneComponents = new javax.swing.JScrollPane();
+        jTableComponents = new javax.swing.JTable();
 
         setMinimumSize(new java.awt.Dimension(0, 60));
 
-        jFormattedTextField1.setText("jFormattedTextField1");
-
-        jList1.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
+        jButtonNewExpenseIncome.setText("New expense/income");
+        jButtonNewExpenseIncome.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonNewExpenseIncomeActionPerformed(evt);
+            }
         });
-        jScrollPane1.setViewportView(jList1);
+
+        jButtonNewTransfer.setText("New transfer");
+        jButtonNewTransfer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonNewTransferActionPerformed(evt);
+            }
+        });
+
+        jLabelName.setText("Description");
+
+        jTextFieldName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldNameActionPerformed(evt);
+            }
+        });
+
+        jLabelTags.setText("Tags");
+
+        jTextFieldTags.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldTagsActionPerformed(evt);
+            }
+        });
+
+        jLabelDate.setText("Date");
+
+        jFormattedTextFieldDate.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("yyyy-MM-dd"))));
+        jFormattedTextFieldDate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jFormattedTextFieldDateActionPerformed(evt);
+            }
+        });
+
+        jButtonAddComponent.setText("Add component");
+        jButtonAddComponent.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonAddComponentActionPerformed(evt);
+            }
+        });
+
+        jButtonDeleteComponent.setText("Delete component");
+        jButtonDeleteComponent.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDeleteComponentActionPerformed(evt);
+            }
+        });
+
+        jTableComponents.setModel(new TransactionComponentsTableModel());
+        jTableComponents.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jScrollPaneComponents.setViewportView(jTableComponents);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(70, 70, 70))
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jButtonAddComponent)
+                .addGap(18, 18, 18)
+                .addComponent(jButtonDeleteComponent)
+                .addContainerGap())
+            .addComponent(jScrollPaneComponents, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jButtonNewExpenseIncome)
+                .addGap(18, 18, 18)
+                .addComponent(jButtonNewTransfer)
+                .addGap(0, 0, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabelTags)
+                    .addComponent(jLabelDate)
+                    .addComponent(jLabelName))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jTextFieldName)
+                    .addComponent(jTextFieldTags, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jFormattedTextFieldDate, javax.swing.GroupLayout.Alignment.TRAILING)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-            .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonNewExpenseIncome)
+                    .addComponent(jButtonNewTransfer))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelName)
+                    .addComponent(jTextFieldName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelTags)
+                    .addComponent(jTextFieldTags, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelDate)
+                    .addComponent(jFormattedTextFieldDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonAddComponent)
+                    .addComponent(jButtonDeleteComponent))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPaneComponents, javax.swing.GroupLayout.DEFAULT_SIZE, 272, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButtonNewExpenseIncomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewExpenseIncomeActionPerformed
+		saveChanges();
+		editTransaction(new ExpenseTransaction("", new String[0], new Date()));
+		financeData.createTransaction(editedTransaction);
+    }//GEN-LAST:event_jButtonNewExpenseIncomeActionPerformed
+
+    private void jButtonDeleteComponentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteComponentActionPerformed
+		if (jTableComponents.getSelectedRow() >= 0)
+			((TransactionComponentsTableModel) jTableComponents.getModel()).deleteComponent(jTableComponents.getSelectedRow());
+    }//GEN-LAST:event_jButtonDeleteComponentActionPerformed
+
+    private void jButtonAddComponentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddComponentActionPerformed
+		((TransactionComponentsTableModel) jTableComponents.getModel()).addCompoment();
+    }//GEN-LAST:event_jButtonAddComponentActionPerformed
+
+    private void jTextFieldNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldNameActionPerformed
+		saveChanges();
+    }//GEN-LAST:event_jTextFieldNameActionPerformed
+
+    private void jTextFieldTagsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldTagsActionPerformed
+		saveChanges();
+    }//GEN-LAST:event_jTextFieldTagsActionPerformed
+
+    private void jFormattedTextFieldDateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFormattedTextFieldDateActionPerformed
+		saveChanges();
+    }//GEN-LAST:event_jFormattedTextFieldDateActionPerformed
+
+    private void jButtonNewTransferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewTransferActionPerformed
+		saveChanges();
+		editTransaction(new TransferTransaction("", new String[0], new Date()));
+		financeData.createTransaction(editedTransaction);
+    }//GEN-LAST:event_jButtonNewTransferActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JFormattedTextField jFormattedTextField1;
-    private javax.swing.JList jList1;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JButton jButtonAddComponent;
+    private javax.swing.JButton jButtonDeleteComponent;
+    private javax.swing.JButton jButtonNewExpenseIncome;
+    private javax.swing.JButton jButtonNewTransfer;
+    private javax.swing.JFormattedTextField jFormattedTextFieldDate;
+    private javax.swing.JLabel jLabelDate;
+    private javax.swing.JLabel jLabelName;
+    private javax.swing.JLabel jLabelTags;
+    private javax.swing.JScrollPane jScrollPaneComponents;
+    private javax.swing.JTable jTableComponents;
+    private javax.swing.JTextField jTextFieldName;
+    private javax.swing.JTextField jTextFieldTags;
     // End of variables declaration//GEN-END:variables
+	protected FinanceData financeData;
+	protected FinanceTransaction editedTransaction;
 
-	@Override
-	public JComponent getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-		table.setRowHeight(row,isSelected?(int)this.getPreferredSize().getHeight():table.getRowHeight());
-		if(isSelected)
-			return this;
-		return (JComponent) table.getDefaultRenderer(String.class).getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+	protected void resetInput() {
+		jTextFieldName.setText("");
+		jTextFieldTags.setText("");
+		jFormattedTextFieldDate.setText("");
+		((TransactionComponentsTableModel) jTableComponents.getModel()).setTransaction(null);
+
+		jTextFieldName.setEnabled(editedTransaction != null);
+		jTextFieldName.setEditable(editedTransaction != null);
+		jTextFieldTags.setEnabled(editedTransaction != null);
+		jTextFieldTags.setEditable(editedTransaction != null);
+		jFormattedTextFieldDate.setEnabled(editedTransaction != null);
+		jFormattedTextFieldDate.setEditable(editedTransaction != null);
 	}
 
-	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-		table.setRowHeight(row,isSelected?(int)this.getPreferredSize().getHeight():table.getRowHeight());
-		if(isSelected)
-			return this;
-		return (JComponent) table.getDefaultEditor(String.class).getTableCellEditorComponent(table, value, isSelected, row, column);
+	public void setFinanceData(FinanceData financeData) {
+		this.financeData = financeData;
+		((TransactionComponentsTableModel) jTableComponents.getModel()).setFinanceData(financeData);
 	}
 
-	@Override
-	public Object getCellEditorValue() {
-		throw new UnsupportedOperationException("Not supported yet.");
+	public void updateAccountsCombo() {
+		jTableComponents.getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(new JComboBox(((TransactionComponentsTableModel) jTableComponents.getModel()).getAccountsComboList())));
 	}
 
-	@Override
-	public boolean isCellEditable(EventObject anEvent) {
-		throw new UnsupportedOperationException("Not supported yet.");
+	public void editTransaction(FinanceTransaction transaction) {
+		if(jTableComponents.getCellEditor()!=null)
+			jTableComponents.getCellEditor().cancelCellEditing();
+		saveChanges();
+		editedTransaction = transaction;
+		resetInput();
+		if (transaction != null) {
+			jTextFieldName.setText(transaction.getDescription());
+			jTextFieldTags.setText(Utils.join(((FinanceTransaction) transaction).getTags(), ","));
+			jFormattedTextFieldDate.setText(MessageFormat.format("{0,date,yyyy-MM-dd}", new Object[]{transaction.getDate()}));
+			((TransactionComponentsTableModel) jTableComponents.getModel()).setTransaction(transaction);
+		}
 	}
 
-	@Override
-	public boolean shouldSelectCell(EventObject anEvent) {
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	@Override
-	public boolean stopCellEditing() {
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	@Override
-	public void cancelCellEditing() {
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	@Override
-	public void addCellEditorListener(CellEditorListener l) {
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	@Override
-	public void removeCellEditorListener(CellEditorListener l) {
-		throw new UnsupportedOperationException("Not supported yet.");
+	protected void saveChanges() {
+		if (editedTransaction != null) {
+			financeData.setTransactionDescription(editedTransaction, jTextFieldName.getText());
+			financeData.setTransactionTags(editedTransaction, jTextFieldTags.getText().split(","));
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			try {
+				financeData.setTransactionDate(editedTransaction, dateFormat.parse(jFormattedTextFieldDate.getText()));
+			} catch (ParseException ex) {
+				//TODO: warn user?
+				Logger.getLogger(TransactionEditor.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
 	}
 }

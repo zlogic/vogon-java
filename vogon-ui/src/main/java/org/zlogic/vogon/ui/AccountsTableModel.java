@@ -128,5 +128,11 @@ public class AccountsTableModel extends AbstractTableModel {
 	public Class getColumnClass(int c) {
 		return getValueAt(0, c).getClass();
 	}
+	
+	
+	@Override
+	public boolean isCellEditable(int rowIndex, int columnIndex) {
+		return columnIndex==0 || columnIndex==2;
+	}
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 }
