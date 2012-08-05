@@ -7,13 +7,13 @@ package org.zlogic.vogon.ui;
 
 import java.io.File;
 import java.text.MessageFormat;
-import java.util.Enumeration;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.table.TableColumn;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import org.zlogic.vogon.data.CsvImporter;
 import org.zlogic.vogon.data.DatabaseManager;
 import org.zlogic.vogon.data.FileImporter;
@@ -26,7 +26,8 @@ import org.zlogic.vogon.data.XmlImporter;
  *
  * @author Zlogic
  */
-public class MainWindow extends javax.swing.JFrame {
+public class MainWindow extends javax.swing.JFrame implements FinanceData.TransactionCreatedEventListener {
+
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 
 	/**
@@ -34,14 +35,33 @@ public class MainWindow extends javax.swing.JFrame {
 	 */
 	public MainWindow() {
 		initComponents();
+		initCustomComponents();
+	}
+
+	private void initCustomComponents() {
 		//Restore settings
 		lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null : new java.io.File(preferenceStorage.get("lastDirectory", null)); //NOI18N
 
 		//Load data from DB
 		((TransactionsTableModel) jTableTransactions.getModel()).setFinanceData(financeData);
 		((AccountsTableModel) jTableAccounts.getModel()).setFinanceData(financeData);
-		jTableTransactions.getColumnModel().getColumn(0).setCellRenderer(new TransactionEditor());
-		jTableTransactions.getColumnModel().getColumn(0).setCellEditor(new TransactionEditor());
+		transactionEditor.setFinanceData(financeData);
+		transactionEditor.updateAccountsCombo();
+		financeData.addTransactionCreatedListener((TransactionsTableModel) jTableTransactions.getModel());
+		financeData.addTransactionUpdatedListener((TransactionsTableModel) jTableTransactions.getModel());
+		financeData.addTransactionCreatedListener(this);
+
+		jTableTransactions.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				if (jTableTransactions.getSelectedRow() >= 0)
+					transactionEditor.editTransaction(financeData.getTransactions().get(jTableTransactions.getSelectedRow()));
+				else
+					transactionEditor.editTransaction(null);
+			}
+		});
+
+
 	}
 
 	/**
@@ -55,11 +75,11 @@ public class MainWindow extends javax.swing.JFrame {
 
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanelTransactions = new javax.swing.JPanel();
+        jSplitPane1 = new javax.swing.JSplitPane();
+        transactionEditor = new org.zlogic.vogon.ui.TransactionEditor();
+        jPanelTransactionsList = new javax.swing.JPanel();
         jPanelTransactionControls = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
+        jButtonDeleteTransaction = new javax.swing.JButton();
         jScrollPaneTransactions = new javax.swing.JScrollPane();
         jTableTransactions = new javax.swing.JTable();
         jPanelAccounts = new javax.swing.JPanel();
@@ -96,31 +116,33 @@ public class MainWindow extends javax.swing.JFrame {
 
         jPanelTransactions.setLayout(new java.awt.BorderLayout());
 
+        jSplitPane1.setDividerLocation(300);
+        jSplitPane1.setTopComponent(transactionEditor);
+
+        jPanelTransactionsList.setLayout(new java.awt.BorderLayout());
+
         jPanelTransactionControls.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        jButton1.setText("Add income/expense transaction");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        jButtonDeleteTransaction.setText("Delete");
+        jButtonDeleteTransaction.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                jButtonDeleteTransactionActionPerformed(evt);
             }
         });
-        jPanelTransactionControls.add(jButton1);
+        jPanelTransactionControls.add(jButtonDeleteTransaction);
 
-        jButton2.setText("Add transfer transaction");
-        jPanelTransactionControls.add(jButton2);
+        jPanelTransactionsList.add(jPanelTransactionControls, java.awt.BorderLayout.NORTH);
 
-        jButton3.setText("Add component");
-        jPanelTransactionControls.add(jButton3);
-
-        jButton4.setText("Delete selection");
-        jPanelTransactionControls.add(jButton4);
-
-        jPanelTransactions.add(jPanelTransactionControls, java.awt.BorderLayout.NORTH);
-
+        jTableTransactions.setAutoCreateRowSorter(true);
         jTableTransactions.setModel(new TransactionsTableModel());
+        jTableTransactions.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPaneTransactions.setViewportView(jTableTransactions);
 
-        jPanelTransactions.add(jScrollPaneTransactions, java.awt.BorderLayout.CENTER);
+        jPanelTransactionsList.add(jScrollPaneTransactions, java.awt.BorderLayout.CENTER);
+
+        jSplitPane1.setBottomComponent(jPanelTransactionsList);
+
+        jPanelTransactions.add(jSplitPane1, java.awt.BorderLayout.CENTER);
 
         jTabbedPane1.addTab(messages.getString("TRANSACTIONS"), jPanelTransactions); // NOI18N
 
@@ -242,12 +264,21 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItemImportActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-		DatabaseManager.getInstance().shutdown();
+		try {
+			transactionEditor.saveChanges();
+			DatabaseManager.getInstance().shutdown();
+		} catch (Exception ex) {
+			Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+		}
     }//GEN-LAST:event_formWindowClosing
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void jButtonDeleteTransactionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteTransactionActionPerformed
+		int selectedRow = jTableTransactions.getSelectedRow();
+		if (selectedRow >= 0) {
+			transactionEditor.editTransaction(null);
+			((TransactionsTableModel) jTableTransactions.getModel()).deleteTransaction(selectedRow);
+		}
+    }//GEN-LAST:event_jButtonDeleteTransactionActionPerformed
 
 	/**
 	 * @param args the command line arguments
@@ -285,12 +316,9 @@ public class MainWindow extends javax.swing.JFrame {
 		});
 	}
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButtonDeleteTransaction;
     private javax.swing.JComboBox jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JMenuBar jMenuBar;
@@ -306,13 +334,16 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel jPanelCurrenciesControls;
     private javax.swing.JPanel jPanelTransactionControls;
     private javax.swing.JPanel jPanelTransactions;
+    private javax.swing.JPanel jPanelTransactionsList;
     private javax.swing.JScrollPane jScrollPaneAccounts;
     private javax.swing.JScrollPane jScrollPaneCurrencies;
     private javax.swing.JScrollPane jScrollPaneTransactions;
+    private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTable jTableAccounts;
     private javax.swing.JTable jTableCurrencies;
     private javax.swing.JTable jTableTransactions;
+    private org.zlogic.vogon.ui.TransactionEditor transactionEditor;
     // End of variables declaration//GEN-END:variables
 	/**
 	 * Last opened directory
@@ -326,4 +357,11 @@ public class MainWindow extends javax.swing.JFrame {
 	 * Finance Data instance
 	 */
 	protected FinanceData financeData = new FinanceData();
+
+	@Override
+	public void transactionCreated(FinanceTransaction newTransaction) {
+		int newTransactionIndex = financeData.getTransactions().indexOf(newTransaction);
+		jTableTransactions.getSelectionModel().setSelectionInterval(newTransactionIndex, newTransactionIndex);
+		jTableTransactions.scrollRectToVisible(jTableTransactions.getCellRect(newTransactionIndex, 0, true));
+	}
 }
