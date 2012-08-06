@@ -44,6 +44,32 @@ public class CurrenciesTableModel extends AbstractTableModel {
 	}
 
 	@Override
+	public String getColumnName(int col) {
+		switch (col) {
+			case 0:
+				return messages.getString("SOURCE_CURRENCY");
+			case 1:
+				return messages.getString("DESTINATION_CURRENCY");
+			case 2:
+				return messages.getString("EXCHANGE_RATE");
+		}
+		return null;
+	}
+
+	
+	@Override
+	public Class<?> getColumnClass(int columnIndex) {
+		switch (columnIndex) {
+			case 0:
+			case 1:
+				return String.class;
+			case 2:
+				return Double.class;
+		}
+		return Object.class;
+	}
+	
+	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		CurrencyRate rate = financeData.getCurrencyRates().get(rowIndex);
 		switch (columnIndex) {
@@ -58,18 +84,15 @@ public class CurrenciesTableModel extends AbstractTableModel {
 	}
 
 	@Override
-	public String getColumnName(int col) {
-		switch (col) {
-			case 0:
-				return messages.getString("SOURCE_CURRENCY");
-			case 1:
-				return messages.getString("DESTINATION_CURRENCY");
-			case 2:
-				return messages.getString("EXCHANGE_RATE");
+	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+		if(columnIndex==2){
+			CurrencyRate rate = financeData.getCurrencyRates().get(rowIndex);
+			financeData.setExchangeRate(rate, (Double)aValue);
+			fireTableDataChanged();
 		}
-		return null;
 	}
-
+	
+	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
 		return columnIndex == 2;
 	}

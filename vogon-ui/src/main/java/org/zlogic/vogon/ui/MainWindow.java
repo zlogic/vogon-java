@@ -5,10 +5,9 @@
  */
 package org.zlogic.vogon.ui;
 
+import java.awt.event.ItemEvent;
 import java.io.File;
 import java.text.MessageFormat;
-import java.util.Currency;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -181,6 +180,11 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
         jLabelDefaultCurrency.setText("Default currency");
         jPanelCurrenciesControls.add(jLabelDefaultCurrency);
 
+        jComboBoxDefaultCurrency.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxDefaultCurrencyItemStateChanged(evt);
+            }
+        });
         jPanelCurrenciesControls.add(jComboBoxDefaultCurrency);
 
         jPanelCurrencies.add(jPanelCurrenciesControls, java.awt.BorderLayout.NORTH);
@@ -333,6 +337,14 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		updateTransactions();
     }//GEN-LAST:event_jMenuItemCleanupDBActionPerformed
 
+    private void jComboBoxDefaultCurrencyItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxDefaultCurrencyItemStateChanged
+        if(evt.getStateChange()==ItemEvent.SELECTED && jComboBoxDefaultCurrency.isEnabled()){
+			CurrenciesTableModel.CurrencyComboItem selectedItem = (CurrenciesTableModel.CurrencyComboItem)evt.getItem();
+			if(selectedItem!=null)
+				financeData.setDefaultCurrency(selectedItem.getCurrency());
+		}
+    }//GEN-LAST:event_jComboBoxDefaultCurrencyItemStateChanged
+
 	/**
 	 * @param args the command line arguments
 	 */
@@ -428,13 +440,14 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 	}
 
 	protected void updateCurrencyCombo() {
-		List<Currency> currencies = financeData.getCurrencies();
 		jComboBoxDefaultCurrency.removeAllItems();
+		jComboBoxDefaultCurrency.setEnabled(false);
 		for (Object currency : ((CurrenciesTableModel) jTableCurrencies.getModel()).getCurrenciesComboList())
 			jComboBoxDefaultCurrency.addItem(currency);
 		if (financeData.getDefaultCurrency() != null)
 			jComboBoxDefaultCurrency.setSelectedItem(((CurrenciesTableModel) jTableCurrencies.getModel()).getDefaultCurrency());
 		else
 			jComboBoxDefaultCurrency.setSelectedItem(-1);
+		jComboBoxDefaultCurrency.setEnabled(true);
 	}
 }
