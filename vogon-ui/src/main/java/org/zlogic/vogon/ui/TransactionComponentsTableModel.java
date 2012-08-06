@@ -86,10 +86,12 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 		fireTableDataChanged();
 	}
 
+	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
 		return true;
 	}
 
+	@Override
 	public Class<?> getColumnClass(int columnIndex) {
 		switch (columnIndex) {
 			case 0:
@@ -116,6 +118,7 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 			this.account = account;
 		}
 
+		@Override
 		public String toString() {
 			if (account != null)
 				return account.getName();
@@ -123,6 +126,7 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 				return messages.getString("INVALID_ACCOUNT");
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			return obj instanceof FinanceAccountComboItem && account == ((FinanceAccountComboItem) obj).account;
 		}
