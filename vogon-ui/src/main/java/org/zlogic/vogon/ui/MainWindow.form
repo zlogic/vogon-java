@@ -226,11 +226,17 @@
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Add account"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonAddAccountActionPerformed"/>
+                  </Events>
                 </Component>
                 <Component class="javax.swing.JButton" name="jButtonDeleteAccount">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Delete account"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonDeleteAccountActionPerformed"/>
+                  </Events>
                 </Component>
               </SubComponents>
             </Container>

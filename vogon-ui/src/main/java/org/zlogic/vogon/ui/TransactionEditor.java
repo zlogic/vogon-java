@@ -5,18 +5,14 @@
  */
 package org.zlogic.vogon.ui;
 
-import java.awt.Component;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.AbstractCellEditor;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
-import javax.swing.JTable;
-import javax.swing.table.TableCellEditor;
 import org.zlogic.vogon.data.ExpenseTransaction;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
@@ -25,10 +21,11 @@ import org.zlogic.vogon.data.Utils;
 
 /**
  * Transaction editor form. Interacts with model directly.
- * 
+ *
  * @author Zlogic
  */
 public class TransactionEditor extends javax.swing.JPanel {
+
 	/**
 	 * Creates new form TransactionEditor
 	 */
@@ -187,7 +184,8 @@ public class TransactionEditor extends javax.swing.JPanel {
     }//GEN-LAST:event_jButtonDeleteComponentActionPerformed
 
     private void jButtonAddComponentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddComponentActionPerformed
-		((TransactionComponentsTableModel) jTableComponents.getModel()).addCompoment();
+		int newComponentIndex = ((TransactionComponentsTableModel) jTableComponents.getModel()).addCompoment();
+		jTableComponents.setRowSelectionInterval(newComponentIndex, newComponentIndex);
     }//GEN-LAST:event_jButtonAddComponentActionPerformed
 
     private void jTextFieldNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldNameActionPerformed
@@ -248,7 +246,7 @@ public class TransactionEditor extends javax.swing.JPanel {
 	}
 
 	public void editTransaction(FinanceTransaction transaction) {
-		if(jTableComponents.getCellEditor()!=null)
+		if (jTableComponents.getCellEditor() != null)
 			jTableComponents.getCellEditor().cancelCellEditing();
 		saveChanges();
 		editedTransaction = transaction;

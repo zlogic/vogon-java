@@ -56,7 +56,6 @@ public class CurrenciesTableModel extends AbstractTableModel {
 		return null;
 	}
 
-	
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
 		switch (columnIndex) {
@@ -68,7 +67,7 @@ public class CurrenciesTableModel extends AbstractTableModel {
 		}
 		return Object.class;
 	}
-	
+
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		CurrencyRate rate = financeData.getCurrencyRates().get(rowIndex);
@@ -85,13 +84,13 @@ public class CurrenciesTableModel extends AbstractTableModel {
 
 	@Override
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-		if(columnIndex==2){
+		if (columnIndex == 2) {
 			CurrencyRate rate = financeData.getCurrencyRates().get(rowIndex);
-			financeData.setExchangeRate(rate, (Double)aValue);
-			fireTableDataChanged();
+			financeData.setExchangeRate(rate, (Double) aValue);
+			fireTableRowsUpdated(rowIndex, rowIndex);
 		}
 	}
-	
+
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
 		return columnIndex == 2;

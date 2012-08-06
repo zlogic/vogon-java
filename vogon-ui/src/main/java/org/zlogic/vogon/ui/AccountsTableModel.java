@@ -105,9 +105,9 @@ public class AccountsTableModel extends AbstractTableModel {
 				case 0:
 					return account.getName();
 				case 1:
-					return MessageFormat.format("{0,number,0.00}", new Object[]{account.getBalance()});
+					return account.getBalance();
 				case 2:
-					return account.getCurrency().getDisplayName();
+					return new CurrencyComboItem(account.getCurrency());
 			}
 		} else {
 			row -= data.getAccounts().size();
@@ -116,9 +116,9 @@ public class AccountsTableModel extends AbstractTableModel {
 				case 0:
 					return account.formatString(account.getName());
 				case 1:
-					return account.formatString(MessageFormat.format("{0,number,0.00}", new Object[]{account.getAmount()}));
+					return account.getAmount();
 				case 2:
-					return account.formatString(account.getCurrency().getDisplayName());
+					return new CurrencyComboItem(account.getCurrency());
 			}
 		}
 		return null;
@@ -126,12 +126,81 @@ public class AccountsTableModel extends AbstractTableModel {
 
 	@Override
 	public Class getColumnClass(int c) {
-		return getValueAt(0, c).getClass();
+		switch (c) {
+			case 0:
+				return String.class;
+			case 1:
+				return Double.class;
+			case 2:
+				return CurrencyComboItem.class;
+		}
+		return null;
+	}
+
+	@Override
+	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+		FinanceAccount account = data.getAccounts().get(rowIndex);
+		switch (columnIndex) {
+			case 0:
+				data.setAccountName(account, (String) aValue);
+				break;
+			case 2:
+				data.setAccountCurrency(account, ((CurrencyComboItem) aValue).getCurrency());
+				break;
+		}
+		fireTableRowsUpdated(rowIndex, rowIndex);
 	}
 
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return columnIndex == 0 || columnIndex == 2;
+		return rowIndex < data.getAccounts().size() && (columnIndex == 0 || columnIndex == 2);
 	}
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
+
+	public Object[] getCurrenciesComboList() {
+		List<CurrencyComboItem> items = new LinkedList<>();
+		for (Currency currency : Currency.getAvailableCurrencies())
+			items.add(new CurrencyComboItem(currency));
+
+		return items.toArray();
+	}
+
+	public int addAccount() {
+		data.createAccount(new FinanceAccount("", data.getDefaultCurrency()));
+		fireTableRowsInserted(data.getAccounts().size() - 1, data.getAccounts().size() - 1);
+		return data.getAccounts().size() - 1;
+	}
+
+	public void deleteAccount(int rowIndex) {
+		if (rowIndex < data.getAccounts().size()) {
+			data.deleteAccount(data.getAccounts().get(rowIndex));
+			fireTableRowsDeleted(rowIndex, rowIndex);
+		}
+	}
+
+	protected class CurrencyComboItem {
+
+		private Currency currency;
+
+		public CurrencyComboItem(Currency currency) {
+			this.currency = currency;
+		}
+
+		@Override
+		public String toString() {
+			if (currency != null)
+				return currency.getDisplayName();
+			else
+				return "";
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			return obj instanceof CurrencyComboItem && currency == ((CurrencyComboItem) obj).currency;
+		}
+
+		public Currency getCurrency() {
+			return currency;
+		}
+	}
 }
