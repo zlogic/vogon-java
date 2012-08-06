@@ -86,7 +86,7 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 					FinanceAccount[] accounts = ((ExpenseTransaction) transaction).getAccounts();
 					StringBuilder builder = new StringBuilder();
 					for (int i = 0; i < accounts.length; i++)
-						builder.append(i != 0 ? "," : "").append(accounts[i]!=null?accounts[i].getName():messages.getString("INVALID_ACCOUNT"));
+						builder.append(i != 0 ? "," : "").append(accounts[i] != null ? accounts[i].getName() : messages.getString("INVALID_ACCOUNT"));
 					return builder.toString();
 				} else if (transaction.getClass() == TransferTransaction.class) {
 					FinanceAccount[] toAccounts = ((TransferTransaction) transaction).getToAccounts();
@@ -95,7 +95,7 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 					if (fromAccounts.length > 1) {
 						builder.append("(");
 						for (int i = 0; i < fromAccounts.length; i++)
-							builder.append(i != 0 ? "," : "").append(fromAccounts[i]!=null?fromAccounts[i].getName():messages.getString("INVALID_ACCOUNT"));
+							builder.append(i != 0 ? "," : "").append(fromAccounts[i] != null ? fromAccounts[i].getName() : messages.getString("INVALID_ACCOUNT"));
 						builder.append(")");
 					} else if (fromAccounts.length == 1)
 						builder.append(fromAccounts[0].getName());
@@ -103,7 +103,7 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 					if (toAccounts.length > 1) {
 						builder.append("(");
 						for (int i = 0; i < toAccounts.length; i++)
-							builder.append(i != 0 ? "," : "").append(toAccounts[i]!=null?toAccounts[i].getName():messages.getString("INVALID_ACCOUNT"));
+							builder.append(i != 0 ? "," : "").append(toAccounts[i] != null ? toAccounts[i].getName() : messages.getString("INVALID_ACCOUNT"));
 						builder.append(")");
 					} else if (toAccounts.length == 1)
 						builder.append(toAccounts[0].getName());

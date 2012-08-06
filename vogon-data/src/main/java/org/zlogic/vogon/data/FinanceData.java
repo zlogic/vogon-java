@@ -318,6 +318,20 @@ public class FinanceData {
 	}
 
 	/**
+	 * Adds a new account
+	 *
+	 * @param transaction the account to be added
+	 */
+	public void createAccount(FinanceAccount account) {
+		EntityManager entityManager = currentEntityManager;
+		entityManager.getTransaction().begin();
+
+		persistenceAdd(account, entityManager);
+
+		entityManager.getTransaction().commit();
+	}
+
+	/**
 	 * Sets a new account name. Adds the account to the persistence if needed.
 	 *
 	 * @param account The account to be updated
@@ -737,7 +751,7 @@ public class FinanceData {
 		currentEntityManager.getTransaction().commit();
 
 		restoreFromDatabase();
-		
+
 		fireTransactionsUpdated();
 	}
 

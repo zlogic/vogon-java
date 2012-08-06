@@ -14,6 +14,7 @@ import org.zlogic.vogon.data.TransactionComponent;
 
 /**
  * Transaction components table model class
+ *
  * @author Zlogic
  */
 public class TransactionComponentsTableModel extends AbstractTableModel {
@@ -83,7 +84,7 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 				financeData.setTransactionComponentAmount(component, (double) aValue);
 				break;
 		}
-		fireTableDataChanged();
+		fireTableRowsUpdated(rowIndex, rowIndex);
 	}
 
 	@Override
@@ -136,9 +137,10 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 		}
 	}
 
-	public void addCompoment() {
+	public int addCompoment() {
 		editingTransaction.addComponent(new TransactionComponent(null, editingTransaction, 0));
 		fireTableRowsInserted(getRowCount() - 1, getRowCount() - 1);
+		return getRowCount() - 1;
 	}
 
 	public void deleteComponent(int rowIndex) {

@@ -11,6 +11,8 @@ import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
@@ -67,7 +69,9 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 			}
 		});
 
-		updateCurrencyCombo();
+		updateDefaultCurrencyCombo();
+
+		jTableAccounts.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(new JComboBox(((AccountsTableModel) jTableAccounts.getModel()).getCurrenciesComboList())));
 	}
 
 	/**
@@ -157,9 +161,19 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
         jPanelAccountsControls.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
         jButtonAddAccount.setText("Add account");
+        jButtonAddAccount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonAddAccountActionPerformed(evt);
+            }
+        });
         jPanelAccountsControls.add(jButtonAddAccount);
 
         jButtonDeleteAccount.setText("Delete account");
+        jButtonDeleteAccount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDeleteAccountActionPerformed(evt);
+            }
+        });
         jPanelAccountsControls.add(jButtonDeleteAccount);
 
         jPanelAccounts.add(jPanelAccountsControls, java.awt.BorderLayout.NORTH);
@@ -338,12 +352,22 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
     }//GEN-LAST:event_jMenuItemCleanupDBActionPerformed
 
     private void jComboBoxDefaultCurrencyItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxDefaultCurrencyItemStateChanged
-        if(evt.getStateChange()==ItemEvent.SELECTED && jComboBoxDefaultCurrency.isEnabled()){
-			CurrenciesTableModel.CurrencyComboItem selectedItem = (CurrenciesTableModel.CurrencyComboItem)evt.getItem();
-			if(selectedItem!=null)
+		if (evt.getStateChange() == ItemEvent.SELECTED && jComboBoxDefaultCurrency.isEnabled()) {
+			CurrenciesTableModel.CurrencyComboItem selectedItem = (CurrenciesTableModel.CurrencyComboItem) evt.getItem();
+			if (selectedItem != null)
 				financeData.setDefaultCurrency(selectedItem.getCurrency());
 		}
     }//GEN-LAST:event_jComboBoxDefaultCurrencyItemStateChanged
+
+    private void jButtonAddAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddAccountActionPerformed
+		int newAccountIndex = ((AccountsTableModel) jTableAccounts.getModel()).addAccount();
+		jTableAccounts.setRowSelectionInterval(newAccountIndex, newAccountIndex);
+    }//GEN-LAST:event_jButtonAddAccountActionPerformed
+
+    private void jButtonDeleteAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteAccountActionPerformed
+		if (jTableAccounts.getSelectedRow() >= 0)
+			((AccountsTableModel) jTableAccounts.getModel()).deleteAccount(jTableAccounts.getSelectedRow());
+    }//GEN-LAST:event_jButtonDeleteAccountActionPerformed
 
 	/**
 	 * @param args the command line arguments
@@ -439,7 +463,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		((TransactionsTableModel) jTableTransactions.getModel()).fireTableDataChanged();
 	}
 
-	protected void updateCurrencyCombo() {
+	protected void updateDefaultCurrencyCombo() {
 		jComboBoxDefaultCurrency.removeAllItems();
 		jComboBoxDefaultCurrency.setEnabled(false);
 		for (Object currency : ((CurrenciesTableModel) jTableCurrencies.getModel()).getCurrenciesComboList())
