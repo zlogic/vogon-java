@@ -72,6 +72,9 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		updateDefaultCurrencyCombo();
 
 		jTableAccounts.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(new JComboBox(((AccountsTableModel) jTableAccounts.getModel()).getCurrenciesComboList())));
+		jTableAccounts.getColumnModel().getColumn(1).setCellRenderer(SumTableCell.getRenderer());
+
+		jTableTransactions.getColumnModel().getColumn(3).setCellRenderer(SumTableCell.getRenderer());
 	}
 
 	/**

@@ -36,6 +36,9 @@ public class TransactionEditor extends javax.swing.JPanel {
 
 	private void initCustomComponents() {
 		resetInput();
+
+		jTableComponents.getColumnModel().getColumn(1).setCellRenderer(SumTableCell.getRenderer());
+		jTableComponents.getColumnModel().getColumn(1).setCellEditor(SumTableCell.getEditor());
 	}
 
 	/**

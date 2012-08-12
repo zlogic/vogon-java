@@ -7,6 +7,7 @@ package org.zlogic.vogon.data;
 
 import java.util.Currency;
 import java.util.Date;
+import java.util.EventListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -15,6 +16,7 @@ import javax.persistence.Transient;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.swing.event.EventListenerList;
 
 /**
  * Class for storing the complete finance data
@@ -803,7 +805,7 @@ public class FinanceData {
 	/**
 	 * Listener for transaction created events
 	 */
-	public interface TransactionCreatedEventListener {
+	public interface TransactionCreatedEventListener extends EventListener {
 
 		/**
 		 * A transaction created callback
@@ -816,7 +818,7 @@ public class FinanceData {
 	/**
 	 * Listener for transaction updated events
 	 */
-	public interface TransactionUpdatedEventListener {
+	public interface TransactionUpdatedEventListener extends EventListener {
 
 		/**
 		 * A transaction updated callback
@@ -834,7 +836,7 @@ public class FinanceData {
 	/**
 	 * Listener for transaction deleted events
 	 */
-	public interface TransactionDeletedEventListener {
+	public interface TransactionDeletedEventListener extends EventListener {
 
 		/**
 		 * A transaction deleted callback
@@ -844,20 +846,10 @@ public class FinanceData {
 		void transactionDeleted(FinanceTransaction deletedTransaction);
 	}
 	/**
-	 * List of transaction created listeners
+	 * List of event listeners
 	 */
 	@Transient
-	protected List<TransactionCreatedEventListener> transactionCreatedListeners = new LinkedList<>();
-	/**
-	 * List of transaction updated listeners
-	 */
-	@Transient
-	protected List<TransactionUpdatedEventListener> transactionUpdatedListeners = new LinkedList<>();
-	/**
-	 * List of transaction deleted listeners
-	 */
-	@Transient
-	protected List<TransactionDeletedEventListener> transactionDeletedListeners = new LinkedList<>();
+	protected EventListenerList eventListeners = new EventListenerList();
 
 	/**
 	 * Dispatches a transaction updated event
@@ -865,7 +857,7 @@ public class FinanceData {
 	 * @param editedTransaction the transaction that was updated
 	 */
 	protected void fireTransactionUpdated(FinanceTransaction editedTransaction) {
-		for (TransactionUpdatedEventListener listener : transactionUpdatedListeners)
+		for (TransactionUpdatedEventListener listener : eventListeners.getListeners(TransactionUpdatedEventListener.class))
 			listener.transactionUpdated(editedTransaction);
 	}
 
@@ -873,7 +865,7 @@ public class FinanceData {
 	 * Dispatches a transactions updated (all transactions were updated)
 	 */
 	protected void fireTransactionsUpdated() {
-		for (TransactionUpdatedEventListener listener : transactionUpdatedListeners)
+		for (TransactionUpdatedEventListener listener : eventListeners.getListeners(TransactionUpdatedEventListener.class))
 			listener.transactionsUpdated();
 	}
 
@@ -883,7 +875,7 @@ public class FinanceData {
 	 * @param newTransaction the transaction that was created
 	 */
 	protected void fireTransactionCreated(FinanceTransaction newTransaction) {
-		for (TransactionCreatedEventListener listener : transactionCreatedListeners)
+		for (TransactionCreatedEventListener listener : eventListeners.getListeners(TransactionCreatedEventListener.class))
 			listener.transactionCreated(newTransaction);
 	}
 
@@ -893,7 +885,7 @@ public class FinanceData {
 	 * @param deletedTransaction the transaction that was deleted
 	 */
 	protected void fireTransactionDeleted(FinanceTransaction deletedTransaction) {
-		for (TransactionDeletedEventListener listener : transactionDeletedListeners)
+		for (TransactionDeletedEventListener listener : eventListeners.getListeners(TransactionDeletedEventListener.class))
 			listener.transactionDeleted(deletedTransaction);
 	}
 
@@ -903,7 +895,7 @@ public class FinanceData {
 	 * @param listener the listener
 	 */
 	public void addTransactionCreatedListener(TransactionCreatedEventListener listener) {
-		transactionCreatedListeners.add(listener);
+		eventListeners.add(TransactionCreatedEventListener.class, listener);
 	}
 
 	/**
@@ -912,7 +904,7 @@ public class FinanceData {
 	 * @param listener the listener
 	 */
 	public void addTransactionUpdatedListener(TransactionUpdatedEventListener listener) {
-		transactionUpdatedListeners.add(listener);
+		eventListeners.add(TransactionUpdatedEventListener.class, listener);
 	}
 
 	/**
@@ -921,6 +913,6 @@ public class FinanceData {
 	 * @param listener the listener
 	 */
 	public void addTransactionDeletedListener(TransactionUpdatedEventListener listener) {
-		transactionUpdatedListeners.add(listener);
+		eventListeners.add(TransactionUpdatedEventListener.class, listener);
 	}
 }

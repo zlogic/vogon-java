@@ -105,7 +105,7 @@ public class AccountsTableModel extends AbstractTableModel {
 				case 0:
 					return account.getName();
 				case 1:
-					return account.getBalance();
+					return new SumTableCell(account.getBalance(), account.getCurrency());
 				case 2:
 					return new CurrencyComboItem(account.getCurrency());
 			}
@@ -116,7 +116,7 @@ public class AccountsTableModel extends AbstractTableModel {
 				case 0:
 					return account.formatString(account.getName());
 				case 1:
-					return account.getAmount();
+					return new SumTableCell(account.getAmount(), account.getCurrency());
 				case 2:
 					return new CurrencyComboItem(account.getCurrency());
 			}
@@ -130,7 +130,7 @@ public class AccountsTableModel extends AbstractTableModel {
 			case 0:
 				return String.class;
 			case 1:
-				return Double.class;
+				return SumTableCell.class;
 			case 2:
 				return CurrencyComboItem.class;
 		}
