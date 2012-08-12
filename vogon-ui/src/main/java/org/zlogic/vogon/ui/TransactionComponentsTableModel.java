@@ -64,11 +64,12 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
+		TransactionComponent component = editingTransaction.getComponents().get(rowIndex);
 		switch (columnIndex) {
 			case 0:
-				return new FinanceAccountComboItem(editingTransaction.getComponents().get(rowIndex).getAccount());
+				return new FinanceAccountComboItem(component.getAccount());
 			case 1:
-				return editingTransaction.getComponents().get(rowIndex).getAmount();
+				return new SumTableCell(component.getAmount(), component.getAccount() != null ? component.getAccount().getCurrency() : null);
 		}
 		return null;
 	}
@@ -81,7 +82,7 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 				financeData.setTransactionComponentAccount(component, ((FinanceAccountComboItem) aValue).getAccount());
 				break;
 			case 1:
-				financeData.setTransactionComponentAmount(component, (double) aValue);
+				financeData.setTransactionComponentAmount(component, Double.parseDouble((String) aValue));
 				break;
 		}
 		fireTableRowsUpdated(rowIndex, rowIndex);
@@ -98,7 +99,7 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 			case 0:
 				return FinanceAccountComboItem.class;
 			case 1:
-				return Double.class;
+				return SumTableCell.class;
 		}
 		return Object.class;
 	}

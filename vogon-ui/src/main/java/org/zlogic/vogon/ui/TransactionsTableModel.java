@@ -6,11 +6,15 @@
 package org.zlogic.vogon.ui;
 
 import java.text.MessageFormat;
+import java.util.Currency;
+import java.util.LinkedList;
+import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import org.zlogic.vogon.data.ExpenseTransaction;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
+import org.zlogic.vogon.data.TransactionComponent;
 import org.zlogic.vogon.data.TransferTransaction;
 
 /**
@@ -77,10 +81,20 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 			case 2:
 				return org.zlogic.vogon.data.Utils.join(transaction.getTags(), ",");
 			case 3:
-				if (transaction.getClass() == ExpenseTransaction.class)
-					return ((ExpenseTransaction) transaction).getAmount();
-				else if (transaction.getClass() == TransferTransaction.class)
-					return ((TransferTransaction) transaction).getAmount();
+				List<Currency> transactionCurrencies = new LinkedList<>();
+				for (TransactionComponent component : transaction.getComponents())
+					if (component.getAccount() != null && !transactionCurrencies.contains(component.getAccount().getCurrency()))
+						transactionCurrencies.add(component.getAccount().getCurrency());
+				Currency currency;
+				double amount;
+				if (transactionCurrencies.size() == 1) {
+					amount = transaction.getAmount();
+					currency = transactionCurrencies.get(0);
+				} else {
+					amount = data.getAmountInCurrency(transaction, data.getDefaultCurrency());
+					currency = data.getDefaultCurrency();
+				}
+				return new SumTableCell(amount, currency);
 			case 4:
 				if (transaction.getClass() == ExpenseTransaction.class) {
 					FinanceAccount[] accounts = ((ExpenseTransaction) transaction).getAccounts();
@@ -124,7 +138,7 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 			case 2:
 				return String.class;
 			case 3:
-				return Double.class;
+				return SumTableCell.class;
 			case 4:
 				return String.class;
 		}
