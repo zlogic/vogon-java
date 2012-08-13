@@ -226,20 +226,25 @@ public class FinanceData {
 	 *
 	 * @param transaction the transaction to be added
 	 * @param entityManager the entity manager
+	 * @return true if transaction was added, false if it's already present in the transactions list
 	 */
-	protected void persistenceAdd(FinanceTransaction transaction, EntityManager entityManager) {
+	protected boolean persistenceAdd(FinanceTransaction transaction, EntityManager entityManager) {
 		if (transaction == null)
-			return;
+			return false;
 
+		boolean result = false;
+		
 		if (!transactions.contains(transaction)) {
 			transactions.add(transaction);
 			for (TransactionComponent component : transaction.getComponents())
 				if (!entityManager.contains(component))
 					entityManager.persist(component);
+			result = true;
 		}
 
 		if (!entityManager.contains(transaction))
 			entityManager.persist(transaction);
+		return result;
 	}
 
 	/**
@@ -322,7 +327,7 @@ public class FinanceData {
 	/**
 	 * Adds a new account
 	 *
-	 * @param transaction the account to be added
+	 * @param account the account to be added
 	 */
 	public void createAccount(FinanceAccount account) {
 		EntityManager entityManager = currentEntityManager;
@@ -377,11 +382,12 @@ public class FinanceData {
 		EntityManager entityManager = currentEntityManager;
 		entityManager.getTransaction().begin();
 
-		persistenceAdd(transaction, entityManager);
+		boolean transactionAdded = persistenceAdd(transaction, entityManager);
 
 		entityManager.getTransaction().commit();
-
-		fireTransactionCreated(transaction);
+		
+		if(transactionAdded)
+			fireTransactionCreated(transaction);
 	}
 
 	/**
@@ -395,10 +401,12 @@ public class FinanceData {
 		entityManager.getTransaction().begin();
 		transaction.setTags(tags);
 
-		persistenceAdd(transaction, entityManager);
+		boolean transactionAdded = persistenceAdd(transaction, entityManager);
 
 		entityManager.getTransaction().commit();
 
+		if(transactionAdded)
+			fireTransactionCreated(transaction);
 		fireTransactionUpdated(transaction);
 	}
 
@@ -413,10 +421,12 @@ public class FinanceData {
 		entityManager.getTransaction().begin();
 		transaction.setDate(date);
 
-		persistenceAdd(transaction, entityManager);
+		boolean transactionAdded = persistenceAdd(transaction, entityManager);
 
 		entityManager.getTransaction().commit();
 
+		if(transactionAdded)
+			fireTransactionCreated(transaction);
 		fireTransactionUpdated(transaction);
 	}
 
@@ -431,10 +441,12 @@ public class FinanceData {
 		entityManager.getTransaction().begin();
 		transaction.setDescription(description);
 
-		persistenceAdd(transaction, entityManager);
+		boolean transactionAdded = persistenceAdd(transaction, entityManager);
 
 		entityManager.getTransaction().commit();
 
+		if(transactionAdded)
+			fireTransactionCreated(transaction);
 		fireTransactionUpdated(transaction);
 	}
 
@@ -455,12 +467,14 @@ public class FinanceData {
 
 		transaction.updateComponentRawAmount(component, Math.round(newAmount * 100));
 
-		persistenceAdd(transaction, entityManager);
+		boolean transactionAdded = persistenceAdd(transaction, entityManager);
 
 		if (!entityManager.contains(component))
 			entityManager.persist(component);
 		entityManager.getTransaction().commit();
 
+		if(transactionAdded)
+			fireTransactionCreated(transaction);
 		fireTransactionUpdated(transaction);
 	}
 
@@ -481,7 +495,7 @@ public class FinanceData {
 
 		transaction.updateComponentAccount(component, newAccount);
 
-		persistenceAdd(transaction, entityManager);
+		boolean transactionAdded = persistenceAdd(transaction, entityManager);
 
 		if (!entityManager.contains(component))
 			entityManager.persist(component);
@@ -490,6 +504,8 @@ public class FinanceData {
 
 		entityManager.getTransaction().commit();
 
+		if(transactionAdded)
+			fireTransactionCreated(transaction);
 		fireTransactionUpdated(transaction);
 	}
 
@@ -510,12 +526,14 @@ public class FinanceData {
 			component.getTransaction().addComponent(component);
 		}
 
-		persistenceAdd(component.getTransaction(), entityManager);
+		boolean transactionAdded = persistenceAdd(component.getTransaction(), entityManager);
 
 		if (!entityManager.contains(component))
 			entityManager.persist(component);
 		entityManager.getTransaction().commit();
 
+		if(transactionAdded)
+			fireTransactionCreated(component.getTransaction());
 		fireTransactionUpdated(component.getTransaction());
 	}
 
@@ -537,7 +555,7 @@ public class FinanceData {
 		}
 
 
-		persistenceAdd(component.getTransaction(), entityManager);
+		boolean transactionAdded = persistenceAdd(component.getTransaction(), entityManager);
 
 		if (!entityManager.contains(component))
 			entityManager.persist(component);
@@ -545,6 +563,8 @@ public class FinanceData {
 		persistenceAdd(newAccount, entityManager);
 		entityManager.getTransaction().commit();
 
+		if(transactionAdded)
+			fireTransactionCreated(component.getTransaction());
 		fireTransactionUpdated(component.getTransaction());
 	}
 

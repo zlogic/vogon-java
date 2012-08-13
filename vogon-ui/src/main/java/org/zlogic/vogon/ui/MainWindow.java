@@ -55,9 +55,9 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		((CurrenciesTableModel) jTableCurrencies.getModel()).setFinanceData(financeData);
 		transactionEditor.setFinanceData(financeData);
 		transactionEditor.updateAccountsCombo();
+		financeData.addTransactionCreatedListener(this);
 		financeData.addTransactionCreatedListener((TransactionsTableModel) jTableTransactions.getModel());
 		financeData.addTransactionUpdatedListener((TransactionsTableModel) jTableTransactions.getModel());
-		financeData.addTransactionCreatedListener(this);
 
 		jTableTransactions.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
