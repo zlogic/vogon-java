@@ -331,7 +331,6 @@ public class FinanceData {
 			if (!usedRates.contains(rate))
 				entityManager.remove(rate);
 		}
-		fireAccountsUpdated();
 	}
 
 	/**
@@ -346,8 +345,10 @@ public class FinanceData {
 		boolean accountAdded = persistenceAdd(account, entityManager);
 
 		entityManager.getTransaction().commit();
-		if (accountAdded)
+		if (accountAdded) {
 			fireAccountCreated(account);
+			fireCurrenciesUpdated();
+		}
 	}
 
 	/**
@@ -365,8 +366,10 @@ public class FinanceData {
 
 		entityManager.getTransaction().commit();
 
-		if (accountAdded)
+		if (accountAdded) {
 			fireAccountCreated(account);
+			fireCurrenciesUpdated();
+		}
 		fireAccountUpdated(account);
 	}
 
@@ -389,8 +392,8 @@ public class FinanceData {
 		entityManager.getTransaction().commit();
 
 		if (accountAdded)
-			fireAccountCreated(account);
-		fireAccountUpdated(account);
+			fireAccountsUpdated();
+		fireCurrenciesUpdated();
 	}
 
 	/**
@@ -545,6 +548,7 @@ public class FinanceData {
 			fireAccountCreated(newAccount);
 		fireAccountUpdated(oldAccount);
 		fireAccountUpdated(newAccount);
+		fireCurrenciesUpdated();
 
 		for (FinanceAccount account : transaction.getAccounts())
 			if (account != oldAccount && account != newAccount)
@@ -614,8 +618,10 @@ public class FinanceData {
 		fireTransactionUpdated(component.getTransaction());
 
 		fireAccountUpdated(component.getAccount());
-		if (component.getAccount() != oldAccount)
+		if (component.getAccount() != oldAccount) {
 			fireAccountUpdated(oldAccount);
+			fireCurrenciesUpdated();
+		}
 	}
 
 	/**
@@ -635,6 +641,7 @@ public class FinanceData {
 		entityManager.getTransaction().commit();
 
 		fireTransactionsUpdated();
+		fireCurrenciesUpdated();
 	}
 
 	/**
@@ -711,6 +718,7 @@ public class FinanceData {
 
 		fireTransactionUpdated(component.getTransaction());
 		fireAccountUpdated(component.getAccount());
+		fireCurrenciesUpdated();
 	}
 
 	/**
@@ -762,6 +770,7 @@ public class FinanceData {
 
 		fireTransactionsUpdated();
 		fireAccountDeleted(account);
+		fireCurrenciesUpdated();
 	}
 
 	/**
@@ -836,6 +845,7 @@ public class FinanceData {
 
 		fireTransactionsUpdated();
 		fireAccountsUpdated();
+		fireCurrenciesUpdated();
 	}
 
 	/*
@@ -970,6 +980,17 @@ public class FinanceData {
 		 */
 		void accountDeleted(FinanceAccount deletedAccount);
 	}
+
+	/**
+	 * Listener for currency updated events
+	 */
+	public interface CurrencyUpdatedEventListener extends EventListener {
+
+		/**
+		 * A currencies updated handler (all accounts have been updated)
+		 */
+		void currenciesUpdated();
+	}
 	/**
 	 * List of event listeners
 	 */
@@ -982,12 +1003,14 @@ public class FinanceData {
 	 * @param editedTransaction the transaction that was updated
 	 */
 	protected void fireTransactionUpdated(FinanceTransaction editedTransaction) {
+		if (editedTransaction == null)
+			return;
 		for (TransactionUpdatedEventListener listener : eventListeners.getListeners(TransactionUpdatedEventListener.class))
 			listener.transactionUpdated(editedTransaction);
 	}
 
 	/**
-	 * Dispatches a transactions updated (all transactions were updated)
+	 * Dispatches a transactions updated event (all transactions were updated)
 	 */
 	protected void fireTransactionsUpdated() {
 		for (TransactionUpdatedEventListener listener : eventListeners.getListeners(TransactionUpdatedEventListener.class))
@@ -1000,6 +1023,8 @@ public class FinanceData {
 	 * @param newTransaction the transaction that was created
 	 */
 	protected void fireTransactionCreated(FinanceTransaction newTransaction) {
+		if (newTransaction == null)
+			return;
 		for (TransactionCreatedEventListener listener : eventListeners.getListeners(TransactionCreatedEventListener.class))
 			listener.transactionCreated(newTransaction);
 	}
@@ -1010,6 +1035,8 @@ public class FinanceData {
 	 * @param deletedTransaction the transaction that was deleted
 	 */
 	protected void fireTransactionDeleted(FinanceTransaction deletedTransaction) {
+		if (deletedTransaction == null)
+			return;
 		for (TransactionDeletedEventListener listener : eventListeners.getListeners(TransactionDeletedEventListener.class))
 			listener.transactionDeleted(deletedTransaction);
 	}
@@ -1020,12 +1047,14 @@ public class FinanceData {
 	 * @param editedAccount the account that was updated
 	 */
 	protected void fireAccountUpdated(FinanceAccount editedAccount) {
+		if (editedAccount == null)
+			return;
 		for (AccountUpdatedEventListener listener : eventListeners.getListeners(AccountUpdatedEventListener.class))
 			listener.accountUpdated(editedAccount);
 	}
 
 	/**
-	 * Dispatches an accounts updated (all accounts were updated)
+	 * Dispatches an accounts updated event (all accounts were updated)
 	 */
 	protected void fireAccountsUpdated() {
 		for (AccountUpdatedEventListener listener : eventListeners.getListeners(AccountUpdatedEventListener.class))
@@ -1038,6 +1067,8 @@ public class FinanceData {
 	 * @param newAccount the account that was created
 	 */
 	protected void fireAccountCreated(FinanceAccount newAccount) {
+		if (newAccount == null)
+			return;
 		for (AccountCreatedEventListener listener : eventListeners.getListeners(AccountCreatedEventListener.class))
 			listener.accountCreated(newAccount);
 	}
@@ -1048,8 +1079,18 @@ public class FinanceData {
 	 * @param deletedAccount the account that was deleted
 	 */
 	protected void fireAccountDeleted(FinanceAccount deletedAccount) {
+		if (deletedAccount == null)
+			return;
 		for (AccountDeletedEventListener listener : eventListeners.getListeners(AccountDeletedEventListener.class))
 			listener.accountDeleted(deletedAccount);
+	}
+
+	/**
+	 * Dispatches a currencies updated event (all accounts were updated)
+	 */
+	protected void fireCurrenciesUpdated() {
+		for (CurrencyUpdatedEventListener listener : eventListeners.getListeners(CurrencyUpdatedEventListener.class))
+			listener.currenciesUpdated();
 	}
 
 	/**
@@ -1104,5 +1145,14 @@ public class FinanceData {
 	 */
 	public void addAccountDeletedListener(AccountUpdatedEventListener listener) {
 		eventListeners.add(AccountUpdatedEventListener.class, listener);
+	}
+
+	/**
+	 * Adds a new listener for currency updated events
+	 *
+	 * @param listener the listener
+	 */
+	public void addCurrencyUpdatedListener(CurrencyUpdatedEventListener listener) {
+		eventListeners.add(CurrencyUpdatedEventListener.class, listener);
 	}
 }

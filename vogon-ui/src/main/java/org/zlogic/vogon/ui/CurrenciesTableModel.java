@@ -18,7 +18,7 @@ import org.zlogic.vogon.data.FinanceData;
  *
  * @author Zlogic
  */
-public class CurrenciesTableModel extends AbstractTableModel {
+public class CurrenciesTableModel extends AbstractTableModel implements FinanceData.CurrencyUpdatedEventListener {
 
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	protected FinanceData financeData;
@@ -105,6 +105,11 @@ public class CurrenciesTableModel extends AbstractTableModel {
 
 	public CurrencyComboItem getDefaultCurrency() {
 		return new CurrencyComboItem(financeData.getDefaultCurrency());
+	}
+
+	@Override
+	public void currenciesUpdated() {
+		fireTableDataChanged();
 	}
 
 	protected class CurrencyComboItem {
