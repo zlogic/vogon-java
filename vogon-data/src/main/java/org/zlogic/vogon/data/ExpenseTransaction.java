@@ -53,20 +53,4 @@ public class ExpenseTransaction extends FinanceTransaction implements Serializab
 		for (TransactionComponent component : components)
 			amount += component.getRawAmount();
 	}
-
-	/*
-	 * Getters/setters
-	 */
-	/**
-	 * Returns the account
-	 *
-	 * @return the account
-	 */
-	public FinanceAccount[] getAccounts() {
-		HashSet<FinanceAccount> accounts = new HashSet<>();
-		for (TransactionComponent component : components) {
-			accounts.add(component.getAccount());
-		}
-		return accounts.toArray(new FinanceAccount[0]);
-	}
 }
