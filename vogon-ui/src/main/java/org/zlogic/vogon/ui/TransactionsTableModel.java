@@ -97,10 +97,10 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 				return new SumTableCell(amount, currency);
 			case 4:
 				if (transaction.getClass() == ExpenseTransaction.class) {
-					FinanceAccount[] accounts = ((ExpenseTransaction) transaction).getAccounts();
+					List<FinanceAccount> accounts = ((ExpenseTransaction) transaction).getAccounts();
 					StringBuilder builder = new StringBuilder();
-					for (int i = 0; i < accounts.length; i++)
-						builder.append(i != 0 ? "," : "").append(accounts[i] != null ? accounts[i].getName() : messages.getString("INVALID_ACCOUNT"));
+					for (int i = 0; i < accounts.size(); i++)
+						builder.append(i != 0 ? "," : "").append(accounts.get(i) != null ? accounts.get(i).getName() : messages.getString("INVALID_ACCOUNT"));
 					return builder.toString();
 				} else if (transaction.getClass() == TransferTransaction.class) {
 					FinanceAccount[] toAccounts = ((TransferTransaction) transaction).getToAccounts();

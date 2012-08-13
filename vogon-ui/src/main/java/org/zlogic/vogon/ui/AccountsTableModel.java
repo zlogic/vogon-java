@@ -18,7 +18,7 @@ import org.zlogic.vogon.data.FinanceData;
  *
  * @author Dmitry Zolotukhin
  */
-public class AccountsTableModel extends AbstractTableModel {
+public class AccountsTableModel extends AbstractTableModel implements FinanceData.AccountCreatedEventListener, FinanceData.AccountUpdatedEventListener, FinanceData.AccountDeletedEventListener {
 
 	private FinanceData data = null;
 	private List<ReportingAccount> reportingAcconts = null;
@@ -176,6 +176,28 @@ public class AccountsTableModel extends AbstractTableModel {
 			data.deleteAccount(data.getAccounts().get(rowIndex));
 			fireTableRowsDeleted(rowIndex, rowIndex);
 		}
+	}
+
+	@Override
+	public void accountCreated(FinanceAccount newAccount) {
+		int rowIndex = data.getAccounts().indexOf(newAccount);
+		fireTableRowsInserted(rowIndex, rowIndex);
+	}
+
+	@Override
+	public void accountUpdated(FinanceAccount updatedAccount) {
+		int rowIndex = data.getAccounts().indexOf(updatedAccount);
+		fireTableRowsUpdated(rowIndex, rowIndex);
+	}
+
+	@Override
+	public void accountsUpdated() {
+		fireTableDataChanged();
+	}
+
+	@Override
+	public void accountDeleted(FinanceAccount deletedAccount) {
+		fireTableDataChanged();
 	}
 
 	protected class CurrencyComboItem {

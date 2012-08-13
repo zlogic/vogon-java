@@ -205,18 +205,26 @@ public class FinanceData {
 	 *
 	 * @param account the account to be added
 	 * @param entityManager the entity manager
+	 * @return true if account was added, false if it's already present in the
+	 * accounts list
 	 */
-	protected void persistenceAdd(FinanceAccount account, EntityManager entityManager) {
+	protected boolean persistenceAdd(FinanceAccount account, EntityManager entityManager) {
 		if (account == null)
-			return;
+			return false;
 
-		if (!accounts.contains(account))
+		boolean result = false;
+
+		if (!accounts.contains(account)) {
 			accounts.add(account);
+			result = true;
+		}
 
 		if (!entityManager.contains(account))
 			entityManager.persist(account);
 
 		populateCurrencies();
+
+		return result;
 	}
 
 	/**
@@ -226,14 +234,15 @@ public class FinanceData {
 	 *
 	 * @param transaction the transaction to be added
 	 * @param entityManager the entity manager
-	 * @return true if transaction was added, false if it's already present in the transactions list
+	 * @return true if transaction was added, false if it's already present in
+	 * the transactions list
 	 */
 	protected boolean persistenceAdd(FinanceTransaction transaction, EntityManager entityManager) {
 		if (transaction == null)
 			return false;
 
 		boolean result = false;
-		
+
 		if (!transactions.contains(transaction)) {
 			transactions.add(transaction);
 			for (TransactionComponent component : transaction.getComponents())
@@ -322,6 +331,7 @@ public class FinanceData {
 			if (!usedRates.contains(rate))
 				entityManager.remove(rate);
 		}
+		fireAccountsUpdated();
 	}
 
 	/**
@@ -333,9 +343,11 @@ public class FinanceData {
 		EntityManager entityManager = currentEntityManager;
 		entityManager.getTransaction().begin();
 
-		persistenceAdd(account, entityManager);
+		boolean accountAdded = persistenceAdd(account, entityManager);
 
 		entityManager.getTransaction().commit();
+		if (accountAdded)
+			fireAccountCreated(account);
 	}
 
 	/**
@@ -349,9 +361,13 @@ public class FinanceData {
 		entityManager.getTransaction().begin();
 		account.setName(name);
 
-		persistenceAdd(account, entityManager);
+		boolean accountAdded = persistenceAdd(account, entityManager);
 
 		entityManager.getTransaction().commit();
+
+		if (accountAdded)
+			fireAccountCreated(account);
+		fireAccountUpdated(account);
 	}
 
 	/**
@@ -366,11 +382,15 @@ public class FinanceData {
 		entityManager.getTransaction().begin();
 		account.setCurrency(currency);
 
-		persistenceAdd(account, entityManager);
+		boolean accountAdded = persistenceAdd(account, entityManager);
 
 		populateCurrencies();
 
 		entityManager.getTransaction().commit();
+
+		if (accountAdded)
+			fireAccountCreated(account);
+		fireAccountUpdated(account);
 	}
 
 	/**
@@ -385,9 +405,11 @@ public class FinanceData {
 		boolean transactionAdded = persistenceAdd(transaction, entityManager);
 
 		entityManager.getTransaction().commit();
-		
-		if(transactionAdded)
+
+		if (transactionAdded)
 			fireTransactionCreated(transaction);
+		for (FinanceAccount account : transaction.getAccounts())
+			fireAccountUpdated(account);
 	}
 
 	/**
@@ -405,9 +427,11 @@ public class FinanceData {
 
 		entityManager.getTransaction().commit();
 
-		if(transactionAdded)
+		if (transactionAdded)
 			fireTransactionCreated(transaction);
 		fireTransactionUpdated(transaction);
+		for (FinanceAccount account : transaction.getAccounts())
+			fireAccountUpdated(account);
 	}
 
 	/**
@@ -425,9 +449,11 @@ public class FinanceData {
 
 		entityManager.getTransaction().commit();
 
-		if(transactionAdded)
+		if (transactionAdded)
 			fireTransactionCreated(transaction);
 		fireTransactionUpdated(transaction);
+		for (FinanceAccount account : transaction.getAccounts())
+			fireAccountUpdated(account);
 	}
 
 	/**
@@ -445,9 +471,11 @@ public class FinanceData {
 
 		entityManager.getTransaction().commit();
 
-		if(transactionAdded)
+		if (transactionAdded)
 			fireTransactionCreated(transaction);
 		fireTransactionUpdated(transaction);
+		for (FinanceAccount account : transaction.getAccounts())
+			fireAccountUpdated(account);
 	}
 
 	/**
@@ -473,9 +501,12 @@ public class FinanceData {
 			entityManager.persist(component);
 		entityManager.getTransaction().commit();
 
-		if(transactionAdded)
+		if (transactionAdded)
 			fireTransactionCreated(transaction);
 		fireTransactionUpdated(transaction);
+
+		for (FinanceAccount account : transaction.getAccounts())
+			fireAccountUpdated(account);
 	}
 
 	/**
@@ -493,6 +524,8 @@ public class FinanceData {
 		EntityManager entityManager = currentEntityManager;
 		entityManager.getTransaction().begin();
 
+		FinanceAccount oldAccount = component.getAccount();
+
 		transaction.updateComponentAccount(component, newAccount);
 
 		boolean transactionAdded = persistenceAdd(transaction, entityManager);
@@ -500,13 +533,22 @@ public class FinanceData {
 		if (!entityManager.contains(component))
 			entityManager.persist(component);
 
-		persistenceAdd(newAccount, entityManager);
+		boolean accountAdded = persistenceAdd(newAccount, entityManager);
 
 		entityManager.getTransaction().commit();
 
-		if(transactionAdded)
+		if (transactionAdded)
 			fireTransactionCreated(transaction);
 		fireTransactionUpdated(transaction);
+
+		if (accountAdded)
+			fireAccountCreated(newAccount);
+		fireAccountUpdated(oldAccount);
+		fireAccountUpdated(newAccount);
+
+		for (FinanceAccount account : transaction.getAccounts())
+			if (account != oldAccount && account != newAccount)
+				fireAccountUpdated(account);
 	}
 
 	/**
@@ -532,9 +574,11 @@ public class FinanceData {
 			entityManager.persist(component);
 		entityManager.getTransaction().commit();
 
-		if(transactionAdded)
+		if (transactionAdded)
 			fireTransactionCreated(component.getTransaction());
 		fireTransactionUpdated(component.getTransaction());
+
+		fireAccountUpdated(component.getAccount());
 	}
 
 	/**
@@ -546,6 +590,8 @@ public class FinanceData {
 	public void setTransactionComponentAccount(TransactionComponent component, FinanceAccount newAccount) {
 		EntityManager entityManager = currentEntityManager;
 		entityManager.getTransaction().begin();
+
+		FinanceAccount oldAccount = component.getAccount();
 
 		if (component.getTransaction().getComponents().contains(component))
 			component.getTransaction().updateComponentAccount(component, newAccount);
@@ -563,9 +609,13 @@ public class FinanceData {
 		persistenceAdd(newAccount, entityManager);
 		entityManager.getTransaction().commit();
 
-		if(transactionAdded)
+		if (transactionAdded)
 			fireTransactionCreated(component.getTransaction());
 		fireTransactionUpdated(component.getTransaction());
+
+		fireAccountUpdated(component.getAccount());
+		if (component.getAccount() != oldAccount)
+			fireAccountUpdated(oldAccount);
 	}
 
 	/**
@@ -607,6 +657,7 @@ public class FinanceData {
 		entityManager.getTransaction().commit();
 
 		fireTransactionsUpdated();
+		fireAccountsUpdated();
 	}
 
 	/**
@@ -659,6 +710,7 @@ public class FinanceData {
 		entityManager.getTransaction().commit();
 
 		fireTransactionUpdated(component.getTransaction());
+		fireAccountUpdated(component.getAccount());
 	}
 
 	/**
@@ -672,6 +724,8 @@ public class FinanceData {
 
 		transactions.remove(transaction);
 
+		List<FinanceAccount> affectedAccounts = transaction.getAccounts();
+
 		for (TransactionComponent component : transaction.getComponents())
 			entityManager.remove(component);
 		transaction.removeAllComponents();
@@ -680,6 +734,9 @@ public class FinanceData {
 		entityManager.getTransaction().commit();
 
 		fireTransactionDeleted(transaction);
+
+		for (FinanceAccount account : affectedAccounts)
+			fireAccountUpdated(account);
 	}
 
 	/**
@@ -704,6 +761,7 @@ public class FinanceData {
 		entityManager.getTransaction().commit();
 
 		fireTransactionsUpdated();
+		fireAccountDeleted(account);
 	}
 
 	/**
@@ -732,6 +790,8 @@ public class FinanceData {
 		currentEntityManager.refresh(account);
 
 		tempEntityManager.close();
+
+		fireAccountUpdated(account);
 	}
 
 	/**
@@ -775,6 +835,7 @@ public class FinanceData {
 		restoreFromDatabase();
 
 		fireTransactionsUpdated();
+		fireAccountsUpdated();
 	}
 
 	/*
@@ -865,6 +926,50 @@ public class FinanceData {
 		 */
 		void transactionDeleted(FinanceTransaction deletedTransaction);
 	}
+
+	/**
+	 * Listener for account created events
+	 */
+	public interface AccountCreatedEventListener extends EventListener {
+
+		/**
+		 * An account created callback
+		 *
+		 * @param newAccount the account that was created
+		 */
+		void accountCreated(FinanceAccount newAccount);
+	}
+
+	/**
+	 * Listener for account updated events
+	 */
+	public interface AccountUpdatedEventListener extends EventListener {
+
+		/**
+		 * An account updated callback
+		 *
+		 * @param updatedAccount the account that was updated
+		 */
+		void accountUpdated(FinanceAccount updatedAccount);
+
+		/**
+		 * An account updated handler (all accounts have been updated)
+		 */
+		void accountsUpdated();
+	}
+
+	/**
+	 * Listener for account deleted events
+	 */
+	public interface AccountDeletedEventListener extends EventListener {
+
+		/**
+		 * An account deleted callback
+		 *
+		 * @param deletedAccount the deleted account
+		 */
+		void accountDeleted(FinanceAccount deletedAccount);
+	}
 	/**
 	 * List of event listeners
 	 */
@@ -910,6 +1015,44 @@ public class FinanceData {
 	}
 
 	/**
+	 * Dispatches an account updated event
+	 *
+	 * @param editedAccount the account that was updated
+	 */
+	protected void fireAccountUpdated(FinanceAccount editedAccount) {
+		for (AccountUpdatedEventListener listener : eventListeners.getListeners(AccountUpdatedEventListener.class))
+			listener.accountUpdated(editedAccount);
+	}
+
+	/**
+	 * Dispatches an accounts updated (all accounts were updated)
+	 */
+	protected void fireAccountsUpdated() {
+		for (AccountUpdatedEventListener listener : eventListeners.getListeners(AccountUpdatedEventListener.class))
+			listener.accountsUpdated();
+	}
+
+	/**
+	 * Dispatches an account created event
+	 *
+	 * @param newAccount the account that was created
+	 */
+	protected void fireAccountCreated(FinanceAccount newAccount) {
+		for (AccountCreatedEventListener listener : eventListeners.getListeners(AccountCreatedEventListener.class))
+			listener.accountCreated(newAccount);
+	}
+
+	/**
+	 * Dispatches an account deleted event
+	 *
+	 * @param deletedAccount the account that was deleted
+	 */
+	protected void fireAccountDeleted(FinanceAccount deletedAccount) {
+		for (AccountDeletedEventListener listener : eventListeners.getListeners(AccountDeletedEventListener.class))
+			listener.accountDeleted(deletedAccount);
+	}
+
+	/**
 	 * Adds a new listener for transaction created events
 	 *
 	 * @param listener the listener
@@ -934,5 +1077,32 @@ public class FinanceData {
 	 */
 	public void addTransactionDeletedListener(TransactionUpdatedEventListener listener) {
 		eventListeners.add(TransactionUpdatedEventListener.class, listener);
+	}
+
+	/**
+	 * Adds a new listener for account created events
+	 *
+	 * @param listener the listener
+	 */
+	public void addAccountCreatedListener(AccountCreatedEventListener listener) {
+		eventListeners.add(AccountCreatedEventListener.class, listener);
+	}
+
+	/**
+	 * Adds a new listener for account updated events
+	 *
+	 * @param listener the listener
+	 */
+	public void addAccountUpdatedListener(AccountUpdatedEventListener listener) {
+		eventListeners.add(AccountUpdatedEventListener.class, listener);
+	}
+
+	/**
+	 * Adds a new listener for account deleted events
+	 *
+	 * @param listener the listener
+	 */
+	public void addAccountDeletedListener(AccountUpdatedEventListener listener) {
+		eventListeners.add(AccountUpdatedEventListener.class, listener);
 	}
 }

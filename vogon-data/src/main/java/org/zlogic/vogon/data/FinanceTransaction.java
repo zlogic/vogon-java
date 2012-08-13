@@ -131,11 +131,24 @@ public abstract class FinanceTransaction implements Serializable {
 	 * account
 	 */
 	public List<TransactionComponent> getComponentsForAccount(FinanceAccount account) {
-		LinkedList<TransactionComponent> foundComponents = new LinkedList<>();
+		List<TransactionComponent> foundComponents = new LinkedList<>();
 		for (TransactionComponent component : components)
 			if (component.getAccount() == account)
 				foundComponents.add(component);
 		return foundComponents;
+	}
+
+	/**
+	 * Returns a list of all accounts affected by this transaction
+	 *
+	 * @return the list of all accounts affected by this transaction
+	 */
+	public List<FinanceAccount> getAccounts() {
+		List<FinanceAccount> accounts = new LinkedList<>();
+		for (TransactionComponent component : components)
+			if (!accounts.contains(component.getAccount()))
+				accounts.add(component.getAccount());
+		return accounts;
 	}
 
 	/**
@@ -144,7 +157,7 @@ public abstract class FinanceTransaction implements Serializable {
 	 * @return The list of all transaction components
 	 */
 	public List<TransactionComponent> getComponents() {
-		LinkedList<TransactionComponent> foundComponents = new LinkedList<>();
+		List<TransactionComponent> foundComponents = new LinkedList<>();
 		foundComponents.addAll(components);
 		return foundComponents;
 	}
