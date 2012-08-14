@@ -9,6 +9,7 @@ import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultCellEditor;
@@ -25,6 +26,8 @@ import org.zlogic.vogon.data.Utils;
  * @author Zlogic
  */
 public class TransactionEditor extends javax.swing.JPanel {
+
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 
 	/**
 	 * Creates new form TransactionEditor
@@ -65,21 +68,21 @@ public class TransactionEditor extends javax.swing.JPanel {
 
         setMinimumSize(new java.awt.Dimension(0, 60));
 
-        jButtonNewExpenseIncome.setText("New expense/income");
+        jButtonNewExpenseIncome.setText(messages.getString("NEW_EXPENSE_INCOME_TRANSACTION")); // NOI18N
         jButtonNewExpenseIncome.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonNewExpenseIncomeActionPerformed(evt);
             }
         });
 
-        jButtonNewTransfer.setText("New transfer");
+        jButtonNewTransfer.setText(messages.getString("NEW_TRANSFER_TRANSACTION")); // NOI18N
         jButtonNewTransfer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonNewTransferActionPerformed(evt);
             }
         });
 
-        jLabelName.setText("Description");
+        jLabelName.setText(messages.getString("TRANSACTION_DESCRIPTION")); // NOI18N
 
         jTextFieldName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -87,7 +90,7 @@ public class TransactionEditor extends javax.swing.JPanel {
             }
         });
 
-        jLabelTags.setText("Tags");
+        jLabelTags.setText(messages.getString("TRANSACTION_TAGS")); // NOI18N
 
         jTextFieldTags.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -95,7 +98,7 @@ public class TransactionEditor extends javax.swing.JPanel {
             }
         });
 
-        jLabelDate.setText("Date");
+        jLabelDate.setText(messages.getString("TRANSACTION_DATE")); // NOI18N
 
         jFormattedTextFieldDate.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("yyyy-MM-dd"))));
         jFormattedTextFieldDate.addActionListener(new java.awt.event.ActionListener() {
@@ -104,14 +107,14 @@ public class TransactionEditor extends javax.swing.JPanel {
             }
         });
 
-        jButtonAddComponent.setText("Add component");
+        jButtonAddComponent.setText(messages.getString("ADD_COMPONENT")); // NOI18N
         jButtonAddComponent.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonAddComponentActionPerformed(evt);
             }
         });
 
-        jButtonDeleteComponent.setText("Delete component");
+        jButtonDeleteComponent.setText(messages.getString("DELETE_COMPONENT")); // NOI18N
         jButtonDeleteComponent.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonDeleteComponentActionPerformed(evt);
@@ -177,7 +180,7 @@ public class TransactionEditor extends javax.swing.JPanel {
 
     private void jButtonNewExpenseIncomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewExpenseIncomeActionPerformed
 		saveChanges();
-		editTransaction(new ExpenseTransaction("", new String[0], new Date()));
+		editTransaction(new ExpenseTransaction("", new String[0], new Date())); //NOI18N
 		financeData.createTransaction(editedTransaction);
     }//GEN-LAST:event_jButtonNewExpenseIncomeActionPerformed
 
@@ -205,7 +208,7 @@ public class TransactionEditor extends javax.swing.JPanel {
 
     private void jButtonNewTransferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewTransferActionPerformed
 		saveChanges();
-		editTransaction(new TransferTransaction("", new String[0], new Date()));
+		editTransaction(new TransferTransaction("", new String[0], new Date())); //NOI18N
 		financeData.createTransaction(editedTransaction);
     }//GEN-LAST:event_jButtonNewTransferActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -226,9 +229,9 @@ public class TransactionEditor extends javax.swing.JPanel {
 	protected FinanceTransaction editedTransaction;
 
 	protected void resetInput() {
-		jTextFieldName.setText("");
-		jTextFieldTags.setText("");
-		jFormattedTextFieldDate.setText("");
+		jTextFieldName.setText(""); //NOI18N
+		jTextFieldTags.setText(""); //NOI18N
+		jFormattedTextFieldDate.setText(""); //NOI18N
 		((TransactionComponentsTableModel) jTableComponents.getModel()).setTransaction(null);
 
 		jTextFieldName.setEnabled(editedTransaction != null);
@@ -256,8 +259,8 @@ public class TransactionEditor extends javax.swing.JPanel {
 		resetInput();
 		if (transaction != null) {
 			jTextFieldName.setText(transaction.getDescription());
-			jTextFieldTags.setText(Utils.join(((FinanceTransaction) transaction).getTags(), ","));
-			jFormattedTextFieldDate.setText(MessageFormat.format("{0,date,yyyy-MM-dd}", new Object[]{transaction.getDate()}));
+			jTextFieldTags.setText(Utils.join(((FinanceTransaction) transaction).getTags(), ",")); //NOI18N
+			jFormattedTextFieldDate.setText(MessageFormat.format(messages.getString("FORMAT_DATE"), new Object[]{transaction.getDate()}));
 			((TransactionComponentsTableModel) jTableComponents.getModel()).setTransaction(transaction);
 		}
 	}
@@ -265,8 +268,8 @@ public class TransactionEditor extends javax.swing.JPanel {
 	protected void saveChanges() {
 		if (editedTransaction != null) {
 			financeData.setTransactionDescription(editedTransaction, jTextFieldName.getText());
-			financeData.setTransactionTags(editedTransaction, jTextFieldTags.getText().split(","));
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			financeData.setTransactionTags(editedTransaction, jTextFieldTags.getText().split(",")); //NOI18N
+			SimpleDateFormat dateFormat = new SimpleDateFormat(messages.getString("PARSER_DATE"));
 			try {
 				financeData.setTransactionDate(editedTransaction, dateFormat.parse(jFormattedTextFieldDate.getText()));
 			} catch (ParseException ex) {

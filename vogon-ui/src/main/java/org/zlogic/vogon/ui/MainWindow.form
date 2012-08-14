@@ -159,7 +159,9 @@
                       <SubComponents>
                         <Component class="javax.swing.JButton" name="jButtonDeleteTransaction">
                           <Properties>
-                            <Property name="text" type="java.lang.String" value="Delete"/>
+                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                              <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="DELETE" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+                            </Property>
                           </Properties>
                           <Events>
                             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonDeleteTransactionActionPerformed"/>
@@ -224,7 +226,9 @@
               <SubComponents>
                 <Component class="javax.swing.JButton" name="jButtonAddAccount">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Add account"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="ADD_ACCOUNT" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonAddAccountActionPerformed"/>
@@ -232,7 +236,9 @@
                 </Component>
                 <Component class="javax.swing.JButton" name="jButtonDeleteAccount">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Delete account"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="DELETE_ACCOUNT" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonDeleteAccountActionPerformed"/>
@@ -268,7 +274,9 @@
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
               <JTabbedPaneConstraints tabName="Currencies">
-                <Property name="tabTitle" type="java.lang.String" value="Currencies"/>
+                <Property name="tabTitle" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="CURRENCIES" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+                </Property>
               </JTabbedPaneConstraints>
             </Constraint>
           </Constraints>
@@ -291,7 +299,9 @@
                     <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
                       <ComponentRef name="jComboBoxDefaultCurrency"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="Default currency"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="DEFAULT_CURRENCY" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JComboBox" name="jComboBoxDefaultCurrency">

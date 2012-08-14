@@ -142,7 +142,7 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 		TransactionComponent component = new TransactionComponent(null, editingTransaction, 0);
 		editingTransaction.addComponent(component);
 		int newComponentIndex = editingTransaction.getComponents().indexOf(component);
-		fireTableRowsInserted(newComponentIndex,newComponentIndex);
+		fireTableRowsInserted(newComponentIndex, newComponentIndex);
 		return newComponentIndex;
 	}
 

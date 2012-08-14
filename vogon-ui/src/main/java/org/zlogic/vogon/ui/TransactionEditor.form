@@ -86,7 +86,9 @@
   <SubComponents>
     <Component class="javax.swing.JButton" name="jButtonNewExpenseIncome">
       <Properties>
-        <Property name="text" type="java.lang.String" value="New expense/income"/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="NEW_EXPENSE_INCOME_TRANSACTION" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+        </Property>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonNewExpenseIncomeActionPerformed"/>
@@ -94,7 +96,9 @@
     </Component>
     <Component class="javax.swing.JButton" name="jButtonNewTransfer">
       <Properties>
-        <Property name="text" type="java.lang.String" value="New transfer"/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="NEW_TRANSFER_TRANSACTION" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+        </Property>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonNewTransferActionPerformed"/>
@@ -102,7 +106,9 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabelName">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Description"/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="TRANSACTION_DESCRIPTION" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+        </Property>
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="jTextFieldName">
@@ -112,7 +118,9 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabelTags">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Tags"/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="TRANSACTION_TAGS" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+        </Property>
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="jTextFieldTags">
@@ -122,7 +130,9 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabelDate">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Date"/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="TRANSACTION_DATE" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+        </Property>
       </Properties>
     </Component>
     <Component class="javax.swing.JFormattedTextField" name="jFormattedTextFieldDate">
@@ -137,7 +147,9 @@
     </Component>
     <Component class="javax.swing.JButton" name="jButtonAddComponent">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Add component"/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="ADD_COMPONENT" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+        </Property>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonAddComponentActionPerformed"/>
@@ -145,7 +157,9 @@
     </Component>
     <Component class="javax.swing.JButton" name="jButtonDeleteComponent">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Delete component"/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="DELETE_COMPONENT" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+        </Property>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonDeleteComponentActionPerformed"/>

@@ -140,7 +140,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
         jPanelTransactionControls.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        jButtonDeleteTransaction.setText("Delete");
+        jButtonDeleteTransaction.setText(messages.getString("DELETE")); // NOI18N
         jButtonDeleteTransaction.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonDeleteTransactionActionPerformed(evt);
@@ -167,7 +167,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
         jPanelAccountsControls.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        jButtonAddAccount.setText("Add account");
+        jButtonAddAccount.setText(messages.getString("ADD_ACCOUNT")); // NOI18N
         jButtonAddAccount.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonAddAccountActionPerformed(evt);
@@ -175,7 +175,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
         });
         jPanelAccountsControls.add(jButtonAddAccount);
 
-        jButtonDeleteAccount.setText("Delete account");
+        jButtonDeleteAccount.setText(messages.getString("DELETE_ACCOUNT")); // NOI18N
         jButtonDeleteAccount.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonDeleteAccountActionPerformed(evt);
@@ -198,7 +198,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
         jPanelCurrenciesControls.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
         jLabelDefaultCurrency.setLabelFor(jComboBoxDefaultCurrency);
-        jLabelDefaultCurrency.setText("Default currency");
+        jLabelDefaultCurrency.setText(messages.getString("DEFAULT_CURRENCY")); // NOI18N
         jPanelCurrenciesControls.add(jLabelDefaultCurrency);
 
         jComboBoxDefaultCurrency.addItemListener(new java.awt.event.ItemListener() {
@@ -216,7 +216,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
         jPanelCurrencies.add(jScrollPaneCurrencies, java.awt.BorderLayout.CENTER);
 
-        jTabbedPane1.addTab("Currencies", jPanelCurrencies);
+        jTabbedPane1.addTab(messages.getString("CURRENCIES"), jPanelCurrencies); // NOI18N
 
         getContentPane().add(jTabbedPane1);
 
