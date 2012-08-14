@@ -39,9 +39,9 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 		reportingAcconts = new LinkedList<>();
 
 		for (Currency currency : data.getCurrencies())
-			reportingAcconts.add(new ReportingAccount(MessageFormat.format("Total {0}", new Object[]{currency.getCurrencyCode()}), data.getTotalBalance(currency), currency));
+			reportingAcconts.add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ACCOUNT"), new Object[]{currency.getCurrencyCode()}), data.getTotalBalance(currency), currency));
 		if (data.getDefaultCurrency() != null)
-			reportingAcconts.add(new ReportingAccount(MessageFormat.format("Total for all accounts in {0}", new Object[]{data.getDefaultCurrency().getCurrencyCode()}), data.getTotalBalance(null), data.getDefaultCurrency()));
+			reportingAcconts.add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ALL_ACCOUNTS"), new Object[]{data.getDefaultCurrency().getCurrencyCode()}), data.getTotalBalance(null), data.getDefaultCurrency()));
 		fireTableDataChanged();
 	}
 
@@ -70,7 +70,7 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 		}
 
 		public String formatString(String text) {
-			return MessageFormat.format("<html><b>{0}</b></html>", new Object[]{text});
+			return MessageFormat.format(messages.getString("TOTAL_REPORTING_ACCOUNT"), new Object[]{text});
 		}
 	}
 
@@ -166,7 +166,7 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 	}
 
 	public int addAccount() {
-		FinanceAccount account = new FinanceAccount("", data.getDefaultCurrency());
+		FinanceAccount account = new FinanceAccount("", data.getDefaultCurrency()); //NOI18N
 		data.createAccount(account);
 		int newAccountIndex = data.getAccounts().indexOf(account);
 		fireTableRowsInserted(newAccountIndex, newAccountIndex);
@@ -215,7 +215,7 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 			if (currency != null)
 				return currency.getDisplayName();
 			else
-				return "";
+				return ""; //NOI18N
 		}
 
 		@Override

@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.text.MessageFormat;
 import java.util.Currency;
+import java.util.ResourceBundle;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -27,6 +28,7 @@ import javax.swing.table.TableCellRenderer;
  */
 public class SumTableCell {
 
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	protected double balance;
 	protected Currency currency;
 	protected boolean isOk;
@@ -49,7 +51,7 @@ public class SumTableCell {
 
 	@Override
 	public String toString() {
-		String formattedSum = MessageFormat.format("{0,number,0.00} {1}", balance, currency != null ? currency.getCurrencyCode() : "###");
+		String formattedSum = MessageFormat.format(messages.getString("FORMAT_SUM"), balance, currency != null ? currency.getCurrencyCode() : messages.getString("INVALID_CURRENCY"));
 		return formattedSum;
 	}
 

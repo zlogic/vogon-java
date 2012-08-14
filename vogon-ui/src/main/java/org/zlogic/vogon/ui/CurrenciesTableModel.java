@@ -47,11 +47,11 @@ public class CurrenciesTableModel extends AbstractTableModel implements FinanceD
 	public String getColumnName(int col) {
 		switch (col) {
 			case 0:
-				return messages.getString("SOURCE_CURRENCY");
+				return messages.getString("CURRENCY_SOURCE");
 			case 1:
-				return messages.getString("DESTINATION_CURRENCY");
+				return messages.getString("CURRENCY_DESTINATION");
 			case 2:
-				return messages.getString("EXCHANGE_RATE");
+				return messages.getString("CURRENCY_EXCHANGE_RATE");
 		}
 		return null;
 	}
