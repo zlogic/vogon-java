@@ -20,8 +20,14 @@ import org.zlogic.vogon.data.FinanceData;
  */
 public class AccountsTableModel extends AbstractTableModel implements FinanceData.AccountCreatedEventListener, FinanceData.AccountUpdatedEventListener, FinanceData.AccountDeletedEventListener {
 
-	private FinanceData data = null;
-	private List<ReportingAccount> reportingAcconts = null;
+	/**
+	 * Finance Data instance
+	 */
+	protected FinanceData data = null;
+	/**
+	 * List of reporting (virtual) accounts
+	 */
+	protected List<ReportingAccount> reportingAcconts = null;
 
 	/**
 	 * Default constructor for AccountsTableModel
@@ -45,30 +51,72 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 		fireTableDataChanged();
 	}
 
+	/**
+	 * Class that acts as a virtual account for reporting reasons (e.g.
+	 * displaying a total sum)
+	 */
 	protected class ReportingAccount {
 
+		/**
+		 * The account name/description
+		 */
 		protected String name;
+		/**
+		 * The account balance
+		 */
 		protected double amount;
+		/**
+		 * The account currency
+		 */
 		protected Currency currency;
 
+		/**
+		 * Default constructor
+		 *
+		 * @param name the account name/description
+		 * @param amount the account balance
+		 * @param currency the account currency
+		 */
 		public ReportingAccount(String name, double amount, Currency currency) {
 			this.name = name;
 			this.amount = amount;
 			this.currency = currency;
 		}
 
+		/**
+		 * Returns the account name
+		 *
+		 * @return the account name
+		 */
 		public String getName() {
 			return name;
 		}
 
+		/**
+		 * Returns the account balance
+		 *
+		 * @return the account balance
+		 */
 		public double getAmount() {
 			return amount;
 		}
 
+		/**
+		 * Returns the account currency
+		 *
+		 * @return the account currency
+		 */
 		public Currency getCurrency() {
 			return currency;
 		}
 
+		/**
+		 * Formats the string with HTML to distinguish this account's data from
+		 * regular accounts
+		 *
+		 * @param text the text to be formatted
+		 * @return the HTML-formatted text
+		 */
 		public String formatString(String text) {
 			return MessageFormat.format(messages.getString("TOTAL_REPORTING_ACCOUNT"), new Object[]{text});
 		}
@@ -157,6 +205,12 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 	}
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 
+	/**
+	 * Returns a list of currency items which can be rendered in a Combo box
+	 * (used to specifically detect the selected item)
+	 *
+	 * @return the list of currency items
+	 */
 	public Object[] getCurrenciesComboList() {
 		List<CurrencyComboItem> items = new LinkedList<>();
 		for (Currency currency : Currency.getAvailableCurrencies())
@@ -165,6 +219,11 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 		return items.toArray();
 	}
 
+	/**
+	 * Adds an account to the model and FinanceData instance
+	 *
+	 * @return the new account's index
+	 */
 	public int addAccount() {
 		FinanceAccount account = new FinanceAccount("", data.getDefaultCurrency()); //NOI18N
 		data.createAccount(account);
@@ -173,6 +232,11 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 		return newAccountIndex;
 	}
 
+	/**
+	 * Deletes an account from the model and FinanceData instance
+	 *
+	 * @param rowIndex the row index of the item being deleted
+	 */
 	public void deleteAccount(int rowIndex) {
 		if (rowIndex < data.getAccounts().size()) {
 			data.deleteAccount(data.getAccounts().get(rowIndex));
@@ -200,31 +264,5 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 	@Override
 	public void accountDeleted(FinanceAccount deletedAccount) {
 		fireTableDataChanged();
-	}
-
-	protected class CurrencyComboItem {
-
-		private Currency currency;
-
-		public CurrencyComboItem(Currency currency) {
-			this.currency = currency;
-		}
-
-		@Override
-		public String toString() {
-			if (currency != null)
-				return currency.getDisplayName();
-			else
-				return ""; //NOI18N
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			return obj instanceof CurrencyComboItem && currency == ((CurrencyComboItem) obj).currency;
-		}
-
-		public Currency getCurrency() {
-			return currency;
-		}
 	}
 }

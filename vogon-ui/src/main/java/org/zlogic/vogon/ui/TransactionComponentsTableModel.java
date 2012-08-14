@@ -20,7 +20,13 @@ import org.zlogic.vogon.data.TransactionComponent;
 public class TransactionComponentsTableModel extends AbstractTableModel {
 
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
+	/**
+	 * Finance Data instance
+	 */
 	protected FinanceData financeData;
+	/**
+	 * The transaction currently being edited
+	 */
 	protected FinanceTransaction editingTransaction;
 
 	/**
@@ -33,6 +39,11 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 		fireTableDataChanged();
 	}
 
+	/**
+	 * Sets the transaction to be edited
+	 *
+	 * @param transaction the transaction to be edited
+	 */
 	public void setTransaction(FinanceTransaction transaction) {
 		editingTransaction = transaction;
 		fireTableDataChanged();
@@ -104,6 +115,12 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 		return Object.class;
 	}
 
+	/**
+	 * Returns a list of account items which can be rendered in a Combo box
+	 * (used to specifically detect the selected item)
+	 *
+	 * @return the list of account items
+	 */
 	public Object[] getAccountsComboList() {
 		List<FinanceAccountComboItem> items = new LinkedList<>();
 		for (FinanceAccount account : financeData.getAccounts()) {
@@ -112,10 +129,22 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 		return items.toArray();
 	}
 
+	/**
+	 * Class for storing an account with an overloaded toString method for
+	 * better customization of how it's rendered in a combo box.
+	 */
 	protected class FinanceAccountComboItem {
 
-		private FinanceAccount account;
+		/**
+		 * The account
+		 */
+		protected FinanceAccount account;
 
+		/**
+		 * Default constructor
+		 *
+		 * @param account the account for this item
+		 */
 		public FinanceAccountComboItem(FinanceAccount account) {
 			this.account = account;
 		}
@@ -133,11 +162,21 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 			return obj instanceof FinanceAccountComboItem && account == ((FinanceAccountComboItem) obj).account;
 		}
 
+		/**
+		 * Returns the account
+		 *
+		 * @return the account
+		 */
 		public FinanceAccount getAccount() {
 			return account;
 		}
 	}
 
+	/**
+	 * Adds a transaction component to the model and FinanceData instance
+	 *
+	 * @return the new component's index
+	 */
 	public int addCompoment() {
 		TransactionComponent component = new TransactionComponent(null, editingTransaction, 0);
 		editingTransaction.addComponent(component);
@@ -146,6 +185,11 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 		return newComponentIndex;
 	}
 
+	/**
+	 * Deletes a transaction component from the model and FinanceData instance
+	 *
+	 * @param rowIndex the row index of the item being deleted
+	 */
 	public void deleteComponent(int rowIndex) {
 		editingTransaction.removeComponent(editingTransaction.getComponents().get(rowIndex));
 		fireTableRowsDeleted(rowIndex, rowIndex);

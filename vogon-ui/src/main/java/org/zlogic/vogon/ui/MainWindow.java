@@ -30,6 +30,7 @@ import org.zlogic.vogon.data.XmlExporter;
 import org.zlogic.vogon.data.XmlImporter;
 
 /**
+ * Main window class
  *
  * @author Zlogic
  */
@@ -360,7 +361,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
     private void jComboBoxDefaultCurrencyItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxDefaultCurrencyItemStateChanged
 		if (evt.getStateChange() == ItemEvent.SELECTED && jComboBoxDefaultCurrency.isEnabled()) {
-			CurrenciesTableModel.CurrencyComboItem selectedItem = (CurrenciesTableModel.CurrencyComboItem) evt.getItem();
+			CurrencyComboItem selectedItem = (CurrencyComboItem) evt.getItem();
 			if (selectedItem != null)
 				financeData.setDefaultCurrency(selectedItem.getCurrency());
 		}
@@ -461,15 +462,24 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		jTableTransactions.scrollRectToVisible(jTableTransactions.getCellRect(newTransactionIndex, 0, true));
 	}
 
+	/**
+	 * Forces an update of the accounts table
+	 */
 	protected void updateAccounts() {
 		((AccountsTableModel) jTableAccounts.getModel()).fireTableDataChanged();
 	}
 
+	/**
+	 * Forces an update of the transactions table
+	 */
 	protected void updateTransactions() {
 		transactionEditor.editTransaction(null);
 		((TransactionsTableModel) jTableTransactions.getModel()).fireTableDataChanged();
 	}
 
+	/**
+	 * Updates the values displayed in the currency combo
+	 */
 	protected void updateDefaultCurrencyCombo() {
 		jComboBoxDefaultCurrency.removeAllItems();
 		jComboBoxDefaultCurrency.setEnabled(false);
