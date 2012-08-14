@@ -29,14 +29,22 @@ public class SumTableCell {
 
 	protected double balance;
 	protected Currency currency;
+	protected boolean isOk;
 
-	public SumTableCell(double balance, Currency currency) {
+	public SumTableCell(double balance, boolean isOk, Currency currency) {
 		this.balance = balance;
 		this.currency = currency;
+		this.isOk = isOk;
+	}
+
+	public SumTableCell(double balance, boolean isOk) {
+		this.balance = balance;
+		this.isOk = isOk;
 	}
 
 	public SumTableCell(double balance) {
 		this.balance = balance;
+		this.isOk = true;
 	}
 
 	@Override
@@ -46,7 +54,7 @@ public class SumTableCell {
 	}
 
 	public static TableCellRenderer getRenderer() {
-		DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
+		SumModelRenderer renderer = new SumModelRenderer();
 		renderer.setHorizontalAlignment(JLabel.RIGHT);
 		return renderer;
 	}
@@ -56,6 +64,19 @@ public class SumTableCell {
 		textField.setBorder(new LineBorder(Color.black));//Borrowed from JTable
 		textField.setHorizontalAlignment(JLabel.RIGHT);
 		return new SumModelEditor(textField);
+	}
+
+	protected static class SumModelRenderer extends DefaultTableCellRenderer {
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			if (value instanceof SumTableCell && !((SumTableCell) value).isOk)
+				setBackground(Color.red);
+			else
+				setBackground(null);
+			Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			return component;
+		}
 	}
 
 	protected static class SumModelEditor extends DefaultCellEditor {
@@ -73,9 +94,7 @@ public class SumTableCell {
 		}
 
 		@Override
-		public Component getTableCellEditorComponent(JTable table, Object value,
-				boolean isSelected,
-				int row, int column) {
+		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
 			return super.getTableCellEditorComponent(table, ((SumTableCell) value).balance, isSelected, row, column);
 		}
 	}

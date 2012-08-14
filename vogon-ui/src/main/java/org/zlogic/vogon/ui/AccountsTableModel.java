@@ -105,7 +105,7 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 				case 0:
 					return account.getName();
 				case 1:
-					return new SumTableCell(account.getBalance(), account.getCurrency());
+					return new SumTableCell(account.getBalance(), true, account.getCurrency());
 				case 2:
 					return new CurrencyComboItem(account.getCurrency());
 			}
@@ -116,7 +116,7 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 				case 0:
 					return account.formatString(account.getName());
 				case 1:
-					return new SumTableCell(account.getAmount(), account.getCurrency());
+					return new SumTableCell(account.getAmount(), true, account.getCurrency());
 				case 2:
 					return new CurrencyComboItem(account.getCurrency());
 			}

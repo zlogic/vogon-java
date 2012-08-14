@@ -94,7 +94,7 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 					amount = data.getAmountInCurrency(transaction, data.getDefaultCurrency());
 					currency = data.getDefaultCurrency();
 				}
-				return new SumTableCell(amount, currency);
+				return new SumTableCell(amount, (transaction instanceof TransferTransaction) ? ((TransferTransaction) transaction).isAmountOk() : true, currency);
 			case 4:
 				if (transaction.getClass() == ExpenseTransaction.class) {
 					List<FinanceAccount> accounts = ((ExpenseTransaction) transaction).getAccounts();
