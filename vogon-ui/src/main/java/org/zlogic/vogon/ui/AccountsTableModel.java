@@ -166,9 +166,11 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 	}
 
 	public int addAccount() {
-		data.createAccount(new FinanceAccount("", data.getDefaultCurrency()));
-		fireTableRowsInserted(data.getAccounts().size() - 1, data.getAccounts().size() - 1);
-		return data.getAccounts().size() - 1;
+		FinanceAccount account = new FinanceAccount("", data.getDefaultCurrency());
+		data.createAccount(account);
+		int newAccountIndex = data.getAccounts().indexOf(account);
+		fireTableRowsInserted(newAccountIndex, newAccountIndex);
+		return newAccountIndex;
 	}
 
 	public void deleteAccount(int rowIndex) {

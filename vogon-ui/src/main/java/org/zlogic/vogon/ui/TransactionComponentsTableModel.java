@@ -139,9 +139,11 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 	}
 
 	public int addCompoment() {
-		editingTransaction.addComponent(new TransactionComponent(null, editingTransaction, 0));
-		fireTableRowsInserted(getRowCount() - 1, getRowCount() - 1);
-		return getRowCount() - 1;
+		TransactionComponent component = new TransactionComponent(null, editingTransaction, 0);
+		editingTransaction.addComponent(component);
+		int newComponentIndex = editingTransaction.getComponents().indexOf(component);
+		fireTableRowsInserted(newComponentIndex,newComponentIndex);
+		return newComponentIndex;
 	}
 
 	public void deleteComponent(int rowIndex) {
