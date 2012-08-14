@@ -99,8 +99,8 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 				if (transaction.getClass() == ExpenseTransaction.class) {
 					List<FinanceAccount> accounts = ((ExpenseTransaction) transaction).getAccounts();
 					StringBuilder builder = new StringBuilder();
-					for (int i = 0; i < accounts.size(); i++)
-						builder.append(i != 0 ? "," : "").append(accounts.get(i) != null ? accounts.get(i).getName() : messages.getString("INVALID_ACCOUNT"));
+					for (FinanceAccount account : accounts)
+						builder.append(account != accounts.get(0) ? "," : "").append(account != null ? account.getName() : messages.getString("INVALID_ACCOUNT"));
 					return builder.toString();
 				} else if (transaction.getClass() == TransferTransaction.class) {
 					FinanceAccount[] toAccounts = ((TransferTransaction) transaction).getToAccounts();
@@ -108,16 +108,16 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 					StringBuilder builder = new StringBuilder();
 					if (fromAccounts.length > 1) {
 						builder.append("(");
-						for (int i = 0; i < fromAccounts.length; i++)
-							builder.append(i != 0 ? "," : "").append(fromAccounts[i] != null ? fromAccounts[i].getName() : messages.getString("INVALID_ACCOUNT"));
+						for (FinanceAccount account : fromAccounts)
+							builder.append(account != fromAccounts[0] ? "," : "").append(account != null ? account.getName() : messages.getString("INVALID_ACCOUNT"));
 						builder.append(")");
 					} else if (fromAccounts.length == 1)
 						builder.append(fromAccounts[0].getName());
 					builder.append("->");
 					if (toAccounts.length > 1) {
 						builder.append("(");
-						for (int i = 0; i < toAccounts.length; i++)
-							builder.append(i != 0 ? "," : "").append(toAccounts[i] != null ? toAccounts[i].getName() : messages.getString("INVALID_ACCOUNT"));
+						for (FinanceAccount account : toAccounts)
+							builder.append(account != toAccounts[0] ? "," : "").append(account != null ? account.getName() : messages.getString("INVALID_ACCOUNT"));
 						builder.append(")");
 					} else if (toAccounts.length == 1)
 						builder.append(toAccounts[0].getName());
