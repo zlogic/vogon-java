@@ -21,12 +21,15 @@ import org.zlogic.vogon.data.FinanceData;
 public class CurrenciesTableModel extends AbstractTableModel implements FinanceData.CurrencyUpdatedEventListener {
 
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
+	/**
+	 * Finance Data instance
+	 */
 	protected FinanceData financeData;
 
 	/**
-	 * Sets the table data
+	 * Sets the FinanceData reference
 	 *
-	 * @param data
+	 * @param data the FinanceDat instance
 	 */
 	public void setFinanceData(FinanceData data) {
 		this.financeData = data;
@@ -96,6 +99,12 @@ public class CurrenciesTableModel extends AbstractTableModel implements FinanceD
 		return columnIndex == 2;
 	}
 
+	/**
+	 * Returns a list of currency items which can be rendered in a Combo box
+	 * (used to specifically detect the selected item)
+	 *
+	 * @return the list of currency items
+	 */
 	public List<CurrencyComboItem> getCurrenciesComboList() {
 		List<CurrencyComboItem> items = new LinkedList<>();
 		for (Currency currency : financeData.getCurrencies())
@@ -103,6 +112,11 @@ public class CurrenciesTableModel extends AbstractTableModel implements FinanceD
 		return items;
 	}
 
+	/**
+	 * Returns the default currency
+	 *
+	 * @return the default currency
+	 */
 	public CurrencyComboItem getDefaultCurrency() {
 		return new CurrencyComboItem(financeData.getDefaultCurrency());
 	}
@@ -110,33 +124,5 @@ public class CurrenciesTableModel extends AbstractTableModel implements FinanceD
 	@Override
 	public void currenciesUpdated() {
 		fireTableDataChanged();
-	}
-
-	protected class CurrencyComboItem {
-
-		private Currency currency;
-
-		public CurrencyComboItem(Currency currency) {
-			this.currency = currency;
-		}
-
-		public String toString() {
-			if (currency != null)
-				return currency.getDisplayName();
-			else
-				return messages.getString("INVALID_CURRENCY");
-		}
-
-		public boolean equals(Object obj) {
-			if (obj instanceof CurrencyComboItem)
-				return currency == ((CurrencyComboItem) obj).currency;
-			if (obj instanceof Currency)
-				return currency == (Currency) obj;
-			return false;
-		}
-
-		public Currency getCurrency() {
-			return currency;
-		}
 	}
 }

@@ -225,9 +225,18 @@ public class TransactionEditor extends javax.swing.JPanel {
     private javax.swing.JTextField jTextFieldName;
     private javax.swing.JTextField jTextFieldTags;
     // End of variables declaration//GEN-END:variables
+	/**
+	 * Finance Data instance
+	 */
 	protected FinanceData financeData;
+	/**
+	 * The transaction currently being edited
+	 */
 	protected FinanceTransaction editedTransaction;
 
+	/**
+	 * Resets all input fields to default (empty) values)
+	 */
 	protected void resetInput() {
 		jTextFieldName.setText(""); //NOI18N
 		jTextFieldTags.setText(""); //NOI18N
@@ -242,15 +251,28 @@ public class TransactionEditor extends javax.swing.JPanel {
 		jFormattedTextFieldDate.setEditable(editedTransaction != null);
 	}
 
+	/**
+	 * Sets the FinanceData reference
+	 *
+	 * @param financeData the FinanceData instance
+	 */
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
 		((TransactionComponentsTableModel) jTableComponents.getModel()).setFinanceData(financeData);
 	}
 
+	/**
+	 * Updates the account combo box cell editor with all current accounts
+	 */
 	public void updateAccountsCombo() {
 		jTableComponents.getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(new JComboBox(((TransactionComponentsTableModel) jTableComponents.getModel()).getAccountsComboList())));
 	}
 
+	/**
+	 * Assigns this editor to edit the specified transaction
+	 *
+	 * @param transaction the transaction to be edited
+	 */
 	public void editTransaction(FinanceTransaction transaction) {
 		if (jTableComponents.getCellEditor() != null)
 			jTableComponents.getCellEditor().cancelCellEditing();
@@ -265,6 +287,9 @@ public class TransactionEditor extends javax.swing.JPanel {
 		}
 	}
 
+	/**
+	 * Saves all changes in the FinanceData persistence
+	 */
 	protected void saveChanges() {
 		if (editedTransaction != null) {
 			financeData.setTransactionDescription(editedTransaction, jTextFieldName.getText());

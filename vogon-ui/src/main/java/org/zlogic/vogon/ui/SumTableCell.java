@@ -29,21 +29,51 @@ import javax.swing.table.TableCellRenderer;
 public class SumTableCell {
 
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
+	/**
+	 * The balance/amount
+	 */
 	protected double balance;
+	/**
+	 * The currency
+	 */
 	protected Currency currency;
+	/**
+	 * The amount is OK (e.g. zero sum for a transfer transaction)
+	 */
 	protected boolean isOk;
 
+	/**
+	 * Constructs a SumTableCell
+	 *
+	 * @param balance the initial cell balance
+	 * @param isOk if the cell data is OK (e.g. zero sum for a transfer
+	 * transaction)
+	 * @param currency the currency
+	 */
 	public SumTableCell(double balance, boolean isOk, Currency currency) {
 		this.balance = balance;
 		this.currency = currency;
 		this.isOk = isOk;
 	}
 
+	/**
+	 * Constructs a SumTableCell. Currency will be invalid.
+	 *
+	 * @param balance the initial cell balance
+	 * @param isOk if the cell data is OK (e.g. zero sum for a transfer
+	 * transaction)
+	 */
 	public SumTableCell(double balance, boolean isOk) {
 		this.balance = balance;
 		this.isOk = isOk;
 	}
 
+	/**
+	 * Constructs a SumTableCell. Currency will be invalid, balance will be
+	 * considered to be OK.
+	 *
+	 * @param balance the initial cell balance
+	 */
 	public SumTableCell(double balance) {
 		this.balance = balance;
 		this.isOk = true;
@@ -55,12 +85,22 @@ public class SumTableCell {
 		return formattedSum;
 	}
 
+	/**
+	 * Returns the customized cell renderer
+	 *
+	 * @return the customized cell renderer
+	 */
 	public static TableCellRenderer getRenderer() {
 		SumModelRenderer renderer = new SumModelRenderer();
 		renderer.setHorizontalAlignment(JLabel.RIGHT);
 		return renderer;
 	}
 
+	/**
+	 * Returns the customized cell editor
+	 *
+	 * @return the customized cell editor
+	 */
 	public static TableCellEditor getEditor() {
 		JTextField textField = new JTextField();
 		textField.setBorder(new LineBorder(Color.black));//Borrowed from JTable
@@ -68,6 +108,10 @@ public class SumTableCell {
 		return new SumModelEditor(textField);
 	}
 
+	/**
+	 * The customized cell renderer class Renders cells where !isOK with a red
+	 * background
+	 */
 	protected static class SumModelRenderer extends DefaultTableCellRenderer {
 
 		@Override
@@ -81,16 +125,38 @@ public class SumTableCell {
 		}
 	}
 
+	/**
+	 * The customized cell editor class Calls the editor for double values
+	 * instead of string
+	 */
 	protected static class SumModelEditor extends DefaultCellEditor {
 
+		/**
+		 * Constructs a
+		 * <code>DefaultCellEditor</code> that uses a text field.
+		 *
+		 * @param textField a <code>JTextField</code> object
+		 */
 		public SumModelEditor(final JTextField textField) {
 			super(textField);
 		}
 
+		/**
+		 * Constructs a
+		 * <code>DefaultCellEditor</code> object that uses a check box.
+		 *
+		 * @param checkBox a <code>JCheckBox</code> object
+		 */
 		public SumModelEditor(final JCheckBox checkBox) {
 			super(checkBox);
 		}
 
+		/**
+		 * Constructs a
+		 * <code>DefaultCellEditor</code> object that uses a combo box.
+		 *
+		 * @param comboBox a <code>JComboBox</code> object
+		 */
 		public SumModelEditor(final JComboBox comboBox) {
 			super(comboBox);
 		}

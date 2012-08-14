@@ -150,6 +150,11 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 		return false;
 	}
 
+	/**
+	 * Deletes a transaction
+	 *
+	 * @param row the row to be deleted
+	 */
 	public void deleteTransaction(int row) {
 		data.deleteTransaction(data.getTransactions().get(row));
 		fireTableRowsDeleted(row, row);
