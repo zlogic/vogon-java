@@ -69,7 +69,7 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 			case 0:
 				return new FinanceAccountComboItem(component.getAccount());
 			case 1:
-				return new SumTableCell(component.getAmount(), component.getAccount() != null ? component.getAccount().getCurrency() : null);
+				return new SumTableCell(component.getAmount(), true, component.getAccount() != null ? component.getAccount().getCurrency() : null);
 		}
 		return null;
 	}
