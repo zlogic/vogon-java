@@ -83,6 +83,7 @@ public class XmlExporter implements FileExporter {
 				accountElement.setAttribute("Id", Long.toString(account.id)); //NOI18N
 				accountElement.setAttribute("Name", account.getName()); //NOI18N
 				accountElement.setAttribute("Currency", account.getCurrency().getCurrencyCode()); //NOI18N
+				accountElement.setAttribute("IncludeInTotal", Boolean.toString(account.getIncludeInTotal())); //NOI18N
 				//accountElement.setAttribute("Balance", Long.toString(account.getRawBalance()));
 				accountsElement.appendChild(accountElement);
 			}

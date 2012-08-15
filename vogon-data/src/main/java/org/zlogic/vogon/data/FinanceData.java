@@ -265,11 +265,14 @@ public class FinanceData {
 	 */
 	public double getTotalBalance(Currency currency) {
 		long totalBalance = 0;
-		for (FinanceAccount account : accounts)
+		for (FinanceAccount account : accounts) {
+			if (!account.getIncludeInTotal())
+				continue;
 			if (account.getCurrency() == currency)
 				totalBalance += account.getRawBalance();
 			else if (currency == null)
 				totalBalance += Math.round(account.getBalance() * getExchangeRate(account.getCurrency(), getDefaultCurrency()) * 100);
+		}
 		return totalBalance / 100.0;
 	}
 
@@ -394,6 +397,26 @@ public class FinanceData {
 		if (accountAdded)
 			fireAccountsUpdated();
 		fireCurrenciesUpdated();
+	}
+
+	/**
+	 * Sets if this account should be included in the total for all accounts.
+	 *
+	 * @param account The account to be updated
+	 * @param includeInTotal true if the account should be included in the total
+	 */
+	public void setAccountIncludeInTocal(FinanceAccount account, boolean includeInTotal) {
+		EntityManager entityManager = currentEntityManager;
+		entityManager.getTransaction().begin();
+		account.setIncludeInTotal(includeInTotal);
+
+		persistenceAdd(account, entityManager);
+
+		populateCurrencies();
+
+		entityManager.getTransaction().commit();
+
+		fireAccountsUpdated();
 	}
 
 	/**

@@ -6,6 +6,7 @@
 		<artifactId>top</artifactId>
 		<version>0.0.2-SNAPSHOT</version>
 	</parent>
+	<groupId>org.zlogic.vogon.data</groupId>
 	<artifactId>vogon-data</artifactId>
 	<name>Vogon :: Data</name>
 
@@ -63,5 +64,4 @@
 			<version>1.2.0.Final</version>
 		</dependency>
 	</dependencies>
-	<groupId>org.zlogic.vogon.data</groupId>
 </project>

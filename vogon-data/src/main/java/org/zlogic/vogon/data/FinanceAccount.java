@@ -43,11 +43,16 @@ public class FinanceAccount implements Serializable {
 	 * The account currency
 	 */
 	protected String currency;
+	/**
+	 * If this account should be included in the total
+	 */
+	protected Boolean includeInTotal;
 
 	/**
 	 * Creates an account
 	 */
 	protected FinanceAccount() {
+		includeInTotal = true;
 	}
 
 	/**
@@ -57,6 +62,7 @@ public class FinanceAccount implements Serializable {
 	 * @param currency The account currency
 	 */
 	public FinanceAccount(String name, Currency currency) {
+		includeInTotal = true;
 		this.name = name;
 		this.balance = 0L;
 		this.currency = (currency != null ? currency : Currency.getInstance(Locale.getDefault())).getCurrencyCode();
@@ -124,6 +130,26 @@ public class FinanceAccount implements Serializable {
 		if (currency == null)
 			return;
 		this.currency = currency.getCurrencyCode();
+	}
+
+	/**
+	 * Returns if this account should be included in the total for all accounts
+	 *
+	 * @return true if this account should be included in the total for all
+	 * accounts
+	 */
+	public boolean getIncludeInTotal() {
+		return includeInTotal == null ? true : includeInTotal;
+	}
+
+	/**
+	 * Sets if this account should be included in the total for all accounts
+	 *
+	 * @param includeInTotal true if this account should be included in the
+	 * total for all accounts
+	 */
+	public void setIncludeInTotal(boolean includeInTotal) {
+		this.includeInTotal = includeInTotal;
 	}
 
 	/**

@@ -62,6 +62,9 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		financeData.addAccountCreatedListener((AccountsTableModel) jTableAccounts.getModel());
 		financeData.addAccountUpdatedListener((AccountsTableModel) jTableAccounts.getModel());
 		financeData.addAccountDeletedListener((AccountsTableModel) jTableAccounts.getModel());
+		financeData.addAccountCreatedListener(transactionEditor);
+		financeData.addAccountUpdatedListener(transactionEditor);
+		financeData.addAccountDeletedListener(transactionEditor);
 		financeData.addCurrencyUpdatedListener((CurrenciesTableModel) jTableCurrencies.getModel());
 
 		jTableTransactions.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -124,7 +127,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages"); // NOI18N
         setTitle(bundle.getString("MAINWINDOW_TITLE")); // NOI18N
         setLocationByPlatform(true);
-        setPreferredSize(new java.awt.Dimension(800, 600));
+        setPreferredSize(new java.awt.Dimension(1024, 768));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
@@ -153,6 +156,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
         jTableTransactions.setAutoCreateRowSorter(true);
         jTableTransactions.setModel(new TransactionsTableModel());
+        jTableTransactions.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         jTableTransactions.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPaneTransactions.setViewportView(jTableTransactions);
 

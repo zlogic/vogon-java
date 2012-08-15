@@ -44,11 +44,21 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 		this.data = data;
 		reportingAcconts = new LinkedList<>();
 
+		updateReportingAccounts();
+
+		fireTableDataChanged();
+	}
+
+	/**
+	 * Updates the reporting accounts list
+	 */
+	protected void updateReportingAccounts() {
+		reportingAcconts.clear();
+
 		for (Currency currency : data.getCurrencies())
 			reportingAcconts.add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ACCOUNT"), new Object[]{currency.getCurrencyCode()}), data.getTotalBalance(currency), currency));
 		if (data.getDefaultCurrency() != null)
 			reportingAcconts.add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ALL_ACCOUNTS"), new Object[]{data.getDefaultCurrency().getCurrencyCode()}), data.getTotalBalance(null), data.getDefaultCurrency()));
-		fireTableDataChanged();
 	}
 
 	/**
@@ -124,7 +134,7 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 
 	@Override
 	public int getColumnCount() {
-		return 3;
+		return 4;
 	}
 
 	@Override
@@ -141,6 +151,8 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 				return messages.getString("ACCOUNT_BALANCE");
 			case 2:
 				return messages.getString("ACCOUNT_CURRENCY");
+			case 3:
+				return "Include in total";
 		}
 		return null;
 	}
@@ -156,6 +168,8 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 					return new SumTableCell(account.getBalance(), true, account.getCurrency());
 				case 2:
 					return new CurrencyComboItem(account.getCurrency());
+				case 3:
+					return account.getIncludeInTotal();
 			}
 		} else {
 			row -= data.getAccounts().size();
@@ -167,6 +181,8 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 					return new SumTableCell(account.getAmount(), true, account.getCurrency());
 				case 2:
 					return new CurrencyComboItem(account.getCurrency());
+				case 3:
+					return false;
 			}
 		}
 		return null;
@@ -181,6 +197,8 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 				return SumTableCell.class;
 			case 2:
 				return CurrencyComboItem.class;
+			case 3:
+				return Boolean.class;
 		}
 		return null;
 	}
@@ -195,13 +213,16 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 			case 2:
 				data.setAccountCurrency(account, ((CurrencyComboItem) aValue).getCurrency());
 				break;
+			case 3:
+				data.setAccountIncludeInTocal(account, (Boolean) aValue);
+				break;
 		}
 		fireTableRowsUpdated(rowIndex, rowIndex);
 	}
 
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return rowIndex < data.getAccounts().size() && (columnIndex == 0 || columnIndex == 2);
+		return rowIndex < data.getAccounts().size() && (columnIndex == 0 || columnIndex == 2 || columnIndex == 3);
 	}
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 
@@ -258,6 +279,7 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 
 	@Override
 	public void accountsUpdated() {
+		updateReportingAccounts();
 		fireTableDataChanged();
 	}
 
