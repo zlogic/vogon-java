@@ -15,12 +15,12 @@
 			<dependency>
 				<groupId>org.zlogic.vogon.data</groupId>
 				<artifactId>vogon-data</artifactId>
-				<version>${parent.version}</version>
+				<version>${project.parent.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.zlogic.vogon.ui</groupId>
 				<artifactId>vogon-ui</artifactId>
-				<version>${parent.version}</version>
+				<version>${project.parent.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import org.zlogic.vogon.data.ExpenseTransaction;
+import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransferTransaction;
@@ -25,7 +26,7 @@ import org.zlogic.vogon.data.Utils;
  *
  * @author Zlogic
  */
-public class TransactionEditor extends javax.swing.JPanel {
+public class TransactionEditor extends javax.swing.JPanel implements FinanceData.AccountCreatedEventListener, FinanceData.AccountUpdatedEventListener, FinanceData.AccountDeletedEventListener {
 
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 
@@ -302,5 +303,25 @@ public class TransactionEditor extends javax.swing.JPanel {
 				Logger.getLogger(TransactionEditor.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
+	}
+
+	@Override
+	public void accountCreated(FinanceAccount newAccount) {
+		updateAccountsCombo();
+	}
+
+	@Override
+	public void accountUpdated(FinanceAccount updatedAccount) {
+		updateAccountsCombo();
+	}
+
+	@Override
+	public void accountsUpdated() {
+		updateAccountsCombo();
+	}
+
+	@Override
+	public void accountDeleted(FinanceAccount deletedAccount) {
+		updateAccountsCombo();
 	}
 }

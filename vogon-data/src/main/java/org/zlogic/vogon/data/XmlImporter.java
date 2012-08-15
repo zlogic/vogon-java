@@ -125,6 +125,7 @@ public class XmlImporter implements FileImporter {
 				NamedNodeMap attributes = currentNode.getAttributes();
 				String accountName = attributes.getNamedItem("Name").getNodeValue(); //NOI18N
 				long accountId = Long.parseLong(attributes.getNamedItem("Id").getNodeValue()); //NOI18N
+				boolean includeInTotal = Boolean.parseBoolean(attributes.getNamedItem("IncludeInTotal").getNodeValue()); //NOI18N
 				String currency = attributes.getNamedItem("Currency") != null ? attributes.getNamedItem("Currency").getNodeValue() : null; //NOI18N
 				//long accountBalance = Long.parseLong(attributes.getNamedItem("Balance").getNodeValue());
 
@@ -145,6 +146,7 @@ public class XmlImporter implements FileImporter {
 					accountsMap.put(accountId, foundAccount);
 				} else {
 					FinanceAccount account = new FinanceAccount(accountName, currency != null ? Currency.getInstance(currency) : null);
+					account.setIncludeInTotal(includeInTotal);
 					accountsMap.put(accountId, account);
 					entityManager.persist(account);
 				}
