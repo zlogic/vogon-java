@@ -187,7 +187,7 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
 
     private void jButtonDeleteComponentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteComponentActionPerformed
 		if (jTableComponents.getSelectedRow() >= 0)
-			((TransactionComponentsTableModel) jTableComponents.getModel()).deleteComponent(jTableComponents.getSelectedRow());
+			((TransactionComponentsTableModel) jTableComponents.getModel()).deleteComponent(jTableComponents.convertRowIndexToModel(jTableComponents.getSelectedRow()));
     }//GEN-LAST:event_jButtonDeleteComponentActionPerformed
 
     private void jButtonAddComponentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddComponentActionPerformed
