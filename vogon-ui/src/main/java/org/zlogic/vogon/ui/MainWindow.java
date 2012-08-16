@@ -71,7 +71,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
 				if (jTableTransactions.getSelectedRow() >= 0)
-					transactionEditor.editTransaction(financeData.getTransactions().get(jTableTransactions.getSelectedRow()));
+					transactionEditor.editTransaction(financeData.getTransactions().get(jTableTransactions.convertRowIndexToModel(jTableTransactions.getSelectedRow())));
 				else
 					transactionEditor.editTransaction(null);
 			}
@@ -317,7 +317,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
     }//GEN-LAST:event_formWindowClosing
 
     private void jButtonDeleteTransactionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteTransactionActionPerformed
-		int selectedRow = jTableTransactions.getSelectedRow();
+		int selectedRow = jTableTransactions.convertRowIndexToModel(jTableTransactions.getSelectedRow());
 		if (selectedRow >= 0) {
 			transactionEditor.editTransaction(null);
 			((TransactionsTableModel) jTableTransactions.getModel()).deleteTransaction(selectedRow);
@@ -378,7 +378,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
     private void jButtonDeleteAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteAccountActionPerformed
 		if (jTableAccounts.getSelectedRow() >= 0)
-			((AccountsTableModel) jTableAccounts.getModel()).deleteAccount(jTableAccounts.getSelectedRow());
+			((AccountsTableModel) jTableAccounts.getModel()).deleteAccount(jTableAccounts.convertRowIndexToModel(jTableAccounts.getSelectedRow()));
     }//GEN-LAST:event_jButtonDeleteAccountActionPerformed
 
 	/**
