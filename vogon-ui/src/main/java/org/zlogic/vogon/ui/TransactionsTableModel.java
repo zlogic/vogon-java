@@ -43,6 +43,26 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 		fireTableDataChanged();
 	}
 
+	/**
+	 * Translates a model row index to a FinanceData transaction index
+	 *
+	 * @param rowIndex the model row index
+	 * @return the FinanceData transaction index
+	 */
+	protected int translateRowToFinanceData(int rowIndex) {
+		return data.getTransactions().size() - 1 - rowIndex;
+	}
+
+	/**
+	 * Translates a FinanceData transaction index to a model row index
+	 *
+	 * @param rowIndex the FinanceData transaction index
+	 * @return the model row index
+	 */
+	protected int translateRowToModel(int rowIndex) {
+		return data.getTransactions().size() - 1 - rowIndex;
+	}
+
 	@Override
 	public int getColumnCount() {
 		return 5;
@@ -72,7 +92,7 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 
 	@Override
 	public Object getValueAt(int row, int col) {
-		FinanceTransaction transaction = data.getTransactions().get(row);
+		FinanceTransaction transaction = getTransaction(row);
 		switch (col) {
 			case 0:
 				return transaction.getDescription();
@@ -128,6 +148,28 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 		return null;
 	}
 
+	/**
+	 * Returns a model index for the specific transaction
+	 *
+	 * @param transaction the transaction
+	 * @return the transaction's index in the model
+	 */
+	public int getTransactionIndex(FinanceTransaction transaction) {
+		int rowIndex = translateRowToModel(data.getTransactions().indexOf(transaction));
+		return rowIndex;
+	}
+
+	/**
+	 * Returns a transaction at a specific index
+	 *
+	 * @param rowIndex the transaction's model index
+	 * @return the transaction
+	 */
+	public FinanceTransaction getTransaction(int rowIndex) {
+		FinanceTransaction transaction = data.getTransactions().get(translateRowToFinanceData(rowIndex));
+		return transaction;
+	}
+
 	@Override
 	public Class getColumnClass(int c) {
 		switch (c) {
@@ -156,19 +198,19 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 	 * @param row the row to be deleted
 	 */
 	public void deleteTransaction(int row) {
-		data.deleteTransaction(data.getTransactions().get(row));
+		data.deleteTransaction(data.getTransactions().get(translateRowToFinanceData(row)));
 		fireTableRowsDeleted(row, row);
 	}
 
 	@Override
 	public void transactionCreated(FinanceTransaction newTransaction) {
-		int rowIndex = data.getTransactions().indexOf(newTransaction);
+		int rowIndex = translateRowToModel(data.getTransactions().indexOf(newTransaction));
 		fireTableRowsInserted(rowIndex, rowIndex);
 	}
 
 	@Override
 	public void transactionUpdated(FinanceTransaction updatedTransaction) {
-		int rowIndex = data.getTransactions().indexOf(updatedTransaction);
+		int rowIndex = translateRowToModel(data.getTransactions().indexOf(updatedTransaction));
 		fireTableRowsUpdated(rowIndex, rowIndex);
 	}
 

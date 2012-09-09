@@ -71,7 +71,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
 				if (jTableTransactions.getSelectedRow() >= 0)
-					transactionEditor.editTransaction(financeData.getTransactions().get(jTableTransactions.convertRowIndexToModel(jTableTransactions.getSelectedRow())));
+					transactionEditor.editTransaction(((TransactionsTableModel) jTableTransactions.getModel()).getTransaction(jTableTransactions.convertRowIndexToModel(jTableTransactions.getSelectedRow())));
 				else
 					transactionEditor.editTransaction(null);
 			}
@@ -461,7 +461,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
 	@Override
 	public void transactionCreated(FinanceTransaction newTransaction) {
-		int newTransactionIndex = financeData.getTransactions().indexOf(newTransaction);
+		int newTransactionIndex = ((TransactionsTableModel) jTableTransactions.getModel()).getTransactionIndex(newTransaction);
 		jTableTransactions.getSelectionModel().setSelectionInterval(newTransactionIndex, newTransactionIndex);
 		jTableTransactions.scrollRectToVisible(jTableTransactions.getCellRect(newTransactionIndex, 0, true));
 	}
