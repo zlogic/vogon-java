@@ -6,8 +6,9 @@
 		<artifactId>top</artifactId>
 		<version>0.0.2-SNAPSHOT</version>
 	</parent>
-	<artifactId>vogon-ui</artifactId>
-	<name>Vogon :: UI</name>
+	<groupId>org.zlogic.vogon.analytics</groupId>
+	<artifactId>vogon-analytics</artifactId>
+	<name>Vogon :: Analytics</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -21,6 +22,9 @@
 					<include>**/*.properties</include>
 				</includes>
 			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
 		</resources>
 		<plugins>
 			<plugin>
@@ -30,6 +34,9 @@
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
+					<compilerArguments>
+						<processor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</processor>
+					</compilerArguments>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -39,25 +46,7 @@
 		<dependency>
 			<groupId>org.zlogic.vogon.data</groupId>
 			<artifactId>vogon-data</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.zlogic.vogon.analytics</groupId>
-			<artifactId>vogon-analytics</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 	</dependencies>
-	<groupId>org.zlogic.vogon.ui</groupId>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.zlogic.vogon.data</groupId>
-				<artifactId>vogon-data</artifactId>
-				<version>${project.parent.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.zlogic.vogon.analytics</groupId>
-				<artifactId>vogon-analytics</artifactId>
-				<version>${project.parent.version}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 </project>
