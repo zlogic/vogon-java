@@ -270,16 +270,7 @@ public class Report {
 		Predicate datePredicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), earliestDate),
 				criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), latestDate));
 
-		Predicate tagPredicate = null;
-		for (String tag : selectedTags) {
-			if(tag.isEmpty())
-				continue;
-			Predicate tagExpression = criteriaBuilder.literal(tag).in(tr.join(FinanceTransaction_.tags));
-			if (tagPredicate == null)
-				tagPredicate = tagExpression;
-			else
-				tagPredicate = criteriaBuilder.or(tagPredicate, tagExpression);
-		}
+		Predicate tagPredicate = (tr.join(FinanceTransaction_.tags).in(criteriaBuilder.literal(selectedTags)));
 
 		Predicate transactionTypePredicate = null;
 		transactionTypePredicate = transactionTypePredicate==null?
