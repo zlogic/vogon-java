@@ -106,6 +106,9 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabelName">
       <Properties>
+        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
+          <ComponentRef name="jTextFieldName"/>
+        </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="TRANSACTION_DESCRIPTION" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
         </Property>
@@ -118,6 +121,9 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabelTags">
       <Properties>
+        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
+          <ComponentRef name="jTextFieldTags"/>
+        </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="TRANSACTION_TAGS" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
         </Property>
@@ -130,6 +136,9 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabelDate">
       <Properties>
+        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
+          <ComponentRef name="jFormattedTextFieldDate"/>
+        </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="TRANSACTION_DATE" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
         </Property>

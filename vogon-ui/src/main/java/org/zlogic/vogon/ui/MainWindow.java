@@ -116,7 +116,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
         jTableAccounts = new javax.swing.JTable();
         jPanelCurrencies = new javax.swing.JPanel();
         jPanelCurrenciesControls = new javax.swing.JPanel();
-        jLabelDefaultCurrency = new javax.swing.JLabel();
+        javax.swing.JLabel jLabelDefaultCurrency = new javax.swing.JLabel();
         jComboBoxDefaultCurrency = new javax.swing.JComboBox();
         jScrollPaneCurrencies = new javax.swing.JScrollPane();
         jTableCurrencies = new javax.swing.JTable();
@@ -430,7 +430,6 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
     private javax.swing.JButton jButtonDeleteAccount;
     private javax.swing.JButton jButtonDeleteTransaction;
     private javax.swing.JComboBox jComboBoxDefaultCurrency;
-    private javax.swing.JLabel jLabelDefaultCurrency;
     private javax.swing.JMenuBar jMenuBar;
     private javax.swing.JMenu jMenuFile;
     private javax.swing.JMenuItem jMenuItemCleanupDB;

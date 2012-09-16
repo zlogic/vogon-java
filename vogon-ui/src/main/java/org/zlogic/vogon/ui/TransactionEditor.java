@@ -83,6 +83,7 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
             }
         });
 
+        jLabelName.setLabelFor(jTextFieldName);
         jLabelName.setText(messages.getString("TRANSACTION_DESCRIPTION")); // NOI18N
 
         jTextFieldName.addActionListener(new java.awt.event.ActionListener() {
@@ -91,6 +92,7 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
             }
         });
 
+        jLabelTags.setLabelFor(jTextFieldTags);
         jLabelTags.setText(messages.getString("TRANSACTION_TAGS")); // NOI18N
 
         jTextFieldTags.addActionListener(new java.awt.event.ActionListener() {
@@ -99,6 +101,7 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
             }
         });
 
+        jLabelDate.setLabelFor(jFormattedTextFieldDate);
         jLabelDate.setText(messages.getString("TRANSACTION_DATE")); // NOI18N
 
         jFormattedTextFieldDate.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("yyyy-MM-dd"))));
