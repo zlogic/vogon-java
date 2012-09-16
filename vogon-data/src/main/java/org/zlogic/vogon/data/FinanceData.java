@@ -38,10 +38,6 @@ public class FinanceData {
 	 */
 	protected java.util.List<CurrencyRate> exchangeRates;
 	/**
-	 * Contains a list of all tags (cached)
-	 */
-	protected java.util.Set<String> tags;
-	/**
 	 * Preferred currency
 	 */
 	protected Currency defaultCurrency;
@@ -96,7 +92,7 @@ public class FinanceData {
 	/**
 	 * Restores all data from the persistence database
 	 */
-	public void restoreFromDatabase() {
+	private void restoreFromDatabase() {
 		if (currentEntityManager != null)
 			currentEntityManager.close();
 		currentEntityManager = DatabaseManager.getInstance().createEntityManager();

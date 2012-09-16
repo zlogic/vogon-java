@@ -8,13 +8,14 @@ package org.zlogic.vogon.ui;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.table.DefaultTableModel;
 import org.zlogic.vogon.analytics.Report;
+import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 
 /**
@@ -31,7 +32,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 	 */
 	public AnalyticsViewer() {
 		initComponents();
-		resetForm();
+		initCustomComponents();
 	}
 
 	/**
@@ -44,14 +45,18 @@ public class AnalyticsViewer extends javax.swing.JPanel {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        javax.swing.JLabel jLabelStartDate = new javax.swing.JLabel();
-        javax.swing.JLabel jLabelEndDate = new javax.swing.JLabel();
+        jLabelStartDate = new javax.swing.JLabel();
+        jLabelEndDate = new javax.swing.JLabel();
         jFormattedTextFieldStartDate = new javax.swing.JFormattedTextField();
         jFormattedTextFieldEndDate = new javax.swing.JFormattedTextField();
-        javax.swing.JLabel jLabelTags = new javax.swing.JLabel();
+        jLabelTags = new javax.swing.JLabel();
         jTextFieldTags = new javax.swing.JTextField();
         jCheckBoxExpenseTransactions = new javax.swing.JCheckBox();
         jCheckBoxTransferTransactions = new javax.swing.JCheckBox();
+        jScrollPaneAccounts = new javax.swing.JScrollPane();
+        jTableAccounts = new javax.swing.JTable();
+        jScrollPaneTags = new javax.swing.JScrollPane();
+        jTableTags = new javax.swing.JTable();
         jButton1 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextPane1 = new javax.swing.JTextPane();
@@ -76,43 +81,98 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 
         jCheckBoxTransferTransactions.setText(messages.getString("TRANSFER_TRANSACTIONS")); // NOI18N
 
+        jTableAccounts.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null},
+                {null, null},
+                {null, null}
+            },
+            new String [] {
+                "Account", "Show"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Object.class, java.lang.Boolean.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        jTableAccounts.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
+        jScrollPaneAccounts.setViewportView(jTableAccounts);
+
+        jTableTags.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Tag", "Show"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.Boolean.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        jTableTags.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
+        jScrollPaneTags.setViewportView(jTableTags);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabelStartDate)
-                    .addComponent(jLabelEndDate))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jFormattedTextFieldStartDate, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
-                    .addComponent(jFormattedTextFieldEndDate))
-                .addGap(18, 18, 18)
-                .addComponent(jLabelTags)
-                .addGap(18, 18, 18)
-                .addComponent(jTextFieldTags, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jCheckBoxExpenseTransactions)
-                    .addComponent(jCheckBoxTransferTransactions))
-                .addContainerGap(121, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabelStartDate)
+                                    .addComponent(jLabelEndDate))
+                                .addGap(18, 18, 18))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabelTags)
+                                .addGap(44, 44, 44)))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jFormattedTextFieldStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jFormattedTextFieldEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jTextFieldTags, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jCheckBoxTransferTransactions)
+                    .addComponent(jCheckBoxExpenseTransactions))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPaneAccounts, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPaneTags, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addGap(0, 0, 0))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap(11, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabelStartDate)
-                    .addComponent(jFormattedTextFieldStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabelTags)
-                    .addComponent(jTextFieldTags, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jCheckBoxExpenseTransactions))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabelEndDate)
-                    .addComponent(jFormattedTextFieldEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jCheckBoxTransferTransactions)))
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabelStartDate)
+                            .addComponent(jFormattedTextFieldStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabelEndDate)
+                            .addComponent(jFormattedTextFieldEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabelTags)
+                            .addComponent(jTextFieldTags, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jCheckBoxTransferTransactions)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jCheckBoxExpenseTransactions))
+                    .addComponent(jScrollPaneTags, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(jScrollPaneAccounts, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
         );
 
         jButton1.setText(messages.getString("GENERATE_REPORT")); // NOI18N
@@ -128,11 +188,11 @@ public class AnalyticsViewer extends javax.swing.JPanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jScrollPane1)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jButton1)
-                .addGap(0, 0, Short.MAX_VALUE))
-            .addComponent(jScrollPane1)
+                .addGap(573, 745, Short.MAX_VALUE))
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -140,8 +200,8 @@ public class AnalyticsViewer extends javax.swing.JPanel {
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 248, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -151,7 +211,14 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 		try {
 			report.setEarliestDate(dateFormat.parse(jFormattedTextFieldStartDate.getText()));
 			report.setLatestDate(dateFormat.parse(jFormattedTextFieldEndDate.getText()));
-			report.setSelectedTags(jTextFieldTags.getText().split(",")); //NOI18N
+			report.setEnabledExpenseTransactions(jCheckBoxExpenseTransactions.isSelected());
+			report.setEnabledTransferTransactions(jCheckBoxTransferTransactions.isSelected());
+			DefaultTableModel tagsModel = (DefaultTableModel) jTableTags.getModel();
+			List<String> tags = new LinkedList<>();
+			for (int i = 0; i < tagsModel.getRowCount(); i++)
+				if (tagsModel.getValueAt(i, 1) instanceof Boolean && (Boolean) tagsModel.getValueAt(i, 1))
+					tags.add((String) tagsModel.getValueAt(i, 0));
+			report.setSelectedTags(tags);
 		} catch (ParseException ex) {
 			Logger.getLogger(AnalyticsViewer.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -163,8 +230,15 @@ public class AnalyticsViewer extends javax.swing.JPanel {
     private javax.swing.JCheckBox jCheckBoxTransferTransactions;
     private javax.swing.JFormattedTextField jFormattedTextFieldEndDate;
     private javax.swing.JFormattedTextField jFormattedTextFieldStartDate;
+    private javax.swing.JLabel jLabelEndDate;
+    private javax.swing.JLabel jLabelStartDate;
+    private javax.swing.JLabel jLabelTags;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPaneAccounts;
+    private javax.swing.JScrollPane jScrollPaneTags;
+    private javax.swing.JTable jTableAccounts;
+    private javax.swing.JTable jTableTags;
     private javax.swing.JTextField jTextFieldTags;
     private javax.swing.JTextPane jTextPane1;
     // End of variables declaration//GEN-END:variables
@@ -175,25 +249,73 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 	 * @param financeData the finance data to generate the report
 	 */
 	public void setFinanceData(FinanceData financeData) {
+		this.financeData = financeData;
 		report = new Report(financeData);
+		resetForm();
+	}
+
+	/**
+	 * Completes user configuration of form
+	 */
+	private void initCustomComponents() {
+		jTableTags.getColumnModel().getColumn(1).setMinWidth(30);
+		jTableTags.getColumnModel().getColumn(1).setMaxWidth(100);
+		jTableTags.getColumnModel().getColumn(1).setPreferredWidth(50);
+		jTableAccounts.getColumnModel().getColumn(1).setMinWidth(30);
+		jTableAccounts.getColumnModel().getColumn(1).setMaxWidth(100);
+		jTableAccounts.getColumnModel().getColumn(1).setPreferredWidth(50);
 	}
 
 	/**
 	 * Resets all fields to their default values
 	 */
 	private void resetForm() {
-		//Prepare start/end dates
-		Calendar calendar = new GregorianCalendar();
 		DateFormat format = new SimpleDateFormat(messages.getString("PARSER_DATE"));
-		calendar.set(Calendar.DAY_OF_MONTH, 1);
-		Date startDate = calendar.getTime();
-		jFormattedTextFieldStartDate.setText(format.format(startDate));
-		calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
-		Date endDate = calendar.getTime();
-		jFormattedTextFieldEndDate.setText(format.format(endDate));
+		jFormattedTextFieldStartDate.setText(format.format(report.getEarliestDate()));
+		jFormattedTextFieldEndDate.setText(format.format(report.getLatestDate()));
+
+		//Set tags
+		DefaultTableModel tagsModel = (DefaultTableModel) jTableTags.getModel();
+		while (tagsModel.getRowCount() > 0)
+			tagsModel.removeRow(0);
+		for (String tag : report.getAllTags())
+			if (!tag.isEmpty())
+				tagsModel.addRow(new Object[]{tag, new Boolean(true)});
+
+		//Set accounts
+		DefaultTableModel accountsModel = (DefaultTableModel) jTableAccounts.getModel();
+		while (accountsModel.getRowCount() > 0)
+			accountsModel.removeRow(0);
+		for (FinanceAccount account : report.getAllAccounts())
+			accountsModel.addRow(new Object[]{new AccountDisplay(account), new Boolean(true)});
+	}
+
+	/**
+	 * Class for displaying an account in a table
+	 */
+	private class AccountDisplay {
+
+		protected FinanceAccount account;
+
+		public AccountDisplay(FinanceAccount account) {
+			this.account = account;
+		}
+
+		public FinanceAccount getAccount() {
+			return account;
+		}
+
+		@Override
+		public String toString() {
+			return account.getName();
+		}
 	}
 	/**
 	 * The report generator
 	 */
 	protected Report report;
+	/**
+	 * The finance data reference
+	 */
+	protected FinanceData financeData;
 }
