@@ -17,6 +17,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableModel;
 import org.zlogic.vogon.data.CsvImporter;
 import org.zlogic.vogon.data.DatabaseManager;
 import org.zlogic.vogon.data.FileExporter;
@@ -35,7 +36,7 @@ import org.zlogic.vogon.data.XmlImporter;
  * @author Zlogic
  */
 public class MainWindow extends javax.swing.JFrame implements FinanceData.TransactionCreatedEventListener {
-	
+
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 
 	/**
@@ -45,45 +46,45 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		initComponents();
 		initCustomComponents();
 	}
-	
+
 	private void initCustomComponents() {
 		//Restore settings
 		lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null : new java.io.File(preferenceStorage.get("lastDirectory", null)); //NOI18N
 
 		//Load data from DB
-		((TransactionsTableModel) jTableTransactions.getModel()).setFinanceData(financeData);
-		((AccountsTableModel) jTableAccounts.getModel()).setFinanceData(financeData);
-		((CurrenciesTableModel) jTableCurrencies.getModel()).setFinanceData(financeData);
+		transactionsTableModel.setFinanceData(financeData);
+		accountsTableModel.setFinanceData(financeData);
+		currenciesTableModel.setFinanceData(financeData);
 		transactionEditor.setFinanceData(financeData);
 		transactionEditor.updateAccountsCombo();
 		financeData.addTransactionCreatedListener(this);
-		financeData.addTransactionCreatedListener((TransactionsTableModel) jTableTransactions.getModel());
-		financeData.addTransactionUpdatedListener((TransactionsTableModel) jTableTransactions.getModel());
-		financeData.addAccountCreatedListener((AccountsTableModel) jTableAccounts.getModel());
-		financeData.addAccountUpdatedListener((AccountsTableModel) jTableAccounts.getModel());
-		financeData.addAccountDeletedListener((AccountsTableModel) jTableAccounts.getModel());
+		financeData.addTransactionCreatedListener(transactionsTableModel);
+		financeData.addTransactionUpdatedListener(transactionsTableModel);
+		financeData.addAccountCreatedListener(accountsTableModel);
+		financeData.addAccountUpdatedListener(accountsTableModel);
+		financeData.addAccountDeletedListener(accountsTableModel);
 		financeData.addAccountCreatedListener(transactionEditor);
 		financeData.addAccountUpdatedListener(transactionEditor);
 		financeData.addAccountDeletedListener(transactionEditor);
-		financeData.addCurrencyUpdatedListener((CurrenciesTableModel) jTableCurrencies.getModel());
-		
+		financeData.addCurrencyUpdatedListener(currenciesTableModel);
+
 		jTableTransactions.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
 				if (jTableTransactions.getSelectedRow() >= 0)
-					transactionEditor.editTransaction(((TransactionsTableModel) jTableTransactions.getModel()).getTransaction(jTableTransactions.convertRowIndexToModel(jTableTransactions.getSelectedRow())));
+					transactionEditor.editTransaction(transactionsTableModel.getTransaction(jTableTransactions.convertRowIndexToModel(jTableTransactions.getSelectedRow())));
 				else
 					transactionEditor.editTransaction(null);
 			}
 		});
-		
+
 		updateDefaultCurrencyCombo();
-		
-		jTableAccounts.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(new JComboBox(((AccountsTableModel) jTableAccounts.getModel()).getCurrenciesComboList())));
+
+		jTableAccounts.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(new JComboBox(accountsTableModel.getCurrenciesComboList())));
 		jTableAccounts.getColumnModel().getColumn(1).setCellRenderer(SumTableCell.getRenderer());
-		
+
 		jTableTransactions.getColumnModel().getColumn(3).setCellRenderer(SumTableCell.getRenderer());
-		
+
 		analyticsViewer.setFinanceData(financeData);
 	}
 
@@ -128,9 +129,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
         jMenuItemCleanupDB = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages"); // NOI18N
-        setTitle(bundle.getString("MAINWINDOW_TITLE")); // NOI18N
-        setLocationByPlatform(true);
+        setTitle(messages.getString("MAINWINDOW_TITLE")); // NOI18N
         setPreferredSize(new java.awt.Dimension(1024, 768));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
@@ -159,7 +158,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
         jPanelTransactionsList.add(jPanelTransactionControls, java.awt.BorderLayout.NORTH);
 
         jTableTransactions.setAutoCreateRowSorter(true);
-        jTableTransactions.setModel(new TransactionsTableModel());
+        jTableTransactions.setModel(getTransactionsTableModel());
         jTableTransactions.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         jTableTransactions.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPaneTransactions.setViewportView(jTableTransactions);
@@ -199,7 +198,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
         jPanelAccounts.add(jPanelAccountsControls, java.awt.BorderLayout.NORTH);
 
-        jTableAccounts.setModel(new org.zlogic.vogon.ui.AccountsTableModel());
+        jTableAccounts.setModel(getAccountsTableModel());
         jTableAccounts.setFillsViewportHeight(true);
         jScrollPaneAccounts.setViewportView(jTableAccounts);
 
@@ -224,7 +223,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
         jPanelCurrencies.add(jPanelCurrenciesControls, java.awt.BorderLayout.NORTH);
 
-        jTableCurrencies.setModel(new CurrenciesTableModel());
+        jTableCurrencies.setModel(getCurrenciesTableModel());
         jTableCurrencies.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPaneCurrencies.setViewportView(jTableCurrencies);
 
@@ -295,7 +294,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
 			//Test code for printing data
 			FileImporter importer = null;
-			
+
 			if (fileChooser.getFileFilter().getDescription().equals(messages.getString("CSV_FILES_(COMMA-SEPARATED)")))
 				importer = new CsvImporter(selectedFile);
 			else if (fileChooser.getFileFilter().getDescription().equals(messages.getString("XML_FILES")))
@@ -304,8 +303,8 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 				if (importer == null)
 					throw new VogonImportLogicalException(messages.getString("UNKNOWN_FILE_TYPE"));
 				financeData.importData(importer);
-				((TransactionsTableModel) jTableTransactions.getModel()).setFinanceData(financeData);
-				((AccountsTableModel) jTableAccounts.getModel()).setFinanceData(financeData);
+				transactionsTableModel.setFinanceData(financeData);
+				accountsTableModel.setFinanceData(financeData);
 			} catch (org.zlogic.vogon.data.VogonImportLogicalException ex) {
 				Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
 				JOptionPane.showMessageDialog(this, new MessageFormat(messages.getString("IMPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), messages.getString("IMPORT_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
@@ -315,7 +314,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 			}
 		}
     }//GEN-LAST:event_jMenuItemImportActionPerformed
-	
+
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
 		try {
 			transactionEditor.saveChanges();
@@ -324,15 +323,15 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 			Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
 		}
     }//GEN-LAST:event_formWindowClosing
-	
+
     private void jButtonDeleteTransactionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteTransactionActionPerformed
 		int selectedRow = jTableTransactions.convertRowIndexToModel(jTableTransactions.getSelectedRow());
 		if (selectedRow >= 0) {
 			transactionEditor.editTransaction(null);
-			((TransactionsTableModel) jTableTransactions.getModel()).deleteTransaction(selectedRow);
+			transactionsTableModel.deleteTransaction(selectedRow);
 		}
     }//GEN-LAST:event_jButtonDeleteTransactionActionPerformed
-	
+
     private void jMenuItemExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExportActionPerformed
 		// Prepare file chooser dialog
 		JFileChooser fileChooser = new JFileChooser((lastDirectory != null && lastDirectory.exists()) ? lastDirectory : null);
@@ -348,7 +347,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
 			//Test code for printing data
 			FileExporter exporter = null;
-			
+
 			if (fileChooser.getFileFilter().getDescription().equals(messages.getString("XML_FILES")))
 				exporter = new XmlExporter(selectedFile);
 			try {
@@ -359,19 +358,19 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 			}
 		}
     }//GEN-LAST:event_jMenuItemExportActionPerformed
-	
+
     private void jMenuItemRecalculateBalanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemRecalculateBalanceActionPerformed
 		for (FinanceAccount account : financeData.getAccounts())
 			financeData.refreshAccountBalance(account);
 		updateAccounts();
     }//GEN-LAST:event_jMenuItemRecalculateBalanceActionPerformed
-	
+
     private void jMenuItemCleanupDBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemCleanupDBActionPerformed
 		financeData.cleanup();
 		updateAccounts();
 		updateTransactions();
     }//GEN-LAST:event_jMenuItemCleanupDBActionPerformed
-	
+
     private void jComboBoxDefaultCurrencyItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxDefaultCurrencyItemStateChanged
 		if (evt.getStateChange() == ItemEvent.SELECTED && jComboBoxDefaultCurrency.isEnabled()) {
 			CurrencyComboItem selectedItem = (CurrencyComboItem) evt.getItem();
@@ -379,15 +378,15 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 				financeData.setDefaultCurrency(selectedItem.getCurrency());
 		}
     }//GEN-LAST:event_jComboBoxDefaultCurrencyItemStateChanged
-	
+
     private void jButtonAddAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddAccountActionPerformed
-		int newAccountIndex = ((AccountsTableModel) jTableAccounts.getModel()).addAccount();
+		int newAccountIndex = accountsTableModel.addAccount();
 		jTableAccounts.setRowSelectionInterval(newAccountIndex, newAccountIndex);
     }//GEN-LAST:event_jButtonAddAccountActionPerformed
-	
+
     private void jButtonDeleteAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteAccountActionPerformed
 		if (jTableAccounts.getSelectedRow() >= 0)
-			((AccountsTableModel) jTableAccounts.getModel()).deleteAccount(jTableAccounts.convertRowIndexToModel(jTableAccounts.getSelectedRow()));
+			accountsTableModel.deleteAccount(jTableAccounts.convertRowIndexToModel(jTableAccounts.getSelectedRow()));
     }//GEN-LAST:event_jButtonDeleteAccountActionPerformed
 
 	/**
@@ -469,10 +468,49 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 	 * Finance Data instance
 	 */
 	protected FinanceData financeData = new FinanceData();
-	
+	/**
+	 * Transactions table model
+	 */
+	private TransactionsTableModel transactionsTableModel = new TransactionsTableModel();
+	/**
+	 * Accounts table model
+	 */
+	private AccountsTableModel accountsTableModel = new AccountsTableModel();
+	/**
+	 * Currencies table model
+	 */
+	private CurrenciesTableModel currenciesTableModel = new CurrenciesTableModel();
+
+	/**
+	 * Returns the transactions table model (used only for form construction)
+	 *
+	 * @return the transactions table model
+	 */
+	private TableModel getTransactionsTableModel() {
+		return transactionsTableModel;
+	}
+
+	/**
+	 * Returns the accounts table model (used only for form construction)
+	 *
+	 * @return the accounts table model
+	 */
+	private TableModel getAccountsTableModel() {
+		return accountsTableModel;
+	}
+
+	/**
+	 * Returns the currencies table model (used only for form construction)
+	 *
+	 * @return the currencies table model
+	 */
+	private TableModel getCurrenciesTableModel() {
+		return currenciesTableModel;
+	}
+
 	@Override
 	public void transactionCreated(FinanceTransaction newTransaction) {
-		int newTransactionIndex = ((TransactionsTableModel) jTableTransactions.getModel()).getTransactionIndex(newTransaction);
+		int newTransactionIndex = transactionsTableModel.getTransactionIndex(newTransaction);
 		jTableTransactions.getSelectionModel().setSelectionInterval(newTransactionIndex, newTransactionIndex);
 		jTableTransactions.scrollRectToVisible(jTableTransactions.getCellRect(newTransactionIndex, 0, true));
 	}
@@ -481,7 +519,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 	 * Forces an update of the accounts table
 	 */
 	protected void updateAccounts() {
-		((AccountsTableModel) jTableAccounts.getModel()).fireTableDataChanged();
+		accountsTableModel.fireTableDataChanged();
 	}
 
 	/**
@@ -489,7 +527,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 	 */
 	protected void updateTransactions() {
 		transactionEditor.editTransaction(null);
-		((TransactionsTableModel) jTableTransactions.getModel()).fireTableDataChanged();
+		transactionsTableModel.fireTableDataChanged();
 	}
 
 	/**
@@ -498,10 +536,10 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 	protected void updateDefaultCurrencyCombo() {
 		jComboBoxDefaultCurrency.removeAllItems();
 		jComboBoxDefaultCurrency.setEnabled(false);
-		for (Object currency : ((CurrenciesTableModel) jTableCurrencies.getModel()).getCurrenciesComboList())
+		for (Object currency : currenciesTableModel.getCurrenciesComboList())
 			jComboBoxDefaultCurrency.addItem(currency);
 		if (financeData.getDefaultCurrency() != null)
-			jComboBoxDefaultCurrency.setSelectedItem(((CurrenciesTableModel) jTableCurrencies.getModel()).getDefaultCurrency());
+			jComboBoxDefaultCurrency.setSelectedItem(currenciesTableModel.getDefaultCurrency());
 		else
 			jComboBoxDefaultCurrency.setSelectedItem(-1);
 		jComboBoxDefaultCurrency.setEnabled(true);
