@@ -31,7 +31,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jButton1" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Component id="jScrollPane1" pref="315" max="32767" attributes="0"/>
+              <Component id="jScrollPane1" pref="312" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -59,22 +59,35 @@
                       <Component id="jFormattedTextFieldStartDate" pref="120" max="32767" attributes="0"/>
                       <Component id="jFormattedTextFieldEndDate" max="32767" attributes="0"/>
                   </Group>
-                  <EmptySpace min="0" pref="447" max="32767" attributes="0"/>
+                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                  <Component id="jLabelTags" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                  <Component id="jTextFieldTags" min="-2" pref="120" max="-2" attributes="0"/>
+                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="jCheckBoxExpenseTransactions" min="-2" max="-2" attributes="0"/>
+                      <Component id="jCheckBoxTransferTransactions" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace pref="121" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace max="32767" attributes="0"/>
+                  <EmptySpace pref="11" max="32767" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabelStartDate" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="jFormattedTextFieldStartDate" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabelTags" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jTextFieldTags" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jCheckBoxExpenseTransactions" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabelEndDate" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="jFormattedTextFieldEndDate" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jCheckBoxTransferTransactions" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
           </Group>
@@ -120,6 +133,35 @@
           <Properties>
             <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
               <Format format="yyyy-MM-dd" subtype="-1" type="1"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabelTags">
+          <Properties>
+            <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
+              <ComponentRef name="jTextFieldTags"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Tags"/>
+          </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_VariableLocal" type="java.lang.Boolean" value="true"/>
+            <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="0"/>
+          </AuxValues>
+        </Component>
+        <Component class="javax.swing.JTextField" name="jTextFieldTags">
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="jCheckBoxExpenseTransactions">
+          <Properties>
+            <Property name="selected" type="boolean" value="true"/>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+              <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="EXPENSE_TRANSACTIONS" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="jCheckBoxTransferTransactions">
+          <Properties>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+              <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="TRANSFER_TRANSACTIONS" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
             </Property>
           </Properties>
         </Component>

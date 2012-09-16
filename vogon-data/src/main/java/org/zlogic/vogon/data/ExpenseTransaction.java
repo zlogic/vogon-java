@@ -6,6 +6,7 @@
 package org.zlogic.vogon.data;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import javax.persistence.Entity;
@@ -27,6 +28,7 @@ public class ExpenseTransaction extends FinanceTransaction implements Serializab
 	 * Default constructor for an expense transaction
 	 */
 	protected ExpenseTransaction() {
+		super();
 	}
 
 	/**
@@ -38,7 +40,7 @@ public class ExpenseTransaction extends FinanceTransaction implements Serializab
 	 */
 	public ExpenseTransaction(String description, String[] tags, Date date) {
 		this.description = description;
-		this.tags = tags;
+		this.tags = tags != null ? Arrays.asList(tags) : new LinkedList<String>();
 		this.transactionDate = date;
 		this.components = new LinkedList<>();
 	}

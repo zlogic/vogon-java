@@ -48,6 +48,10 @@ public class AnalyticsViewer extends javax.swing.JPanel {
         javax.swing.JLabel jLabelEndDate = new javax.swing.JLabel();
         jFormattedTextFieldStartDate = new javax.swing.JFormattedTextField();
         jFormattedTextFieldEndDate = new javax.swing.JFormattedTextField();
+        javax.swing.JLabel jLabelTags = new javax.swing.JLabel();
+        jTextFieldTags = new javax.swing.JTextField();
+        jCheckBoxExpenseTransactions = new javax.swing.JCheckBox();
+        jCheckBoxTransferTransactions = new javax.swing.JCheckBox();
         jButton1 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextPane1 = new javax.swing.JTextPane();
@@ -64,6 +68,14 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 
         jFormattedTextFieldEndDate.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("yyyy-MM-dd"))));
 
+        jLabelTags.setLabelFor(jTextFieldTags);
+        jLabelTags.setText("Tags");
+
+        jCheckBoxExpenseTransactions.setSelected(true);
+        jCheckBoxExpenseTransactions.setText(messages.getString("EXPENSE_TRANSACTIONS")); // NOI18N
+
+        jCheckBoxTransferTransactions.setText(messages.getString("TRANSFER_TRANSACTIONS")); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -76,19 +88,31 @@ public class AnalyticsViewer extends javax.swing.JPanel {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jFormattedTextFieldStartDate, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
                     .addComponent(jFormattedTextFieldEndDate))
-                .addGap(0, 447, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(jLabelTags)
+                .addGap(18, 18, 18)
+                .addComponent(jTextFieldTags, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jCheckBoxExpenseTransactions)
+                    .addComponent(jCheckBoxTransferTransactions))
+                .addContainerGap(121, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(11, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabelStartDate)
-                    .addComponent(jFormattedTextFieldStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jFormattedTextFieldStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabelTags)
+                    .addComponent(jTextFieldTags, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jCheckBoxExpenseTransactions))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabelEndDate)
-                    .addComponent(jFormattedTextFieldEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jFormattedTextFieldEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jCheckBoxTransferTransactions)))
         );
 
         jButton1.setText(messages.getString("GENERATE_REPORT")); // NOI18N
@@ -117,7 +141,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 315, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -127,6 +151,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 		try {
 			report.setEarliestDate(dateFormat.parse(jFormattedTextFieldStartDate.getText()));
 			report.setLatestDate(dateFormat.parse(jFormattedTextFieldEndDate.getText()));
+			report.setSelectedTags(jTextFieldTags.getText().split(",")); //NOI18N
 		} catch (ParseException ex) {
 			Logger.getLogger(AnalyticsViewer.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -134,10 +159,13 @@ public class AnalyticsViewer extends javax.swing.JPanel {
     }//GEN-LAST:event_jButton1ActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JCheckBox jCheckBoxExpenseTransactions;
+    private javax.swing.JCheckBox jCheckBoxTransferTransactions;
     private javax.swing.JFormattedTextField jFormattedTextFieldEndDate;
     private javax.swing.JFormattedTextField jFormattedTextFieldStartDate;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextField jTextFieldTags;
     private javax.swing.JTextPane jTextPane1;
     // End of variables declaration//GEN-END:variables
 

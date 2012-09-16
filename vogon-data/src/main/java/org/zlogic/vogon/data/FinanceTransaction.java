@@ -6,10 +6,12 @@
 package org.zlogic.vogon.data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -43,7 +45,8 @@ public abstract class FinanceTransaction implements Serializable {
 	/**
 	 * Contains the expense tags
 	 */
-	protected String[] tags;
+	@ElementCollection
+	protected List<String> tags;
 	/**
 	 * Contains the related accounts and the transaction's distribution into
 	 * them
@@ -231,8 +234,10 @@ public abstract class FinanceTransaction implements Serializable {
 	 * @param tag the tag to add
 	 */
 	void addTag(String tag) {
-		tags = Arrays.copyOf(tags, tags.length + 1);
-		tags[tags.length - 1] = tag;
+		if (tags == null)
+			tags = new ArrayList<>();
+		if (!tags.contains(tag))
+			tags.add(tag);
 	}
 
 	/**
@@ -259,7 +264,7 @@ public abstract class FinanceTransaction implements Serializable {
 	 * @return the transaction's tags
 	 */
 	public String[] getTags() {
-		return tags;
+		return tags.toArray(new String[0]);
 	}
 
 	/**
@@ -268,7 +273,7 @@ public abstract class FinanceTransaction implements Serializable {
 	 * @param tags the new transaction's tags
 	 */
 	public void setTags(String[] tags) {
-		this.tags = tags;
+		this.tags = new ArrayList<>(Arrays.asList(tags));
 	}
 
 	/**

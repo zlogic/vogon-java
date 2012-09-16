@@ -6,6 +6,7 @@
 package org.zlogic.vogon.analytics;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -14,10 +15,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.SingularAttribute;
 import org.zlogic.vogon.data.DatabaseManager;
@@ -49,6 +52,10 @@ public class Report {
 	 * Entity manager
 	 */
 	protected EntityManager entityManager;
+	/**
+	 * Selected tags
+	 */
+	protected List<String> selectedTags;
 
 	/**
 	 * Default constructor
@@ -100,6 +107,42 @@ public class Report {
 		this.latestDate = latestDate;
 	}
 
+	/**
+	 * Returns the tags to be included in the report. Empty list means all tags
+	 * will be used.
+	 *
+	 * @return the tags to be included in the report
+	 */
+	public List<String> getSelectedTags() {
+		return selectedTags != null ? selectedTags : new LinkedList<String>();
+	}
+
+	/**
+	 * Sets the tags to be included in the report. Null or empty means all tags
+	 * will be used.
+	 *
+	 * @param selectedTags the tags to be included in the report
+	 */
+	public void setSelectedTags(List<String> selectedTags) {
+		if (selectedTags == null || selectedTags.isEmpty())
+			this.selectedTags = null;
+		else
+			this.selectedTags = selectedTags;
+	}
+
+	/**
+	 * Sets the tags to be included in the report. Null or empty means all tags
+	 * will be used.
+	 *
+	 * @param selectedTags the tags to be included in the report
+	 */
+	public void setSelectedTags(String[] selectedTags) {
+		if (selectedTags == null || selectedTags.length == 0)
+			this.selectedTags = null;
+		else
+			this.selectedTags = Arrays.asList(selectedTags);
+	}
+
 	/*
 	 * Obtain report data
 	 */
@@ -144,27 +187,42 @@ public class Report {
 	 * @param orderBy field for ordering the result
 	 * @param orderAsc true if results should be ordered ascending, false if
 	 * descending
-	 * @param orderAbsolute true if order should be for absolute value (e.g. ABS(orderBy))
+	 * @param orderAbsolute true if order should be for absolute value (e.g.
+	 * ABS(orderBy))
 	 * @return list of all transactions matching the set filters
 	 */
 	public List<FinanceTransaction> getTransactions(SingularAttribute orderBy, boolean orderAsc, boolean orderAbsolute) {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
-		transactionsCriteriaQuery.where(
-				criteriaBuilder.and(
-				criteriaBuilder.and(
-				criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), earliestDate),
-				criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), latestDate)),
-				criteriaBuilder.equal(tr.type(), ExpenseTransaction.class)));
+
+		Predicate datePredicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), earliestDate),
+				criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), latestDate));
+
+		Predicate tagPredicate = null;
+		for (String tag : selectedTags) {
+			Predicate tagExpression = criteriaBuilder.literal(tag).in(tr.join(FinanceTransaction_.tags));
+			if (tagPredicate == null)
+				tagPredicate = tagExpression;
+			else
+				tagPredicate = criteriaBuilder.or(tagPredicate, tagExpression);
+		}
+
+		Predicate transactionTypePredicate = criteriaBuilder.equal(tr.type(), ExpenseTransaction.class);
+
+		transactionsCriteriaQuery.where(criteriaBuilder.and(datePredicate,
+				tagPredicate == null ? transactionTypePredicate : criteriaBuilder.and(transactionTypePredicate, tagPredicate)));
+
 		Expression userOrderBy = tr.get(orderBy);
+
 		if (orderAbsolute)
 			userOrderBy = criteriaBuilder.abs(userOrderBy);
 		Order userOrder = orderAsc ? criteriaBuilder.asc(userOrderBy) : criteriaBuilder.desc(userOrderBy);
 		transactionsCriteriaQuery.orderBy(userOrder,
 				criteriaBuilder.asc(tr.get(FinanceTransaction_.id)));
 
-		return entityManager.createQuery(transactionsCriteriaQuery).getResultList();
+		Query query = entityManager.createQuery(transactionsCriteriaQuery);
+		return query.getResultList();
 	}
 
 	/**

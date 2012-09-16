@@ -19,6 +19,8 @@
 			<property name="eclipselink.target-database" value="Derby"/>
 			<!--<property name="eclipselink.logging.level" value="ALL"/>-->
 			<property name="hibernate.hbm2ddl.auto" value="update"/>
+			<!--<property name="hibernate.show_sql" value="true" />-->
+			<property name="hibernate.connection.driver_class" value="org.apache.derby.jdbc.EmbeddedDriver" />
 		</properties>
 	</persistence-unit>
 </persistence>
