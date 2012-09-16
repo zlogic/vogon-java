@@ -5,6 +5,9 @@
  */
 package org.zlogic.vogon.data;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Various helper utilities
  *
@@ -37,7 +40,18 @@ public class Utils {
 	 * @return the joined array
 	 */
 	static public String join(String[] parts, String separator) {
-		if (parts.length == 0)
+		return join(Arrays.asList(parts), separator);
+	}
+
+	/**
+	 * Joins an array of strings with the specified separator
+	 *
+	 * @param parts The string array
+	 * @param separator The separator inserted during joining
+	 * @return the joined array
+	 */
+	static public String join(List<String> parts, String separator) {
+		if (parts.isEmpty())
 			return ""; //NOI18N
 		StringBuilder builder = new StringBuilder();
 		String sep = ""; //NOI18N

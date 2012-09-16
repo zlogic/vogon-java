@@ -22,9 +22,6 @@
 					<include>**/*.properties</include>
 				</includes>
 			</resource>
-			<resource>
-				<directory>src/main/resources</directory>
-			</resource>
 		</resources>
 		<plugins>
 			<plugin>
@@ -34,9 +31,6 @@
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
-					<compilerArguments>
-						<processor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</processor>
-					</compilerArguments>
 				</configuration>
 			</plugin>
 		</plugins>

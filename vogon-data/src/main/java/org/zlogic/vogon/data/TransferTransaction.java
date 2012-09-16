@@ -5,6 +5,7 @@
  */
 package org.zlogic.vogon.data;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -27,6 +28,7 @@ public class TransferTransaction extends FinanceTransaction {
 	 * Default constructor for a transfer transaction
 	 */
 	protected TransferTransaction() {
+		super();
 	}
 
 	/**
@@ -38,7 +40,7 @@ public class TransferTransaction extends FinanceTransaction {
 	 */
 	public TransferTransaction(String description, String[] tags, Date date) {
 		this.description = description;
-		this.tags = tags;
+		this.tags = tags != null ? Arrays.asList(tags) : new LinkedList<String>();
 		this.transactionDate = date;
 		this.components = new LinkedList<>();
 	}
