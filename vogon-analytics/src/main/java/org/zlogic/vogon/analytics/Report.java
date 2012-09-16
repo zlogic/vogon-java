@@ -59,7 +59,6 @@ public class Report {
 	 * Selected tags
 	 */
 	protected List<String> selectedTags;
-	
 	/**
 	 * Show expense transactions
 	 */
@@ -82,7 +81,7 @@ public class Report {
 	public Report(FinanceData financeData) {
 		this.financeData = financeData;
 		entityManager = DatabaseManager.getInstance().createEntityManager();
-		
+
 		//Prepare start/end dates
 		Calendar calendar = new GregorianCalendar();
 		calendar.set(Calendar.DAY_OF_MONTH, 1);
@@ -168,6 +167,7 @@ public class Report {
 
 	/**
 	 * Returns if expense transactions will be included in the report
+	 *
 	 * @return true if expense transactions will be included in the report
 	 */
 	public boolean isEnabledExpenseTransactions() {
@@ -176,7 +176,9 @@ public class Report {
 
 	/**
 	 * Sets if expense transactions will be included in the report
-	 * @param enabledExpenseTransactions true if expense transactions should be included in the report
+	 *
+	 * @param enabledExpenseTransactions true if expense transactions should be
+	 * included in the report
 	 */
 	public void setEnabledExpenseTransactions(boolean enabledExpenseTransactions) {
 		this.enabledExpenseTransactions = enabledExpenseTransactions;
@@ -184,6 +186,7 @@ public class Report {
 
 	/**
 	 * Returns if income transactions will be included in the report
+	 *
 	 * @return true if income transactions will be included in the report
 	 */
 	public boolean isEnabledIncomeTransactions() {
@@ -192,7 +195,9 @@ public class Report {
 
 	/**
 	 * Sets if income transactions will be included in the report
-	 * @param enabledIncomeTransactions true if income transactions should be included in the report
+	 *
+	 * @param enabledIncomeTransactions true if income transactions should be
+	 * included in the report
 	 */
 	public void setEnabledIncomeTransactions(boolean enabledIncomeTransactions) {
 		this.enabledIncomeTransactions = enabledIncomeTransactions;
@@ -200,6 +205,7 @@ public class Report {
 
 	/**
 	 * Returns if transfer transactions will be included in the report
+	 *
 	 * @return true if transfer transactions will be included in the report
 	 */
 	public boolean isEnabledTransferTransactions() {
@@ -208,12 +214,14 @@ public class Report {
 
 	/**
 	 * Sets if transfer transactions will be included in the report
-	 * @param enabledTransferTransactions true if transfer transactions should be included in the report
+	 *
+	 * @param enabledTransferTransactions true if transfer transactions should
+	 * be included in the report
 	 */
 	public void setEnabledTransferTransactions(boolean enabledTransferTransactions) {
 		this.enabledTransferTransactions = enabledTransferTransactions;
 	}
-	
+
 	/*
 	 * Obtain report data
 	 */
@@ -270,18 +278,28 @@ public class Report {
 		Predicate datePredicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), earliestDate),
 				criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), latestDate));
 
-		Predicate tagPredicate = (tr.join(FinanceTransaction_.tags).in(criteriaBuilder.literal(selectedTags)));
+		Predicate tagsPredicate = (!selectedTags.isEmpty())?tr.join(FinanceTransaction_.tags).in(criteriaBuilder.literal(selectedTags)):null;
 
 		Predicate transactionTypePredicate = null;
-		transactionTypePredicate = transactionTypePredicate==null?
-				criteriaBuilder.equal(tr.type(), ExpenseTransaction.class):
-				criteriaBuilder.or(transactionTypePredicate,criteriaBuilder.equal(tr.type(), ExpenseTransaction.class));
-		transactionTypePredicate = transactionTypePredicate==null?
-				criteriaBuilder.equal(tr.type(), TransferTransaction.class):
-				criteriaBuilder.or(transactionTypePredicate,criteriaBuilder.equal(tr.type(), TransferTransaction.class));
+		if (enabledExpenseTransactions)
+			transactionTypePredicate = transactionTypePredicate == null
+					? criteriaBuilder.equal(tr.type(), ExpenseTransaction.class)
+					: criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.type(), ExpenseTransaction.class));
+		if (enabledTransferTransactions)
+			transactionTypePredicate = transactionTypePredicate == null
+					? criteriaBuilder.equal(tr.type(), TransferTransaction.class)
+					: criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.type(), TransferTransaction.class));
 
-		transactionsCriteriaQuery.where(criteriaBuilder.and(datePredicate,
-				tagPredicate == null ? transactionTypePredicate : criteriaBuilder.and(transactionTypePredicate, tagPredicate)));
+		if (transactionTypePredicate == null)
+			return new LinkedList<FinanceTransaction>();
+
+		Predicate rootPredicate = datePredicate;
+		if (tagsPredicate != null)
+			rootPredicate = criteriaBuilder.and(rootPredicate, tagsPredicate);
+		if (transactionTypePredicate != null)
+			rootPredicate = criteriaBuilder.and(rootPredicate, transactionTypePredicate);
+
+		transactionsCriteriaQuery.where(rootPredicate);
 
 		Expression userOrderBy = tr.get(orderBy);
 
@@ -294,17 +312,21 @@ public class Report {
 		return entityManager.createQuery(transactionsCriteriaQuery).getResultList();
 	}
 
-	
-	public List<String> getAllTags(){
+	/**
+	 * Returns a list of all tags
+	 *
+	 * @return a list of all tags
+	 */
+	public List<String> getAllTags() {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<String> transactionsCriteriaQuery = criteriaBuilder.createQuery(String.class);
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
-		
+
 		transactionsCriteriaQuery.select(tr.join(FinanceTransaction_.tags)).distinct(true);
-		
+
 		return entityManager.createQuery(transactionsCriteriaQuery).getResultList();
 	}
-	
+
 	/**
 	 * Retrieves all accounts from the database
 	 *
@@ -317,6 +339,7 @@ public class Report {
 
 		return entityManager.createQuery(accountsCriteriaQuery).getResultList();
 	}
+
 	/**
 	 * Returns expenses grouped by tags
 	 *
