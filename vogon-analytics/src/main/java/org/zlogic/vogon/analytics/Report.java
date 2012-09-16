@@ -278,7 +278,7 @@ public class Report {
 		Predicate datePredicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), earliestDate),
 				criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), latestDate));
 
-		Predicate tagsPredicate = (!selectedTags.isEmpty())?tr.join(FinanceTransaction_.tags).in(criteriaBuilder.literal(selectedTags)):null;
+		Predicate tagsPredicate = (selectedTags != null && !selectedTags.isEmpty()) ? tr.join(FinanceTransaction_.tags).in(criteriaBuilder.literal(selectedTags)) : null;
 
 		Predicate transactionTypePredicate = null;
 		if (enabledExpenseTransactions)
@@ -290,14 +290,12 @@ public class Report {
 					? criteriaBuilder.equal(tr.type(), TransferTransaction.class)
 					: criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.type(), TransferTransaction.class));
 
-		if (transactionTypePredicate == null)
+		if (transactionTypePredicate == null || tagsPredicate == null)
 			return new LinkedList<FinanceTransaction>();
 
 		Predicate rootPredicate = datePredicate;
-		if (tagsPredicate != null)
-			rootPredicate = criteriaBuilder.and(rootPredicate, tagsPredicate);
-		if (transactionTypePredicate != null)
-			rootPredicate = criteriaBuilder.and(rootPredicate, transactionTypePredicate);
+		rootPredicate = criteriaBuilder.and(rootPredicate, tagsPredicate);
+		rootPredicate = criteriaBuilder.and(rootPredicate, transactionTypePredicate);
 
 		transactionsCriteriaQuery.where(rootPredicate);
 
