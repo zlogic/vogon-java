@@ -47,6 +47,9 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		initCustomComponents();
 	}
 
+	/**
+	 * Completes user configuration of form
+	 */
 	private void initCustomComponents() {
 		//Restore settings
 		lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null : new java.io.File(preferenceStorage.get("lastDirectory", null)); //NOI18N

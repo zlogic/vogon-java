@@ -7,15 +7,16 @@ package org.zlogic.vogon.analytics;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
@@ -25,9 +26,11 @@ import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.SingularAttribute;
 import org.zlogic.vogon.data.DatabaseManager;
 import org.zlogic.vogon.data.ExpenseTransaction;
+import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.FinanceTransaction_;
+import org.zlogic.vogon.data.TransferTransaction;
 
 /**
  * Central class for setting report parameters and generating various reports
@@ -56,6 +59,19 @@ public class Report {
 	 * Selected tags
 	 */
 	protected List<String> selectedTags;
+	
+	/**
+	 * Show expense transactions
+	 */
+	protected boolean enabledExpenseTransactions;
+	/**
+	 * Show income transactions
+	 */
+	protected boolean enabledIncomeTransactions;
+	/**
+	 * Show transfer transactions
+	 */
+	protected boolean enabledTransferTransactions;
 
 	/**
 	 * Default constructor
@@ -66,6 +82,13 @@ public class Report {
 	public Report(FinanceData financeData) {
 		this.financeData = financeData;
 		entityManager = DatabaseManager.getInstance().createEntityManager();
+		
+		//Prepare start/end dates
+		Calendar calendar = new GregorianCalendar();
+		calendar.set(Calendar.DAY_OF_MONTH, 1);
+		earliestDate = calendar.getTime();
+		calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+		latestDate = calendar.getTime();
 	}
 
 	/*
@@ -143,6 +166,54 @@ public class Report {
 			this.selectedTags = Arrays.asList(selectedTags);
 	}
 
+	/**
+	 * Returns if expense transactions will be included in the report
+	 * @return true if expense transactions will be included in the report
+	 */
+	public boolean isEnabledExpenseTransactions() {
+		return enabledExpenseTransactions;
+	}
+
+	/**
+	 * Sets if expense transactions will be included in the report
+	 * @param enabledExpenseTransactions true if expense transactions should be included in the report
+	 */
+	public void setEnabledExpenseTransactions(boolean enabledExpenseTransactions) {
+		this.enabledExpenseTransactions = enabledExpenseTransactions;
+	}
+
+	/**
+	 * Returns if income transactions will be included in the report
+	 * @return true if income transactions will be included in the report
+	 */
+	public boolean isEnabledIncomeTransactions() {
+		return enabledIncomeTransactions;
+	}
+
+	/**
+	 * Sets if income transactions will be included in the report
+	 * @param enabledIncomeTransactions true if income transactions should be included in the report
+	 */
+	public void setEnabledIncomeTransactions(boolean enabledIncomeTransactions) {
+		this.enabledIncomeTransactions = enabledIncomeTransactions;
+	}
+
+	/**
+	 * Returns if transfer transactions will be included in the report
+	 * @return true if transfer transactions will be included in the report
+	 */
+	public boolean isEnabledTransferTransactions() {
+		return enabledTransferTransactions;
+	}
+
+	/**
+	 * Sets if transfer transactions will be included in the report
+	 * @param enabledTransferTransactions true if transfer transactions should be included in the report
+	 */
+	public void setEnabledTransferTransactions(boolean enabledTransferTransactions) {
+		this.enabledTransferTransactions = enabledTransferTransactions;
+	}
+	
 	/*
 	 * Obtain report data
 	 */
@@ -201,6 +272,8 @@ public class Report {
 
 		Predicate tagPredicate = null;
 		for (String tag : selectedTags) {
+			if(tag.isEmpty())
+				continue;
 			Predicate tagExpression = criteriaBuilder.literal(tag).in(tr.join(FinanceTransaction_.tags));
 			if (tagPredicate == null)
 				tagPredicate = tagExpression;
@@ -208,7 +281,13 @@ public class Report {
 				tagPredicate = criteriaBuilder.or(tagPredicate, tagExpression);
 		}
 
-		Predicate transactionTypePredicate = criteriaBuilder.equal(tr.type(), ExpenseTransaction.class);
+		Predicate transactionTypePredicate = null;
+		transactionTypePredicate = transactionTypePredicate==null?
+				criteriaBuilder.equal(tr.type(), ExpenseTransaction.class):
+				criteriaBuilder.or(transactionTypePredicate,criteriaBuilder.equal(tr.type(), ExpenseTransaction.class));
+		transactionTypePredicate = transactionTypePredicate==null?
+				criteriaBuilder.equal(tr.type(), TransferTransaction.class):
+				criteriaBuilder.or(transactionTypePredicate,criteriaBuilder.equal(tr.type(), TransferTransaction.class));
 
 		transactionsCriteriaQuery.where(criteriaBuilder.and(datePredicate,
 				tagPredicate == null ? transactionTypePredicate : criteriaBuilder.and(transactionTypePredicate, tagPredicate)));
@@ -221,10 +300,32 @@ public class Report {
 		transactionsCriteriaQuery.orderBy(userOrder,
 				criteriaBuilder.asc(tr.get(FinanceTransaction_.id)));
 
-		Query query = entityManager.createQuery(transactionsCriteriaQuery);
-		return query.getResultList();
+		return entityManager.createQuery(transactionsCriteriaQuery).getResultList();
 	}
 
+	
+	public List<String> getAllTags(){
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<String> transactionsCriteriaQuery = criteriaBuilder.createQuery(String.class);
+		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
+		
+		transactionsCriteriaQuery.select(tr.join(FinanceTransaction_.tags)).distinct(true);
+		
+		return entityManager.createQuery(transactionsCriteriaQuery).getResultList();
+	}
+	
+	/**
+	 * Retrieves all accounts from the database
+	 *
+	 * @return the list of all accounts stored in the database
+	 */
+	public List<FinanceAccount> getAllAccounts() {
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<FinanceAccount> accountsCriteriaQuery = criteriaBuilder.createQuery(FinanceAccount.class);
+		accountsCriteriaQuery.from(FinanceAccount.class);
+
+		return entityManager.createQuery(accountsCriteriaQuery).getResultList();
+	}
 	/**
 	 * Returns expenses grouped by tags
 	 *
