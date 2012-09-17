@@ -3,13 +3,14 @@
  * License TBD.
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
-package org.zlogic.vogon.analytics;
+package org.zlogic.vogon.data;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Currency;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
@@ -28,15 +29,6 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.SingularAttribute;
-import org.zlogic.vogon.data.DatabaseManager;
-import org.zlogic.vogon.data.ExpenseTransaction;
-import org.zlogic.vogon.data.FinanceAccount;
-import org.zlogic.vogon.data.FinanceData;
-import org.zlogic.vogon.data.FinanceTransaction;
-import org.zlogic.vogon.data.FinanceTransaction_;
-import org.zlogic.vogon.data.TransactionComponent;
-import org.zlogic.vogon.data.TransactionComponent_;
-import org.zlogic.vogon.data.TransferTransaction;
 
 /**
  * Central class for setting report parameters and generating various reports
@@ -476,6 +468,21 @@ public class Report {
 	}
 
 	/**
+	 * Converts a multi-currency amount map into the default currency
+	 *
+	 * @param amounts the amounts in different currencies
+	 * @return sum of all amounts converted to the default currency
+	 */
+	protected long convertRawAmountToCommonCurrency(Map<String, Long> amounts) {
+		long result = 0;
+		for (Map.Entry<String, Long> amountInCurrency : amounts.entrySet())
+			result += Currency.getInstance(amountInCurrency.getKey()) == financeData.getDefaultCurrency()
+					? amountInCurrency.getValue()
+					: (long) (Math.round(financeData.getExchangeRate(Currency.getInstance(amountInCurrency.getKey()), financeData.getDefaultCurrency()) * (double) amountInCurrency.getValue()));
+		return result;
+	}
+
+	/**
 	 * Returns a graph for the total balance of accounts, sorted by date
 	 *
 	 * @return a graph for the total balance of accounts, sorted by date
@@ -484,17 +491,18 @@ public class Report {
 		List<FinanceTransaction> transactions = getTransactions(FinanceTransaction_.transactionDate, true, false);
 		Map<Date, Long> currentBalance = new TreeMap<>();
 		Map<Date, Double> result = new TreeMap<>();
-		long sumBalance = 0;
+		Map<String, Long> sumBalance = new TreeMap<>();
+
+		for (Currency currency : financeData.getCurrencies())
+			sumBalance.put(currency.getCurrencyCode(), 0L);
+
 		for (FinanceAccount account : selectedAccounts)
-			sumBalance += getRawAccountBalanceByDate(account, earliestDate);
+			sumBalance.put(account.getCurrency().getCurrencyCode(), sumBalance.get(account.getCurrency().getCurrencyCode()) + getRawAccountBalanceByDate(account, earliestDate));
 		for (FinanceTransaction transaction : transactions) {
-			long dateAmount = currentBalance.containsKey(transaction.getDate()) ? currentBalance.get(transaction.getDate()) : sumBalance;
-			long deltaAmount = 0L;
 			for (FinanceAccount account : selectedAccounts)
 				for (TransactionComponent component : transaction.getComponentsForAccount(account))
-					deltaAmount += component.getRawAmount();
-			currentBalance.put(transaction.getDate(), dateAmount + deltaAmount);
-			sumBalance += deltaAmount;
+					sumBalance.put(account.getCurrency().getCurrencyCode(), sumBalance.get(account.getCurrency().getCurrencyCode()) + component.getRawAmount());
+			currentBalance.put(transaction.getDate(), convertRawAmountToCommonCurrency(sumBalance));
 		}
 
 		for (Map.Entry<Date, Long> entry : currentBalance.entrySet())
@@ -509,20 +517,29 @@ public class Report {
 	 * @return expenses grouped by tags
 	 */
 	public Map<String, Double> getTagExpenses() {
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<Tuple> transactionsCriteriaQuery = criteriaBuilder.createTupleQuery();
-		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
-
-		ConstructedPredicate predicate = getFilteredTransactionsPredicate(criteriaBuilder, tr);
-
-		transactionsCriteriaQuery.multiselect(criteriaBuilder.sum(tr.get(FinanceTransaction_.amount)),
-				predicate.getTagsJoin()).distinct(true);
-		transactionsCriteriaQuery.where(predicate.getPredicate());
-		transactionsCriteriaQuery.groupBy(predicate.getComponentsJoin(), predicate.getTagsJoin());
-
 		Map<String, Double> result = new TreeMap<>();
-		for (Tuple tuple : entityManager.createQuery(transactionsCriteriaQuery).getResultList())
-			result.put(tuple.get(1, String.class), tuple.get(0, Long.class) / 100.0D);
+		for (Currency currency : financeData.getCurrencies()) {
+			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+			CriteriaQuery<Tuple> transactionsCriteriaQuery = criteriaBuilder.createTupleQuery();
+			Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
+
+			ConstructedPredicate predicate = getFilteredTransactionsPredicate(criteriaBuilder, tr);
+
+			Predicate currencyPredicate = criteriaBuilder.equal(predicate.getComponentsJoin().get(TransactionComponent_.account).get(FinanceAccount_.currency), currency.getCurrencyCode());
+
+			transactionsCriteriaQuery.multiselect(criteriaBuilder.sum(tr.get(FinanceTransaction_.amount)),
+					predicate.getTagsJoin()).distinct(true);
+			transactionsCriteriaQuery.where(criteriaBuilder.and(predicate.getPredicate(), currencyPredicate));
+			transactionsCriteriaQuery.groupBy(predicate.getComponentsJoin(), predicate.getTagsJoin());
+
+			double exchangeRate = financeData.getExchangeRate(currency, financeData.getDefaultCurrency());
+
+			for (Tuple tuple : entityManager.createQuery(transactionsCriteriaQuery).getResultList()) {
+				String tag = tuple.get(1, String.class);
+				double accumulatedBalance = result.containsKey(tag) ? result.get(tag) : 0.0D;
+				result.put(tag, accumulatedBalance + exchangeRate * (tuple.get(0, Long.class) / 100.0D));
+			}
+		}
 		return result;
 	}
 }
