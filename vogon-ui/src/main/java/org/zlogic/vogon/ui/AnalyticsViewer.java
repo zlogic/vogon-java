@@ -59,12 +59,10 @@ public class AnalyticsViewer extends javax.swing.JPanel {
     private void initComponents() {
 
         jPanelParameters = new javax.swing.JPanel();
-        javax.swing.JLabel jLabelStartDate = new javax.swing.JLabel();
-        javax.swing.JLabel jLabelEndDate = new javax.swing.JLabel();
+        jLabelStartDate = new javax.swing.JLabel();
+        jLabelEndDate = new javax.swing.JLabel();
         jFormattedTextFieldStartDate = new javax.swing.JFormattedTextField();
         jFormattedTextFieldEndDate = new javax.swing.JFormattedTextField();
-        javax.swing.JLabel jLabelTags = new javax.swing.JLabel();
-        jTextFieldTags = new javax.swing.JTextField();
         jCheckBoxExpenseTransactions = new javax.swing.JCheckBox();
         jCheckBoxTransferTransactions = new javax.swing.JCheckBox();
         jCheckBoxIncomeTransactions = new javax.swing.JCheckBox();
@@ -93,9 +91,6 @@ public class AnalyticsViewer extends javax.swing.JPanel {
         jFormattedTextFieldStartDate.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("yyyy-MM-dd"))));
 
         jFormattedTextFieldEndDate.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("yyyy-MM-dd"))));
-
-        jLabelTags.setLabelFor(jTextFieldTags);
-        jLabelTags.setText("Tags");
 
         jCheckBoxExpenseTransactions.setSelected(true);
         jCheckBoxExpenseTransactions.setText(messages.getString("EXPENSE_TRANSACTIONS")); // NOI18N
@@ -159,52 +154,43 @@ public class AnalyticsViewer extends javax.swing.JPanel {
                 .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelParametersLayout.createSequentialGroup()
                         .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanelParametersLayout.createSequentialGroup()
-                                .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabelStartDate)
-                                    .addComponent(jLabelEndDate))
-                                .addGap(18, 18, 18))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelParametersLayout.createSequentialGroup()
-                                .addComponent(jLabelTags)
-                                .addGap(44, 44, 44)))
+                            .addComponent(jLabelStartDate)
+                            .addComponent(jLabelEndDate))
+                        .addGap(18, 18, 18)
                         .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jFormattedTextFieldStartDate, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
-                            .addComponent(jFormattedTextFieldEndDate)
-                            .addComponent(jTextFieldTags)))
+                            .addComponent(jFormattedTextFieldEndDate)))
                     .addComponent(jCheckBoxTransferTransactions)
                     .addComponent(jCheckBoxExpenseTransactions)
                     .addComponent(jCheckBoxIncomeTransactions))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPaneAccounts, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
+                .addComponent(jScrollPaneAccounts, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPaneTags, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
+                .addComponent(jScrollPaneTags, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addGap(0, 0, 0))
         );
         jPanelParametersLayout.setVerticalGroup(
             jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelParametersLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanelParametersLayout.createSequentialGroup()
-                        .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabelStartDate)
-                            .addComponent(jFormattedTextFieldStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jFormattedTextFieldEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabelEndDate))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jTextFieldTags, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabelTags))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jCheckBoxTransferTransactions)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jCheckBoxExpenseTransactions)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jCheckBoxIncomeTransactions))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addComponent(jScrollPaneTags, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jScrollPaneAccounts, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                    .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(jScrollPaneAccounts, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                        .addGroup(jPanelParametersLayout.createSequentialGroup()
+                            .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabelStartDate)
+                                .addComponent(jFormattedTextFieldStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jFormattedTextFieldEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabelEndDate))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(jCheckBoxTransferTransactions)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jCheckBoxExpenseTransactions)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jCheckBoxIncomeTransactions)))))
         );
 
         jButtonGenerateReport.setText(messages.getString("GENERATE_REPORT")); // NOI18N
@@ -254,7 +240,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
         jPanelTagsReportLayout.setVerticalGroup(
             jPanelTagsReportLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jScrollPaneTagsReport, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-            .addComponent(jPanelTagsChart, javax.swing.GroupLayout.DEFAULT_SIZE, 177, Short.MAX_VALUE)
+            .addComponent(jPanelTagsChart, javax.swing.GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
         );
 
         jPanelTransactionsReport.setBorder(javax.swing.BorderFactory.createTitledBorder("Transactions"));
@@ -297,7 +283,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
         jPanelTransactionsReportLayout.setVerticalGroup(
             jPanelTransactionsReportLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jScrollPaneTransactionsReport, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-            .addComponent(jPanelBalanceChart, javax.swing.GroupLayout.DEFAULT_SIZE, 177, Short.MAX_VALUE)
+            .addComponent(jPanelBalanceChart, javax.swing.GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -363,6 +349,8 @@ public class AnalyticsViewer extends javax.swing.JPanel {
     private javax.swing.JCheckBox jCheckBoxTransferTransactions;
     private javax.swing.JFormattedTextField jFormattedTextFieldEndDate;
     private javax.swing.JFormattedTextField jFormattedTextFieldStartDate;
+    private javax.swing.JLabel jLabelEndDate;
+    private javax.swing.JLabel jLabelStartDate;
     private javax.swing.JPanel jPanelBalanceChart;
     private javax.swing.JPanel jPanelParameters;
     private javax.swing.JPanel jPanelTagsChart;
@@ -376,7 +364,6 @@ public class AnalyticsViewer extends javax.swing.JPanel {
     private javax.swing.JTable jTableTags;
     private javax.swing.JTable jTableTagsReport;
     private javax.swing.JTable jTableTransactionsReport;
-    private javax.swing.JTextField jTextFieldTags;
     // End of variables declaration//GEN-END:variables
 
 	/**
@@ -425,7 +412,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 		while (accountsModel.getRowCount() > 0)
 			accountsModel.removeRow(0);
 		for (FinanceAccount account : report.getAllAccounts())
-			accountsModel.addRow(new Object[]{new AccountDisplay(account), new Boolean(true)});
+			accountsModel.addRow(new Object[]{new AccountDisplay(account), account.getIncludeInTotal()});
 	}
 
 	/**
