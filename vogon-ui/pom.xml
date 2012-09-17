@@ -6,6 +6,7 @@
 		<artifactId>top</artifactId>
 		<version>0.0.3-SNAPSHOT</version>
 	</parent>
+	<groupId>org.zlogic.vogon.ui</groupId>
 	<artifactId>vogon-ui</artifactId>
 	<name>Vogon :: UI</name>
 
@@ -26,10 +27,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.5.1</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>${version.java}</source>
+					<target>${version.java}</target>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -39,25 +39,12 @@
 		<dependency>
 			<groupId>org.zlogic.vogon.data</groupId>
 			<artifactId>vogon-data</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.zlogic.vogon.analytics</groupId>
 			<artifactId>vogon-analytics</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 	</dependencies>
-	<groupId>org.zlogic.vogon.ui</groupId>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.zlogic.vogon.data</groupId>
-				<artifactId>vogon-data</artifactId>
-				<version>${project.parent.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.zlogic.vogon.analytics</groupId>
-				<artifactId>vogon-analytics</artifactId>
-				<version>${project.parent.version}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 </project>

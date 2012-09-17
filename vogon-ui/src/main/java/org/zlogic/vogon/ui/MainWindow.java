@@ -7,6 +7,7 @@ package org.zlogic.vogon.ui;
 
 import java.awt.event.ItemEvent;
 import java.io.File;
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -417,6 +418,18 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		}
 		//</editor-fold>
 
+		/*
+		 * Configure logging to load config from classpath
+		 */
+		String loggingFile = System.getProperty("java.util.logging.config.file");
+		if (loggingFile == null || loggingFile.isEmpty()) {
+			try {
+				java.net.URL url = ClassLoader.getSystemClassLoader().getResource("logging.properties");
+				if (url != null)
+					java.util.logging.LogManager.getLogManager().readConfiguration(url.openStream());
+			} catch (IOException | SecurityException e) {
+			}
+		}
 		/*
 		 * Create and display the form
 		 */
