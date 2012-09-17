@@ -440,11 +440,11 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 
 		JFreeChart chart = ChartFactory.createPieChart3D("", dataset, false, true, false);
 		chart.setBackgroundPaint(jPanelTagsChart.getBackground());
-		
+
 		PiePlot3D plot = (PiePlot3D) chart.getPlot();
 		plot.setForegroundAlpha(0.5f);
 		plot.setBackgroundPaint(jPanelTagsChart.getBackground());
-		
+
 		ChartPanel chartPanel = new ChartPanel(chart);
 		jPanelTagsChart.removeAll();
 		jPanelTagsChart.add(chartPanel);
@@ -474,23 +474,23 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 		for (Map.Entry<Date, Double> balance : values.entrySet())
 			balanceSeries.add(new Day(balance.getKey()), balance.getValue());
 
-		JFreeChart chart = ChartFactory.createTimeSeriesChart("","Date","Total balance", new TimeSeriesCollection(balanceSeries), false, true, false);
+		JFreeChart chart = ChartFactory.createTimeSeriesChart("", "Date", "Total balance", new TimeSeriesCollection(balanceSeries), false, true, false);
 		chart.setBackgroundPaint(jPanelTagsChart.getBackground());
-				
-		XYPlot plot = (XYPlot)chart.getPlot();
+
+		XYPlot plot = (XYPlot) chart.getPlot();
 		//XYSplineRenderer renderer = new XYSplineRenderer();
 		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, true);
-		renderer.setBaseToolTipGenerator(((XYLineAndShapeRenderer)plot.getRenderer()).getBaseToolTipGenerator());
+		renderer.setBaseToolTipGenerator(((XYLineAndShapeRenderer) plot.getRenderer()).getBaseToolTipGenerator());
 		plot.setRenderer(renderer);
 		plot.setForegroundAlpha(0.5f);
 		plot.setBackgroundPaint(jPanelTagsChart.getBackground());
-		
+
 		ChartPanel chartPanel = new ChartPanel(chart);
 		jPanelBalanceChart.removeAll();
 		jPanelBalanceChart.add(chartPanel);
 		jPanelBalanceChart.revalidate();
 	}
-	
+
 	/**
 	 * Updates the transactions reporting table
 	 *
