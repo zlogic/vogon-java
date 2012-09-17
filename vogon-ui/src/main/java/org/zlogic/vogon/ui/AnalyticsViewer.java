@@ -8,6 +8,7 @@ package org.zlogic.vogon.ui;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,13 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PiePlot3D;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.data.general.DefaultPieDataset;
+import org.jfree.data.time.Day;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
 import org.zlogic.vogon.analytics.Report;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
@@ -51,12 +58,12 @@ public class AnalyticsViewer extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
-        jLabelStartDate = new javax.swing.JLabel();
-        jLabelEndDate = new javax.swing.JLabel();
+        jPanelParameters = new javax.swing.JPanel();
+        javax.swing.JLabel jLabelStartDate = new javax.swing.JLabel();
+        javax.swing.JLabel jLabelEndDate = new javax.swing.JLabel();
         jFormattedTextFieldStartDate = new javax.swing.JFormattedTextField();
         jFormattedTextFieldEndDate = new javax.swing.JFormattedTextField();
-        jLabelTags = new javax.swing.JLabel();
+        javax.swing.JLabel jLabelTags = new javax.swing.JLabel();
         jTextFieldTags = new javax.swing.JTextField();
         jCheckBoxExpenseTransactions = new javax.swing.JCheckBox();
         jCheckBoxTransferTransactions = new javax.swing.JCheckBox();
@@ -73,8 +80,9 @@ public class AnalyticsViewer extends javax.swing.JPanel {
         jPanelTransactionsReport = new javax.swing.JPanel();
         jScrollPaneTransactionsReport = new javax.swing.JScrollPane();
         jTableTransactionsReport = new javax.swing.JTable();
+        jPanelBalanceChart = new javax.swing.JPanel();
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Parameters"));
+        jPanelParameters.setBorder(javax.swing.BorderFactory.createTitledBorder("Parameters"));
 
         jLabelStartDate.setLabelFor(jFormattedTextFieldStartDate);
         jLabelStartDate.setText(messages.getString("START_DATE")); // NOI18N
@@ -143,23 +151,23 @@ public class AnalyticsViewer extends javax.swing.JPanel {
         jTableTags.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         jScrollPaneTags.setViewportView(jTableTags);
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout jPanelParametersLayout = new javax.swing.GroupLayout(jPanelParameters);
+        jPanelParameters.setLayout(jPanelParametersLayout);
+        jPanelParametersLayout.setHorizontalGroup(
+            jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelParametersLayout.createSequentialGroup()
+                .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelParametersLayout.createSequentialGroup()
+                        .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanelParametersLayout.createSequentialGroup()
+                                .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabelStartDate)
                                     .addComponent(jLabelEndDate))
                                 .addGap(18, 18, 18))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelParametersLayout.createSequentialGroup()
                                 .addComponent(jLabelTags)
                                 .addGap(44, 44, 44)))
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jFormattedTextFieldStartDate, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
                             .addComponent(jFormattedTextFieldEndDate)
                             .addComponent(jTextFieldTags)))
@@ -172,21 +180,21 @@ public class AnalyticsViewer extends javax.swing.JPanel {
                 .addComponent(jScrollPaneTags, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
                 .addGap(0, 0, 0))
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        jPanelParametersLayout.setVerticalGroup(
+            jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelParametersLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelParametersLayout.createSequentialGroup()
+                        .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabelStartDate)
                             .addComponent(jFormattedTextFieldStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jFormattedTextFieldEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabelEndDate))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jTextFieldTags, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabelTags))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -275,17 +283,21 @@ public class AnalyticsViewer extends javax.swing.JPanel {
         jTableTransactionsReport.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         jScrollPaneTransactionsReport.setViewportView(jTableTransactionsReport);
 
+        jPanelBalanceChart.setLayout(new java.awt.CardLayout());
+
         javax.swing.GroupLayout jPanelTransactionsReportLayout = new javax.swing.GroupLayout(jPanelTransactionsReport);
         jPanelTransactionsReport.setLayout(jPanelTransactionsReportLayout);
         jPanelTransactionsReportLayout.setHorizontalGroup(
             jPanelTransactionsReportLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelTransactionsReportLayout.createSequentialGroup()
                 .addComponent(jScrollPaneTransactionsReport, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanelBalanceChart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanelTransactionsReportLayout.setVerticalGroup(
             jPanelTransactionsReportLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPaneTransactionsReport, javax.swing.GroupLayout.DEFAULT_SIZE, 177, Short.MAX_VALUE)
+            .addComponent(jScrollPaneTransactionsReport, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+            .addComponent(jPanelBalanceChart, javax.swing.GroupLayout.DEFAULT_SIZE, 177, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -295,14 +307,14 @@ public class AnalyticsViewer extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jButtonGenerateReport)
                 .addGap(573, 604, Short.MAX_VALUE))
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanelParameters, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanelTagsReport, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanelTransactionsReport, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanelParameters, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButtonGenerateReport)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -341,6 +353,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 		//Update form with report
 		updateTagsChart(report.getTagExpenses());
 		updateTagsReportTable(report.getTagExpenses());
+		updateBalanceChart(report.getAccountsBalanceGraph());
 		updateTransactionsReportTable(report.getTransactions());
     }//GEN-LAST:event_jButtonGenerateReportActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -350,10 +363,8 @@ public class AnalyticsViewer extends javax.swing.JPanel {
     private javax.swing.JCheckBox jCheckBoxTransferTransactions;
     private javax.swing.JFormattedTextField jFormattedTextFieldEndDate;
     private javax.swing.JFormattedTextField jFormattedTextFieldStartDate;
-    private javax.swing.JLabel jLabelEndDate;
-    private javax.swing.JLabel jLabelStartDate;
-    private javax.swing.JLabel jLabelTags;
-    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanelBalanceChart;
+    private javax.swing.JPanel jPanelParameters;
     private javax.swing.JPanel jPanelTagsChart;
     private javax.swing.JPanel jPanelTagsReport;
     private javax.swing.JPanel jPanelTransactionsReport;
@@ -407,8 +418,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 		while (tagsModel.getRowCount() > 0)
 			tagsModel.removeRow(0);
 		for (String tag : report.getAllTags())
-			if (!tag.isEmpty())
-				tagsModel.addRow(new Object[]{tag, new Boolean(true)});
+			tagsModel.addRow(new Object[]{tag, new Boolean(true)});
 
 		//Set accounts
 		DefaultTableModel accountsModel = (DefaultTableModel) jTableAccounts.getModel();
@@ -428,12 +438,14 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 		for (Map.Entry<String, Double> tagExpense : values.entrySet())
 			dataset.setValue(tagExpense.getKey(), Math.abs(tagExpense.getValue()));
 
-		JFreeChart chart = ChartFactory.createPieChart3D("", dataset, false, true, true);
-		ChartPanel chartPanel = new ChartPanel(chart);
+		JFreeChart chart = ChartFactory.createPieChart3D("", dataset, false, true, false);
 		chart.setBackgroundPaint(jPanelTagsChart.getBackground());
+		
 		PiePlot3D plot = (PiePlot3D) chart.getPlot();
 		plot.setForegroundAlpha(0.5f);
 		plot.setBackgroundPaint(jPanelTagsChart.getBackground());
+		
+		ChartPanel chartPanel = new ChartPanel(chart);
 		jPanelTagsChart.removeAll();
 		jPanelTagsChart.add(chartPanel);
 		jPanelTagsChart.revalidate();
@@ -452,6 +464,33 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 			tableModel.addRow(new Object[]{tagExpense.getKey(), new SumTableCell(tagExpense.getValue(), true, financeData.getDefaultCurrency())});
 	}
 
+	/**
+	 * Updates the balance chart
+	 *
+	 * @param values expenses grouped by tag
+	 */
+	private void updateBalanceChart(Map<Date, Double> values) {
+		TimeSeries balanceSeries = new TimeSeries("Balance");
+		for (Map.Entry<Date, Double> balance : values.entrySet())
+			balanceSeries.add(new Day(balance.getKey()), balance.getValue());
+
+		JFreeChart chart = ChartFactory.createTimeSeriesChart("","Date","Total balance", new TimeSeriesCollection(balanceSeries), false, true, false);
+		chart.setBackgroundPaint(jPanelTagsChart.getBackground());
+				
+		XYPlot plot = (XYPlot)chart.getPlot();
+		//XYSplineRenderer renderer = new XYSplineRenderer();
+		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, true);
+		renderer.setBaseToolTipGenerator(((XYLineAndShapeRenderer)plot.getRenderer()).getBaseToolTipGenerator());
+		plot.setRenderer(renderer);
+		plot.setForegroundAlpha(0.5f);
+		plot.setBackgroundPaint(jPanelTagsChart.getBackground());
+		
+		ChartPanel chartPanel = new ChartPanel(chart);
+		jPanelBalanceChart.removeAll();
+		jPanelBalanceChart.add(chartPanel);
+		jPanelBalanceChart.revalidate();
+	}
+	
 	/**
 	 * Updates the transactions reporting table
 	 *
