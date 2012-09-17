@@ -32,6 +32,7 @@ import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.FinanceTransaction_;
+import org.zlogic.vogon.data.TransactionComponent_;
 import org.zlogic.vogon.data.TransferTransaction;
 
 /**
@@ -61,6 +62,10 @@ public class Report {
 	 * Selected tags
 	 */
 	protected List<String> selectedTags;
+	/**
+	 * Selected accounts
+	 */
+	protected List<FinanceAccount> selectedAccounts;
 	/**
 	 * Show expense transactions
 	 */
@@ -139,8 +144,7 @@ public class Report {
 	}
 
 	/**
-	 * Returns the tags to be included in the report. Empty list means all tags
-	 * will be used.
+	 * Returns the tags to be included in the report.
 	 *
 	 * @return the tags to be included in the report
 	 */
@@ -149,8 +153,7 @@ public class Report {
 	}
 
 	/**
-	 * Sets the tags to be included in the report. Null or empty means all tags
-	 * will be used.
+	 * Sets the tags to be included in the report.
 	 *
 	 * @param selectedTags the tags to be included in the report
 	 */
@@ -162,8 +165,7 @@ public class Report {
 	}
 
 	/**
-	 * Sets the tags to be included in the report. Null or empty means all tags
-	 * will be used.
+	 * Sets the tags to be included in the report.
 	 *
 	 * @param selectedTags the tags to be included in the report
 	 */
@@ -172,6 +174,27 @@ public class Report {
 			this.selectedTags = null;
 		else
 			this.selectedTags = Arrays.asList(selectedTags);
+	}
+
+	/**
+	 * Returns the accounts to be included in the report.
+	 *
+	 * @return the accounts to be included in the report
+	 */
+	public List<FinanceAccount> getSelectedAccounts() {
+		return selectedAccounts != null ? selectedAccounts : new LinkedList<FinanceAccount>();
+	}
+
+	/**
+	 * Sets the accounts to be included in the report.
+	 *
+	 * @param selectedAccounts the accounts to be included in the report
+	 */
+	public void setSelectedAccounts(List<FinanceAccount> selectedAccounts) {
+		if (selectedAccounts == null || selectedAccounts.isEmpty())
+			this.selectedAccounts = null;
+		else
+			this.selectedAccounts = selectedAccounts;
 	}
 
 	/**
@@ -271,12 +294,16 @@ public class Report {
 
 	/**
 	 * Returns a predicate for filtering transactions
+	 *
+	 * @param criteriaBuilder the CriteriaBuilder
+	 * @param tr the FinanceTransaction Root
+	 * @return the predicate for filtering transactions
 	 */
 	protected Predicate getFilteredTransactionsPredicate(CriteriaBuilder criteriaBuilder, Root<FinanceTransaction> tr) {
 		Predicate datePredicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), earliestDate),
 				criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), latestDate));
 
-		Predicate tagsPredicate = (selectedTags != null && !selectedTags.isEmpty()) ? tr.join(FinanceTransaction_.tags).in(criteriaBuilder.literal(selectedTags)) : null;
+		Predicate tagsPredicate = (selectedTags != null && !selectedTags.isEmpty()) ? tr.join(FinanceTransaction_.tags).in(criteriaBuilder.literal(selectedTags)) : criteriaBuilder.disjunction();
 
 		Predicate transactionTypePredicate = criteriaBuilder.disjunction();
 		if (enabledExpenseTransactions || enabledIncomeTransactions)
@@ -291,10 +318,13 @@ public class Report {
 		if (enabledIncomeTransactions)
 			expenseTypePredicate = criteriaBuilder.or(expenseTypePredicate, criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.amount), new Long(0)));
 
+		Predicate accountsPredicate = (selectedAccounts != null && !selectedAccounts.isEmpty()) ? tr.join(FinanceTransaction_.components).get(TransactionComponent_.account).in(criteriaBuilder.literal(selectedAccounts)) : criteriaBuilder.disjunction();
+
 		Predicate rootPredicate = datePredicate;
 		rootPredicate = criteriaBuilder.and(rootPredicate, tagsPredicate);
 		rootPredicate = criteriaBuilder.and(rootPredicate, transactionTypePredicate);
 		rootPredicate = criteriaBuilder.and(rootPredicate, expenseTypePredicate);
+		rootPredicate = criteriaBuilder.and(rootPredicate, accountsPredicate);
 		return rootPredicate;
 	}
 
@@ -362,12 +392,11 @@ public class Report {
 	public Map<String, Double> getTagExpenses() {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Tuple> transactionsCriteriaQuery = criteriaBuilder.createTupleQuery();
-
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 
-		Join tagsJoin = tr.join(FinanceTransaction_.tags);
-
 		transactionsCriteriaQuery.where(getFilteredTransactionsPredicate(criteriaBuilder, tr));
+
+		Join tagsJoin = tr.join(FinanceTransaction_.tags);
 		transactionsCriteriaQuery.multiselect(criteriaBuilder.sum(tr.get(FinanceTransaction_.amount)),
 				tagsJoin).distinct(true);
 		transactionsCriteriaQuery.groupBy(tagsJoin);
