@@ -59,8 +59,8 @@ public class AnalyticsViewer extends javax.swing.JPanel {
     private void initComponents() {
 
         jPanelParameters = new javax.swing.JPanel();
-        jLabelStartDate = new javax.swing.JLabel();
-        jLabelEndDate = new javax.swing.JLabel();
+        javax.swing.JLabel jLabelStartDate = new javax.swing.JLabel();
+        javax.swing.JLabel jLabelEndDate = new javax.swing.JLabel();
         jFormattedTextFieldStartDate = new javax.swing.JFormattedTextField();
         jFormattedTextFieldEndDate = new javax.swing.JFormattedTextField();
         jCheckBoxExpenseTransactions = new javax.swing.JCheckBox();
@@ -105,7 +105,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 
             },
             new String [] {
-                "Account", "Show"
+                messages.getString("ACCOUNT_NAME"), messages.getString("SHOW")
             }
         ) {
             Class[] types = new Class [] {
@@ -128,7 +128,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 
             },
             new String [] {
-                "Tag", "Show"
+                messages.getString("TAG_NAME"), messages.getString("SHOW")
             }
         ) {
             Class[] types = new Class [] {
@@ -208,7 +208,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 
             },
             new String [] {
-                "Tag", "Amount"
+                "Tag", messages.getString("TRANSACTION_AMOUNT")
             }
         ) {
             Class[] types = new Class [] {
@@ -251,7 +251,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 
             },
             new String [] {
-                "Transaction", "Date", "Amount"
+                messages.getString("TRANSACTION_NAME"), messages.getString("TRANSACTION_DATE"), messages.getString("TRANSACTION_AMOUNT")
             }
         ) {
             Class[] types = new Class [] {
@@ -349,8 +349,6 @@ public class AnalyticsViewer extends javax.swing.JPanel {
     private javax.swing.JCheckBox jCheckBoxTransferTransactions;
     private javax.swing.JFormattedTextField jFormattedTextFieldEndDate;
     private javax.swing.JFormattedTextField jFormattedTextFieldStartDate;
-    private javax.swing.JLabel jLabelEndDate;
-    private javax.swing.JLabel jLabelStartDate;
     private javax.swing.JPanel jPanelBalanceChart;
     private javax.swing.JPanel jPanelParameters;
     private javax.swing.JPanel jPanelTagsChart;
@@ -457,11 +455,11 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 	 * @param values expenses grouped by tag
 	 */
 	private void updateBalanceChart(Map<Date, Double> values) {
-		TimeSeries balanceSeries = new TimeSeries("Balance");
+		TimeSeries balanceSeries = new TimeSeries(messages.getString("TOTAL_BALANCE"));
 		for (Map.Entry<Date, Double> balance : values.entrySet())
 			balanceSeries.add(new Day(balance.getKey()), balance.getValue());
 
-		JFreeChart chart = ChartFactory.createTimeSeriesChart("", "Date", "Total balance", new TimeSeriesCollection(balanceSeries), false, true, false);
+		JFreeChart chart = ChartFactory.createTimeSeriesChart("", "", "", new TimeSeriesCollection(balanceSeries), false, true, false);
 		chart.setBackgroundPaint(jPanelTagsChart.getBackground());
 
 		XYPlot plot = (XYPlot) chart.getPlot();

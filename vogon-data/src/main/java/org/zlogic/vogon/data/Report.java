@@ -254,30 +254,6 @@ public class Report {
 	 * Obtain report data
 	 */
 	/**
-	 * Generates a text-only report
-	 *
-	 * @return the text-based report
-	 */
-	public String getTextReport() {
-		String report = "";
-		report += new MessageFormat("{0,date,yyyy-MM-dd}---{1,date,yyyy-MM-dd}\n").format(new Object[]{earliestDate, latestDate});
-		report += "Transactions:\n";
-		for (FinanceTransaction transaction : getTransactions(FinanceTransaction_.amount, false, true))
-			report += new MessageFormat("{0,date,yyyy-MM-dd}: {1} {2,number,0.00}\n").format(new Object[]{transaction.getDate(), transaction.getDescription(), transaction.getAmount()});
-		report += "Top tags:\n";
-		List<Map.Entry<String, Double>> tagsSorted = new LinkedList(getTagExpenses().entrySet());
-		Collections.sort(tagsSorted, new Comparator() {
-			@Override
-			public int compare(Object o1, Object o2) {
-				return ((Comparable) ((Map.Entry<String, Double>) (o1)).getValue()).compareTo(((Map.Entry<String, Double>) (o2)).getValue());
-			}
-		});
-		for (Map.Entry<String, Double> tag : tagsSorted)
-			report += new MessageFormat("{0} {1,number,0.00}\n").format(new Object[]{tag.getKey(), tag.getValue()});
-		return report;
-	}
-
-	/**
 	 * Returns all transactions matching the set filters, ordered by amount
 	 * descending
 	 *

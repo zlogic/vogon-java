@@ -152,7 +152,7 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 			case 2:
 				return messages.getString("ACCOUNT_CURRENCY");
 			case 3:
-				return "Include in total";
+				return messages.getString("INCLUDE_IN_TOTAL");
 		}
 		return null;
 	}

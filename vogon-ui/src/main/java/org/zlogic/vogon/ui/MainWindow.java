@@ -178,7 +178,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
         jPanelAnalytics.setLayout(new java.awt.BorderLayout());
         jPanelAnalytics.add(analyticsViewer, java.awt.BorderLayout.CENTER);
 
-        jTabbedPane1.addTab("Analytics", jPanelAnalytics);
+        jTabbedPane1.addTab(messages.getString("ANALYTICS"), jPanelAnalytics); // NOI18N
 
         jPanelAccounts.setLayout(new java.awt.BorderLayout());
 
@@ -421,10 +421,10 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		/*
 		 * Configure logging to load config from classpath
 		 */
-		String loggingFile = System.getProperty("java.util.logging.config.file");
+		String loggingFile = System.getProperty("java.util.logging.config.file"); //NOI18N
 		if (loggingFile == null || loggingFile.isEmpty()) {
 			try {
-				java.net.URL url = ClassLoader.getSystemClassLoader().getResource("logging.properties");
+				java.net.URL url = ClassLoader.getSystemClassLoader().getResource("logging.properties"); //NOI18N
 				if (url != null)
 					java.util.logging.LogManager.getLogManager().readConfiguration(url.openStream());
 			} catch (IOException | SecurityException e) {

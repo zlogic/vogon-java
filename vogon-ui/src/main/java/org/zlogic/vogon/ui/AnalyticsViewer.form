@@ -83,25 +83,23 @@
                   <EmptySpace max="32767" attributes="0"/>
                   <Group type="103" groupAlignment="1" max="-2" attributes="0">
                       <Component id="jScrollPaneTags" pref="0" max="32767" attributes="0"/>
-                      <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                          <Component id="jScrollPaneAccounts" alignment="0" pref="0" max="32767" attributes="0"/>
-                          <Group type="102" attributes="0">
-                              <Group type="103" groupAlignment="3" attributes="0">
-                                  <Component id="jLabelStartDate" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jFormattedTextFieldStartDate" alignment="3" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="3" attributes="0">
-                                  <Component id="jFormattedTextFieldEndDate" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jLabelEndDate" alignment="3" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="jCheckBoxTransferTransactions" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="jCheckBoxExpenseTransactions" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="jCheckBoxIncomeTransactions" min="-2" max="-2" attributes="0"/>
+                      <Component id="jScrollPaneAccounts" alignment="0" pref="0" max="32767" attributes="0"/>
+                      <Group type="102" attributes="0">
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="jLabelStartDate" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="jFormattedTextFieldStartDate" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="jFormattedTextFieldEndDate" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="jLabelEndDate" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Component id="jCheckBoxTransferTransactions" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jCheckBoxExpenseTransactions" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jCheckBoxIncomeTransactions" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
@@ -184,7 +182,7 @@
             <Component class="javax.swing.JTable" name="jTableAccounts">
               <Properties>
                 <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="new javax.swing.table.DefaultTableModel(&#xa;            new Object [][] {&#xa;&#xa;            },&#xa;            new String [] {&#xa;                &quot;Account&quot;, &quot;Show&quot;&#xa;            }&#xa;        ) {&#xa;            Class[] types = new Class [] {&#xa;                java.lang.Object.class, java.lang.Boolean.class&#xa;            };&#xa;&#xa;            public Class getColumnClass(int columnIndex) {&#xa;                return types [columnIndex];&#xa;            }&#xa;&#x9;@Override&#xa;&#x9;public boolean isCellEditable(int row, int column) {&#xa;        return getColumnClass(column).equals(Boolean.class);&#xa;    }&#xa;        }" type="code"/>
+                  <Connection code="new javax.swing.table.DefaultTableModel(&#xa;            new Object [][] {&#xa;&#xa;            },&#xa;            new String [] {&#xa;                messages.getString(&quot;ACCOUNT_NAME&quot;), messages.getString(&quot;SHOW&quot;)&#xa;            }&#xa;        ) {&#xa;            Class[] types = new Class [] {&#xa;                java.lang.Object.class, java.lang.Boolean.class&#xa;            };&#xa;&#xa;            public Class getColumnClass(int columnIndex) {&#xa;                return types [columnIndex];&#xa;            }&#xa;&#x9;@Override&#xa;&#x9;public boolean isCellEditable(int row, int column) {&#xa;        return getColumnClass(column).equals(Boolean.class);&#xa;    }&#xa;        }" type="code"/>
                 </Property>
                 <Property name="autoResizeMode" type="int" value="4"/>
               </Properties>
@@ -201,7 +199,7 @@
             <Component class="javax.swing.JTable" name="jTableTags">
               <Properties>
                 <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="new javax.swing.table.DefaultTableModel(&#xa;            new Object [][] {&#xa;&#xa;            },&#xa;            new String [] {&#xa;                &quot;Tag&quot;, &quot;Show&quot;&#xa;            }&#xa;        ) {&#xa;            Class[] types = new Class [] {&#xa;                java.lang.String.class, java.lang.Boolean.class&#xa;            };&#xa;&#xa;            public Class getColumnClass(int columnIndex) {&#xa;                return types [columnIndex];&#xa;            }&#xa;&#x9;@Override&#xa;&#x9;public boolean isCellEditable(int row, int column) {&#xa;        return getColumnClass(column).equals(Boolean.class);&#xa;    }&#xa;        }" type="code"/>
+                  <Connection code="new javax.swing.table.DefaultTableModel(&#xa;            new Object [][] {&#xa;&#xa;            },&#xa;            new String [] {&#xa;                messages.getString(&quot;TAG_NAME&quot;), messages.getString(&quot;SHOW&quot;)&#xa;            }&#xa;        ) {&#xa;            Class[] types = new Class [] {&#xa;                java.lang.String.class, java.lang.Boolean.class&#xa;            };&#xa;&#xa;            public Class getColumnClass(int columnIndex) {&#xa;                return types [columnIndex];&#xa;            }&#xa;&#x9;@Override&#xa;&#x9;public boolean isCellEditable(int row, int column) {&#xa;        return getColumnClass(column).equals(Boolean.class);&#xa;    }&#xa;        }" type="code"/>
                 </Property>
                 <Property name="autoResizeMode" type="int" value="4"/>
               </Properties>
@@ -258,7 +256,7 @@
               <Properties>
                 <Property name="autoCreateRowSorter" type="boolean" value="true"/>
                 <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="new javax.swing.table.DefaultTableModel(&#xa;            new Object [][] {&#xa;&#xa;            },&#xa;            new String [] {&#xa;                &quot;Tag&quot;, &quot;Amount&quot;&#xa;            }&#xa;        ) {&#xa;            Class[] types = new Class [] {&#xa;                java.lang.String.class, java.lang.Object.class&#xa;            };&#xa;&#xa;            public Class getColumnClass(int columnIndex) {&#xa;                return types [columnIndex];&#xa;            }&#xa;&#x9;@Override&#xa;&#x9;public boolean isCellEditable(int row, int column) {&#xa;        return false;&#xa;    }&#xa;        }" type="code"/>
+                  <Connection code="new javax.swing.table.DefaultTableModel(&#xa;            new Object [][] {&#xa;&#xa;            },&#xa;            new String [] {&#xa;                &quot;Tag&quot;, messages.getString(&quot;TRANSACTION_AMOUNT&quot;)&#xa;            }&#xa;        ) {&#xa;            Class[] types = new Class [] {&#xa;                java.lang.String.class, java.lang.Object.class&#xa;            };&#xa;&#xa;            public Class getColumnClass(int columnIndex) {&#xa;                return types [columnIndex];&#xa;            }&#xa;&#x9;@Override&#xa;&#x9;public boolean isCellEditable(int row, int column) {&#xa;        return false;&#xa;    }&#xa;        }" type="code"/>
                 </Property>
                 <Property name="autoResizeMode" type="int" value="4"/>
               </Properties>
@@ -309,7 +307,7 @@
               <Properties>
                 <Property name="autoCreateRowSorter" type="boolean" value="true"/>
                 <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="new javax.swing.table.DefaultTableModel(&#xa;            new Object [][] {&#xa;&#xa;            },&#xa;            new String [] {&#xa;                &quot;Transaction&quot;, &quot;Date&quot;, &quot;Amount&quot;&#xa;            }&#xa;        ) {&#xa;            Class[] types = new Class [] {&#xa;                java.lang.String.class,java.lang.String.class, java.lang.Object.class&#xa;            };&#xa;&#xa;            public Class getColumnClass(int columnIndex) {&#xa;                return types [columnIndex];&#xa;            }&#xa;&#x9;@Override&#xa;&#x9;public boolean isCellEditable(int row, int column) {&#xa;        return false;&#xa;    }&#xa;        }" type="code"/>
+                  <Connection code="new javax.swing.table.DefaultTableModel(&#xa;            new Object [][] {&#xa;&#xa;            },&#xa;            new String [] {&#xa;                messages.getString(&quot;TRANSACTION_NAME&quot;), messages.getString(&quot;TRANSACTION_DATE&quot;), messages.getString(&quot;TRANSACTION_AMOUNT&quot;)&#xa;            }&#xa;        ) {&#xa;            Class[] types = new Class [] {&#xa;                java.lang.String.class,java.lang.String.class, java.lang.Object.class&#xa;            };&#xa;&#xa;            public Class getColumnClass(int columnIndex) {&#xa;                return types [columnIndex];&#xa;            }&#xa;&#x9;@Override&#xa;&#x9;public boolean isCellEditable(int row, int column) {&#xa;        return false;&#xa;    }&#xa;        }" type="code"/>
                 </Property>
                 <Property name="autoResizeMode" type="int" value="4"/>
               </Properties>
