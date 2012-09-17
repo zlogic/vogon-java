@@ -23,6 +23,7 @@ import org.jfree.data.general.DefaultPieDataset;
 import org.zlogic.vogon.analytics.Report;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
+import org.zlogic.vogon.data.FinanceTransaction;
 
 /**
  * Form for viewing analytics reports
@@ -65,11 +66,13 @@ public class AnalyticsViewer extends javax.swing.JPanel {
         jScrollPaneTags = new javax.swing.JScrollPane();
         jTableTags = new javax.swing.JTable();
         jButtonGenerateReport = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTextPane1 = new javax.swing.JTextPane();
-        jPanelTagsChart = new javax.swing.JPanel();
+        jPanelTagsReport = new javax.swing.JPanel();
         jScrollPaneTagsReport = new javax.swing.JScrollPane();
         jTableTagsReport = new javax.swing.JTable();
+        jPanelTagsChart = new javax.swing.JPanel();
+        jPanelTransactionsReport = new javax.swing.JPanel();
+        jScrollPaneTransactionsReport = new javax.swing.JScrollPane();
+        jTableTransactionsReport = new javax.swing.JTable();
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Parameters"));
 
@@ -203,9 +206,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
             }
         });
 
-        jScrollPane1.setViewportView(jTextPane1);
-
-        jPanelTagsChart.setLayout(new java.awt.CardLayout());
+        jPanelTagsReport.setBorder(javax.swing.BorderFactory.createTitledBorder("Statistics by tags"));
 
         jTableTagsReport.setAutoCreateRowSorter(true);
         jTableTagsReport.setModel(new javax.swing.table.DefaultTableModel(
@@ -231,6 +232,62 @@ public class AnalyticsViewer extends javax.swing.JPanel {
         jTableTagsReport.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         jScrollPaneTagsReport.setViewportView(jTableTagsReport);
 
+        jPanelTagsChart.setLayout(new java.awt.CardLayout());
+
+        javax.swing.GroupLayout jPanelTagsReportLayout = new javax.swing.GroupLayout(jPanelTagsReport);
+        jPanelTagsReport.setLayout(jPanelTagsReportLayout);
+        jPanelTagsReportLayout.setHorizontalGroup(
+            jPanelTagsReportLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelTagsReportLayout.createSequentialGroup()
+                .addComponent(jScrollPaneTagsReport, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanelTagsChart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanelTagsReportLayout.setVerticalGroup(
+            jPanelTagsReportLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPaneTagsReport, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+            .addComponent(jPanelTagsChart, javax.swing.GroupLayout.DEFAULT_SIZE, 177, Short.MAX_VALUE)
+        );
+
+        jPanelTransactionsReport.setBorder(javax.swing.BorderFactory.createTitledBorder("Transactions"));
+
+        jTableTransactionsReport.setAutoCreateRowSorter(true);
+        jTableTransactionsReport.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Transaction", "Date", "Amount"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class,java.lang.String.class, java.lang.Object.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        });
+        jTableTransactionsReport.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
+        jScrollPaneTransactionsReport.setViewportView(jTableTransactionsReport);
+
+        javax.swing.GroupLayout jPanelTransactionsReportLayout = new javax.swing.GroupLayout(jPanelTransactionsReport);
+        jPanelTransactionsReport.setLayout(jPanelTransactionsReportLayout);
+        jPanelTransactionsReportLayout.setHorizontalGroup(
+            jPanelTransactionsReportLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelTransactionsReportLayout.createSequentialGroup()
+                .addComponent(jScrollPaneTransactionsReport, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
+        jPanelTransactionsReportLayout.setVerticalGroup(
+            jPanelTransactionsReportLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPaneTransactionsReport, javax.swing.GroupLayout.DEFAULT_SIZE, 177, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -239,11 +296,8 @@ public class AnalyticsViewer extends javax.swing.JPanel {
                 .addComponent(jButtonGenerateReport)
                 .addGap(573, 604, Short.MAX_VALUE))
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jScrollPaneTagsReport, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanelTagsChart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addComponent(jScrollPane1)
+            .addComponent(jPanelTagsReport, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanelTransactionsReport, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -252,11 +306,9 @@ public class AnalyticsViewer extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButtonGenerateReport)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanelTagsChart, javax.swing.GroupLayout.DEFAULT_SIZE, 149, Short.MAX_VALUE)
-                    .addComponent(jScrollPaneTagsReport, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addComponent(jPanelTagsReport, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jPanelTransactionsReport, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -287,9 +339,9 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 			Logger.getLogger(AnalyticsViewer.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		//Update form with report
-		jTextPane1.setText(report.getTextReport());
 		updateTagsChart(report.getTagExpenses());
 		updateTagsReportTable(report.getTagExpenses());
+		updateTransactionsReportTable(report.getTransactions());
     }//GEN-LAST:event_jButtonGenerateReportActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonGenerateReport;
@@ -303,15 +355,17 @@ public class AnalyticsViewer extends javax.swing.JPanel {
     private javax.swing.JLabel jLabelTags;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanelTagsChart;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JPanel jPanelTagsReport;
+    private javax.swing.JPanel jPanelTransactionsReport;
     private javax.swing.JScrollPane jScrollPaneAccounts;
     private javax.swing.JScrollPane jScrollPaneTags;
     private javax.swing.JScrollPane jScrollPaneTagsReport;
+    private javax.swing.JScrollPane jScrollPaneTransactionsReport;
     private javax.swing.JTable jTableAccounts;
     private javax.swing.JTable jTableTags;
     private javax.swing.JTable jTableTagsReport;
+    private javax.swing.JTable jTableTransactionsReport;
     private javax.swing.JTextField jTextFieldTags;
-    private javax.swing.JTextPane jTextPane1;
     // End of variables declaration//GEN-END:variables
 
 	/**
@@ -336,6 +390,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 		jTableAccounts.getColumnModel().getColumn(1).setMaxWidth(100);
 		jTableAccounts.getColumnModel().getColumn(1).setPreferredWidth(50);
 		jTableTagsReport.getColumnModel().getColumn(1).setCellRenderer(SumTableCell.getRenderer());
+		jTableTransactionsReport.getColumnModel().getColumn(2).setCellRenderer(SumTableCell.getRenderer());
 		//jTableTagsReport.getRowSorter().toggleSortOrder(1);
 	}
 
@@ -395,6 +450,19 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 			tableModel.removeRow(0);
 		for (Map.Entry<String, Double> tagExpense : values.entrySet())
 			tableModel.addRow(new Object[]{tagExpense.getKey(), new SumTableCell(tagExpense.getValue(), true, financeData.getDefaultCurrency())});
+	}
+
+	/**
+	 * Updates the transactions reporting table
+	 *
+	 * @param values expenses grouped by tag
+	 */
+	private void updateTransactionsReportTable(List<FinanceTransaction> transactions) {
+		DefaultTableModel tableModel = (DefaultTableModel) jTableTransactionsReport.getModel();
+		while (tableModel.getRowCount() > 0)
+			tableModel.removeRow(0);
+		for (FinanceTransaction transaction : transactions)
+			tableModel.addRow(new Object[]{transaction.getDescription(), transaction.getDate(), new SumTableCell(transaction.getAmount(), true, financeData.getDefaultCurrency())});
 	}
 
 	/**
