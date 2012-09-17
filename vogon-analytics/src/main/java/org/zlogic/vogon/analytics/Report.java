@@ -17,9 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.persistence.EntityManager;
+import javax.persistence.Tuple;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -79,9 +81,16 @@ public class Report {
 	 * report
 	 */
 	public Report(FinanceData financeData) {
+		this();
 		this.financeData = financeData;
 		entityManager = DatabaseManager.getInstance().createEntityManager();
+	}
 
+	/**
+	 * Default constructor
+	 *
+	 */
+	public Report() {
 		//Prepare start/end dates
 		Calendar calendar = new GregorianCalendar();
 		calendar.set(Calendar.DAY_OF_MONTH, 1);
@@ -344,13 +353,43 @@ public class Report {
 	 * @return expenses grouped by tags
 	 */
 	public Map<String, Double> getTagExpenses() {
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Tuple> transactionsCriteriaQuery = criteriaBuilder.createTupleQuery();
+
+		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
+
+		Predicate datePredicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), earliestDate),
+				criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), latestDate));
+
+		Predicate tagsPredicate = (selectedTags != null && !selectedTags.isEmpty()) ? tr.join(FinanceTransaction_.tags).in(criteriaBuilder.literal(selectedTags)) : null;
+
+		Predicate transactionTypePredicate = null;
+		if (enabledExpenseTransactions)
+			transactionTypePredicate = transactionTypePredicate == null
+					? criteriaBuilder.equal(tr.type(), ExpenseTransaction.class)
+					: criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.type(), ExpenseTransaction.class));
+		if (enabledTransferTransactions)
+			transactionTypePredicate = transactionTypePredicate == null
+					? criteriaBuilder.equal(tr.type(), TransferTransaction.class)
+					: criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.type(), TransferTransaction.class));
+
+		if (transactionTypePredicate == null || tagsPredicate == null)
+			return new TreeMap<String, Double>();
+
+		Predicate rootPredicate = datePredicate;
+		rootPredicate = criteriaBuilder.and(rootPredicate, tagsPredicate);
+		rootPredicate = criteriaBuilder.and(rootPredicate, transactionTypePredicate);
+
+		Join tagsJoin = tr.join(FinanceTransaction_.tags);
+
+		transactionsCriteriaQuery.where(rootPredicate);
+		transactionsCriteriaQuery.multiselect(criteriaBuilder.sum(tr.get(FinanceTransaction_.amount)),
+				tagsJoin).distinct(true);
+		transactionsCriteriaQuery.groupBy(tagsJoin);
+
 		Map<String, Double> result = new TreeMap<>();
-		for (FinanceTransaction transaction : getTransactions())
-			for (String tag : transaction.getTags())
-				if (result.containsKey(tag))
-					result.put(tag, result.get(tag) + transaction.getAmount());
-				else if (!tag.isEmpty())
-					result.put(tag, transaction.getAmount());
+		for (Tuple tuple : entityManager.createQuery(transactionsCriteriaQuery).getResultList())
+			result.put(tuple.get(1, String.class), tuple.get(0, Long.class) / 100.0D);
 		return result;
 	}
 }

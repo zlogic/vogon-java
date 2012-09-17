@@ -1,38 +1,31 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.zlogic.vogon</groupId>
 		<artifactId>top</artifactId>
 		<version>0.0.3-SNAPSHOT</version>
 	</parent>
+	<groupId>org.zlogic.vogon.distribution</groupId>
 	<artifactId>vogon-distribution</artifactId>
 	<name>Vogon :: Distribution</name>
 	<packaging>pom</packaging>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.zlogic.vogon.data</groupId>
-				<artifactId>vogon-data</artifactId>
-				<version>${project.parent.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.zlogic.vogon.ui</groupId>
-				<artifactId>vogon-ui</artifactId>
-				<version>${project.parent.version}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.zlogic.vogon.data</groupId>
 			<artifactId>vogon-data</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.zlogic.vogon.ui</groupId>
 			<artifactId>vogon-ui</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.zlogic.vogon.resources</groupId>
+			<artifactId>vogon-resources</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 	</dependencies>
 
@@ -40,7 +33,6 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.3</version>
 				<executions>
 					<execution>
 						<id>distro-assembly</id>
@@ -56,9 +48,50 @@
 							</archive>
 							<finalName>vogon-${project.parent.version}</finalName>
 							<appendAssemblyId>false</appendAssemblyId>
-						<descriptorRefs>
-							<descriptorRef>jar-with-dependencies</descriptorRef>
-						</descriptorRefs>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.akathist.maven.plugins.launch4j</groupId>
+				<artifactId>launch4j-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>l4j-clui</id>
+						<phase>package</phase>
+						<goals>
+							<goal>launch4j</goal>
+						</goals>
+						<configuration>
+							<headerType>gui</headerType>
+							<outfile>target/vogon-${project.parent.version}.exe</outfile>
+							<jar>target/vogon-${project.parent.version}.jar</jar>
+							<errTitle>encc</errTitle>
+							<classPath>
+								<mainClass>org.zlogic.vogon.ui.MainWindow</mainClass>
+								<addDependencies>true</addDependencies>
+								<preCp>anything</preCp>
+							</classPath>
+							<jre>
+								<minVersion>1.7.0</minVersion>
+								<opts>
+									<!--<opt>-Djava.util.logging.config.file=logging.properties</opt>-->
+								</opts>
+							</jre>
+							<versionInfo>
+								<fileVersion>${version.windows}</fileVersion>
+								<txtFileVersion>${project.parent.version}</txtFileVersion>
+								<fileDescription>Vogon personal finance tracker</fileDescription>
+								<copyright>Zlogic</copyright>
+								<productVersion>${version.windows}</productVersion>
+								<txtProductVersion>${project.parent.version}</txtProductVersion>
+								<productName>Vogon</productName>
+								<internalName>vogon</internalName>
+								<originalFilename>vogon-${project.parent.version}.exe</originalFilename>
+							</versionInfo>
 						</configuration>
 					</execution>
 				</executions>
