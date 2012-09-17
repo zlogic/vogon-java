@@ -10,10 +10,16 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.table.DefaultTableModel;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PiePlot3D;
+import org.jfree.data.general.DefaultPieDataset;
 import org.zlogic.vogon.analytics.Report;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
@@ -45,21 +51,25 @@ public class AnalyticsViewer extends javax.swing.JPanel {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        javax.swing.JLabel jLabelStartDate = new javax.swing.JLabel();
-        javax.swing.JLabel jLabelEndDate = new javax.swing.JLabel();
+        jLabelStartDate = new javax.swing.JLabel();
+        jLabelEndDate = new javax.swing.JLabel();
         jFormattedTextFieldStartDate = new javax.swing.JFormattedTextField();
         jFormattedTextFieldEndDate = new javax.swing.JFormattedTextField();
-        javax.swing.JLabel jLabelTags = new javax.swing.JLabel();
+        jLabelTags = new javax.swing.JLabel();
         jTextFieldTags = new javax.swing.JTextField();
         jCheckBoxExpenseTransactions = new javax.swing.JCheckBox();
         jCheckBoxTransferTransactions = new javax.swing.JCheckBox();
+        jCheckBoxIncomeTransactions = new javax.swing.JCheckBox();
         jScrollPaneAccounts = new javax.swing.JScrollPane();
         jTableAccounts = new javax.swing.JTable();
         jScrollPaneTags = new javax.swing.JScrollPane();
         jTableTags = new javax.swing.JTable();
-        jButton1 = new javax.swing.JButton();
+        jButtonGenerateReport = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextPane1 = new javax.swing.JTextPane();
+        jPanelTagsChart = new javax.swing.JPanel();
+        jScrollPaneTagsReport = new javax.swing.JScrollPane();
+        jTableTagsReport = new javax.swing.JTable();
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Parameters"));
 
@@ -81,6 +91,9 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 
         jCheckBoxTransferTransactions.setText(messages.getString("TRANSFER_TRANSACTIONS")); // NOI18N
 
+        jCheckBoxIncomeTransactions.setSelected(true);
+        jCheckBoxIncomeTransactions.setText(messages.getString("INCOME_TRANSACTIONS")); // NOI18N
+
         jTableAccounts.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -90,11 +103,15 @@ public class AnalyticsViewer extends javax.swing.JPanel {
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Object.class, java.lang.Boolean.class
+                java.lang.String.class, java.lang.Boolean.class
             };
 
             public Class getColumnClass(int columnIndex) {
                 return types [columnIndex];
+            }
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return getColumnClass(column).equals(Boolean.class);
             }
         });
         jTableAccounts.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -144,11 +161,12 @@ public class AnalyticsViewer extends javax.swing.JPanel {
                             .addComponent(jFormattedTextFieldEndDate)
                             .addComponent(jTextFieldTags)))
                     .addComponent(jCheckBoxTransferTransactions)
-                    .addComponent(jCheckBoxExpenseTransactions))
+                    .addComponent(jCheckBoxExpenseTransactions)
+                    .addComponent(jCheckBoxIncomeTransactions))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPaneAccounts, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addComponent(jScrollPaneAccounts, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPaneTags, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addComponent(jScrollPaneTags, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
                 .addGap(0, 0, 0))
         );
         jPanel1Layout.setVerticalGroup(
@@ -157,57 +175,92 @@ public class AnalyticsViewer extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabelStartDate)
                             .addComponent(jFormattedTextFieldStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabelEndDate)
-                            .addComponent(jFormattedTextFieldEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jFormattedTextFieldEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabelEndDate))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jTextFieldTags, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabelTags, javax.swing.GroupLayout.Alignment.TRAILING))
-                        .addGap(18, 18, 18)
-                        .addComponent(jCheckBoxTransferTransactions)
+                            .addComponent(jLabelTags))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jCheckBoxExpenseTransactions))
+                        .addComponent(jCheckBoxTransferTransactions)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jCheckBoxExpenseTransactions)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jCheckBoxIncomeTransactions))
                     .addComponent(jScrollPaneTags, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(jScrollPaneAccounts, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
         );
 
-        jButton1.setText(messages.getString("GENERATE_REPORT")); // NOI18N
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        jButtonGenerateReport.setText(messages.getString("GENERATE_REPORT")); // NOI18N
+        jButtonGenerateReport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                jButtonGenerateReportActionPerformed(evt);
             }
         });
 
         jScrollPane1.setViewportView(jTextPane1);
 
+        jPanelTagsChart.setLayout(new java.awt.CardLayout());
+
+        jTableTagsReport.setAutoCreateRowSorter(true);
+        jTableTagsReport.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Tag", "Amount"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.Object.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        });
+        jTableTagsReport.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
+        jScrollPaneTagsReport.setViewportView(jTableTagsReport);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jButton1)
-                .addGap(573, 745, Short.MAX_VALUE))
+                .addComponent(jButtonGenerateReport)
+                .addGap(573, 604, Short.MAX_VALUE))
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jScrollPaneTagsReport, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanelTagsChart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(jScrollPane1)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton1)
+                .addComponent(jButtonGenerateReport)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 242, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanelTagsChart, javax.swing.GroupLayout.DEFAULT_SIZE, 149, Short.MAX_VALUE)
+                    .addComponent(jScrollPaneTagsReport, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void jButtonGenerateReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGenerateReportActionPerformed
 		//Assign report settings
 		DateFormat dateFormat = new SimpleDateFormat(messages.getString("PARSER_DATE"));
 		try {
@@ -215,6 +268,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 			report.setLatestDate(dateFormat.parse(jFormattedTextFieldEndDate.getText()));
 			report.setEnabledExpenseTransactions(jCheckBoxExpenseTransactions.isSelected());
 			report.setEnabledTransferTransactions(jCheckBoxTransferTransactions.isSelected());
+			report.setEnabledIncomeTransactions(jCheckBoxIncomeTransactions.isSelected());
 			DefaultTableModel tagsModel = (DefaultTableModel) jTableTags.getModel();
 			List<String> tags = new LinkedList<>();
 			for (int i = 0; i < tagsModel.getRowCount(); i++)
@@ -224,20 +278,30 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 		} catch (ParseException ex) {
 			Logger.getLogger(AnalyticsViewer.class.getName()).log(Level.SEVERE, null, ex);
 		}
+		//Update form with report
 		jTextPane1.setText(report.getTextReport());
-    }//GEN-LAST:event_jButton1ActionPerformed
+		updateTagsChart(report.getTagExpenses());
+		updateTagsReportTable(report.getTagExpenses());
+    }//GEN-LAST:event_jButtonGenerateReportActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButtonGenerateReport;
     private javax.swing.JCheckBox jCheckBoxExpenseTransactions;
+    private javax.swing.JCheckBox jCheckBoxIncomeTransactions;
     private javax.swing.JCheckBox jCheckBoxTransferTransactions;
     private javax.swing.JFormattedTextField jFormattedTextFieldEndDate;
     private javax.swing.JFormattedTextField jFormattedTextFieldStartDate;
+    private javax.swing.JLabel jLabelEndDate;
+    private javax.swing.JLabel jLabelStartDate;
+    private javax.swing.JLabel jLabelTags;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanelTagsChart;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPaneAccounts;
     private javax.swing.JScrollPane jScrollPaneTags;
+    private javax.swing.JScrollPane jScrollPaneTagsReport;
     private javax.swing.JTable jTableAccounts;
     private javax.swing.JTable jTableTags;
+    private javax.swing.JTable jTableTagsReport;
     private javax.swing.JTextField jTextFieldTags;
     private javax.swing.JTextPane jTextPane1;
     // End of variables declaration//GEN-END:variables
@@ -263,6 +327,8 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 		jTableAccounts.getColumnModel().getColumn(1).setMinWidth(30);
 		jTableAccounts.getColumnModel().getColumn(1).setMaxWidth(100);
 		jTableAccounts.getColumnModel().getColumn(1).setPreferredWidth(50);
+		jTableTagsReport.getColumnModel().getColumn(1).setCellRenderer(SumTableCell.getRenderer());
+		//jTableTagsReport.getRowSorter().toggleSortOrder(1);
 	}
 
 	/**
@@ -287,6 +353,40 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 			accountsModel.removeRow(0);
 		for (FinanceAccount account : report.getAllAccounts())
 			accountsModel.addRow(new Object[]{new AccountDisplay(account), new Boolean(true)});
+	}
+
+	/**
+	 * Updates the tags pie chart
+	 *
+	 * @param values expenses grouped by tag
+	 */
+	private void updateTagsChart(Map<String, Double> values) {
+		DefaultPieDataset dataset = new DefaultPieDataset();
+		for (Map.Entry<String, Double> tagExpense : values.entrySet())
+			dataset.setValue(tagExpense.getKey(), Math.abs(tagExpense.getValue()));
+
+		JFreeChart chart = ChartFactory.createPieChart3D("", dataset, false, true, true);
+		ChartPanel chartPanel = new ChartPanel(chart);
+		chart.setBackgroundPaint(jPanelTagsChart.getBackground());
+		PiePlot3D plot = (PiePlot3D) chart.getPlot();
+		plot.setForegroundAlpha(0.5f);
+		plot.setBackgroundPaint(jPanelTagsChart.getBackground());
+		jPanelTagsChart.removeAll();
+		jPanelTagsChart.add(chartPanel);
+		jPanelTagsChart.revalidate();
+	}
+
+	/**
+	 * Updates the tags reporting table
+	 *
+	 * @param values expenses grouped by tag
+	 */
+	private void updateTagsReportTable(Map<String, Double> values) {
+		DefaultTableModel tableModel = (DefaultTableModel) jTableTagsReport.getModel();
+		while (tableModel.getRowCount() > 0)
+			tableModel.removeRow(0);
+		for (Map.Entry<String, Double> tagExpense : values.entrySet())
+			tableModel.addRow(new Object[]{tagExpense.getKey(), new SumTableCell(tagExpense.getValue(), true, financeData.getDefaultCurrency())});
 	}
 
 	/**

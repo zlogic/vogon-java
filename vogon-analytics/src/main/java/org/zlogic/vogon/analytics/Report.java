@@ -270,6 +270,35 @@ public class Report {
 	}
 
 	/**
+	 * Returns a predicate for filtering transactions
+	 */
+	protected Predicate getFilteredTransactionsPredicate(CriteriaBuilder criteriaBuilder, Root<FinanceTransaction> tr) {
+		Predicate datePredicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), earliestDate),
+				criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), latestDate));
+
+		Predicate tagsPredicate = (selectedTags != null && !selectedTags.isEmpty()) ? tr.join(FinanceTransaction_.tags).in(criteriaBuilder.literal(selectedTags)) : null;
+
+		Predicate transactionTypePredicate = criteriaBuilder.disjunction();
+		if (enabledExpenseTransactions || enabledIncomeTransactions)
+			transactionTypePredicate = criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.type(), ExpenseTransaction.class));
+		if (enabledTransferTransactions)
+			transactionTypePredicate = criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.type(), TransferTransaction.class));
+
+		Predicate expenseTypePredicate = criteriaBuilder.disjunction();
+		if (enabledExpenseTransactions)
+			expenseTypePredicate = criteriaBuilder.or(expenseTypePredicate, criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.amount), new Long(0)));
+
+		if (enabledIncomeTransactions)
+			expenseTypePredicate = criteriaBuilder.or(expenseTypePredicate, criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.amount), new Long(0)));
+
+		Predicate rootPredicate = datePredicate;
+		rootPredicate = criteriaBuilder.and(rootPredicate, tagsPredicate);
+		rootPredicate = criteriaBuilder.and(rootPredicate, transactionTypePredicate);
+		rootPredicate = criteriaBuilder.and(rootPredicate, expenseTypePredicate);
+		return rootPredicate;
+	}
+
+	/**
 	 * Returns all transactions matching the set filters
 	 *
 	 * @param orderBy field for ordering the result
@@ -284,29 +313,7 @@ public class Report {
 		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 
-		Predicate datePredicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), earliestDate),
-				criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), latestDate));
-
-		Predicate tagsPredicate = (selectedTags != null && !selectedTags.isEmpty()) ? tr.join(FinanceTransaction_.tags).in(criteriaBuilder.literal(selectedTags)) : null;
-
-		Predicate transactionTypePredicate = null;
-		if (enabledExpenseTransactions)
-			transactionTypePredicate = transactionTypePredicate == null
-					? criteriaBuilder.equal(tr.type(), ExpenseTransaction.class)
-					: criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.type(), ExpenseTransaction.class));
-		if (enabledTransferTransactions)
-			transactionTypePredicate = transactionTypePredicate == null
-					? criteriaBuilder.equal(tr.type(), TransferTransaction.class)
-					: criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.type(), TransferTransaction.class));
-
-		if (transactionTypePredicate == null || tagsPredicate == null)
-			return new LinkedList<FinanceTransaction>();
-
-		Predicate rootPredicate = datePredicate;
-		rootPredicate = criteriaBuilder.and(rootPredicate, tagsPredicate);
-		rootPredicate = criteriaBuilder.and(rootPredicate, transactionTypePredicate);
-
-		transactionsCriteriaQuery.where(rootPredicate);
+		transactionsCriteriaQuery.where(getFilteredTransactionsPredicate(criteriaBuilder, tr));
 
 		Expression userOrderBy = tr.get(orderBy);
 
@@ -358,31 +365,9 @@ public class Report {
 
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 
-		Predicate datePredicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), earliestDate),
-				criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), latestDate));
-
-		Predicate tagsPredicate = (selectedTags != null && !selectedTags.isEmpty()) ? tr.join(FinanceTransaction_.tags).in(criteriaBuilder.literal(selectedTags)) : null;
-
-		Predicate transactionTypePredicate = null;
-		if (enabledExpenseTransactions)
-			transactionTypePredicate = transactionTypePredicate == null
-					? criteriaBuilder.equal(tr.type(), ExpenseTransaction.class)
-					: criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.type(), ExpenseTransaction.class));
-		if (enabledTransferTransactions)
-			transactionTypePredicate = transactionTypePredicate == null
-					? criteriaBuilder.equal(tr.type(), TransferTransaction.class)
-					: criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.type(), TransferTransaction.class));
-
-		if (transactionTypePredicate == null || tagsPredicate == null)
-			return new TreeMap<String, Double>();
-
-		Predicate rootPredicate = datePredicate;
-		rootPredicate = criteriaBuilder.and(rootPredicate, tagsPredicate);
-		rootPredicate = criteriaBuilder.and(rootPredicate, transactionTypePredicate);
-
 		Join tagsJoin = tr.join(FinanceTransaction_.tags);
 
-		transactionsCriteriaQuery.where(rootPredicate);
+		transactionsCriteriaQuery.where(getFilteredTransactionsPredicate(criteriaBuilder, tr));
 		transactionsCriteriaQuery.multiselect(criteriaBuilder.sum(tr.get(FinanceTransaction_.amount)),
 				tagsJoin).distinct(true);
 		transactionsCriteriaQuery.groupBy(tagsJoin);
