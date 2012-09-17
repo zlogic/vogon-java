@@ -31,7 +31,8 @@ import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.SingularAttribute;
 
 /**
- * Central class for setting report parameters and generating various reports
+ * Central class for setting report parameters and generating various reports.
+ * Interacts with DB directly.
  *
  * @author Dmitry Zolotukhin
  */
