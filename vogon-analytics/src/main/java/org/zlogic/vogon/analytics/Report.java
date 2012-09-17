@@ -282,14 +282,14 @@ public class Report {
 	}
 
 	/**
-	 * Returns all transactions matching the set filters, ordered by date
-	 * ascending
+	 * Returns all transactions matching the set filters, ordered by amount
+	 * descending
 	 *
 	 * @return list of all transactions matching the set filters, ordered by
-	 * date ascending
+	 * amount descending
 	 */
 	public List<FinanceTransaction> getTransactions() {
-		return getTransactions(FinanceTransaction_.transactionDate, true, false);
+		return getTransactions(FinanceTransaction_.amount, false, true);
 	}
 
 	/**
@@ -350,8 +350,8 @@ public class Report {
 		if (orderAbsolute)
 			userOrderBy = criteriaBuilder.abs(userOrderBy);
 		Order userOrder = orderAsc ? criteriaBuilder.asc(userOrderBy) : criteriaBuilder.desc(userOrderBy);
-		transactionsCriteriaQuery.orderBy(userOrder,
-				criteriaBuilder.asc(tr.get(FinanceTransaction_.id)));
+		transactionsCriteriaQuery.orderBy(userOrder, criteriaBuilder.asc(tr.get(FinanceTransaction_.id)));
+		transactionsCriteriaQuery.select(tr).distinct(true);
 
 		return entityManager.createQuery(transactionsCriteriaQuery).getResultList();
 	}
