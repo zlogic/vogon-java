@@ -11,7 +11,6 @@
 
 	<modules>
 		<module>vogon-data</module>
-		<module>vogon-analytics</module>
 		<module>vogon-ui</module>
 		<module>vogon-distribution</module>
 		<module>vogon-resources</module>
@@ -45,6 +44,21 @@
 	</build>
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>org.zlogic.vogon.data</groupId>
+				<artifactId>vogon-data</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.zlogic.vogon.ui</groupId>
+				<artifactId>vogon-ui</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.zlogic.vogon.resources</groupId>
+				<artifactId>vogon-resources</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.apache.derby</groupId>
 				<artifactId>derby</artifactId>

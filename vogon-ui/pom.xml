@@ -39,12 +39,6 @@
 		<dependency>
 			<groupId>org.zlogic.vogon.data</groupId>
 			<artifactId>vogon-data</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.zlogic.vogon.analytics</groupId>
-			<artifactId>vogon-analytics</artifactId>
-			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>jfree</groupId>

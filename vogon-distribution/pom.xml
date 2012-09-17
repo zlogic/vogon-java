@@ -15,17 +15,14 @@
 		<dependency>
 			<groupId>org.zlogic.vogon.data</groupId>
 			<artifactId>vogon-data</artifactId>
-			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.zlogic.vogon.ui</groupId>
 			<artifactId>vogon-ui</artifactId>
-			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.zlogic.vogon.resources</groupId>
 			<artifactId>vogon-resources</artifactId>
-			<version>${project.parent.version}</version>
 		</dependency>
 	</dependencies>
 
@@ -46,7 +43,7 @@
 									<mainClass>org.zlogic.vogon.ui.MainWindow</mainClass>
 								</manifest>
 							</archive>
-							<finalName>vogon-${project.parent.version}</finalName>
+							<finalName>vogon-${project.version}</finalName>
 							<appendAssemblyId>false</appendAssemblyId>
 							<descriptorRefs>
 								<descriptorRef>jar-with-dependencies</descriptorRef>
@@ -67,8 +64,8 @@
 						</goals>
 						<configuration>
 							<headerType>gui</headerType>
-							<outfile>target/vogon-${project.parent.version}.exe</outfile>
-							<jar>target/vogon-${project.parent.version}.jar</jar>
+							<outfile>target/vogon-${project.version}.exe</outfile>
+							<jar>target/vogon-${project.version}.jar</jar>
 							<errTitle>encc</errTitle>
 							<classPath>
 								<mainClass>org.zlogic.vogon.ui.MainWindow</mainClass>
@@ -83,14 +80,14 @@
 							</jre>
 							<versionInfo>
 								<fileVersion>${version.windows}</fileVersion>
-								<txtFileVersion>${project.parent.version}</txtFileVersion>
+								<txtFileVersion>${project.version}</txtFileVersion>
 								<fileDescription>Vogon personal finance tracker</fileDescription>
 								<copyright>Zlogic</copyright>
 								<productVersion>${version.windows}</productVersion>
-								<txtProductVersion>${project.parent.version}</txtProductVersion>
+								<txtProductVersion>${project.version}</txtProductVersion>
 								<productName>Vogon</productName>
 								<internalName>vogon</internalName>
-								<originalFilename>vogon-${project.parent.version}.exe</originalFilename>
+								<originalFilename>vogon-${project.version}.exe</originalFilename>
 							</versionInfo>
 						</configuration>
 					</execution>
