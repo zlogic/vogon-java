@@ -296,17 +296,67 @@ public class Report {
 	}
 
 	/**
+	 * Class for storing a generated predicate and joins (should be used in
+	 * groupBy to avoid duplicate results)
+	 */
+	protected class ConstructedPredicate {
+
+		private Predicate predicate;
+		private Join componentsJoin;
+		private Join tagsJoin;
+
+		/**
+		 * Default constructor
+		 *
+		 * @param predicate the generated predicate
+		 * @param componentsJoin the transaction components join
+		 * @param tagsJoin the transaction tags join
+		 */
+		public ConstructedPredicate(Predicate predicate, Join componentsJoin, Join tagsJoin) {
+			this.predicate = predicate;
+			this.componentsJoin = componentsJoin;
+			this.tagsJoin = tagsJoin;
+		}
+
+		/**
+		 * Returns the generated predicate
+		 *
+		 * @return the predicate
+		 */
+		public Predicate getPredicate() {
+			return predicate;
+		}
+
+		/**
+		 * Returns the transaction components join
+		 *
+		 * @return the transaction components join
+		 */
+		public Join getComponentsJoin() {
+			return componentsJoin;
+		}
+
+		/**
+		 * Returns the transaction tags join
+		 *
+		 * @return the transaction tags join
+		 */
+		public Join getTagsJoin() {
+			return tagsJoin;
+		}
+	}
+
+	/**
 	 * Returns a predicate for filtering transactions
 	 *
 	 * @param criteriaBuilder the CriteriaBuilder
 	 * @param tr the FinanceTransaction Root
-	 * @return the predicate for filtering transactions
+	 * @return the predicate for filtering transactions and joins which should
+	 * be used in groupBy if result of selection is not a unique FinanceAccount
 	 */
-	protected Predicate getFilteredTransactionsPredicate(CriteriaBuilder criteriaBuilder, Root<FinanceTransaction> tr) {
+	protected ConstructedPredicate getFilteredTransactionsPredicate(CriteriaBuilder criteriaBuilder, Root<FinanceTransaction> tr) {
 		Predicate datePredicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), earliestDate),
 				criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), latestDate));
-
-		Predicate tagsPredicate = (selectedTags != null && !selectedTags.isEmpty()) ? tr.join(FinanceTransaction_.tags).in(criteriaBuilder.literal(selectedTags)) : criteriaBuilder.disjunction();
 
 		Predicate transactionTypePredicate = criteriaBuilder.disjunction();
 		if (enabledExpenseTransactions || enabledIncomeTransactions)
@@ -321,14 +371,20 @@ public class Report {
 		if (enabledIncomeTransactions)
 			expenseTypePredicate = criteriaBuilder.or(expenseTypePredicate, criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.amount), new Long(0)));
 
-		Predicate accountsPredicate = (selectedAccounts != null && !selectedAccounts.isEmpty()) ? tr.join(FinanceTransaction_.components).get(TransactionComponent_.account).in(criteriaBuilder.literal(selectedAccounts)) : criteriaBuilder.disjunction();
+		Join tagsJoin = tr.join(FinanceTransaction_.tags);
+
+		Predicate tagsPredicate = (selectedTags != null && !selectedTags.isEmpty()) ? tagsJoin.in(criteriaBuilder.literal(selectedTags)) : criteriaBuilder.disjunction();
+
+		Join componentsJoin = tr.join(FinanceTransaction_.components);
+
+		Predicate accountsPredicate = (selectedAccounts != null && !selectedAccounts.isEmpty()) ? componentsJoin.get(TransactionComponent_.account).in(criteriaBuilder.literal(selectedAccounts)) : criteriaBuilder.disjunction();
 
 		Predicate rootPredicate = datePredicate;
+		rootPredicate = criteriaBuilder.and(rootPredicate, accountsPredicate);
 		rootPredicate = criteriaBuilder.and(rootPredicate, tagsPredicate);
 		rootPredicate = criteriaBuilder.and(rootPredicate, transactionTypePredicate);
 		rootPredicate = criteriaBuilder.and(rootPredicate, expenseTypePredicate);
-		rootPredicate = criteriaBuilder.and(rootPredicate, accountsPredicate);
-		return rootPredicate;
+		return new ConstructedPredicate(rootPredicate, componentsJoin, tagsJoin);
 	}
 
 	/**
@@ -346,7 +402,9 @@ public class Report {
 		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 
-		transactionsCriteriaQuery.where(getFilteredTransactionsPredicate(criteriaBuilder, tr));
+		ConstructedPredicate predicate = getFilteredTransactionsPredicate(criteriaBuilder, tr);
+
+		transactionsCriteriaQuery.where(predicate.getPredicate());
 
 		Expression userOrderBy = tr.get(orderBy);
 
@@ -417,6 +475,11 @@ public class Report {
 		return result;
 	}
 
+	/**
+	 * Returns a graph for the total balance of accounts, sorted by date
+	 *
+	 * @return a graph for the total balance of accounts, sorted by date
+	 */
 	public Map<Date, Double> getAccountsBalanceGraph() {
 		List<FinanceTransaction> transactions = getTransactions(FinanceTransaction_.transactionDate, true, false);
 		Map<Date, Long> currentBalance = new TreeMap<>();
@@ -450,12 +513,12 @@ public class Report {
 		CriteriaQuery<Tuple> transactionsCriteriaQuery = criteriaBuilder.createTupleQuery();
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 
-		transactionsCriteriaQuery.where(getFilteredTransactionsPredicate(criteriaBuilder, tr));
+		ConstructedPredicate predicate = getFilteredTransactionsPredicate(criteriaBuilder, tr);
 
-		Join tagsJoin = tr.join(FinanceTransaction_.tags);
 		transactionsCriteriaQuery.multiselect(criteriaBuilder.sum(tr.get(FinanceTransaction_.amount)),
-				tagsJoin).distinct(true);
-		transactionsCriteriaQuery.groupBy(tagsJoin);
+				predicate.getTagsJoin()).distinct(true);
+		transactionsCriteriaQuery.where(predicate.getPredicate());
+		transactionsCriteriaQuery.groupBy(predicate.getComponentsJoin(), predicate.getTagsJoin());
 
 		Map<String, Double> result = new TreeMap<>();
 		for (Tuple tuple : entityManager.createQuery(transactionsCriteriaQuery).getResultList())
