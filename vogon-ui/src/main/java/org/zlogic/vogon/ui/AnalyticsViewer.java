@@ -103,7 +103,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.Boolean.class
+                java.lang.Object.class, java.lang.Boolean.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -269,12 +269,20 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 			report.setEnabledExpenseTransactions(jCheckBoxExpenseTransactions.isSelected());
 			report.setEnabledTransferTransactions(jCheckBoxTransferTransactions.isSelected());
 			report.setEnabledIncomeTransactions(jCheckBoxIncomeTransactions.isSelected());
+
 			DefaultTableModel tagsModel = (DefaultTableModel) jTableTags.getModel();
 			List<String> tags = new LinkedList<>();
 			for (int i = 0; i < tagsModel.getRowCount(); i++)
 				if (tagsModel.getValueAt(i, 1) instanceof Boolean && (Boolean) tagsModel.getValueAt(i, 1))
 					tags.add((String) tagsModel.getValueAt(i, 0));
 			report.setSelectedTags(tags);
+
+			DefaultTableModel accountsModel = (DefaultTableModel) jTableAccounts.getModel();
+			List<FinanceAccount> accounts = new LinkedList<>();
+			for (int i = 0; i < accountsModel.getRowCount(); i++)
+				if (accountsModel.getValueAt(i, 1) instanceof Boolean && (Boolean) accountsModel.getValueAt(i, 1))
+					accounts.add(((AccountDisplay) accountsModel.getValueAt(i, 0)).getAccount());
+			report.setSelectedAccounts(accounts);
 		} catch (ParseException ex) {
 			Logger.getLogger(AnalyticsViewer.class.getName()).log(Level.SEVERE, null, ex);
 		}
