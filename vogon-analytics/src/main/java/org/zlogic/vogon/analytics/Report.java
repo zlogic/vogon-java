@@ -17,12 +17,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.Tuple;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.SingularAttribute;
@@ -32,6 +34,7 @@ import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.FinanceTransaction_;
+import org.zlogic.vogon.data.TransactionComponent;
 import org.zlogic.vogon.data.TransactionComponent_;
 import org.zlogic.vogon.data.TransferTransaction;
 
@@ -350,7 +353,8 @@ public class Report {
 		if (orderAbsolute)
 			userOrderBy = criteriaBuilder.abs(userOrderBy);
 		Order userOrder = orderAsc ? criteriaBuilder.asc(userOrderBy) : criteriaBuilder.desc(userOrderBy);
-		transactionsCriteriaQuery.orderBy(userOrder, criteriaBuilder.asc(tr.get(FinanceTransaction_.id)));
+		Order idOrder = orderAsc ? criteriaBuilder.asc(tr.get(FinanceTransaction_.id)) : criteriaBuilder.desc(tr.get(FinanceTransaction_.id));
+		transactionsCriteriaQuery.orderBy(userOrder, idOrder);
 		transactionsCriteriaQuery.select(tr).distinct(true);
 
 		return entityManager.createQuery(transactionsCriteriaQuery).getResultList();
@@ -382,6 +386,58 @@ public class Report {
 		accountsCriteriaQuery.from(FinanceAccount.class);
 
 		return entityManager.createQuery(accountsCriteriaQuery).getResultList();
+	}
+
+	/**
+	 * Returns a raw account balance by a specific date
+	 *
+	 * @param account the account
+	 * @param byDate the date
+	 * @return the raw balance
+	 */
+	public long getRawAccountBalanceByDate(FinanceAccount account, Date byDate) {
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> transactionsCriteriaQuery = criteriaBuilder.createQuery(Long.class);
+		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
+
+		Join componentsJoin = tr.join(FinanceTransaction_.components);
+		Path joinedAccount = componentsJoin.get(TransactionComponent_.account);
+
+		Predicate accountsPredicate = criteriaBuilder.equal(componentsJoin.get(TransactionComponent_.account), account);
+		Predicate datePredicate = criteriaBuilder.lessThan(tr.get(FinanceTransaction_.transactionDate), byDate);
+		transactionsCriteriaQuery.select(criteriaBuilder.sum(componentsJoin.get(TransactionComponent_.amount)));
+		transactionsCriteriaQuery.where(criteriaBuilder.and(accountsPredicate, datePredicate));
+		transactionsCriteriaQuery.groupBy(joinedAccount);
+
+		long result = 0;
+		try {
+			result = entityManager.createQuery(transactionsCriteriaQuery).getSingleResult();
+		} catch (NoResultException ex) {
+		}
+		return result;
+	}
+
+	public Map<Date, Double> getAccountsBalanceGraph() {
+		List<FinanceTransaction> transactions = getTransactions(FinanceTransaction_.transactionDate, true, false);
+		Map<Date, Long> currentBalance = new TreeMap<>();
+		Map<Date, Double> result = new TreeMap<>();
+		long sumBalance = 0;
+		for (FinanceAccount account : selectedAccounts)
+			sumBalance += getRawAccountBalanceByDate(account, earliestDate);
+		for (FinanceTransaction transaction : transactions) {
+			long dateAmount = currentBalance.containsKey(transaction.getDate()) ? currentBalance.get(transaction.getDate()) : sumBalance;
+			long deltaAmount = 0L;
+			for (FinanceAccount account : selectedAccounts)
+				for (TransactionComponent component : transaction.getComponentsForAccount(account))
+					deltaAmount += component.getRawAmount();
+			currentBalance.put(transaction.getDate(), dateAmount + deltaAmount);
+			sumBalance += deltaAmount;
+		}
+
+		for (Map.Entry<Date, Long> entry : currentBalance.entrySet())
+			result.put(entry.getKey(), entry.getValue() / 100.0D);
+
+		return result;
 	}
 
 	/**
