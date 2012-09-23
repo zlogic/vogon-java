@@ -41,7 +41,7 @@ public class CsvImporter implements FileImporter {
 	/**
 	 * Creates an instance of the CSV Importer
 	 *
-	 * @param inputFile The input file to read
+	 * @param inputFile the input file to read
 	 */
 	public CsvImporter(File inputFile) {
 		this.inputFile = inputFile;
@@ -50,9 +50,9 @@ public class CsvImporter implements FileImporter {
 	/**
 	 * Parses and imports a CSV file
 	 *
-	 * @throws VogonImportException In case of import errors (I/O, format,
+	 * @throws VogonImportException in case of import errors (I/O, format,
 	 * indexing etc.)
-	 * @throws VogonImportLogicalException In case of logical errors (without
+	 * @throws VogonImportLogicalException in case of logical errors (without
 	 * meaningful stack trace, just to show an error message)
 	 */
 	@Override

@@ -19,8 +19,8 @@ public class Utils {
 	 * Generates a full stack trace from an exception (e.g. to be used in error
 	 * messages or for logging). Can be used instead of e.printStackTrance()
 	 *
-	 * @param t The exception
-	 * @return The string representation of the exception, identical to
+	 * @param t the exception
+	 * @return the string representation of the exception, identical to
 	 * e.printStackTrance().
 	 */
 	static public String getStackTrace(Throwable t) {
@@ -35,8 +35,8 @@ public class Utils {
 	/**
 	 * Joins an array of strings with the specified separator
 	 *
-	 * @param parts The string array
-	 * @param separator The separator inserted during joining
+	 * @param parts the string array
+	 * @param separator the separator inserted during joining
 	 * @return the joined array
 	 */
 	static public String join(String[] parts, String separator) {
@@ -46,8 +46,8 @@ public class Utils {
 	/**
 	 * Joins an array of strings with the specified separator
 	 *
-	 * @param parts The string array
-	 * @param separator The separator inserted during joining
+	 * @param parts the string array
+	 * @param separator the separator inserted during joining
 	 * @return the joined array
 	 */
 	static public String join(List<String> parts, String separator) {

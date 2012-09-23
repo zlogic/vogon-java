@@ -58,8 +58,8 @@ public class FinanceAccount implements Serializable {
 	/**
 	 * Creates an account
 	 *
-	 * @param name The account name
-	 * @param currency The account currency
+	 * @param name the account name
+	 * @param currency the account currency
 	 */
 	public FinanceAccount(String name, Currency currency) {
 		includeInTotal = true;
@@ -94,7 +94,7 @@ public class FinanceAccount implements Serializable {
 	/**
 	 * Returns the account name
 	 *
-	 * @return The account name
+	 * @return the account name
 	 */
 	public String getName() {
 		return name;
@@ -103,7 +103,7 @@ public class FinanceAccount implements Serializable {
 	/**
 	 * Sets the account name
 	 *
-	 * @param name The account name
+	 * @param name the account name
 	 */
 	public void setName(String name) {
 		if (name.isEmpty())
@@ -114,7 +114,7 @@ public class FinanceAccount implements Serializable {
 	/**
 	 * Returns the account currency
 	 *
-	 * @return The account currency
+	 * @return the account currency
 	 */
 	public Currency getCurrency() {
 		Currency currency = Currency.getInstance(this.currency);
@@ -124,7 +124,7 @@ public class FinanceAccount implements Serializable {
 	/**
 	 * Sets the account currency
 	 *
-	 * @param currency The account currency
+	 * @param currency the account currency
 	 */
 	public void setCurrency(Currency currency) {
 		if (currency == null)
@@ -159,5 +159,20 @@ public class FinanceAccount implements Serializable {
 	 */
 	public double getBalance() {
 		return balance / 100.0D;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof FinanceAccount)
+			return id == ((FinanceAccount) obj).id;
+		else
+			return this == obj;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 23 * hash + (int) (this.id ^ (this.id >>> 32));
+		return hash;
 	}
 }
