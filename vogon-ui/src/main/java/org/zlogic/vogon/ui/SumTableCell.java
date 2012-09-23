@@ -26,7 +26,7 @@ import javax.swing.table.TableCellRenderer;
  *
  * @author Dmitry
  */
-public class SumTableCell {
+public class SumTableCell implements Comparable<SumTableCell> {
 
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
@@ -113,6 +113,14 @@ public class SumTableCell {
 		textField.setBorder(new LineBorder(Color.black));//Borrowed from JTable
 		textField.setHorizontalAlignment(JLabel.RIGHT);
 		return new SumModelEditor(textField);
+	}
+
+	@Override
+	public int compareTo(SumTableCell o) {
+		int currencyComparison = currency.getCurrencyCode().compareTo(o.currency.getCurrencyCode());
+		if (currencyComparison != 0)
+			return currencyComparison;
+		return new Double(balance).compareTo(o.balance);
 	}
 
 	/**
