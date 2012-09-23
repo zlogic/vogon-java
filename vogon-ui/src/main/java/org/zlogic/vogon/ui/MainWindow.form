@@ -184,7 +184,7 @@
                           <Properties>
                             <Property name="autoCreateRowSorter" type="boolean" value="true"/>
                             <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                              <Connection code="getTransactionsTableModel()" type="code"/>
+                              <Connection code="transactionsTableModel" type="code"/>
                             </Property>
                             <Property name="autoResizeMode" type="int" value="4"/>
                             <Property name="selectionModel" type="javax.swing.ListSelectionModel" editor="org.netbeans.modules.form.editors2.JTableSelectionModelEditor">
@@ -282,8 +282,9 @@
               <SubComponents>
                 <Component class="javax.swing.JTable" name="jTableAccounts">
                   <Properties>
+                    <Property name="autoCreateRowSorter" type="boolean" value="true"/>
                     <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                      <Connection code="getAccountsTableModel()" type="code"/>
+                      <Connection code="accountsTableModel" type="code"/>
                     </Property>
                     <Property name="fillsViewportHeight" type="boolean" value="true"/>
                   </Properties>
@@ -353,8 +354,9 @@
               <SubComponents>
                 <Component class="javax.swing.JTable" name="jTableCurrencies">
                   <Properties>
+                    <Property name="autoCreateRowSorter" type="boolean" value="true"/>
                     <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                      <Connection code="getCurrenciesTableModel()" type="code"/>
+                      <Connection code="currenciesTableModel" type="code"/>
                     </Property>
                     <Property name="selectionModel" type="javax.swing.ListSelectionModel" editor="org.netbeans.modules.form.editors2.JTableSelectionModelEditor">
                       <JTableSelectionModel selectionMode="0"/>

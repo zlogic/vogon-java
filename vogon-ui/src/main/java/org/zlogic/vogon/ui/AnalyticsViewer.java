@@ -6,6 +6,7 @@
 package org.zlogic.vogon.ui;
 
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Currency;
@@ -17,6 +18,7 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -100,49 +102,11 @@ public class AnalyticsViewer extends javax.swing.JPanel {
         jCheckBoxIncomeTransactions.setSelected(true);
         jCheckBoxIncomeTransactions.setText(messages.getString("INCOME_TRANSACTIONS")); // NOI18N
 
-        jTableAccounts.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                messages.getString("ACCOUNT_NAME"), messages.getString("SHOW")
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.Object.class, java.lang.Boolean.class
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return getColumnClass(column).equals(Boolean.class);
-            }
-        });
+        jTableAccounts.setModel(getAccountsSelectionTableModel());
         jTableAccounts.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         jScrollPaneAccounts.setViewportView(jTableAccounts);
 
-        jTableTags.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                messages.getString("TAG_NAME"), messages.getString("SHOW")
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.Boolean.class
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return getColumnClass(column).equals(Boolean.class);
-            }
-        });
+        jTableTags.setModel(getTagsSelectionTableModel());
         jTableTags.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         jScrollPaneTags.setViewportView(jTableTags);
 
@@ -175,22 +139,21 @@ public class AnalyticsViewer extends javax.swing.JPanel {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addComponent(jScrollPaneTags, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(jScrollPaneAccounts, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                        .addGroup(jPanelParametersLayout.createSequentialGroup()
-                            .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLabelStartDate)
-                                .addComponent(jFormattedTextFieldStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jFormattedTextFieldEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabelEndDate))
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addComponent(jCheckBoxTransferTransactions)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jCheckBoxExpenseTransactions)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jCheckBoxIncomeTransactions)))))
+                    .addComponent(jScrollPaneAccounts, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGroup(jPanelParametersLayout.createSequentialGroup()
+                        .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabelStartDate)
+                            .addComponent(jFormattedTextFieldStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanelParametersLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jFormattedTextFieldEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabelEndDate))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jCheckBoxTransferTransactions)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jCheckBoxExpenseTransactions)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jCheckBoxIncomeTransactions))))
         );
 
         jButtonGenerateReport.setText(messages.getString("GENERATE_REPORT")); // NOI18N
@@ -203,26 +166,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
         jPanelTagsReport.setBorder(javax.swing.BorderFactory.createTitledBorder("Statistics by tags"));
 
         jTableTagsReport.setAutoCreateRowSorter(true);
-        jTableTagsReport.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                "Tag", messages.getString("TRANSACTION_AMOUNT")
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.Object.class
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        });
+        jTableTagsReport.setModel(getTagsReportTableModel());
         jTableTagsReport.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         jScrollPaneTagsReport.setViewportView(jTableTagsReport);
 
@@ -246,26 +190,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
         jPanelTransactionsReport.setBorder(javax.swing.BorderFactory.createTitledBorder("Transactions"));
 
         jTableTransactionsReport.setAutoCreateRowSorter(true);
-        jTableTransactionsReport.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                messages.getString("TRANSACTION_NAME"), messages.getString("TRANSACTION_DATE"), messages.getString("TRANSACTION_AMOUNT")
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class,java.lang.String.class, java.lang.Object.class
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        });
+        jTableTransactionsReport.setModel(getTransactionsReportTableModel());
         jTableTransactionsReport.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         jScrollPaneTransactionsReport.setViewportView(jTableTransactionsReport);
 
@@ -393,7 +318,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 	/**
 	 * Resets all fields to their default values
 	 */
-	private void resetForm() {
+	public void resetForm() {
 		DateFormat format = new SimpleDateFormat(messages.getString("PARSER_DATE"));
 		jFormattedTextFieldStartDate.setText(format.format(report.getEarliestDate()));
 		jFormattedTextFieldEndDate.setText(format.format(report.getLatestDate()));
@@ -496,8 +421,115 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 				amount = financeData.getAmountInCurrency(transaction, financeData.getDefaultCurrency());
 				currency = financeData.getDefaultCurrency();
 			}
-			tableModel.addRow(new Object[]{transaction.getDescription(), transaction.getDate(), new SumTableCell(transaction.getAmount(), true, financeData.getDefaultCurrency(), transactionCurrencies.size() != 1)});
+			tableModel.addRow(new Object[]{transaction.getDescription(), MessageFormat.format(messages.getString("FORMAT_DATE"), new Object[]{transaction.getDate()}), new SumTableCell(transaction.getAmount(), true, financeData.getDefaultCurrency(), transactionCurrencies.size() != 1)});
 		}
+	}
+
+	/**
+	 * Table model for accounts selection table
+	 *
+	 * @return the model for accounts selection table
+	 */
+	private TableModel getAccountsSelectionTableModel() {
+		return new javax.swing.table.DefaultTableModel(
+				new Object[][]{},
+				new String[]{
+					messages.getString("ACCOUNT_NAME"), messages.getString("SHOW")
+				}) {
+			Class[] types = new Class[]{
+				java.lang.Object.class, java.lang.Boolean.class
+			};
+
+			@Override
+			public Class getColumnClass(int columnIndex) {
+				return types[columnIndex];
+			}
+
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return getColumnClass(column).equals(Boolean.class);
+			}
+		};
+	}
+
+	/**
+	 * Table model for tags selection table
+	 *
+	 * @return the model for tags selection table
+	 */
+	private TableModel getTagsSelectionTableModel() {
+		return new javax.swing.table.DefaultTableModel(
+				new Object[][]{},
+				new String[]{
+					messages.getString("TAG_NAME"), messages.getString("SHOW")
+				}) {
+			Class[] types = new Class[]{
+				java.lang.String.class, java.lang.Boolean.class
+			};
+
+			@Override
+			public Class getColumnClass(int columnIndex) {
+				return types[columnIndex];
+			}
+
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return getColumnClass(column).equals(Boolean.class);
+			}
+		};
+	}
+
+	/**
+	 * Table model for tags report/statistics
+	 *
+	 * @return the model for tags report/statistics table
+	 */
+	private TableModel getTagsReportTableModel() {
+		return new javax.swing.table.DefaultTableModel(
+				new Object[][]{},
+				new String[]{
+					messages.getString("TAG_NAME"), messages.getString("TRANSACTION_AMOUNT")
+				}) {
+			Class[] types = new Class[]{
+				java.lang.String.class, SumTableCell.class
+			};
+
+			@Override
+			public Class getColumnClass(int columnIndex) {
+				return types[columnIndex];
+			}
+
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
+	}
+
+	/**
+	 * Table model for transactions report
+	 *
+	 * @return the model for transactions report table
+	 */
+	private TableModel getTransactionsReportTableModel() {
+		return new javax.swing.table.DefaultTableModel(
+				new Object[][]{},
+				new String[]{
+					messages.getString("TRANSACTION_NAME"), messages.getString("TRANSACTION_DATE"), messages.getString("TRANSACTION_AMOUNT")
+				}) {
+			Class[] types = new Class[]{
+				java.lang.String.class, java.lang.String.class, SumTableCell.class
+			};
+
+			public Class getColumnClass(int columnIndex) {
+				return types[columnIndex];
+			}
+
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+		};
 	}
 
 	/**

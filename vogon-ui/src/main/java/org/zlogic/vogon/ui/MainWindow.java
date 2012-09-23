@@ -18,7 +18,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.TableModel;
 import org.zlogic.vogon.data.CsvImporter;
 import org.zlogic.vogon.data.DatabaseManager;
 import org.zlogic.vogon.data.FileExporter;
@@ -162,7 +161,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
         jPanelTransactionsList.add(jPanelTransactionControls, java.awt.BorderLayout.NORTH);
 
         jTableTransactions.setAutoCreateRowSorter(true);
-        jTableTransactions.setModel(getTransactionsTableModel());
+        jTableTransactions.setModel(transactionsTableModel);
         jTableTransactions.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         jTableTransactions.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPaneTransactions.setViewportView(jTableTransactions);
@@ -202,7 +201,8 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
         jPanelAccounts.add(jPanelAccountsControls, java.awt.BorderLayout.NORTH);
 
-        jTableAccounts.setModel(getAccountsTableModel());
+        jTableAccounts.setAutoCreateRowSorter(true);
+        jTableAccounts.setModel(accountsTableModel);
         jTableAccounts.setFillsViewportHeight(true);
         jScrollPaneAccounts.setViewportView(jTableAccounts);
 
@@ -227,7 +227,8 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
         jPanelCurrencies.add(jPanelCurrenciesControls, java.awt.BorderLayout.NORTH);
 
-        jTableCurrencies.setModel(getCurrenciesTableModel());
+        jTableCurrencies.setAutoCreateRowSorter(true);
+        jTableCurrencies.setModel(currenciesTableModel);
         jTableCurrencies.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPaneCurrencies.setViewportView(jTableCurrencies);
 
@@ -495,33 +496,6 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 	 * Currencies table model
 	 */
 	private CurrenciesTableModel currenciesTableModel = new CurrenciesTableModel();
-
-	/**
-	 * Returns the transactions table model (used only for form construction)
-	 *
-	 * @return the transactions table model
-	 */
-	private TableModel getTransactionsTableModel() {
-		return transactionsTableModel;
-	}
-
-	/**
-	 * Returns the accounts table model (used only for form construction)
-	 *
-	 * @return the accounts table model
-	 */
-	private TableModel getAccountsTableModel() {
-		return accountsTableModel;
-	}
-
-	/**
-	 * Returns the currencies table model (used only for form construction)
-	 *
-	 * @return the currencies table model
-	 */
-	private TableModel getCurrenciesTableModel() {
-		return currenciesTableModel;
-	}
 
 	@Override
 	public void transactionCreated(FinanceTransaction newTransaction) {
