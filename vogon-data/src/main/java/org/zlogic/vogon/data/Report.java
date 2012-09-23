@@ -374,6 +374,7 @@ public class Report {
 			userOrderBy = criteriaBuilder.abs(userOrderBy);
 		Order userOrder = orderAsc ? criteriaBuilder.asc(userOrderBy) : criteriaBuilder.desc(userOrderBy);
 		Order idOrder = orderAsc ? criteriaBuilder.asc(tr.get(FinanceTransaction_.id)) : criteriaBuilder.desc(tr.get(FinanceTransaction_.id));
+		tr.fetch(FinanceTransaction_.components);
 		transactionsCriteriaQuery.orderBy(userOrder, idOrder);
 		transactionsCriteriaQuery.select(tr).distinct(true);
 
