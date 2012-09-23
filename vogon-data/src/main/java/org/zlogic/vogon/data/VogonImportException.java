@@ -26,7 +26,7 @@ public class VogonImportException extends Exception {
 	/**
 	 * Constructor based on a human-readable message
 	 *
-	 * @param message The message
+	 * @param message the message
 	 */
 	public VogonImportException(String message) {
 		super(message);
@@ -35,7 +35,7 @@ public class VogonImportException extends Exception {
 	/**
 	 * Constructor based on a throwable object
 	 *
-	 * @param cause A throwable object
+	 * @param cause a throwable object
 	 */
 	public VogonImportException(Throwable cause) {
 		super(cause);
@@ -44,8 +44,8 @@ public class VogonImportException extends Exception {
 	/**
 	 * Constructor based on a human-readable and throwable object
 	 *
-	 * @param message The message
-	 * @param cause A throwable object
+	 * @param message the message
+	 * @param cause a throwable object
 	 */
 	public VogonImportException(String message, Throwable cause) {
 		super(message, cause);

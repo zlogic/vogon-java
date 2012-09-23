@@ -36,7 +36,7 @@ public class XmlExporter implements FileExporter {
 	/**
 	 * Creates an instance of the XML Exporter
 	 *
-	 * @param outputFile The output file to write
+	 * @param outputFile the output file to write
 	 */
 	public XmlExporter(File outputFile) {
 		this.outputFile = outputFile;
@@ -46,7 +46,7 @@ public class XmlExporter implements FileExporter {
 	 * Exports data into an XML file
 	 *
 	 * @param financeData the data to be exported
-	 * @throws VogonExportException In case of any import errors (I/O, format
+	 * @throws VogonExportException in case of any import errors (I/O, format
 	 * etc.)
 	 */
 	@Override

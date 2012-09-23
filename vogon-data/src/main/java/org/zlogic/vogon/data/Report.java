@@ -374,7 +374,9 @@ public class Report {
 			userOrderBy = criteriaBuilder.abs(userOrderBy);
 		Order userOrder = orderAsc ? criteriaBuilder.asc(userOrderBy) : criteriaBuilder.desc(userOrderBy);
 		Order idOrder = orderAsc ? criteriaBuilder.asc(tr.get(FinanceTransaction_.id)) : criteriaBuilder.desc(tr.get(FinanceTransaction_.id));
-		tr.fetch(FinanceTransaction_.components);
+		tr.fetch(FinanceTransaction_.components).fetch(TransactionComponent_.account);
+		//tr.fetch(FinanceTransaction_.tags,JoinType.INNER);
+
 		transactionsCriteriaQuery.orderBy(userOrder, idOrder);
 		transactionsCriteriaQuery.select(tr).distinct(true);
 
@@ -476,8 +478,9 @@ public class Report {
 		for (Currency currency : financeData.getCurrencies())
 			sumBalance.put(currency.getCurrencyCode(), 0L);
 
-		for (FinanceAccount account : selectedAccounts)
+		for (FinanceAccount account : selectedAccounts) {
 			sumBalance.put(account.getCurrency().getCurrencyCode(), sumBalance.get(account.getCurrency().getCurrencyCode()) + getRawAccountBalanceByDate(account, earliestDate));
+		}
 		for (FinanceTransaction transaction : transactions) {
 			for (FinanceAccount account : selectedAccounts)
 				for (TransactionComponent component : transaction.getComponentsForAccount(account))

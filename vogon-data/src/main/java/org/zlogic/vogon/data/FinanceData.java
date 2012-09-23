@@ -57,10 +57,10 @@ public class FinanceData {
 	 * Imports and persists data into this instance by using the output of the
 	 * specified FileImporter
 	 *
-	 * @param importer A configured FileImporter instance
-	 * @throws VogonImportException In case of import errors (I/O, format,
+	 * @param importer a configured FileImporter instance
+	 * @throws VogonImportException in case of import errors (I/O, format,
 	 * indexing etc.)
-	 * @throws VogonImportLogicalException In case of logical errors (without
+	 * @throws VogonImportLogicalException in case of logical errors (without
 	 * meaningful stack trace, just to show an error message)
 	 */
 	public void importData(FileImporter importer) throws VogonImportException, VogonImportLogicalException {
@@ -81,8 +81,8 @@ public class FinanceData {
 	/**
 	 * Exports data by using the specified FileExporter
 	 *
-	 * @param exporter A configured FileExporter instance
-	 * @throws VogonExportException In case of export errors (I/O, format,
+	 * @param exporter a configured FileExporter instance
+	 * @throws VogonExportException in case of export errors (I/O, format,
 	 * indexing etc.)
 	 */
 	public void exportData(FileExporter exporter) throws VogonExportException {
@@ -353,8 +353,8 @@ public class FinanceData {
 	/**
 	 * Sets a new account name. Adds the account to the persistence if needed.
 	 *
-	 * @param account The account to be updated
-	 * @param name The new account name
+	 * @param account the account to be updated
+	 * @param name the new account name
 	 */
 	public void setAccountName(FinanceAccount account, String name) {
 		EntityManager entityManager = currentEntityManager;
@@ -376,8 +376,8 @@ public class FinanceData {
 	 * Sets a new account currency. Adds the account to the persistence if
 	 * needed.
 	 *
-	 * @param account The account to be updated
-	 * @param currency The new account currency
+	 * @param account the account to be updated
+	 * @param currency the new account currency
 	 */
 	public void setAccountCurrency(FinanceAccount account, Currency currency) {
 		EntityManager entityManager = currentEntityManager;
@@ -398,7 +398,7 @@ public class FinanceData {
 	/**
 	 * Sets if this account should be included in the total for all accounts.
 	 *
-	 * @param account The account to be updated
+	 * @param account the account to be updated
 	 * @param includeInTotal true if the account should be included in the total
 	 */
 	public void setAccountIncludeInTocal(FinanceAccount account, boolean includeInTotal) {
@@ -437,8 +437,8 @@ public class FinanceData {
 	/**
 	 * Sets new tags for a transaction
 	 *
-	 * @param transaction The transaction to be updated
-	 * @param tags The new tags
+	 * @param transaction the transaction to be updated
+	 * @param tags the new tags
 	 */
 	public void setTransactionTags(FinanceTransaction transaction, String[] tags) {
 		EntityManager entityManager = currentEntityManager;
@@ -459,8 +459,8 @@ public class FinanceData {
 	/**
 	 * Sets a new date for a transaction
 	 *
-	 * @param transaction The transaction to be updated
-	 * @param date The new date
+	 * @param transaction the transaction to be updated
+	 * @param date the new date
 	 */
 	public void setTransactionDate(FinanceTransaction transaction, Date date) {
 		EntityManager entityManager = currentEntityManager;
@@ -481,8 +481,8 @@ public class FinanceData {
 	/**
 	 * Sets a new description for a transaction
 	 *
-	 * @param transaction The transaction to be updated
-	 * @param description The new description
+	 * @param transaction the transaction to be updated
+	 * @param description the new description
 	 */
 	public void setTransactionDescription(FinanceTransaction transaction, String description) {
 		EntityManager entityManager = currentEntityManager;
@@ -504,8 +504,8 @@ public class FinanceData {
 	 * Sets an expense transaction amount, works only for single-component
 	 * expense transactions
 	 *
-	 * @param transaction The transaction to be updated
-	 * @param newAmount The new amount
+	 * @param transaction the transaction to be updated
+	 * @param newAmount the new amount
 	 */
 	public void setTransactionAmount(ExpenseTransaction transaction, double newAmount) {
 		if (transaction.getComponents().isEmpty())
@@ -535,8 +535,8 @@ public class FinanceData {
 	 * Sets an expense transaction account, works only for single-component
 	 * expense transactions
 	 *
-	 * @param transaction The transaction to be updated
-	 * @param newAccount The new account
+	 * @param transaction the transaction to be updated
+	 * @param newAccount the new account
 	 */
 	public void setTransactionAccount(ExpenseTransaction transaction, FinanceAccount newAccount) {
 		if (transaction.getComponents().isEmpty())
@@ -577,8 +577,8 @@ public class FinanceData {
 	/**
 	 * Sets an transaction component amount
 	 *
-	 * @param component The component to be updated
-	 * @param newAmount The new amount
+	 * @param component the component to be updated
+	 * @param newAmount the new amount
 	 */
 	public void setTransactionComponentAmount(TransactionComponent component, double newAmount) {
 		EntityManager entityManager = currentEntityManager;
@@ -607,8 +607,8 @@ public class FinanceData {
 	/**
 	 * Sets an transaction component account
 	 *
-	 * @param component The component to be updated
-	 * @param newAccount The new account
+	 * @param component the component to be updated
+	 * @param newAccount the new account
 	 */
 	public void setTransactionComponentAccount(TransactionComponent component, FinanceAccount newAccount) {
 		EntityManager entityManager = currentEntityManager;
@@ -646,8 +646,8 @@ public class FinanceData {
 	/**
 	 * Sets the new exchange rate
 	 *
-	 * @param rate The currency rate to be modified
-	 * @param newRate The new exchange rate
+	 * @param rate the currency rate to be modified
+	 * @param newRate the new exchange rate
 	 */
 	public void setExchangeRate(CurrencyRate rate, double newRate) {
 		if (!exchangeRates.contains(rate))
@@ -666,7 +666,7 @@ public class FinanceData {
 	/**
 	 * Sets the default currency
 	 *
-	 * @param defaultCurrency The new default currency
+	 * @param defaultCurrency the new default currency
 	 */
 	public void setDefaultCurrency(Currency defaultCurrency) {
 		if (defaultCurrency == null)
@@ -689,9 +689,9 @@ public class FinanceData {
 	/**
 	 * Returns an exchange rate for a pair of currencies
 	 *
-	 * @param source The source currency
-	 * @param destination The target currency
-	 * @return The source=>target exchange rate
+	 * @param source the source currency
+	 * @param destination the target currency
+	 * @return the source=>target exchange rate
 	 */
 	public double getExchangeRate(Currency source, Currency destination) {
 		if (source == destination)
@@ -706,9 +706,9 @@ public class FinanceData {
 	/**
 	 * Returns the transaction amount converted to a specific currency
 	 *
-	 * @param transaction The transaction
-	 * @param currency The target currency
-	 * @return The transaction amount, converted to the target currency
+	 * @param transaction the transaction
+	 * @param currency the target currency
+	 * @return the transaction amount, converted to the target currency
 	 */
 	public double getAmountInCurrency(FinanceTransaction transaction, Currency currency) {
 		double amount = 0;
@@ -722,7 +722,7 @@ public class FinanceData {
 	/**
 	 * Deletes a transaction component (with all dependencies)
 	 *
-	 * @param component The transaction component to delete
+	 * @param component the transaction component to delete
 	 */
 	public void deleteTransactionComponent(TransactionComponent component) {
 		EntityManager entityManager = currentEntityManager;
@@ -743,7 +743,7 @@ public class FinanceData {
 	/**
 	 * Deletes a transaction (with all dependencies)
 	 *
-	 * @param transaction The transaction to delete
+	 * @param transaction the transaction to delete
 	 */
 	public void deleteTransaction(FinanceTransaction transaction) {
 		EntityManager entityManager = currentEntityManager;
@@ -769,7 +769,7 @@ public class FinanceData {
 	/**
 	 * Deletes an account (with all dependencies)
 	 *
-	 * @param account The account to delete
+	 * @param account the account to delete
 	 */
 	public void deleteAccount(FinanceAccount account) {
 		EntityManager entityManager = currentEntityManager;

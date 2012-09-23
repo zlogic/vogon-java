@@ -130,14 +130,14 @@ public abstract class FinanceTransaction implements Serializable {
 	/**
 	 * Returns a list of all components associated with an account
 	 *
-	 * @param account The account to search
-	 * @return The list of transaction components associated with the searched
+	 * @param account the account to search
+	 * @return the list of transaction components associated with the searched
 	 * account
 	 */
 	public List<TransactionComponent> getComponentsForAccount(FinanceAccount account) {
 		List<TransactionComponent> foundComponents = new LinkedList<>();
 		for (TransactionComponent component : components)
-			if (component.getAccount() == account)
+			if (component.getAccount().equals(account))
 				foundComponents.add(component);
 		return foundComponents;
 	}
@@ -158,7 +158,7 @@ public abstract class FinanceTransaction implements Serializable {
 	/**
 	 * Returns a list of all components
 	 *
-	 * @return The list of all transaction components
+	 * @return the list of all transaction components
 	 */
 	public List<TransactionComponent> getComponents() {
 		List<TransactionComponent> foundComponents = new LinkedList<>();
@@ -302,7 +302,7 @@ public abstract class FinanceTransaction implements Serializable {
 	/**
 	 * Sets the transaction date
 	 *
-	 * @param date The transaction date
+	 * @param date the transaction date
 	 */
 	public void setDate(Date date) {
 		this.transactionDate = date;

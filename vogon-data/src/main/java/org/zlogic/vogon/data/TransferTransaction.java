@@ -35,9 +35,9 @@ public class TransferTransaction extends FinanceTransaction {
 	/**
 	 * Constructor for a transfer transaction
 	 *
-	 * @param description The transaction description
-	 * @param tags The transaction tags
-	 * @param date The transaction date
+	 * @param description the transaction description
+	 * @param tags the transaction tags
+	 * @param date the transaction date
 	 */
 	public TransferTransaction(String description, String[] tags, Date date) {
 		this.description = description;

@@ -43,7 +43,7 @@ public class DatabaseManager {
 	/**
 	 * Returns the singleton instance of DatabaseManager
 	 *
-	 * @return The instance of DatabaseManager
+	 * @return the instance of DatabaseManager
 	 */
 	public static DatabaseManager getInstance() {
 		return instance;
@@ -52,7 +52,7 @@ public class DatabaseManager {
 	/**
 	 * Returns the persistence unit for this package
 	 *
-	 * @return The persistence unit's EntityManagerFactory
+	 * @return the persistence unit's EntityManagerFactory
 	 */
 	public javax.persistence.EntityManagerFactory getPersistenceUnit() {
 		synchronized (this) {
@@ -63,7 +63,7 @@ public class DatabaseManager {
 	/**
 	 * Returns a new entity manager for this package
 	 *
-	 * @return A new EntityManager for the persistence unit
+	 * @return a new EntityManager for the persistence unit
 	 */
 	public javax.persistence.EntityManager createEntityManager() {
 		synchronized (this) {

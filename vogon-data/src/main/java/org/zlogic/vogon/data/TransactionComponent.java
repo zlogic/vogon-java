@@ -54,9 +54,9 @@ public class TransactionComponent implements Serializable {
 	/**
 	 * Constructor for a transaction component
 	 *
-	 * @param account The account
-	 * @param transaction The transaction
-	 * @param amount The amount which this component modifies the account, can
+	 * @param account the account
+	 * @param transaction the transaction
+	 * @param amount the amount which this component modifies the account, can
 	 * be both negative and positive
 	 */
 	public TransactionComponent(FinanceAccount account, FinanceTransaction transaction, long amount) {
