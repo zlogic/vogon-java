@@ -48,10 +48,6 @@ public class Report {
 	 */
 	protected Date latestDate;
 	/**
-	 * Entity manager
-	 */
-	protected EntityManager entityManager;
-	/**
 	 * Selected tags
 	 */
 	protected List<String> selectedTags;
@@ -81,7 +77,6 @@ public class Report {
 	public Report(FinanceData financeData) {
 		this();
 		this.financeData = financeData;
-		entityManager = DatabaseManager.getInstance().createEntityManager();
 	}
 
 	/**
@@ -364,6 +359,7 @@ public class Report {
 	 * @return list of all transactions matching the set filters
 	 */
 	public List<FinanceTransaction> getTransactions(SingularAttribute orderBy, boolean orderAsc, boolean orderAbsolute) {
+		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
@@ -381,7 +377,9 @@ public class Report {
 		transactionsCriteriaQuery.orderBy(userOrder, idOrder);
 		transactionsCriteriaQuery.select(tr).distinct(true);
 
-		return entityManager.createQuery(transactionsCriteriaQuery).getResultList();
+		List<FinanceTransaction> transactions = entityManager.createQuery(transactionsCriteriaQuery).getResultList();
+		entityManager.close();
+		return transactions;
 	}
 
 	/**
@@ -390,13 +388,16 @@ public class Report {
 	 * @return a list of all tags
 	 */
 	public List<String> getAllTags() {
+		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<String> transactionsCriteriaQuery = criteriaBuilder.createQuery(String.class);
-		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
+		CriteriaQuery<String> tagsCriteriaQuery = criteriaBuilder.createQuery(String.class);
+		Root<FinanceTransaction> tr = tagsCriteriaQuery.from(FinanceTransaction.class);
 
-		transactionsCriteriaQuery.select(tr.join(FinanceTransaction_.tags)).distinct(true);
+		tagsCriteriaQuery.select(tr.join(FinanceTransaction_.tags)).distinct(true);
 
-		return entityManager.createQuery(transactionsCriteriaQuery).getResultList();
+		List<String> tags = entityManager.createQuery(tagsCriteriaQuery).getResultList();
+		entityManager.close();
+		return tags;
 	}
 
 	/**
@@ -405,11 +406,13 @@ public class Report {
 	 * @return the list of all accounts stored in the database
 	 */
 	public List<FinanceAccount> getAllAccounts() {
+		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<FinanceAccount> accountsCriteriaQuery = criteriaBuilder.createQuery(FinanceAccount.class);
 		accountsCriteriaQuery.from(FinanceAccount.class);
-
-		return entityManager.createQuery(accountsCriteriaQuery).getResultList();
+		List<FinanceAccount> accounts = entityManager.createQuery(accountsCriteriaQuery).getResultList();
+		entityManager.close();
+		return accounts;
 	}
 
 	/**
@@ -420,6 +423,7 @@ public class Report {
 	 * @return the raw balance
 	 */
 	public long getRawAccountBalanceByDate(FinanceAccount account, Date byDate) {
+		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Long> transactionsCriteriaQuery = criteriaBuilder.createQuery(Long.class);
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
@@ -438,6 +442,7 @@ public class Report {
 			result = entityManager.createQuery(transactionsCriteriaQuery).getSingleResult();
 		} catch (NoResultException ex) {
 		}
+		entityManager.close();
 		return result;
 	}
 
@@ -491,6 +496,7 @@ public class Report {
 	 * @return expenses grouped by tags
 	 */
 	public Map<String, Double> getTagExpenses() {
+		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		Map<String, Double> result = new TreeMap<>();
 		for (Currency currency : financeData.getCurrencies()) {
 			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -514,6 +520,7 @@ public class Report {
 				result.put(tag, accumulatedBalance + exchangeRate * (tuple.get(0, Long.class) / 100.0D));
 			}
 		}
+		entityManager.close();
 		return result;
 	}
 }
