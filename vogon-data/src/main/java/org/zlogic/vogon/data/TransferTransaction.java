@@ -6,6 +6,7 @@
 package org.zlogic.vogon.data;
 
 import java.util.Arrays;
+import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -59,14 +60,21 @@ public class TransferTransaction extends FinanceTransaction {
 	}
 
 	/**
-	 * Returns if the amount is OK (e.g. sum is zero)
+	 * Returns if the amount is OK (e.g. sum is zero or accounts use different
+	 * currencies)
 	 *
 	 * @return true if amount is OK
 	 */
 	public boolean isAmountOk() {
 		long amount = 0;
-		for (TransactionComponent component : components)
+		Currency commonCurrency = null;
+		for (TransactionComponent component : components) {
+			if (commonCurrency == null)
+				commonCurrency = component.getAccount().getCurrency();
+			else if (component.getAccount().getCurrency() != commonCurrency)
+				return true;
 			amount += component.getRawAmount();
+		}
 		return amount == 0;
 	}
 

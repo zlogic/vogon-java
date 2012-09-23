@@ -117,6 +117,7 @@
     <Component class="javax.swing.JTextField" name="jTextFieldName">
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jTextFieldNameActionPerformed"/>
+        <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="jTextFieldNameFocusLost"/>
       </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabelTags">
@@ -132,6 +133,7 @@
     <Component class="javax.swing.JTextField" name="jTextFieldTags">
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jTextFieldTagsActionPerformed"/>
+        <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="jTextFieldTagsFocusLost"/>
       </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabelDate">
@@ -152,6 +154,7 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jFormattedTextFieldDateActionPerformed"/>
+        <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="jFormattedTextFieldDateFocusLost"/>
       </Events>
     </Component>
     <Component class="javax.swing.JButton" name="jButtonAddComponent">

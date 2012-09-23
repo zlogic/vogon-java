@@ -91,6 +91,11 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
                 jTextFieldNameActionPerformed(evt);
             }
         });
+        jTextFieldName.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jTextFieldNameFocusLost(evt);
+            }
+        });
 
         jLabelTags.setLabelFor(jTextFieldTags);
         jLabelTags.setText(messages.getString("TRANSACTION_TAGS")); // NOI18N
@@ -98,6 +103,11 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
         jTextFieldTags.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextFieldTagsActionPerformed(evt);
+            }
+        });
+        jTextFieldTags.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jTextFieldTagsFocusLost(evt);
             }
         });
 
@@ -108,6 +118,11 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
         jFormattedTextFieldDate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jFormattedTextFieldDateActionPerformed(evt);
+            }
+        });
+        jFormattedTextFieldDate.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jFormattedTextFieldDateFocusLost(evt);
             }
         });
 
@@ -215,6 +230,18 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
 		editTransaction(new TransferTransaction("", new String[0], new Date())); //NOI18N
 		financeData.createTransaction(editedTransaction);
     }//GEN-LAST:event_jButtonNewTransferActionPerformed
+
+    private void jTextFieldNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextFieldNameFocusLost
+		saveChanges();
+    }//GEN-LAST:event_jTextFieldNameFocusLost
+
+    private void jTextFieldTagsFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextFieldTagsFocusLost
+		saveChanges();
+    }//GEN-LAST:event_jTextFieldTagsFocusLost
+
+    private void jFormattedTextFieldDateFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jFormattedTextFieldDateFocusLost
+		saveChanges();
+    }//GEN-LAST:event_jFormattedTextFieldDateFocusLost
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonAddComponent;
     private javax.swing.JButton jButtonDeleteComponent;

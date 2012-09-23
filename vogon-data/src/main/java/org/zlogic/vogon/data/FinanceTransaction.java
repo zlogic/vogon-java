@@ -8,6 +8,7 @@ package org.zlogic.vogon.data;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Currency;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -226,6 +227,19 @@ public abstract class FinanceTransaction implements Serializable {
 	 */
 	public double getAmount() {
 		return amount / 100.0D;
+	}
+
+	/**
+	 * Returns a list of all currencies used in this transaction's components
+	 *
+	 * @return the list of all currencies used in this transaction's components
+	 */
+	public List<Currency> getCurrencies() {
+		List<Currency> currencies = new LinkedList<>();
+		for (TransactionComponent component : components)
+			if (component.getAccount() != null && !currencies.contains(component.getAccount().getCurrency()))
+				currencies.add(component.getAccount().getCurrency());
+		return currencies;
 	}
 
 	/**

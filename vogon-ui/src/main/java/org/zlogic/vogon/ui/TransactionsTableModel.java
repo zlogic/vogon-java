@@ -7,14 +7,12 @@ package org.zlogic.vogon.ui;
 
 import java.text.MessageFormat;
 import java.util.Currency;
-import java.util.LinkedList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import org.zlogic.vogon.data.ExpenseTransaction;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
-import org.zlogic.vogon.data.TransactionComponent;
 import org.zlogic.vogon.data.TransferTransaction;
 
 /**
@@ -101,10 +99,7 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 			case 2:
 				return org.zlogic.vogon.data.Utils.join(transaction.getTags(), ","); //NOI18N
 			case 3:
-				List<Currency> transactionCurrencies = new LinkedList<>();
-				for (TransactionComponent component : transaction.getComponents())
-					if (component.getAccount() != null && !transactionCurrencies.contains(component.getAccount().getCurrency()))
-						transactionCurrencies.add(component.getAccount().getCurrency());
+				List<Currency> transactionCurrencies = transaction.getCurrencies();
 				Currency currency;
 				double amount;
 				if (transactionCurrencies.size() == 1) {
@@ -114,7 +109,7 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 					amount = data.getAmountInCurrency(transaction, data.getDefaultCurrency());
 					currency = data.getDefaultCurrency();
 				}
-				return new SumTableCell(amount, (transaction instanceof TransferTransaction) ? ((TransferTransaction) transaction).isAmountOk() : true, currency);
+				return new SumTableCell(amount, (transaction instanceof TransferTransaction) ? ((TransferTransaction) transaction).isAmountOk() : true, currency, transactionCurrencies.size() != 1);
 			case 4:
 				if (transaction.getClass() == ExpenseTransaction.class) {
 					List<FinanceAccount> accounts = ((ExpenseTransaction) transaction).getAccounts();
