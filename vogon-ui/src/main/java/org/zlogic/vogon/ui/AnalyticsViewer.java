@@ -39,7 +39,12 @@ import org.zlogic.vogon.data.Report;
  *
  * @author Dmitry Zolotukhin
  */
-public class AnalyticsViewer extends javax.swing.JPanel {
+public class AnalyticsViewer extends javax.swing.JPanel implements FinanceData.AccountCreatedEventListener,
+		FinanceData.AccountDeletedEventListener,
+		FinanceData.AccountUpdatedEventListener,
+		FinanceData.TransactionCreatedEventListener,
+		FinanceData.TransactionDeletedEventListener,
+		FinanceData.TransactionUpdatedEventListener {
 
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 
@@ -297,6 +302,12 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
 		report = new Report(financeData);
+		financeData.addAccountCreatedListener(this);
+		financeData.addAccountDeletedListener(this);
+		financeData.addAccountUpdatedListener(this);
+		financeData.addTransactionCreatedListener(this);
+		financeData.addTransactionDeletedListener(this);
+		financeData.addTransactionUpdatedListener(this);
 		resetForm();
 	}
 
@@ -521,6 +532,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 				java.lang.String.class, java.lang.String.class, SumTableCell.class
 			};
 
+			@Override
 			public Class getColumnClass(int columnIndex) {
 				return types[columnIndex];
 			}
@@ -530,6 +542,46 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 				return false;
 			}
 		};
+	}
+
+	@Override
+	public void accountCreated(FinanceAccount newAccount) {
+		resetForm();
+	}
+
+	@Override
+	public void accountDeleted(FinanceAccount deletedAccount) {
+		resetForm();
+	}
+
+	@Override
+	public void accountUpdated(FinanceAccount updatedAccount) {
+		resetForm();
+	}
+
+	@Override
+	public void accountsUpdated() {
+		resetForm();
+	}
+
+	@Override
+	public void transactionCreated(FinanceTransaction newTransaction) {
+		resetForm();
+	}
+
+	@Override
+	public void transactionDeleted(FinanceTransaction deletedTransaction) {
+		resetForm();
+	}
+
+	@Override
+	public void transactionUpdated(FinanceTransaction updatedTransaction) {
+		resetForm();
+	}
+
+	@Override
+	public void transactionsUpdated() {
+		resetForm();
 	}
 
 	/**
