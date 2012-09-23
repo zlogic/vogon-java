@@ -5,11 +5,8 @@
  */
 package org.zlogic.vogon.data;
 
-import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Currency;
 import java.util.Date;
 import java.util.GregorianCalendar;

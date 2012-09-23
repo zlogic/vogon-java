@@ -38,6 +38,10 @@ public class SumTableCell {
 	 */
 	protected Currency currency;
 	/**
+	 * true if the currency was converted and should be displayed differently
+	 */
+	protected boolean isCurrencyConverted;
+	/**
 	 * The amount is OK (e.g. zero sum for a transfer transaction)
 	 */
 	protected boolean isOk;
@@ -49,11 +53,14 @@ public class SumTableCell {
 	 * @param isOk if the cell data is OK (e.g. zero sum for a transfer
 	 * transaction)
 	 * @param currency the currency
+	 * @param isCurrencyConverted true if the currency was converted and should
+	 * be displayed differently
 	 */
-	public SumTableCell(double balance, boolean isOk, Currency currency) {
+	public SumTableCell(double balance, boolean isOk, Currency currency, boolean isCurrencyConverted) {
 		this.balance = balance;
 		this.currency = currency;
 		this.isOk = isOk;
+		this.isCurrencyConverted = isCurrencyConverted;
 	}
 
 	/**
@@ -81,7 +88,7 @@ public class SumTableCell {
 
 	@Override
 	public String toString() {
-		String formattedSum = MessageFormat.format(messages.getString("FORMAT_SUM"), balance, currency != null ? currency.getCurrencyCode() : messages.getString("INVALID_CURRENCY"));
+		String formattedSum = MessageFormat.format(messages.getString("FORMAT_SUM"), balance, currency != null ? currency.getCurrencyCode() : messages.getString("INVALID_CURRENCY"), isCurrencyConverted ? messages.getString("CURRENCY_CONVERTED") : messages.getString("CURRENCY_NOT_CONVERTED"));
 		return formattedSum;
 	}
 

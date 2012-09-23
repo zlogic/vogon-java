@@ -8,6 +8,7 @@ package org.zlogic.vogon.ui;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Currency;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,15 +23,14 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PiePlot3D;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
-import org.zlogic.vogon.data.Report;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
+import org.zlogic.vogon.data.Report;
 
 /**
  * Form for viewing analytics reports
@@ -446,7 +446,7 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 		while (tableModel.getRowCount() > 0)
 			tableModel.removeRow(0);
 		for (Map.Entry<String, Double> tagExpense : values.entrySet())
-			tableModel.addRow(new Object[]{tagExpense.getKey(), new SumTableCell(tagExpense.getValue(), true, financeData.getDefaultCurrency())});
+			tableModel.addRow(new Object[]{tagExpense.getKey(), new SumTableCell(tagExpense.getValue(), true, financeData.getDefaultCurrency(), true)});
 	}
 
 	/**
@@ -485,8 +485,19 @@ public class AnalyticsViewer extends javax.swing.JPanel {
 		DefaultTableModel tableModel = (DefaultTableModel) jTableTransactionsReport.getModel();
 		while (tableModel.getRowCount() > 0)
 			tableModel.removeRow(0);
-		for (FinanceTransaction transaction : transactions)
-			tableModel.addRow(new Object[]{transaction.getDescription(), transaction.getDate(), new SumTableCell(transaction.getAmount(), true, financeData.getDefaultCurrency())});
+		for (FinanceTransaction transaction : transactions) {
+			List<Currency> transactionCurrencies = transaction.getCurrencies();
+			Currency currency;
+			double amount;
+			if (transactionCurrencies.size() == 1) {
+				amount = transaction.getAmount();
+				currency = transactionCurrencies.get(0);
+			} else {
+				amount = financeData.getAmountInCurrency(transaction, financeData.getDefaultCurrency());
+				currency = financeData.getDefaultCurrency();
+			}
+			tableModel.addRow(new Object[]{transaction.getDescription(), transaction.getDate(), new SumTableCell(transaction.getAmount(), true, financeData.getDefaultCurrency(), transactionCurrencies.size() != 1)});
+		}
 	}
 
 	/**
