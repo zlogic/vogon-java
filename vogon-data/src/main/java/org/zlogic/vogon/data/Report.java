@@ -375,7 +375,6 @@ public class Report {
 		Order userOrder = orderAsc ? criteriaBuilder.asc(userOrderBy) : criteriaBuilder.desc(userOrderBy);
 		Order idOrder = orderAsc ? criteriaBuilder.asc(tr.get(FinanceTransaction_.id)) : criteriaBuilder.desc(tr.get(FinanceTransaction_.id));
 		tr.fetch(FinanceTransaction_.components).fetch(TransactionComponent_.account);
-		//tr.fetch(FinanceTransaction_.tags,JoinType.INNER);
 
 		transactionsCriteriaQuery.orderBy(userOrder, idOrder);
 		transactionsCriteriaQuery.select(tr).distinct(true);
