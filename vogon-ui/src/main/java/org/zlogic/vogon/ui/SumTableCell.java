@@ -45,6 +45,10 @@ public class SumTableCell implements Comparable<SumTableCell> {
 	 * The amount is OK (e.g. zero sum for a transfer transaction)
 	 */
 	protected boolean isOk;
+	/**
+	 * True if this is a transfer transaction (special rendering)
+	 */
+	protected boolean isTransferTransaction;
 
 	/**
 	 * Constructs a SumTableCell
@@ -55,12 +59,15 @@ public class SumTableCell implements Comparable<SumTableCell> {
 	 * @param currency the currency
 	 * @param isCurrencyConverted true if the currency was converted and should
 	 * be displayed differently
+	 * @param isTransferTransaction true if this is a transfer transaction
+	 * (otherwise, this will be an expense transaction
 	 */
-	public SumTableCell(double balance, boolean isOk, Currency currency, boolean isCurrencyConverted) {
+	public SumTableCell(double balance, boolean isOk, Currency currency, boolean isCurrencyConverted, boolean isTransferTransaction) {
 		this.balance = balance;
 		this.currency = currency;
 		this.isOk = isOk;
 		this.isCurrencyConverted = isCurrencyConverted;
+		this.isTransferTransaction = isTransferTransaction;
 	}
 
 	/**
@@ -88,7 +95,11 @@ public class SumTableCell implements Comparable<SumTableCell> {
 
 	@Override
 	public String toString() {
-		String formattedSum = MessageFormat.format(messages.getString("FORMAT_SUM"), balance, currency != null ? currency.getCurrencyCode() : messages.getString("INVALID_CURRENCY"), isCurrencyConverted ? messages.getString("CURRENCY_CONVERTED") : messages.getString("CURRENCY_NOT_CONVERTED"));
+		String formattedSum = MessageFormat.format(messages.getString("FORMAT_SUM"),
+				isTransferTransaction ? messages.getString("TRANSFER_TRANSACTION_FLAG") : messages.getString("EXPENSE_TRANSACTION_FLAG"),
+				balance,
+				currency != null ? currency.getCurrencyCode() : messages.getString("INVALID_CURRENCY"),
+				isCurrencyConverted ? messages.getString("CURRENCY_CONVERTED") : messages.getString("CURRENCY_NOT_CONVERTED"));
 		return formattedSum;
 	}
 
