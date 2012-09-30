@@ -33,6 +33,7 @@ import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.Report;
+import org.zlogic.vogon.data.TransferTransaction;
 
 /**
  * Form for viewing analytics reports
@@ -382,7 +383,7 @@ public class AnalyticsViewer extends javax.swing.JPanel implements FinanceData.A
 		while (tableModel.getRowCount() > 0)
 			tableModel.removeRow(0);
 		for (Map.Entry<String, Double> tagExpense : values.entrySet())
-			tableModel.addRow(new Object[]{tagExpense.getKey(), new SumTableCell(tagExpense.getValue(), true, financeData.getDefaultCurrency(), true)});
+			tableModel.addRow(new Object[]{tagExpense.getKey(), new SumTableCell(tagExpense.getValue(), true, financeData.getDefaultCurrency(), true, false)});
 	}
 
 	/**
@@ -432,7 +433,14 @@ public class AnalyticsViewer extends javax.swing.JPanel implements FinanceData.A
 				amount = financeData.getAmountInCurrency(transaction, financeData.getDefaultCurrency());
 				currency = financeData.getDefaultCurrency();
 			}
-			tableModel.addRow(new Object[]{transaction.getDescription(), MessageFormat.format(messages.getString("FORMAT_DATE"), new Object[]{transaction.getDate()}), new SumTableCell(transaction.getAmount(), true, financeData.getDefaultCurrency(), transactionCurrencies.size() != 1)});
+			tableModel.addRow(new Object[]{transaction.getDescription(),
+						MessageFormat.format(messages.getString("FORMAT_DATE"), new Object[]{transaction.getDate()}),
+						new SumTableCell(
+						transaction.getAmount(),
+						true,
+						financeData.getDefaultCurrency(),
+						transactionCurrencies.size() != 1,
+						transaction instanceof TransferTransaction)});
 		}
 	}
 
