@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Currency;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,6 +68,34 @@ public class Report {
 	 * Show transfer transactions
 	 */
 	protected boolean enabledTransferTransactions;
+
+	/**
+	 * Filter enablement
+	 */
+	protected enum FilterType {
+
+		/**
+		 * Filter transaction date (earliestDate+latestDate)
+		 */
+		FILTER_DATE,
+		/**
+		 * Filter by transaction tags (selectedTags)
+		 */
+		FILTER_TAGS,
+		/**
+		 * Filter by transaction accounts (selectedAccounts)
+		 */
+		FILTER_ACCOUNTS,
+		/**
+		 * Filter by transaction type (Expense-Income or Transfer)
+		 */
+		FILTER_TRANSACTION_TYPE,
+		/**
+		 * Filter by expense transaction type (enabledIncomeTransactions and
+		 * enabledExpenseTransactions)
+		 */
+		FILTER_EXPENSE_TYPE
+	};
 
 	/**
 	 * Default constructor
@@ -253,7 +282,7 @@ public class Report {
 	 * amount descending
 	 */
 	public List<FinanceTransaction> getTransactions() {
-		return getTransactions(FinanceTransaction_.amount, false, true);
+		return getTransactions(FinanceTransaction_.amount, false, true, EnumSet.allOf(FilterType.class));
 	}
 
 	/**
@@ -312,10 +341,11 @@ public class Report {
 	 *
 	 * @param criteriaBuilder the CriteriaBuilder
 	 * @param tr the FinanceTransaction Root
+	 * @param appliedFilters the filters which should be applied
 	 * @return the predicate for filtering transactions and joins which should
 	 * be used in groupBy if result of selection is not a unique FinanceAccount
 	 */
-	protected ConstructedPredicate getFilteredTransactionsPredicate(CriteriaBuilder criteriaBuilder, Root<FinanceTransaction> tr) {
+	protected ConstructedPredicate getFilteredTransactionsPredicate(CriteriaBuilder criteriaBuilder, Root<FinanceTransaction> tr, EnumSet appliedFilters) {
 		Predicate datePredicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), earliestDate),
 				criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), latestDate));
 
@@ -328,7 +358,6 @@ public class Report {
 		Predicate expenseTypePredicate = criteriaBuilder.disjunction();
 		if (enabledExpenseTransactions)
 			expenseTypePredicate = criteriaBuilder.or(expenseTypePredicate, criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.amount), new Long(0)));
-
 		if (enabledIncomeTransactions)
 			expenseTypePredicate = criteriaBuilder.or(expenseTypePredicate, criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.amount), new Long(0)));
 
@@ -340,11 +369,17 @@ public class Report {
 
 		Predicate accountsPredicate = (selectedAccounts != null && !selectedAccounts.isEmpty()) ? componentsJoin.get(TransactionComponent_.account).in(criteriaBuilder.literal(selectedAccounts)) : criteriaBuilder.disjunction();
 
-		Predicate rootPredicate = datePredicate;
-		rootPredicate = criteriaBuilder.and(rootPredicate, accountsPredicate);
-		rootPredicate = criteriaBuilder.and(rootPredicate, tagsPredicate);
-		rootPredicate = criteriaBuilder.and(rootPredicate, transactionTypePredicate);
-		rootPredicate = criteriaBuilder.and(rootPredicate, expenseTypePredicate);
+		Predicate rootPredicate = criteriaBuilder.conjunction();
+		if (appliedFilters.contains(FilterType.FILTER_DATE))
+			rootPredicate = criteriaBuilder.and(rootPredicate, datePredicate);
+		if (appliedFilters.contains(FilterType.FILTER_ACCOUNTS))
+			rootPredicate = criteriaBuilder.and(rootPredicate, accountsPredicate);
+		if (appliedFilters.contains(FilterType.FILTER_TAGS))
+			rootPredicate = criteriaBuilder.and(rootPredicate, tagsPredicate);
+		if (appliedFilters.contains(FilterType.FILTER_TRANSACTION_TYPE))
+			rootPredicate = criteriaBuilder.and(rootPredicate, transactionTypePredicate);
+		if (appliedFilters.contains(FilterType.FILTER_EXPENSE_TYPE))
+			rootPredicate = criteriaBuilder.and(rootPredicate, expenseTypePredicate);
 		return new ConstructedPredicate(rootPredicate, componentsJoin, tagsJoin);
 	}
 
@@ -356,16 +391,16 @@ public class Report {
 	 * descending
 	 * @param orderAbsolute true if order should be for absolute value (e.g.
 	 * ABS(orderBy))
+	 * @param appliedFilters the filters which should be applied
 	 * @return list of all transactions matching the set filters
 	 */
-	public List<FinanceTransaction> getTransactions(SingularAttribute orderBy, boolean orderAsc, boolean orderAbsolute) {
+	public List<FinanceTransaction> getTransactions(SingularAttribute orderBy, boolean orderAsc, boolean orderAbsolute, EnumSet appliedFilters) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 
-		ConstructedPredicate predicate = getFilteredTransactionsPredicate(criteriaBuilder, tr);
-
+		ConstructedPredicate predicate = getFilteredTransactionsPredicate(criteriaBuilder, tr, appliedFilters);
 		transactionsCriteriaQuery.where(predicate.getPredicate());
 
 		Expression userOrderBy = tr.get(orderBy);
@@ -469,7 +504,9 @@ public class Report {
 	 * @return a graph for the total balance of accounts, sorted by date
 	 */
 	public Map<Date, Double> getAccountsBalanceGraph() {
-		List<FinanceTransaction> transactions = getTransactions(FinanceTransaction_.transactionDate, true, false);
+		List<FinanceTransaction> transactions = getTransactions(
+				FinanceTransaction_.transactionDate, true, false,
+				EnumSet.of(FilterType.FILTER_DATE, FilterType.FILTER_ACCOUNTS));
 		Map<Date, Long> currentBalance = new TreeMap<>();
 		Map<Date, Double> result = new TreeMap<>();
 		Map<String, Long> sumBalance = new TreeMap<>();
@@ -494,36 +531,122 @@ public class Report {
 	}
 
 	/**
+	 * Class for storing results of a getTagExpenses() call
+	 */
+	public class TagExpense {
+
+		/**
+		 * The tag name
+		 */
+		protected String tag;
+		/**
+		 * The currency for amount
+		 */
+		protected Currency currency;
+		/**
+		 * True if the currency was converted
+		 */
+		protected boolean currencyConverted;
+		/**
+		 * The tag's amount
+		 */
+		protected double amount;
+
+		/**
+		 * Default constructor
+		 *
+		 * @param tag the tag name
+		 * @param currency the currency
+		 * @param currencyConverted true if the currency was converted
+		 * @param amount the total amount
+		 */
+		protected TagExpense(String tag, Currency currency, boolean currencyConverted, double amount) {
+			this.tag = tag;
+			this.currency = currency;
+			this.currencyConverted = currencyConverted;
+			this.amount = amount;
+		}
+
+		/**
+		 * Returns the set tag
+		 *
+		 * @return the tag
+		 */
+		public String getTag() {
+			return tag;
+		}
+
+		/**
+		 * Returns the currency
+		 *
+		 * @return the currency
+		 */
+		public Currency getCurrency() {
+			return currency;
+		}
+
+		/**
+		 * Returns the tag amount
+		 *
+		 * @return the tag amount
+		 */
+		public double getAmount() {
+			return amount;
+		}
+
+		/**
+		 * Returns true if the currency was converted
+		 *
+		 * @return true if the currency was converted
+		 */
+		public boolean isCurrencyConverted() {
+			return currencyConverted;
+		}
+	}
+
+	/**
 	 * Returns expenses grouped by tags
 	 *
 	 * @return expenses grouped by tags
 	 */
-	public Map<String, Double> getTagExpenses() {
+	public List<TagExpense> getTagExpenses() {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		Map<String, Double> result = new TreeMap<>();
+		Map<String, TagExpense> result = new TreeMap<>();
 		for (Currency currency : financeData.getCurrencies()) {
 			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 			CriteriaQuery<Tuple> transactionsCriteriaQuery = criteriaBuilder.createTupleQuery();
 			Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 
-			ConstructedPredicate predicate = getFilteredTransactionsPredicate(criteriaBuilder, tr);
+			ConstructedPredicate predicate = getFilteredTransactionsPredicate(criteriaBuilder, tr, EnumSet.allOf(FilterType.class));
 
 			Predicate currencyPredicate = criteriaBuilder.equal(predicate.getComponentsJoin().get(TransactionComponent_.account).get(FinanceAccount_.currency), currency.getCurrencyCode());
 
-			transactionsCriteriaQuery.multiselect(criteriaBuilder.sum(tr.get(FinanceTransaction_.amount)),
+			transactionsCriteriaQuery.multiselect(criteriaBuilder.sum(predicate.getComponentsJoin().get(TransactionComponent_.amount)),
 					predicate.getTagsJoin()).distinct(true);
 			transactionsCriteriaQuery.where(criteriaBuilder.and(predicate.getPredicate(), currencyPredicate));
-			transactionsCriteriaQuery.groupBy(predicate.getComponentsJoin(), predicate.getTagsJoin());
+			transactionsCriteriaQuery.groupBy(predicate.getComponentsJoin(), predicate.getTagsJoin(), predicate.getComponentsJoin().get(TransactionComponent_.account).get(FinanceAccount_.currency));
 
 			double exchangeRate = financeData.getExchangeRate(currency, financeData.getDefaultCurrency());
 
 			for (Tuple tuple : entityManager.createQuery(transactionsCriteriaQuery).getResultList()) {
 				String tag = tuple.get(1, String.class);
-				double accumulatedBalance = result.containsKey(tag) ? result.get(tag) : 0.0D;
-				result.put(tag, accumulatedBalance + exchangeRate * (tuple.get(0, Long.class) / 100.0D));
+				double amount = (tuple.get(0, Long.class) / 100.0D);
+				if (!result.containsKey(tag))
+					result.put(tag, new TagExpense(tag, currency, false, 0));
+				TagExpense tagExpense = result.get(tag);
+
+				if (tagExpense.currency == currency)
+					tagExpense.amount += amount;
+				else if (tagExpense.currencyConverted)
+					tagExpense.amount += exchangeRate * amount;
+				else {
+					tagExpense.currencyConverted = true;
+					tagExpense.amount *= financeData.getExchangeRate(tagExpense.currency, financeData.getDefaultCurrency());
+					tagExpense.currency = financeData.getDefaultCurrency();
+				}
 			}
 		}
 		entityManager.close();
-		return result;
+		return new LinkedList<TagExpense>(result.values());
 	}
 }

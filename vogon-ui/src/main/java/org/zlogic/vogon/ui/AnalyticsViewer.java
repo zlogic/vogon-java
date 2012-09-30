@@ -355,10 +355,12 @@ public class AnalyticsViewer extends javax.swing.JPanel implements FinanceData.A
 	 *
 	 * @param values expenses grouped by tag
 	 */
-	private void updateTagsChart(Map<String, Double> values) {
+	private void updateTagsChart(List<Report.TagExpense> values) {
 		DefaultPieDataset dataset = new DefaultPieDataset();
-		for (Map.Entry<String, Double> tagExpense : values.entrySet())
-			dataset.setValue(tagExpense.getKey(), Math.abs(tagExpense.getValue()));
+		for (Report.TagExpense tagExpense : values)
+			dataset.setValue(tagExpense.getTag(),
+					financeData.getExchangeRate(tagExpense.getCurrency(), financeData.getDefaultCurrency())
+					* Math.abs(tagExpense.getAmount()));
 
 		JFreeChart chart = ChartFactory.createPieChart3D("", dataset, false, true, false);
 		chart.setBackgroundPaint(jPanelTagsChart.getBackground());
@@ -378,12 +380,12 @@ public class AnalyticsViewer extends javax.swing.JPanel implements FinanceData.A
 	 *
 	 * @param values expenses grouped by tag
 	 */
-	private void updateTagsReportTable(Map<String, Double> values) {
+	private void updateTagsReportTable(List<Report.TagExpense> values) {
 		DefaultTableModel tableModel = (DefaultTableModel) jTableTagsReport.getModel();
 		while (tableModel.getRowCount() > 0)
 			tableModel.removeRow(0);
-		for (Map.Entry<String, Double> tagExpense : values.entrySet())
-			tableModel.addRow(new Object[]{tagExpense.getKey(), new SumTableCell(tagExpense.getValue(), true, financeData.getDefaultCurrency(), true, false)});
+		for (Report.TagExpense tagExpense : values)
+			tableModel.addRow(new Object[]{tagExpense.getTag(), new SumTableCell(tagExpense.getAmount(), true, tagExpense.getCurrency(), tagExpense.isCurrencyConverted(), false)});
 	}
 
 	/**
@@ -437,8 +439,8 @@ public class AnalyticsViewer extends javax.swing.JPanel implements FinanceData.A
 						MessageFormat.format(messages.getString("FORMAT_DATE"), new Object[]{transaction.getDate()}),
 						new SumTableCell(
 						transaction.getAmount(),
-						true,
-						financeData.getDefaultCurrency(),
+						(transaction instanceof TransferTransaction) ? ((TransferTransaction) transaction).isAmountOk() : true,
+						currency,
 						transactionCurrencies.size() != 1,
 						transaction instanceof TransferTransaction)});
 		}
