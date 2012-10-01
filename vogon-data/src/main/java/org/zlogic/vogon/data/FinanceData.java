@@ -544,7 +544,9 @@ public class FinanceData {
 	 * @param transaction the transaction to be updated
 	 * @param newAmount the new amount
 	 */
-	public void setTransactionAmount(ExpenseTransaction transaction, double newAmount) {
+	public void setTransactionAmount(FinanceTransaction transaction, double newAmount) {
+		if (transaction.getType() != FinanceTransaction.Type.EXPENSEINCOME)
+			return;
 		if (transaction.getComponents().isEmpty())
 			return;
 
@@ -578,7 +580,9 @@ public class FinanceData {
 	 * @param transaction the transaction to be updated
 	 * @param newAccount the new account
 	 */
-	public void setTransactionAccount(ExpenseTransaction transaction, FinanceAccount newAccount) {
+	public void setTransactionAccount(FinanceTransaction transaction, FinanceAccount newAccount) {
+		if (transaction.getType() != FinanceTransaction.Type.EXPENSEINCOME)
+			return;
 		if (transaction.getComponents().isEmpty())
 			return;
 

@@ -77,24 +77,24 @@ public class Report {
 		/**
 		 * Filter transaction date (earliestDate+latestDate)
 		 */
-		FILTER_DATE,
+		DATE,
 		/**
 		 * Filter by transaction tags (selectedTags)
 		 */
-		FILTER_TAGS,
+		TAGS,
 		/**
 		 * Filter by transaction accounts (selectedAccounts)
 		 */
-		FILTER_ACCOUNTS,
+		ACCOUNTS,
 		/**
 		 * Filter by transaction type (Expense-Income or Transfer)
 		 */
-		FILTER_TRANSACTION_TYPE,
+		TRANSACTION_TYPE,
 		/**
 		 * Filter by expense transaction type (enabledIncomeTransactions and
 		 * enabledExpenseTransactions)
 		 */
-		FILTER_EXPENSE_TYPE
+		EXPENSE_TYPE
 	};
 
 	/**
@@ -351,9 +351,9 @@ public class Report {
 
 		Predicate transactionTypePredicate = criteriaBuilder.disjunction();
 		if (enabledExpenseTransactions || enabledIncomeTransactions)
-			transactionTypePredicate = criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.type(), ExpenseTransaction.class));
+			transactionTypePredicate = criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.get(FinanceTransaction_.type), FinanceTransaction.Type.EXPENSEINCOME));
 		if (enabledTransferTransactions)
-			transactionTypePredicate = criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.type(), TransferTransaction.class));
+			transactionTypePredicate = criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.get(FinanceTransaction_.type), FinanceTransaction.Type.TRANSFER));
 
 		Predicate expenseTypePredicate = criteriaBuilder.disjunction();
 		if (enabledExpenseTransactions)
@@ -370,15 +370,15 @@ public class Report {
 		Predicate accountsPredicate = (selectedAccounts != null && !selectedAccounts.isEmpty()) ? componentsJoin.get(TransactionComponent_.account).in(criteriaBuilder.literal(selectedAccounts)) : criteriaBuilder.disjunction();
 
 		Predicate rootPredicate = criteriaBuilder.conjunction();
-		if (appliedFilters.contains(FilterType.FILTER_DATE))
+		if (appliedFilters.contains(FilterType.DATE))
 			rootPredicate = criteriaBuilder.and(rootPredicate, datePredicate);
-		if (appliedFilters.contains(FilterType.FILTER_ACCOUNTS))
+		if (appliedFilters.contains(FilterType.ACCOUNTS))
 			rootPredicate = criteriaBuilder.and(rootPredicate, accountsPredicate);
-		if (appliedFilters.contains(FilterType.FILTER_TAGS))
+		if (appliedFilters.contains(FilterType.TAGS))
 			rootPredicate = criteriaBuilder.and(rootPredicate, tagsPredicate);
-		if (appliedFilters.contains(FilterType.FILTER_TRANSACTION_TYPE))
+		if (appliedFilters.contains(FilterType.TRANSACTION_TYPE))
 			rootPredicate = criteriaBuilder.and(rootPredicate, transactionTypePredicate);
-		if (appliedFilters.contains(FilterType.FILTER_EXPENSE_TYPE))
+		if (appliedFilters.contains(FilterType.EXPENSE_TYPE))
 			rootPredicate = criteriaBuilder.and(rootPredicate, expenseTypePredicate);
 		return new ConstructedPredicate(rootPredicate, componentsJoin, tagsJoin);
 	}
@@ -506,7 +506,7 @@ public class Report {
 	public Map<Date, Double> getAccountsBalanceGraph() {
 		List<FinanceTransaction> transactions = getTransactions(
 				FinanceTransaction_.transactionDate, true, false,
-				EnumSet.of(FilterType.FILTER_DATE, FilterType.FILTER_ACCOUNTS));
+				EnumSet.of(FilterType.DATE, FilterType.ACCOUNTS));
 		Map<Date, Long> currentBalance = new TreeMap<>();
 		Map<Date, Double> result = new TreeMap<>();
 		Map<String, Long> sumBalance = new TreeMap<>();

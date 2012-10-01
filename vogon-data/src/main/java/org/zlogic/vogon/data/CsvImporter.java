@@ -116,12 +116,14 @@ public class CsvImporter implements FileImporter {
 					String[] tags = columns[2].split(","); //NOI18N
 					FinanceTransaction transaction = null;
 					Date date = new SimpleDateFormat("yyyy-MM-dd").parse(columns[1]); //NOI18N
-					if ((hasPositiveAmounts || hasNegativeAmounts) && !(hasPositiveAmounts && hasNegativeAmounts)) {
+					FinanceTransaction.Type transactionType = null;
+					if ((hasPositiveAmounts || hasNegativeAmounts) && !(hasPositiveAmounts && hasNegativeAmounts))
+						transactionType = FinanceTransaction.Type.EXPENSEINCOME;
+					else if (hasPositiveAmounts && hasNegativeAmounts)
+						transactionType = FinanceTransaction.Type.TRANSFER;
+					if (transactionType != null) {
 						//Expense transaction
-						transaction = new ExpenseTransaction(columns[0], tags, date);
-					} else if (hasPositiveAmounts && hasNegativeAmounts) {
-						//Transfer/split transaction
-						transaction = new TransferTransaction(columns[0], tags, date);
+						transaction = new FinanceTransaction(columns[0], tags, date, transactionType);
 					} else {
 						reader.close();
 						throw new VogonImportLogicalException((new MessageFormat(messages.getString("CSV_TRANSACTION_TOO_COMPLEX"))).format(new Object[]{Utils.join(columns, ",")})); //NOI18N

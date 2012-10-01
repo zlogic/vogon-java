@@ -9,11 +9,9 @@ import java.text.MessageFormat;
 import java.util.Currency;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.zlogic.vogon.data.ExpenseTransaction;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
-import org.zlogic.vogon.data.TransferTransaction;
 
 /**
  * Transactions table model class
@@ -109,17 +107,17 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 					amount = data.getAmountInCurrency(transaction, data.getDefaultCurrency());
 					currency = data.getDefaultCurrency();
 				}
-				return new SumTableCell(amount, (transaction instanceof TransferTransaction) ? ((TransferTransaction) transaction).isAmountOk() : true, currency, transactionCurrencies.size() != 1, (transaction instanceof TransferTransaction));
+				return new SumTableCell(amount, transaction.isAmountOk(), currency, transactionCurrencies.size() != 1, transaction.getType());
 			case 4:
-				if (transaction.getClass() == ExpenseTransaction.class) {
-					List<FinanceAccount> accounts = ((ExpenseTransaction) transaction).getAccounts();
+				if (transaction.getType() == FinanceTransaction.Type.EXPENSEINCOME) {
+					List<FinanceAccount> accounts = transaction.getAccounts();
 					StringBuilder builder = new StringBuilder();
 					for (FinanceAccount account : accounts)
 						builder.append(account != accounts.get(0) ? "," : "").append(account != null ? account.getName() : messages.getString("INVALID_ACCOUNT")); //NOI18N
 					return builder.toString();
-				} else if (transaction.getClass() == TransferTransaction.class) {
-					FinanceAccount[] toAccounts = ((TransferTransaction) transaction).getToAccounts();
-					FinanceAccount[] fromAccounts = ((TransferTransaction) transaction).getFromAccounts();
+				} else if (transaction.getType() == FinanceTransaction.Type.TRANSFER) {
+					FinanceAccount[] toAccounts = transaction.getToAccounts();
+					FinanceAccount[] fromAccounts = transaction.getFromAccounts();
 					StringBuilder builder = new StringBuilder();
 					if (fromAccounts.length > 1) {
 						builder.append("("); //NOI18N

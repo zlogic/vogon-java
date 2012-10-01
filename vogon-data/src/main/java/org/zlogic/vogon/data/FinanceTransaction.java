@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Currency;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import javax.persistence.ElementCollection;
@@ -27,8 +28,26 @@ import javax.persistence.Temporal;
  * @author Dmitry Zolotukhin
  */
 @Entity
-public abstract class FinanceTransaction implements Serializable {
+public class FinanceTransaction implements Serializable {
 
+	/**
+	 * The transaction type
+	 */
+	public enum Type {
+
+		/**
+		 * Income or expense
+		 */
+		EXPENSEINCOME,
+		/**
+		 * Transfer
+		 */
+		TRANSFER,
+		/**
+		 * Unknown (default) value
+		 */
+		UNDEFINED
+	};
 	/**
 	 * Version UID
 	 */
@@ -39,6 +58,10 @@ public abstract class FinanceTransaction implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	protected long id;
+	/**
+	 * The transaction type
+	 */
+	protected Type type;
 	/**
 	 * Contains the expense description string
 	 */
@@ -64,6 +87,30 @@ public abstract class FinanceTransaction implements Serializable {
 	 * The transaction amount
 	 */
 	protected long amount;
+
+	/**
+	 * Default constructor
+	 */
+	public FinanceTransaction() {
+		type = Type.UNDEFINED;
+		amount = 0;
+	}
+
+	/**
+	 * Constructor for a transaction
+	 *
+	 * @param description the transaction description
+	 * @param tags the transaction tags
+	 * @param date the transaction date
+	 * @param type the transaction type
+	 */
+	public FinanceTransaction(String description, String[] tags, Date date, Type type) {
+		this.description = description;
+		this.tags = tags != null ? Arrays.asList(tags) : new LinkedList<String>();
+		this.transactionDate = date;
+		this.components = new LinkedList<>();
+		this.type = type;
+	}
 
 	/**
 	 * Adds component to this account
@@ -125,7 +172,20 @@ public abstract class FinanceTransaction implements Serializable {
 	/**
 	 * Updates the transaction's amount from its components
 	 */
-	public abstract void updateAmounts();
+	public void updateAmounts() {
+		if (type == Type.EXPENSEINCOME) {
+			amount = 0;
+			for (TransactionComponent component : components)
+				amount += component.getRawAmount();
+		} else if (type == Type.TRANSFER) {
+			long amountPositive = 0, amountNegative = 0;
+			for (TransactionComponent component : components) {
+				amountPositive += component.getRawAmount() > 0 ? component.getRawAmount() : 0;
+				amountNegative += component.getRawAmount() < 0 ? component.getRawAmount() : 0;
+			}
+			amount = amountPositive > -amountNegative ? amountPositive : -amountNegative;
+		}
+	}
 
 	/**
 	 * Returns a list of all components associated with an account
@@ -208,6 +268,32 @@ public abstract class FinanceTransaction implements Serializable {
 		updateAmounts();
 	}
 
+	/**
+	 * Returns if the amount is OK (e.g. for transfer transactions sum is zero
+	 * or accounts use different currencies)
+	 *
+	 * @return true if amount is OK
+	 */
+	public boolean isAmountOk() {
+		if (type == Type.EXPENSEINCOME)
+			return true;
+		else if (type == Type.TRANSFER) {
+			long amount = 0;
+			Currency commonCurrency = null;
+			for (TransactionComponent component : components) {
+				if (commonCurrency == null)
+					commonCurrency = component.getAccount().getCurrency();
+				else if (component.getAccount().getCurrency() != commonCurrency)
+					return true;
+				amount += component.getRawAmount();
+			}
+			return amount == 0;
+		} else if (type == Type.UNDEFINED)
+			return false;
+		else
+			return true;
+	}
+
 	/*
 	 * Getters/setters
 	 */
@@ -252,6 +338,40 @@ public abstract class FinanceTransaction implements Serializable {
 			tags = new ArrayList<>();
 		if (!tags.contains(tag))
 			tags.add(tag);
+	}
+
+	/**
+	 * For transfer transactions returns the account accountFrom which money was
+	 * transferred. For expense/income transactions: returns empty array
+	 *
+	 * @return the source accounts
+	 */
+	public FinanceAccount[] getFromAccounts() {
+		if (type == Type.TRANSFER) {
+			HashSet<FinanceAccount> accounts = new HashSet<>();
+			for (TransactionComponent component : components)
+				if (component.getRawAmount() < 0)
+					accounts.add(component.getAccount());
+			return accounts.toArray(new FinanceAccount[0]);
+		} else
+			return new FinanceAccount[0];
+	}
+
+	/**
+	 * For transfer transactions returns the accounts account to which money was
+	 * transferred, For expense/income transactions: returns empty array
+	 *
+	 * @return the destination accounts
+	 */
+	public FinanceAccount[] getToAccounts() {
+		if (type == Type.TRANSFER) {
+			HashSet<FinanceAccount> accounts = new HashSet<>();
+			for (TransactionComponent component : components)
+				if (component.getRawAmount() > 0)
+					accounts.add(component.getAccount());
+			return accounts.toArray(new FinanceAccount[0]);
+		} else
+			return new FinanceAccount[0];
 	}
 
 	/**
@@ -306,5 +426,23 @@ public abstract class FinanceTransaction implements Serializable {
 	 */
 	public void setDate(Date date) {
 		this.transactionDate = date;
+	}
+
+	/**
+	 * Returns the transaction type
+	 *
+	 * @return the transaction type
+	 */
+	public Type getType() {
+		return type;
+	}
+
+	/**
+	 * Sets the transaction type
+	 *
+	 * @param type the transaction type to set
+	 */
+	public void setType(Type type) {
+		this.type = type;
 	}
 }

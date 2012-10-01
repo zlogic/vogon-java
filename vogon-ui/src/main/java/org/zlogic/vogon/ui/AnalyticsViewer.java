@@ -33,7 +33,6 @@ import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.Report;
-import org.zlogic.vogon.data.TransferTransaction;
 
 /**
  * Form for viewing analytics reports
@@ -385,7 +384,7 @@ public class AnalyticsViewer extends javax.swing.JPanel implements FinanceData.A
 		while (tableModel.getRowCount() > 0)
 			tableModel.removeRow(0);
 		for (Report.TagExpense tagExpense : values)
-			tableModel.addRow(new Object[]{tagExpense.getTag(), new SumTableCell(tagExpense.getAmount(), true, tagExpense.getCurrency(), tagExpense.isCurrencyConverted(), false)});
+			tableModel.addRow(new Object[]{tagExpense.getTag(), new SumTableCell(tagExpense.getAmount(), true, tagExpense.getCurrency(), tagExpense.isCurrencyConverted(), FinanceTransaction.Type.UNDEFINED)});
 	}
 
 	/**
@@ -439,10 +438,10 @@ public class AnalyticsViewer extends javax.swing.JPanel implements FinanceData.A
 						MessageFormat.format(messages.getString("FORMAT_DATE"), new Object[]{transaction.getDate()}),
 						new SumTableCell(
 						transaction.getAmount(),
-						(transaction instanceof TransferTransaction) ? ((TransferTransaction) transaction).isAmountOk() : true,
+						transaction.isAmountOk(),
 						currency,
 						transactionCurrencies.size() != 1,
-						transaction instanceof TransferTransaction)});
+						transaction.getType())});
 		}
 	}
 

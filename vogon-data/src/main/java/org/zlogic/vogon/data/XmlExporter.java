@@ -7,6 +7,8 @@ package org.zlogic.vogon.data;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
@@ -51,6 +53,10 @@ public class XmlExporter implements FileExporter {
 	 */
 	@Override
 	public void exportFile(FinanceData financeData) throws VogonExportException {
+		Map<FinanceTransaction.Type, String> transactionTypes = new TreeMap<>();
+		transactionTypes.put(FinanceTransaction.Type.TRANSFER, "Transfer");
+		transactionTypes.put(FinanceTransaction.Type.EXPENSEINCOME, "ExpenseIncome");
+		transactionTypes.put(FinanceTransaction.Type.UNDEFINED, "");
 		try {
 
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -100,7 +106,7 @@ public class XmlExporter implements FileExporter {
 			//Transactions list
 			for (FinanceTransaction transaction : financeData.getTransactions()) {
 				Element transactionElement = doc.createElement("Transaction"); //NOI18N
-				transactionElement.setAttribute("Type", transaction.getClass().getSimpleName()); //NOI18N
+				transactionElement.setAttribute("Type", transactionTypes.get(transaction.getType())); //NOI18N
 				transactionElement.setAttribute("Id", Long.toString(transaction.id)); //NOI18N
 				transactionElement.setAttribute("Description", transaction.getDescription()); //NOI18N
 				//transactionElement.setAttribute("Amount", Long.toString(transaction.getRawAmount()));

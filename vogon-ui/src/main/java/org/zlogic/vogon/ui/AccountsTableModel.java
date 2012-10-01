@@ -12,6 +12,7 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
+import org.zlogic.vogon.data.FinanceTransaction;
 
 /**
  * Accounts table model class
@@ -165,7 +166,7 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 				case 0:
 					return account.getName();
 				case 1:
-					return new SumTableCell(account.getBalance(), true, account.getCurrency(), false, false);
+					return new SumTableCell(account.getBalance(), true, account.getCurrency(), false, FinanceTransaction.Type.UNDEFINED);
 				case 2:
 					return new CurrencyComboItem(account.getCurrency());
 				case 3:
@@ -178,7 +179,7 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 				case 0:
 					return account.formatString(account.getName());
 				case 1:
-					return new SumTableCell(account.getAmount(), true, account.getCurrency(), false, false);
+					return new SumTableCell(account.getAmount(), true, account.getCurrency(), false, FinanceTransaction.Type.UNDEFINED);
 				case 2:
 					return new CurrencyComboItem(account.getCurrency());
 				case 3:
