@@ -71,6 +71,10 @@ public class FinanceData {
 				setDefaultCurrency(getCurrencies().contains(Currency.getInstance(Locale.getDefault())) ? Currency.getInstance(Locale.getDefault()) : getCurrencies().get(0));
 			else
 				setDefaultCurrency(Currency.getInstance(Locale.getDefault()));
+
+		fireTransactionsUpdated();
+		fireAccountsUpdated();
+		fireCurrenciesUpdated();
 	}
 
 	/**
