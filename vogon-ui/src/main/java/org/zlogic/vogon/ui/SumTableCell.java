@@ -20,6 +20,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import org.zlogic.vogon.data.FinanceTransaction;
 
 /**
  * Helper class for rendering/editing finance amounts (with currency)
@@ -46,9 +47,9 @@ public class SumTableCell implements Comparable<SumTableCell> {
 	 */
 	protected boolean isOk;
 	/**
-	 * True if this is a transfer transaction (special rendering)
+	 * The transaction type (for special rendering)
 	 */
-	protected boolean isTransferTransaction;
+	protected FinanceTransaction.Type transactionType;
 
 	/**
 	 * Constructs a SumTableCell
@@ -62,12 +63,12 @@ public class SumTableCell implements Comparable<SumTableCell> {
 	 * @param isTransferTransaction true if this is a transfer transaction
 	 * (otherwise, this will be an expense transaction
 	 */
-	public SumTableCell(double balance, boolean isOk, Currency currency, boolean isCurrencyConverted, boolean isTransferTransaction) {
+	public SumTableCell(double balance, boolean isOk, Currency currency, boolean isCurrencyConverted, FinanceTransaction.Type transactionType) {
 		this.balance = balance;
 		this.currency = currency;
 		this.isOk = isOk;
 		this.isCurrencyConverted = isCurrencyConverted;
-		this.isTransferTransaction = isTransferTransaction;
+		this.transactionType = transactionType;
 	}
 
 	/**
@@ -96,7 +97,7 @@ public class SumTableCell implements Comparable<SumTableCell> {
 	@Override
 	public String toString() {
 		String formattedSum = MessageFormat.format(messages.getString("FORMAT_SUM"),
-				isTransferTransaction ? messages.getString("TRANSFER_TRANSACTION_FLAG") : messages.getString("EXPENSE_TRANSACTION_FLAG"),
+				transactionType == FinanceTransaction.Type.TRANSFER ? messages.getString("TRANSFER_TRANSACTION_FLAG") : messages.getString("EXPENSE_TRANSACTION_FLAG"),
 				balance,
 				currency != null ? currency.getCurrencyCode() : messages.getString("INVALID_CURRENCY"),
 				isCurrencyConverted ? messages.getString("CURRENCY_CONVERTED") : messages.getString("CURRENCY_NOT_CONVERTED"));

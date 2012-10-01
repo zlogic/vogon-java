@@ -14,11 +14,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
-import org.zlogic.vogon.data.ExpenseTransaction;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
-import org.zlogic.vogon.data.TransferTransaction;
 import org.zlogic.vogon.data.Utils;
 
 /**
@@ -199,7 +197,7 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
 
     private void jButtonNewExpenseIncomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewExpenseIncomeActionPerformed
 		saveChanges();
-		editTransaction(new ExpenseTransaction("", new String[0], new Date())); //NOI18N
+		editTransaction(new FinanceTransaction("", new String[0], new Date(), FinanceTransaction.Type.EXPENSEINCOME)); //NOI18N
 		financeData.createTransaction(editedTransaction);
     }//GEN-LAST:event_jButtonNewExpenseIncomeActionPerformed
 
@@ -227,7 +225,7 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
 
     private void jButtonNewTransferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewTransferActionPerformed
 		saveChanges();
-		editTransaction(new TransferTransaction("", new String[0], new Date())); //NOI18N
+		editTransaction(new FinanceTransaction("", new String[0], new Date(), FinanceTransaction.Type.TRANSFER)); //NOI18N
 		financeData.createTransaction(editedTransaction);
     }//GEN-LAST:event_jButtonNewTransferActionPerformed
 

@@ -198,11 +198,14 @@ public class XmlImporter implements FileImporter {
 				Date transactionDate = dateFormat.parse(attributes.getNamedItem("Date").getNodeValue()); //NOI18N
 
 				//Create transaction instance
-				FinanceTransaction transaction = null;
-				if (transactionType.equals(ExpenseTransaction.class.getSimpleName()))
-					transaction = new ExpenseTransaction(transactionDescription, null, transactionDate);
-				else if (transactionType.equals(TransferTransaction.class.getSimpleName()))
-					transaction = new TransferTransaction(transactionDescription, null, transactionDate);
+				FinanceTransaction.Type transactionTypeEnum = null;
+				if (transactionType.equals("Transfer"))
+					transactionTypeEnum = FinanceTransaction.Type.TRANSFER;
+				else if (transactionType.equals("ExpenseIncome"))
+					transactionTypeEnum = FinanceTransaction.Type.EXPENSEINCOME;
+				else
+					transactionTypeEnum = FinanceTransaction.Type.UNDEFINED;
+				FinanceTransaction transaction = new FinanceTransaction(transactionDescription, null, transactionDate, transactionTypeEnum);
 				transactionsMap.put(transactionId, transaction);
 				entityManager.persist(transaction);
 
