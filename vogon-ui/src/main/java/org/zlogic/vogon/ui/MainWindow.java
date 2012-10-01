@@ -35,7 +35,7 @@ import org.zlogic.vogon.data.XmlImporter;
  *
  * @author Zlogic
  */
-public class MainWindow extends javax.swing.JFrame implements FinanceData.TransactionCreatedEventListener {
+public class MainWindow extends javax.swing.JFrame implements FinanceData.TransactionCreatedEventListener, FinanceData.CurrencyUpdatedEventListener {
 
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 
@@ -69,6 +69,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		financeData.addAccountCreatedListener(transactionEditor);
 		financeData.addAccountUpdatedListener(transactionEditor);
 		financeData.addAccountDeletedListener(transactionEditor);
+		financeData.addCurrencyUpdatedListener(this);
 		financeData.addCurrencyUpdatedListener(currenciesTableModel);
 
 		jTableTransactions.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -532,5 +533,10 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		else
 			jComboBoxDefaultCurrency.setSelectedItem(-1);
 		jComboBoxDefaultCurrency.setEnabled(true);
+	}
+
+	@Override
+	public void currenciesUpdated() {
+		updateDefaultCurrencyCombo();
 	}
 }
