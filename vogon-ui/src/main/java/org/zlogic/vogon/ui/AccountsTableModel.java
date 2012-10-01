@@ -273,6 +273,7 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 
 	@Override
 	public void accountUpdated(FinanceAccount updatedAccount) {
+		updateReportingAccounts();
 		int rowIndex = data.getAccounts().indexOf(updatedAccount);
 		fireTableRowsUpdated(rowIndex, rowIndex);
 	}
