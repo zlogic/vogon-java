@@ -60,8 +60,7 @@ public class SumTableCell implements Comparable<SumTableCell> {
 	 * @param currency the currency
 	 * @param isCurrencyConverted true if the currency was converted and should
 	 * be displayed differently
-	 * @param isTransferTransaction true if this is a transfer transaction
-	 * (otherwise, this will be an expense transaction
+	 * @param transactionType the transaction type
 	 */
 	public SumTableCell(double balance, boolean isOk, Currency currency, boolean isCurrencyConverted, FinanceTransaction.Type transactionType) {
 		this.balance = balance;

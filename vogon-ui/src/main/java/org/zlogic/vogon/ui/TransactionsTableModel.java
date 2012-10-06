@@ -21,7 +21,18 @@ import org.zlogic.vogon.data.FinanceTransaction;
 public class TransactionsTableModel extends AbstractTableModel implements FinanceData.TransactionCreatedEventListener, FinanceData.TransactionUpdatedEventListener {
 
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
-	private FinanceData data = null;
+	/**
+	 * FinanceData instance
+	 */
+	protected FinanceData financeData = null;
+	/**
+	 * Page size
+	 */
+	protected int pageSize = 100;
+	/**
+	 * Currently selected page
+	 */
+	protected int currentPage = 0;
 
 	/**
 	 * Default constructor for TransactionsTableModel
@@ -30,13 +41,73 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 	}
 
 	/**
-	 * Sets the table data
+	 * Sets the table financeData
 	 *
-	 * @param data
+	 * @param financeData the FinanceData to be used
 	 */
-	public void setFinanceData(FinanceData data) {
-		this.data = data;
+	public void setFinanceData(FinanceData financeData) {
+		this.financeData = financeData;
 		fireTableDataChanged();
+	}
+
+	/**
+	 * Returns the page for a model row
+	 *
+	 * @param rowIndex the model row
+	 * @return the page number
+	 */
+	protected int getRowPage(int rowIndex) {
+		if (currentPage < getPageCount())
+			return rowIndex / pageSize;
+		else
+			return -1;
+	}
+
+	/**
+	 * Returns the number of pages
+	 *
+	 * @return the number of pages
+	 */
+	public int getPageCount() {
+		return financeData.getTransactions().size() / pageSize + 1;
+	}
+
+	/**
+	 * Returns the generic page size
+	 *
+	 * @return the page size
+	 */
+	public int getPageSize() {
+		return pageSize;
+	}
+
+	/**
+	 * Returns the page size for a specific page (last page may be smaller)
+	 *
+	 * @param pageIndex the page number
+	 * @return the page size for a specific page
+	 */
+	public int getPageSize(int pageIndex) {
+		if (financeData == null)
+			return 0;
+		return Math.min(pageSize, financeData.getTransactions().size() - currentPage * pageSize);
+	}
+
+	/**
+	 * Sets the current page
+	 *
+	 * @param pageIndex the page to be set
+	 * @return the selected page index; if pageIndex is out of range, the
+	 * closest valid value
+	 */
+	public int setCurrentPage(int pageIndex) {
+		if (pageIndex < 0)
+			pageIndex = 0;
+		else if (pageIndex >= getPageCount())
+			pageIndex = getPageCount() - 1;
+		currentPage = pageIndex;
+		fireTableDataChanged();
+		return pageIndex;
 	}
 
 	/**
@@ -46,7 +117,7 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 	 * @return the FinanceData transaction index
 	 */
 	protected int translateRowToFinanceData(int rowIndex) {
-		return data.getTransactions().size() - 1 - rowIndex;
+		return financeData.getTransactions().size() - 1 - rowIndex;
 	}
 
 	/**
@@ -56,7 +127,27 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 	 * @return the model row index
 	 */
 	protected int translateRowToModel(int rowIndex) {
-		return data.getTransactions().size() - 1 - rowIndex;
+		return financeData.getTransactions().size() - 1 - rowIndex;
+	}
+
+	/**
+	 * Returns the absolute index of a paged row
+	 *
+	 * @param rowIndex the index of a row on the current page
+	 * @return the absolute row index
+	 */
+	protected int translatePagedRowToModelRow(int rowIndex) {
+		return rowIndex + currentPage * pageSize;
+	}
+
+	/**
+	 * Returns the page-related index of an absolute model row index
+	 *
+	 * @param rowIndex the absolute index of a row in the model
+	 * @return the page-related index
+	 */
+	protected int translateModelRowToPagedRow(int rowIndex) {
+		return rowIndex % pageSize;
 	}
 
 	@Override
@@ -66,7 +157,7 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 
 	@Override
 	public int getRowCount() {
-		return data != null ? data.getTransactions().size() : 0;
+		return financeData != null ? getPageSize(currentPage) : 0;
 	}
 
 	@Override
@@ -104,8 +195,8 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 					amount = transaction.getAmount();
 					currency = transactionCurrencies.get(0);
 				} else {
-					amount = data.getAmountInCurrency(transaction, data.getDefaultCurrency());
-					currency = data.getDefaultCurrency();
+					amount = financeData.getAmountInCurrency(transaction, financeData.getDefaultCurrency());
+					currency = financeData.getDefaultCurrency();
 				}
 				return new SumTableCell(amount, transaction.isAmountOk(), currency, transactionCurrencies.size() != 1, transaction.getType());
 			case 4:
@@ -142,13 +233,14 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 	}
 
 	/**
-	 * Returns a model index for the specific transaction
+	 * Returns a page-related index for the specific transaction
 	 *
 	 * @param transaction the transaction
-	 * @return the transaction's index in the model
+	 * @return the transaction's index in the model (on the current page)
 	 */
 	public int getTransactionIndex(FinanceTransaction transaction) {
-		int rowIndex = translateRowToModel(data.getTransactions().indexOf(transaction));
+		int rowIndex = translateRowToModel(financeData.getTransactions().indexOf(transaction));
+		rowIndex = translateModelRowToPagedRow(rowIndex);
 		return rowIndex;
 	}
 
@@ -159,7 +251,8 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 	 * @return the transaction
 	 */
 	public FinanceTransaction getTransaction(int rowIndex) {
-		FinanceTransaction transaction = data.getTransactions().get(translateRowToFinanceData(rowIndex));
+		rowIndex = translatePagedRowToModelRow(rowIndex);
+		FinanceTransaction transaction = financeData.getTransactions().get(translateRowToFinanceData(rowIndex));
 		return transaction;
 	}
 
@@ -188,22 +281,25 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 	/**
 	 * Deletes a transaction
 	 *
-	 * @param row the row to be deleted
+	 * @param rowIndex the rowIndex to be deleted
 	 */
-	public void deleteTransaction(int row) {
-		data.deleteTransaction(data.getTransactions().get(translateRowToFinanceData(row)));
-		fireTableRowsDeleted(row, row);
+	public void deleteTransaction(int rowIndex) {
+		rowIndex = translatePagedRowToModelRow(rowIndex);
+		financeData.deleteTransaction(financeData.getTransactions().get(translateRowToFinanceData(rowIndex)));
+		fireTableRowsDeleted(rowIndex, rowIndex);
 	}
 
 	@Override
 	public void transactionCreated(FinanceTransaction newTransaction) {
-		int rowIndex = translateRowToModel(data.getTransactions().indexOf(newTransaction));
+		int rowIndex = translateRowToModel(financeData.getTransactions().indexOf(newTransaction));
+		rowIndex = translateModelRowToPagedRow(rowIndex);
 		fireTableRowsInserted(rowIndex, rowIndex);
 	}
 
 	@Override
 	public void transactionUpdated(FinanceTransaction updatedTransaction) {
-		int rowIndex = translateRowToModel(data.getTransactions().indexOf(updatedTransaction));
+		int rowIndex = translateRowToModel(financeData.getTransactions().indexOf(updatedTransaction));
+		rowIndex = translateModelRowToPagedRow(rowIndex);
 		fireTableRowsUpdated(rowIndex, rowIndex);
 	}
 

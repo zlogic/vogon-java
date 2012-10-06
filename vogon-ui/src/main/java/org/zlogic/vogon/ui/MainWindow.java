@@ -16,6 +16,7 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.zlogic.vogon.data.CsvImporter;
@@ -35,7 +36,7 @@ import org.zlogic.vogon.data.XmlImporter;
  *
  * @author Zlogic
  */
-public class MainWindow extends javax.swing.JFrame implements FinanceData.TransactionCreatedEventListener, FinanceData.CurrencyUpdatedEventListener {
+public class MainWindow extends javax.swing.JFrame {
 
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 
@@ -59,9 +60,12 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		accountsTableModel.setFinanceData(financeData);
 		currenciesTableModel.setFinanceData(financeData);
 		transactionEditor.setFinanceData(financeData);
+		analyticsViewer.setFinanceData(financeData);
 		transactionEditor.updateAccountsCombo();
-		financeData.addTransactionCreatedListener(this);
+
+		financeData.addTransactionCreatedListener(externalEventHandler);
 		financeData.addTransactionCreatedListener(transactionsTableModel);
+		financeData.addTransactionUpdatedListener(externalEventHandler);
 		financeData.addTransactionUpdatedListener(transactionsTableModel);
 		financeData.addAccountCreatedListener(accountsTableModel);
 		financeData.addAccountUpdatedListener(accountsTableModel);
@@ -69,7 +73,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		financeData.addAccountCreatedListener(transactionEditor);
 		financeData.addAccountUpdatedListener(transactionEditor);
 		financeData.addAccountDeletedListener(transactionEditor);
-		financeData.addCurrencyUpdatedListener(this);
+		financeData.addCurrencyUpdatedListener(externalEventHandler);
 		financeData.addCurrencyUpdatedListener(currenciesTableModel);
 
 		jTableTransactions.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -83,13 +87,13 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		});
 
 		updateDefaultCurrencyCombo();
+		externalEventHandler.transactionsUpdated();
 
 		jTableAccounts.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(new JComboBox(accountsTableModel.getCurrenciesComboList())));
 		jTableAccounts.getColumnModel().getColumn(1).setCellRenderer(SumTableCell.getRenderer());
 
 		jTableTransactions.getColumnModel().getColumn(3).setCellRenderer(SumTableCell.getRenderer());
 
-		analyticsViewer.setFinanceData(financeData);
 	}
 
 	/**
@@ -108,6 +112,8 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
         jPanelTransactionsList = new javax.swing.JPanel();
         jPanelTransactionControls = new javax.swing.JPanel();
         jButtonDeleteTransaction = new javax.swing.JButton();
+        javax.swing.JLabel jLabelPageNumber = new javax.swing.JLabel();
+        jSpinnerPage = new javax.swing.JSpinner();
         jScrollPaneTransactions = new javax.swing.JScrollPane();
         jTableTransactions = new javax.swing.JTable();
         jPanelAnalytics = new javax.swing.JPanel();
@@ -134,7 +140,6 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle(messages.getString("MAINWINDOW_TITLE")); // NOI18N
-        setPreferredSize(new java.awt.Dimension(1024, 768));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
@@ -149,15 +154,45 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
         jPanelTransactionsList.setLayout(new java.awt.BorderLayout());
 
-        jPanelTransactionControls.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
         jButtonDeleteTransaction.setText(messages.getString("DELETE")); // NOI18N
         jButtonDeleteTransaction.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonDeleteTransactionActionPerformed(evt);
             }
         });
-        jPanelTransactionControls.add(jButtonDeleteTransaction);
+
+        jLabelPageNumber.setText("Page");
+
+        jSpinnerPage.setModel(new javax.swing.SpinnerNumberModel(1, 1, 1, 1));
+        jSpinnerPage.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                jSpinnerPageStateChanged(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanelTransactionControlsLayout = new javax.swing.GroupLayout(jPanelTransactionControls);
+        jPanelTransactionControls.setLayout(jPanelTransactionControlsLayout);
+        jPanelTransactionControlsLayout.setHorizontalGroup(
+            jPanelTransactionControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelTransactionControlsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jButtonDeleteTransaction)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 475, Short.MAX_VALUE)
+                .addComponent(jLabelPageNumber)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jSpinnerPage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanelTransactionControlsLayout.setVerticalGroup(
+            jPanelTransactionControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelTransactionControlsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanelTransactionControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonDeleteTransaction)
+                    .addComponent(jSpinnerPage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabelPageNumber))
+                .addContainerGap())
+        );
 
         jPanelTransactionsList.add(jPanelTransactionControls, java.awt.BorderLayout.NORTH);
 
@@ -182,15 +217,12 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
         jPanelAccounts.setLayout(new java.awt.BorderLayout());
 
-        jPanelAccountsControls.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
         jButtonAddAccount.setText(messages.getString("ADD_ACCOUNT")); // NOI18N
         jButtonAddAccount.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonAddAccountActionPerformed(evt);
             }
         });
-        jPanelAccountsControls.add(jButtonAddAccount);
 
         jButtonDeleteAccount.setText(messages.getString("DELETE_ACCOUNT")); // NOI18N
         jButtonDeleteAccount.addActionListener(new java.awt.event.ActionListener() {
@@ -198,7 +230,27 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
                 jButtonDeleteAccountActionPerformed(evt);
             }
         });
-        jPanelAccountsControls.add(jButtonDeleteAccount);
+
+        javax.swing.GroupLayout jPanelAccountsControlsLayout = new javax.swing.GroupLayout(jPanelAccountsControls);
+        jPanelAccountsControls.setLayout(jPanelAccountsControlsLayout);
+        jPanelAccountsControlsLayout.setHorizontalGroup(
+            jPanelAccountsControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelAccountsControlsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jButtonAddAccount)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButtonDeleteAccount)
+                .addGap(718, 718, 718))
+        );
+        jPanelAccountsControlsLayout.setVerticalGroup(
+            jPanelAccountsControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelAccountsControlsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanelAccountsControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonAddAccount)
+                    .addComponent(jButtonDeleteAccount))
+                .addContainerGap())
+        );
 
         jPanelAccounts.add(jPanelAccountsControls, java.awt.BorderLayout.NORTH);
 
@@ -213,18 +265,35 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 
         jPanelCurrencies.setLayout(new java.awt.BorderLayout());
 
-        jPanelCurrenciesControls.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
         jLabelDefaultCurrency.setLabelFor(jComboBoxDefaultCurrency);
         jLabelDefaultCurrency.setText(messages.getString("DEFAULT_CURRENCY")); // NOI18N
-        jPanelCurrenciesControls.add(jLabelDefaultCurrency);
 
         jComboBoxDefaultCurrency.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jComboBoxDefaultCurrencyItemStateChanged(evt);
             }
         });
-        jPanelCurrenciesControls.add(jComboBoxDefaultCurrency);
+
+        javax.swing.GroupLayout jPanelCurrenciesControlsLayout = new javax.swing.GroupLayout(jPanelCurrenciesControls);
+        jPanelCurrenciesControls.setLayout(jPanelCurrenciesControlsLayout);
+        jPanelCurrenciesControlsLayout.setHorizontalGroup(
+            jPanelCurrenciesControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelCurrenciesControlsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabelDefaultCurrency)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jComboBoxDefaultCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanelCurrenciesControlsLayout.setVerticalGroup(
+            jPanelCurrenciesControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelCurrenciesControlsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanelCurrenciesControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelDefaultCurrency)
+                    .addComponent(jComboBoxDefaultCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         jPanelCurrencies.add(jPanelCurrenciesControls, java.awt.BorderLayout.NORTH);
 
@@ -385,15 +454,19 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		}
     }//GEN-LAST:event_jComboBoxDefaultCurrencyItemStateChanged
 
+    private void jButtonDeleteAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteAccountActionPerformed
+		if (jTableAccounts.getSelectedRow() >= 0)
+			accountsTableModel.deleteAccount(jTableAccounts.convertRowIndexToModel(jTableAccounts.getSelectedRow()));
+    }//GEN-LAST:event_jButtonDeleteAccountActionPerformed
+
     private void jButtonAddAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddAccountActionPerformed
 		int newAccountIndex = accountsTableModel.addAccount();
 		jTableAccounts.setRowSelectionInterval(newAccountIndex, newAccountIndex);
     }//GEN-LAST:event_jButtonAddAccountActionPerformed
 
-    private void jButtonDeleteAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteAccountActionPerformed
-		if (jTableAccounts.getSelectedRow() >= 0)
-			accountsTableModel.deleteAccount(jTableAccounts.convertRowIndexToModel(jTableAccounts.getSelectedRow()));
-    }//GEN-LAST:event_jButtonDeleteAccountActionPerformed
+    private void jSpinnerPageStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSpinnerPageStateChanged
+		transactionsTableModel.setCurrentPage((Integer) jSpinnerPage.getValue() - 1);
+    }//GEN-LAST:event_jSpinnerPageStateChanged
 
 	/**
 	 * @param args the command line arguments
@@ -466,6 +539,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
     private javax.swing.JScrollPane jScrollPaneAccounts;
     private javax.swing.JScrollPane jScrollPaneCurrencies;
     private javax.swing.JScrollPane jScrollPaneTransactions;
+    private javax.swing.JSpinner jSpinnerPage;
     private javax.swing.JSplitPane jSplitPaneTransactions;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTable jTableAccounts;
@@ -497,13 +571,10 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 	 * Currencies table model
 	 */
 	private CurrenciesTableModel currenciesTableModel = new CurrenciesTableModel();
-
-	@Override
-	public void transactionCreated(FinanceTransaction newTransaction) {
-		int newTransactionIndex = transactionsTableModel.getTransactionIndex(newTransaction);
-		jTableTransactions.getSelectionModel().setSelectionInterval(newTransactionIndex, newTransactionIndex);
-		jTableTransactions.scrollRectToVisible(jTableTransactions.getCellRect(newTransactionIndex, 0, true));
-	}
+	/**
+	 * Handler of external events
+	 */
+	private ExternalEventHandler externalEventHandler = new ExternalEventHandler();
 
 	/**
 	 * Forces an update of the accounts table
@@ -518,6 +589,7 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 	protected void updateTransactions() {
 		transactionEditor.editTransaction(null);
 		transactionsTableModel.fireTableDataChanged();
+		externalEventHandler.transactionsUpdated();
 	}
 
 	/**
@@ -535,8 +607,32 @@ public class MainWindow extends javax.swing.JFrame implements FinanceData.Transa
 		jComboBoxDefaultCurrency.setEnabled(true);
 	}
 
-	@Override
-	public void currenciesUpdated() {
-		updateDefaultCurrencyCombo();
+	/**
+	 * Class for processing external events
+	 */
+	public class ExternalEventHandler implements FinanceData.TransactionCreatedEventListener, FinanceData.TransactionUpdatedEventListener, FinanceData.CurrencyUpdatedEventListener {
+
+		@Override
+		public void transactionCreated(FinanceTransaction newTransaction) {
+			int newTransactionIndex = transactionsTableModel.getTransactionIndex(newTransaction);
+			jTableTransactions.getSelectionModel().setSelectionInterval(newTransactionIndex, newTransactionIndex);
+			jTableTransactions.scrollRectToVisible(jTableTransactions.getCellRect(newTransactionIndex, 0, true));
+			((SpinnerNumberModel) jSpinnerPage.getModel()).setMaximum(transactionsTableModel.getPageCount());
+		}
+
+		@Override
+		public void currenciesUpdated() {
+			updateDefaultCurrencyCombo();
+		}
+
+		@Override
+		public void transactionUpdated(FinanceTransaction updatedTransaction) {
+			//Do nothing
+		}
+
+		@Override
+		public void transactionsUpdated() {
+			((SpinnerNumberModel) jSpinnerPage.getModel()).setMaximum(transactionsTableModel.getPageCount());
+		}
 	}
 }
