@@ -445,4 +445,19 @@ public class FinanceTransaction implements Serializable {
 	public void setType(Type type) {
 		this.type = type;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof FinanceTransaction)
+			return id == ((FinanceTransaction) obj).id;
+		else
+			return this == obj;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 23 * hash + (int) (this.id ^ (this.id >>> 32));
+		return hash;
+	}
 }

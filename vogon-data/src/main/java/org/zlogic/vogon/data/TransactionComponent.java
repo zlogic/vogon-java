@@ -131,4 +131,19 @@ public class TransactionComponent implements Serializable {
 	public double getAmount() {
 		return amount / 100.0D;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof TransactionComponent)
+			return id == ((TransactionComponent) obj).id;
+		else
+			return this == obj;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 97 * hash + (int) (this.id ^ (this.id >>> 32));
+		return hash;
+	}
 }

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import javax.persistence.EntityManager;
 import javax.persistence.Transient;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
@@ -27,10 +28,6 @@ import javax.swing.event.EventListenerList;
 public class FinanceData {
 
 	/**
-	 * Contains all finance transactions
-	 */
-	protected java.util.List<FinanceTransaction> transactions;
-	/**
 	 * Contains all accounts
 	 */
 	protected java.util.List<FinanceAccount> accounts;
@@ -42,6 +39,10 @@ public class FinanceData {
 	 * Preferred currency
 	 */
 	protected Currency defaultCurrency;
+	/**
+	 * Number of transactions in the database
+	 */
+	protected long transactionsCount = 0;
 
 	/**
 	 * Default constructor
@@ -94,10 +95,11 @@ public class FinanceData {
 	private void restoreFromDatabase() {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		accounts = getAccountsFromDatabase(entityManager);
-		transactions = getTransactionsFromDatabase(entityManager);
 		exchangeRates = getCurrencyRatesFromDatabase(entityManager);
 		defaultCurrency = getDefaultCurrencyFromDatabase(entityManager);
 		entityManager.close();
+
+		transactionsCount = getTransactionsCountFromDatabase();
 
 		fireTransactionsUpdated();
 		fireAccountsUpdated();
@@ -105,13 +107,14 @@ public class FinanceData {
 	}
 
 	/**
-	 * Retrieves all transactions from the database
+	 * Retrieves all transactions from the database (from firstTransaction to lastTransaction)
 	 *
-	 * @param entityManager the entity manager (used for obtaining the same
-	 * classes from DB)
+	 * @param firstTransaction the first transaction number to be selected
+	 * @param lastTransaction the last transaction number to be selected
 	 * @return the list of all transactions stored in the database
 	 */
-	public List<FinanceTransaction> getTransactionsFromDatabase(EntityManager entityManager) {
+	public List<FinanceTransaction> getTransactionsFromDatabase(int firstTransaction, int lastTransaction) {
+		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
 		//Prefetch components
@@ -130,7 +133,34 @@ public class FinanceData {
 				criteriaBuilder.asc(tr.get(FinanceTransaction_.id)));
 		transactionsCriteriaQuery.select(tr).distinct(true);
 
-		return entityManager.createQuery(transactionsCriteriaQuery).getResultList();
+		TypedQuery query = entityManager.createQuery(transactionsCriteriaQuery);
+		if (firstTransaction >= 0)
+			query = query.setFirstResult(firstTransaction);
+		if (lastTransaction >= 0)
+			query = query.setMaxResults(lastTransaction - firstTransaction + 1);
+
+		List<FinanceTransaction> result = query.getResultList();
+		entityManager.close();
+		return result;
+	}
+
+	/**
+	 * Returns the number of transactions stored in the database
+	 *
+	 * @return the number of transactions stored in the database
+	 */
+	public long getTransactionsCountFromDatabase() {
+		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+		CriteriaQuery<Long> transactionsCriteriaQuery = criteriaBuilder.createQuery(Long.class);
+		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
+
+		transactionsCriteriaQuery.select(criteriaBuilder.countDistinct(tr));
+
+		Long result = entityManager.createQuery(transactionsCriteriaQuery).getSingleResult();
+		entityManager.close();
+		return result;
 	}
 
 	/**
@@ -255,12 +285,9 @@ public class FinanceData {
 
 		boolean result = false;
 
-		if (!transactions.contains(transaction)) {
-			transactions.add(transaction);
-			for (TransactionComponent component : transaction.getComponents())
-				if (entityManager.find(TransactionComponent.class, component.id) == null)
-					entityManager.persist(component);
-		}
+		for (TransactionComponent component : transaction.getComponents())
+			if (entityManager.find(TransactionComponent.class, component.id) == null)
+				entityManager.persist(component);
 
 		if (entityManager.find(FinanceTransaction.class, transaction.id) == null) {
 			entityManager.persist(transaction);
@@ -464,8 +491,10 @@ public class FinanceData {
 		entityManager.getTransaction().commit();
 		entityManager.close();
 
-		if (transactionAdded)
+		if (transactionAdded) {
 			fireTransactionCreated(transaction);
+			fireTransactionsUpdated();
+		}
 		for (FinanceAccount account : transaction.getAccounts())
 			fireAccountUpdated(account);
 	}
@@ -488,8 +517,10 @@ public class FinanceData {
 		entityManager.getTransaction().commit();
 		entityManager.close();
 
-		if (transactionAdded)
+		if (transactionAdded) {
 			fireTransactionCreated(transaction);
+			fireTransactionsUpdated();
+		}
 		fireTransactionUpdated(transaction);
 		for (FinanceAccount account : transaction.getAccounts())
 			fireAccountUpdated(account);
@@ -513,8 +544,10 @@ public class FinanceData {
 		entityManager.getTransaction().commit();
 		entityManager.close();
 
-		if (transactionAdded)
+		if (transactionAdded) {
 			fireTransactionCreated(transaction);
+			fireTransactionsUpdated();
+		}
 		fireTransactionUpdated(transaction);
 		for (FinanceAccount account : transaction.getAccounts())
 			fireAccountUpdated(account);
@@ -538,8 +571,10 @@ public class FinanceData {
 		entityManager.getTransaction().commit();
 		entityManager.close();
 
-		if (transactionAdded)
+		if (transactionAdded) {
 			fireTransactionCreated(transaction);
+			fireTransactionsUpdated();
+		}
 		fireTransactionUpdated(transaction);
 		for (FinanceAccount account : transaction.getAccounts())
 			fireAccountUpdated(account);
@@ -573,8 +608,10 @@ public class FinanceData {
 		entityManager.getTransaction().commit();
 		entityManager.close();
 
-		if (transactionAdded)
+		if (transactionAdded) {
 			fireTransactionCreated(transaction);
+			fireTransactionsUpdated();
+		}
 		fireTransactionUpdated(transaction);
 
 		for (FinanceAccount account : transaction.getAccounts())
@@ -614,8 +651,10 @@ public class FinanceData {
 		entityManager.getTransaction().commit();
 		entityManager.close();
 
-		if (transactionAdded)
+		if (transactionAdded) {
 			fireTransactionCreated(transaction);
+			fireTransactionsUpdated();
+		}
 		fireTransactionUpdated(transaction);
 
 		if (accountAdded)
@@ -659,8 +698,10 @@ public class FinanceData {
 		entityManager.getTransaction().commit();
 		entityManager.close();
 
-		if (transactionAdded)
+		if (transactionAdded) {
 			fireTransactionCreated(component.getTransaction());
+			fireTransactionsUpdated();
+		}
 		fireTransactionUpdated(component.getTransaction());
 
 		fireAccountUpdated(component.getAccount());
@@ -703,8 +744,10 @@ public class FinanceData {
 		entityManager.getTransaction().commit();
 		entityManager.close();
 
-		if (transactionAdded)
+		if (transactionAdded) {
 			fireTransactionCreated(component.getTransaction());
+			fireTransactionsUpdated();
+		}
 		fireTransactionUpdated(component.getTransaction());
 
 		fireAccountUpdated(component.getAccount());
@@ -827,8 +870,6 @@ public class FinanceData {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
 
-		transactions.remove(transaction);
-
 		List<FinanceAccount> affectedAccounts = transaction.getAccounts();
 
 		for (TransactionComponent component : transaction.getComponents())
@@ -854,7 +895,7 @@ public class FinanceData {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
 
-		for (FinanceTransaction transaction : transactions) {
+		for (FinanceTransaction transaction : getTransactions()) {
 			List<TransactionComponent> components = transaction.getComponentsForAccount(account);
 			transaction.removeComponents(components);
 			if (!components.isEmpty())
@@ -961,12 +1002,43 @@ public class FinanceData {
 	}
 
 	/**
-	 * Returns the list of transactions
+	 * Returns the list of transactions (from firstTransaction to lastTransaction)
 	 *
+	 * @param firstTransaction the first transaction number to be selected
+	 * @param lastTransaction the last transaction number to be selected
 	 * @return the list of transactions
 	 */
+	public List<FinanceTransaction> getTransactions(int firstTransaction, int lastTransaction) {
+		return getTransactionsFromDatabase(firstTransaction, lastTransaction);
+	}
+
+	/**
+	 * Returns a specific transaction from database
+	 *
+	 * @param index the transaction's index
+	 * @return all transactions in the database
+	 */
+	public FinanceTransaction getTransaction(int index) {
+		List<FinanceTransaction> transactions = getTransactionsFromDatabase(index, index);
+		return transactions.isEmpty() ? null : transactions.get(0);
+	}
+
+	/**
+	 * Returns all transactions from database
+	 *
+	 * @return all transactions in the database
+	 */
 	public List<FinanceTransaction> getTransactions() {
-		return transactions;
+		return getTransactionsFromDatabase(-1, -1);
+	}
+
+	/**
+	 * Returns number of transactions
+	 *
+	 * @return the number of transactions
+	 */
+	public int getTransactionCount() {
+		return (int) transactionsCount;
 	}
 
 	/**
@@ -1113,6 +1185,7 @@ public class FinanceData {
 	 * Dispatches a transactions updated event (all transactions were updated)
 	 */
 	protected void fireTransactionsUpdated() {
+		transactionsCount = getTransactionsCountFromDatabase();
 		for (TransactionUpdatedEventListener listener : eventListeners.getListeners(TransactionUpdatedEventListener.class))
 			listener.transactionsUpdated();
 	}
