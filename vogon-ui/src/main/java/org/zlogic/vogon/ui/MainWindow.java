@@ -67,12 +67,13 @@ public class MainWindow extends javax.swing.JFrame {
 		financeData.addTransactionCreatedListener(transactionsTableModel);
 		financeData.addTransactionUpdatedListener(externalEventHandler);
 		financeData.addTransactionUpdatedListener(transactionsTableModel);
-		financeData.addAccountCreatedListener(accountsTableModel);
-		financeData.addAccountUpdatedListener(accountsTableModel);
-		financeData.addAccountDeletedListener(accountsTableModel);
+		financeData.addTransactionDeletedListener(transactionsTableModel);
 		financeData.addAccountCreatedListener(transactionEditor);
 		financeData.addAccountUpdatedListener(transactionEditor);
 		financeData.addAccountDeletedListener(transactionEditor);
+		financeData.addAccountCreatedListener(accountsTableModel);
+		financeData.addAccountUpdatedListener(accountsTableModel);
+		financeData.addAccountDeletedListener(accountsTableModel);
 		financeData.addCurrencyUpdatedListener(externalEventHandler);
 		financeData.addCurrencyUpdatedListener(currenciesTableModel);
 

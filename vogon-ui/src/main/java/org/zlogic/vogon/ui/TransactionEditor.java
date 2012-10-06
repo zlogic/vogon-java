@@ -288,6 +288,10 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
 		((TransactionComponentsTableModel) jTableComponents.getModel()).setFinanceData(financeData);
+
+		financeData.addAccountCreatedListener((TransactionComponentsTableModel) jTableComponents.getModel());
+		financeData.addAccountUpdatedListener((TransactionComponentsTableModel) jTableComponents.getModel());
+		financeData.addAccountDeletedListener((TransactionComponentsTableModel) jTableComponents.getModel());
 	}
 
 	/**

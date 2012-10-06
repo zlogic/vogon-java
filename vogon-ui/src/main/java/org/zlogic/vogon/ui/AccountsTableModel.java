@@ -21,14 +21,19 @@ import org.zlogic.vogon.data.FinanceTransaction;
  */
 public class AccountsTableModel extends AbstractTableModel implements FinanceData.AccountCreatedEventListener, FinanceData.AccountUpdatedEventListener, FinanceData.AccountDeletedEventListener {
 
+	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * Finance Data instance
 	 */
-	protected FinanceData data = null;
+	protected FinanceData financeData = null;
 	/**
 	 * List of reporting (virtual) accounts
 	 */
 	protected List<ReportingAccount> reportingAcconts = null;
+	/**
+	 * The locally cached accounts
+	 */
+	protected List<FinanceAccount> accounts;
 
 	/**
 	 * Default constructor for AccountsTableModel
@@ -37,13 +42,15 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 	}
 
 	/**
-	 * Sets the table data
+	 * Sets the table financeData
 	 *
-	 * @param data
+	 * @param financeData the FinanceData to be used
 	 */
-	public void setFinanceData(FinanceData data) {
-		this.data = data;
+	public void setFinanceData(FinanceData financeData) {
+		this.financeData = financeData;
 		reportingAcconts = new LinkedList<>();
+
+		accounts = financeData.getAccounts();
 
 		updateReportingAccounts();
 
@@ -56,10 +63,10 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 	protected void updateReportingAccounts() {
 		reportingAcconts.clear();
 
-		for (Currency currency : data.getCurrencies())
-			reportingAcconts.add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ACCOUNT"), new Object[]{currency.getCurrencyCode()}), data.getTotalBalance(currency), currency));
-		if (data.getDefaultCurrency() != null)
-			reportingAcconts.add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ALL_ACCOUNTS"), new Object[]{data.getDefaultCurrency().getCurrencyCode()}), data.getTotalBalance(null), data.getDefaultCurrency()));
+		for (Currency currency : financeData.getCurrencies())
+			reportingAcconts.add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ACCOUNT"), new Object[]{currency.getCurrencyCode()}), financeData.getTotalBalance(currency), currency));
+		if (financeData.getDefaultCurrency() != null)
+			reportingAcconts.add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ALL_ACCOUNTS"), new Object[]{financeData.getDefaultCurrency().getCurrencyCode()}), financeData.getTotalBalance(null), financeData.getDefaultCurrency()));
 	}
 
 	/**
@@ -122,8 +129,8 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 		}
 
 		/**
-		 * Formats the string with HTML to distinguish this account's data from
-		 * regular accounts
+		 * Formats the string with HTML to distinguish this account's
+		 * financeData from regular accounts
 		 *
 		 * @param text the text to be formatted
 		 * @return the HTML-formatted text
@@ -140,7 +147,7 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 
 	@Override
 	public int getRowCount() {
-		return data != null ? data.getAccounts().size() + reportingAcconts.size() : 0;
+		return financeData != null ? accounts.size() + reportingAcconts.size() : 0;
 	}
 
 	@Override
@@ -160,8 +167,8 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 
 	@Override
 	public Object getValueAt(int row, int col) {
-		if (row < data.getAccounts().size()) {
-			FinanceAccount account = data.getAccounts().get(row);
+		if (row < accounts.size()) {
+			FinanceAccount account = accounts.get(row);
 			switch (col) {
 				case 0:
 					return account.getName();
@@ -173,7 +180,7 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 					return account.getIncludeInTotal();
 			}
 		} else {
-			row -= data.getAccounts().size();
+			row -= accounts.size();
 			ReportingAccount account = reportingAcconts.get(row);
 			switch (col) {
 				case 0:
@@ -206,26 +213,26 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 
 	@Override
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-		FinanceAccount account = data.getAccounts().get(rowIndex);
+		FinanceAccount account = accounts.get(rowIndex);
 		switch (columnIndex) {
 			case 0:
-				data.setAccountName(account, (String) aValue);
+				financeData.setAccountName(account, (String) aValue);
 				break;
 			case 2:
-				data.setAccountCurrency(account, ((CurrencyComboItem) aValue).getCurrency());
+				financeData.setAccountCurrency(account, ((CurrencyComboItem) aValue).getCurrency());
 				break;
 			case 3:
-				data.setAccountIncludeInTocal(account, (Boolean) aValue);
+				financeData.setAccountIncludeInTotal(account, (Boolean) aValue);
 				break;
 		}
+		accounts = financeData.getAccounts();
 		fireTableRowsUpdated(rowIndex, rowIndex);
 	}
 
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return rowIndex < data.getAccounts().size() && (columnIndex == 0 || columnIndex == 2 || columnIndex == 3);
+		return rowIndex < accounts.size() && (columnIndex == 0 || columnIndex == 2 || columnIndex == 3);
 	}
-	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 
 	/**
 	 * Returns a list of currency items which can be rendered in a Combo box
@@ -247,9 +254,10 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 	 * @return the new account's index
 	 */
 	public int addAccount() {
-		FinanceAccount account = new FinanceAccount("", data.getDefaultCurrency()); //NOI18N
-		data.createAccount(account);
-		int newAccountIndex = data.getAccounts().indexOf(account);
+		FinanceAccount account = new FinanceAccount("", financeData.getDefaultCurrency()); //NOI18N
+		financeData.createAccount(account);
+		accounts = financeData.getAccounts();
+		int newAccountIndex = accounts.indexOf(account);
 		fireTableRowsInserted(newAccountIndex, newAccountIndex);
 		return newAccountIndex;
 	}
@@ -260,33 +268,39 @@ public class AccountsTableModel extends AbstractTableModel implements FinanceDat
 	 * @param rowIndex the row index of the item being deleted
 	 */
 	public void deleteAccount(int rowIndex) {
-		if (rowIndex < data.getAccounts().size()) {
-			data.deleteAccount(data.getAccounts().get(rowIndex));
+		if (rowIndex < accounts.size()) {
+			financeData.deleteAccount(accounts.get(rowIndex));
+			accounts = financeData.getAccounts();
 			fireTableRowsDeleted(rowIndex, rowIndex);
 		}
 	}
 
 	@Override
 	public void accountCreated(FinanceAccount newAccount) {
-		int rowIndex = data.getAccounts().indexOf(newAccount);
+		accounts = financeData.getAccounts();
+		int rowIndex = accounts.indexOf(newAccount);
 		fireTableRowsInserted(rowIndex, rowIndex);
 	}
 
 	@Override
 	public void accountUpdated(FinanceAccount updatedAccount) {
+		accounts = financeData.getAccounts();
 		updateReportingAccounts();
-		int rowIndex = data.getAccounts().indexOf(updatedAccount);
+		int rowIndex = accounts.indexOf(updatedAccount);
 		fireTableRowsUpdated(rowIndex, rowIndex);
 	}
 
 	@Override
 	public void accountsUpdated() {
+		accounts = financeData.getAccounts();
 		updateReportingAccounts();
 		fireTableDataChanged();
 	}
 
 	@Override
 	public void accountDeleted(FinanceAccount deletedAccount) {
+		accounts = financeData.getAccounts();
+		updateReportingAccounts();
 		fireTableDataChanged();
 	}
 }
