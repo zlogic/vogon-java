@@ -177,7 +177,7 @@ public class MainWindow extends javax.swing.JFrame {
             .addGroup(jPanelTransactionControlsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jButtonDeleteTransaction)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 475, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 480, Short.MAX_VALUE)
                 .addComponent(jLabelPageNumber)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSpinnerPage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -196,7 +196,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         jPanelTransactionsList.add(jPanelTransactionControls, java.awt.BorderLayout.NORTH);
 
-        jTableTransactions.setAutoCreateRowSorter(true);
         jTableTransactions.setModel(transactionsTableModel);
         jTableTransactions.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         jTableTransactions.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);

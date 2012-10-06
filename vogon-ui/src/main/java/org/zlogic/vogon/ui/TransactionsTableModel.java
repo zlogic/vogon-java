@@ -6,6 +6,7 @@
 package org.zlogic.vogon.ui;
 
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -33,6 +34,10 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 	 * Currently selected page
 	 */
 	protected int currentPage = 0;
+	/**
+	 * Transactions on the current page
+	 */
+	protected List<FinanceTransaction> pageTransactions;
 
 	/**
 	 * Default constructor for TransactionsTableModel
@@ -47,6 +52,7 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 	 */
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
+		updatePageTransactions();
 		fireTableDataChanged();
 	}
 
@@ -69,7 +75,7 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 	 * @return the number of pages
 	 */
 	public int getPageCount() {
-		return financeData.getTransactions().size() / pageSize + 1;
+		return financeData.getTransactionCount() / pageSize + 1;
 	}
 
 	/**
@@ -90,7 +96,7 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 	public int getPageSize(int pageIndex) {
 		if (financeData == null)
 			return 0;
-		return Math.min(pageSize, financeData.getTransactions().size() - currentPage * pageSize);
+		return Math.min(pageSize, financeData.getTransactionCount() - currentPage * pageSize);
 	}
 
 	/**
@@ -105,49 +111,27 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 			pageIndex = 0;
 		else if (pageIndex >= getPageCount())
 			pageIndex = getPageCount() - 1;
+
+		boolean pageChanged = currentPage != pageIndex;
 		currentPage = pageIndex;
+		if (pageChanged)
+			updatePageTransactions();
 		fireTableDataChanged();
 		return pageIndex;
 	}
 
 	/**
-	 * Translates a model row index to a FinanceData transaction index
-	 *
-	 * @param rowIndex the model row index
-	 * @return the FinanceData transaction index
+	 * Updates transactions for current page from database
 	 */
-	protected int translateRowToFinanceData(int rowIndex) {
-		return financeData.getTransactions().size() - 1 - rowIndex;
-	}
-
-	/**
-	 * Translates a FinanceData transaction index to a model row index
-	 *
-	 * @param rowIndex the FinanceData transaction index
-	 * @return the model row index
-	 */
-	protected int translateRowToModel(int rowIndex) {
-		return financeData.getTransactions().size() - 1 - rowIndex;
-	}
-
-	/**
-	 * Returns the absolute index of a paged row
-	 *
-	 * @param rowIndex the index of a row on the current page
-	 * @return the absolute row index
-	 */
-	protected int translatePagedRowToModelRow(int rowIndex) {
-		return rowIndex + currentPage * pageSize;
-	}
-
-	/**
-	 * Returns the page-related index of an absolute model row index
-	 *
-	 * @param rowIndex the absolute index of a row in the model
-	 * @return the page-related index
-	 */
-	protected int translateModelRowToPagedRow(int rowIndex) {
-		return rowIndex % pageSize;
+	protected void updatePageTransactions() {
+		int firstTransactionIndex = currentPage * pageSize;
+		int lastTransactionIndex = firstTransactionIndex + pageSize - 1;
+		lastTransactionIndex = Math.min(lastTransactionIndex, financeData.getTransactionCount() - 1);
+		firstTransactionIndex = financeData.getTransactionCount() - 1 - firstTransactionIndex;
+		lastTransactionIndex = financeData.getTransactionCount() - 1 - lastTransactionIndex;
+		List<FinanceTransaction> transactions = financeData.getTransactions(Math.min(firstTransactionIndex, lastTransactionIndex), Math.max(firstTransactionIndex, lastTransactionIndex));
+		Collections.reverse(transactions);
+		pageTransactions = transactions;
 	}
 
 	@Override
@@ -239,9 +223,7 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 	 * @return the transaction's index in the model (on the current page)
 	 */
 	public int getTransactionIndex(FinanceTransaction transaction) {
-		int rowIndex = translateRowToModel(financeData.getTransactions().indexOf(transaction));
-		rowIndex = translateModelRowToPagedRow(rowIndex);
-		return rowIndex;
+		return pageTransactions.indexOf(transaction);
 	}
 
 	/**
@@ -251,9 +233,7 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 	 * @return the transaction
 	 */
 	public FinanceTransaction getTransaction(int rowIndex) {
-		rowIndex = translatePagedRowToModelRow(rowIndex);
-		FinanceTransaction transaction = financeData.getTransactions().get(translateRowToFinanceData(rowIndex));
-		return transaction;
+		return pageTransactions.get(rowIndex);
 	}
 
 	@Override
@@ -284,27 +264,28 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 	 * @param rowIndex the rowIndex to be deleted
 	 */
 	public void deleteTransaction(int rowIndex) {
-		rowIndex = translatePagedRowToModelRow(rowIndex);
-		financeData.deleteTransaction(financeData.getTransactions().get(translateRowToFinanceData(rowIndex)));
+		financeData.deleteTransaction(pageTransactions.get(rowIndex));
+		updatePageTransactions();
 		fireTableRowsDeleted(rowIndex, rowIndex);
 	}
 
 	@Override
 	public void transactionCreated(FinanceTransaction newTransaction) {
-		int rowIndex = translateRowToModel(financeData.getTransactions().indexOf(newTransaction));
-		rowIndex = translateModelRowToPagedRow(rowIndex);
+		updatePageTransactions();
+		int rowIndex = pageTransactions.indexOf(newTransaction);
 		fireTableRowsInserted(rowIndex, rowIndex);
 	}
 
 	@Override
 	public void transactionUpdated(FinanceTransaction updatedTransaction) {
-		int rowIndex = translateRowToModel(financeData.getTransactions().indexOf(updatedTransaction));
-		rowIndex = translateModelRowToPagedRow(rowIndex);
-		fireTableRowsUpdated(rowIndex, rowIndex);
+		int rowIndex = pageTransactions.indexOf(updatedTransaction);
+		if (rowIndex >= 0)
+			fireTableRowsUpdated(rowIndex, rowIndex);
 	}
 
 	@Override
 	public void transactionsUpdated() {
+		updatePageTransactions();
 		fireTableDataChanged();
 	}
 }
