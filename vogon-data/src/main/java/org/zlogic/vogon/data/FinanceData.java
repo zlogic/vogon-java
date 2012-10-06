@@ -28,10 +28,6 @@ import javax.swing.event.EventListenerList;
 public class FinanceData {
 
 	/**
-	 * Contains all accounts
-	 */
-	protected java.util.List<FinanceAccount> accounts;
-	/**
 	 * Contains exchange rates
 	 */
 	protected java.util.List<CurrencyRate> exchangeRates;
@@ -94,7 +90,6 @@ public class FinanceData {
 	 */
 	private void restoreFromDatabase() {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		accounts = getAccountsFromDatabase(entityManager);
 		exchangeRates = getCurrencyRatesFromDatabase(entityManager);
 		defaultCurrency = getDefaultCurrencyFromDatabase(entityManager);
 		entityManager.close();
@@ -107,7 +102,8 @@ public class FinanceData {
 	}
 
 	/**
-	 * Retrieves all transactions from the database (from firstTransaction to lastTransaction)
+	 * Retrieves all transactions from the database (from firstTransaction to
+	 * lastTransaction)
 	 *
 	 * @param firstTransaction the first transaction number to be selected
 	 * @param lastTransaction the last transaction number to be selected
@@ -149,7 +145,7 @@ public class FinanceData {
 	 *
 	 * @return the number of transactions stored in the database
 	 */
-	public long getTransactionsCountFromDatabase() {
+	protected long getTransactionsCountFromDatabase() {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
@@ -166,16 +162,18 @@ public class FinanceData {
 	/**
 	 * Retrieves all accounts from the database
 	 *
-	 * @param entityManager the entity manager (used for obtaining the same
-	 * classes from DB)
 	 * @return the list of all accounts stored in the database
 	 */
-	public List<FinanceAccount> getAccountsFromDatabase(EntityManager entityManager) {
+	protected List<FinanceAccount> getAccountsFromDatabase() {
+		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
+
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<FinanceAccount> accountsCriteriaQuery = criteriaBuilder.createQuery(FinanceAccount.class);
 		Root<FinanceAccount> acc = accountsCriteriaQuery.from(FinanceAccount.class);
 
-		return entityManager.createQuery(accountsCriteriaQuery).getResultList();
+		List<FinanceAccount> result = entityManager.createQuery(accountsCriteriaQuery).getResultList();
+		entityManager.close();
+		return result;
 	}
 
 	/**
@@ -185,7 +183,7 @@ public class FinanceData {
 	 * classes from DB)
 	 * @return the list of all currency exchange rates stored in the database
 	 */
-	public List<CurrencyRate> getCurrencyRatesFromDatabase(EntityManager entityManager) {
+	protected List<CurrencyRate> getCurrencyRatesFromDatabase(EntityManager entityManager) {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<CurrencyRate> exchangeRatesCriteriaQuery = criteriaBuilder.createQuery(CurrencyRate.class);
 		Root<CurrencyRate> er = exchangeRatesCriteriaQuery.from(CurrencyRate.class);
@@ -203,7 +201,7 @@ public class FinanceData {
 	 * @return the Preferences class instance, or a new persisted instance if
 	 * the database doesn't contain any
 	 */
-	public Preferences getPreferencesFromDatabase(EntityManager entityManager) {
+	protected Preferences getPreferencesFromDatabase(EntityManager entityManager) {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Preferences> preferencesCriteriaQuery = criteriaBuilder.createQuery(Preferences.class);
 		Root<Preferences> prf = preferencesCriteriaQuery.from(Preferences.class);
@@ -256,9 +254,6 @@ public class FinanceData {
 
 		boolean result = false;
 
-		if (!accounts.contains(account))
-			accounts.add(account);
-
 		if (entityManager.find(FinanceAccount.class, account.id) == null) {
 			entityManager.persist(account);
 			result = true;
@@ -306,7 +301,7 @@ public class FinanceData {
 	 */
 	public double getTotalBalance(Currency currency) {
 		long totalBalance = 0;
-		for (FinanceAccount account : accounts) {
+		for (FinanceAccount account : getAccountsFromDatabase()) {
 			if (!account.getIncludeInTotal())
 				continue;
 			if (account.getCurrency() == currency)
@@ -344,6 +339,7 @@ public class FinanceData {
 
 		//Search for missing currencies
 		List<CurrencyRate> usedRates = new LinkedList<>();
+		List<FinanceAccount> accounts = getAccountsFromDatabase();
 		for (FinanceAccount account1 : accounts) {
 			for (FinanceAccount account2 : accounts) {
 				if (account1.getCurrency() != account2.getCurrency()) {
@@ -460,7 +456,7 @@ public class FinanceData {
 	 * @param account the account to be updated
 	 * @param includeInTotal true if the account should be included in the total
 	 */
-	public void setAccountIncludeInTocal(FinanceAccount account, boolean includeInTotal) {
+	public void setAccountIncludeInTotal(FinanceAccount account, boolean includeInTotal) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
 
@@ -903,7 +899,6 @@ public class FinanceData {
 			for (TransactionComponent component : components)
 				entityManager.remove(entityManager.find(TransactionComponent.class, component.id));
 		}
-		accounts.remove(account);
 		entityManager.remove(entityManager.find(FinanceAccount.class, account.id));
 
 		entityManager.getTransaction().commit();
@@ -998,11 +993,12 @@ public class FinanceData {
 	 * @return the list of accounts
 	 */
 	public List<FinanceAccount> getAccounts() {
-		return accounts;
+		return getAccountsFromDatabase();
 	}
 
 	/**
-	 * Returns the list of transactions (from firstTransaction to lastTransaction)
+	 * Returns the list of transactions (from firstTransaction to
+	 * lastTransaction)
 	 *
 	 * @param firstTransaction the first transaction number to be selected
 	 * @param lastTransaction the last transaction number to be selected

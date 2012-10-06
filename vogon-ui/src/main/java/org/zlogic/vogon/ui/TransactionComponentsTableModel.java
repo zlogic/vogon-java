@@ -17,7 +17,7 @@ import org.zlogic.vogon.data.TransactionComponent;
  *
  * @author Zlogic
  */
-public class TransactionComponentsTableModel extends AbstractTableModel {
+public class TransactionComponentsTableModel extends AbstractTableModel implements FinanceData.AccountCreatedEventListener, FinanceData.AccountUpdatedEventListener, FinanceData.AccountDeletedEventListener {
 
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
@@ -28,14 +28,18 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 	 * The transaction currently being edited
 	 */
 	protected FinanceTransaction editingTransaction;
+	/**
+	 * The locally cached accounts
+	 */
+	protected List<FinanceAccount> accounts;
 
 	/**
 	 * Sets the table data
 	 *
-	 * @param data
+	 * @param financeData the FinanceData to be used
 	 */
-	public void setFinanceData(FinanceData data) {
-		this.financeData = data;
+	public void setFinanceData(FinanceData financeData) {
+		this.financeData = financeData;
 		fireTableDataChanged();
 	}
 
@@ -115,6 +119,26 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 		return Object.class;
 	}
 
+	@Override
+	public void accountCreated(FinanceAccount newAccount) {
+		accounts = financeData.getAccounts();
+	}
+
+	@Override
+	public void accountUpdated(FinanceAccount updatedAccount) {
+		accounts = financeData.getAccounts();
+	}
+
+	@Override
+	public void accountsUpdated() {
+		accounts = financeData.getAccounts();
+	}
+
+	@Override
+	public void accountDeleted(FinanceAccount deletedAccount) {
+		accounts = financeData.getAccounts();
+	}
+
 	/**
 	 * Returns a list of account items which can be rendered in a Combo box
 	 * (used to specifically detect the selected item)
@@ -123,10 +147,35 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 	 */
 	public Object[] getAccountsComboList() {
 		List<FinanceAccountComboItem> items = new LinkedList<>();
-		for (FinanceAccount account : financeData.getAccounts()) {
-			items.add(new FinanceAccountComboItem(account));
-		}
+		if (accounts == null)
+			accounts = financeData.getAccounts();
+		for (FinanceAccount account : accounts)
+			if (account.getIncludeInTotal())
+				items.add(new FinanceAccountComboItem(account));
 		return items.toArray();
+	}
+
+	/**
+	 * Adds a transaction component to the model and FinanceData instance
+	 *
+	 * @return the new component's index
+	 */
+	public int addCompoment() {
+		TransactionComponent component = new TransactionComponent(null, editingTransaction, 0);
+		editingTransaction.addComponent(component);
+		int newComponentIndex = editingTransaction.getComponents().indexOf(component);
+		fireTableRowsInserted(newComponentIndex, newComponentIndex);
+		return newComponentIndex;
+	}
+
+	/**
+	 * Deletes a transaction component from the model and FinanceData instance
+	 *
+	 * @param rowIndex the row index of the item being deleted
+	 */
+	public void deleteComponent(int rowIndex) {
+		editingTransaction.removeComponent(editingTransaction.getComponents().get(rowIndex));
+		fireTableRowsDeleted(rowIndex, rowIndex);
 	}
 
 	/**
@@ -170,28 +219,5 @@ public class TransactionComponentsTableModel extends AbstractTableModel {
 		public FinanceAccount getAccount() {
 			return account;
 		}
-	}
-
-	/**
-	 * Adds a transaction component to the model and FinanceData instance
-	 *
-	 * @return the new component's index
-	 */
-	public int addCompoment() {
-		TransactionComponent component = new TransactionComponent(null, editingTransaction, 0);
-		editingTransaction.addComponent(component);
-		int newComponentIndex = editingTransaction.getComponents().indexOf(component);
-		fireTableRowsInserted(newComponentIndex, newComponentIndex);
-		return newComponentIndex;
-	}
-
-	/**
-	 * Deletes a transaction component from the model and FinanceData instance
-	 *
-	 * @param rowIndex the row index of the item being deleted
-	 */
-	public void deleteComponent(int rowIndex) {
-		editingTransaction.removeComponent(editingTransaction.getComponents().get(rowIndex));
-		fireTableRowsDeleted(rowIndex, rowIndex);
 	}
 }
