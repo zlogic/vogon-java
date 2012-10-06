@@ -98,6 +98,10 @@ public class FinanceData {
 		exchangeRates = getCurrencyRatesFromDatabase(entityManager);
 		defaultCurrency = getDefaultCurrencyFromDatabase(entityManager);
 		entityManager.close();
+
+		fireTransactionsUpdated();
+		fireAccountsUpdated();
+		fireCurrenciesUpdated();
 	}
 
 	/**
