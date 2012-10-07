@@ -162,7 +162,7 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
 
-        jLabelPageNumber.setText("Page");
+        jLabelPageNumber.setText(messages.getString("PAGE")); // NOI18N
 
         jSpinnerPage.setModel(new javax.swing.SpinnerNumberModel(1, 1, 1, 1));
         jSpinnerPage.addChangeListener(new javax.swing.event.ChangeListener() {

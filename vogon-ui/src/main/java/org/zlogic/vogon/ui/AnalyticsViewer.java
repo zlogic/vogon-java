@@ -168,7 +168,7 @@ public class AnalyticsViewer extends javax.swing.JPanel implements FinanceData.A
             }
         });
 
-        jPanelTagsReport.setBorder(javax.swing.BorderFactory.createTitledBorder("Statistics by tags"));
+        jPanelTagsReport.setBorder(javax.swing.BorderFactory.createTitledBorder(messages.getString("STATISTICS_BY_TAGS"))); // NOI18N
 
         jTableTagsReport.setAutoCreateRowSorter(true);
         jTableTagsReport.setModel(getTagsReportTableModel());
@@ -192,7 +192,7 @@ public class AnalyticsViewer extends javax.swing.JPanel implements FinanceData.A
             .addComponent(jPanelTagsChart, javax.swing.GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
         );
 
-        jPanelTransactionsReport.setBorder(javax.swing.BorderFactory.createTitledBorder("Transactions"));
+        jPanelTransactionsReport.setBorder(javax.swing.BorderFactory.createTitledBorder(messages.getString("TRANSACTIONS_BALANCE_HISTORY"))); // NOI18N
 
         jTableTransactionsReport.setAutoCreateRowSorter(true);
         jTableTransactionsReport.setModel(getTransactionsReportTableModel());
@@ -361,7 +361,7 @@ public class AnalyticsViewer extends javax.swing.JPanel implements FinanceData.A
 					financeData.getExchangeRate(tagExpense.getCurrency(), financeData.getDefaultCurrency())
 					* Math.abs(tagExpense.getAmount()));
 
-		JFreeChart chart = ChartFactory.createPieChart3D("", dataset, false, true, false);
+		JFreeChart chart = ChartFactory.createPieChart3D(messages.getString("CHART_TAGS_TITLE"), dataset, false, true, false);
 		chart.setBackgroundPaint(jPanelTagsChart.getBackground());
 
 		PiePlot3D plot = (PiePlot3D) chart.getPlot();
@@ -397,7 +397,7 @@ public class AnalyticsViewer extends javax.swing.JPanel implements FinanceData.A
 		for (Map.Entry<Date, Double> balance : values.entrySet())
 			balanceSeries.add(new Day(balance.getKey()), balance.getValue());
 
-		JFreeChart chart = ChartFactory.createTimeSeriesChart("", "", "", new TimeSeriesCollection(balanceSeries), false, true, false);
+		JFreeChart chart = ChartFactory.createTimeSeriesChart(messages.getString("CHART_BALANCE_TITLE"), messages.getString("CHART_BALANCE_TIME_LABEL"), messages.getString("CHART_BALANCE_VALUE_LABEL"), new TimeSeriesCollection(balanceSeries), false, true, false);
 		chart.setBackgroundPaint(jPanelTagsChart.getBackground());
 
 		XYPlot plot = (XYPlot) chart.getPlot();

@@ -199,9 +199,9 @@ public class XmlImporter implements FileImporter {
 
 				//Create transaction instance
 				FinanceTransaction.Type transactionTypeEnum = null;
-				if (transactionType.equals("Transfer"))
+				if (transactionType.equals("Transfer")) //NOI18N
 					transactionTypeEnum = FinanceTransaction.Type.TRANSFER;
-				else if (transactionType.equals("ExpenseIncome"))
+				else if (transactionType.equals("ExpenseIncome")) //NOI18N
 					transactionTypeEnum = FinanceTransaction.Type.EXPENSEINCOME;
 				else
 					transactionTypeEnum = FinanceTransaction.Type.UNDEFINED;
