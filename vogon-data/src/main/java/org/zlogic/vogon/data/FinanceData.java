@@ -395,6 +395,7 @@ public class FinanceData {
 		entityManager.close();
 
 		if (accountAdded) {
+			fireAccountsUpdated();
 			fireAccountCreated(account);
 			fireCurrenciesUpdated();
 		}
@@ -489,8 +490,8 @@ public class FinanceData {
 		entityManager.close();
 
 		if (transactionAdded) {
-			fireTransactionCreated(transaction);
 			fireTransactionsUpdated();
+			fireTransactionCreated(transaction);
 		}
 		for (FinanceAccount account : transaction.getAccounts())
 			fireAccountUpdated(account);
@@ -515,8 +516,8 @@ public class FinanceData {
 		entityManager.close();
 
 		if (transactionAdded) {
-			fireTransactionCreated(transaction);
 			fireTransactionsUpdated();
+			fireTransactionCreated(transaction);
 		}
 		fireTransactionUpdated(transaction);
 		for (FinanceAccount account : transaction.getAccounts())
@@ -542,8 +543,8 @@ public class FinanceData {
 		entityManager.close();
 
 		if (transactionAdded) {
-			fireTransactionCreated(transaction);
 			fireTransactionsUpdated();
+			fireTransactionCreated(transaction);
 		}
 		fireTransactionUpdated(transaction);
 		for (FinanceAccount account : transaction.getAccounts())
@@ -569,8 +570,8 @@ public class FinanceData {
 		entityManager.close();
 
 		if (transactionAdded) {
-			fireTransactionCreated(transaction);
 			fireTransactionsUpdated();
+			fireTransactionCreated(transaction);
 		}
 		fireTransactionUpdated(transaction);
 		for (FinanceAccount account : transaction.getAccounts())
@@ -596,8 +597,8 @@ public class FinanceData {
 		entityManager.close();
 
 		if (transactionAdded) {
-			fireTransactionCreated(transaction);
 			fireTransactionsUpdated();
+			fireTransactionCreated(transaction);
 		}
 		fireTransactionUpdated(transaction);
 		for (FinanceAccount account : transaction.getAccounts())
@@ -633,8 +634,8 @@ public class FinanceData {
 		entityManager.close();
 
 		if (transactionAdded) {
-			fireTransactionCreated(transaction);
 			fireTransactionsUpdated();
+			fireTransactionCreated(transaction);
 		}
 		fireTransactionUpdated(transaction);
 
@@ -676,8 +677,8 @@ public class FinanceData {
 		entityManager.close();
 
 		if (transactionAdded) {
-			fireTransactionCreated(transaction);
 			fireTransactionsUpdated();
+			fireTransactionCreated(transaction);
 		}
 		fireTransactionUpdated(transaction);
 
@@ -723,8 +724,8 @@ public class FinanceData {
 		entityManager.close();
 
 		if (transactionAdded) {
-			fireTransactionCreated(component.getTransaction());
 			fireTransactionsUpdated();
+			fireTransactionCreated(component.getTransaction());
 		}
 		fireTransactionUpdated(component.getTransaction());
 
@@ -769,8 +770,8 @@ public class FinanceData {
 		entityManager.close();
 
 		if (transactionAdded) {
-			fireTransactionCreated(component.getTransaction());
 			fireTransactionsUpdated();
+			fireTransactionCreated(component.getTransaction());
 		}
 		fireTransactionUpdated(component.getTransaction());
 
@@ -904,6 +905,7 @@ public class FinanceData {
 		entityManager.getTransaction().commit();
 		entityManager.close();
 
+		fireTransactionsUpdated();
 		fireTransactionDeleted(transaction);
 
 		for (FinanceAccount account : affectedAccounts)
@@ -935,6 +937,7 @@ public class FinanceData {
 		populateCurrencies();
 
 		fireTransactionsUpdated();
+		fireAccountsUpdated();
 		fireAccountDeleted(account);
 		fireCurrenciesUpdated();
 	}
