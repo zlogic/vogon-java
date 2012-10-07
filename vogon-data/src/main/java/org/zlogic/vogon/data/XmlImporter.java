@@ -89,11 +89,11 @@ public class XmlImporter implements FileImporter {
 			for (currentNode = rootNode.getFirstChild(); currentNode != null; currentNode = currentNode.getNextSibling()) {
 				if (currentNode.getNodeName().equals("Accounts")) //NOI18N
 					accountsNode = currentNode;
-				if (currentNode.getNodeName().equals("Currencies")) //NOI18N
+				else if (currentNode.getNodeName().equals("Currencies")) //NOI18N
 					currenciesNode = currentNode;
-				if (currentNode.getNodeName().equals("Transactions")) //NOI18N
+				else if (currentNode.getNodeName().equals("Transactions")) //NOI18N
 					transactionsNode = currentNode;
-				else
+				else if (currentNode.getNodeType() != Node.TEXT_NODE)
 					Logger.getLogger(XmlImporter.class.getName()).log(Level.WARNING, MessageFormat.format(messages.getString("UNRECOGNIZED_NODE"), currentNode.getNodeName()));
 			}
 

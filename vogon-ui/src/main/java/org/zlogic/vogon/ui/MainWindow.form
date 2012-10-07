@@ -24,11 +24,21 @@
             <MenuItem class="javax.swing.JMenuItem" name="jMenuItemExport">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="EXPORT" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="MAINWINDOW_MENU_EXPORT" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
                 </Property>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemExportActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemExit">
+              <Properties>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="MAINWINDOW_MENU_EXIT" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+                </Property>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemExitActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>
@@ -36,14 +46,14 @@
         <Menu class="javax.swing.JMenu" name="jMenuTools">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="TOOLS" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="MAINWINDOW_MENU_TOOLS" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="jMenuItemRecalculateBalance">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="RECALCULATE_BALANCE" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="MAINWINDOW_MENU_RECALCULATE_BALANCE" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
                 </Property>
               </Properties>
               <Events>
@@ -53,7 +63,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="jMenuItemCleanupDB">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="CLEANUP_DB" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="MAINWINDOW_MENU_CLEANUP_DB" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
                 </Property>
               </Properties>
               <Events>
