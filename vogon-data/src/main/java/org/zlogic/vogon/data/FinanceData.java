@@ -294,6 +294,35 @@ public class FinanceData {
 	}
 
 	/**
+	 * Internal helper function Adds a transaction component to the list &
+	 * persists it and its transaction (if necessary) Safe to call even if the
+	 * transaction component already exists Should only be called from an
+	 * started transaction
+	 *
+	 * @param component the component to be added
+	 * @param entityManager the entity manager
+	 * @return true if component was added, false if it's already present in the
+	 * components list
+	 */
+	protected boolean persistenceAdd(TransactionComponent component, EntityManager entityManager) {
+		if (component == null)
+			return false;
+
+		boolean result = false;
+
+		if (component.getTransaction() != null)
+			if (entityManager.find(FinanceTransaction.class, component.getTransaction().id) == null)
+				entityManager.persist(component.getTransaction());
+
+		if (entityManager.find(TransactionComponent.class, component.id) == null) {
+			entityManager.persist(component);
+			result = true;
+		}
+
+		return result;
+	}
+
+	/**
 	 * Returns the total balance for all accounts with a specific currency
 	 *
 	 * @param currency the currency (or null if the balance should be calculated
@@ -495,6 +524,32 @@ public class FinanceData {
 		}
 		for (FinanceAccount account : transaction.getAccounts())
 			fireAccountUpdated(account);
+	}
+
+	/**
+	 * Adds a new transaction
+	 *
+	 * @param component the component to be added
+	 */
+	public void createTransactionComponent(TransactionComponent component) {
+		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
+		entityManager.getTransaction().begin();
+
+		if (component.getTransaction() != null) {
+			persistenceAdd(component.getTransaction(), entityManager);
+			persistenceAdd(component, entityManager);
+			if (!component.getTransaction().getComponents().contains(component))
+				component.getTransaction().addComponent(component);
+			entityManager.merge(component.getTransaction());
+		}
+
+		entityManager.getTransaction().commit();
+		entityManager.close();
+
+		if (component.getTransaction() != null)
+			fireTransactionUpdated(component.getTransaction());
+		if (component.getAccount() != null)
+			fireAccountUpdated(component.getAccount());
 	}
 
 	/**
@@ -874,16 +929,19 @@ public class FinanceData {
 
 		persistenceAdd(component.getTransaction(), entityManager);
 
-		component.getTransaction().removeComponent(component);
+		FinanceTransaction transaction = component.getTransaction();
+		if (transaction != null) {
+			component.getTransaction().removeComponent(component);
+			entityManager.merge(transaction);
+		}
 
 		entityManager.remove(entityManager.find(TransactionComponent.class, component.id));
 
 		entityManager.getTransaction().commit();
 		entityManager.close();
 
-		fireTransactionUpdated(component.getTransaction());
+		fireTransactionUpdated(transaction);
 		fireAccountUpdated(component.getAccount());
-		fireCurrenciesUpdated();
 	}
 
 	/**

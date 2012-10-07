@@ -259,10 +259,6 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
 	 * The transaction currently being edited
 	 */
 	protected FinanceTransaction editedTransaction;
-	/**
-	 * true if is currently saving data. Used to catch recursion in saveData()
-	 */
-	protected boolean isSaving = false;
 
 	/**
 	 * Resets all input fields to default (empty) values)
@@ -310,8 +306,6 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
 	 * @param transaction the transaction to be edited
 	 */
 	public void editTransaction(FinanceTransaction transaction) {
-		if (isSaving)
-			return;
 		if (jTableComponents.getCellEditor() != null)
 			jTableComponents.getCellEditor().cancelCellEditing();
 		saveChanges();
@@ -330,9 +324,6 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
 	 * Saves all changes in the FinanceData persistence
 	 */
 	protected void saveChanges() {
-		if (isSaving)
-			return;
-		isSaving = true;
 		if (editedTransaction != null) {
 			financeData.setTransactionDescription(editedTransaction, jTextFieldName.getText());
 			financeData.setTransactionTags(editedTransaction, jTextFieldTags.getText().split(",")); //NOI18N
@@ -345,7 +336,6 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
 				Logger.getLogger(TransactionEditor.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
-		isSaving = false;
 	}
 
 	/**
