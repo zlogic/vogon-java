@@ -135,6 +135,7 @@ public class MainWindow extends javax.swing.JFrame {
         jMenuFile = new javax.swing.JMenu();
         jMenuItemImport = new javax.swing.JMenuItem();
         jMenuItemExport = new javax.swing.JMenuItem();
+        jMenuItemExit = new javax.swing.JMenuItem();
         jMenuTools = new javax.swing.JMenu();
         jMenuItemRecalculateBalance = new javax.swing.JMenuItem();
         jMenuItemCleanupDB = new javax.swing.JMenuItem();
@@ -318,7 +319,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jMenuFile.add(jMenuItemImport);
 
-        jMenuItemExport.setText(messages.getString("EXPORT")); // NOI18N
+        jMenuItemExport.setText(messages.getString("MAINWINDOW_MENU_EXPORT")); // NOI18N
         jMenuItemExport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemExportActionPerformed(evt);
@@ -326,11 +327,19 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jMenuFile.add(jMenuItemExport);
 
+        jMenuItemExit.setText(messages.getString("MAINWINDOW_MENU_EXIT")); // NOI18N
+        jMenuItemExit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemExitActionPerformed(evt);
+            }
+        });
+        jMenuFile.add(jMenuItemExit);
+
         jMenuBar.add(jMenuFile);
 
-        jMenuTools.setText(messages.getString("TOOLS")); // NOI18N
+        jMenuTools.setText(messages.getString("MAINWINDOW_MENU_TOOLS")); // NOI18N
 
-        jMenuItemRecalculateBalance.setText(messages.getString("RECALCULATE_BALANCE")); // NOI18N
+        jMenuItemRecalculateBalance.setText(messages.getString("MAINWINDOW_MENU_RECALCULATE_BALANCE")); // NOI18N
         jMenuItemRecalculateBalance.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemRecalculateBalanceActionPerformed(evt);
@@ -338,7 +347,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jMenuTools.add(jMenuItemRecalculateBalance);
 
-        jMenuItemCleanupDB.setText(messages.getString("CLEANUP_DB")); // NOI18N
+        jMenuItemCleanupDB.setText(messages.getString("MAINWINDOW_MENU_CLEANUP_DB")); // NOI18N
         jMenuItemCleanupDB.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemCleanupDBActionPerformed(evt);
@@ -468,6 +477,10 @@ public class MainWindow extends javax.swing.JFrame {
 		transactionsTableModel.setCurrentPage((Integer) jSpinnerPage.getValue() - 1);
     }//GEN-LAST:event_jSpinnerPageStateChanged
 
+    private void jMenuItemExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExitActionPerformed
+		dispose();
+    }//GEN-LAST:event_jMenuItemExitActionPerformed
+
 	/**
 	 * @param args the command line arguments
 	 */
@@ -524,6 +537,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuBar jMenuBar;
     private javax.swing.JMenu jMenuFile;
     private javax.swing.JMenuItem jMenuItemCleanupDB;
+    private javax.swing.JMenuItem jMenuItemExit;
     private javax.swing.JMenuItem jMenuItemExport;
     private javax.swing.JMenuItem jMenuItemImport;
     private javax.swing.JMenuItem jMenuItemRecalculateBalance;
