@@ -162,7 +162,7 @@ public class TransactionComponentsTableModel extends AbstractTableModel implemen
 	 */
 	public int addCompoment() {
 		TransactionComponent component = new TransactionComponent(null, editingTransaction, 0);
-		editingTransaction.addComponent(component);
+		financeData.createTransactionComponent(component);
 		int newComponentIndex = editingTransaction.getComponents().indexOf(component);
 		fireTableRowsInserted(newComponentIndex, newComponentIndex);
 		return newComponentIndex;
@@ -174,7 +174,7 @@ public class TransactionComponentsTableModel extends AbstractTableModel implemen
 	 * @param rowIndex the row index of the item being deleted
 	 */
 	public void deleteComponent(int rowIndex) {
-		editingTransaction.removeComponent(editingTransaction.getComponents().get(rowIndex));
+		financeData.deleteTransactionComponent(editingTransaction.getComponents().get(rowIndex));
 		fireTableRowsDeleted(rowIndex, rowIndex);
 	}
 
