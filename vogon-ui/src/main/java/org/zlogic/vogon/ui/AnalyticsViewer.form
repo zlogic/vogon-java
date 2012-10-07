@@ -222,7 +222,9 @@
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Statistics by tags"/>
+            <TitledBorder title="Statistics by tags">
+              <ResourceString PropertyName="titleX" bundle="org/zlogic/vogon/ui/messages.properties" key="STATISTICS_BY_TAGS" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+            </TitledBorder>
           </Border>
         </Property>
       </Properties>
@@ -273,7 +275,9 @@
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Transactions"/>
+            <TitledBorder title="Transactions, balance history">
+              <ResourceString PropertyName="titleX" bundle="org/zlogic/vogon/ui/messages.properties" key="TRANSACTIONS_BALANCE_HISTORY" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+            </TitledBorder>
           </Border>
         </Property>
       </Properties>

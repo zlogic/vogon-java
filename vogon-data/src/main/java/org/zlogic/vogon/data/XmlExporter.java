@@ -54,9 +54,9 @@ public class XmlExporter implements FileExporter {
 	@Override
 	public void exportFile(FinanceData financeData) throws VogonExportException {
 		Map<FinanceTransaction.Type, String> transactionTypes = new TreeMap<>();
-		transactionTypes.put(FinanceTransaction.Type.TRANSFER, "Transfer");
-		transactionTypes.put(FinanceTransaction.Type.EXPENSEINCOME, "ExpenseIncome");
-		transactionTypes.put(FinanceTransaction.Type.UNDEFINED, "");
+		transactionTypes.put(FinanceTransaction.Type.TRANSFER, "Transfer"); //NOI18N
+		transactionTypes.put(FinanceTransaction.Type.EXPENSEINCOME, "ExpenseIncome"); //NOI18N
+		transactionTypes.put(FinanceTransaction.Type.UNDEFINED, ""); //NOI18N
 		try {
 
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
