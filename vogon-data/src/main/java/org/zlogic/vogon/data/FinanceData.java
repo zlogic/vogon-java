@@ -578,6 +578,33 @@ public class FinanceData {
 	}
 
 	/**
+	 * Sets a new type for a transaction
+	 *
+	 * @param transaction the transaction to be updated
+	 * @param type the new transaction type
+	 */
+	public void setTransactionType(FinanceTransaction transaction, FinanceTransaction.Type type) {
+		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
+		entityManager.getTransaction().begin();
+
+		boolean transactionAdded = persistenceAdd(transaction, entityManager);
+
+		transaction.setType(type);
+		entityManager.merge(transaction);
+
+		entityManager.getTransaction().commit();
+		entityManager.close();
+
+		if (transactionAdded) {
+			fireTransactionCreated(transaction);
+			fireTransactionsUpdated();
+		}
+		fireTransactionUpdated(transaction);
+		for (FinanceAccount account : transaction.getAccounts())
+			fireAccountUpdated(account);
+	}
+
+	/**
 	 * Sets an expense transaction amount, works only for single-component
 	 * expense transactions
 	 *

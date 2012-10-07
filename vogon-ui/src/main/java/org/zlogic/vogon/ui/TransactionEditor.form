@@ -22,19 +22,7 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="1" attributes="0">
-              <Component id="jButtonAddComponent" min="-2" max="-2" attributes="0"/>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Component id="jButtonDeleteComponent" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="32767" attributes="0"/>
-          </Group>
           <Component id="jScrollPaneComponents" pref="0" max="32767" attributes="0"/>
-          <Group type="102" attributes="0">
-              <Component id="jButtonNewExpenseIncome" min="-2" max="-2" attributes="0"/>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Component id="jButtonNewTransfer" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-          </Group>
           <Group type="102" alignment="0" attributes="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="jLabelTags" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -48,14 +36,29 @@
                   <Component id="jFormattedTextFieldDate" alignment="1" max="32767" attributes="0"/>
               </Group>
           </Group>
+          <Group type="102" attributes="0">
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="jButtonAddComponent" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="jButtonDeleteComponent" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" attributes="0">
+                      <Component id="jButtonNewTransaction" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="jComboBoxTransactionType" max="32767" attributes="0"/>
+                  </Group>
+              </Group>
+              <EmptySpace max="32767" attributes="0"/>
+          </Group>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jButtonNewExpenseIncome" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jButtonNewTransfer" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jButtonNewTransaction" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jComboBoxTransactionType" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
@@ -84,24 +87,24 @@
     </DimensionLayout>
   </Layout>
   <SubComponents>
-    <Component class="javax.swing.JButton" name="jButtonNewExpenseIncome">
+    <Component class="javax.swing.JButton" name="jButtonNewTransaction">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="NEW_EXPENSE_INCOME_TRANSACTION" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="NEW_TRANSACTION" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonNewExpenseIncomeActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonNewTransactionActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="jButtonNewTransfer">
+    <Component class="javax.swing.JComboBox" name="jComboBoxTransactionType">
       <Properties>
-        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="NEW_TRANSFER_TRANSACTION" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
+        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+          <StringArray count="0"/>
         </Property>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonNewTransferActionPerformed"/>
+        <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="jComboBoxTransactionTypeItemStateChanged"/>
       </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabelName">
@@ -113,6 +116,10 @@
           <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="TRANSACTION_DESCRIPTION" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
         </Property>
       </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_VariableLocal" type="java.lang.Boolean" value="true"/>
+        <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="0"/>
+      </AuxValues>
     </Component>
     <Component class="javax.swing.JTextField" name="jTextFieldName">
       <Events>
@@ -129,6 +136,10 @@
           <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="TRANSACTION_TAGS" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
         </Property>
       </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_VariableLocal" type="java.lang.Boolean" value="true"/>
+        <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="0"/>
+      </AuxValues>
     </Component>
     <Component class="javax.swing.JTextField" name="jTextFieldTags">
       <Events>
@@ -145,6 +156,10 @@
           <ResourceString bundle="org/zlogic/vogon/ui/messages.properties" key="TRANSACTION_DATE" replaceFormat="messages.getString(&quot;{key}&quot;)"/>
         </Property>
       </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_VariableLocal" type="java.lang.Boolean" value="true"/>
+        <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="0"/>
+      </AuxValues>
     </Component>
     <Component class="javax.swing.JFormattedTextField" name="jFormattedTextFieldDate">
       <Properties>
