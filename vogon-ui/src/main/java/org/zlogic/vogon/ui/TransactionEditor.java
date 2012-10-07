@@ -5,6 +5,7 @@
  */
 package org.zlogic.vogon.ui;
 
+import java.awt.event.ItemEvent;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -52,13 +53,13 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jButtonNewExpenseIncome = new javax.swing.JButton();
-        jButtonNewTransfer = new javax.swing.JButton();
-        jLabelName = new javax.swing.JLabel();
+        jButtonNewTransaction = new javax.swing.JButton();
+        jComboBoxTransactionType = new javax.swing.JComboBox();
+        javax.swing.JLabel jLabelName = new javax.swing.JLabel();
         jTextFieldName = new javax.swing.JTextField();
-        jLabelTags = new javax.swing.JLabel();
+        javax.swing.JLabel jLabelTags = new javax.swing.JLabel();
         jTextFieldTags = new javax.swing.JTextField();
-        jLabelDate = new javax.swing.JLabel();
+        javax.swing.JLabel jLabelDate = new javax.swing.JLabel();
         jFormattedTextFieldDate = new javax.swing.JFormattedTextField();
         jButtonAddComponent = new javax.swing.JButton();
         jButtonDeleteComponent = new javax.swing.JButton();
@@ -67,17 +68,16 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
 
         setMinimumSize(new java.awt.Dimension(0, 60));
 
-        jButtonNewExpenseIncome.setText(messages.getString("NEW_EXPENSE_INCOME_TRANSACTION")); // NOI18N
-        jButtonNewExpenseIncome.addActionListener(new java.awt.event.ActionListener() {
+        jButtonNewTransaction.setText(messages.getString("NEW_TRANSACTION")); // NOI18N
+        jButtonNewTransaction.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonNewExpenseIncomeActionPerformed(evt);
+                jButtonNewTransactionActionPerformed(evt);
             }
         });
 
-        jButtonNewTransfer.setText(messages.getString("NEW_TRANSFER_TRANSACTION")); // NOI18N
-        jButtonNewTransfer.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonNewTransferActionPerformed(evt);
+        jComboBoxTransactionType.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBoxTransactionTypeItemStateChanged(evt);
             }
         });
 
@@ -146,17 +146,7 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jButtonAddComponent)
-                .addGap(18, 18, 18)
-                .addComponent(jButtonDeleteComponent)
-                .addContainerGap())
             .addComponent(jScrollPaneComponents, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jButtonNewExpenseIncome)
-                .addGap(18, 18, 18)
-                .addComponent(jButtonNewTransfer)
-                .addGap(0, 0, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabelTags)
@@ -167,13 +157,24 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
                     .addComponent(jTextFieldName)
                     .addComponent(jTextFieldTags, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jFormattedTextFieldDate, javax.swing.GroupLayout.Alignment.TRAILING)))
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButtonAddComponent)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButtonDeleteComponent))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButtonNewTransaction)
+                        .addGap(18, 18, 18)
+                        .addComponent(jComboBoxTransactionType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButtonNewExpenseIncome)
-                    .addComponent(jButtonNewTransfer))
+                    .addComponent(jButtonNewTransaction)
+                    .addComponent(jComboBoxTransactionType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabelName)
@@ -195,11 +196,11 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButtonNewExpenseIncomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewExpenseIncomeActionPerformed
+    private void jButtonNewTransactionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewTransactionActionPerformed
 		saveChanges();
 		editTransaction(new FinanceTransaction("", new String[0], new Date(), FinanceTransaction.Type.EXPENSEINCOME)); //NOI18N
 		financeData.createTransaction(editedTransaction);
-    }//GEN-LAST:event_jButtonNewExpenseIncomeActionPerformed
+    }//GEN-LAST:event_jButtonNewTransactionActionPerformed
 
     private void jButtonDeleteComponentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteComponentActionPerformed
 		if (jTableComponents.getSelectedRow() >= 0)
@@ -223,12 +224,6 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
 		saveChanges();
     }//GEN-LAST:event_jFormattedTextFieldDateActionPerformed
 
-    private void jButtonNewTransferActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewTransferActionPerformed
-		saveChanges();
-		editTransaction(new FinanceTransaction("", new String[0], new Date(), FinanceTransaction.Type.TRANSFER)); //NOI18N
-		financeData.createTransaction(editedTransaction);
-    }//GEN-LAST:event_jButtonNewTransferActionPerformed
-
     private void jTextFieldNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextFieldNameFocusLost
 		saveChanges();
     }//GEN-LAST:event_jTextFieldNameFocusLost
@@ -240,15 +235,17 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
     private void jFormattedTextFieldDateFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jFormattedTextFieldDateFocusLost
 		saveChanges();
     }//GEN-LAST:event_jFormattedTextFieldDateFocusLost
+
+    private void jComboBoxTransactionTypeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxTransactionTypeItemStateChanged
+		if (evt.getStateChange() == ItemEvent.SELECTED && jComboBoxTransactionType.isEnabled())
+			saveChanges();
+    }//GEN-LAST:event_jComboBoxTransactionTypeItemStateChanged
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonAddComponent;
     private javax.swing.JButton jButtonDeleteComponent;
-    private javax.swing.JButton jButtonNewExpenseIncome;
-    private javax.swing.JButton jButtonNewTransfer;
+    private javax.swing.JButton jButtonNewTransaction;
+    private javax.swing.JComboBox jComboBoxTransactionType;
     private javax.swing.JFormattedTextField jFormattedTextFieldDate;
-    private javax.swing.JLabel jLabelDate;
-    private javax.swing.JLabel jLabelName;
-    private javax.swing.JLabel jLabelTags;
     private javax.swing.JScrollPane jScrollPaneComponents;
     private javax.swing.JTable jTableComponents;
     private javax.swing.JTextField jTextFieldName;
@@ -271,6 +268,8 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
 		jTextFieldTags.setText(""); //NOI18N
 		jFormattedTextFieldDate.setText(""); //NOI18N
 		((TransactionComponentsTableModel) jTableComponents.getModel()).setTransaction(null);
+
+		updateTransactionTypeCombo(FinanceTransaction.Type.EXPENSEINCOME);//Default type
 
 		jTextFieldName.setEnabled(editedTransaction != null);
 		jTextFieldName.setEditable(editedTransaction != null);
@@ -313,6 +312,7 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
 		editedTransaction = transaction;
 		resetInput();
 		if (transaction != null) {
+			updateTransactionTypeCombo(transaction.getType());
 			jTextFieldName.setText(transaction.getDescription());
 			jTextFieldTags.setText(Utils.join(((FinanceTransaction) transaction).getTags(), ",")); //NOI18N
 			jFormattedTextFieldDate.setText(MessageFormat.format(messages.getString("FORMAT_DATE"), new Object[]{transaction.getDate()}));
@@ -327,6 +327,7 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
 		if (editedTransaction != null) {
 			financeData.setTransactionDescription(editedTransaction, jTextFieldName.getText());
 			financeData.setTransactionTags(editedTransaction, jTextFieldTags.getText().split(",")); //NOI18N
+			financeData.setTransactionType(editedTransaction, ((TransactionTypeComboItem) jComboBoxTransactionType.getSelectedItem()).getType());
 			SimpleDateFormat dateFormat = new SimpleDateFormat(messages.getString("PARSER_DATE"));
 			try {
 				financeData.setTransactionDate(editedTransaction, dateFormat.parse(jFormattedTextFieldDate.getText()));
@@ -335,6 +336,68 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
 				Logger.getLogger(TransactionEditor.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
+	}
+
+	/**
+	 * Transaction type combo box item
+	 */
+	protected class TransactionTypeComboItem {
+
+		/**
+		 * The transaction type
+		 */
+		protected FinanceTransaction.Type type;
+
+		/**
+		 * Default constructor
+		 *
+		 * @param type the transaction type
+		 */
+		public TransactionTypeComboItem(FinanceTransaction.Type type) {
+			this.type = type;
+		}
+
+		@Override
+		public String toString() {
+			switch (type) {
+				case EXPENSEINCOME:
+					return messages.getString("TRANSACTION_EXPENSE_INCOME");
+				case TRANSFER:
+					return messages.getString("TRANSACTION_TRANSFER");
+				case UNDEFINED:
+					return messages.getString("INVALID_TRANSACTION_TYPE");
+			}
+			return messages.getString("INVALID_TRANSACTION_TYPE");
+		}
+
+		/**
+		 * Returns the transaction type
+		 *
+		 * @return the transaction type
+		 */
+		public FinanceTransaction.Type getType() {
+			return type;
+		}
+	}
+
+	/**
+	 * Updates the transaction type combo box
+	 *
+	 * @param type the selected transaction type
+	 */
+	protected void updateTransactionTypeCombo(FinanceTransaction.Type type) {
+		jComboBoxTransactionType.setEnabled(false);
+		jComboBoxTransactionType.removeAllItems();
+		TransactionTypeComboItem selectedItem = null;
+		for (FinanceTransaction.Type currentType : FinanceTransaction.Type.values())
+			if (currentType != FinanceTransaction.Type.UNDEFINED) {
+				TransactionTypeComboItem currentItem = new TransactionTypeComboItem(currentType);
+				jComboBoxTransactionType.addItem(currentItem);
+				if (type == currentType)
+					selectedItem = currentItem;
+			}
+		jComboBoxTransactionType.setSelectedItem(selectedItem);
+		jComboBoxTransactionType.setEnabled(true);
 	}
 
 	@Override
