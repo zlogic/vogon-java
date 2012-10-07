@@ -19,7 +19,7 @@ import org.zlogic.vogon.data.FinanceTransaction;
  *
  * @author Dmitry Zolotukhin
  */
-public class TransactionsTableModel extends AbstractTableModel implements FinanceData.TransactionCreatedEventListener, FinanceData.TransactionUpdatedEventListener {
+public class TransactionsTableModel extends AbstractTableModel implements FinanceData.TransactionUpdatedEventListener {
 
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
@@ -266,14 +266,7 @@ public class TransactionsTableModel extends AbstractTableModel implements Financ
 	public void deleteTransaction(int rowIndex) {
 		financeData.deleteTransaction(pageTransactions.get(rowIndex));
 		updatePageTransactions();
-		fireTableRowsDeleted(rowIndex, rowIndex);
-	}
-
-	@Override
-	public void transactionCreated(FinanceTransaction newTransaction) {
-		updatePageTransactions();
-		int rowIndex = pageTransactions.indexOf(newTransaction);
-		fireTableRowsInserted(rowIndex, rowIndex);
+		fireTableDataChanged();
 	}
 
 	@Override

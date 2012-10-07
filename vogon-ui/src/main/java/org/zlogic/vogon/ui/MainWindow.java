@@ -43,7 +43,7 @@ import org.zlogic.vogon.data.XmlImporter;
  * @author Zlogic
  */
 public class MainWindow extends javax.swing.JFrame {
-	
+
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 
 	/**
@@ -68,9 +68,8 @@ public class MainWindow extends javax.swing.JFrame {
 		transactionEditor.setFinanceData(financeData);
 		analyticsViewer.setFinanceData(financeData);
 		transactionEditor.updateAccountsCombo();
-		
+
 		financeData.addTransactionCreatedListener(externalEventHandler);
-		financeData.addTransactionCreatedListener(transactionsTableModel);
 		financeData.addTransactionUpdatedListener(externalEventHandler);
 		financeData.addTransactionUpdatedListener(transactionsTableModel);
 		financeData.addTransactionDeletedListener(transactionsTableModel);
@@ -82,23 +81,25 @@ public class MainWindow extends javax.swing.JFrame {
 		financeData.addAccountDeletedListener(accountsTableModel);
 		financeData.addCurrencyUpdatedListener(externalEventHandler);
 		financeData.addCurrencyUpdatedListener(currenciesTableModel);
-		
+
 		jTableTransactions.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
+				if (e.getValueIsAdjusting())
+					return;
 				if (jTableTransactions.getSelectedRow() >= 0)
 					transactionEditor.editTransaction(transactionsTableModel.getTransaction(jTableTransactions.convertRowIndexToModel(jTableTransactions.getSelectedRow())));
 				else
 					transactionEditor.editTransaction(null);
 			}
 		});
-		
+
 		updateDefaultCurrencyCombo();
 		externalEventHandler.transactionsUpdated();
-		
+
 		jTableAccounts.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(new JComboBox(accountsTableModel.getCurrenciesComboList())));
 		jTableAccounts.getColumnModel().getColumn(1).setCellRenderer(SumTableCell.getRenderer());
-		
+
 		jTableTransactions.getColumnModel().getColumn(3).setCellRenderer(SumTableCell.getRenderer());
 		jLabelProgressIndicator.setVisible(false);
 	}
@@ -410,12 +411,12 @@ public class MainWindow extends javax.swing.JFrame {
     private void jMenuItemImportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemImportActionPerformed
 		Runnable task = new Runnable() {
 			protected Component parent;
-			
+
 			public Runnable setParent(Component parent) {
 				this.parent = parent;
 				return this;
 			}
-			
+
 			@Override
 			public void run() {
 
@@ -434,7 +435,7 @@ public class MainWindow extends javax.swing.JFrame {
 
 					//Test code for printing data
 					FileImporter importer = null;
-					
+
 					if (fileChooser.getFileFilter().getDescription().equals(messages.getString("CSV_FILES_(COMMA-SEPARATED)")))
 						importer = new CsvImporter(selectedFile);
 					else if (fileChooser.getFileFilter().getDescription().equals(messages.getString("XML_FILES")))
@@ -462,7 +463,7 @@ public class MainWindow extends javax.swing.JFrame {
 			JOptionPane.showMessageDialog(this, new MessageFormat(messages.getString("BACKGROUND_TASK_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), messages.getString("BACKGROUND_TASK_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
 		}
     }//GEN-LAST:event_jMenuItemImportActionPerformed
-	
+
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
 		try {
 			backgroundTaskHandler.completeTasks();
@@ -472,7 +473,7 @@ public class MainWindow extends javax.swing.JFrame {
 			Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
 		}
     }//GEN-LAST:event_formWindowClosing
-	
+
     private void jButtonDeleteTransactionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteTransactionActionPerformed
 		int selectedRow = jTableTransactions.convertRowIndexToModel(jTableTransactions.getSelectedRow());
 		if (selectedRow >= 0) {
@@ -480,16 +481,16 @@ public class MainWindow extends javax.swing.JFrame {
 			transactionsTableModel.deleteTransaction(selectedRow);
 		}
     }//GEN-LAST:event_jButtonDeleteTransactionActionPerformed
-	
+
     private void jMenuItemExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExportActionPerformed
 		Runnable task = new Runnable() {
 			protected Component parent;
-			
+
 			public Runnable setParent(Component parent) {
 				this.parent = parent;
 				return this;
 			}
-			
+
 			@Override
 			public void run() {
 				// Prepare file chooser dialog
@@ -506,7 +507,7 @@ public class MainWindow extends javax.swing.JFrame {
 
 					//Test code for printing data
 					FileExporter exporter = null;
-					
+
 					if (fileChooser.getFileFilter().getDescription().equals(messages.getString("XML_FILES")))
 						exporter = new XmlExporter(selectedFile);
 					try {
@@ -525,7 +526,7 @@ public class MainWindow extends javax.swing.JFrame {
 			JOptionPane.showMessageDialog(this, new MessageFormat(messages.getString("BACKGROUND_TASK_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), messages.getString("BACKGROUND_TASK_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
 		}
     }//GEN-LAST:event_jMenuItemExportActionPerformed
-	
+
     private void jMenuItemRecalculateBalanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemRecalculateBalanceActionPerformed
 		Runnable task = new Runnable() {
 			@Override
@@ -542,7 +543,7 @@ public class MainWindow extends javax.swing.JFrame {
 			JOptionPane.showMessageDialog(this, new MessageFormat(messages.getString("BACKGROUND_TASK_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), messages.getString("BACKGROUND_TASK_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
 		}
     }//GEN-LAST:event_jMenuItemRecalculateBalanceActionPerformed
-	
+
     private void jMenuItemCleanupDBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemCleanupDBActionPerformed
 		Runnable task = new Runnable() {
 			@Override
@@ -559,7 +560,7 @@ public class MainWindow extends javax.swing.JFrame {
 			JOptionPane.showMessageDialog(this, new MessageFormat(messages.getString("BACKGROUND_TASK_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), messages.getString("BACKGROUND_TASK_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
 		}
     }//GEN-LAST:event_jMenuItemCleanupDBActionPerformed
-	
+
     private void jComboBoxDefaultCurrencyItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxDefaultCurrencyItemStateChanged
 		if (evt.getStateChange() == ItemEvent.SELECTED && jComboBoxDefaultCurrency.isEnabled()) {
 			CurrencyComboItem selectedItem = (CurrencyComboItem) evt.getItem();
@@ -567,21 +568,21 @@ public class MainWindow extends javax.swing.JFrame {
 				financeData.setDefaultCurrency(selectedItem.getCurrency());
 		}
     }//GEN-LAST:event_jComboBoxDefaultCurrencyItemStateChanged
-	
+
     private void jButtonDeleteAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteAccountActionPerformed
 		if (jTableAccounts.getSelectedRow() >= 0)
 			accountsTableModel.deleteAccount(jTableAccounts.convertRowIndexToModel(jTableAccounts.getSelectedRow()));
     }//GEN-LAST:event_jButtonDeleteAccountActionPerformed
-	
+
     private void jButtonAddAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddAccountActionPerformed
 		int newAccountIndex = accountsTableModel.addAccount();
 		jTableAccounts.setRowSelectionInterval(newAccountIndex, newAccountIndex);
     }//GEN-LAST:event_jButtonAddAccountActionPerformed
-	
+
     private void jSpinnerPageStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSpinnerPageStateChanged
 		transactionsTableModel.setCurrentPage((Integer) jSpinnerPage.getValue() - 1);
     }//GEN-LAST:event_jSpinnerPageStateChanged
-	
+
     private void jMenuItemExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExitActionPerformed
 		WindowEvent wev = new WindowEvent(this, WindowEvent.WINDOW_CLOSING);
 		Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(wev);
@@ -737,8 +738,8 @@ public class MainWindow extends javax.swing.JFrame {
 	/**
 	 * Class for processing external events
 	 */
-	protected class ExternalEventHandler implements FinanceData.TransactionCreatedEventListener, FinanceData.TransactionUpdatedEventListener, FinanceData.CurrencyUpdatedEventListener {
-		
+	protected class ExternalEventHandler implements FinanceData.TransactionCreatedEventListener, FinanceData.TransactionUpdatedEventListener, FinanceData.TransactionDeletedEventListener, FinanceData.CurrencyUpdatedEventListener {
+
 		@Override
 		public void transactionCreated(FinanceTransaction newTransaction) {
 			int newTransactionIndex = transactionsTableModel.getTransactionIndex(newTransaction);
@@ -746,19 +747,24 @@ public class MainWindow extends javax.swing.JFrame {
 			jTableTransactions.scrollRectToVisible(jTableTransactions.getCellRect(newTransactionIndex, 0, true));
 			((SpinnerNumberModel) jSpinnerPage.getModel()).setMaximum(transactionsTableModel.getPageCount());
 		}
-		
+
 		@Override
 		public void currenciesUpdated() {
 			updateDefaultCurrencyCombo();
 		}
-		
+
 		@Override
 		public void transactionUpdated(FinanceTransaction updatedTransaction) {
 			//Do nothing
 		}
-		
+
 		@Override
 		public void transactionsUpdated() {
+			((SpinnerNumberModel) jSpinnerPage.getModel()).setMaximum(transactionsTableModel.getPageCount());
+		}
+
+		@Override
+		public void transactionDeleted(FinanceTransaction deletedTransaction) {
 			((SpinnerNumberModel) jSpinnerPage.getModel()).setMaximum(transactionsTableModel.getPageCount());
 		}
 	}
@@ -782,7 +788,7 @@ public class MainWindow extends javax.swing.JFrame {
 		 */
 		public BackgroundTaskHandler() {
 		}
-		
+
 		private void initComponents() {
 			if (disabledComponents == null) {
 				disabledComponents = new LinkedList<>();
@@ -792,7 +798,16 @@ public class MainWindow extends javax.swing.JFrame {
 				disabledComponents.add(jMenuItemRecalculateBalance);
 			}
 		}
-		
+
+		/**
+		 * Runs a runnable task in the background. Wait for the previous task to
+		 * complete.
+		 *
+		 * @param task the task to run
+		 * @param taskDescription the task description to be displayed in the
+		 * status bar
+		 * @throws InterruptedException if unable to join the previous task
+		 */
 		public void runTask(final Runnable task, String taskDescription) throws InterruptedException {
 			synchronized (this) {
 				initComponents();
@@ -805,7 +820,7 @@ public class MainWindow extends javax.swing.JFrame {
 					component.setEnabled(false);
 				jLabelProgressIndicator.setVisible(true);
 				jLabelCurrentTask.setText(taskDescription);
-				
+
 				thread = new Thread(new Runnable() {
 					@Override
 					public void run() {
@@ -818,11 +833,14 @@ public class MainWindow extends javax.swing.JFrame {
 						jLabelCurrentTask.setText(""); //NOI18N
 					}
 				});
-				
+
 				thread.start();
 			}
 		}
-		
+
+		/**
+		 * Waits for all tasks to complete before shutdown
+		 */
 		public void completeTasks() {
 			synchronized (this) {
 				if (thread != null) {
