@@ -6,6 +6,7 @@
 package org.zlogic.vogon.data;
 
 import java.io.File;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Currency;
@@ -92,6 +93,8 @@ public class XmlImporter implements FileImporter {
 					currenciesNode = currentNode;
 				if (currentNode.getNodeName().equals("Transactions")) //NOI18N
 					transactionsNode = currentNode;
+				else
+					Logger.getLogger(XmlImporter.class.getName()).log(Level.WARNING, MessageFormat.format(messages.getString("UNRECOGNIZED_NODE"), currentNode.getNodeName()));
 			}
 
 			//Process default properties
@@ -205,6 +208,8 @@ public class XmlImporter implements FileImporter {
 					transactionTypeEnum = FinanceTransaction.Type.EXPENSEINCOME;
 				else
 					transactionTypeEnum = FinanceTransaction.Type.UNDEFINED;
+				if (transactionTypeEnum == FinanceTransaction.Type.UNDEFINED)
+					throw new VogonImportLogicalException(MessageFormat.format(messages.getString("UNKNOWN_TRANSACTION_TYPE"), transactionType));
 				FinanceTransaction transaction = new FinanceTransaction(transactionDescription, null, transactionDate, transactionTypeEnum);
 				transactionsMap.put(transactionId, transaction);
 				entityManager.persist(transaction);

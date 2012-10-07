@@ -21,7 +21,8 @@ import javax.persistence.criteria.Root;
 import javax.swing.event.EventListenerList;
 
 /**
- * Class for storing the complete finance data
+ * Class for storing the finance data, performing database operations and
+ * generating events
  *
  * @author Dmitry Zolotukhin
  */
@@ -109,7 +110,7 @@ public class FinanceData {
 	 * @param lastTransaction the last transaction number to be selected
 	 * @return the list of all transactions stored in the database
 	 */
-	public List<FinanceTransaction> getTransactionsFromDatabase(int firstTransaction, int lastTransaction) {
+	protected List<FinanceTransaction> getTransactionsFromDatabase(int firstTransaction, int lastTransaction) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
