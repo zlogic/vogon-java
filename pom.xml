@@ -12,8 +12,8 @@
 	<modules>
 		<module>vogon-data</module>
 		<module>vogon-ui</module>
-		<module>vogon-distribution</module>
 		<module>vogon-resources</module>
+		<module>vogon-distribution</module>
 	</modules>
 
 	<properties>
