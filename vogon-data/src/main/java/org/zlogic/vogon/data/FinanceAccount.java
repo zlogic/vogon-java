@@ -69,7 +69,8 @@ public class FinanceAccount implements Serializable {
 	}
 
 	/**
-	 * Returns the raw balance (should be divided by 100 to get the real amount)
+	 * Returns the raw balance (should be divided by
+	 * Constants.rawAmountMultiplier to get the real amount)
 	 *
 	 * @return the raw balance
 	 */
@@ -158,7 +159,7 @@ public class FinanceAccount implements Serializable {
 	 * @return the balance
 	 */
 	public double getBalance() {
-		return balance / 100.0D;
+		return balance / Constants.rawAmountMultiplier;
 	}
 
 	@Override

@@ -18,10 +18,12 @@ import java.util.TreeMap;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Tuple;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -282,7 +284,7 @@ public class Report {
 	 * amount descending
 	 */
 	public List<FinanceTransaction> getTransactions() {
-		return getTransactions(FinanceTransaction_.amount, false, true, EnumSet.allOf(FilterType.class));
+		return getTransactions(FinanceTransaction_.amount, false, true, EnumSet.allOf(FilterType.class), -1, -1);
 	}
 
 	/**
@@ -397,12 +399,14 @@ public class Report {
 	 * @param orderAbsolute true if order should be for absolute value (e.g.
 	 * ABS(orderBy))
 	 * @param appliedFilters the filters which should be applied
+	 * @param firstTransaction the first transaction number to be selected
+	 * @param lastTransaction the last transaction number to be selected
 	 * @return list of all transactions matching the set filters
 	 */
-	public List<FinanceTransaction> getTransactions(SingularAttribute orderBy, boolean orderAsc, boolean orderAbsolute, EnumSet appliedFilters) {
+	public List<FinanceTransaction> getTransactions(SingularAttribute orderBy, boolean orderAsc, boolean orderAbsolute, EnumSet appliedFilters, int firstTransaction, int lastTransaction) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
+		CriteriaQuery<Tuple> transactionsCriteriaQuery = criteriaBuilder.createTupleQuery();
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 
 		//Build general filter
@@ -416,13 +420,29 @@ public class Report {
 			userOrderBy = criteriaBuilder.abs(userOrderBy);
 		Order userOrder = orderAsc ? criteriaBuilder.asc(userOrderBy) : criteriaBuilder.desc(userOrderBy);
 		Order idOrder = orderAsc ? criteriaBuilder.asc(tr.get(FinanceTransaction_.id)) : criteriaBuilder.desc(tr.get(FinanceTransaction_.id));
-		tr.fetch(FinanceTransaction_.components).fetch(TransactionComponent_.account);
 
-		transactionsCriteriaQuery.orderBy(userOrder, idOrder);
-		transactionsCriteriaQuery.select(tr).distinct(true);
+		transactionsCriteriaQuery.multiselect(tr, userOrderBy).distinct(true);
+		transactionsCriteriaQuery.groupBy(tr, userOrderBy, predicate.getComponentsJoin(), predicate.getTagsJoin());
+		transactionsCriteriaQuery.orderBy(idOrder, userOrder);
 
 		//Fetch data
-		List<FinanceTransaction> transactions = entityManager.createQuery(transactionsCriteriaQuery).getResultList();
+		TypedQuery<Tuple> query = entityManager.createQuery(transactionsCriteriaQuery);
+		if (firstTransaction >= 0)
+			query = query.setFirstResult(firstTransaction);
+		if (lastTransaction >= 0 && firstTransaction >= 0)
+			query = query.setMaxResults(lastTransaction - firstTransaction + 1);
+
+		List<FinanceTransaction> transactions = new LinkedList<>();
+		for (Tuple tuple : query.getResultList())
+			transactions.add(tuple.get(tr));
+
+		//Post-fetch components
+		CriteriaQuery<FinanceTransaction> transactionsComponentsFetchCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
+		Root<FinanceTransaction> trComponentsFetch = transactionsComponentsFetchCriteriaQuery.from(FinanceTransaction.class);
+		transactionsComponentsFetchCriteriaQuery.where(tr.in(transactions));
+		trComponentsFetch.fetch(FinanceTransaction_.components, JoinType.LEFT).fetch(TransactionComponent_.account, JoinType.LEFT);
+		entityManager.createQuery(transactionsComponentsFetchCriteriaQuery).getResultList();
+
 		entityManager.close();
 		return transactions;
 	}
@@ -512,12 +532,6 @@ public class Report {
 	 * @return a graph for the total balance of accounts, sorted by date
 	 */
 	public Map<Date, Double> getAccountsBalanceGraph() {
-		//Get all transactions
-		List<FinanceTransaction> transactions = getTransactions(
-				FinanceTransaction_.transactionDate, true, false,
-				EnumSet.of(FilterType.DATE, FilterType.ACCOUNTS));
-		Map<Date, Long> currentBalance = new TreeMap<>();
-		Map<Date, Double> result = new TreeMap<>();
 		Map<String, Long> sumBalance = new TreeMap<>();
 
 		for (Currency currency : financeData.getCurrencies())
@@ -526,16 +540,33 @@ public class Report {
 		for (FinanceAccount account : selectedAccounts)
 			sumBalance.put(account.getCurrency().getCurrencyCode(), sumBalance.get(account.getCurrency().getCurrencyCode()) + getRawAccountBalanceByDate(account, earliestDate));
 
-		//Calculate sum for accounts/currencies for each transaction
-		for (FinanceTransaction transaction : transactions) {
-			for (FinanceAccount account : selectedAccounts)
-				for (TransactionComponent component : transaction.getComponentsForAccount(account))
-					sumBalance.put(account.getCurrency().getCurrencyCode(), sumBalance.get(account.getCurrency().getCurrencyCode()) + component.getRawAmount());
-			currentBalance.put(transaction.getDate(), convertRawAmountToCommonCurrency(sumBalance));
+		//Process transactions in batches
+		Map<Date, Long> currentBalance = new TreeMap<>();
+		boolean done = false;
+		int currentTransaction = 0;
+		while (!done) {
+			//Fetch next batch
+			List<FinanceTransaction> transactions = getTransactions(
+					FinanceTransaction_.transactionDate, true, false,
+					EnumSet.of(FilterType.DATE, FilterType.ACCOUNTS),
+					//currentTransaction, currentTransaction + Constants.batchFetchSize-1);
+					-1, -1);
+			currentTransaction += transactions.size();
+			//done = transactions.isEmpty();
+			done = true;
+
+			//Calculate sum for accounts/currencies for each transaction
+			for (FinanceTransaction transaction : transactions) {
+				for (FinanceAccount account : selectedAccounts)
+					for (TransactionComponent component : transaction.getComponentsForAccount(account))
+						sumBalance.put(account.getCurrency().getCurrencyCode(), sumBalance.get(account.getCurrency().getCurrencyCode()) + component.getRawAmount());
+				currentBalance.put(transaction.getDate(), convertRawAmountToCommonCurrency(sumBalance));
+			}
 		}
 
+		Map<Date, Double> result = new TreeMap<>();
 		for (Map.Entry<Date, Long> entry : currentBalance.entrySet())
-			result.put(entry.getKey(), entry.getValue() / 100.0D);
+			result.put(entry.getKey(), entry.getValue() / Constants.rawAmountMultiplier);
 
 		return result;
 	}
@@ -643,7 +674,7 @@ public class Report {
 			//Convert results to a common currency if tag contains transactions in different currencies
 			for (Tuple tuple : entityManager.createQuery(transactionsCriteriaQuery).getResultList()) {
 				String tag = tuple.get(1, String.class);
-				double amount = (tuple.get(0, Long.class) / 100.0D);
+				double amount = (tuple.get(0, Long.class) / Constants.rawAmountMultiplier);
 				if (!result.containsKey(tag))
 					result.put(tag, new TagExpense(tag, currency, false, 0));
 				TagExpense tagExpense = result.get(tag);
@@ -660,6 +691,6 @@ public class Report {
 			}
 		}
 		entityManager.close();
-		return new LinkedList<TagExpense>(result.values());
+		return new LinkedList<>(result.values());
 	}
 }

@@ -68,6 +68,7 @@ public class MainWindow extends javax.swing.JFrame {
 		transactionEditor.setFinanceData(financeData);
 		analyticsViewer.setFinanceData(financeData);
 		transactionEditor.updateAccountsCombo();
+		analyticsViewer.setBackgroundTaskHandler(backgroundTaskHandler);
 
 		financeData.addTransactionCreatedListener(externalEventHandler);
 		financeData.addTransactionUpdatedListener(externalEventHandler);
@@ -593,6 +594,19 @@ public class MainWindow extends javax.swing.JFrame {
 	 */
 	public static void main(String args[]) {
 		/*
+		 * Configure logging to load config from classpath
+		 */
+		String loggingFile = System.getProperty("java.util.logging.config.file"); //NOI18N
+		if (loggingFile == null || loggingFile.isEmpty()) {
+			try {
+				java.net.URL url = ClassLoader.getSystemClassLoader().getResource("logging.properties"); //NOI18N
+				if (url != null)
+					java.util.logging.LogManager.getLogManager().readConfiguration(url.openStream());
+			} catch (IOException | SecurityException e) {
+			}
+		}
+
+		/*
 		 * Set the Nimbus look and feel
 		 */
 		//<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -613,18 +627,6 @@ public class MainWindow extends javax.swing.JFrame {
 		}
 		//</editor-fold>
 
-		/*
-		 * Configure logging to load config from classpath
-		 */
-		String loggingFile = System.getProperty("java.util.logging.config.file"); //NOI18N
-		if (loggingFile == null || loggingFile.isEmpty()) {
-			try {
-				java.net.URL url = ClassLoader.getSystemClassLoader().getResource("logging.properties"); //NOI18N
-				if (url != null)
-					java.util.logging.LogManager.getLogManager().readConfiguration(url.openStream());
-			} catch (IOException | SecurityException e) {
-			}
-		}
 		/*
 		 * Create and display the form
 		 */
@@ -772,7 +774,7 @@ public class MainWindow extends javax.swing.JFrame {
 	/**
 	 * Helper class for processing background tasks
 	 */
-	protected class BackgroundTaskHandler {
+	protected class BackgroundTaskHandler implements org.zlogic.vogon.ui.BackgroundTaskHandler {
 
 		/**
 		 * List of components to be disabled during the background task
@@ -799,15 +801,7 @@ public class MainWindow extends javax.swing.JFrame {
 			}
 		}
 
-		/**
-		 * Runs a runnable task in the background. Wait for the previous task to
-		 * complete.
-		 *
-		 * @param task the task to run
-		 * @param taskDescription the task description to be displayed in the
-		 * status bar
-		 * @throws InterruptedException if unable to join the previous task
-		 */
+		@Override
 		public void runTask(final Runnable task, String taskDescription) throws InterruptedException {
 			synchronized (this) {
 				initComponents();

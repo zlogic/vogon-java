@@ -103,13 +103,13 @@ public class CsvImporter implements FileImporter {
 							double amount = Double.parseDouble(columns[i].replaceAll("[^ \\t]\\s+", "").replaceAll("[^0-9.-]", "")); //NOI18N
 							if (amount == 0)
 								continue;
-							amount = Math.round(amount * 100);
+							amount = Math.round(amount * Constants.rawAmountMultiplier);
 							accountAmounts.put(accounts.get(i - 3), (long) (amount));
 							if (amount > 0)
 								hasPositiveAmounts = true;
 							if (amount < 0)
 								hasNegativeAmounts = true;
-							}
+						}
 					//Split tags
 					String[] tags = columns[2].split(","); //NOI18N
 					FinanceTransaction transaction = null;

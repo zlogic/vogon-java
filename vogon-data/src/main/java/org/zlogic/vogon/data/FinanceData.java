@@ -114,12 +114,6 @@ public class FinanceData {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
-		//Prefetch components
-		CriteriaQuery<FinanceTransaction> transactionsComponentsFetchCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
-		Root<FinanceTransaction> trComponentsFetch = transactionsComponentsFetchCriteriaQuery.from(FinanceTransaction.class);
-		trComponentsFetch.fetch(FinanceTransaction_.components, JoinType.LEFT).fetch(TransactionComponent_.account, JoinType.LEFT);
-		entityManager.createQuery(transactionsComponentsFetchCriteriaQuery).getResultList();
-
 		//Retreive the transactions
 		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
@@ -134,10 +128,18 @@ public class FinanceData {
 		TypedQuery query = entityManager.createQuery(transactionsCriteriaQuery);
 		if (firstTransaction >= 0)
 			query = query.setFirstResult(firstTransaction);
-		if (lastTransaction >= 0)
+		if (lastTransaction >= 0 && firstTransaction >= 0)
 			query = query.setMaxResults(lastTransaction - firstTransaction + 1);
 
 		List<FinanceTransaction> result = query.getResultList();
+
+		//Post-fetch components
+		CriteriaQuery<FinanceTransaction> transactionsComponentsFetchCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
+		Root<FinanceTransaction> trComponentsFetch = transactionsComponentsFetchCriteriaQuery.from(FinanceTransaction.class);
+		transactionsComponentsFetchCriteriaQuery.where(tr.in(result));
+		trComponentsFetch.fetch(FinanceTransaction_.components, JoinType.LEFT).fetch(TransactionComponent_.account, JoinType.LEFT);
+		entityManager.createQuery(transactionsComponentsFetchCriteriaQuery).getResultList();
+
 		entityManager.close();
 		return result;
 	}
@@ -338,9 +340,9 @@ public class FinanceData {
 			if (account.getCurrency() == currency)
 				totalBalance += account.getRawBalance();
 			else if (currency == null)
-				totalBalance += Math.round(account.getBalance() * getExchangeRate(account.getCurrency(), getDefaultCurrency()) * 100);
+				totalBalance += Math.round(account.getBalance() * getExchangeRate(account.getCurrency(), getDefaultCurrency()) * Constants.rawAmountMultiplier);
 		}
-		return totalBalance / 100.0;
+		return totalBalance / Constants.rawAmountMultiplier;
 	}
 
 	/**
@@ -685,7 +687,7 @@ public class FinanceData {
 		if (entityManager.find(TransactionComponent.class, component.id) == null)
 			entityManager.persist(component);
 
-		transaction.updateComponentRawAmount(component, Math.round(newAmount * 100));
+		transaction.updateComponentRawAmount(component, Math.round(newAmount * Constants.rawAmountMultiplier));
 		entityManager.merge(transaction);
 
 		entityManager.getTransaction().commit();
@@ -769,9 +771,9 @@ public class FinanceData {
 
 		//Update accounts
 		if (component.getTransaction().getComponents().contains(component))
-			component.getTransaction().updateComponentRawAmount(component, Math.round(newAmount * 100));
+			component.getTransaction().updateComponentRawAmount(component, Math.round(newAmount * Constants.rawAmountMultiplier));
 		else {
-			component.setRawAmount(Math.round(newAmount * 100));
+			component.setRawAmount(Math.round(newAmount * Constants.rawAmountMultiplier));
 			component.getTransaction().addComponent(component);
 		}
 
@@ -1027,13 +1029,20 @@ public class FinanceData {
 		FinanceAccount tempAccount = tempEntityManager.find(FinanceAccount.class, account.id);
 
 		//Recalculate balance from related transactions
-		//TODO: add paging here
 		tempEntityManager.getTransaction().begin();
 		tempAccount.updateRawBalance(-tempAccount.getRawBalance());
-		for (FinanceTransaction transaction : tempEntityManager.createQuery(transactionsCriteriaQuery).getResultList()) {
-			for (TransactionComponent component : transaction.getComponentsForAccount(tempAccount)) {
-				tempAccount.updateRawBalance(component.getRawAmount());
-			}
+
+		TypedQuery<FinanceTransaction> transactionsBatchQuery = tempEntityManager.createQuery(transactionsCriteriaQuery);
+
+		int currentTransaction = 0;
+		boolean done = false;
+		while (!done) {
+			List<FinanceTransaction> transactions = transactionsBatchQuery.setFirstResult(currentTransaction).setMaxResults(Constants.batchFetchSize).getResultList();
+			currentTransaction += transactions.size();
+			done = transactions.isEmpty();
+			for (FinanceTransaction transaction : transactions)
+				for (TransactionComponent component : transaction.getComponentsForAccount(tempAccount))
+					tempAccount.updateRawBalance(component.getRawAmount());
 		}
 		tempEntityManager.getTransaction().commit();
 

@@ -34,6 +34,7 @@ public class FinanceTransaction implements Serializable {
 	 * The transaction type
 	 */
 	public enum Type {
+
 		/**
 		 * Income or expense
 		 */
@@ -277,16 +278,16 @@ public class FinanceTransaction implements Serializable {
 		if (type == Type.EXPENSEINCOME)
 			return true;
 		else if (type == Type.TRANSFER) {
-			long amount = 0;
+			long sum = 0;
 			Currency commonCurrency = null;
 			for (TransactionComponent component : components) {
 				if (commonCurrency == null && component.getAccount() != null)
 					commonCurrency = component.getAccount().getCurrency();
 				else if (component.getAccount() != null && component.getAccount().getCurrency() != commonCurrency)
 					return true;
-				amount += component.getRawAmount();
+				sum += component.getRawAmount();
 			}
-			return amount == 0;
+			return sum == 0;
 		} else if (type == Type.UNDEFINED)
 			return false;
 		else
@@ -297,7 +298,8 @@ public class FinanceTransaction implements Serializable {
 	 * Getters/setters
 	 */
 	/**
-	 * Returns the raw amount (should be divided by 100 to get the real amount)
+	 * Returns the raw amount (should be divided by
+	 * Constants.rawAmountMultiplier to get the real amount)
 	 *
 	 * @return the transaction amount
 	 */
@@ -311,7 +313,7 @@ public class FinanceTransaction implements Serializable {
 	 * @return the transaction amount
 	 */
 	public double getAmount() {
-		return amount / 100.0D;
+		return amount / Constants.rawAmountMultiplier;
 	}
 
 	/**

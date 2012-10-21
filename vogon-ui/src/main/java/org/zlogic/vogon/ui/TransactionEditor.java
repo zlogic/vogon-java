@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
@@ -332,8 +333,8 @@ public class TransactionEditor extends javax.swing.JPanel implements FinanceData
 			try {
 				financeData.setTransactionDate(editedTransaction, dateFormat.parse(jFormattedTextFieldDate.getText()));
 			} catch (ParseException ex) {
-				//TODO: warn user?
 				Logger.getLogger(TransactionEditor.class.getName()).log(Level.SEVERE, null, ex);
+				JOptionPane.showMessageDialog(this, new MessageFormat(messages.getString("SAVE_TRANSACTION_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), messages.getString("SAVE_TRANSACTION_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
