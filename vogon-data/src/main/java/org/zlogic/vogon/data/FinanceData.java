@@ -130,6 +130,7 @@ public class FinanceData {
 				criteriaBuilder.asc(tr.get(FinanceTransaction_.id)));
 		transactionsCriteriaQuery.select(tr).distinct(true);
 
+		//Limit the number of transactions retreived
 		TypedQuery query = entityManager.createQuery(transactionsCriteriaQuery);
 		if (firstTransaction >= 0)
 			query = query.setFirstResult(firstTransaction);
@@ -374,12 +375,14 @@ public class FinanceData {
 			for (FinanceAccount account2 : accounts) {
 				if (account1.getCurrency() != account2.getCurrency()) {
 					CurrencyRate rateFrom = null, rateTo = null;
+					//Check that currencies between account1 and account2 can be converted
 					for (CurrencyRate rate : exchangeRates) {
 						if (rate.getSource() == account1.getCurrency() && rate.getDestination() == account2.getCurrency())
 							rateFrom = rate;
 						if (rate.getDestination() == account1.getCurrency() && rate.getSource() == account2.getCurrency())
 							rateTo = rate;
 					}
+					//Add missing currency rates
 					if (rateFrom == null) {
 						CurrencyRate rate = new CurrencyRate(account1.getCurrency(), account2.getCurrency(), 1.0);
 						entityManager.persist(rate);
@@ -723,6 +726,7 @@ public class FinanceData {
 		if (entityManager.find(TransactionComponent.class, component.id) == null)
 			entityManager.persist(component);
 
+		//Update transaciton, old & new accounts in DB
 		transaction.updateComponentAccount(component, newAccount);
 		entityManager.merge(transaction);
 		entityManager.merge(newAccount);
@@ -763,6 +767,7 @@ public class FinanceData {
 		if (entityManager.find(TransactionComponent.class, component.id) == null)
 			entityManager.persist(component);
 
+		//Update accounts
 		if (component.getTransaction().getComponents().contains(component))
 			component.getTransaction().updateComponentRawAmount(component, Math.round(newAmount * 100));
 		else {
@@ -770,6 +775,7 @@ public class FinanceData {
 			component.getTransaction().addComponent(component);
 		}
 
+		//Update component
 		entityManager.merge(component);
 		if (component.getAccount() != null) {
 			entityManager.merge(component.getAccount());
@@ -806,6 +812,7 @@ public class FinanceData {
 
 		persistenceAdd(newAccount, entityManager);
 
+		//Update accounts
 		if (component.getTransaction().getComponents().contains(component))
 			component.getTransaction().updateComponentAccount(component, newAccount);
 		else {
@@ -813,6 +820,7 @@ public class FinanceData {
 			component.getTransaction().addComponent(component);
 		}
 
+		//Update transaction and accounts in DB
 		entityManager.merge(component);
 		if (component.getTransaction() != null)
 			entityManager.merge(component.getTransaction());
@@ -955,10 +963,12 @@ public class FinanceData {
 
 		List<FinanceAccount> affectedAccounts = transaction.getAccounts();
 
+		//Remove all components
 		for (TransactionComponent component : transaction.getComponents())
 			entityManager.remove(entityManager.find(TransactionComponent.class, component.id));
 		transaction.removeAllComponents();
 
+		//Remove transaction
 		entityManager.remove(entityManager.find(FinanceTransaction.class, transaction.id));
 		entityManager.getTransaction().commit();
 		entityManager.close();
@@ -979,6 +989,7 @@ public class FinanceData {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
 
+		//Delete all related transaction components
 		for (FinanceTransaction transaction : getTransactions()) {
 			List<TransactionComponent> components = transaction.getComponentsForAccount(account);
 			transaction.removeComponents(components);
@@ -987,6 +998,8 @@ public class FinanceData {
 			for (TransactionComponent component : components)
 				entityManager.remove(entityManager.find(TransactionComponent.class, component.id));
 		}
+
+		//Remove account
 		entityManager.remove(entityManager.find(FinanceAccount.class, account.id));
 
 		entityManager.getTransaction().commit();
@@ -1013,6 +1026,7 @@ public class FinanceData {
 		Root<FinanceTransaction> ftr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 		FinanceAccount tempAccount = tempEntityManager.find(FinanceAccount.class, account.id);
 
+		//Recalculate balance from related transactions
 		//TODO: add paging here
 		tempEntityManager.getTransaction().begin();
 		tempAccount.updateRawBalance(-tempAccount.getRawBalance());
@@ -1023,6 +1037,7 @@ public class FinanceData {
 		}
 		tempEntityManager.getTransaction().commit();
 
+		//Update real account balance from temporary account
 		account.updateRawBalance(-account.getRawBalance() + tempAccount.getRawBalance());
 
 		tempEntityManager.close();

@@ -34,7 +34,6 @@ public class FinanceTransaction implements Serializable {
 	 * The transaction type
 	 */
 	public enum Type {
-
 		/**
 		 * Income or expense
 		 */
