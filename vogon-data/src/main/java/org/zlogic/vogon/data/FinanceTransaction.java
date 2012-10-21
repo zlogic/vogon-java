@@ -281,9 +281,9 @@ public class FinanceTransaction implements Serializable {
 			long amount = 0;
 			Currency commonCurrency = null;
 			for (TransactionComponent component : components) {
-				if (commonCurrency == null)
+				if (commonCurrency == null && component.getAccount() != null)
 					commonCurrency = component.getAccount().getCurrency();
-				else if (component.getAccount().getCurrency() != commonCurrency)
+				else if (component.getAccount() != null && component.getAccount().getCurrency() != commonCurrency)
 					return true;
 				amount += component.getRawAmount();
 			}
