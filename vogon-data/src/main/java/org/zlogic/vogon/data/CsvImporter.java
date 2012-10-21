@@ -57,7 +57,6 @@ public class CsvImporter implements FileImporter {
 	 */
 	@Override
 	public void importFile() throws VogonImportException, VogonImportLogicalException {
-
 		try {
 			EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 			entityManager.getTransaction().begin();
@@ -74,7 +73,6 @@ public class CsvImporter implements FileImporter {
 				if (columnsHeader == null) {
 					columnsHeader = columns;
 					//Create accounts
-
 					for (int i = 3; i < columns.length; i++) {
 						// Try searching existing account in database
 						CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -111,7 +109,7 @@ public class CsvImporter implements FileImporter {
 								hasPositiveAmounts = true;
 							if (amount < 0)
 								hasNegativeAmounts = true;
-						}
+							}
 					//Split tags
 					String[] tags = columns[2].split(","); //NOI18N
 					FinanceTransaction transaction = null;

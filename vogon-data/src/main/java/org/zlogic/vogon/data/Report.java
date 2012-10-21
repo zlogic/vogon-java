@@ -346,29 +346,34 @@ public class Report {
 	 * be used in groupBy if result of selection is not a unique FinanceAccount
 	 */
 	protected ConstructedPredicate getFilteredTransactionsPredicate(CriteriaBuilder criteriaBuilder, Root<FinanceTransaction> tr, EnumSet appliedFilters) {
+		//Date filter
 		Predicate datePredicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), earliestDate),
 				criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), latestDate));
 
+		//Transaction type filter
 		Predicate transactionTypePredicate = criteriaBuilder.disjunction();
 		if (enabledExpenseTransactions || enabledIncomeTransactions)
 			transactionTypePredicate = criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.get(FinanceTransaction_.type), FinanceTransaction.Type.EXPENSEINCOME));
 		if (enabledTransferTransactions)
 			transactionTypePredicate = criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.get(FinanceTransaction_.type), FinanceTransaction.Type.TRANSFER));
 
+
+		//Expense/income filter
 		Predicate expenseTypePredicate = criteriaBuilder.disjunction();
 		if (enabledExpenseTransactions)
 			expenseTypePredicate = criteriaBuilder.or(expenseTypePredicate, criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.amount), new Long(0)));
 		if (enabledIncomeTransactions)
 			expenseTypePredicate = criteriaBuilder.or(expenseTypePredicate, criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.amount), new Long(0)));
 
+		//Tags jon
 		Join tagsJoin = tr.join(FinanceTransaction_.tags);
-
 		Predicate tagsPredicate = (selectedTags != null && !selectedTags.isEmpty()) ? tagsJoin.in(criteriaBuilder.literal(selectedTags)) : criteriaBuilder.disjunction();
 
+		//Transaction components join
 		Join componentsJoin = tr.join(FinanceTransaction_.components);
-
 		Predicate accountsPredicate = (selectedAccounts != null && !selectedAccounts.isEmpty()) ? componentsJoin.get(TransactionComponent_.account).in(criteriaBuilder.literal(selectedAccounts)) : criteriaBuilder.disjunction();
 
+		//Combine all filters
 		Predicate rootPredicate = criteriaBuilder.conjunction();
 		if (appliedFilters.contains(FilterType.DATE))
 			rootPredicate = criteriaBuilder.and(rootPredicate, datePredicate);
@@ -400,9 +405,11 @@ public class Report {
 		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 
+		//Build general filter
 		ConstructedPredicate predicate = getFilteredTransactionsPredicate(criteriaBuilder, tr, appliedFilters);
 		transactionsCriteriaQuery.where(predicate.getPredicate());
 
+		//Configure the query
 		Expression userOrderBy = tr.get(orderBy);
 
 		if (orderAbsolute)
@@ -414,6 +421,7 @@ public class Report {
 		transactionsCriteriaQuery.orderBy(userOrder, idOrder);
 		transactionsCriteriaQuery.select(tr).distinct(true);
 
+		//Fetch data
 		List<FinanceTransaction> transactions = entityManager.createQuery(transactionsCriteriaQuery).getResultList();
 		entityManager.close();
 		return transactions;
@@ -504,6 +512,7 @@ public class Report {
 	 * @return a graph for the total balance of accounts, sorted by date
 	 */
 	public Map<Date, Double> getAccountsBalanceGraph() {
+		//Get all transactions
 		List<FinanceTransaction> transactions = getTransactions(
 				FinanceTransaction_.transactionDate, true, false,
 				EnumSet.of(FilterType.DATE, FilterType.ACCOUNTS));
@@ -514,9 +523,10 @@ public class Report {
 		for (Currency currency : financeData.getCurrencies())
 			sumBalance.put(currency.getCurrencyCode(), 0L);
 
-		for (FinanceAccount account : selectedAccounts) {
+		for (FinanceAccount account : selectedAccounts)
 			sumBalance.put(account.getCurrency().getCurrencyCode(), sumBalance.get(account.getCurrency().getCurrencyCode()) + getRawAccountBalanceByDate(account, earliestDate));
-		}
+
+		//Calculate sum for accounts/currencies for each transaction
 		for (FinanceTransaction transaction : transactions) {
 			for (FinanceAccount account : selectedAccounts)
 				for (TransactionComponent component : transaction.getComponentsForAccount(account))
@@ -612,7 +622,9 @@ public class Report {
 	public List<TagExpense> getTagExpenses() {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		Map<String, TagExpense> result = new TreeMap<>();
+		//Process currencies separately
 		for (Currency currency : financeData.getCurrencies()) {
+			//Obtain the tag-total sum table via a query
 			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 			CriteriaQuery<Tuple> transactionsCriteriaQuery = criteriaBuilder.createTupleQuery();
 			Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
@@ -628,6 +640,7 @@ public class Report {
 
 			double exchangeRate = financeData.getExchangeRate(currency, financeData.getDefaultCurrency());
 
+			//Convert results to a common currency if tag contains transactions in different currencies
 			for (Tuple tuple : entityManager.createQuery(transactionsCriteriaQuery).getResultList()) {
 				String tag = tuple.get(1, String.class);
 				double amount = (tuple.get(0, Long.class) / 100.0D);
