@@ -18,7 +18,7 @@
 
 	<properties>
 		<version.java>1.7</version.java>
-		<version.windows>0.0.3.0</version.windows>
+		<version.windows>0.0.4.0</version.windows>
 	</properties>
 
 	<build>
