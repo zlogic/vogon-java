@@ -105,7 +105,8 @@ public class TransactionComponent implements Serializable {
 	}
 
 	/**
-	 * Returns the raw amount (should be divided by 100 to get the real amount)
+	 * Returns the raw amount (should be divided by
+	 * Constants.rawAmountMultiplier to get the real amount)
 	 *
 	 * @return the raw amount
 	 */
@@ -114,8 +115,8 @@ public class TransactionComponent implements Serializable {
 	}
 
 	/**
-	 * Sets a new raw amount (should be divided by 100 to get the real amount)
-	 * Also updates the account balance
+	 * Sets a new raw amount (should be divided by Constants.rawAmountMultiplier
+	 * to get the real amount) Also updates the account balance
 	 *
 	 * @param amount the new raw amount
 	 */
@@ -129,7 +130,7 @@ public class TransactionComponent implements Serializable {
 	 * @return the raw amount
 	 */
 	public double getAmount() {
-		return amount / 100.0D;
+		return amount / Constants.rawAmountMultiplier;
 	}
 
 	@Override

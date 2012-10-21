@@ -5,6 +5,7 @@
  */
 package org.zlogic.vogon.ui;
 
+import java.awt.Component;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.ParseException;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import org.jfree.chart.ChartFactory;
@@ -54,6 +56,10 @@ public class AnalyticsViewer extends javax.swing.JPanel implements FinanceData.A
 	public AnalyticsViewer() {
 		initComponents();
 		initCustomComponents();
+	}
+
+	public void setBackgroundTaskHandler(BackgroundTaskHandler backgroundTaskHandler) {
+		this.backgroundTaskHandler = backgroundTaskHandler;
 	}
 
 	/**
@@ -242,35 +248,56 @@ public class AnalyticsViewer extends javax.swing.JPanel implements FinanceData.A
 
     private void jButtonGenerateReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGenerateReportActionPerformed
 		//Assign report settings
-		DateFormat dateFormat = new SimpleDateFormat(messages.getString("PARSER_DATE"));
+
+		Runnable task = new Runnable() {
+			protected Component parent;
+
+			public Runnable setParent(Component parent) {
+				this.parent = parent;
+				return this;
+			}
+
+			@Override
+			public void run() {
+				DateFormat dateFormat = new SimpleDateFormat(messages.getString("PARSER_DATE"));
+				try {
+					report.setEarliestDate(dateFormat.parse(jFormattedTextFieldStartDate.getText()));
+					report.setLatestDate(dateFormat.parse(jFormattedTextFieldEndDate.getText()));
+					report.setEnabledExpenseTransactions(jCheckBoxExpenseTransactions.isSelected());
+					report.setEnabledTransferTransactions(jCheckBoxTransferTransactions.isSelected());
+					report.setEnabledIncomeTransactions(jCheckBoxIncomeTransactions.isSelected());
+
+					DefaultTableModel tagsModel = (DefaultTableModel) jTableTags.getModel();
+					List<String> tags = new LinkedList<>();
+					for (int i = 0; i < tagsModel.getRowCount(); i++)
+						if (tagsModel.getValueAt(i, 1) instanceof Boolean && (Boolean) tagsModel.getValueAt(i, 1))
+							tags.add((String) tagsModel.getValueAt(i, 0));
+					report.setSelectedTags(tags);
+
+					DefaultTableModel accountsModel = (DefaultTableModel) jTableAccounts.getModel();
+					List<FinanceAccount> accounts = new LinkedList<>();
+					for (int i = 0; i < accountsModel.getRowCount(); i++)
+						if (accountsModel.getValueAt(i, 1) instanceof Boolean && (Boolean) accountsModel.getValueAt(i, 1))
+							accounts.add(((AccountDisplay) accountsModel.getValueAt(i, 0)).getAccount());
+					report.setSelectedAccounts(accounts);
+				} catch (ParseException ex) {
+					Logger.getLogger(AnalyticsViewer.class.getName()).log(Level.SEVERE, null, ex);
+					JOptionPane.showMessageDialog(parent, new MessageFormat(messages.getString("ANALYTICS_REPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), messages.getString("ANALYTICS_REPORT_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
+				}
+				//Update form with report
+				updateTagsChart(report.getTagExpenses());
+				updateTagsReportTable(report.getTagExpenses());
+				updateBalanceChart(report.getAccountsBalanceGraph());
+				updateTransactionsReportTable(report.getTransactions());//TODO: add paging
+			}
+		}.setParent(this);
+
 		try {
-			report.setEarliestDate(dateFormat.parse(jFormattedTextFieldStartDate.getText()));
-			report.setLatestDate(dateFormat.parse(jFormattedTextFieldEndDate.getText()));
-			report.setEnabledExpenseTransactions(jCheckBoxExpenseTransactions.isSelected());
-			report.setEnabledTransferTransactions(jCheckBoxTransferTransactions.isSelected());
-			report.setEnabledIncomeTransactions(jCheckBoxIncomeTransactions.isSelected());
-
-			DefaultTableModel tagsModel = (DefaultTableModel) jTableTags.getModel();
-			List<String> tags = new LinkedList<>();
-			for (int i = 0; i < tagsModel.getRowCount(); i++)
-				if (tagsModel.getValueAt(i, 1) instanceof Boolean && (Boolean) tagsModel.getValueAt(i, 1))
-					tags.add((String) tagsModel.getValueAt(i, 0));
-			report.setSelectedTags(tags);
-
-			DefaultTableModel accountsModel = (DefaultTableModel) jTableAccounts.getModel();
-			List<FinanceAccount> accounts = new LinkedList<>();
-			for (int i = 0; i < accountsModel.getRowCount(); i++)
-				if (accountsModel.getValueAt(i, 1) instanceof Boolean && (Boolean) accountsModel.getValueAt(i, 1))
-					accounts.add(((AccountDisplay) accountsModel.getValueAt(i, 0)).getAccount());
-			report.setSelectedAccounts(accounts);
-		} catch (ParseException ex) {
-			Logger.getLogger(AnalyticsViewer.class.getName()).log(Level.SEVERE, null, ex);
+			backgroundTaskHandler.runTask(task, messages.getString("TASK_GENERATING_REPORT"));
+		} catch (InterruptedException ex) {
+			Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+			JOptionPane.showMessageDialog(this, new MessageFormat(messages.getString("BACKGROUND_TASK_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), messages.getString("BACKGROUND_TASK_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
 		}
-		//Update form with report
-		updateTagsChart(report.getTagExpenses());
-		updateTagsReportTable(report.getTagExpenses());
-		updateBalanceChart(report.getAccountsBalanceGraph());
-		updateTransactionsReportTable(report.getTransactions());
     }//GEN-LAST:event_jButtonGenerateReportActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonGenerateReport;
@@ -621,4 +648,8 @@ public class AnalyticsViewer extends javax.swing.JPanel implements FinanceData.A
 	 * The finance data reference
 	 */
 	protected FinanceData financeData;
+	/**
+	 * The background task handler class
+	 */
+	protected BackgroundTaskHandler backgroundTaskHandler;
 }
