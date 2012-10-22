@@ -27,6 +27,11 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -67,6 +72,7 @@
 							<outfile>target/vogon-${project.version}.exe</outfile>
 							<jar>target/vogon-${project.version}.jar</jar>
 							<errTitle>encc</errTitle>
+							<icon>src/main/resources/Vogon.ico</icon>
 							<classPath>
 								<mainClass>org.zlogic.vogon.ui.MainWindow</mainClass>
 								<addDependencies>true</addDependencies>

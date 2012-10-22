@@ -6,6 +6,7 @@
 package org.zlogic.vogon.ui;
 
 import java.awt.Component;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ItemEvent;
 import java.awt.event.WindowEvent;
@@ -153,6 +154,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle(messages.getString("MAINWINDOW_TITLE")); // NOI18N
+        setIconImages(getIconImages());
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
@@ -737,6 +739,15 @@ public class MainWindow extends javax.swing.JFrame {
 		jComboBoxDefaultCurrency.setEnabled(true);
 	}
 
+	@Override
+	public List<Image> getIconImages() {
+		List<Image> images = new LinkedList<>();
+		int[] iconSizes = new int[]{16, 24, 32, 48, 64, 128, 256, 512};
+		for (int iconName : iconSizes)
+			images.add(new javax.swing.ImageIcon(getClass().getResource("/icon/vogon-tilt-" + Integer.toString(iconName) + ".png")).getImage());
+		return images;
+	}
+
 	/**
 	 * Class for processing external events
 	 */
@@ -818,13 +829,18 @@ public class MainWindow extends javax.swing.JFrame {
 				thread = new Thread(new Runnable() {
 					@Override
 					public void run() {
-						task.run();
-
-						//Restore the form after running the task
-						for (JComponent component : disabledComponents)
-							component.setEnabled(true);
-						jLabelProgressIndicator.setVisible(false);
-						jLabelCurrentTask.setText(""); //NOI18N
+						try {
+							task.run();
+						} catch (Exception ex) {
+							Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+							JOptionPane.showMessageDialog(MainWindow.this, new MessageFormat(messages.getString("BACKGROUND_TASK_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), messages.getString("BACKGROUND_TASK_EXCEPTION_DIALOG_TITLE"), JOptionPane.ERROR_MESSAGE);
+						} finally {
+							//Restore the form after running the task
+							for (JComponent component : disabledComponents)
+								component.setEnabled(true);
+							jLabelProgressIndicator.setVisible(false);
+							jLabelCurrentTask.setText(""); //NOI18N
+						}
 					}
 				});
 
