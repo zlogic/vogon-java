@@ -58,6 +58,11 @@ public class AnalyticsViewer extends javax.swing.JPanel implements FinanceData.A
 		initCustomComponents();
 	}
 
+	/**
+	 * Sets the background task handler
+	 *
+	 * @param backgroundTaskHandler the background task handler
+	 */
 	public void setBackgroundTaskHandler(BackgroundTaskHandler backgroundTaskHandler) {
 		this.backgroundTaskHandler = backgroundTaskHandler;
 	}
