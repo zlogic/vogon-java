@@ -4,13 +4,14 @@
 
 	<groupId>org.zlogic.vogon</groupId>
 	<artifactId>top</artifactId>
-	<version>0.0.4-SNAPSHOT</version>
+	<version>0.0.5-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Vogon :: Top</name>
 
 	<modules>
 		<module>vogon-data</module>
+		<module>vogon-javafx-repack</module>
 		<module>vogon-ui</module>
 		<module>vogon-resources</module>
 		<module>vogon-distribution</module>
@@ -18,7 +19,7 @@
 
 	<properties>
 		<version.java>1.7</version.java>
-		<version.windows>0.0.4.0</version.windows>
+		<version.windows>0.0.5.0</version.windows>
 	</properties>
 
 	<build>
@@ -52,6 +53,11 @@
 			<dependency>
 				<groupId>org.zlogic.vogon.ui</groupId>
 				<artifactId>vogon-ui</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.zlogic.vogon.ui</groupId>
+				<artifactId>vogon-javafx-repack</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

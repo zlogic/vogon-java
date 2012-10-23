@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.zlogic.vogon</groupId>
 		<artifactId>top</artifactId>
-		<version>0.0.4-SNAPSHOT</version>
+		<version>0.0.5-SNAPSHOT</version>
 	</parent>
 	<groupId>org.zlogic.vogon.ui</groupId>
 	<artifactId>vogon-ui</artifactId>
@@ -38,6 +38,24 @@
 					<target>${version.java}</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
+							<overWriteIfNewer>true</overWriteIfNewer>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -47,8 +65,8 @@
 			<artifactId>vogon-data</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>jfree</groupId>
-			<artifactId>jfreechart</artifactId>
+			<groupId>org.zlogic.vogon.ui</groupId>
+			<artifactId>vogon-javafx-repack</artifactId>
 		</dependency>
 	</dependencies>
 </project>
