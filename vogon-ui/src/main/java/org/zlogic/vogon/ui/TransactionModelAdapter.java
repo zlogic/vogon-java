@@ -5,30 +5,27 @@
  */
 package org.zlogic.vogon.ui;
 
-import java.text.MessageFormat;
 import java.util.Currency;
 import java.util.Date;
 import java.util.List;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
+import org.zlogic.vogon.ui.cell.CellStatus;
 
 /**
  * Transactions helper class for rendering.
  *
  * @author Dmitry Zolotukhin
  */
-public class ModelTransaction {
-
+public class TransactionModelAdapter implements CellStatus {
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	protected FinanceTransaction transaction;
 	protected FinanceData financeData;
 
-	public ModelTransaction(FinanceTransaction transaction, FinanceData financeData) {
+	public TransactionModelAdapter(FinanceTransaction transaction, FinanceData financeData) {
 		this.transaction = transaction;
 		this.financeData = financeData;
-
-		//Set properties
 	}
 
 	public String getDescription() {
@@ -36,7 +33,7 @@ public class ModelTransaction {
 	}
 
 	public void setDescription(String description) {
-		transaction.setDescription(description);
+		financeData.setTransactionDescription(transaction, description);
 	}
 
 	public Date getDate() {
@@ -44,8 +41,7 @@ public class ModelTransaction {
 	}
 
 	public void setDate(Date date) {
-		//financeData.setTransactionType(editedTransaction, ((TransactionEditor.TransactionTypeComboItem) jComboBoxTransactionType.getSelectedItem()).getType());
-		transaction.setDate(date);
+		financeData.setTransactionDate(transaction, date);
 	}
 
 	public String getTags() {
@@ -53,10 +49,18 @@ public class ModelTransaction {
 	}
 
 	public void setTags(String tags) {
-		transaction.setTags(tags.split(",")); //NOI18N
+		financeData.setTransactionTags(transaction, tags.split(","));//NOI18N
 	}
 
-	public String getAmount() {
+	public TransactionModelAdapter getModelTransaction(){
+		return this;
+	}
+	
+	public FinanceTransaction getTransaction(){
+		return transaction;
+	}
+	
+	public AmountAdapter getAmount() {
 		List<Currency> transactionCurrencies = transaction.getCurrencies();
 		Currency currency;
 		double amount;
@@ -67,13 +71,7 @@ public class ModelTransaction {
 			amount = financeData.getAmountInCurrency(transaction, financeData.getDefaultCurrency());
 			currency = financeData.getDefaultCurrency();
 		}
-
-		String formattedSum = MessageFormat.format(messages.getString("FORMAT_SUM"),
-				transaction.getType() == FinanceTransaction.Type.TRANSFER ? messages.getString("TRANSFER_TRANSACTION_FLAG") : messages.getString("EXPENSE_TRANSACTION_FLAG"),
-				amount,
-				currency != null ? currency.getCurrencyCode() : messages.getString("INVALID_CURRENCY"),
-				transactionCurrencies.size() != 1 ? messages.getString("CURRENCY_CONVERTED") : messages.getString("CURRENCY_NOT_CONVERTED"));
-		return formattedSum;
+		return new AmountAdapter(amount, transaction.isAmountOk(), currency, transactionCurrencies.size() != 1, transaction.getType());
 	}
 
 	public String getAccount() {
@@ -105,5 +103,10 @@ public class ModelTransaction {
 			return builder.toString();
 		} else
 			return ""; //NOI18N
+	}
+
+	@Override
+	public boolean isOK() {
+		return transaction.isAmountOk();
 	}
 }

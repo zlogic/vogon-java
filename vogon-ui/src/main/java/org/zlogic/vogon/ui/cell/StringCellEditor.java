@@ -6,6 +6,7 @@
 package org.zlogic.vogon.ui.cell;
 
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -17,12 +18,18 @@ import javafx.scene.input.KeyEvent;
  * @author Dmitry
  */
 public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType, PropertyType> {
-
-	private TextField textField;
-	private StringCellValidator validator;
-
+	protected TextField textField;
+	protected StringCellValidator validator;
+	protected Pos alignment;
+	
 	public StringCellEditor(StringCellValidator validator) {
+		this(validator,null);
+	}
+	public StringCellEditor(StringCellValidator validator,Pos alignment) {
 		this.validator = validator;
+		if(alignment!=null)
+			setAlignment(alignment);
+		this.alignment = alignment;
 	}
 
 	@Override
@@ -75,6 +82,8 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 	private void createTextField() {
 		textField = new TextField(getString());
 		textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2);
+		if(alignment!=null)
+			textField.setAlignment(alignment);
 		textField.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent t) {

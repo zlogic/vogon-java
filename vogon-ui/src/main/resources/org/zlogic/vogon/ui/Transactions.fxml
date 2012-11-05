@@ -8,32 +8,39 @@
 <?import javafx.scene.control.cell.*?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.layout.*?>
+<?scenebuilder-preview-i18n-resource messages.properties?>
 
-<VBox fx:id="transactionsVBox" prefHeight="313.0" prefWidth="347.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.TransactionsController">
+<VBox fx:id="transactionsVBox" prefHeight="382.0" prefWidth="436.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.TransactionsController">
   <children>
+    <AnchorPane prefHeight="35.0" prefWidth="436.0" VBox.vgrow="NEVER">
+      <children>
+        <Button mnemonicParsing="false" onAction="#handleCreateTransaction" text="%NEW_TRANSACTION" />
+        <Button layoutX="133.0" mnemonicParsing="false" onAction="#handleDeleteTransaction" text="%DELETE_TRANSACTION" />
+      </children>
+    </AnchorPane>
     <TableView fx:id="transactionsTable" editable="true" prefHeight="423.0" prefWidth="563.0">
       <columns>
-        <TableColumn prefWidth="150.0" sortable="false" style="" text="Description" fx:id="columnDescription">
+        <TableColumn prefWidth="150.0" sortable="false" style="" text="%TRANSACTION_DESCRIPTION" fx:id="columnDescription">
           <cellValueFactory>
             <PropertyValueFactory property="description" />
           </cellValueFactory>
         </TableColumn>
-        <TableColumn prefWidth="75.0" sortable="false" text="Date" fx:id="columnDate">
+        <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_DATE" fx:id="columnDate">
           <cellValueFactory>
             <PropertyValueFactory property="date" />
           </cellValueFactory>
         </TableColumn>
-        <TableColumn prefWidth="75.0" sortable="false" text="Tags" fx:id="columnTags">
+        <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_TAGS" fx:id="columnTags">
           <cellValueFactory>
             <PropertyValueFactory property="tags" />
           </cellValueFactory>
         </TableColumn>
-        <TableColumn prefWidth="75.0" sortable="false" text="Amount" fx:id="columnAmount">
+        <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_AMOUNT" fx:id="columnAmount">
           <cellValueFactory>
-            <PropertyValueFactory property="amount" />
+            <PropertyValueFactory property="modelTransaction" />
           </cellValueFactory>
         </TableColumn>
-        <TableColumn prefWidth="75.0" sortable="false" text="Account" fx:id="columnAccount">
+        <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_ACCOUNT" fx:id="columnAccount">
           <cellValueFactory>
             <PropertyValueFactory property="account" />
           </cellValueFactory>

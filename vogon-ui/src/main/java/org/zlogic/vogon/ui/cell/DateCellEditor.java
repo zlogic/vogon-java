@@ -41,8 +41,8 @@ public class DateCellEditor<BaseType> extends StringCellEditor<BaseType, Date> {
 		if (getItem() == null)
 			return "";
 		if (isEditing())
-			return MessageFormat.format(messages.getString("FORMAT_DATE"), new Object[]{((Date) getItem())});
+			return MessageFormat.format(messages.getString("FORMAT_DATE"), new Object[]{getItem()});
 		else
-			return DateFormat.getDateInstance(DateFormat.LONG).format((Date) getItem());
+			return DateFormat.getDateInstance(DateFormat.LONG).format(getItem());
 	}
 }

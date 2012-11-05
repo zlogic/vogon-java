@@ -11,7 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Validator which always returns true.
+ * Validator which validates dates.
  *
  * @author Dmitry
  */
