@@ -5,6 +5,7 @@
 package org.zlogic.vogon.ui;
 
 import org.zlogic.vogon.data.FinanceAccount;
+import org.zlogic.vogon.data.FinanceTransaction;
 
 /**
  * Class for storing an account with an overloaded toString method for better
@@ -58,5 +59,21 @@ public class FinanceAccountModelAdapter {
 	 */
 	public FinanceAccount getAccount() {
 		return account;
+	}
+	
+	public String getName(){
+		return account.getName();
+	}
+	
+	public String getCurrency(){
+		return account.getCurrency().getDisplayName();
+	}
+	
+	public boolean getIncludeInTotal(){
+		return account.getIncludeInTotal();
+	}
+	
+	public String getBalance(){
+		return new AmountAdapter(account.getBalance(),true,account.getCurrency(),false,FinanceTransaction.Type.UNDEFINED).toString();
 	}
 }
