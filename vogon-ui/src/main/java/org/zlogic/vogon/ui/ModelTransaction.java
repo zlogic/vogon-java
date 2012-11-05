@@ -7,6 +7,7 @@ package org.zlogic.vogon.ui;
 
 import java.text.MessageFormat;
 import java.util.Currency;
+import java.util.Date;
 import java.util.List;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
@@ -26,18 +27,33 @@ public class ModelTransaction {
 	public ModelTransaction(FinanceTransaction transaction, FinanceData financeData) {
 		this.transaction = transaction;
 		this.financeData = financeData;
+
+		//Set properties
 	}
 
 	public String getDescription() {
 		return transaction.getDescription();
 	}
 
-	public String getDate() {
-		return MessageFormat.format(messages.getString("FORMAT_DATE"), new Object[]{transaction.getDate()});
+	public void setDescription(String description) {
+		transaction.setDescription(description);
+	}
+
+	public Date getDate() {
+		return transaction.getDate();
+	}
+
+	public void setDate(Date date) {
+		//financeData.setTransactionType(editedTransaction, ((TransactionEditor.TransactionTypeComboItem) jComboBoxTransactionType.getSelectedItem()).getType());
+		transaction.setDate(date);
 	}
 
 	public String getTags() {
 		return org.zlogic.vogon.data.Utils.join(transaction.getTags(), ","); //NOI18N
+	}
+
+	public void setTags(String tags) {
+		transaction.setTags(tags.split(",")); //NOI18N
 	}
 
 	public String getAmount() {

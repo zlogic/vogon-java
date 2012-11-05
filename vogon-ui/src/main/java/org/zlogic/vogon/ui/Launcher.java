@@ -26,6 +26,9 @@ import org.zlogic.vogon.data.FinanceData;
 public class Launcher extends Application {
 
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
+	/**
+	 * FinanceData instance
+	 */
 	private FinanceData financeData = new FinanceData();
 
 	/**
