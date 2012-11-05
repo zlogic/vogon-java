@@ -14,27 +14,27 @@
     <Pagination fx:id="transactionsTablePagination" pageCount="10" prefWidth="563.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
     <TableView fx:id="transactionsTable" prefHeight="423.0" prefWidth="563.0" AnchorPane.bottomAnchor="65.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <columns>
-        <TableColumn prefWidth="150.0" text="Description" fx:id="columnDescription">
+        <TableColumn prefWidth="150.0" sortable="false" style="" text="Description" fx:id="columnDescription">
           <cellValueFactory>
             <PropertyValueFactory property="description" />
           </cellValueFactory>
         </TableColumn>
-        <TableColumn prefWidth="75.0" text="Date" fx:id="columnDate">
+        <TableColumn prefWidth="75.0" sortable="false" text="Date" fx:id="columnDate">
           <cellValueFactory>
             <PropertyValueFactory property="date" />
           </cellValueFactory>
         </TableColumn>
-        <TableColumn prefWidth="75.0" text="Tags" fx:id="columnTags">
+        <TableColumn prefWidth="75.0" sortable="false" text="Tags" fx:id="columnTags">
           <cellValueFactory>
             <PropertyValueFactory property="tags" />
           </cellValueFactory>
         </TableColumn>
-        <TableColumn prefWidth="75.0" text="Amount" fx:id="columnAmount">
+        <TableColumn prefWidth="75.0" sortable="false" text="Amount" fx:id="columnAmount">
           <cellValueFactory>
             <PropertyValueFactory property="amount" />
           </cellValueFactory>
         </TableColumn>
-        <TableColumn prefWidth="75.0" text="Account" fx:id="columnAccount">
+        <TableColumn prefWidth="75.0" sortable="false" text="Account" fx:id="columnAccount">
           <cellValueFactory>
             <PropertyValueFactory property="account" />
           </cellValueFactory>

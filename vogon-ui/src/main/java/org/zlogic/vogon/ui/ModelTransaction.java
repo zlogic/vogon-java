@@ -14,31 +14,33 @@ import org.zlogic.vogon.data.FinanceTransaction;
 
 /**
  * Transactions helper class for rendering.
+ *
  * @author Dmitry Zolotukhin
  */
 public class ModelTransaction {
+
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
-	
 	protected FinanceTransaction transaction;
 	protected FinanceData financeData;
-	public ModelTransaction(FinanceTransaction transaction, FinanceData financeData){
+
+	public ModelTransaction(FinanceTransaction transaction, FinanceData financeData) {
 		this.transaction = transaction;
 		this.financeData = financeData;
 	}
-	
-	public String getDescription(){
+
+	public String getDescription() {
 		return transaction.getDescription();
 	}
-	
-	public String getDate(){
+
+	public String getDate() {
 		return MessageFormat.format(messages.getString("FORMAT_DATE"), new Object[]{transaction.getDate()});
 	}
-	
-	public String getTags(){
+
+	public String getTags() {
 		return org.zlogic.vogon.data.Utils.join(transaction.getTags(), ","); //NOI18N
 	}
-	
-	public String getAmount(){
+
+	public String getAmount() {
 		List<Currency> transactionCurrencies = transaction.getCurrencies();
 		Currency currency;
 		double amount;
@@ -49,7 +51,7 @@ public class ModelTransaction {
 			amount = financeData.getAmountInCurrency(transaction, financeData.getDefaultCurrency());
 			currency = financeData.getDefaultCurrency();
 		}
-		
+
 		String formattedSum = MessageFormat.format(messages.getString("FORMAT_SUM"),
 				transaction.getType() == FinanceTransaction.Type.TRANSFER ? messages.getString("TRANSFER_TRANSACTION_FLAG") : messages.getString("EXPENSE_TRANSACTION_FLAG"),
 				amount,
@@ -57,8 +59,8 @@ public class ModelTransaction {
 				transactionCurrencies.size() != 1 ? messages.getString("CURRENCY_CONVERTED") : messages.getString("CURRENCY_NOT_CONVERTED"));
 		return formattedSum;
 	}
-	
-	public String getAccount(){
+
+	public String getAccount() {
 		if (transaction.getType() == FinanceTransaction.Type.EXPENSEINCOME) {
 			List<FinanceAccount> accounts = transaction.getAccounts();
 			StringBuilder builder = new StringBuilder();
