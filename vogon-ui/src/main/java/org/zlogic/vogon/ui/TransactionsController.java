@@ -19,43 +19,40 @@ import org.zlogic.vogon.data.FinanceTransaction;
 
 /**
  * Transactions tab controller.
+ *
  * @author Dmitry Zolotukhin
  */
-public class TransactionsController implements Initializable{
-	
+public class TransactionsController implements Initializable {
+
 	private FinanceData financeData;
 	@FXML
 	private TableView<ModelTransaction> transactionsTable;
-	
 	@FXML
-	private TableColumn<ModelTransaction,String> columnDescription;
+	private TableColumn<ModelTransaction, String> columnDescription;
 	@FXML
-	private TableColumn<ModelTransaction,String> columnDate;
+	private TableColumn<ModelTransaction, String> columnDate;
 	@FXML
-	private TableColumn<ModelTransaction,String> columnTags;
+	private TableColumn<ModelTransaction, String> columnTags;
 	@FXML
-	private TableColumn<ModelTransaction,String> columnAmount;
+	private TableColumn<ModelTransaction, String> columnAmount;
 	@FXML
-	private TableColumn<ModelTransaction,String> columnAccount;
-	
+	private TableColumn<ModelTransaction, String> columnAccount;
 	@FXML
 	private Pagination transactionsTablePagination;
-	
+
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		//Init columns
 		transactionsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 	}
-	
-	protected void updateTransactions(){
+
+	protected void updateTransactions() {
 		List<ModelTransaction> transactionsList = new LinkedList<>();
-		for(FinanceTransaction transaction : financeData.getTransactions())
+		for (FinanceTransaction transaction : financeData.getTransactions())
 			transactionsList.add(new ModelTransaction(transaction, financeData));
 		transactionsTable.getItems().addAll(transactionsList);
 	}
-	
-	
-	
+
 	public FinanceData getFinanceData() {
 		return financeData;
 	}
