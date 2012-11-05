@@ -9,10 +9,9 @@
 <?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="488.0" prefWidth="563.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.TransactionsController">
+<VBox fx:id="transactionsVBox" prefHeight="313.0" prefWidth="347.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.TransactionsController">
   <children>
-    <Pagination fx:id="transactionsTablePagination" pageCount="10" prefWidth="563.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-    <TableView fx:id="transactionsTable" prefHeight="423.0" prefWidth="563.0" AnchorPane.bottomAnchor="65.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <TableView fx:id="transactionsTable" prefHeight="423.0" prefWidth="563.0">
       <columns>
         <TableColumn prefWidth="150.0" sortable="false" style="" text="Description" fx:id="columnDescription">
           <cellValueFactory>
@@ -41,5 +40,6 @@
         </TableColumn>
       </columns>
     </TableView>
+    <Pagination fx:id="transactionsTablePagination" pageCount="10" prefWidth="563.0" VBox.vgrow="ALWAYS" />
   </children>
-</AnchorPane>
+</VBox>
