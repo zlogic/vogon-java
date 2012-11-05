@@ -2,6 +2,7 @@
 
 <?import java.lang.*?>
 <?import java.util.*?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.control.Pagination?>
@@ -12,12 +13,16 @@
 
 <VBox fx:id="transactionsVBox" prefHeight="382.0" prefWidth="436.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.TransactionsController">
   <children>
-    <AnchorPane prefHeight="35.0" prefWidth="436.0" VBox.vgrow="NEVER">
+    <FlowPane prefHeight="35.0" prefWidth="436.0" VBox.vgrow="NEVER">
       <children>
-        <Button mnemonicParsing="false" onAction="#handleCreateTransaction" text="%NEW_TRANSACTION" />
-        <Button layoutX="133.0" mnemonicParsing="false" onAction="#handleDeleteTransaction" text="%DELETE_TRANSACTION" />
+        <Button mnemonicParsing="false" onAction="#handleCreateTransaction" text="%NEW_TRANSACTION">
+          <FlowPane.margin>
+            <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" fx:id="x1" />
+          </FlowPane.margin>
+        </Button>
+        <Button mnemonicParsing="false" onAction="#handleDeleteTransaction" text="%DELETE_TRANSACTION" FlowPane.margin="$x1" />
       </children>
-    </AnchorPane>
+    </FlowPane>
     <TableView fx:id="transactionsTable" editable="true" prefHeight="423.0" prefWidth="563.0">
       <columns>
         <TableColumn prefWidth="150.0" sortable="false" style="" text="%TRANSACTION_DESCRIPTION" fx:id="columnDescription">
