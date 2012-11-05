@@ -5,10 +5,54 @@
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?scenebuilder-preview-i18n-resource messages.properties?>
 
-<AnchorPane id="AnchorPane" prefHeight="200" prefWidth="320" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.SampleController">
+<AnchorPane id="AnchorPane" prefHeight="414.0" prefWidth="455.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.MainWindowController">
 	<children>
-		<Button layoutX="126" layoutY="90" text="Click Me!" onAction="#handleButtonAction" fx:id="button" />
-		<Label layoutX="126" layoutY="120" minHeight="16" minWidth="69" fx:id="label" />
+		<TabPane prefHeight="390.0" prefWidth="455.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="24.0">
+			<tabs>
+				<Tab text="%TRANSACTIONS">
+					<content>
+						<AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="358.0" prefWidth="451.0">
+							<children>
+								<fx:include fx:id="transactionsPane" source="Transactions.fxml" prefHeight="358.0" prefWidth="455.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+							</children>
+						</AnchorPane>
+					</content>
+				</Tab>
+				<Tab text="%ANALYTICS">
+					<content>
+						<AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+					</content>
+				</Tab>
+				<Tab text="%ACCOUNTS">
+					<content>
+						<AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+					</content>
+				</Tab>
+				<Tab text="%CURRENCIES">
+					<content>
+						<AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+					</content>
+				</Tab>
+			</tabs>
+		</TabPane>
+		<MenuBar prefWidth="455.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+			<menus>
+				<Menu mnemonicParsing="false" text="%MAINWINDOW_MENU_FILE">
+					<items>
+						<MenuItem mnemonicParsing="false" text="%MAINWINDOW_MENU_IMPORT" />
+						<MenuItem mnemonicParsing="false" text="%MAINWINDOW_MENU_EXPORT" />
+						<MenuItem mnemonicParsing="false" onAction="#handleMenuExitAction" text="%MAINWINDOW_MENU_EXIT" />
+					</items>
+				</Menu>
+				<Menu mnemonicParsing="false" text="%MAINWINDOW_MENU_TOOLS">
+					<items>
+						<MenuItem mnemonicParsing="false" text="%MAINWINDOW_MENU_RECALCULATE_BALANCE" />
+						<MenuItem mnemonicParsing="false" text="%MAINWINDOW_MENU_CLEANUP_DB" />
+					</items>
+				</Menu>
+			</menus>
+		</MenuBar>
 	</children>
 </AnchorPane>
