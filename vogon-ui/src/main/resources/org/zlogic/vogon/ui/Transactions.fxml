@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Pagination?>
+<?import javafx.scene.control.cell.*?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="488.0" prefWidth="563.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.TransactionsController">
+  <children>
+    <Pagination fx:id="transactionsTablePagination" pageCount="10" prefWidth="563.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+    <TableView fx:id="transactionsTable" prefHeight="423.0" prefWidth="563.0" AnchorPane.bottomAnchor="65.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <columns>
+        <TableColumn prefWidth="150.0" text="Description" fx:id="columnDescription">
+          <cellValueFactory>
+            <PropertyValueFactory property="description" />
+          </cellValueFactory>
+        </TableColumn>
+        <TableColumn prefWidth="75.0" text="Date" fx:id="columnDate">
+          <cellValueFactory>
+            <PropertyValueFactory property="date" />
+          </cellValueFactory>
+        </TableColumn>
+        <TableColumn prefWidth="75.0" text="Tags" fx:id="columnTags">
+          <cellValueFactory>
+            <PropertyValueFactory property="tags" />
+          </cellValueFactory>
+        </TableColumn>
+        <TableColumn prefWidth="75.0" text="Amount" fx:id="columnAmount">
+          <cellValueFactory>
+            <PropertyValueFactory property="amount" />
+          </cellValueFactory>
+        </TableColumn>
+        <TableColumn prefWidth="75.0" text="Account" fx:id="columnAccount">
+          <cellValueFactory>
+            <PropertyValueFactory property="account" />
+          </cellValueFactory>
+        </TableColumn>
+      </columns>
+    </TableView>
+  </children>
+</AnchorPane>
