@@ -24,7 +24,6 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import javax.swing.JOptionPane;
 import org.zlogic.vogon.data.CsvImporter;
 import org.zlogic.vogon.data.DatabaseManager;
 import org.zlogic.vogon.data.FileExporter;
@@ -132,7 +131,7 @@ public class MainWindowController implements Initializable {
 						transactionsPaneController.setFinanceData(financeData);
 						//TODO: fix this
 						//accountsTableModel.setFinanceData(financeData);
-					} catch (final org.zlogic.vogon.data.VogonImportLogicalException ex) {
+					} catch (VogonImportLogicalException ex) {
 						Logger.getLogger(MainWindowController.class.getName()).log(Level.SEVERE, null, ex);
 						MessageDialog.showDialog(messages.getString("IMPORT_EXCEPTION_DIALOG_TITLE"), new MessageFormat(messages.getString("IMPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), true);
 					} catch (Exception ex) {
@@ -162,7 +161,6 @@ public class MainWindowController implements Initializable {
 			fileChooser.setInitialDirectory(lastDirectory);
 		fileChooser.setTitle(messages.getString("CHOOSE_FILES_TO_EXPORT"));
 		//Prepare file chooser filter
-		Map<String, String> extensionFilters = new TreeMap<>();
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(messages.getString("XML_FILES"), "*.xml"));//NOI18N
 
 		//Show the dialog
@@ -194,7 +192,7 @@ public class MainWindowController implements Initializable {
 						beginBackgroundTask();
 
 						financeData.exportData(exporter);
-					} catch (final org.zlogic.vogon.data.VogonExportException ex) {
+					} catch (VogonExportException ex) {
 						Logger.getLogger(MainWindowController.class.getName()).log(Level.SEVERE, null, ex);
 						MessageDialog.showDialog(messages.getString("EXPORT_EXCEPTION_DIALOG_TITLE"), new MessageFormat(messages.getString("EXPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), true);
 					} catch (Exception ex) {
