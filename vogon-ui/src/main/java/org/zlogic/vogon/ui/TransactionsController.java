@@ -11,9 +11,11 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Pagination;
 import javafx.scene.control.TableCell;
@@ -28,6 +30,7 @@ import org.zlogic.vogon.ui.cell.DateCellEditor;
 import org.zlogic.vogon.ui.cell.StringCellEditor;
 import org.zlogic.vogon.ui.cell.StringValidatorDate;
 import org.zlogic.vogon.ui.cell.StringValidatorDefault;
+import org.zlogic.vogon.ui.cell.TransactionEditor;
 
 /**
  * Transactions tab controller.
@@ -37,23 +40,21 @@ import org.zlogic.vogon.ui.cell.StringValidatorDefault;
 public class TransactionsController implements Initializable {
 
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
-	private FinanceData financeData;
+	protected FinanceData financeData;
 	@FXML
-	private TableView<ModelTransaction> transactionsTable;
+	protected TableView<TransactionModelAdapter> transactionsTable;
 	@FXML
-	private TableColumn<ModelTransaction, String> columnDescription;
+	protected TableColumn<TransactionModelAdapter, String> columnDescription;
 	@FXML
-	private TableColumn<ModelTransaction, Date> columnDate;
+	protected TableColumn<TransactionModelAdapter, Date> columnDate;
 	@FXML
-	private TableColumn<ModelTransaction, String> columnTags;
+	protected TableColumn<TransactionModelAdapter, String> columnTags;
 	@FXML
-	private TableColumn<ModelTransaction, String> columnAmount;
+	protected TableColumn<TransactionModelAdapter, TransactionModelAdapter> columnAmount;
 	@FXML
-	private TableColumn<ModelTransaction, String> columnAccount;
+	protected Pagination transactionsTablePagination;
 	@FXML
-	private Pagination transactionsTablePagination;
-	@FXML
-	private VBox transactionsVBox;
+	protected VBox transactionsVBox;
 	/**
 	 * Page size
 	 */
@@ -67,45 +68,62 @@ public class TransactionsController implements Initializable {
 		transactionsVBox.getChildren().remove(transactionsTable);
 
 		//Cell editors
-		columnDescription.setCellFactory(new Callback<TableColumn<ModelTransaction, String>, TableCell<ModelTransaction, String>>() {
+		columnDescription.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, String>, TableCell<TransactionModelAdapter, String>>() {
 			@Override
-			public TableCell<ModelTransaction, String> call(TableColumn<ModelTransaction, String> p) {
+			public TableCell<TransactionModelAdapter, String> call(TableColumn<TransactionModelAdapter, String> p) {
 				return new StringCellEditor<>(new StringValidatorDefault());
 			}
 		});
-		columnDescription.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<ModelTransaction, String>>() {
+		columnDescription.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionModelAdapter, String>>() {
 			@Override
-			public void handle(CellEditEvent<ModelTransaction, String> t) {
+			public void handle(CellEditEvent<TransactionModelAdapter, String> t) {
 				t.getRowValue().setDescription(t.getNewValue());
 			}
 		});
-		columnTags.setCellFactory(new Callback<TableColumn<ModelTransaction, String>, TableCell<ModelTransaction, String>>() {
+		columnTags.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, String>, TableCell<TransactionModelAdapter, String>>() {
 			@Override
-			public TableCell<ModelTransaction, String> call(TableColumn<ModelTransaction, String> p) {
+			public TableCell<TransactionModelAdapter, String> call(TableColumn<TransactionModelAdapter, String> p) {
 				return new StringCellEditor<>(new StringValidatorDefault());
 			}
 		});
-		columnTags.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<ModelTransaction, String>>() {
+		columnTags.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionModelAdapter, String>>() {
 			@Override
-			public void handle(CellEditEvent<ModelTransaction, String> t) {
+			public void handle(CellEditEvent<TransactionModelAdapter, String> t) {
 				t.getRowValue().setDescription(t.getNewValue());
 			}
 		});
-
-		columnDate.setCellFactory(new Callback<TableColumn<ModelTransaction, Date>, TableCell<ModelTransaction, Date>>() {
+		columnDate.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, Date>, TableCell<TransactionModelAdapter, Date>>() {
 			@Override
-			public TableCell<ModelTransaction, Date> call(TableColumn<ModelTransaction, Date> p) {
+			public TableCell<TransactionModelAdapter, Date> call(TableColumn<TransactionModelAdapter, Date> p) {
 				return new DateCellEditor<>(new StringValidatorDate(messages.getString("PARSER_DATE")));
 			}
 		});
-		columnTags.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<ModelTransaction, String>>() {
+		columnTags.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionModelAdapter, String>>() {
 			@Override
-			public void handle(CellEditEvent<ModelTransaction, String> t) {
+			public void handle(CellEditEvent<TransactionModelAdapter, String> t) {
 				t.getRowValue().setDescription(t.getNewValue());
+			}
+		});
+		columnAmount.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, TransactionModelAdapter>, TableCell<TransactionModelAdapter, TransactionModelAdapter>>() {
+			@Override
+			public TableCell<TransactionModelAdapter, TransactionModelAdapter> call(TableColumn<TransactionModelAdapter, TransactionModelAdapter> p) {
+				return new TransactionEditor(financeData,Pos.CENTER_RIGHT);
 			}
 		});
 	}
 
+	@FXML
+	void handleCreateTransaction(ActionEvent event){
+		financeData.createTransaction(new FinanceTransaction("", new String[0], new Date(), FinanceTransaction.Type.EXPENSEINCOME));//NOI18N
+		updateTransactions();
+	}
+	@FXML
+	void handleDeleteTransaction(ActionEvent event){
+		TransactionModelAdapter selectedItem = transactionsTable.getSelectionModel().getSelectedItem();
+		if(selectedItem!=null)
+			financeData.deleteTransaction(selectedItem.getTransaction());
+		updateTransactions();
+	}
 	/**
 	 * Updates transactions for current page from database
 	 */
@@ -118,9 +136,9 @@ public class TransactionsController implements Initializable {
 		List<FinanceTransaction> transactions = financeData.getTransactions(Math.min(firstTransactionIndex, lastTransactionIndex), Math.max(firstTransactionIndex, lastTransactionIndex));
 		Collections.reverse(transactions);
 
-		List<ModelTransaction> transactionsList = new LinkedList<>();
+		List<TransactionModelAdapter> transactionsList = new LinkedList<>();
 		for (FinanceTransaction transaction : transactions)
-			transactionsList.add(new ModelTransaction(transaction, financeData));
+			transactionsList.add(new TransactionModelAdapter(transaction, financeData));
 		transactionsTable.getItems().clear();
 		transactionsTable.getItems().addAll(transactionsList);
 	}

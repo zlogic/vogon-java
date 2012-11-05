@@ -73,7 +73,7 @@ public class MainWindowController implements Initializable {
 	private MenuItem menuItemCleanupDB;
 
 	@FXML
-	private void handleMenuExitAction(ActionEvent event) {
+	protected void handleMenuExitAction(ActionEvent event) {
 		completeTaskThread();
 		DatabaseManager.getInstance().shutdown();
 		Platform.exit();

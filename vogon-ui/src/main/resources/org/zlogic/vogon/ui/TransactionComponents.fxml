@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.*?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?scenebuilder-preview-i18n-resource messages.properties?>
+
+<VBox id="VBox" minWidth="256.0" prefHeight="180.0" prefWidth="256.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.TransactionComponentsController">
+  <children>
+    <FlowPane id="FlowPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
+      <children>
+        <Button mnemonicParsing="false" onAction="#handleAddComponent" text="%ADD_COMPONENT" />
+        <Button mnemonicParsing="false" onAction="#handleDeleteComponent" text="%DELETE_COMPONENT" />
+        <ComboBox fx:id="transactionType" onAction="#handleSetTransactionType" />
+      </children>
+      <VBox.margin>
+        <Insets fx:id="x1" />
+      </VBox.margin>
+    </FlowPane>
+    <TableView fx:id="transactionComponents" editable="true">
+      <columns>
+        <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_ACCOUNT" fx:id="columnAccount">
+          <cellValueFactory>
+            <PropertyValueFactory property="account" />
+          </cellValueFactory>
+        </TableColumn>
+        <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_AMOUNT" fx:id="columnAmount">
+          <cellValueFactory>
+            <PropertyValueFactory property="amount" />
+          </cellValueFactory>
+        </TableColumn>
+      </columns>
+    </TableView>
+  </children>
+</VBox>
