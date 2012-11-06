@@ -3,7 +3,7 @@
  * License TBD.
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
-package org.zlogic.vogon.data;
+package org.zlogic.vogon.data.interop;
 
 import au.com.bytecode.opencsv.CSVReader;
 import java.io.File;
@@ -24,6 +24,13 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import org.zlogic.vogon.data.Constants;
+import org.zlogic.vogon.data.DatabaseManager;
+import org.zlogic.vogon.data.FinanceAccount;
+import org.zlogic.vogon.data.FinanceAccount_;
+import org.zlogic.vogon.data.FinanceTransaction;
+import org.zlogic.vogon.data.TransactionComponent;
+import org.zlogic.vogon.data.Utils;
 
 /**
  * Implementation for importing data from CSV files

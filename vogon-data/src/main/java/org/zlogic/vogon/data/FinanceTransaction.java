@@ -447,6 +447,15 @@ public class FinanceTransaction implements Serializable {
 		this.type = type;
 	}
 
+	/**
+	 * Returns the ID for this class instance
+	 *
+	 * @return the ID for this class instance
+	 */
+	public long getId() {
+		return id;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof FinanceTransaction)

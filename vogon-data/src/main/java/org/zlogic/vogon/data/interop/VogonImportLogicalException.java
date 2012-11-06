@@ -3,14 +3,14 @@
  * License TBD.
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
-package org.zlogic.vogon.data;
+package org.zlogic.vogon.data.interop;
 
 /**
- * File export exception class
+ * File import logical exception class (stack trace is useless)
  *
  * @author Dmitry Zolotukhin
  */
-public class VogonExportException extends Exception {
+public class VogonImportLogicalException extends Exception {
 
 	/**
 	 * Version UID
@@ -20,7 +20,7 @@ public class VogonExportException extends Exception {
 	/**
 	 * Default constructor
 	 */
-	public VogonExportException() {
+	public VogonImportLogicalException() {
 	}
 
 	/**
@@ -28,7 +28,7 @@ public class VogonExportException extends Exception {
 	 *
 	 * @param message the message
 	 */
-	public VogonExportException(String message) {
+	public VogonImportLogicalException(String message) {
 		super(message);
 	}
 
@@ -37,7 +37,7 @@ public class VogonExportException extends Exception {
 	 *
 	 * @param cause a throwable object
 	 */
-	public VogonExportException(Throwable cause) {
+	public VogonImportLogicalException(Throwable cause) {
 		super(cause);
 	}
 
@@ -47,7 +47,7 @@ public class VogonExportException extends Exception {
 	 * @param message the message
 	 * @param cause a throwable object
 	 */
-	public VogonExportException(String message, Throwable cause) {
+	public VogonImportLogicalException(String message, Throwable cause) {
 		super(message, cause);
 	}
 }

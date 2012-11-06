@@ -118,8 +118,8 @@ public class FinanceAccount implements Serializable {
 	 * @return the account currency
 	 */
 	public Currency getCurrency() {
-		Currency currency = Currency.getInstance(this.currency);
-		return currency != null ? currency : Currency.getInstance(Locale.getDefault());
+		Currency currencyInstance = Currency.getInstance(this.currency);
+		return currencyInstance != null ? currencyInstance : Currency.getInstance(Locale.getDefault());
 	}
 
 	/**
@@ -160,6 +160,15 @@ public class FinanceAccount implements Serializable {
 	 */
 	public double getBalance() {
 		return balance / Constants.rawAmountMultiplier;
+	}
+
+	/**
+	 * Returns the ID for this class instance
+	 *
+	 * @return the ID for this class instance
+	 */
+	public long getId() {
+		return id;
 	}
 
 	@Override

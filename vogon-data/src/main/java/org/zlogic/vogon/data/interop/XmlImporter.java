@@ -3,7 +3,7 @@
  * License TBD.
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
-package org.zlogic.vogon.data;
+package org.zlogic.vogon.data.interop;
 
 import java.io.File;
 import java.text.MessageFormat;
@@ -31,6 +31,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
+import org.zlogic.vogon.data.CurrencyRate;
+import org.zlogic.vogon.data.CurrencyRate_;
+import org.zlogic.vogon.data.DatabaseManager;
+import org.zlogic.vogon.data.FinanceAccount;
+import org.zlogic.vogon.data.FinanceAccount_;
+import org.zlogic.vogon.data.FinanceTransaction;
+import org.zlogic.vogon.data.Preferences;
+import org.zlogic.vogon.data.TransactionComponent;
 
 /**
  * Implementation for importing data from XML files
@@ -82,7 +90,7 @@ public class XmlImporter implements FileImporter {
 			if (rootNode == null || !rootNode.getNodeName().equals("VogonFinanceData")) //NOI18N
 				throw new VogonImportLogicalException(messages.getString("MISSING_VOGONFINANCEDATA_NODE_IN_XML"));
 
-			Node currentNode = null;
+			Node currentNode;
 
 			//Iterate through root children
 			Node accountsNode = null, currenciesNode = null, transactionsNode = null;
