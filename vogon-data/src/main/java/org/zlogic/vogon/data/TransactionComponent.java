@@ -133,6 +133,15 @@ public class TransactionComponent implements Serializable {
 		return amount / Constants.rawAmountMultiplier;
 	}
 
+	/**
+	 * Returns the ID for this class instance
+	 *
+	 * @return the ID for this class instance
+	 */
+	public long getId() {
+		return id;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof TransactionComponent)

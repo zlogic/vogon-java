@@ -24,16 +24,16 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import org.zlogic.vogon.data.CsvImporter;
 import org.zlogic.vogon.data.DatabaseManager;
-import org.zlogic.vogon.data.FileExporter;
-import org.zlogic.vogon.data.FileImporter;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
-import org.zlogic.vogon.data.VogonExportException;
-import org.zlogic.vogon.data.VogonImportLogicalException;
-import org.zlogic.vogon.data.XmlExporter;
-import org.zlogic.vogon.data.XmlImporter;
+import org.zlogic.vogon.data.interop.CsvImporter;
+import org.zlogic.vogon.data.interop.FileExporter;
+import org.zlogic.vogon.data.interop.FileImporter;
+import org.zlogic.vogon.data.interop.VogonExportException;
+import org.zlogic.vogon.data.interop.VogonImportLogicalException;
+import org.zlogic.vogon.data.interop.XmlExporter;
+import org.zlogic.vogon.data.interop.XmlImporter;
 
 //TODO: Add event processing from FinanceData
 //TODO: Remove private

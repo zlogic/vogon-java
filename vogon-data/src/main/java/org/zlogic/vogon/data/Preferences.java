@@ -5,6 +5,7 @@
  */
 package org.zlogic.vogon.data;
 
+import java.io.Serializable;
 import java.util.Currency;
 import java.util.Map;
 import javax.persistence.ElementCollection;
@@ -20,7 +21,7 @@ import javax.persistence.Transient;
  * @author Dmitry Zolotukhin
  */
 @Entity
-public class Preferences {
+public class Preferences implements Serializable {
 
 	@Transient
 	private static String CURRENCY = "Currency"; //NOI18N
@@ -39,7 +40,7 @@ public class Preferences {
 	/**
 	 * Default constructor
 	 */
-	protected Preferences() {
+	public Preferences() {
 	}
 
 	/**

@@ -3,7 +3,7 @@
  * License TBD.
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
-package org.zlogic.vogon.data;
+package org.zlogic.vogon.data.interop;
 
 import java.io.File;
 import java.text.MessageFormat;
@@ -22,6 +22,11 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.zlogic.vogon.data.CurrencyRate;
+import org.zlogic.vogon.data.FinanceAccount;
+import org.zlogic.vogon.data.FinanceData;
+import org.zlogic.vogon.data.FinanceTransaction;
+import org.zlogic.vogon.data.TransactionComponent;
 
 /**
  * Implementation for exporting data to XML files
@@ -86,7 +91,7 @@ public class XmlExporter implements FileExporter {
 			//Accounts list
 			for (FinanceAccount account : financeData.getAccounts()) {
 				Element accountElement = doc.createElement("Account"); //NOI18N
-				accountElement.setAttribute("Id", Long.toString(account.id)); //NOI18N
+				accountElement.setAttribute("Id", Long.toString(account.getId())); //NOI18N
 				accountElement.setAttribute("Name", account.getName()); //NOI18N
 				accountElement.setAttribute("Currency", account.getCurrency().getCurrencyCode()); //NOI18N
 				accountElement.setAttribute("IncludeInTotal", Boolean.toString(account.getIncludeInTotal())); //NOI18N
@@ -107,7 +112,7 @@ public class XmlExporter implements FileExporter {
 			for (FinanceTransaction transaction : financeData.getTransactions()) {
 				Element transactionElement = doc.createElement("Transaction"); //NOI18N
 				transactionElement.setAttribute("Type", transactionTypes.get(transaction.getType())); //NOI18N
-				transactionElement.setAttribute("Id", Long.toString(transaction.id)); //NOI18N
+				transactionElement.setAttribute("Id", Long.toString(transaction.getId())); //NOI18N
 				transactionElement.setAttribute("Description", transaction.getDescription()); //NOI18N
 				//transactionElement.setAttribute("Amount", Long.toString(transaction.getRawAmount()));
 				transactionElement.setAttribute("Date", MessageFormat.format("{0,date,yyyy-MM-dd}", new Object[]{transaction.getDate()})); //NOI18N
@@ -120,10 +125,10 @@ public class XmlExporter implements FileExporter {
 				//Transaction components list
 				for (TransactionComponent component : transaction.getComponents()) {
 					Element compomentElement = doc.createElement("Component"); //NOI18N
-					compomentElement.setAttribute("Id", Long.toString(component.id)); //NOI18N
-					compomentElement.setAttribute("Account", Long.toString(component.getAccount().id)); //NOI18N
+					compomentElement.setAttribute("Id", Long.toString(component.getId())); //NOI18N
+					compomentElement.setAttribute("Account", Long.toString(component.getAccount().getId())); //NOI18N
 					compomentElement.setAttribute("Amount", Long.toString(component.getRawAmount())); //NOI18N
-					compomentElement.setAttribute("Transaction", Long.toString(component.getTransaction().id)); //NOI18N
+					compomentElement.setAttribute("Transaction", Long.toString(component.getTransaction().getId())); //NOI18N
 					transactionElement.appendChild(compomentElement);
 				}
 				transactionsElement.appendChild(transactionElement);

@@ -3,7 +3,9 @@
  * License TBD.
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
-package org.zlogic.vogon.data;
+package org.zlogic.vogon.data.interop;
+
+import org.zlogic.vogon.data.FinanceData;
 
 /**
  * Interface for exporting data to files

@@ -7,18 +7,23 @@ package org.zlogic.vogon.data;
 
 import java.util.Currency;
 import java.util.Date;
-import java.util.EventListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import javax.persistence.EntityManager;
-import javax.persistence.Transient;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
-import javax.swing.event.EventListenerList;
+import org.zlogic.vogon.data.events.AccountEventHandler;
+import org.zlogic.vogon.data.events.CurrencyEventHandler;
+import org.zlogic.vogon.data.events.TransactionEventHandler;
+import org.zlogic.vogon.data.interop.FileExporter;
+import org.zlogic.vogon.data.interop.FileImporter;
+import org.zlogic.vogon.data.interop.VogonExportException;
+import org.zlogic.vogon.data.interop.VogonImportException;
+import org.zlogic.vogon.data.interop.VogonImportLogicalException;
 
 /**
  * Class for storing the finance data, performing database operations and
@@ -1172,132 +1177,11 @@ public class FinanceData {
 	}
 
 	/*
-	 * Assigned event listeners
+	 * Assigned event handlers
 	 */
-	/**
-	 * Listener for transaction created events
-	 */
-	public interface TransactionCreatedEventListener extends EventListener {
-
-		/**
-		 * A transaction created callback
-		 *
-		 * @param newTransaction the transaction that was created
-		 */
-		void transactionCreated(FinanceTransaction newTransaction);
-	}
-
-	/**
-	 * Listener for transaction updated events
-	 */
-	public interface TransactionUpdatedEventListener extends EventListener {
-
-		/**
-		 * A transaction updated callback
-		 *
-		 * @param updatedTransaction the transaction that was updated
-		 */
-		void transactionUpdated(FinanceTransaction updatedTransaction);
-
-		/**
-		 * A transaction updated handler (all transactions have been updated)
-		 */
-		void transactionsUpdated();
-	}
-
-	/**
-	 * Listener for transaction deleted events
-	 */
-	public interface TransactionDeletedEventListener extends EventListener {
-
-		/**
-		 * A transaction deleted callback
-		 *
-		 * @param deletedTransaction the deleted transaction
-		 */
-		void transactionDeleted(FinanceTransaction deletedTransaction);
-	}
-
-	/**
-	 * Listener for account created events
-	 */
-	public interface AccountCreatedEventListener extends EventListener {
-
-		/**
-		 * An account created callback
-		 *
-		 * @param newAccount the account that was created
-		 */
-		void accountCreated(FinanceAccount newAccount);
-	}
-
-	/**
-	 * Listener for account updated events
-	 */
-	public interface AccountUpdatedEventListener extends EventListener {
-
-		/**
-		 * An account updated callback
-		 *
-		 * @param updatedAccount the account that was updated
-		 */
-		void accountUpdated(FinanceAccount updatedAccount);
-
-		/**
-		 * An account updated handler (all accounts have been updated)
-		 */
-		void accountsUpdated();
-	}
-
-	/**
-	 * Listener for account deleted events
-	 */
-	public interface AccountDeletedEventListener extends EventListener {
-
-		/**
-		 * An account deleted callback
-		 *
-		 * @param deletedAccount the deleted account
-		 */
-		void accountDeleted(FinanceAccount deletedAccount);
-	}
-
-	/**
-	 * Listener for currency updated events
-	 */
-	public interface CurrencyUpdatedEventListener extends EventListener {
-
-		/**
-		 * A currencies updated handler (all accounts have been updated)
-		 */
-		void currenciesUpdated();
-	}
-	/**
-	 * List of event listeners
-	 */
-	@Transient
-	protected EventListenerList eventListeners = new EventListenerList();
-
-	/**
-	 * Dispatches a transaction updated event
-	 *
-	 * @param editedTransaction the transaction that was updated
-	 */
-	protected void fireTransactionUpdated(FinanceTransaction editedTransaction) {
-		if (editedTransaction == null)
-			return;
-		for (TransactionUpdatedEventListener listener : eventListeners.getListeners(TransactionUpdatedEventListener.class))
-			listener.transactionUpdated(editedTransaction);
-	}
-
-	/**
-	 * Dispatches a transactions updated event (all transactions were updated)
-	 */
-	protected void fireTransactionsUpdated() {
-		transactionsCount = getTransactionsCountFromDatabase();
-		for (TransactionUpdatedEventListener listener : eventListeners.getListeners(TransactionUpdatedEventListener.class))
-			listener.transactionsUpdated();
-	}
+	protected TransactionEventHandler transactionEventHandler;
+	protected AccountEventHandler accountEventHandler;
+	protected CurrencyEventHandler currencyEventHandler;
 
 	/**
 	 * Dispatches a transaction created event
@@ -1307,8 +1191,28 @@ public class FinanceData {
 	protected void fireTransactionCreated(FinanceTransaction newTransaction) {
 		if (newTransaction == null)
 			return;
-		for (TransactionCreatedEventListener listener : eventListeners.getListeners(TransactionCreatedEventListener.class))
-			listener.transactionCreated(newTransaction);
+		if (transactionEventHandler != null)
+			transactionEventHandler.transactionCreated(newTransaction);
+	}
+
+	/**
+	 * Dispatches a transaction updated event
+	 *
+	 * @param editedTransaction the transaction that was updated
+	 */
+	protected void fireTransactionUpdated(FinanceTransaction editedTransaction) {
+		if (editedTransaction == null)
+			return;
+		if (transactionEventHandler != null)
+			transactionEventHandler.transactionUpdated(editedTransaction);
+	}
+
+	/**
+	 * Dispatches a transactions updated event (all transactions were updated)
+	 */
+	protected void fireTransactionsUpdated() {
+		if (transactionEventHandler != null)
+			transactionEventHandler.transactionsUpdated();
 	}
 
 	/**
@@ -1319,28 +1223,8 @@ public class FinanceData {
 	protected void fireTransactionDeleted(FinanceTransaction deletedTransaction) {
 		if (deletedTransaction == null)
 			return;
-		for (TransactionDeletedEventListener listener : eventListeners.getListeners(TransactionDeletedEventListener.class))
-			listener.transactionDeleted(deletedTransaction);
-	}
-
-	/**
-	 * Dispatches an account updated event
-	 *
-	 * @param editedAccount the account that was updated
-	 */
-	protected void fireAccountUpdated(FinanceAccount editedAccount) {
-		if (editedAccount == null)
-			return;
-		for (AccountUpdatedEventListener listener : eventListeners.getListeners(AccountUpdatedEventListener.class))
-			listener.accountUpdated(editedAccount);
-	}
-
-	/**
-	 * Dispatches an accounts updated event (all accounts were updated)
-	 */
-	protected void fireAccountsUpdated() {
-		for (AccountUpdatedEventListener listener : eventListeners.getListeners(AccountUpdatedEventListener.class))
-			listener.accountsUpdated();
+		if (transactionEventHandler != null)
+			transactionEventHandler.transactionDeleted(deletedTransaction);
 	}
 
 	/**
@@ -1351,8 +1235,28 @@ public class FinanceData {
 	protected void fireAccountCreated(FinanceAccount newAccount) {
 		if (newAccount == null)
 			return;
-		for (AccountCreatedEventListener listener : eventListeners.getListeners(AccountCreatedEventListener.class))
-			listener.accountCreated(newAccount);
+		if (accountEventHandler != null)
+			accountEventHandler.accountCreated(newAccount);
+	}
+
+	/**
+	 * Dispatches an account updated event
+	 *
+	 * @param editedAccount the account that was updated
+	 */
+	protected void fireAccountUpdated(FinanceAccount editedAccount) {
+		if (editedAccount == null)
+			return;
+		if (accountEventHandler != null)
+			accountEventHandler.accountUpdated(editedAccount);
+	}
+
+	/**
+	 * Dispatches an accounts updated event (all accounts were updated)
+	 */
+	protected void fireAccountsUpdated() {
+		if (accountEventHandler != null)
+			accountEventHandler.accountsUpdated();
 	}
 
 	/**
@@ -1363,78 +1267,42 @@ public class FinanceData {
 	protected void fireAccountDeleted(FinanceAccount deletedAccount) {
 		if (deletedAccount == null)
 			return;
-		for (AccountDeletedEventListener listener : eventListeners.getListeners(AccountDeletedEventListener.class))
-			listener.accountDeleted(deletedAccount);
+		if (accountEventHandler != null)
+			accountEventHandler.accountDeleted(deletedAccount);
 	}
 
 	/**
 	 * Dispatches a currencies updated event (all accounts were updated)
 	 */
 	protected void fireCurrenciesUpdated() {
-		for (CurrencyUpdatedEventListener listener : eventListeners.getListeners(CurrencyUpdatedEventListener.class))
-			listener.currenciesUpdated();
+		if (currencyEventHandler != null)
+			currencyEventHandler.currenciesUpdated();
 	}
 
 	/**
-	 * Adds a new listener for transaction created events
+	 * Adds a new listener for transaction events
 	 *
 	 * @param listener the listener
 	 */
-	public void addTransactionCreatedListener(TransactionCreatedEventListener listener) {
-		eventListeners.add(TransactionCreatedEventListener.class, listener);
+	public void addTransactionListener(TransactionEventHandler transactionEventHandler) {
+		this.transactionEventHandler = transactionEventHandler;
 	}
 
 	/**
-	 * Adds a new listener for transaction updated events
+	 * Adds a new listener for account events
 	 *
 	 * @param listener the listener
 	 */
-	public void addTransactionUpdatedListener(TransactionUpdatedEventListener listener) {
-		eventListeners.add(TransactionUpdatedEventListener.class, listener);
+	public void addAccountListener(AccountEventHandler accountEventHandler) {
+		this.accountEventHandler = accountEventHandler;
 	}
 
 	/**
-	 * Adds a new listener for transaction deleted events
+	 * Adds a new listener for currency events
 	 *
 	 * @param listener the listener
 	 */
-	public void addTransactionDeletedListener(TransactionUpdatedEventListener listener) {
-		eventListeners.add(TransactionUpdatedEventListener.class, listener);
-	}
-
-	/**
-	 * Adds a new listener for account created events
-	 *
-	 * @param listener the listener
-	 */
-	public void addAccountCreatedListener(AccountCreatedEventListener listener) {
-		eventListeners.add(AccountCreatedEventListener.class, listener);
-	}
-
-	/**
-	 * Adds a new listener for account updated events
-	 *
-	 * @param listener the listener
-	 */
-	public void addAccountUpdatedListener(AccountUpdatedEventListener listener) {
-		eventListeners.add(AccountUpdatedEventListener.class, listener);
-	}
-
-	/**
-	 * Adds a new listener for account deleted events
-	 *
-	 * @param listener the listener
-	 */
-	public void addAccountDeletedListener(AccountUpdatedEventListener listener) {
-		eventListeners.add(AccountUpdatedEventListener.class, listener);
-	}
-
-	/**
-	 * Adds a new listener for currency updated events
-	 *
-	 * @param listener the listener
-	 */
-	public void addCurrencyUpdatedListener(CurrencyUpdatedEventListener listener) {
-		eventListeners.add(CurrencyUpdatedEventListener.class, listener);
+	public void addCurrencyUpdatedListener(CurrencyEventHandler currencyEventHandler) {
+		this.currencyEventHandler = currencyEventHandler;
 	}
 }
