@@ -35,6 +35,11 @@ import org.zlogic.vogon.data.VogonImportLogicalException;
 import org.zlogic.vogon.data.XmlExporter;
 import org.zlogic.vogon.data.XmlImporter;
 
+//TODO: Add event processing from FinanceData
+//TODO: Remove private
+//TODO: Add comments & javadoc
+//TODO: All exceptions should be displayed
+//TODO: Scroll to added item
 /**
  * Main entry window controller.
  *
@@ -53,6 +58,7 @@ public class MainWindowController implements Initializable {
 	 */
 	protected java.util.prefs.Preferences preferenceStorage = java.util.prefs.Preferences.userNodeForPackage(Launcher.class);
 	protected Thread backgroundThread;
+	protected Task backgroundTask;
 	@FXML
 	private VBox mainWindow;
 	@FXML
@@ -147,9 +153,6 @@ public class MainWindowController implements Initializable {
 					return null;
 				}
 			}.setImporter(importer);
-			//Bind the task's progress
-			progressIndicator.progressProperty().bind(task.progressProperty());
-			progressLabel.textProperty().bind(task.messageProperty());
 			//Run the task
 			startTaskThread(task);
 		}
@@ -208,9 +211,6 @@ public class MainWindowController implements Initializable {
 					return null;
 				}
 			}.setExporter(exporter);
-			//Bind the task's progress
-			progressIndicator.progressProperty().bind(task.progressProperty());
-			progressLabel.textProperty().bind(task.messageProperty());
 			//Run the task
 			startTaskThread(task);
 		}
@@ -234,9 +234,6 @@ public class MainWindowController implements Initializable {
 				return null;
 			}
 		};
-		//Bind the task's progress
-		progressIndicator.progressProperty().bind(task.progressProperty());
-		progressLabel.textProperty().bind(task.messageProperty());
 		//Run the task
 		startTaskThread(task);
 	}
@@ -262,9 +259,6 @@ public class MainWindowController implements Initializable {
 				return null;
 			}
 		};
-		//Bind the task's progress
-		progressIndicator.progressProperty().bind(task.progressProperty());
-		progressLabel.textProperty().bind(task.messageProperty());
 		//Run the task
 		startTaskThread(task);
 	}
@@ -288,6 +282,11 @@ public class MainWindowController implements Initializable {
 	private void startTaskThread(Task task) {
 		synchronized (this) {
 			completeTaskThread();
+			backgroundTask = task;
+			
+			progressIndicator.progressProperty().bind(task.progressProperty());
+			progressLabel.textProperty().bind(task.messageProperty());
+			
 			backgroundThread = new Thread(task);
 			backgroundThread.setDaemon(true);
 			backgroundThread.start();
@@ -303,6 +302,11 @@ public class MainWindowController implements Initializable {
 				} catch (InterruptedException ex) {
 					Logger.getLogger(MainWindowController.class.getName()).log(Level.SEVERE, null, ex);
 				}
+			}
+			if(backgroundTask!=null){
+				progressIndicator.progressProperty().unbind();
+				progressLabel.textProperty().unbind();
+				backgroundTask = null;
 			}
 		}
 	}
