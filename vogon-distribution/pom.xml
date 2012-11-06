@@ -45,7 +45,7 @@
 						<configuration>
 							<archive>
 								<manifest>
-									<mainClass>org.zlogic.vogon.ui.MainWindow</mainClass>
+									<mainClass>org.zlogic.vogon.ui.Launcher</mainClass>
 								</manifest>
 							</archive>
 							<finalName>vogon-${project.version}</finalName>
@@ -74,7 +74,7 @@
 							<errTitle>encc</errTitle>
 							<icon>src/main/resources/Vogon.ico</icon>
 							<classPath>
-								<mainClass>org.zlogic.vogon.ui.MainWindow</mainClass>
+								<mainClass>org.zlogic.vogon.ui.Launcher</mainClass>
 								<addDependencies>true</addDependencies>
 								<preCp>anything</preCp>
 							</classPath>
