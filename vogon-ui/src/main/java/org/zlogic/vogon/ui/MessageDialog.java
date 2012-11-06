@@ -85,7 +85,7 @@ public class MessageDialog implements Initializable {
 	}
 
 	@FXML
-	private void handleOkAction(ActionEvent event) {
+	private void handleOkAction() {
 		((Stage) okButton.getScene().getWindow()).close();
 	}
 }

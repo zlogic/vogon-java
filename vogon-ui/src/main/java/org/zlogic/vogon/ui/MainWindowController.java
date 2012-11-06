@@ -59,6 +59,7 @@ public class MainWindowController implements Initializable {
 	protected java.util.prefs.Preferences preferenceStorage = java.util.prefs.Preferences.userNodeForPackage(Launcher.class);
 	protected Thread backgroundThread;
 	protected Task backgroundTask;
+	
 	@FXML
 	private VBox mainWindow;
 	@FXML
@@ -81,14 +82,14 @@ public class MainWindowController implements Initializable {
 	private MenuItem menuItemCleanupDB;
 
 	@FXML
-	protected void handleMenuExitAction(ActionEvent event) {
+	protected void handleMenuExitAction() {
 		completeTaskThread();
 		DatabaseManager.getInstance().shutdown();
 		Platform.exit();
 	}
 
 	@FXML
-	private void handleMenuImportAction(ActionEvent event) {
+	private void handleMenuImportAction() {
 		// Prepare file chooser dialog
 		FileChooser fileChooser = new FileChooser();
 		if (lastDirectory != null && lastDirectory.exists())
@@ -159,7 +160,7 @@ public class MainWindowController implements Initializable {
 	}
 
 	@FXML
-	private void handleMenuExportAction(ActionEvent event) {
+	private void handleMenuExportAction() {
 		// Prepare file chooser dialog
 		FileChooser fileChooser = new FileChooser();
 		if (lastDirectory != null && lastDirectory.exists())
@@ -217,7 +218,7 @@ public class MainWindowController implements Initializable {
 	}
 
 	@FXML
-	private void handleMenuCleanupDBAction(ActionEvent event) {
+	private void handleMenuCleanupDBAction() {
 		//Prepare the task
 		Task<Void> task = new Task<Void>() {
 			@Override
@@ -239,7 +240,7 @@ public class MainWindowController implements Initializable {
 	}
 
 	@FXML
-	private void handleMenuRecalculateBalanceAction(ActionEvent event) {
+	private void handleMenuRecalculateBalanceAction() {
 		//Prepare the task
 		Task<Void> task = new Task<Void>() {
 			@Override
