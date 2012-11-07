@@ -165,6 +165,7 @@ public class FinanceData {
 
 		Long result = entityManager.createQuery(transactionsCriteriaQuery).getSingleResult();
 		entityManager.close();
+		transactionsCount = result;
 		return result;
 	}
 
@@ -529,6 +530,7 @@ public class FinanceData {
 		entityManager.close();
 
 		if (transactionAdded) {
+			transactionsCount++;
 			fireTransactionsUpdated();
 			fireTransactionCreated(transaction);
 		}
@@ -945,6 +947,7 @@ public class FinanceData {
 		persistenceAdd(component.getTransaction(), entityManager);
 
 		FinanceTransaction transaction = component.getTransaction();
+		FinanceAccount account = component.getAccount();
 		if (transaction != null) {
 			component.getTransaction().removeComponent(component);
 			entityManager.merge(transaction);
@@ -956,7 +959,7 @@ public class FinanceData {
 		entityManager.close();
 
 		fireTransactionUpdated(transaction);
-		fireAccountUpdated(component.getAccount());
+		fireAccountUpdated(account);
 	}
 
 	/**
@@ -976,10 +979,13 @@ public class FinanceData {
 		transaction.removeAllComponents();
 
 		//Remove transaction
-		entityManager.remove(entityManager.find(FinanceTransaction.class, transaction.id));
+		FinanceTransaction foundTransaction = entityManager.find(FinanceTransaction.class, transaction.id);
+		entityManager.remove(foundTransaction);
 		entityManager.getTransaction().commit();
 		entityManager.close();
 
+		if (foundTransaction != null)
+			transactionsCount--;
 		fireTransactionsUpdated();
 		fireTransactionDeleted(transaction);
 
@@ -1179,8 +1185,17 @@ public class FinanceData {
 	/*
 	 * Assigned event handlers
 	 */
+	/**
+	 * Transaction event handler
+	 */
 	protected TransactionEventHandler transactionEventHandler;
+	/**
+	 * Account event handler
+	 */
 	protected AccountEventHandler accountEventHandler;
+	/**
+	 * Currency event handler
+	 */
 	protected CurrencyEventHandler currencyEventHandler;
 
 	/**
@@ -1282,27 +1297,27 @@ public class FinanceData {
 	/**
 	 * Adds a new listener for transaction events
 	 *
-	 * @param listener the listener
+	 * @param transactionEventHandler the event handler
 	 */
-	public void addTransactionListener(TransactionEventHandler transactionEventHandler) {
+	public void setTransactionListener(TransactionEventHandler transactionEventHandler) {
 		this.transactionEventHandler = transactionEventHandler;
 	}
 
 	/**
 	 * Adds a new listener for account events
 	 *
-	 * @param listener the listener
+	 * @param accountEventHandler the event handler
 	 */
-	public void addAccountListener(AccountEventHandler accountEventHandler) {
+	public void setAccountListener(AccountEventHandler accountEventHandler) {
 		this.accountEventHandler = accountEventHandler;
 	}
 
 	/**
 	 * Adds a new listener for currency events
 	 *
-	 * @param listener the listener
+	 * @param currencyEventHandler the event handler
 	 */
-	public void addCurrencyUpdatedListener(CurrencyEventHandler currencyEventHandler) {
+	public void setCurrencyListener(CurrencyEventHandler currencyEventHandler) {
 		this.currencyEventHandler = currencyEventHandler;
 	}
 }

@@ -255,7 +255,8 @@ public class FinanceTransaction implements Serializable {
 		if (component.getAccount() != null)
 			component.getAccount().updateRawBalance(-component.getRawAmount());
 		component.setAccount(account);
-		component.getAccount().updateRawBalance(component.getRawAmount());
+		if (component.getAccount() != null)
+			component.getAccount().updateRawBalance(component.getRawAmount());
 	}
 
 	/**
