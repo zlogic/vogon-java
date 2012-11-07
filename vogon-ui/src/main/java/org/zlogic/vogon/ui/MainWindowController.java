@@ -39,7 +39,8 @@ import org.zlogic.vogon.data.interop.XmlImporter;
 //TODO: Remove private
 //TODO: Add comments & javadoc
 //TODO: All exceptions should be displayed
-//TODO: Scroll to added item
+//TODO: Scroll/select added item
+//TODO: Add refreshing for transactions (e.g. when account's currency is updated)
 /**
  * Main entry window controller.
  *
@@ -59,7 +60,6 @@ public class MainWindowController implements Initializable {
 	protected java.util.prefs.Preferences preferenceStorage = java.util.prefs.Preferences.userNodeForPackage(Launcher.class);
 	protected Thread backgroundThread;
 	protected Task backgroundTask;
-	
 	@FXML
 	private VBox mainWindow;
 	@FXML
@@ -138,8 +138,6 @@ public class MainWindowController implements Initializable {
 							throw new VogonImportLogicalException(messages.getString("UNKNOWN_FILE_TYPE"));
 						financeData.importData(importer);
 						transactionsPaneController.setFinanceData(financeData);
-						//TODO: fix this
-						//accountsTableModel.setFinanceData(financeData);
 					} catch (VogonImportLogicalException ex) {
 						Logger.getLogger(MainWindowController.class.getName()).log(Level.SEVERE, null, ex);
 						MessageDialog.showDialog(messages.getString("IMPORT_EXCEPTION_DIALOG_TITLE"), new MessageFormat(messages.getString("IMPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), true);
@@ -251,8 +249,6 @@ public class MainWindowController implements Initializable {
 
 				for (FinanceAccount account : financeData.getAccounts())
 					financeData.refreshAccountBalance(account);
-				//TODO: fix this
-				//updateAccounts();
 
 				endBackgroundTask();
 				updateProgress(1, 1);
@@ -284,10 +280,10 @@ public class MainWindowController implements Initializable {
 		synchronized (this) {
 			completeTaskThread();
 			backgroundTask = task;
-			
+
 			progressIndicator.progressProperty().bind(task.progressProperty());
 			progressLabel.textProperty().bind(task.messageProperty());
-			
+
 			backgroundThread = new Thread(task);
 			backgroundThread.setDaemon(true);
 			backgroundThread.start();
@@ -304,7 +300,7 @@ public class MainWindowController implements Initializable {
 					Logger.getLogger(MainWindowController.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
-			if(backgroundTask!=null){
+			if (backgroundTask != null) {
 				progressIndicator.progressProperty().unbind();
 				progressLabel.textProperty().unbind();
 				backgroundTask = null;

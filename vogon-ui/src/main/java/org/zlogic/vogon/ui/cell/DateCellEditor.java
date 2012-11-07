@@ -1,6 +1,7 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Vogon personal finance/expense analyzer.
+ * License TBD.
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
 package org.zlogic.vogon.ui.cell;
 
@@ -13,16 +14,24 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * String cell editor with date validation & parsing
  *
- * @author Dmitry
+ * @param <BaseType> the row type
+ * @author Dmitry Zolotukhin
  */
 public class DateCellEditor<BaseType> extends StringCellEditor<BaseType, Date> {
 
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
+	/**
+	 * The date format to be used for validation
+	 */
 	protected SimpleDateFormat dateFormat;
 
-	public DateCellEditor(StringCellValidator validator) {
-		super(validator);
+	/**
+	 * Creates a date editor
+	 */
+	public DateCellEditor() {
+		super(new StringValidatorDate(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages").getString("PARSER_DATE")));
 		dateFormat = new SimpleDateFormat(messages.getString("PARSER_DATE"));
 	}
 

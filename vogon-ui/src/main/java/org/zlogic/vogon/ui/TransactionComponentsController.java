@@ -1,6 +1,7 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Vogon personal finance/expense analyzer.
+ * License TBD.
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
 package org.zlogic.vogon.ui;
 
@@ -28,25 +29,26 @@ import org.zlogic.vogon.ui.cell.StringValidatorDouble;
 
 /**
  *
- * @author Dmitry
+ * @author Dmitry Zolotukhin
  */
 public class TransactionComponentsController implements Initializable {
+
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
-	
 	protected FinanceData financeData;
 	protected FinanceTransaction transaction;
-	
 	@FXML
 	private TableView<TransactionComponentModelAdapter> transactionComponents;
-	
-	@FXML ComboBox<TransactionTypeComboItem> transactionType;
-	@FXML TableColumn<TransactionComponentModelAdapter,FinanceAccountModelAdapter> columnAccount;
-	@FXML TableColumn<TransactionComponentModelAdapter,AmountAdapter> columnAmount;
-	
+	@FXML
+	ComboBox<TransactionTypeComboItem> transactionType;
+	@FXML
+	TableColumn<TransactionComponentModelAdapter, FinanceAccountModelAdapter> columnAccount;
+	@FXML
+	TableColumn<TransactionComponentModelAdapter, AmountAdapter> columnAmount;
+
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		transactionComponents.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-		
+
 		columnAccount.setCellFactory(new Callback<TableColumn<TransactionComponentModelAdapter, FinanceAccountModelAdapter>, TableCell<TransactionComponentModelAdapter, FinanceAccountModelAdapter>>() {
 			@Override
 			public TableCell<TransactionComponentModelAdapter, FinanceAccountModelAdapter> call(TableColumn<TransactionComponentModelAdapter, FinanceAccountModelAdapter> p) {
@@ -59,57 +61,59 @@ public class TransactionComponentsController implements Initializable {
 				t.getRowValue().setAccount(t.getNewValue().getAccount());
 			}
 		});
-		
+
 		columnAmount.setCellFactory(new Callback<TableColumn<TransactionComponentModelAdapter, AmountAdapter>, TableCell<TransactionComponentModelAdapter, AmountAdapter>>() {
 			@Override
 			public TableCell<TransactionComponentModelAdapter, AmountAdapter> call(TableColumn<TransactionComponentModelAdapter, AmountAdapter> p) {
-				return new AmountCellEditor<>(new StringValidatorDouble(),Pos.CENTER_RIGHT);
+				return new AmountCellEditor<>(new StringValidatorDouble(), Pos.CENTER_RIGHT);
 			}
 		});
 		columnAmount.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionComponentModelAdapter, AmountAdapter>>() {
 			@Override
 			public void handle(TableColumn.CellEditEvent<TransactionComponentModelAdapter, AmountAdapter> t) {
-				t.getRowValue().setAmount(t.getNewValue().getBalance());
+				t.getRowValue().setAmount(t.getNewValue().getAmount());
 			}
 		});
 	}
-	
-	public void setTransaction(FinanceTransaction transaction){
+
+	public void setTransaction(FinanceTransaction transaction) {
 		this.transaction = transaction;
 		updateTransactionTypeCombo(transaction.getType());
 		updateComponents();
 	}
-	
+
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
 	}
-	
+
 	@FXML
-	protected void handleAddComponent(ActionEvent event){
+	protected void handleAddComponent(ActionEvent event) {
 		TransactionComponent component = new TransactionComponent(null, transaction, 0);
 		financeData.createTransactionComponent(component);
 		transactionComponents.getItems().add(new TransactionComponentModelAdapter(component, financeData));
 	}
+
 	@FXML
-	protected void handleDeleteComponent(ActionEvent event){
+	protected void handleDeleteComponent(ActionEvent event) {
 		TransactionComponentModelAdapter selectedItem = transactionComponents.getSelectionModel().getSelectedItem();
-		if(selectedItem!=null)
+		if (selectedItem != null)
 			financeData.deleteTransactionComponent(selectedItem.getTransactionComponent());
 		transactionComponents.getItems().remove(selectedItem);
 	}
+
 	@FXML
-	protected void handleSetTransactionType(ActionEvent event){
+	protected void handleSetTransactionType(ActionEvent event) {
 		TransactionTypeComboItem newType = transactionType.getSelectionModel().getSelectedItem();
-		if(newType!=null)
+		if (newType != null)
 			financeData.setTransactionType(transaction, newType.getType());
 	}
-	
-	protected void updateComponents(){
+
+	protected void updateComponents() {
 		transactionComponents.getItems().clear();
-		for(TransactionComponent component:transaction.getComponents())
+		for (TransactionComponent component : transaction.getComponents())
 			transactionComponents.getItems().add(new TransactionComponentModelAdapter(component, financeData));
 	}
-	
+
 	protected void updateTransactionTypeCombo(FinanceTransaction.Type type) {
 		transactionType.setDisable(true);
 		transactionType.getItems().clear();
@@ -124,7 +128,7 @@ public class TransactionComponentsController implements Initializable {
 		transactionType.getSelectionModel().select(selectedItem);
 		transactionType.setDisable(false);
 	}
-	
+
 	/**
 	 * Returns a list of account items which can be rendered in a Combo box
 	 * (used to specifically detect the selected item)
@@ -138,10 +142,12 @@ public class TransactionComponentsController implements Initializable {
 				items.add(new FinanceAccountModelAdapter(account));
 		return items;
 	}
+
 	/**
 	 * Transaction type combo box item
 	 */
 	protected class TransactionTypeComboItem {
+
 		/**
 		 * The transaction type
 		 */

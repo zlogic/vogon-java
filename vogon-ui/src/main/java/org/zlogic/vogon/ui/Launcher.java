@@ -27,6 +27,7 @@ import org.zlogic.vogon.data.FinanceData;
  * @author Dmitry Zolotukhin
  */
 public class Launcher extends Application {
+
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * FinanceData instance
@@ -54,7 +55,7 @@ public class Launcher extends Application {
 			java.util.logging.Logger.getLogger(Launcher.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
 			return;
 		}
-		
+
 		//Create scene
 		Scene scene = new Scene(root);
 
@@ -68,13 +69,14 @@ public class Launcher extends Application {
 		//Show scene
 		stage.setScene(scene);
 		//Add graceful shutdown procedure
-		stage.setOnCloseRequest(new EventHandler<WindowEvent>(){
+		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			private MainWindowController controller;
-			public EventHandler<WindowEvent> setController(MainWindowController controller){
+
+			public EventHandler<WindowEvent> setController(MainWindowController controller) {
 				this.controller = controller;
 				return this;
 			}
-			
+
 			@Override
 			public void handle(WindowEvent t) {
 				controller.completeTaskThread();

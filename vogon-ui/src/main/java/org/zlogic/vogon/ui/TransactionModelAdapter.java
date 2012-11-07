@@ -19,6 +19,7 @@ import org.zlogic.vogon.ui.cell.CellStatus;
  * @author Dmitry Zolotukhin
  */
 public class TransactionModelAdapter implements CellStatus {
+
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	protected FinanceTransaction transaction;
 	protected FinanceData financeData;
@@ -52,14 +53,14 @@ public class TransactionModelAdapter implements CellStatus {
 		financeData.setTransactionTags(transaction, tags.split(","));//NOI18N
 	}
 
-	public TransactionModelAdapter getModelTransaction(){
+	public TransactionModelAdapter getModelTransaction() {
 		return this;
 	}
-	
-	public FinanceTransaction getTransaction(){
+
+	public FinanceTransaction getTransaction() {
 		return transaction;
 	}
-	
+
 	public AmountAdapter getAmount() {
 		List<Currency> transactionCurrencies = transaction.getCurrencies();
 		Currency currency;
@@ -108,5 +109,19 @@ public class TransactionModelAdapter implements CellStatus {
 	@Override
 	public boolean isOK() {
 		return transaction.isAmountOk();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return this == null;
+		if (transaction == null)
+			return obj instanceof TransactionModelAdapter && ((TransactionModelAdapter) obj).transaction == null;
+		return obj instanceof TransactionModelAdapter && transaction.equals(((TransactionModelAdapter) obj).transaction);
+	}
+
+	@Override
+	public int hashCode() {
+		return transaction.hashCode();
 	}
 }

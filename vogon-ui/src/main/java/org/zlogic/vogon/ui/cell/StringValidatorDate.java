@@ -13,12 +13,20 @@ import java.util.logging.Logger;
 /**
  * Validator which validates dates.
  *
- * @author Dmitry
+ * @author Dmitry Zolotukhin
  */
 public class StringValidatorDate implements StringCellValidator {
+	/*
+	 * The date format to be used
+	 */
 
 	private String format;
 
+	/**
+	 * Constructs a StringValidatorDate with a specific date format
+	 *
+	 * @param format the date format for validation
+	 */
 	public StringValidatorDate(String format) {
 		this.format = format;
 	}
