@@ -1,6 +1,7 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Vogon personal finance/expense analyzer.
+ * License TBD.
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
 package org.zlogic.vogon.ui.cell;
 
@@ -11,17 +12,35 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableCell;
 
 /**
+ * Cell editor which uses a combo box for selecting a value.
  *
- * @author Dmitry
+ * @param <BaseType> the row type
+ * @param <PropertyType> the cell type
+ * @author Dmitry Zolotukhin
  */
 public class ComboCellEditor<BaseType, PropertyType> extends TableCell<BaseType, PropertyType> {
+
+	/**
+	 * The combo box editor control
+	 */
 	protected ComboBox<PropertyType> comboField;
+	/**
+	 * The list of items for the combo box editor control
+	 */
 	protected List<PropertyType> values;
-	
-	public ComboCellEditor(List<PropertyType> values){
+
+	/**
+	 * Constructs a ComboCellEditor with a list of values
+	 *
+	 * @param values the values to be displayed in the combo box
+	 */
+	public ComboCellEditor(List<PropertyType> values) {
 		this.values = values;
 	}
-	
+
+	/**
+	 * Prepares the cell for editing
+	 */
 	@Override
 	public void startEdit() {
 		super.startEdit();
@@ -34,6 +53,9 @@ public class ComboCellEditor<BaseType, PropertyType> extends TableCell<BaseType,
 		comboField.getSelectionModel().select(getItem());
 	}
 
+	/**
+	 * Cancels cell editing
+	 */
 	@Override
 	public void cancelEdit() {
 		super.cancelEdit();
@@ -41,6 +63,12 @@ public class ComboCellEditor<BaseType, PropertyType> extends TableCell<BaseType,
 		setGraphic(null);
 	}
 
+	/**
+	 * Performs an item update
+	 *
+	 * @param item the updated TransactionModelAdapter instance
+	 * @param empty true if the item is empty
+	 */
 	@Override
 	public void updateItem(PropertyType item, boolean empty) {
 		super.updateItem(item, empty);
@@ -61,10 +89,13 @@ public class ComboCellEditor<BaseType, PropertyType> extends TableCell<BaseType,
 		}
 	}
 
+	/*
+	 * Creates the edit control
+	 */
 	private void createComboField() {
 		comboField = new ComboBox<>();
 		comboField.getItems().addAll(values);
-		comboField.setOnAction(new EventHandler<ActionEvent>(){
+		comboField.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent t) {
 				commitEdit(comboField.getSelectionModel().getSelectedItem());
@@ -72,10 +103,11 @@ public class ComboCellEditor<BaseType, PropertyType> extends TableCell<BaseType,
 		});
 	}
 
-	protected PropertyType propertyFromString(String value) {
-		return (PropertyType) value;
-	}
-
+	/**
+	 * Returns the string value of the edited property (before editing)
+	 *
+	 * @return the string value of the edited property
+	 */
 	protected String getString() {
 		return getItem() == null ? "" : getItem().toString();
 	}

@@ -1,6 +1,7 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Vogon personal finance/expense analyzer.
+ * License TBD.
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
 package org.zlogic.vogon.ui;
 
@@ -12,15 +13,18 @@ import org.zlogic.vogon.ui.cell.CellStatus;
 
 /**
  *
- * @author Dmitry
+ * @author Dmitry Zolotukhin
  */
-public class AmountAdapter implements Comparable<AmountAdapter>,CellStatus {
+public class AmountAdapter implements Comparable<AmountAdapter>, CellStatus {
+
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
-	
+	/*
+	 * These values are use if owner is null
+	 */
 	/**
 	 * The balance/amount
 	 */
-	protected double balance;
+	protected double amount;
 	/**
 	 * The currency
 	 */
@@ -37,11 +41,11 @@ public class AmountAdapter implements Comparable<AmountAdapter>,CellStatus {
 	 * The transaction type (for special rendering)
 	 */
 	protected FinanceTransaction.Type transactionType;
-	
+
 	/**
-	 * Constructs a AmountAdapter
+	 * Constructs an AmountAdapter
 	 *
-	 * @param balance the initial cell balance
+	 * @param amount the initial cell amount
 	 * @param isOk if the cell data is OK (e.g. zero sum for a transfer
 	 * transaction)
 	 * @param currency the currency
@@ -50,7 +54,7 @@ public class AmountAdapter implements Comparable<AmountAdapter>,CellStatus {
 	 * @param transactionType the transaction type
 	 */
 	public AmountAdapter(double balance, boolean isOk, Currency currency, boolean isCurrencyConverted, FinanceTransaction.Type transactionType) {
-		this.balance = balance;
+		this.amount = balance;
 		this.currency = currency;
 		this.isOk = isOk;
 		this.isCurrencyConverted = isCurrencyConverted;
@@ -58,25 +62,25 @@ public class AmountAdapter implements Comparable<AmountAdapter>,CellStatus {
 	}
 
 	/**
-	 * Constructs a SumTableCell. Currency will be invalid.
+	 * Constructs an AmountAdapter. Currency will be invalid.
 	 *
-	 * @param balance the initial cell balance
+	 * @param amount the initial cell amount
 	 * @param isOk if the cell data is OK (e.g. zero sum for a transfer
 	 * transaction)
 	 */
 	public AmountAdapter(double balance, boolean isOk) {
-		this.balance = balance;
+		this.amount = balance;
 		this.isOk = isOk;
 	}
 
 	/**
-	 * Constructs a SumTableCell. Currency will be invalid, balance will be
+	 * Constructs an AmountAdapter. Currency will be invalid, amount will be
 	 * considered to be OK.
 	 *
-	 * @param balance the initial cell balance
+	 * @param amount the initial cell amount
 	 */
 	public AmountAdapter(double balance) {
-		this.balance = balance;
+		this.amount = balance;
 		this.isOk = true;
 	}
 
@@ -84,8 +88,8 @@ public class AmountAdapter implements Comparable<AmountAdapter>,CellStatus {
 	public String toString() {
 		String formattedSum = MessageFormat.format(messages.getString("FORMAT_SUM"),
 				transactionType == FinanceTransaction.Type.TRANSFER ? messages.getString("TRANSFER_TRANSACTION_FLAG") : messages.getString("EXPENSE_TRANSACTION_FLAG"),
-				balance,
-				currency != null ? currency.getCurrencyCode() : messages.getString("INVALID_CURRENCY"),
+				getAmount(),
+				getCurrency() != null ? getCurrency().getCurrencyCode() : messages.getString("INVALID_CURRENCY"),
 				isCurrencyConverted ? messages.getString("CURRENCY_CONVERTED") : messages.getString("CURRENCY_NOT_CONVERTED"));
 		return formattedSum;
 	}
@@ -95,15 +99,23 @@ public class AmountAdapter implements Comparable<AmountAdapter>,CellStatus {
 		int currencyComparison = currency.getCurrencyCode().compareTo(o.currency.getCurrencyCode());
 		if (currencyComparison != 0)
 			return currencyComparison;
-		return new Double(balance).compareTo(o.balance);
+		return new Double(amount).compareTo(o.amount);
 	}
-	
-	public Double getBalance(){
-		return balance;
+
+	public Double getAmount() {
+		return amount;
+	}
+
+	public void setAmount(double amount) {
+		this.amount = amount;
+	}
+
+	public Currency getCurrency() {
+		return currency;
 	}
 
 	@Override
 	public boolean isOK() {
-		return isOK();
+		return isOk;
 	}
 }

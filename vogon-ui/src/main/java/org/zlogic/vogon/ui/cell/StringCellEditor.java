@@ -15,23 +15,51 @@ import javafx.scene.input.KeyEvent;
 /**
  * Simple string cell editor
  *
- * @author Dmitry
+ * @param <BaseType> the row type
+ * @param <PropertyType> the cell type
+ * @author Dmitry Zolotukhin
  */
 public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType, PropertyType> {
+
+	/**
+	 * The editor component
+	 */
 	protected TextField textField;
+	/**
+	 * The cell value validator
+	 */
 	protected StringCellValidator validator;
+	/**
+	 * Cell alignment in view (not edit) state
+	 */
 	protected Pos alignment;
-	
+
+	/**
+	 * Constructs a StringCellEditor with a validator
+	 *
+	 * @param validator the value validator
+	 */
 	public StringCellEditor(StringCellValidator validator) {
-		this(validator,null);
+		this(validator, null);
 	}
-	public StringCellEditor(StringCellValidator validator,Pos alignment) {
+
+	/**
+	 * Constructs a StringCellEditor with a validator and an alignment for view
+	 * (not edit) state
+	 *
+	 * @param validator the value validator
+	 * @param alignment alignment in view state
+	 */
+	public StringCellEditor(StringCellValidator validator, Pos alignment) {
 		this.validator = validator;
-		if(alignment!=null)
+		if (alignment != null)
 			setAlignment(alignment);
 		this.alignment = alignment;
 	}
 
+	/**
+	 * Prepares the cell for editing
+	 */
 	@Override
 	public void startEdit() {
 		super.startEdit();
@@ -45,6 +73,11 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 		textField.selectAll();
 	}
 
+	/**
+	 * Performs a commit only if the item is valid
+	 *
+	 * @param item the item to be committed
+	 */
 	public void commitIfValid(String item) {
 		if (validator.isValid(item))
 			super.commitEdit(propertyFromString(item));
@@ -52,6 +85,9 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 			cancelEdit();
 	}
 
+	/**
+	 * Cancels cell editing
+	 */
 	@Override
 	public void cancelEdit() {
 		super.cancelEdit();
@@ -59,6 +95,12 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 		setGraphic(null);
 	}
 
+	/**
+	 * Performs an item update
+	 *
+	 * @param item the updated cell type class instance
+	 * @param empty true if the item is empty
+	 */
 	@Override
 	public void updateItem(PropertyType item, boolean empty) {
 		super.updateItem(item, empty);
@@ -79,10 +121,13 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 		}
 	}
 
+	/**
+	 * Creates the editor
+	 */
 	private void createTextField() {
 		textField = new TextField(getString());
 		textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2);
-		if(alignment!=null)
+		if (alignment != null)
 			textField.setAlignment(alignment);
 		textField.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
@@ -96,10 +141,22 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 		});
 	}
 
+	/**
+	 * Returns the cell item from the string value. Should be overridden if a
+	 * complex parser should be used.
+	 *
+	 * @param value the value to be parsed
+	 * @return value, converted to the cell class type
+	 */
 	protected PropertyType propertyFromString(String value) {
 		return (PropertyType) value;
 	}
 
+	/**
+	 * Returns the string value of the edited property (before editing)
+	 *
+	 * @return the string value of the edited property
+	 */
 	protected String getString() {
 		return getItem() == null ? "" : getItem().toString();
 	}

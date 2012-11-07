@@ -11,7 +11,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -26,6 +25,7 @@ import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
+import org.zlogic.vogon.data.events.TransactionEventHandler;
 import org.zlogic.vogon.ui.cell.DateCellEditor;
 import org.zlogic.vogon.ui.cell.StringCellEditor;
 import org.zlogic.vogon.ui.cell.StringValidatorDate;
@@ -52,6 +52,8 @@ public class TransactionsController implements Initializable {
 	@FXML
 	protected TableColumn<TransactionModelAdapter, TransactionModelAdapter> columnAmount;
 	@FXML
+	protected TableColumn<TransactionModelAdapter, TransactionModelAdapter> columnAccount;
+	@FXML
 	protected Pagination transactionsTablePagination;
 	@FXML
 	protected VBox transactionsVBox;
@@ -62,10 +64,25 @@ public class TransactionsController implements Initializable {
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		transactionsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		//Column sizes
+		columnDescription.prefWidthProperty().bind(transactionsTable.widthProperty().multiply(0.2));
+		columnDate.prefWidthProperty().bind(transactionsTable.widthProperty().multiply(0.15));
+		columnTags.prefWidthProperty().bind(transactionsTable.widthProperty().multiply(0.15));
+		columnAmount.prefWidthProperty().bind(transactionsTable.widthProperty().multiply(0.4));
+		columnAccount.prefWidthProperty().bind(transactionsTable.widthProperty().subtract(columnDescription.widthProperty()).subtract(columnDate.widthProperty()).subtract(columnTags.widthProperty()).subtract(columnAmount.widthProperty()).subtract(20));
 
+		//Remove transactions table since it will be used in paging
 		transactionsTable.managedProperty().bind(transactionsTable.visibleProperty());
 		transactionsVBox.getChildren().remove(transactionsTable);
+
+		//COnfigure paging
+		transactionsTablePagination.setPageFactory(new Callback<Integer, Node>() {
+			@Override
+			public Node call(Integer p) {
+				updatePageTransactions(p);
+				return transactionsTable;//transactionsTable;
+			}
+		});
 
 		//Cell editors
 		columnDescription.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, String>, TableCell<TransactionModelAdapter, String>>() {
@@ -95,7 +112,7 @@ public class TransactionsController implements Initializable {
 		columnDate.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, Date>, TableCell<TransactionModelAdapter, Date>>() {
 			@Override
 			public TableCell<TransactionModelAdapter, Date> call(TableColumn<TransactionModelAdapter, Date> p) {
-				return new DateCellEditor<>(new StringValidatorDate(messages.getString("PARSER_DATE")));
+				return new DateCellEditor<>();
 			}
 		});
 		columnTags.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionModelAdapter, String>>() {
@@ -107,23 +124,25 @@ public class TransactionsController implements Initializable {
 		columnAmount.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, TransactionModelAdapter>, TableCell<TransactionModelAdapter, TransactionModelAdapter>>() {
 			@Override
 			public TableCell<TransactionModelAdapter, TransactionModelAdapter> call(TableColumn<TransactionModelAdapter, TransactionModelAdapter> p) {
-				return new TransactionEditor(financeData,Pos.CENTER_RIGHT);
+				return new TransactionEditor(financeData, Pos.CENTER_RIGHT);
 			}
 		});
 	}
 
 	@FXML
-	private void handleCreateTransaction(){
+	private void handleCreateTransaction() {
 		financeData.createTransaction(new FinanceTransaction("", new String[0], new Date(), FinanceTransaction.Type.EXPENSEINCOME));//NOI18N
 		updateTransactions();
 	}
+
 	@FXML
-	private void handleDeleteTransaction(){
+	private void handleDeleteTransaction() {
 		TransactionModelAdapter selectedItem = transactionsTable.getSelectionModel().getSelectedItem();
-		if(selectedItem!=null)
+		if (selectedItem != null)
 			financeData.deleteTransaction(selectedItem.getTransaction());
 		updateTransactions();
 	}
+
 	/**
 	 * Updates transactions for current page from database
 	 */
@@ -145,13 +164,7 @@ public class TransactionsController implements Initializable {
 
 	protected void updateTransactions() {
 		transactionsTablePagination.setPageCount(getPageCount());
-		transactionsTablePagination.setPageFactory(new Callback<Integer, Node>() {
-			@Override
-			public Node call(Integer p) {
-				updatePageTransactions(p);
-				return transactionsTable;//transactionsTable;
-			}
-		});
+		updatePageTransactions(transactionsTablePagination.getCurrentPageIndex());
 	}
 
 	public FinanceData getFinanceData() {
@@ -161,6 +174,36 @@ public class TransactionsController implements Initializable {
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
 		updateTransactions();
+		financeData.setTransactionListener(new TransactionEventHandler() {
+			protected FinanceData financeData;
+
+			public TransactionEventHandler setFinanceData(FinanceData financeData) {
+				this.financeData = financeData;
+				return this;
+			}
+
+			@Override
+			public void transactionCreated(FinanceTransaction newTransaction) {
+				transactionsTablePagination.setCurrentPageIndex(0);
+			}
+
+			@Override
+			public void transactionUpdated(FinanceTransaction updatedTransaction) {
+				TransactionModelAdapter updatedTransactionModelAdapter = new TransactionModelAdapter(updatedTransaction, financeData);
+				int index = transactionsTable.getItems().indexOf(updatedTransaction);
+				if (index >= 0)
+					transactionsTable.getItems().set(index, updatedTransactionModelAdapter);
+			}
+
+			@Override
+			public void transactionDeleted(FinanceTransaction deletedTransaction) {
+			}
+
+			@Override
+			public void transactionsUpdated() {
+				updateTransactions();
+			}
+		}.setFinanceData(financeData));
 	}
 
 	/**

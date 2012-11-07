@@ -11,9 +11,10 @@ import java.util.logging.Logger;
 /**
  * Validator which validates integer/double values.
  *
- * @author Dmitry
+ * @author Dmitry Zolotukhin
  */
 public class StringValidatorDouble implements StringCellValidator {
+
 	@Override
 	public boolean isValid(String value) {
 		try {

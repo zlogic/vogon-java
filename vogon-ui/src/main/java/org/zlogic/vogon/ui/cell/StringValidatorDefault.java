@@ -8,7 +8,7 @@ package org.zlogic.vogon.ui.cell;
 /**
  * Validator which always returns true.
  *
- * @author Dmitry
+ * @author Dmitry Zolotukhin
  */
 public class StringValidatorDefault implements StringCellValidator {
 

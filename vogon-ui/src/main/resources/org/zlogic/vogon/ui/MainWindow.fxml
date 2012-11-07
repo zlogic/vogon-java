@@ -8,68 +8,68 @@
 <?import javafx.scene.layout.*?>
 <?scenebuilder-preview-i18n-resource messages.properties?>
 
-<VBox id="VBox" fx:id="mainWindow" prefHeight="422.0" prefWidth="538.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.MainWindowController">
-  <children>
-    <MenuBar prefWidth="455.0" VBox.vgrow="NEVER">
-      <menus>
-        <Menu mnemonicParsing="false" text="%MAINWINDOW_MENU_FILE">
-          <items>
-            <MenuItem mnemonicParsing="false" onAction="#handleMenuImportAction" text="%MAINWINDOW_MENU_IMPORT" fx:id="menuItemImport" />
-            <MenuItem mnemonicParsing="false" onAction="#handleMenuExportAction" text="%MAINWINDOW_MENU_EXPORT" fx:id="menuItemExport" />
-            <MenuItem mnemonicParsing="false" onAction="#handleMenuExitAction" text="%MAINWINDOW_MENU_EXIT" />
-          </items>
-        </Menu>
-        <Menu mnemonicParsing="false" text="%MAINWINDOW_MENU_TOOLS">
-          <items>
-            <MenuItem mnemonicParsing="false" onAction="#handleMenuRecalculateBalanceAction" text="%MAINWINDOW_MENU_RECALCULATE_BALANCE" fx:id="menuItemRecalculateBalance" />
-            <MenuItem mnemonicParsing="false" onAction="#handleMenuCleanupDBAction" text="%MAINWINDOW_MENU_CLEANUP_DB" fx:id="menuItemCleanupDB" />
-          </items>
-        </Menu>
-      </menus>
-      <VBox.margin>
-        <Insets fx:id="x3" />
-      </VBox.margin>
-    </MenuBar>
-    <Accordion prefHeight="332.0" prefWidth="538.0" VBox.margin="$x3" VBox.vgrow="ALWAYS">
-      <expandedPane>
-        <TitledPane fx:id="x1" animated="false" text="%TRANSACTIONS">
-          <content>
-            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-              <children>
-                <fx:include fx:id="transactionsPane" source="Transactions.fxml" prefHeight="126.0" prefWidth="455.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-              </children>
-            </AnchorPane>
-          </content>
-        </TitledPane>
-      </expandedPane>
-      <panes>
-        <fx:reference source="x1" />
-        <TitledPane fx:id="x4" animated="false" text="%ACCOUNTS">
-          <content>
-            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-              <children>
-                <fx:include fx:id="accountsPane" source="Accounts.fxml" prefHeight="126.0" prefWidth="455.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-              </children>
-            </AnchorPane>
-          </content>
-        </TitledPane>
-        <TitledPane animated="false" text="%ANALYTICS">
-          <content>
-            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-          </content>
-        </TitledPane>
-        <TitledPane fx:id="x2" animated="false" text="%CURRENCIES">
-          <content>
-            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-          </content>
-        </TitledPane>
-      </panes>
-    </Accordion>
-    <HBox fx:id="statusPane" alignment="CENTER_RIGHT">
-      <children>
-        <Label fx:id="progressLabel" HBox.hgrow="ALWAYS" />
-        <ProgressIndicator fx:id="progressIndicator" progress="0.0" HBox.hgrow="NEVER" />
-      </children>
-    </HBox>
-  </children>
+<VBox id="VBox" fx:id="mainWindow" prefHeight="700.0" prefWidth="900.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.MainWindowController">
+	<children>
+		<MenuBar prefWidth="455.0" VBox.vgrow="NEVER">
+			<menus>
+				<Menu mnemonicParsing="false" text="%MAINWINDOW_MENU_FILE">
+					<items>
+						<MenuItem mnemonicParsing="false" onAction="#handleMenuImportAction" text="%MAINWINDOW_MENU_IMPORT" fx:id="menuItemImport" />
+						<MenuItem mnemonicParsing="false" onAction="#handleMenuExportAction" text="%MAINWINDOW_MENU_EXPORT" fx:id="menuItemExport" />
+						<MenuItem mnemonicParsing="false" onAction="#handleMenuExitAction" text="%MAINWINDOW_MENU_EXIT" />
+					</items>
+				</Menu>
+				<Menu mnemonicParsing="false" text="%MAINWINDOW_MENU_TOOLS">
+					<items>
+						<MenuItem mnemonicParsing="false" onAction="#handleMenuRecalculateBalanceAction" text="%MAINWINDOW_MENU_RECALCULATE_BALANCE" fx:id="menuItemRecalculateBalance" />
+						<MenuItem mnemonicParsing="false" onAction="#handleMenuCleanupDBAction" text="%MAINWINDOW_MENU_CLEANUP_DB" fx:id="menuItemCleanupDB" />
+					</items>
+				</Menu>
+			</menus>
+			<VBox.margin>
+				<Insets fx:id="x3" />
+			</VBox.margin>
+		</MenuBar>
+		<Accordion prefHeight="332.0" prefWidth="538.0" VBox.margin="$x3" VBox.vgrow="ALWAYS">
+			<expandedPane>
+				<TitledPane fx:id="x1" animated="false" text="%TRANSACTIONS">
+					<content>
+						<AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+							<children>
+								<fx:include fx:id="transactionsPane" source="Transactions.fxml" prefHeight="126.0" prefWidth="455.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+							</children>
+						</AnchorPane>
+					</content>
+				</TitledPane>
+			</expandedPane>
+			<panes>
+				<fx:reference source="x1" />
+				<TitledPane fx:id="x4" animated="false" text="%ACCOUNTS">
+					<content>
+						<AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+							<children>
+								<fx:include fx:id="accountsPane" source="Accounts.fxml" prefHeight="126.0" prefWidth="455.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+							</children>
+						</AnchorPane>
+					</content>
+				</TitledPane>
+				<TitledPane animated="false" text="%ANALYTICS">
+					<content>
+						<AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+					</content>
+				</TitledPane>
+				<TitledPane fx:id="x2" animated="false" text="%CURRENCIES">
+					<content>
+						<AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+					</content>
+				</TitledPane>
+			</panes>
+		</Accordion>
+		<HBox fx:id="statusPane" alignment="CENTER_RIGHT">
+			<children>
+				<Label fx:id="progressLabel" HBox.hgrow="ALWAYS" />
+				<ProgressIndicator fx:id="progressIndicator" progress="0.0" HBox.hgrow="NEVER" />
+			</children>
+		</HBox>
+	</children>
 </VBox>
