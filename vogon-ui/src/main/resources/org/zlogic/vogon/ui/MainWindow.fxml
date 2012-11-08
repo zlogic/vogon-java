@@ -36,7 +36,7 @@
 					<content>
 						<AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
 							<children>
-								<fx:include fx:id="transactionsPane" source="Transactions.fxml" prefHeight="126.0" prefWidth="455.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+								<fx:include fx:id="transactionsPane" source="Transactions.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
 							</children>
 						</AnchorPane>
 					</content>
@@ -48,19 +48,23 @@
 					<content>
 						<AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
 							<children>
-								<fx:include fx:id="accountsPane" source="Accounts.fxml" prefHeight="126.0" prefWidth="455.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+								<fx:include fx:id="accountsPane" source="Accounts.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
 							</children>
 						</AnchorPane>
 					</content>
 				</TitledPane>
 				<TitledPane animated="false" text="%ANALYTICS">
 					<content>
-						<AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+						<AnchorPane id="Content" minHeight="0.0" minWidth="0.0" />
 					</content>
 				</TitledPane>
 				<TitledPane fx:id="x2" animated="false" text="%CURRENCIES">
 					<content>
-						<AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+						<AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+							<children>
+								<fx:include fx:id="currenciesPane" source="Currencies.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+							</children>
+						</AnchorPane>
 					</content>
 				</TitledPane>
 			</panes>

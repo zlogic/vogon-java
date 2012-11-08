@@ -54,7 +54,7 @@ public class TransactionComponentModelAdapter {
 
 	private void updateProperties() {
 		if (transactionComponent != null) {
-			account.set(new AccountModelAdapter(transactionComponent.getAccount(),financeData));
+			account.set(new AccountModelAdapter(transactionComponent.getAccount(), financeData));
 			amount.set(new AmountModelAdapter(transactionComponent.getAmount(), true, transactionComponent.getAccount() != null ? transactionComponent.getAccount().getCurrency() : null, false, FinanceTransaction.Type.UNDEFINED));
 		}
 	}

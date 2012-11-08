@@ -74,8 +74,8 @@ public class AmountModelAdapter implements Comparable<AmountModelAdapter>, CellS
 	}
 
 	/**
-	 * Constructs an AmountModelAdapter. Currency will be invalid, amount will be
-	 * considered to be OK.
+	 * Constructs an AmountModelAdapter. Currency will be invalid, amount will
+	 * be considered to be OK.
 	 *
 	 * @param amount the initial cell amount
 	 */

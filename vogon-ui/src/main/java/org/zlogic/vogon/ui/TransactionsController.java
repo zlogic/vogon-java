@@ -185,7 +185,7 @@ public class TransactionsController implements Initializable {
 			public void transactionCreated(FinanceTransaction newTransaction) {
 				transactionsTablePagination.setCurrentPageIndex(0);
 				int index = transactionsTable.getItems().indexOf(newTransaction);
-				if(index>=0)
+				if (index >= 0)
 					transactionsTable.getSelectionModel().select(index);
 			}
 
@@ -199,7 +199,6 @@ public class TransactionsController implements Initializable {
 
 			@Override
 			public void transactionDeleted(FinanceTransaction deletedTransaction) {
-				
 			}
 
 			@Override

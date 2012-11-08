@@ -11,40 +11,40 @@
 <?scenebuilder-preview-i18n-resource messages.properties?>
 
 <VBox id="VBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.AccountsController">
-  <children>
-    <FlowPane minHeight="-Infinity">
-      <children>
-        <Button mnemonicParsing="false" onAction="#handleCreateAccount" text="%ADD_ACCOUNT">
-          <FlowPane.margin>
-            <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" fx:id="x1" />
-          </FlowPane.margin>
-        </Button>
-        <Button mnemonicParsing="false" onAction="#handleDeleteAccount" text="%DELETE_ACCOUNT" FlowPane.margin="$x1" />
-      </children>
-    </FlowPane>
-    <TableView fx:id="accountsTable" editable="true" VBox.vgrow="ALWAYS">
-      <columns>
-        <TableColumn prefWidth="75.0" text="%ACCOUNT_NAME" fx:id="columnName">
-          <cellValueFactory>
-            <PropertyValueFactory property="name" />
-          </cellValueFactory>
-        </TableColumn>
-        <TableColumn editable="false" prefWidth="75.0" text="%ACCOUNT_BALANCE" fx:id="columnBalance">
-          <cellValueFactory>
-            <PropertyValueFactory property="balance" />
-          </cellValueFactory>
-        </TableColumn>
-        <TableColumn prefWidth="75.0" text="%ACCOUNT_CURRENCY" fx:id="columnCurrency">
-          <cellValueFactory>
-            <PropertyValueFactory property="currency" />
-          </cellValueFactory>
-        </TableColumn>
-        <TableColumn prefWidth="75.0" text="%INCLUDE_IN_TOTAL" fx:id="columnIncludeInTotal">
-          <cellValueFactory>
-            <PropertyValueFactory property="includeInTotal" />
-          </cellValueFactory>
-        </TableColumn>
-      </columns>
-    </TableView>
-  </children>
+	<children>
+		<FlowPane minHeight="-Infinity">
+			<children>
+				<Button mnemonicParsing="false" onAction="#handleCreateAccount" text="%ADD_ACCOUNT">
+					<FlowPane.margin>
+						<Insets bottom="4.0" left="4.0" right="4.0" top="4.0" fx:id="x1" />
+					</FlowPane.margin>
+				</Button>
+				<Button mnemonicParsing="false" onAction="#handleDeleteAccount" text="%DELETE_ACCOUNT" FlowPane.margin="$x1" />
+			</children>
+		</FlowPane>
+		<TableView fx:id="accountsTable" editable="true" VBox.vgrow="ALWAYS">
+			<columns>
+				<TableColumn prefWidth="75.0" text="%ACCOUNT_NAME" fx:id="columnName">
+					<cellValueFactory>
+						<PropertyValueFactory property="name" />
+					</cellValueFactory>
+				</TableColumn>
+				<TableColumn editable="false" prefWidth="75.0" text="%ACCOUNT_BALANCE" fx:id="columnBalance">
+					<cellValueFactory>
+						<PropertyValueFactory property="balance" />
+					</cellValueFactory>
+				</TableColumn>
+				<TableColumn prefWidth="75.0" text="%ACCOUNT_CURRENCY" fx:id="columnCurrency">
+					<cellValueFactory>
+						<PropertyValueFactory property="currency" />
+					</cellValueFactory>
+				</TableColumn>
+				<TableColumn prefWidth="75.0" text="%INCLUDE_IN_TOTAL" fx:id="columnIncludeInTotal">
+					<cellValueFactory>
+						<PropertyValueFactory property="includeInTotal" />
+					</cellValueFactory>
+				</TableColumn>
+			</columns>
+		</TableView>
+	</children>
 </VBox>
