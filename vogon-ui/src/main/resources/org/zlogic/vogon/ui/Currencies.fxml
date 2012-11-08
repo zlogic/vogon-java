@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.*?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?scenebuilder-preview-i18n-resource messages.properties?>
+
+<VBox id="VBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.CurrenciesController">
+	<children>
+		<FlowPane>
+			<children>
+				<Label text="%DEFAULT_CURRENCY">
+					<FlowPane.margin>
+						<Insets bottom="4.0" left="4.0" right="4.0" top="4.0" fx:id="x1" />
+					</FlowPane.margin>
+				</Label>
+				<ComboBox fx:id="defaultCurrency" FlowPane.margin="$x1" />
+			</children>
+		</FlowPane>
+		<TableView fx:id="currenciesTable" editable="true">
+			<columns>
+				<TableColumn editable="false" prefWidth="75.0" text="%CURRENCY_SOURCE" fx:id="columnSourceCurrency">
+					<cellValueFactory>
+						<PropertyValueFactory property="sourceCurrency" />
+					</cellValueFactory>
+				</TableColumn>
+				<TableColumn editable="false" prefWidth="75.0" text="%CURRENCY_DESTINATION" fx:id="columnDestinationCurrency">
+					<cellValueFactory>
+						<PropertyValueFactory property="destinationCurrency" />
+					</cellValueFactory>
+				</TableColumn>
+				<TableColumn prefWidth="75.0" text="%CURRENCY_EXCHANGE_RATE" fx:id="columnExchangeRate">
+					<cellValueFactory>
+						<PropertyValueFactory property="exchangeRate" />
+					</cellValueFactory>
+				</TableColumn>
+			</columns>
+		</TableView>
+	</children>
+</VBox>

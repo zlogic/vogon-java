@@ -95,7 +95,7 @@ public class ComboCellEditor<BaseType, PropertyType> extends TableCell<BaseType,
 		comboField.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent t) {
-				if(isEditing())
+				if (isEditing())
 					commitEdit(comboField.getSelectionModel().getSelectedItem());
 			}
 		});

@@ -5,7 +5,6 @@
  */
 package org.zlogic.vogon.ui.adapter;
 
-import java.util.Currency;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -25,7 +24,7 @@ import org.zlogic.vogon.data.FinanceTransaction;
  * @author Dmitry Zolotukhin
  */
 public class AccountModelAdapter {
-	
+
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * The account
@@ -45,7 +44,7 @@ public class AccountModelAdapter {
 	public AccountModelAdapter(final FinanceAccount account, FinanceData financeData) {
 		this.account = account;
 		this.financeData = financeData;
-		
+
 		updateProperties();
 
 		//Set property change listeners
@@ -65,7 +64,7 @@ public class AccountModelAdapter {
 					financeData.setAccountIncludeInTotal(account, t1);
 			}
 		}.setData(account, financeData));
-		
+
 		name.addListener(new ChangeListener<String>() {
 			protected FinanceData financeData;
 			protected FinanceAccount account;
@@ -82,7 +81,7 @@ public class AccountModelAdapter {
 					financeData.setAccountName(account, t1);
 			}
 		}.setData(account, financeData));
-		
+
 		currency.addListener(new ChangeListener<CurrencyModelAdapter>() {
 			protected FinanceData financeData;
 			protected FinanceAccount account;
@@ -99,7 +98,7 @@ public class AccountModelAdapter {
 			}
 		}.setData(account, financeData));
 	}
-	
+
 	@Override
 	public String toString() {
 		if (account != null)
@@ -107,7 +106,7 @@ public class AccountModelAdapter {
 		else
 			return messages.getString("INVALID_ACCOUNT");
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null)
@@ -116,7 +115,7 @@ public class AccountModelAdapter {
 			return obj instanceof AccountModelAdapter && ((AccountModelAdapter) obj).account == null;
 		return obj instanceof AccountModelAdapter && account.equals(((AccountModelAdapter) obj).account);
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return account.hashCode();
@@ -130,23 +129,23 @@ public class AccountModelAdapter {
 	public FinanceAccount getAccount() {
 		return account;
 	}
-	
+
 	public StringProperty balanceProperty() {
 		return balance;
 	}
-	
+
 	public StringProperty nameProperty() {
 		return name;
 	}
-	
+
 	public ObjectProperty<CurrencyModelAdapter> currencyProperty() {
 		return currency;
 	}
-	
+
 	public BooleanProperty includeInTotalProperty() {
 		return includeInTotal;
 	}
-	
+
 	private void updateProperties() {
 		if (account != null) {
 			balance.set(new AmountModelAdapter(account.getBalance(), true, account.getCurrency(), false, FinanceTransaction.Type.UNDEFINED).toString());
@@ -155,7 +154,7 @@ public class AccountModelAdapter {
 			includeInTotal.set(account.getIncludeInTotal());
 		}
 	}
-	
+
 	public void refresh(FinanceAccount account) {
 		this.account = account;
 		updateProperties();

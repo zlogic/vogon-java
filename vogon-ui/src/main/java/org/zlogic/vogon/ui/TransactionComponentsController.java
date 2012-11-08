@@ -145,7 +145,7 @@ public class TransactionComponentsController implements Initializable {
 		List<AccountModelAdapter> items = new LinkedList<>();
 		for (FinanceAccount account : financeData.getAccounts())
 			if (account.getIncludeInTotal())
-				items.add(new AccountModelAdapter(account,financeData));
+				items.add(new AccountModelAdapter(account, financeData));
 		return items;
 	}
 

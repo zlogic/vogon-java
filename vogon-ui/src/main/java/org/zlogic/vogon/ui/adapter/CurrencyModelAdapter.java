@@ -23,16 +23,15 @@ public class CurrencyModelAdapter implements Comparable<CurrencyModelAdapter> {
 
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
-	 * The account
+	 * The currency
 	 */
 	protected Currency currency;
-	
 	private final StringProperty value = new SimpleStringProperty();
 
 	/**
 	 * Default constructor
 	 *
-	 * @param account the account for this item
+	 * @param currency the currency for this item
 	 */
 	public CurrencyModelAdapter(Currency currency) {
 		this.currency = currency;
@@ -67,11 +66,11 @@ public class CurrencyModelAdapter implements Comparable<CurrencyModelAdapter> {
 		return currency;
 	}
 
-	public void setCurrency(Currency currency){
+	public void setCurrency(Currency currency) {
 		this.currency = currency;
 		updateProperties();
 	}
-	
+
 	public StringProperty currencyProperty() {
 		return value;
 	}
@@ -79,8 +78,7 @@ public class CurrencyModelAdapter implements Comparable<CurrencyModelAdapter> {
 	private void updateProperties() {
 		value.set(toString());
 	}
-	
-	
+
 	public static List<CurrencyModelAdapter> getCurrenciesList() {
 		List<CurrencyModelAdapter> items = new LinkedList<>();
 		for (Currency curr : Currency.getAvailableCurrencies())
@@ -92,10 +90,11 @@ public class CurrencyModelAdapter implements Comparable<CurrencyModelAdapter> {
 
 	@Override
 	public int compareTo(CurrencyModelAdapter obj) {
-		if(currency==null && obj.currency!=null)
+		if (currency == null && obj.currency != null)
 			return -1;
-		else if(currency!=null &&( obj==null || obj.currency==null))
+		else if (currency != null && (obj == null || obj.currency == null))
 			return 1;
-		else return currency.getCurrencyCode().compareTo(obj.currency.getCurrencyCode());
+		else
+			return currency.getCurrencyCode().compareTo(obj.currency.getCurrencyCode());
 	}
 }

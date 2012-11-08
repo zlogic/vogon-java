@@ -71,6 +71,8 @@ public class MainWindowController implements Initializable {
 	@FXML
 	private AccountsController accountsPaneController;
 	@FXML
+	private CurrenciesController currenciesPaneController;
+	@FXML
 	private ProgressIndicator progressIndicator;
 	@FXML
 	private Label progressLabel;
@@ -328,5 +330,6 @@ public class MainWindowController implements Initializable {
 		this.financeData = financeData;
 		transactionsPaneController.setFinanceData(financeData);
 		accountsPaneController.setFinanceData(financeData);
+		currenciesPaneController.setFinanceData(financeData);
 	}
 }
