@@ -3,7 +3,7 @@
  * License TBD.
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
-package org.zlogic.vogon.ui;
+package org.zlogic.vogon.ui.adapter;
 
 import java.util.Currency;
 import java.util.Date;
@@ -61,7 +61,7 @@ public class TransactionModelAdapter implements CellStatus {
 		return transaction;
 	}
 
-	public AmountAdapter getAmount() {
+	public AmountModelAdapter getAmount() {
 		List<Currency> transactionCurrencies = transaction.getCurrencies();
 		Currency currency;
 		double amount;
@@ -72,7 +72,7 @@ public class TransactionModelAdapter implements CellStatus {
 			amount = financeData.getAmountInCurrency(transaction, financeData.getDefaultCurrency());
 			currency = financeData.getDefaultCurrency();
 		}
-		return new AmountAdapter(amount, transaction.isAmountOk(), currency, transactionCurrencies.size() != 1, transaction.getType());
+		return new AmountModelAdapter(amount, transaction.isAmountOk(), currency, transactionCurrencies.size() != 1, transaction.getType());
 	}
 
 	public String getAccount() {

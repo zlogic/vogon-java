@@ -43,14 +43,12 @@ public class ComboCellEditor<BaseType, PropertyType> extends TableCell<BaseType,
 	 */
 	@Override
 	public void startEdit() {
-		super.startEdit();
-
-		if (comboField == null) {
+		if (comboField == null)
 			createComboField();
-		}
+		comboField.getSelectionModel().select(getItem());
+		super.startEdit();
 		setText(null);
 		setGraphic(comboField);
-		comboField.getSelectionModel().select(getItem());
 	}
 
 	/**
@@ -77,9 +75,8 @@ public class ComboCellEditor<BaseType, PropertyType> extends TableCell<BaseType,
 			setGraphic(null);
 		} else {
 			if (isEditing()) {
-				if (comboField != null) {
+				if (comboField != null)
 					comboField.getSelectionModel().select(item);
-				}
 				setText(null);
 				setGraphic(comboField);
 			} else {
@@ -98,7 +95,8 @@ public class ComboCellEditor<BaseType, PropertyType> extends TableCell<BaseType,
 		comboField.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent t) {
-				commitEdit(comboField.getSelectionModel().getSelectedItem());
+				if(isEditing())
+					commitEdit(comboField.getSelectionModel().getSelectedItem());
 			}
 		});
 	}

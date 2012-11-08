@@ -8,7 +8,7 @@ package org.zlogic.vogon.ui.cell;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.geometry.Pos;
-import org.zlogic.vogon.ui.AmountAdapter;
+import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
 
 /**
  * Cell editor capable of displaying and editing an amount.
@@ -16,7 +16,7 @@ import org.zlogic.vogon.ui.AmountAdapter;
  * @param <BaseType> the cell type
  * @author Dmitry Zolotukhin
  */
-public class AmountCellEditor<BaseType> extends StringCellEditor<BaseType, AmountAdapter> {
+public class AmountCellEditor<BaseType> extends StringCellEditor<BaseType, AmountModelAdapter> {
 
 	/**
 	 * Creates an AmountCellEditor with a value validator
@@ -39,7 +39,7 @@ public class AmountCellEditor<BaseType> extends StringCellEditor<BaseType, Amoun
 	}
 
 	@Override
-	protected AmountAdapter propertyFromString(String value) {
+	protected AmountModelAdapter propertyFromString(String value) {
 		try {
 			getItem().setAmount(Double.parseDouble(value));
 			return getItem();

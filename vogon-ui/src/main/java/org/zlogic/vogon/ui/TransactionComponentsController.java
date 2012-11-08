@@ -23,6 +23,9 @@ import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
+import org.zlogic.vogon.ui.adapter.AccountModelAdapter;
+import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
+import org.zlogic.vogon.ui.adapter.TransactionComponentModelAdapter;
 import org.zlogic.vogon.ui.cell.AmountCellEditor;
 import org.zlogic.vogon.ui.cell.ComboCellEditor;
 import org.zlogic.vogon.ui.cell.StringValidatorDouble;
@@ -41,36 +44,36 @@ public class TransactionComponentsController implements Initializable {
 	@FXML
 	ComboBox<TransactionTypeComboItem> transactionType;
 	@FXML
-	TableColumn<TransactionComponentModelAdapter, FinanceAccountModelAdapter> columnAccount;
+	TableColumn<TransactionComponentModelAdapter, AccountModelAdapter> columnAccount;
 	@FXML
-	TableColumn<TransactionComponentModelAdapter, AmountAdapter> columnAmount;
+	TableColumn<TransactionComponentModelAdapter, AmountModelAdapter> columnAmount;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		transactionComponents.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-		columnAccount.setCellFactory(new Callback<TableColumn<TransactionComponentModelAdapter, FinanceAccountModelAdapter>, TableCell<TransactionComponentModelAdapter, FinanceAccountModelAdapter>>() {
+		columnAccount.setCellFactory(new Callback<TableColumn<TransactionComponentModelAdapter, AccountModelAdapter>, TableCell<TransactionComponentModelAdapter, AccountModelAdapter>>() {
 			@Override
-			public TableCell<TransactionComponentModelAdapter, FinanceAccountModelAdapter> call(TableColumn<TransactionComponentModelAdapter, FinanceAccountModelAdapter> p) {
+			public TableCell<TransactionComponentModelAdapter, AccountModelAdapter> call(TableColumn<TransactionComponentModelAdapter, AccountModelAdapter> p) {
 				return new ComboCellEditor<>(getAccountsComboList());
 			}
 		});
-		columnAccount.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionComponentModelAdapter, FinanceAccountModelAdapter>>() {
+		columnAccount.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionComponentModelAdapter, AccountModelAdapter>>() {
 			@Override
-			public void handle(TableColumn.CellEditEvent<TransactionComponentModelAdapter, FinanceAccountModelAdapter> t) {
+			public void handle(TableColumn.CellEditEvent<TransactionComponentModelAdapter, AccountModelAdapter> t) {
 				t.getRowValue().setAccount(t.getNewValue().getAccount());
 			}
 		});
 
-		columnAmount.setCellFactory(new Callback<TableColumn<TransactionComponentModelAdapter, AmountAdapter>, TableCell<TransactionComponentModelAdapter, AmountAdapter>>() {
+		columnAmount.setCellFactory(new Callback<TableColumn<TransactionComponentModelAdapter, AmountModelAdapter>, TableCell<TransactionComponentModelAdapter, AmountModelAdapter>>() {
 			@Override
-			public TableCell<TransactionComponentModelAdapter, AmountAdapter> call(TableColumn<TransactionComponentModelAdapter, AmountAdapter> p) {
+			public TableCell<TransactionComponentModelAdapter, AmountModelAdapter> call(TableColumn<TransactionComponentModelAdapter, AmountModelAdapter> p) {
 				return new AmountCellEditor<>(new StringValidatorDouble(), Pos.CENTER_RIGHT);
 			}
 		});
-		columnAmount.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionComponentModelAdapter, AmountAdapter>>() {
+		columnAmount.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionComponentModelAdapter, AmountModelAdapter>>() {
 			@Override
-			public void handle(TableColumn.CellEditEvent<TransactionComponentModelAdapter, AmountAdapter> t) {
+			public void handle(TableColumn.CellEditEvent<TransactionComponentModelAdapter, AmountModelAdapter> t) {
 				t.getRowValue().setAmount(t.getNewValue().getAmount());
 			}
 		});
@@ -90,7 +93,9 @@ public class TransactionComponentsController implements Initializable {
 	protected void handleAddComponent(ActionEvent event) {
 		TransactionComponent component = new TransactionComponent(null, transaction, 0);
 		financeData.createTransactionComponent(component);
-		transactionComponents.getItems().add(new TransactionComponentModelAdapter(component, financeData));
+		TransactionComponentModelAdapter newComponentAdapter = new TransactionComponentModelAdapter(component, financeData);
+		transactionComponents.getItems().add(newComponentAdapter);
+		transactionComponents.getSelectionModel().select(newComponentAdapter);
 	}
 
 	@FXML
@@ -135,11 +140,12 @@ public class TransactionComponentsController implements Initializable {
 	 *
 	 * @return the list of account items
 	 */
-	public List<FinanceAccountModelAdapter> getAccountsComboList() {
-		List<FinanceAccountModelAdapter> items = new LinkedList<>();
+	public List<AccountModelAdapter> getAccountsComboList() {
+		//TODO: check how this handles adding/hiding of accounts. Swing simply updates the accounts combo box on any changes.
+		List<AccountModelAdapter> items = new LinkedList<>();
 		for (FinanceAccount account : financeData.getAccounts())
 			if (account.getIncludeInTotal())
-				items.add(new FinanceAccountModelAdapter(account));
+				items.add(new AccountModelAdapter(account,financeData));
 		return items;
 	}
 
