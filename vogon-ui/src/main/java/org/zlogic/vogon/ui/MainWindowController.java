@@ -15,7 +15,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
@@ -39,8 +38,11 @@ import org.zlogic.vogon.data.interop.XmlImporter;
 //TODO: Remove private
 //TODO: Add comments & javadoc
 //TODO: All exceptions should be displayed
-//TODO: Scroll/select added item
 //TODO: Add refreshing for transactions (e.g. when account's currency is updated)
+//TODO: Sorting (where possible)
+//TODO: Bind properties insted of using callbacks (see Accounts editor)
+//TODO: Update & clean up i18n properties
+//TODO: Reporting accounts
 /**
  * Main entry window controller.
  *

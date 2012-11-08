@@ -26,9 +26,9 @@ import javafx.util.Callback;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.events.TransactionEventHandler;
+import org.zlogic.vogon.ui.adapter.TransactionModelAdapter;
 import org.zlogic.vogon.ui.cell.DateCellEditor;
 import org.zlogic.vogon.ui.cell.StringCellEditor;
-import org.zlogic.vogon.ui.cell.StringValidatorDate;
 import org.zlogic.vogon.ui.cell.StringValidatorDefault;
 import org.zlogic.vogon.ui.cell.TransactionEditor;
 
@@ -132,7 +132,6 @@ public class TransactionsController implements Initializable {
 	@FXML
 	private void handleCreateTransaction() {
 		financeData.createTransaction(new FinanceTransaction("", new String[0], new Date(), FinanceTransaction.Type.EXPENSEINCOME));//NOI18N
-		updateTransactions();
 	}
 
 	@FXML
@@ -140,7 +139,6 @@ public class TransactionsController implements Initializable {
 		TransactionModelAdapter selectedItem = transactionsTable.getSelectionModel().getSelectedItem();
 		if (selectedItem != null)
 			financeData.deleteTransaction(selectedItem.getTransaction());
-		updateTransactions();
 	}
 
 	/**
@@ -175,6 +173,7 @@ public class TransactionsController implements Initializable {
 		this.financeData = financeData;
 		updateTransactions();
 		financeData.setTransactionListener(new TransactionEventHandler() {
+			//TODO: Add handling for account events
 			protected FinanceData financeData;
 
 			public TransactionEventHandler setFinanceData(FinanceData financeData) {
@@ -185,6 +184,9 @@ public class TransactionsController implements Initializable {
 			@Override
 			public void transactionCreated(FinanceTransaction newTransaction) {
 				transactionsTablePagination.setCurrentPageIndex(0);
+				int index = transactionsTable.getItems().indexOf(newTransaction);
+				if(index>=0)
+					transactionsTable.getSelectionModel().select(index);
 			}
 
 			@Override
@@ -197,6 +199,7 @@ public class TransactionsController implements Initializable {
 
 			@Override
 			public void transactionDeleted(FinanceTransaction deletedTransaction) {
+				
 			}
 
 			@Override

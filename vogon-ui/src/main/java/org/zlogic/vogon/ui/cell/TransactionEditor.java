@@ -17,7 +17,7 @@ import javafx.scene.paint.Color;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.ui.MessageDialog;
 import org.zlogic.vogon.ui.TransactionComponentsController;
-import org.zlogic.vogon.ui.TransactionModelAdapter;
+import org.zlogic.vogon.ui.adapter.TransactionModelAdapter;
 
 /**
  * Transactions components editor. Expands from a simple string to a

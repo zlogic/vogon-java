@@ -3,7 +3,7 @@
  * License TBD.
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
-package org.zlogic.vogon.ui;
+package org.zlogic.vogon.ui.adapter;
 
 import java.text.MessageFormat;
 import java.util.Currency;
@@ -15,7 +15,7 @@ import org.zlogic.vogon.ui.cell.CellStatus;
  *
  * @author Dmitry Zolotukhin
  */
-public class AmountAdapter implements Comparable<AmountAdapter>, CellStatus {
+public class AmountModelAdapter implements Comparable<AmountModelAdapter>, CellStatus {
 
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/*
@@ -43,7 +43,7 @@ public class AmountAdapter implements Comparable<AmountAdapter>, CellStatus {
 	protected FinanceTransaction.Type transactionType;
 
 	/**
-	 * Constructs an AmountAdapter
+	 * Constructs an AmountModelAdapter
 	 *
 	 * @param amount the initial cell amount
 	 * @param isOk if the cell data is OK (e.g. zero sum for a transfer
@@ -53,7 +53,7 @@ public class AmountAdapter implements Comparable<AmountAdapter>, CellStatus {
 	 * be displayed differently
 	 * @param transactionType the transaction type
 	 */
-	public AmountAdapter(double balance, boolean isOk, Currency currency, boolean isCurrencyConverted, FinanceTransaction.Type transactionType) {
+	public AmountModelAdapter(double balance, boolean isOk, Currency currency, boolean isCurrencyConverted, FinanceTransaction.Type transactionType) {
 		this.amount = balance;
 		this.currency = currency;
 		this.isOk = isOk;
@@ -62,24 +62,24 @@ public class AmountAdapter implements Comparable<AmountAdapter>, CellStatus {
 	}
 
 	/**
-	 * Constructs an AmountAdapter. Currency will be invalid.
+	 * Constructs an AmountModelAdapter. Currency will be invalid.
 	 *
 	 * @param amount the initial cell amount
 	 * @param isOk if the cell data is OK (e.g. zero sum for a transfer
 	 * transaction)
 	 */
-	public AmountAdapter(double balance, boolean isOk) {
+	public AmountModelAdapter(double balance, boolean isOk) {
 		this.amount = balance;
 		this.isOk = isOk;
 	}
 
 	/**
-	 * Constructs an AmountAdapter. Currency will be invalid, amount will be
+	 * Constructs an AmountModelAdapter. Currency will be invalid, amount will be
 	 * considered to be OK.
 	 *
 	 * @param amount the initial cell amount
 	 */
-	public AmountAdapter(double balance) {
+	public AmountModelAdapter(double balance) {
 		this.amount = balance;
 		this.isOk = true;
 	}
@@ -95,7 +95,7 @@ public class AmountAdapter implements Comparable<AmountAdapter>, CellStatus {
 	}
 
 	@Override
-	public int compareTo(AmountAdapter o) {
+	public int compareTo(AmountModelAdapter o) {
 		int currencyComparison = currency.getCurrencyCode().compareTo(o.currency.getCurrencyCode());
 		if (currencyComparison != 0)
 			return currencyComparison;
