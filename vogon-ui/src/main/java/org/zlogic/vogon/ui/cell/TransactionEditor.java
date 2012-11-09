@@ -10,10 +10,12 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.control.TableCell;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Popup;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.ui.MessageDialog;
 import org.zlogic.vogon.ui.TransactionComponentsController;
@@ -30,7 +32,8 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 	/**
 	 * The editor parent container
 	 */
-	protected VBox editor;
+	protected Parent editor;
+	protected Popup popup;
 	/**
 	 * The editor controller
 	 */
@@ -75,10 +78,12 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 
 		if (editor == null)
 			createEditor();
-		setText(null);
+		
 		componentsController.setFinanceData(financeData);
 		componentsController.setTransaction(getItem().getTransaction());
-		setGraphic(editor);
+		
+		Point2D bounds = localToScene(0,getHeight());
+		popup.show(this,getScene().getWindow().getX()+getScene().getX()+bounds.getX(),getScene().getWindow().getY()+getScene().getY()+bounds.getY());
 	}
 
 	/**
@@ -89,7 +94,13 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 		super.cancelEdit();
 		setText(getString());
 		setStatusColor();
-		setGraphic(null);
+		popup.hide();
+	}
+	
+	@Override
+	public void commitEdit(TransactionModelAdapter item){
+		super.commitEdit(item);
+		popup.hide();
 	}
 
 	/**
@@ -105,14 +116,8 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 			setText(null);
 			setGraphic(null);
 		} else {
-			if (isEditing()) {
-				setText(null);
-				setGraphic(editor);
-			} else {
-				setText(getString());
-				setStatusColor();
-				setGraphic(null);
-			}
+			setText(getString());
+			setStatusColor();
 		}
 	}
 
@@ -124,9 +129,11 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 		loader.setResources(ResourceBundle.getBundle("org/zlogic/vogon/ui/messages")); //NOI18N
 		loader.setLocation(TransactionComponentsController.class.getResource("TransactionComponents.fxml")); //NOI18N
 		try {
-			editor = (VBox) loader.load();
+			editor = (Parent) loader.load();
 			editor.autosize();
 			componentsController = loader.getController();
+			popup = new Popup();
+			popup.getContent().add(editor);
 		} catch (IOException ex) {
 			Logger.getLogger(MessageDialog.class.getName()).log(Level.SEVERE, null, ex);
 		}

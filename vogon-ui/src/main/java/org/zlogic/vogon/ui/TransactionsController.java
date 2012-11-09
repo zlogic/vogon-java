@@ -65,12 +65,8 @@ public class TransactionsController implements Initializable {
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		//Column sizes
-		columnDescription.prefWidthProperty().bind(transactionsTable.widthProperty().multiply(0.2));
-		columnDate.prefWidthProperty().bind(transactionsTable.widthProperty().multiply(0.15));
-		columnTags.prefWidthProperty().bind(transactionsTable.widthProperty().multiply(0.15));
-		columnAmount.prefWidthProperty().bind(transactionsTable.widthProperty().multiply(0.4));
-		columnAccount.prefWidthProperty().bind(transactionsTable.widthProperty().subtract(columnDescription.widthProperty()).subtract(columnDate.widthProperty()).subtract(columnTags.widthProperty()).subtract(columnAmount.widthProperty()).subtract(20));
-
+		transactionsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		
 		//Remove transactions table since it will be used in paging
 		transactionsTable.managedProperty().bind(transactionsTable.visibleProperty());
 		transactionsVBox.getChildren().remove(transactionsTable);
@@ -112,7 +108,9 @@ public class TransactionsController implements Initializable {
 		columnDate.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, Date>, TableCell<TransactionModelAdapter, Date>>() {
 			@Override
 			public TableCell<TransactionModelAdapter, Date> call(TableColumn<TransactionModelAdapter, Date> p) {
-				return new DateCellEditor<>();
+				DateCellEditor cell = new DateCellEditor<>();
+				cell.setAlignment(Pos.CENTER_RIGHT);
+				return cell;
 			}
 		});
 		columnTags.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionModelAdapter, String>>() {
