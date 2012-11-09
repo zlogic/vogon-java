@@ -102,7 +102,7 @@ public class TransactionsController implements Initializable {
 		columnTags.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionModelAdapter, String>>() {
 			@Override
 			public void handle(CellEditEvent<TransactionModelAdapter, String> t) {
-				t.getRowValue().setDescription(t.getNewValue());
+				t.getRowValue().setTags(t.getNewValue());
 			}
 		});
 		columnDate.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, Date>, TableCell<TransactionModelAdapter, Date>>() {
@@ -113,10 +113,10 @@ public class TransactionsController implements Initializable {
 				return cell;
 			}
 		});
-		columnTags.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionModelAdapter, String>>() {
+		columnDate.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionModelAdapter, Date>>() {
 			@Override
-			public void handle(CellEditEvent<TransactionModelAdapter, String> t) {
-				t.getRowValue().setDescription(t.getNewValue());
+			public void handle(CellEditEvent<TransactionModelAdapter, Date> t) {
+				t.getRowValue().setDate(t.getNewValue());
 			}
 		});
 		columnAmount.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, TransactionModelAdapter>, TableCell<TransactionModelAdapter, TransactionModelAdapter>>() {
