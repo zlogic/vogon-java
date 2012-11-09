@@ -43,6 +43,7 @@ import org.zlogic.vogon.data.interop.XmlImporter;
 //TODO: Bind properties insted of using callbacks (see Accounts editor)
 //TODO: Update & clean up i18n properties
 //TODO: Reporting accounts
+//TODO: Move cell editors to FXML where possible
 /**
  * Main entry window controller.
  *

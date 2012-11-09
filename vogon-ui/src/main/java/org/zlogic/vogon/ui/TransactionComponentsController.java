@@ -42,11 +42,11 @@ public class TransactionComponentsController implements Initializable {
 	@FXML
 	private TableView<TransactionComponentModelAdapter> transactionComponents;
 	@FXML
-	ComboBox<TransactionTypeComboItem> transactionType;
+	protected ComboBox<TransactionTypeComboItem> transactionType;
 	@FXML
-	TableColumn<TransactionComponentModelAdapter, AccountModelAdapter> columnAccount;
+	protected TableColumn<TransactionComponentModelAdapter, AccountModelAdapter> columnAccount;
 	@FXML
-	TableColumn<TransactionComponentModelAdapter, AmountModelAdapter> columnAmount;
+	protected TableColumn<TransactionComponentModelAdapter, AmountModelAdapter> columnAmount;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
