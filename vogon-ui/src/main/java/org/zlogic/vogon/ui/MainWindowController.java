@@ -14,12 +14,16 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Accordion;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TitledPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -76,6 +80,10 @@ public class MainWindowController implements Initializable {
 	private MenuItem menuItemRecalculateBalance;
 	@FXML
 	private MenuItem menuItemCleanupDB;
+	@FXML
+	private Accordion accordion;
+	@FXML
+	private TitledPane transactionsAccordionPane;
 
 	@FXML
 	protected void handleMenuExitAction() {
@@ -312,6 +320,14 @@ public class MainWindowController implements Initializable {
 		//Configure components
 		statusPane.managedProperty().bind(statusPane.visibleProperty());
 		statusPane.setVisible(false);
+		accordion.expandedPaneProperty().addListener(new ChangeListener<TitledPane>(){
+			@Override
+			public void changed(ObservableValue<? extends TitledPane> ov, TitledPane t, TitledPane t1) {
+				if(t==transactionsAccordionPane && t1!=transactionsAccordionPane)
+					transactionsPaneController.cancelEdit();
+			}
+			
+		});
 	}
 
 	public FinanceData getFinanceData() {

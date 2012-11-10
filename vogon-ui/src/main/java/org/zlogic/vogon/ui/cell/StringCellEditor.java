@@ -6,7 +6,6 @@
 package org.zlogic.vogon.ui.cell;
 
 import javafx.event.EventHandler;
-import javafx.geometry.Pos;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -29,10 +28,6 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 	 * The cell value validator
 	 */
 	protected StringCellValidator validator;
-	/**
-	 * Cell alignment in view (not edit) state
-	 */
-	protected Pos alignment;
 
 	/**
 	 * Constructs a StringCellEditor with a validator
@@ -40,21 +35,7 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 	 * @param validator the value validator
 	 */
 	public StringCellEditor(StringCellValidator validator) {
-		this(validator, null);
-	}
-
-	/**
-	 * Constructs a StringCellEditor with a validator and an alignment for view
-	 * (not edit) state
-	 *
-	 * @param validator the value validator
-	 * @param alignment alignment in view state
-	 */
-	public StringCellEditor(StringCellValidator validator, Pos alignment) {
 		this.validator = validator;
-		if (alignment != null)
-			setAlignment(alignment);
-		this.alignment = alignment;
 	}
 
 	/**
@@ -127,8 +108,7 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 	private void createTextField() {
 		textField = new TextField(getString());
 		textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2);
-		if (alignment != null)
-			textField.setAlignment(alignment);
+		textField.setAlignment(getAlignment());
 		textField.setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent t) {

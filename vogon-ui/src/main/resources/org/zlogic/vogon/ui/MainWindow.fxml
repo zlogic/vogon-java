@@ -26,15 +26,12 @@
           </items>
         </Menu>
       </menus>
-      <VBox.margin>
-        <Insets fx:id="x3" />
-      </VBox.margin>
     </MenuBar>
-    <Accordion prefHeight="332.0" prefWidth="538.0" VBox.margin="$x3" VBox.vgrow="ALWAYS">
+    <Accordion fx:id="accordion" prefHeight="332.0" prefWidth="538.0" VBox.vgrow="ALWAYS">
       <expandedPane>
-        <TitledPane fx:id="x1" text="%TRANSACTIONS">
+        <TitledPane fx:id="transactionsAccordionPane" disable="true" text="%TRANSACTIONS">
           <content>
-            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="251.0" prefWidth="896.0">
               <children>
                 <fx:include fx:id="transactionsPane" source="Transactions.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
               </children>
@@ -43,8 +40,8 @@
         </TitledPane>
       </expandedPane>
       <panes>
-        <fx:reference source="x1" />
-        <TitledPane fx:id="x4" text="%ACCOUNTS">
+        <fx:reference source="transactionsAccordionPane" />
+        <TitledPane fx:id="accountsAccordionPane" expanded="false" text="%ACCOUNTS">
           <content>
             <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
               <children>
@@ -53,12 +50,12 @@
             </AnchorPane>
           </content>
         </TitledPane>
-        <TitledPane text="%ANALYTICS">
+        <TitledPane fx:id="analyticsAccordionPane" expanded="false" text="%ANALYTICS">
           <content>
             <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" />
           </content>
         </TitledPane>
-        <TitledPane fx:id="x2" text="%CURRENCIES">
+        <TitledPane fx:id="currenciesAccordionPane" expanded="false" text="%CURRENCIES">
           <content>
             <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
               <children>
