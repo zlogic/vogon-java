@@ -28,6 +28,7 @@ import javafx.util.Callback;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.events.AccountEventHandler;
+import org.zlogic.vogon.data.events.CurrencyEventHandler;
 import org.zlogic.vogon.ui.adapter.AccountInterface;
 import org.zlogic.vogon.ui.adapter.AccountModelAdapter;
 import org.zlogic.vogon.ui.adapter.CurrencyModelAdapter;
@@ -64,7 +65,7 @@ public class AccountsController implements Initializable {
 					@Override
 					public void updateItem(ObjectWithStatus<String, Boolean> item, boolean empty) {
 						super.updateItem(item, empty);
-						if (!isEmpty()) {
+						if (!isEmpty() && item.getStatus()!=null) {
 							setEditable(item.getStatus());
 							setFont(Font.font(getFont().getName(), item.getStatus() ? FontWeight.NORMAL : FontWeight.BOLD, getFont().getSize()));
 						}
@@ -145,26 +146,12 @@ public class AccountsController implements Initializable {
 
 				@Override
 				public void accountUpdated(FinanceAccount updatedAccount) {
-					for (AccountInterface account : accountsTable.getItems()) {
-						if (account instanceof AccountModelAdapter) {
-							AccountModelAdapter accountAdapter = (AccountModelAdapter) account;
-							if (accountAdapter.getAccount().equals(updatedAccount))
-								accountAdapter.refresh(updatedAccount);
-						}
-					}
-					accountsTable.setItems(accountsTable.getItems());
+					updateAccounts();
 				}
 
 				@Override
 				public void accountDeleted(FinanceAccount deletedAccount) {
-					List<AccountModelAdapter> deletedAdapters = new LinkedList<>();
-					for (AccountInterface account : accountsTable.getItems())
-						if (account instanceof AccountModelAdapter) {
-							AccountModelAdapter accountAdapter = (AccountModelAdapter) account;
-							if (accountAdapter.getAccount().equals(deletedAccount))
-								deletedAdapters.add(accountAdapter);
-						}
-					accountsTable.getItems().removeAll(deletedAdapters);
+					updateAccounts();
 				}
 
 				@Override
@@ -173,6 +160,15 @@ public class AccountsController implements Initializable {
 				}
 			}.setFinanceData(financeData));
 		}
+		
+		if(financeData.getAccountListener() instanceof FinanceDataEventDispatcher){
+			((FinanceDataEventDispatcher)financeData.getAccountListener()).addCurrencyEventHandler(new CurrencyEventHandler() {
+				@Override
+				public void currenciesUpdated() {
+					updateAccounts();
+				}
+			});
+		}	
 	}
 
 	@FXML
@@ -204,6 +200,5 @@ public class AccountsController implements Initializable {
 			accountsTable.getItems().add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ACCOUNT"), new Object[]{currency.getCurrencyCode()}), financeData.getTotalBalance(currency), currency));
 		if (financeData.getDefaultCurrency() != null)
 			accountsTable.getItems().add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ALL_ACCOUNTS"), new Object[]{financeData.getDefaultCurrency().getCurrencyCode()}), financeData.getTotalBalance(null), financeData.getDefaultCurrency()));
-
 	}
 }
