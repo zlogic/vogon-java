@@ -23,9 +23,13 @@ import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
+import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
+import org.zlogic.vogon.data.events.AccountEventHandler;
 import org.zlogic.vogon.data.events.TransactionEventHandler;
+import org.zlogic.vogon.ui.adapter.AccountInterface;
+import org.zlogic.vogon.ui.adapter.AccountModelAdapter;
 import org.zlogic.vogon.ui.adapter.TransactionModelAdapter;
 import org.zlogic.vogon.ui.cell.DateCellEditor;
 import org.zlogic.vogon.ui.cell.StringCellEditor;
@@ -173,7 +177,6 @@ public class TransactionsController implements Initializable {
 		
 		if(financeData.getAccountListener() instanceof FinanceDataEventDispatcher){
 			((FinanceDataEventDispatcher)financeData.getAccountListener()).addTransactionEventHandler(new TransactionEventHandler() {
-				//TODO: Add handling for account events
 				protected FinanceData financeData;
 
 				public TransactionEventHandler setFinanceData(FinanceData financeData) {
@@ -206,6 +209,30 @@ public class TransactionsController implements Initializable {
 					updateTransactions();
 				}
 			}.setFinanceData(financeData));
+		}
+		
+		if(financeData.getAccountListener() instanceof FinanceDataEventDispatcher){
+			((FinanceDataEventDispatcher)financeData.getAccountListener()).addAccountEventHandler(new AccountEventHandler() {
+				@Override
+				public void accountCreated(FinanceAccount newAccount) {
+					updateTransactions();
+				}
+
+				@Override
+				public void accountUpdated(FinanceAccount updatedAccount) {
+					updateTransactions();
+				}
+
+				@Override
+				public void accountDeleted(FinanceAccount deletedAccount) {
+					updateTransactions();
+				}
+
+				@Override
+				public void accountsUpdated() {
+					updateTransactions();
+				}
+			});
 		}
 	}
 
