@@ -64,6 +64,10 @@ public class Launcher extends Application {
 		stage.getIcons().addAll(getIconImages());
 
 		//Set data
+		FinanceDataEventDispatcher dispatcher = new FinanceDataEventDispatcher();
+		financeData.setTransactionListener(dispatcher);
+		financeData.setAccountListener(dispatcher);
+		financeData.setCurrencyListener(dispatcher);
 		((MainWindowController) loader.getController()).setFinanceData(financeData);
 
 		//Show scene

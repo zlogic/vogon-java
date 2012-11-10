@@ -785,9 +785,10 @@ public class FinanceData {
 
 		//Update component
 		entityManager.merge(component);
-		if (component.getAccount() != null) {
+		if (component.getAccount() != null)
 			entityManager.merge(component.getAccount());
-		}
+		if (component.getTransaction() != null)
+			entityManager.merge(component.getTransaction());
 
 		entityManager.getTransaction().commit();
 		entityManager.close();
@@ -1303,6 +1304,15 @@ public class FinanceData {
 	}
 
 	/**
+	 * Returns the listener for transaction events
+	 *
+	 * @return the event handler
+	 */
+	public TransactionEventHandler getTransactionListener() {
+		return transactionEventHandler;
+	}
+
+	/**
 	 * Adds a new listener for account events
 	 *
 	 * @param accountEventHandler the event handler
@@ -1312,11 +1322,29 @@ public class FinanceData {
 	}
 
 	/**
+	 * Returns the listener for account events
+	 *
+	 * @return the event handler
+	 */
+	public AccountEventHandler getAccountListener() {
+		return accountEventHandler;
+	}
+
+	/**
 	 * Adds a new listener for currency events
 	 *
 	 * @param currencyEventHandler the event handler
 	 */
 	public void setCurrencyListener(CurrencyEventHandler currencyEventHandler) {
 		this.currencyEventHandler = currencyEventHandler;
+	}
+
+	/**
+	 * Returns the listener for currency events
+	 *
+	 * @return the event handler
+	 */
+	public CurrencyEventHandler getCurrencyListener() {
+		return currencyEventHandler;
 	}
 }

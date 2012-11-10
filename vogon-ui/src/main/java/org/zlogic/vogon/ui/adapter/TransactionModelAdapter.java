@@ -117,6 +117,8 @@ public class TransactionModelAdapter implements CellStatus {
 			return this == null;
 		if (transaction == null)
 			return obj instanceof TransactionModelAdapter && ((TransactionModelAdapter) obj).transaction == null;
+		if(obj instanceof FinanceTransaction)
+			return transaction.equals((FinanceTransaction)obj);
 		return obj instanceof TransactionModelAdapter && transaction.equals(((TransactionModelAdapter) obj).transaction);
 	}
 

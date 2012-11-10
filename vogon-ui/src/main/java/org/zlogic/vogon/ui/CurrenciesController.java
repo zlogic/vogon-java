@@ -59,32 +59,35 @@ public class CurrenciesController implements Initializable {
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
 		updateCurrencies();
-		financeData.setCurrencyListener(new CurrencyEventHandler() {
-			protected FinanceData financeData;
+		
+		if(financeData.getAccountListener() instanceof FinanceDataEventDispatcher){
+			((FinanceDataEventDispatcher)financeData.getCurrencyListener()).addCurrencyEventHandler(new CurrencyEventHandler() {
+				protected FinanceData financeData;
 
-			public CurrencyEventHandler setFinanceData(FinanceData financeData) {
-				this.financeData = financeData;
-				return this;
-			}
+				public CurrencyEventHandler setFinanceData(FinanceData financeData) {
+					this.financeData = financeData;
+					return this;
+				}
 
-			@Override
-			public void currenciesUpdated() {
-				//TODO
-			}
-		}.setFinanceData(financeData));
-		defaultCurrency.valueProperty().addListener(new ChangeListener<CurrencyModelAdapter>() {
-			protected FinanceData financeData;
+				@Override
+				public void currenciesUpdated() {
+					//TODO
+				}
+			}.setFinanceData(financeData));
+			defaultCurrency.valueProperty().addListener(new ChangeListener<CurrencyModelAdapter>() {
+				protected FinanceData financeData;
 
-			public ChangeListener<CurrencyModelAdapter> setFinanceData(FinanceData financeData) {
-				this.financeData = financeData;
-				return this;
-			}
+				public ChangeListener<CurrencyModelAdapter> setFinanceData(FinanceData financeData) {
+					this.financeData = financeData;
+					return this;
+				}
 
-			@Override
-			public void changed(ObservableValue<? extends CurrencyModelAdapter> ov, CurrencyModelAdapter t, CurrencyModelAdapter t1) {
-				financeData.setDefaultCurrency(t1.getCurrency());
-			}
-		}.setFinanceData(financeData));
+				@Override
+				public void changed(ObservableValue<? extends CurrencyModelAdapter> ov, CurrencyModelAdapter t, CurrencyModelAdapter t1) {
+					financeData.setDefaultCurrency(t1.getCurrency());
+				}
+			}.setFinanceData(financeData));
+		}
 	}
 
 	protected void updateCurrencies() {
