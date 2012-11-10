@@ -66,7 +66,7 @@ public class TransactionsController implements Initializable {
 	public void initialize(URL url, ResourceBundle rb) {
 		//Column sizes
 		transactionsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-		
+
 		//Remove transactions table since it will be used in paging
 		transactionsTable.managedProperty().bind(transactionsTable.visibleProperty());
 		transactionsVBox.getChildren().remove(transactionsTable);

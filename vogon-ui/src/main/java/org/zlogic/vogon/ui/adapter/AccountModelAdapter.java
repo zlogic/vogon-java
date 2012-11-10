@@ -23,7 +23,7 @@ import org.zlogic.vogon.data.FinanceTransaction;
  *
  * @author Dmitry Zolotukhin
  */
-public class AccountModelAdapter {
+public class AccountModelAdapter implements AccountInterface {
 
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
@@ -31,10 +31,10 @@ public class AccountModelAdapter {
 	 */
 	protected FinanceAccount account;
 	protected FinanceData financeData;
-	private final StringProperty name = new SimpleStringProperty();
+	private final ObjectProperty<ObjectWithStatus<String, Boolean>> name = new SimpleObjectProperty();
 	private final StringProperty balance = new SimpleStringProperty();
-	private final ObjectProperty<CurrencyModelAdapter> currency = new SimpleObjectProperty();
-	private final BooleanProperty includeInTotal = new SimpleBooleanProperty();
+	private final ObjectProperty<ObjectWithStatus<CurrencyModelAdapter, Boolean>> currency = new SimpleObjectProperty();
+	private final ObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>> includeInTotal = new SimpleObjectProperty(new ObjectWithStatus<>(new SimpleBooleanProperty(true), true));
 
 	/**
 	 * Default constructor
@@ -48,7 +48,7 @@ public class AccountModelAdapter {
 		updateProperties();
 
 		//Set property change listeners
-		includeInTotal.addListener(new ChangeListener<Boolean>() {
+		includeInTotal.getValue().getValue().addListener(new ChangeListener<Boolean>() {
 			protected FinanceData financeData;
 			protected FinanceAccount account;
 
@@ -65,7 +65,7 @@ public class AccountModelAdapter {
 			}
 		}.setData(account, financeData));
 
-		name.addListener(new ChangeListener<String>() {
+		name.addListener(new ChangeListener<ObjectWithStatus<String, Boolean>>() {
 			protected FinanceData financeData;
 			protected FinanceAccount account;
 
@@ -76,13 +76,13 @@ public class AccountModelAdapter {
 			}
 
 			@Override
-			public void changed(ObservableValue<? extends String> ov, String t, String t1) {
-				if (!account.getName().equals(t1))
-					financeData.setAccountName(account, t1);
+			public void changed(ObservableValue<? extends ObjectWithStatus<String, Boolean>> ov, ObjectWithStatus<String, Boolean> t, ObjectWithStatus<String, Boolean> t1) {
+				if (!account.getName().equals(t1.getValue()))
+					financeData.setAccountName(account, t1.getValue());
 			}
 		}.setData(account, financeData));
 
-		currency.addListener(new ChangeListener<CurrencyModelAdapter>() {
+		currency.addListener(new ChangeListener<ObjectWithStatus<CurrencyModelAdapter, Boolean>>() {
 			protected FinanceData financeData;
 			protected FinanceAccount account;
 
@@ -93,8 +93,8 @@ public class AccountModelAdapter {
 			}
 
 			@Override
-			public void changed(ObservableValue<? extends CurrencyModelAdapter> ov, CurrencyModelAdapter t, CurrencyModelAdapter t1) {
-				financeData.setAccountCurrency(account, t1.getCurrency());
+			public void changed(ObservableValue<? extends ObjectWithStatus<CurrencyModelAdapter, Boolean>> ov, ObjectWithStatus<CurrencyModelAdapter, Boolean> t, ObjectWithStatus<CurrencyModelAdapter, Boolean> t1) {
+				financeData.setAccountCurrency(account, t1.getValue().getCurrency());
 			}
 		}.setData(account, financeData));
 	}
@@ -130,28 +130,33 @@ public class AccountModelAdapter {
 		return account;
 	}
 
+	@Override
 	public StringProperty balanceProperty() {
 		return balance;
 	}
 
-	public StringProperty nameProperty() {
+	@Override
+	public ObjectProperty<ObjectWithStatus<String, Boolean>> nameProperty() {
 		return name;
 	}
 
-	public ObjectProperty<CurrencyModelAdapter> currencyProperty() {
+	@Override
+	public ObjectProperty<ObjectWithStatus<CurrencyModelAdapter, Boolean>> currencyProperty() {
 		return currency;
 	}
 
-	public BooleanProperty includeInTotalProperty() {
+	@Override
+	public ObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>> includeInTotalProperty() {
 		return includeInTotal;
 	}
 
 	private void updateProperties() {
 		if (account != null) {
 			balance.set(new AmountModelAdapter(account.getBalance(), true, account.getCurrency(), false, FinanceTransaction.Type.UNDEFINED).toString());
-			name.set(account.getName());
-			currency.set(new CurrencyModelAdapter(account.getCurrency()));
-			includeInTotal.set(account.getIncludeInTotal());
+			name.set(new ObjectWithStatus<>(account.getName(), true));
+			currency.set(new ObjectWithStatus<>(new CurrencyModelAdapter(account.getCurrency()), true));
+			includeInTotal.get().getValue().setValue(account.getIncludeInTotal());
+			includeInTotal.set(new ObjectWithStatus<>(includeInTotal.get().getValue(), true));
 		}
 	}
 

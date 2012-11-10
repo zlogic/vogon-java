@@ -477,7 +477,7 @@ public class FinanceData {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
 
-		boolean accountAdded = persistenceAdd(account, entityManager);
+		persistenceAdd(account, entityManager);
 
 		account.setCurrency(currency);
 		entityManager.merge(account);
@@ -487,8 +487,7 @@ public class FinanceData {
 
 		populateCurrencies();
 
-		if (accountAdded)
-			fireAccountsUpdated();
+		fireAccountsUpdated();
 		fireCurrenciesUpdated();
 	}
 
