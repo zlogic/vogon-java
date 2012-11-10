@@ -100,6 +100,8 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 	@Override
 	public void commitEdit(TransactionModelAdapter item){
 		super.commitEdit(item);
+		setText(getString());
+		setStatusColor();
 		popup.hide();
 	}
 

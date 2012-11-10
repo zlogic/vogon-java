@@ -24,10 +24,10 @@ import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
 import org.zlogic.vogon.ui.adapter.AccountModelAdapter;
-import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
+
+import javafx.scene.control.cell.ComboBoxTableCell;import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
 import org.zlogic.vogon.ui.adapter.TransactionComponentModelAdapter;
 import org.zlogic.vogon.ui.cell.AmountCellEditor;
-import org.zlogic.vogon.ui.cell.ComboCellEditor;
 import org.zlogic.vogon.ui.cell.StringValidatorDouble;
 
 /**
@@ -55,7 +55,9 @@ public class TransactionComponentsController implements Initializable {
 		columnAccount.setCellFactory(new Callback<TableColumn<TransactionComponentModelAdapter, AccountModelAdapter>, TableCell<TransactionComponentModelAdapter, AccountModelAdapter>>() {
 			@Override
 			public TableCell<TransactionComponentModelAdapter, AccountModelAdapter> call(TableColumn<TransactionComponentModelAdapter, AccountModelAdapter> p) {
-				return new ComboCellEditor<>(getAccountsComboList());
+				ComboBoxTableCell cell = new ComboBoxTableCell<>();
+				cell.getItems().addAll(getAccountsComboList());
+				return cell;
 			}
 		});
 		columnAccount.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionComponentModelAdapter, AccountModelAdapter>>() {
@@ -114,6 +116,7 @@ public class TransactionComponentsController implements Initializable {
 	}
 
 	protected void updateComponents() {
+		transactionComponents.getItems().removeAll(transactionComponents.getItems());
 		transactionComponents.getItems().clear();
 		for (TransactionComponent component : transaction.getComponents())
 			transactionComponents.getItems().add(new TransactionComponentModelAdapter(component, financeData));
@@ -121,6 +124,7 @@ public class TransactionComponentsController implements Initializable {
 
 	protected void updateTransactionTypeCombo(FinanceTransaction.Type type) {
 		transactionType.setDisable(true);
+		transactionType.getItems().removeAll(transactionType.getItems());
 		transactionType.getItems().clear();
 		TransactionTypeComboItem selectedItem = null;
 		for (FinanceTransaction.Type currentType : FinanceTransaction.Type.values())

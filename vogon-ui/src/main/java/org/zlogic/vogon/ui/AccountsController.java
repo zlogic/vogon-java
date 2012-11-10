@@ -12,7 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -128,50 +127,52 @@ public class AccountsController implements Initializable {
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
 		updateAccounts();
-		financeData.setAccountListener(new AccountEventHandler() {
-			protected FinanceData financeData;
+		if(financeData.getAccountListener() instanceof FinanceDataEventDispatcher){
+			((FinanceDataEventDispatcher)financeData.getAccountListener()).addAccountEventHandler(new AccountEventHandler() {
+				protected FinanceData financeData;
 
-			public AccountEventHandler setFinanceData(FinanceData financeData) {
-				this.financeData = financeData;
-				return this;
-			}
-
-			@Override
-			public void accountCreated(FinanceAccount newAccount) {
-				int accountIndex = accountsTable.getItems().indexOf(newAccount);
-				if (accountIndex >= 0)
-					accountsTable.getSelectionModel().select(accountIndex);
-			}
-
-			@Override
-			public void accountUpdated(FinanceAccount updatedAccount) {
-				for (AccountInterface account : accountsTable.getItems()) {
-					if (account instanceof AccountModelAdapter) {
-						AccountModelAdapter accountAdapter = (AccountModelAdapter) account;
-						if (accountAdapter.getAccount().equals(updatedAccount))
-							accountAdapter.refresh(updatedAccount);
-					}
+				public AccountEventHandler setFinanceData(FinanceData financeData) {
+					this.financeData = financeData;
+					return this;
 				}
-				accountsTable.setItems(accountsTable.getItems());
-			}
 
-			@Override
-			public void accountDeleted(FinanceAccount deletedAccount) {
-				List<AccountModelAdapter> deletedAdapters = new LinkedList<>();
-				for (AccountInterface account : accountsTable.getItems())
-					if (account instanceof AccountModelAdapter) {
-						AccountModelAdapter accountAdapter = (AccountModelAdapter) account;
-						if (accountAdapter.getAccount().equals(deletedAccount))
-							deletedAdapters.add(accountAdapter);
+				@Override
+				public void accountCreated(FinanceAccount newAccount) {
+					int accountIndex = accountsTable.getItems().indexOf(newAccount);
+					if (accountIndex >= 0)
+						accountsTable.getSelectionModel().select(accountIndex);
+				}
+
+				@Override
+				public void accountUpdated(FinanceAccount updatedAccount) {
+					for (AccountInterface account : accountsTable.getItems()) {
+						if (account instanceof AccountModelAdapter) {
+							AccountModelAdapter accountAdapter = (AccountModelAdapter) account;
+							if (accountAdapter.getAccount().equals(updatedAccount))
+								accountAdapter.refresh(updatedAccount);
+						}
 					}
-				accountsTable.getItems().removeAll(deletedAdapters);
-			}
+					accountsTable.setItems(accountsTable.getItems());
+				}
 
-			@Override
-			public void accountsUpdated() {
-				updateAccounts();
-			}
-		}.setFinanceData(financeData));
+				@Override
+				public void accountDeleted(FinanceAccount deletedAccount) {
+					List<AccountModelAdapter> deletedAdapters = new LinkedList<>();
+					for (AccountInterface account : accountsTable.getItems())
+						if (account instanceof AccountModelAdapter) {
+							AccountModelAdapter accountAdapter = (AccountModelAdapter) account;
+							if (accountAdapter.getAccount().equals(deletedAccount))
+								deletedAdapters.add(accountAdapter);
+						}
+					accountsTable.getItems().removeAll(deletedAdapters);
+				}
+
+				@Override
+				public void accountsUpdated() {
+					updateAccounts();
+				}
+			}.setFinanceData(financeData));
+		}
 	}
 
 	@FXML

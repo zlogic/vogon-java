@@ -34,16 +34,7 @@ import org.zlogic.vogon.data.interop.VogonImportLogicalException;
 import org.zlogic.vogon.data.interop.XmlExporter;
 import org.zlogic.vogon.data.interop.XmlImporter;
 
-//TODO: Add refreshing for transactions (e.g. when account's currency is updated)
-//TODO: Add refreshing for accounts (e.g. when account's currency is updated)
-//TODO: Bind properties instead of using callbacks (see Accounts editor)
-//TODO: Reports page
-//TODO: Remove private
-//TODO: Add comments & javadoc
-//TODO: Update & clean up i18n properties
-//TODO: All exceptions should be displayed
-//TODO: Sorting (where possible)
-//TODO: Move cell editors to FXML where possible (http://docs.oracle.com/javafx/2/fxml_get_started/fxml_tableview.fxml.html)
+
 /**
  * Main entry window controller.
  *

@@ -1,6 +1,7 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Vogon personal finance/expense analyzer.
+ * License TBD.
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
 package org.zlogic.vogon.ui.adapter;
 
@@ -10,7 +11,7 @@ import javafx.beans.property.StringProperty;
 
 /**
  *
- * @author Dmitry
+ * @author Dmitry Zolotukhin
  */
 public interface AccountInterface {
 

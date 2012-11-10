@@ -154,7 +154,7 @@ public class TransactionsController implements Initializable {
 		List<TransactionModelAdapter> transactionsList = new LinkedList<>();
 		for (FinanceTransaction transaction : transactions)
 			transactionsList.add(new TransactionModelAdapter(transaction, financeData));
-		transactionsTable.getItems().clear();
+		transactionsTable.getItems().removeAll(transactionsTable.getItems());
 		transactionsTable.getItems().addAll(transactionsList);
 	}
 
@@ -170,40 +170,43 @@ public class TransactionsController implements Initializable {
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
 		updateTransactions();
-		financeData.setTransactionListener(new TransactionEventHandler() {
-			//TODO: Add handling for account events
-			protected FinanceData financeData;
+		
+		if(financeData.getAccountListener() instanceof FinanceDataEventDispatcher){
+			((FinanceDataEventDispatcher)financeData.getAccountListener()).addTransactionEventHandler(new TransactionEventHandler() {
+				//TODO: Add handling for account events
+				protected FinanceData financeData;
 
-			public TransactionEventHandler setFinanceData(FinanceData financeData) {
-				this.financeData = financeData;
-				return this;
-			}
+				public TransactionEventHandler setFinanceData(FinanceData financeData) {
+					this.financeData = financeData;
+					return this;
+				}
 
-			@Override
-			public void transactionCreated(FinanceTransaction newTransaction) {
-				transactionsTablePagination.setCurrentPageIndex(0);
-				int index = transactionsTable.getItems().indexOf(newTransaction);
-				if (index >= 0)
-					transactionsTable.getSelectionModel().select(index);
-			}
+				@Override
+				public void transactionCreated(FinanceTransaction newTransaction) {
+					transactionsTablePagination.setCurrentPageIndex(0);
+					int index = transactionsTable.getItems().indexOf(newTransaction);
+					if (index >= 0)
+						transactionsTable.getSelectionModel().select(index);
+				}
 
-			@Override
-			public void transactionUpdated(FinanceTransaction updatedTransaction) {
-				TransactionModelAdapter updatedTransactionModelAdapter = new TransactionModelAdapter(updatedTransaction, financeData);
-				int index = transactionsTable.getItems().indexOf(updatedTransaction);
-				if (index >= 0)
-					transactionsTable.getItems().set(index, updatedTransactionModelAdapter);
-			}
+				@Override
+				public void transactionUpdated(FinanceTransaction updatedTransaction) {
+					TransactionModelAdapter updatedTransactionModelAdapter = new TransactionModelAdapter(updatedTransaction, financeData);
+					int index = transactionsTable.getItems().indexOf(updatedTransactionModelAdapter);
+					if (index >= 0)
+						transactionsTable.getItems().set(index, updatedTransactionModelAdapter);
+				}
 
-			@Override
-			public void transactionDeleted(FinanceTransaction deletedTransaction) {
-			}
+				@Override
+				public void transactionDeleted(FinanceTransaction deletedTransaction) {
+				}
 
-			@Override
-			public void transactionsUpdated() {
-				updateTransactions();
-			}
-		}.setFinanceData(financeData));
+				@Override
+				public void transactionsUpdated() {
+					updateTransactions();
+				}
+			}.setFinanceData(financeData));
+		}
 	}
 
 	/**
