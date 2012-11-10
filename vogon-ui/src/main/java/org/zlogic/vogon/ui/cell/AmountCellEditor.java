@@ -7,7 +7,6 @@ package org.zlogic.vogon.ui.cell;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.geometry.Pos;
 import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
 
 /**
@@ -25,17 +24,6 @@ public class AmountCellEditor<BaseType> extends StringCellEditor<BaseType, Amoun
 	 */
 	public AmountCellEditor(StringCellValidator validator) {
 		super(validator);
-	}
-
-	/**
-	 * Creates an AmountCellEditor with a value validator and an alignment in
-	 * view state
-	 *
-	 * @param validator the value validator
-	 * @param alignment the cell alignment in view state
-	 */
-	public AmountCellEditor(StringCellValidator validator, Pos alignment) {
-		super(validator, alignment);
 	}
 
 	@Override

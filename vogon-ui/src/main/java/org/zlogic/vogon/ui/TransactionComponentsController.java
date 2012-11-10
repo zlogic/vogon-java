@@ -18,14 +18,14 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.util.Callback;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
 import org.zlogic.vogon.ui.adapter.AccountModelAdapter;
-
-import javafx.scene.control.cell.ComboBoxTableCell;import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
+import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
 import org.zlogic.vogon.ui.adapter.TransactionComponentModelAdapter;
 import org.zlogic.vogon.ui.cell.AmountCellEditor;
 import org.zlogic.vogon.ui.cell.StringValidatorDouble;
@@ -70,7 +70,9 @@ public class TransactionComponentsController implements Initializable {
 		columnAmount.setCellFactory(new Callback<TableColumn<TransactionComponentModelAdapter, AmountModelAdapter>, TableCell<TransactionComponentModelAdapter, AmountModelAdapter>>() {
 			@Override
 			public TableCell<TransactionComponentModelAdapter, AmountModelAdapter> call(TableColumn<TransactionComponentModelAdapter, AmountModelAdapter> p) {
-				return new AmountCellEditor<>(new StringValidatorDouble(), Pos.CENTER_RIGHT);
+				AmountCellEditor cell = new AmountCellEditor<>(new StringValidatorDouble());
+				cell.setAlignment(Pos.CENTER_RIGHT);
+				return cell;
 			}
 		});
 		columnAmount.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionComponentModelAdapter, AmountModelAdapter>>() {

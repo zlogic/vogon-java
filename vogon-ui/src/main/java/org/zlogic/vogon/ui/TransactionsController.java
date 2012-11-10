@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
+import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -28,8 +29,6 @@ import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.events.AccountEventHandler;
 import org.zlogic.vogon.data.events.TransactionEventHandler;
-import org.zlogic.vogon.ui.adapter.AccountInterface;
-import org.zlogic.vogon.ui.adapter.AccountModelAdapter;
 import org.zlogic.vogon.ui.adapter.TransactionModelAdapter;
 import org.zlogic.vogon.ui.cell.DateCellEditor;
 import org.zlogic.vogon.ui.cell.StringCellEditor;
@@ -61,6 +60,9 @@ public class TransactionsController implements Initializable {
 	protected Pagination transactionsTablePagination;
 	@FXML
 	protected VBox transactionsVBox;
+	
+	protected List<TransactionEditor> editingTransactionEditors = new LinkedList<>();
+	
 	/**
 	 * Page size
 	 */
@@ -126,7 +128,24 @@ public class TransactionsController implements Initializable {
 		columnAmount.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, TransactionModelAdapter>, TableCell<TransactionModelAdapter, TransactionModelAdapter>>() {
 			@Override
 			public TableCell<TransactionModelAdapter, TransactionModelAdapter> call(TableColumn<TransactionModelAdapter, TransactionModelAdapter> p) {
-				return new TransactionEditor(financeData, Pos.CENTER_RIGHT);
+				TransactionEditor cell = new TransactionEditor(financeData);
+				cell.editingProperty().addListener(new javafx.beans.value.ChangeListener<Boolean>(){
+					protected List<TransactionEditor> transactionEditors;
+					protected TransactionEditor cell;
+					public javafx.beans.value.ChangeListener<Boolean> setData(List<TransactionEditor> transactionEditors,TransactionEditor cell){
+						this.transactionEditors = transactionEditors;
+						this.cell = cell;
+						return this;
+					}
+					@Override
+					public void changed(ObservableValue<? extends Boolean> ov, Boolean t, Boolean t1) {
+						if(t1 && t1!=t)
+							transactionEditors.add(cell);
+						if(!t1 && t1!=t)
+							transactionEditors.remove(cell);
+					}
+				}.setData(editingTransactionEditors, cell));
+				return cell;
 			}
 		});
 	}
@@ -171,6 +190,13 @@ public class TransactionsController implements Initializable {
 		return financeData;
 	}
 
+	public void cancelEdit(){
+		for(TransactionEditor editor : editingTransactionEditors)
+			if(editor.isEditing())
+				editor.cancelEdit();
+		editingTransactionEditors.clear();
+	}
+	
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
 		updateTransactions();
