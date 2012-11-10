@@ -129,6 +129,7 @@ public class TransactionsController implements Initializable {
 			@Override
 			public TableCell<TransactionModelAdapter, TransactionModelAdapter> call(TableColumn<TransactionModelAdapter, TransactionModelAdapter> p) {
 				TransactionEditor cell = new TransactionEditor(financeData);
+				cell.setAlignment(Pos.CENTER_RIGHT);
 				cell.editingProperty().addListener(new javafx.beans.value.ChangeListener<Boolean>(){
 					protected List<TransactionEditor> transactionEditors;
 					protected TransactionEditor cell;

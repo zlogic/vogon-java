@@ -29,7 +29,7 @@
     </MenuBar>
     <Accordion fx:id="accordion" prefHeight="332.0" prefWidth="538.0" VBox.vgrow="ALWAYS">
       <expandedPane>
-        <TitledPane fx:id="transactionsAccordionPane" disable="true" text="%TRANSACTIONS">
+        <TitledPane fx:id="transactionsAccordionPane" text="%TRANSACTIONS">
           <content>
             <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="251.0" prefWidth="896.0">
               <children>

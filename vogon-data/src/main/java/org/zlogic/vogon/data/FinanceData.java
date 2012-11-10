@@ -65,16 +65,16 @@ public class FinanceData {
 	 */
 	public void importData(FileImporter importer) throws VogonImportException, VogonImportLogicalException {
 		importer.importFile();
-
+		
 		restoreFromDatabase();
-
+		
 		populateCurrencies();
 		if (!getCurrencies().contains(defaultCurrency))
 			if (getCurrencies().size() > 0)
 				setDefaultCurrency(getCurrencies().contains(Currency.getInstance(Locale.getDefault())) ? Currency.getInstance(Locale.getDefault()) : getCurrencies().get(0));
 			else
 				setDefaultCurrency(Currency.getInstance(Locale.getDefault()));
-
+		
 		fireTransactionsUpdated();
 		fireAccountsUpdated();
 		fireCurrenciesUpdated();
@@ -99,9 +99,9 @@ public class FinanceData {
 		exchangeRates = getCurrencyRatesFromDatabase(entityManager);
 		defaultCurrency = getDefaultCurrencyFromDatabase(entityManager);
 		entityManager.close();
-
+		
 		transactionsCount = getTransactionsCountFromDatabase();
-
+		
 		fireTransactionsUpdated();
 		fireAccountsUpdated();
 		fireCurrenciesUpdated();
@@ -123,7 +123,7 @@ public class FinanceData {
 		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 		tr.fetch(FinanceTransaction_.tags, JoinType.LEFT);
-
+		
 		transactionsCriteriaQuery.orderBy(
 				criteriaBuilder.asc(tr.get(FinanceTransaction_.transactionDate)),
 				criteriaBuilder.asc(tr.get(FinanceTransaction_.id)));
@@ -135,7 +135,7 @@ public class FinanceData {
 			query = query.setFirstResult(firstTransaction);
 		if (lastTransaction >= 0 && firstTransaction >= 0)
 			query = query.setMaxResults(lastTransaction - firstTransaction + 1);
-
+		
 		List<FinanceTransaction> result = query.getResultList();
 
 		//Post-fetch components
@@ -144,7 +144,7 @@ public class FinanceData {
 		transactionsComponentsFetchCriteriaQuery.where(tr.in(result));
 		trComponentsFetch.fetch(FinanceTransaction_.components, JoinType.LEFT).fetch(TransactionComponent_.account, JoinType.LEFT);
 		entityManager.createQuery(transactionsComponentsFetchCriteriaQuery).getResultList();
-
+		
 		entityManager.close();
 		return result;
 	}
@@ -157,12 +157,12 @@ public class FinanceData {
 	protected long getTransactionsCountFromDatabase() {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-
+		
 		CriteriaQuery<Long> transactionsCriteriaQuery = criteriaBuilder.createQuery(Long.class);
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
-
+		
 		transactionsCriteriaQuery.select(criteriaBuilder.countDistinct(tr));
-
+		
 		Long result = entityManager.createQuery(transactionsCriteriaQuery).getSingleResult();
 		entityManager.close();
 		transactionsCount = result;
@@ -176,11 +176,11 @@ public class FinanceData {
 	 */
 	protected List<FinanceAccount> getAccountsFromDatabase() {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-
+		
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<FinanceAccount> accountsCriteriaQuery = criteriaBuilder.createQuery(FinanceAccount.class);
 		Root<FinanceAccount> acc = accountsCriteriaQuery.from(FinanceAccount.class);
-
+		
 		List<FinanceAccount> result = entityManager.createQuery(accountsCriteriaQuery).getResultList();
 		entityManager.close();
 		return result;
@@ -242,7 +242,7 @@ public class FinanceData {
 		Currency currency = preferences.getDefaultCurrency();
 		if (currency == null) {
 			currency = Currency.getInstance(Locale.getDefault());
-
+			
 			entityManager.merge(preferences);
 		}
 		return currency;
@@ -261,16 +261,16 @@ public class FinanceData {
 	protected boolean persistenceAdd(FinanceAccount account, EntityManager entityManager) {
 		if (account == null)
 			return false;
-
+		
 		boolean result = false;
-
+		
 		if (entityManager.find(FinanceAccount.class, account.id) == null) {
 			entityManager.persist(account);
 			result = true;
 		}
-
+		
 		populateCurrencies();
-
+		
 		return result;
 	}
 
@@ -287,18 +287,18 @@ public class FinanceData {
 	protected boolean persistenceAdd(FinanceTransaction transaction, EntityManager entityManager) {
 		if (transaction == null)
 			return false;
-
+		
 		boolean result = false;
-
+		
 		for (TransactionComponent component : transaction.getComponents())
 			if (entityManager.find(TransactionComponent.class, component.id) == null)
 				entityManager.persist(component);
-
+		
 		if (entityManager.find(FinanceTransaction.class, transaction.id) == null) {
 			entityManager.persist(transaction);
 			result = true;
 		}
-
+		
 		return result;
 	}
 
@@ -316,18 +316,18 @@ public class FinanceData {
 	protected boolean persistenceAdd(TransactionComponent component, EntityManager entityManager) {
 		if (component == null)
 			return false;
-
+		
 		boolean result = false;
-
+		
 		if (component.getTransaction() != null)
 			if (entityManager.find(FinanceTransaction.class, component.getTransaction().id) == null)
 				entityManager.persist(component.getTransaction());
-
+		
 		if (entityManager.find(TransactionComponent.class, component.id) == null) {
 			entityManager.persist(component);
 			result = true;
 		}
-
+		
 		return result;
 	}
 
@@ -373,7 +373,7 @@ public class FinanceData {
 	 */
 	protected void populateCurrencies() {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-
+		
 		entityManager.getTransaction().begin();
 
 		//Search for missing currencies
@@ -411,13 +411,19 @@ public class FinanceData {
 
 		//Remove orphaned currencies
 		for (CurrencyRate rate : exchangeRates) {
-			if (!usedRates.contains(rate))
-				entityManager.remove(entityManager.find(CurrencyRate.class, rate.id));
+			if (!usedRates.contains(rate)) {
+				CurrencyRate foundRate = entityManager.find(CurrencyRate.class, rate.id);
+				if (foundRate != null)
+					entityManager.remove(foundRate);
+			}
 		}
-
+		
 		entityManager.getTransaction().commit();
-
+		
 		entityManager.close();
+		
+		exchangeRates.clear();
+		exchangeRates.addAll(usedRates);
 	}
 
 	/**
@@ -428,12 +434,12 @@ public class FinanceData {
 	public void createAccount(FinanceAccount account) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-
+		
 		boolean accountAdded = persistenceAdd(account, entityManager);
-
+		
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		if (accountAdded) {
 			fireAccountsUpdated();
 			fireAccountCreated(account);
@@ -450,15 +456,15 @@ public class FinanceData {
 	public void setAccountName(FinanceAccount account, String name) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-
+		
 		boolean accountAdded = persistenceAdd(account, entityManager);
-
+		
 		account.setName(name);
 		entityManager.merge(account);
-
+		
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		if (accountAdded) {
 			fireAccountCreated(account);
 			fireCurrenciesUpdated();
@@ -476,17 +482,17 @@ public class FinanceData {
 	public void setAccountCurrency(FinanceAccount account, Currency currency) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-
+		
 		persistenceAdd(account, entityManager);
-
+		
 		account.setCurrency(currency);
 		entityManager.merge(account);
-
+		
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		populateCurrencies();
-
+		
 		fireAccountsUpdated();
 		fireCurrenciesUpdated();
 	}
@@ -500,17 +506,17 @@ public class FinanceData {
 	public void setAccountIncludeInTotal(FinanceAccount account, boolean includeInTotal) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-
+		
 		persistenceAdd(account, entityManager);
-
+		
 		account.setIncludeInTotal(includeInTotal);
 		entityManager.merge(account);
-
+		
 		populateCurrencies();
-
+		
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		fireAccountsUpdated();
 	}
 
@@ -522,12 +528,12 @@ public class FinanceData {
 	public void createTransaction(FinanceTransaction transaction) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-
+		
 		boolean transactionAdded = persistenceAdd(transaction, entityManager);
-
+		
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		if (transactionAdded) {
 			transactionsCount++;
 			fireTransactionsUpdated();
@@ -545,7 +551,7 @@ public class FinanceData {
 	public void createTransactionComponent(TransactionComponent component) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-
+		
 		if (component.getTransaction() != null) {
 			persistenceAdd(component.getTransaction(), entityManager);
 			persistenceAdd(component, entityManager);
@@ -553,10 +559,10 @@ public class FinanceData {
 				component.getTransaction().addComponent(component);
 			entityManager.merge(component.getTransaction());
 		}
-
+		
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		if (component.getTransaction() != null)
 			fireTransactionUpdated(component.getTransaction());
 		if (component.getAccount() != null)
@@ -572,15 +578,15 @@ public class FinanceData {
 	public void setTransactionTags(FinanceTransaction transaction, String[] tags) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-
+		
 		boolean transactionAdded = persistenceAdd(transaction, entityManager);
-
+		
 		transaction.setTags(tags);
 		entityManager.merge(transaction);
-
+		
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		if (transactionAdded) {
 			fireTransactionsUpdated();
 			fireTransactionCreated(transaction);
@@ -599,15 +605,15 @@ public class FinanceData {
 	public void setTransactionDate(FinanceTransaction transaction, Date date) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-
+		
 		boolean transactionAdded = persistenceAdd(transaction, entityManager);
-
+		
 		transaction.setDate(date);
 		entityManager.merge(transaction);
-
+		
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		if (transactionAdded) {
 			fireTransactionsUpdated();
 			fireTransactionCreated(transaction);
@@ -626,15 +632,15 @@ public class FinanceData {
 	public void setTransactionDescription(FinanceTransaction transaction, String description) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-
+		
 		boolean transactionAdded = persistenceAdd(transaction, entityManager);
-
+		
 		transaction.setDescription(description);
 		entityManager.merge(transaction);
-
+		
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		if (transactionAdded) {
 			fireTransactionsUpdated();
 			fireTransactionCreated(transaction);
@@ -653,15 +659,15 @@ public class FinanceData {
 	public void setTransactionType(FinanceTransaction transaction, FinanceTransaction.Type type) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-
+		
 		boolean transactionAdded = persistenceAdd(transaction, entityManager);
-
+		
 		transaction.setType(type);
 		entityManager.merge(transaction);
-
+		
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		if (transactionAdded) {
 			fireTransactionsUpdated();
 			fireTransactionCreated(transaction);
@@ -683,28 +689,28 @@ public class FinanceData {
 			return;
 		if (transaction.getComponents().isEmpty())
 			return;
-
+		
 		TransactionComponent component = transaction.getComponents().get(0);
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-
+		
 		boolean transactionAdded = persistenceAdd(transaction, entityManager);
-
+		
 		if (entityManager.find(TransactionComponent.class, component.id) == null)
 			entityManager.persist(component);
-
+		
 		transaction.updateComponentRawAmount(component, Math.round(newAmount * Constants.rawAmountMultiplier));
 		entityManager.merge(transaction);
-
+		
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		if (transactionAdded) {
 			fireTransactionsUpdated();
 			fireTransactionCreated(transaction);
 		}
 		fireTransactionUpdated(transaction);
-
+		
 		for (FinanceAccount account : transaction.getAccounts())
 			fireAccountUpdated(account);
 	}
@@ -721,16 +727,16 @@ public class FinanceData {
 			return;
 		if (transaction.getComponents().isEmpty())
 			return;
-
+		
 		TransactionComponent component = transaction.getComponents().get(0);
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-
+		
 		FinanceAccount oldAccount = component.getAccount();
-
+		
 		boolean transactionAdded = persistenceAdd(transaction, entityManager);
 		boolean accountAdded = persistenceAdd(newAccount, entityManager);
-
+		
 		if (entityManager.find(TransactionComponent.class, component.id) == null)
 			entityManager.persist(component);
 
@@ -739,22 +745,22 @@ public class FinanceData {
 		entityManager.merge(transaction);
 		entityManager.merge(newAccount);
 		entityManager.merge(oldAccount);
-
+		
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		if (transactionAdded) {
 			fireTransactionsUpdated();
 			fireTransactionCreated(transaction);
 		}
 		fireTransactionUpdated(transaction);
-
+		
 		if (accountAdded)
 			fireAccountCreated(newAccount);
 		fireAccountUpdated(oldAccount);
 		fireAccountUpdated(newAccount);
 		fireCurrenciesUpdated();
-
+		
 		for (FinanceAccount account : transaction.getAccounts())
 			if (account != oldAccount && account != newAccount)
 				fireAccountUpdated(account);
@@ -769,9 +775,9 @@ public class FinanceData {
 	public void setTransactionComponentAmount(TransactionComponent component, double newAmount) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-
+		
 		boolean transactionAdded = persistenceAdd(component.getTransaction(), entityManager);
-
+		
 		if (entityManager.find(TransactionComponent.class, component.id) == null)
 			entityManager.persist(component);
 
@@ -789,16 +795,16 @@ public class FinanceData {
 			entityManager.merge(component.getAccount());
 		if (component.getTransaction() != null)
 			entityManager.merge(component.getTransaction());
-
+		
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		if (transactionAdded) {
 			fireTransactionsUpdated();
 			fireTransactionCreated(component.getTransaction());
 		}
 		fireTransactionUpdated(component.getTransaction());
-
+		
 		fireAccountUpdated(component.getAccount());
 	}
 
@@ -811,14 +817,14 @@ public class FinanceData {
 	public void setTransactionComponentAccount(TransactionComponent component, FinanceAccount newAccount) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-
+		
 		FinanceAccount oldAccount = component.getAccount();
-
+		
 		boolean transactionAdded = persistenceAdd(component.getTransaction(), entityManager);
-
+		
 		if (entityManager.find(TransactionComponent.class, component.id) == null)
 			entityManager.persist(component);
-
+		
 		persistenceAdd(newAccount, entityManager);
 
 		//Update accounts
@@ -837,16 +843,16 @@ public class FinanceData {
 			entityManager.merge(component.getAccount());
 		if (oldAccount != null && component.getAccount() != oldAccount)
 			entityManager.merge(oldAccount);
-
+		
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		if (transactionAdded) {
 			fireTransactionsUpdated();
 			fireTransactionCreated(component.getTransaction());
 		}
 		fireTransactionUpdated(component.getTransaction());
-
+		
 		fireAccountUpdated(component.getAccount());
 		if (component.getAccount() != oldAccount) {
 			fireAccountUpdated(oldAccount);
@@ -865,13 +871,13 @@ public class FinanceData {
 			return;
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-
+		
 		rate.setExchangeRate(newRate);
 		entityManager.merge(rate);
-
+		
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		fireTransactionsUpdated();
 		fireCurrenciesUpdated();
 		fireAccountsUpdated();
@@ -885,19 +891,19 @@ public class FinanceData {
 	public void setDefaultCurrency(Currency defaultCurrency) {
 		if (defaultCurrency == null)
 			return;
-
+		
 		this.defaultCurrency = defaultCurrency;
-
+		
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		Preferences preferences = getPreferencesFromDatabase(entityManager);
 		entityManager.getTransaction().begin();
-
+		
 		preferences.setDefaultCurrency(defaultCurrency);
 		entityManager.merge(preferences);
-
+		
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		fireTransactionsUpdated();
 		fireAccountsUpdated();
 	}
@@ -943,21 +949,21 @@ public class FinanceData {
 	public void deleteTransactionComponent(TransactionComponent component) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-
+		
 		persistenceAdd(component.getTransaction(), entityManager);
-
+		
 		FinanceTransaction transaction = component.getTransaction();
 		FinanceAccount account = component.getAccount();
 		if (transaction != null) {
 			component.getTransaction().removeComponent(component);
 			entityManager.merge(transaction);
 		}
-
+		
 		entityManager.remove(entityManager.find(TransactionComponent.class, component.id));
-
+		
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		fireTransactionUpdated(transaction);
 		fireAccountUpdated(account);
 	}
@@ -970,7 +976,7 @@ public class FinanceData {
 	public void deleteTransaction(FinanceTransaction transaction) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-
+		
 		List<FinanceAccount> affectedAccounts = transaction.getAccounts();
 
 		//Remove all components
@@ -983,12 +989,12 @@ public class FinanceData {
 		entityManager.remove(foundTransaction);
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		if (foundTransaction != null)
 			transactionsCount--;
 		fireTransactionsUpdated();
 		fireTransactionDeleted(transaction);
-
+		
 		for (FinanceAccount account : affectedAccounts)
 			fireAccountUpdated(account);
 	}
@@ -1014,12 +1020,12 @@ public class FinanceData {
 
 		//Remove account
 		entityManager.remove(entityManager.find(FinanceAccount.class, account.id));
-
+		
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
+		
 		populateCurrencies();
-
+		
 		fireTransactionsUpdated();
 		fireAccountsUpdated();
 		fireAccountDeleted(account);
@@ -1042,9 +1048,9 @@ public class FinanceData {
 		//Recalculate balance from related transactions
 		tempEntityManager.getTransaction().begin();
 		tempAccount.updateRawBalance(-tempAccount.getRawBalance());
-
+		
 		TypedQuery<FinanceTransaction> transactionsBatchQuery = tempEntityManager.createQuery(transactionsCriteriaQuery);
-
+		
 		int currentTransaction = 0;
 		boolean done = false;
 		while (!done) {
@@ -1059,9 +1065,9 @@ public class FinanceData {
 
 		//Update real account balance from temporary account
 		account.updateRawBalance(-account.getRawBalance() + tempAccount.getRawBalance());
-
+		
 		tempEntityManager.close();
-
+		
 		fireAccountUpdated(account);
 	}
 
@@ -1073,11 +1079,11 @@ public class FinanceData {
 		CriteriaBuilder componentCriteriaBuilder = tempEntityManager.getCriteriaBuilder();
 		CriteriaQuery<TransactionComponent> componentsCriteriaQuery = componentCriteriaBuilder.createQuery(TransactionComponent.class);
 		Root<TransactionComponent> trc = componentsCriteriaQuery.from(TransactionComponent.class);
-
+		
 		CriteriaBuilder transactionCriteriaBuilder = tempEntityManager.getCriteriaBuilder();
 		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = transactionCriteriaBuilder.createQuery(FinanceTransaction.class);
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
-
+		
 		tempEntityManager.getTransaction().begin();
 
 		//Get all data from DB
@@ -1095,14 +1101,14 @@ public class FinanceData {
 			component.setTransaction(null);
 			tempEntityManager.remove(component);
 		}
-
+		
 		tempEntityManager.getTransaction().commit();
 		tempEntityManager.close();
-
+		
 		populateCurrencies();
-
+		
 		restoreFromDatabase();
-
+		
 		fireTransactionsUpdated();
 		fireAccountsUpdated();
 		fireCurrenciesUpdated();
