@@ -11,6 +11,7 @@ import java.util.Currency;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -88,6 +89,7 @@ public class AccountsController implements Initializable {
 		columnCurrency.setCellFactory(new Callback<TableColumn<AccountInterface, ObjectWithStatus<CurrencyModelAdapter, Boolean>>, TableCell<AccountInterface, ObjectWithStatus<CurrencyModelAdapter, Boolean>>>() {
 			@Override
 			public TableCell<AccountInterface, ObjectWithStatus<CurrencyModelAdapter, Boolean>> call(TableColumn<AccountInterface, ObjectWithStatus<CurrencyModelAdapter, Boolean>> p) {
+				//TODO: sometimes the balance is not correctly updated in case of a change in currency. Most likely is a Java FX bug.
 				ComboBoxTableCell cell = new ComboBoxTableCell<AccountInterface, ObjectWithStatus<CurrencyModelAdapter, Boolean>>() {
 					@Override
 					public void updateItem(ObjectWithStatus<CurrencyModelAdapter, Boolean> item, boolean empty) {
