@@ -11,7 +11,6 @@ import java.util.Currency;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
-import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -66,7 +65,7 @@ public class AccountsController implements Initializable {
 					@Override
 					public void updateItem(ObjectWithStatus<String, Boolean> item, boolean empty) {
 						super.updateItem(item, empty);
-						if (!isEmpty() && item.getStatus()!=null) {
+						if (!isEmpty() && item.getStatus() != null) {
 							setEditable(item.getStatus());
 							setFont(Font.font(getFont().getName(), item.getStatus() ? FontWeight.NORMAL : FontWeight.BOLD, getFont().getSize()));
 						}
@@ -130,8 +129,8 @@ public class AccountsController implements Initializable {
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
 		updateAccounts();
-		if(financeData.getAccountListener() instanceof FinanceDataEventDispatcher){
-			((FinanceDataEventDispatcher)financeData.getAccountListener()).addAccountEventHandler(new AccountEventHandler() {
+		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
+			((FinanceDataEventDispatcher) financeData.getAccountListener()).addAccountEventHandler(new AccountEventHandler() {
 				protected FinanceData financeData;
 
 				public AccountEventHandler setFinanceData(FinanceData financeData) {
@@ -162,15 +161,15 @@ public class AccountsController implements Initializable {
 				}
 			}.setFinanceData(financeData));
 		}
-		
-		if(financeData.getAccountListener() instanceof FinanceDataEventDispatcher){
-			((FinanceDataEventDispatcher)financeData.getAccountListener()).addCurrencyEventHandler(new CurrencyEventHandler() {
+
+		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
+			((FinanceDataEventDispatcher) financeData.getAccountListener()).addCurrencyEventHandler(new CurrencyEventHandler() {
 				@Override
 				public void currenciesUpdated() {
 					updateAccounts();
 				}
 			});
-		}	
+		}
 	}
 
 	@FXML

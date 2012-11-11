@@ -12,7 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.value.ObservableValue;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -20,10 +19,11 @@ import javafx.scene.Node;
 import javafx.scene.control.Pagination;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
+import javafx.util.converter.DefaultStringConverter;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
@@ -31,8 +31,6 @@ import org.zlogic.vogon.data.events.AccountEventHandler;
 import org.zlogic.vogon.data.events.TransactionEventHandler;
 import org.zlogic.vogon.ui.adapter.TransactionModelAdapter;
 import org.zlogic.vogon.ui.cell.DateCellEditor;
-import org.zlogic.vogon.ui.cell.StringCellEditor;
-import org.zlogic.vogon.ui.cell.StringValidatorDefault;
 import org.zlogic.vogon.ui.cell.TransactionEditor;
 
 /**
@@ -51,7 +49,7 @@ public class TransactionsController implements Initializable {
 	@FXML
 	protected TableColumn<TransactionModelAdapter, Date> columnDate;
 	@FXML
-	protected TableColumn<TransactionModelAdapter, String> columnTags;
+	protected TableColumn<TransactionModelAdapter, List<String>> columnTags;
 	@FXML
 	protected TableColumn<TransactionModelAdapter, TransactionModelAdapter> columnAmount;
 	@FXML
@@ -60,9 +58,7 @@ public class TransactionsController implements Initializable {
 	protected Pagination transactionsTablePagination;
 	@FXML
 	protected VBox transactionsVBox;
-	
 	protected List<TransactionEditor> editingTransactionEditors = new LinkedList<>();
-	
 	/**
 	 * Page size
 	 */
@@ -90,25 +86,17 @@ public class TransactionsController implements Initializable {
 		columnDescription.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, String>, TableCell<TransactionModelAdapter, String>>() {
 			@Override
 			public TableCell<TransactionModelAdapter, String> call(TableColumn<TransactionModelAdapter, String> p) {
-				return new StringCellEditor<>(new StringValidatorDefault());
+				TextFieldTableCell cell = new TextFieldTableCell<>();
+				cell.setConverter(new DefaultStringConverter());
+				return cell;
 			}
 		});
-		columnDescription.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionModelAdapter, String>>() {
+		columnTags.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, List<String>>, TableCell<TransactionModelAdapter, List<String>>>() {
 			@Override
-			public void handle(CellEditEvent<TransactionModelAdapter, String> t) {
-				t.getRowValue().setDescription(t.getNewValue());
-			}
-		});
-		columnTags.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, String>, TableCell<TransactionModelAdapter, String>>() {
-			@Override
-			public TableCell<TransactionModelAdapter, String> call(TableColumn<TransactionModelAdapter, String> p) {
-				return new StringCellEditor<>(new StringValidatorDefault());
-			}
-		});
-		columnTags.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionModelAdapter, String>>() {
-			@Override
-			public void handle(CellEditEvent<TransactionModelAdapter, String> t) {
-				t.getRowValue().setTags(t.getNewValue());
+			public TableCell<TransactionModelAdapter, List<String>> call(TableColumn<TransactionModelAdapter, List<String>> p) {
+				TextFieldTableCell cell = new TextFieldTableCell<>();
+				cell.setConverter(TransactionModelAdapter.getTagsListConverter());
+				return cell;
 			}
 		});
 		columnDate.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, Date>, TableCell<TransactionModelAdapter, Date>>() {
@@ -119,30 +107,26 @@ public class TransactionsController implements Initializable {
 				return cell;
 			}
 		});
-		columnDate.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionModelAdapter, Date>>() {
-			@Override
-			public void handle(CellEditEvent<TransactionModelAdapter, Date> t) {
-				t.getRowValue().setDate(t.getNewValue());
-			}
-		});
 		columnAmount.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, TransactionModelAdapter>, TableCell<TransactionModelAdapter, TransactionModelAdapter>>() {
 			@Override
 			public TableCell<TransactionModelAdapter, TransactionModelAdapter> call(TableColumn<TransactionModelAdapter, TransactionModelAdapter> p) {
 				TransactionEditor cell = new TransactionEditor(financeData);
 				cell.setAlignment(Pos.CENTER_RIGHT);
-				cell.editingProperty().addListener(new javafx.beans.value.ChangeListener<Boolean>(){
+				cell.editingProperty().addListener(new javafx.beans.value.ChangeListener<Boolean>() {
 					protected List<TransactionEditor> transactionEditors;
 					protected TransactionEditor cell;
-					public javafx.beans.value.ChangeListener<Boolean> setData(List<TransactionEditor> transactionEditors,TransactionEditor cell){
+
+					public javafx.beans.value.ChangeListener<Boolean> setData(List<TransactionEditor> transactionEditors, TransactionEditor cell) {
 						this.transactionEditors = transactionEditors;
 						this.cell = cell;
 						return this;
 					}
+
 					@Override
 					public void changed(ObservableValue<? extends Boolean> ov, Boolean t, Boolean t1) {
-						if(t1 && t1!=t)
+						if (t1 && t1 != t)
 							transactionEditors.add(cell);
-						if(!t1 && t1!=t)
+						if (!t1 && t1 != t)
 							transactionEditors.remove(cell);
 					}
 				}.setData(editingTransactionEditors, cell));
@@ -191,19 +175,19 @@ public class TransactionsController implements Initializable {
 		return financeData;
 	}
 
-	public void cancelEdit(){
-		for(TransactionEditor editor : editingTransactionEditors)
-			if(editor.isEditing())
+	public void cancelEdit() {
+		for (TransactionEditor editor : editingTransactionEditors)
+			if (editor.isEditing())
 				editor.cancelEdit();
 		editingTransactionEditors.clear();
 	}
-	
+
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
 		updateTransactions();
-		
-		if(financeData.getAccountListener() instanceof FinanceDataEventDispatcher){
-			((FinanceDataEventDispatcher)financeData.getAccountListener()).addTransactionEventHandler(new TransactionEventHandler() {
+
+		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
+			((FinanceDataEventDispatcher) financeData.getAccountListener()).addTransactionEventHandler(new TransactionEventHandler() {
 				protected FinanceData financeData;
 
 				public TransactionEventHandler setFinanceData(FinanceData financeData) {
@@ -237,9 +221,9 @@ public class TransactionsController implements Initializable {
 				}
 			}.setFinanceData(financeData));
 		}
-		
-		if(financeData.getAccountListener() instanceof FinanceDataEventDispatcher){
-			((FinanceDataEventDispatcher)financeData.getAccountListener()).addAccountEventHandler(new AccountEventHandler() {
+
+		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
+			((FinanceDataEventDispatcher) financeData.getAccountListener()).addAccountEventHandler(new AccountEventHandler() {
 				@Override
 				public void accountCreated(FinanceAccount newAccount) {
 					updateTransactions();

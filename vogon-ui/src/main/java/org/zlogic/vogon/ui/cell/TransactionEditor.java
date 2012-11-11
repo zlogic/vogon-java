@@ -78,12 +78,12 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 
 		if (editor == null)
 			createEditor();
-		
+
 		componentsController.setFinanceData(financeData);
 		componentsController.setTransaction(getItem().getTransaction());
-		
-		Point2D bounds = localToScene(0,getHeight());
-		popup.show(this,getScene().getWindow().getX()+getScene().getX()+bounds.getX(),getScene().getWindow().getY()+getScene().getY()+bounds.getY());
+
+		Point2D bounds = localToScene(0, getHeight());
+		popup.show(this, getScene().getWindow().getX() + getScene().getX() + bounds.getX(), getScene().getWindow().getY() + getScene().getY() + bounds.getY());
 	}
 
 	/**
@@ -96,9 +96,9 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 		setStatusColor();
 		popup.hide();
 	}
-	
+
 	@Override
-	public void commitEdit(TransactionModelAdapter item){
+	public void commitEdit(TransactionModelAdapter item) {
 		super.commitEdit(item);
 		setText(getString());
 		setStatusColor();
