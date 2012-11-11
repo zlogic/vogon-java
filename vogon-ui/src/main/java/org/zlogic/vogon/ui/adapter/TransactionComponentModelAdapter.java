@@ -7,7 +7,8 @@ package org.zlogic.vogon.ui.adapter;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import org.zlogic.vogon.data.FinanceAccount;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
@@ -19,7 +20,6 @@ import org.zlogic.vogon.data.TransactionComponent;
  */
 public class TransactionComponentModelAdapter {
 
-	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * The FinanceData instance
 	 */
@@ -47,26 +47,38 @@ public class TransactionComponentModelAdapter {
 		this.transactionComponent = transactionComponent;
 		this.financeData = financeData;
 		updateProperties();
-	}
 
-	/**
-	 * Sets the component's account
-	 *
-	 * @param account the account to be set
-	 */
-	public void setAccount(FinanceAccount account) {
-		financeData.setTransactionComponentAccount(transactionComponent, account);
-		updateProperties();
-	}
+		//Set property change listeners
+		account.addListener(new ChangeListener<AccountModelAdapter>() {
+			protected FinanceData financeData;
+			protected TransactionComponent transactionComponent;
 
-	/**
-	 * Sets the component's amount
-	 *
-	 * @param amount the amount to be set
-	 */
-	public void setAmount(double amount) {
-		financeData.setTransactionComponentAmount(transactionComponent, amount);
-		updateProperties();
+			public ChangeListener setData(TransactionComponent transactionComponent, FinanceData financeData) {
+				this.transactionComponent = transactionComponent;
+				this.financeData = financeData;
+				return this;
+			}
+
+			@Override
+			public void changed(ObservableValue<? extends AccountModelAdapter> ov, AccountModelAdapter t, AccountModelAdapter t1) {
+				financeData.setTransactionComponentAccount(transactionComponent, t1.getAccount());
+			}
+		}.setData(transactionComponent, financeData));
+		amount.addListener(new ChangeListener<AmountModelAdapter>() {
+			protected FinanceData financeData;
+			protected TransactionComponent transactionComponent;
+
+			public ChangeListener setData(TransactionComponent transactionComponent, FinanceData financeData) {
+				this.transactionComponent = transactionComponent;
+				this.financeData = financeData;
+				return this;
+			}
+
+			@Override
+			public void changed(ObservableValue<? extends AmountModelAdapter> ov, AmountModelAdapter t, AmountModelAdapter t1) {
+				financeData.setTransactionComponentAmount(transactionComponent, t1.getAmount());
+			}
+		}.setData(transactionComponent, financeData));
 	}
 
 	/**

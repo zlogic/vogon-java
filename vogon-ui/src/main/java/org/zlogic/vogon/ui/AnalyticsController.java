@@ -259,7 +259,7 @@ public class AnalyticsController implements Initializable {
 	 * Updates the table for selecting tags
 	 */
 	private void updateTagsSelectionTable() {
-		tagsSelectionTable.getItems().removeAll(tagsSelectionTable.getItems());
+		tagsSelectionTable.getItems().clear();
 		for (String tag : report.getAllTags())
 			tagsSelectionTable.getItems().add(new TagSelectionAdapter(tag, true));
 	}
@@ -268,7 +268,7 @@ public class AnalyticsController implements Initializable {
 	 * Updates the table for selecting accounts
 	 */
 	private void updateAccountsSelectionTable() {
-		accountsSelectionTable.getItems().removeAll(accountsSelectionTable.getItems());
+		accountsSelectionTable.getItems().clear();
 		for (FinanceAccount account : report.getAllAccounts())
 			accountsSelectionTable.getItems().add(new AccountSelectionAdapter(new AccountModelAdapter(account, financeData), account.getIncludeInTotal()));
 	}
@@ -279,7 +279,7 @@ public class AnalyticsController implements Initializable {
 	 * @param values the list of expenses grouped by tag
 	 */
 	private void updateTagsResultTable(List<Report.TagExpense> values) {
-		tagsResultTable.getItems().removeAll(tagsResultTable.getItems());
+		tagsResultTable.getItems().clear();
 		for (Report.TagExpense tagExpense : values)
 			tagsResultTable.getItems().add(new TagResultAdapter(tagExpense.getTag(), tagExpense.getAmount(), tagExpense.getCurrency(), tagExpense.isCurrencyConverted()));
 	}
@@ -290,7 +290,7 @@ public class AnalyticsController implements Initializable {
 	 * @param values the list of transactions matching the criteria
 	 */
 	private void updateTransactionsResultTable(List<FinanceTransaction> values) {
-		transactionsResultTable.getItems().removeAll(transactionsResultTable.getItems());
+		transactionsResultTable.getItems().clear();
 		for (FinanceTransaction transaction : values)
 			transactionsResultTable.getItems().add(new TransactionResultAdapter(transaction, financeData));
 	}

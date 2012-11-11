@@ -5,6 +5,7 @@
  */
 package org.zlogic.vogon.ui.adapter;
 
+import java.util.Objects;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -130,12 +131,21 @@ public class AccountModelAdapter implements AccountInterface {
 			return this == null;
 		if (account == null)
 			return obj instanceof AccountModelAdapter && ((AccountModelAdapter) obj).account == null;
-		return obj instanceof AccountModelAdapter && account.equals(((AccountModelAdapter) obj).account);
+		if (!(obj instanceof AccountModelAdapter))
+			return false;
+		AccountModelAdapter adapter = (AccountModelAdapter) obj;
+		return account.equals(adapter.account) && balance.equals(adapter.balance) && currency.equals(adapter.currency) && includeInTotal.equals(adapter.includeInTotal) && name.equals(adapter.name);
 	}
 
 	@Override
 	public int hashCode() {
-		return account.hashCode();
+		int hash = 7;
+		hash = 79 * hash + Objects.hashCode(this.account);
+		hash = 79 * hash + Objects.hashCode(this.name);
+		hash = 79 * hash + Objects.hashCode(this.balance);
+		hash = 79 * hash + Objects.hashCode(this.currency);
+		hash = 79 * hash + Objects.hashCode(this.includeInTotal);
+		return hash;
 	}
 
 	/**

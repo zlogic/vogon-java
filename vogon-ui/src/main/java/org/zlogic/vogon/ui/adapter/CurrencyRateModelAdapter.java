@@ -67,7 +67,7 @@ public class CurrencyRateModelAdapter {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof CurrencyRateModelAdapter)
-			return rate.equals(((CurrencyRateModelAdapter) obj).rate);
+			return rate.equals(((CurrencyRateModelAdapter) obj).rate) && value.equals(((CurrencyRateModelAdapter) obj).value);
 		if (obj instanceof CurrencyRate)
 			return rate.equals((CurrencyRate) obj);
 		return false;

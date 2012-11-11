@@ -111,6 +111,24 @@ public class AmountModelAdapter implements Comparable<AmountModelAdapter>, CellS
 	}
 
 	/**
+	 * Returns the amount currency
+	 *
+	 * @return the amount currency
+	 */
+	public Currency getCurrency() {
+		return currency;
+	}
+
+	/**
+	 * Returns the associated transaction type
+	 *
+	 * @return the associated transaction type
+	 */
+	public FinanceTransaction.Type getTransactionType() {
+		return transactionType;
+	}
+
+	/**
 	 * Sets the amount double value
 	 *
 	 * @param amount the amount double value
@@ -122,5 +140,14 @@ public class AmountModelAdapter implements Comparable<AmountModelAdapter>, CellS
 	@Override
 	public boolean isOK() {
 		return isOk;
+	}
+
+	/**
+	 * Returns true if currency is converted
+	 *
+	 * @return true if currency is converted
+	 */
+	public boolean isCurrencyConverted() {
+		return isCurrencyConverted;
 	}
 }
