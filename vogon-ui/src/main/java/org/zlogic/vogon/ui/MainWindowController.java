@@ -38,7 +38,6 @@ import org.zlogic.vogon.data.interop.VogonImportLogicalException;
 import org.zlogic.vogon.data.interop.XmlExporter;
 import org.zlogic.vogon.data.interop.XmlImporter;
 
-
 /**
  * Main entry window controller.
  *
@@ -320,13 +319,12 @@ public class MainWindowController implements Initializable {
 		//Configure components
 		statusPane.managedProperty().bind(statusPane.visibleProperty());
 		statusPane.setVisible(false);
-		accordion.expandedPaneProperty().addListener(new ChangeListener<TitledPane>(){
+		accordion.expandedPaneProperty().addListener(new ChangeListener<TitledPane>() {
 			@Override
 			public void changed(ObservableValue<? extends TitledPane> ov, TitledPane t, TitledPane t1) {
-				if(t==transactionsAccordionPane && t1!=transactionsAccordionPane)
+				if (t == transactionsAccordionPane && t1 != transactionsAccordionPane)
 					transactionsPaneController.cancelEdit();
 			}
-			
 		});
 	}
 

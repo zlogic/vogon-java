@@ -59,9 +59,9 @@ public class CurrenciesController implements Initializable {
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
 		updateCurrencies();
-		
-		if(financeData.getAccountListener() instanceof FinanceDataEventDispatcher){
-			((FinanceDataEventDispatcher)financeData.getCurrencyListener()).addCurrencyEventHandler(new CurrencyEventHandler() {
+
+		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
+			((FinanceDataEventDispatcher) financeData.getCurrencyListener()).addCurrencyEventHandler(new CurrencyEventHandler() {
 				protected FinanceData financeData;
 
 				public CurrencyEventHandler setFinanceData(FinanceData financeData) {
