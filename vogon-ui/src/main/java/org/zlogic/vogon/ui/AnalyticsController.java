@@ -28,6 +28,7 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -42,7 +43,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
-import javafx.concurrent.Task;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
@@ -55,6 +55,7 @@ import org.zlogic.vogon.ui.adapter.ObjectWithStatus;
 import org.zlogic.vogon.ui.cell.DateConverter;
 
 /**
+ * The Analytics pane
  *
  * @author Dmitry Zolotukhin
  */
@@ -69,49 +70,53 @@ public class AnalyticsController implements Initializable {
 	 * The finance data reference
 	 */
 	protected FinanceData financeData;
+	/**
+	 * The date format for resulting tables
+	 */
 	protected DateFormat dateFormat;
-	protected Callback<Task, Void> backgroundTaskProcessor;
+	/**
+	 * The processor for background tasks
+	 */
+	private Callback<Task, Void> backgroundTaskProcessor;
 	@FXML
-	protected TextField startDateField;
+	private TextField startDateField;
 	@FXML
-	protected TextField endDateField;
+	private TextField endDateField;
 	@FXML
-	protected CheckBox transferTransactionsCheckbox;
+	private CheckBox transferTransactionsCheckbox;
 	@FXML
-	protected CheckBox incomeTransactionsCheckbox;
+	private CheckBox incomeTransactionsCheckbox;
 	@FXML
-	protected CheckBox expenseTransactionsCheckbox;
+	private CheckBox expenseTransactionsCheckbox;
 	@FXML
-	protected TableView<TagSelectionAdapter> tagsSelectionTable;
+	private TableView<TagSelectionAdapter> tagsSelectionTable;
 	@FXML
-	protected TableColumn<TagSelectionAdapter, String> tagsSelectionTagColumn;
+	private TableColumn<TagSelectionAdapter, Boolean> tagsSelectionShowColumn;
 	@FXML
-	protected TableColumn<TagSelectionAdapter, Boolean> tagsSelectionShowColumn;
+	private TableView<AccountSelectionAdapter> accountsSelectionTable;
 	@FXML
-	protected TableView<AccountSelectionAdapter> accountsSelectionTable;
+	private TableColumn<AccountSelectionAdapter, Boolean> accountsSelectionShowColumn;
 	@FXML
-	protected TableColumn<AccountSelectionAdapter, AccountModelAdapter> accountsSelectionAccountColumn;
+	private TableView<TagResultAdapter> tagsResultTable;
 	@FXML
-	protected TableColumn<AccountSelectionAdapter, Boolean> accountsSelectionShowColumn;
+	private TableColumn<TagResultAdapter, AmountModelAdapter> tagsResultAmountColumn;
 	@FXML
-	protected TableView<TagResultAdapter> tagsResultTable;
+	private TableView<TransactionResultAdapter> transactionsResultTable;
 	@FXML
-	protected TableColumn<TagResultAdapter, String> tagsResultTagColumn;
+	private TableColumn<TransactionResultAdapter, Date> transactionsResultDateColumn;
 	@FXML
-	protected TableColumn<TagResultAdapter, AmountModelAdapter> tagsResultAmountColumn;
+	private TableColumn<TransactionResultAdapter, AmountModelAdapter> transactionsResultAmountColumn;
 	@FXML
-	protected TableView<TransactionResultAdapter> transactionsResultTable;
+	private PieChart tagsChart;
 	@FXML
-	protected TableColumn<TransactionResultAdapter, String> transactionsResultTransactionColumn;
-	@FXML
-	protected TableColumn<TransactionResultAdapter, Date> transactionsResultDateColumn;
-	@FXML
-	protected TableColumn<TransactionResultAdapter, AmountModelAdapter> transactionsResultAmountColumn;
-	@FXML
-	protected PieChart tagsChart;
-	@FXML
-	protected LineChart<String, Double> balanceChart;
+	private LineChart<String, Double> balanceChart;
 
+	/**
+	 * Initializes the Analytics Controller
+	 *
+	 * @param url the FXML URL
+	 * @param rb the FXML ResourceBundle
+	 */
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		dateFormat = new SimpleDateFormat(messages.getString("PARSER_DATE"));
@@ -149,6 +154,7 @@ public class AnalyticsController implements Initializable {
 			}
 		});
 
+		//Configure result columns
 		tagsResultAmountColumn.setCellFactory(new Callback<TableColumn<TagResultAdapter, AmountModelAdapter>, TableCell<TagResultAdapter, AmountModelAdapter>>() {
 			@Override
 			public TableCell<TagResultAdapter, AmountModelAdapter> call(TableColumn<TagResultAdapter, AmountModelAdapter> p) {
@@ -178,8 +184,11 @@ public class AnalyticsController implements Initializable {
 		});
 	}
 
+	/**
+	 * Generate Report button handler
+	 */
 	@FXML
-	protected void handleGenerateReport() {
+	private void handleGenerateReport() {
 		Task task = new Task() {
 			@Override
 			protected Void call() {
@@ -208,9 +217,12 @@ public class AnalyticsController implements Initializable {
 				report.setEnabledIncomeTransactions(incomeTransactionsCheckbox.selectedProperty().get());
 				report.setEnabledExpenseTransactions(expenseTransactionsCheckbox.selectedProperty().get());
 
+				//Generate the report
 				List<Report.TagExpense> tagExpenses = report.getTagExpenses();
 				List<FinanceTransaction> transactions = report.getTransactions();
 				Map<Date, Double> balanceGraph = report.getAccountsBalanceGraph();
+
+				//Update the UI
 				Platform.runLater(new Runnable() {
 					protected List<Report.TagExpense> tagExpenses;
 					protected List<FinanceTransaction> transactions;
@@ -243,31 +255,52 @@ public class AnalyticsController implements Initializable {
 			backgroundTaskProcessor.call(task);
 	}
 
-	protected void updateTagsSelectionTable() {
+	/**
+	 * Updates the table for selecting tags
+	 */
+	private void updateTagsSelectionTable() {
 		tagsSelectionTable.getItems().removeAll(tagsSelectionTable.getItems());
 		for (String tag : report.getAllTags())
 			tagsSelectionTable.getItems().add(new TagSelectionAdapter(tag, true));
 	}
 
-	protected void updateAccountsSelectionTable() {
+	/**
+	 * Updates the table for selecting accounts
+	 */
+	private void updateAccountsSelectionTable() {
 		accountsSelectionTable.getItems().removeAll(accountsSelectionTable.getItems());
 		for (FinanceAccount account : report.getAllAccounts())
 			accountsSelectionTable.getItems().add(new AccountSelectionAdapter(new AccountModelAdapter(account, financeData), account.getIncludeInTotal()));
 	}
 
-	protected void updateTagsResultTable(List<Report.TagExpense> values) {
+	/**
+	 * Updates the resulting tags table
+	 *
+	 * @param values the list of expenses grouped by tag
+	 */
+	private void updateTagsResultTable(List<Report.TagExpense> values) {
 		tagsResultTable.getItems().removeAll(tagsResultTable.getItems());
 		for (Report.TagExpense tagExpense : values)
 			tagsResultTable.getItems().add(new TagResultAdapter(tagExpense.getTag(), tagExpense.getAmount(), tagExpense.getCurrency(), tagExpense.isCurrencyConverted()));
 	}
 
-	protected void updateTransactionsResultTable(List<FinanceTransaction> values) {
+	/**
+	 * Updates the resulting transactions table
+	 *
+	 * @param values the list of transactions matching the criteria
+	 */
+	private void updateTransactionsResultTable(List<FinanceTransaction> values) {
 		transactionsResultTable.getItems().removeAll(transactionsResultTable.getItems());
 		for (FinanceTransaction transaction : values)
 			transactionsResultTable.getItems().add(new TransactionResultAdapter(transaction, financeData));
 	}
 
-	protected void updateTagsChart(List<Report.TagExpense> values) {
+	/**
+	 * Updates the tags chart
+	 *
+	 * @param values the list of expenses grouped by tag
+	 */
+	private void updateTagsChart(List<Report.TagExpense> values) {
 		ObservableList<PieChart.Data> data = FXCollections.observableList(new LinkedList<PieChart.Data>());
 		for (Report.TagExpense tagExpense : values) {
 			TagResultAdapter tagResult = new TagResultAdapter(tagExpense.getTag(), tagExpense.getAmount(), tagExpense.getCurrency(), tagExpense.isCurrencyConverted());
@@ -279,7 +312,12 @@ public class AnalyticsController implements Initializable {
 		tagsChart.dataProperty().set(data);
 	}
 
-	protected void updateBalanceChart(Map<Date, Double> values) {
+	/**
+	 * Updates the balance graph
+	 *
+	 * @param values the balance graph, grouped by date
+	 */
+	private void updateBalanceChart(Map<Date, Double> values) {
 		if (!balanceChart.getData().isEmpty())
 			balanceChart.getXAxis().invalidateRange(new LinkedList<String>());
 
@@ -291,13 +329,24 @@ public class AnalyticsController implements Initializable {
 		balanceChart.getData().add(series);
 	}
 
+	/**
+	 * Assigns the FinanceData instance
+	 *
+	 * @param financeData the FinanceData instance
+	 */
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
+
+		//Update the form
 		report = new Report(financeData);
 
 		startDateField.setText(dateFormat.format(report.getEarliestDate()));
 		endDateField.setText(dateFormat.format(report.getLatestDate()));
 
+		updateTagsSelectionTable();
+		updateAccountsSelectionTable();
+
+		//Listen for Account events
 		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
 			((FinanceDataEventDispatcher) financeData.getAccountListener()).addAccountEventHandler(new AccountEventHandler() {
 				@Override
@@ -322,7 +371,7 @@ public class AnalyticsController implements Initializable {
 			});
 		}
 
-
+		//Listen for Transaction events
 		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
 			((FinanceDataEventDispatcher) financeData.getAccountListener()).addTransactionEventHandler(new TransactionEventHandler() {
 				@Override
@@ -345,77 +394,179 @@ public class AnalyticsController implements Initializable {
 				}
 			});
 		}
-		updateTagsSelectionTable();
-		updateAccountsSelectionTable();
 	}
 
+	/**
+	 * Sets the background task processor callback
+	 *
+	 * @param backgroundTaskProcessor the background task processor callback
+	 * (otherwise the report generation will run in the current thread)
+	 */
 	public void setBackgroundTaskProcessor(Callback<Task, Void> backgroundTaskProcessor) {
 		this.backgroundTaskProcessor = backgroundTaskProcessor;
 	}
 
+	/**
+	 * Class for representing an account with a checkbox to select accounts to
+	 * be used in the report
+	 */
 	protected class AccountSelectionAdapter {
 
-		protected final ObjectProperty<AccountModelAdapter> account = new SimpleObjectProperty();
-		protected final BooleanProperty enabled = new SimpleBooleanProperty();
+		/**
+		 * The associated account property
+		 */
+		private final ObjectProperty<AccountModelAdapter> account = new SimpleObjectProperty();
+		/**
+		 * The account enabled property
+		 */
+		private final BooleanProperty enabled = new SimpleBooleanProperty();
 
+		/**
+		 * Constructs a AccountSelectionAdapter
+		 *
+		 * @param account the associated account
+		 * @param enabled true if the account should be enabled
+		 */
 		public AccountSelectionAdapter(AccountModelAdapter account, boolean enabled) {
 			this.account.set(account);
 			this.enabled.set(enabled);
 		}
 
+		/**
+		 * Returns the account property
+		 *
+		 * @return the account property
+		 */
 		public ObjectProperty<AccountModelAdapter> accountProperty() {
 			return account;
 		}
 
+		/**
+		 * Returns the account enabled property
+		 *
+		 * @return the account enabled property
+		 */
 		public BooleanProperty enabledProperty() {
 			return enabled;
 		}
 	}
 
+	/**
+	 * Class for representing a tag with a checkbox to select tags to be used in
+	 * the report
+	 */
 	protected class TagSelectionAdapter {
 
-		protected final StringProperty tag = new SimpleStringProperty();
-		protected final BooleanProperty enabled = new SimpleBooleanProperty();
+		/**
+		 * The associated tag property
+		 */
+		private final StringProperty tag = new SimpleStringProperty();
+		/**
+		 * The tag enabled property
+		 */
+		private final BooleanProperty enabled = new SimpleBooleanProperty();
 
+		/**
+		 * Constructs a TagSelectionAdapter
+		 *
+		 * @param tag the associated tag
+		 * @param enabled true if the tag should be enabled
+		 */
 		public TagSelectionAdapter(String tag, boolean enabled) {
 			this.tag.set(tag);
 			this.enabled.set(enabled);
 		}
 
+		/**
+		 * Returns the tag property
+		 *
+		 * @return the tag property
+		 */
 		public StringProperty tagProperty() {
 			return tag;
 		}
 
+		/**
+		 * Returns the tag enabled property
+		 *
+		 * @return the tag enabled property
+		 */
 		public BooleanProperty enabledProperty() {
 			return enabled;
 		}
 	}
 
+	/**
+	 * Class for representing a resulting tag with its expense amount
+	 */
 	protected class TagResultAdapter {
 
+		/**
+		 * The tag property
+		 */
 		protected final StringProperty tag = new SimpleStringProperty();
+		/**
+		 * The tag amount property
+		 */
 		protected final ObjectProperty<AmountModelAdapter> amount = new SimpleObjectProperty<>();
 
+		/**
+		 * Constructs a TagResultAdapter
+		 *
+		 * @param tag the tag
+		 * @param amount the tag's expense amount
+		 * @param currency the tag's currency
+		 * @param isCurrencyConverted true if the currency was converted
+		 */
 		public TagResultAdapter(String tag, double amount, Currency currency, boolean isCurrencyConverted) {
 			this.tag.set(tag);
 			this.amount.set(new AmountModelAdapter(amount, true, currency, isCurrencyConverted, FinanceTransaction.Type.UNDEFINED));
 		}
 
+		/**
+		 * Returns the tag property
+		 *
+		 * @return the tag property
+		 */
 		public StringProperty tagProperty() {
 			return tag;
 		}
 
+		/**
+		 * Returns the tag's expense amount property
+		 *
+		 * @return the tag's expense amount property
+		 */
 		public ObjectProperty<AmountModelAdapter> amountProperty() {
 			return amount;
 		}
 	}
 
+	/**
+	 * Class for representing a resulting transaction with minimum attributes
+	 */
 	protected class TransactionResultAdapter {
 
-		protected final StringProperty description = new SimpleStringProperty();
-		protected final ObjectProperty<AmountModelAdapter> amount = new SimpleObjectProperty<>();
-		protected final ObjectProperty<Date> date = new SimpleObjectProperty<>();
+		/**
+		 * The transaction description property
+		 */
+		private final StringProperty description = new SimpleStringProperty();
+		/**
+		 * The transaction amount property
+		 */
+		private final ObjectProperty<AmountModelAdapter> amount = new SimpleObjectProperty<>();
+		/**
+		 * The transaction date property
+		 */
+		private final ObjectProperty<Date> date = new SimpleObjectProperty<>();
 
+		/**
+		 * Constructs a TransactionResultAdapter
+		 *
+		 * @param transaction the transaction
+		 * @param financeData the associated FinanceData instance (used only for
+		 * currency conversion)
+		 */
 		public TransactionResultAdapter(FinanceTransaction transaction, FinanceData financeData) {
 			this.description.set(transaction.getDescription());
 			double transactionAmount;
@@ -431,14 +582,29 @@ public class AnalyticsController implements Initializable {
 			date.set(transaction.getDate());
 		}
 
+		/**
+		 * Returns the transaction description property
+		 *
+		 * @return the transaction description property
+		 */
 		public StringProperty descriptionProperty() {
 			return description;
 		}
 
+		/**
+		 * Returns the transaction amount property
+		 *
+		 * @return the transaction amount property
+		 */
 		public ObjectProperty<AmountModelAdapter> amountProperty() {
 			return amount;
 		}
 
+		/**
+		 * Returns the transaction date property
+		 *
+		 * @return the transaction date property
+		 */
 		public ObjectProperty<Date> dateProperty() {
 			return date;
 		}

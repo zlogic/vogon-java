@@ -15,7 +15,7 @@ import javafx.beans.property.StringProperty;
 
 /**
  * Class for storing an currency with an overloaded toString method for better
- * customization of how it's rendered.
+ * customization of how it's rendered in a control.
  *
  * @author Dmitry Zolotukhin
  */
@@ -26,6 +26,9 @@ public class CurrencyModelAdapter implements Comparable<CurrencyModelAdapter> {
 	 * The currency
 	 */
 	protected Currency currency;
+	/**
+	 * The currency property (formatted as a string)
+	 */
 	private final StringProperty value = new SimpleStringProperty();
 
 	/**
@@ -62,23 +65,47 @@ public class CurrencyModelAdapter implements Comparable<CurrencyModelAdapter> {
 		return hash;
 	}
 
+	/**
+	 * Returns the currency
+	 *
+	 * @return the currency
+	 */
 	public Currency getCurrency() {
 		return currency;
 	}
 
+	/**
+	 * Sets the currency and updates the currency property
+	 *
+	 * @param currency
+	 */
 	public void setCurrency(Currency currency) {
 		this.currency = currency;
 		updateProperties();
 	}
 
+	/**
+	 * Returns the currency name property
+	 *
+	 * @return the currency name property
+	 */
 	public StringProperty currencyProperty() {
 		return value;
 	}
 
+	/**
+	 * Updates the properties from the current currency, causing ChangeListeners
+	 * to trigger.
+	 */
 	private void updateProperties() {
 		value.set(toString());
 	}
 
+	/**
+	 * Returns a sorted list of all currencies
+	 *
+	 * @return a sorted list of all currencies
+	 */
 	public static List<CurrencyModelAdapter> getCurrenciesList() {
 		List<CurrencyModelAdapter> items = new LinkedList<>();
 		for (Currency curr : Currency.getAvailableCurrencies())

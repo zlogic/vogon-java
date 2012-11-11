@@ -14,26 +14,54 @@ import org.zlogic.vogon.data.events.CurrencyEventHandler;
 import org.zlogic.vogon.data.events.TransactionEventHandler;
 
 /**
+ * Class for dispatching a single FinanceData event to multiple listeners
  *
  * @author Dmitry Zolotukhin
  */
 public class FinanceDataEventDispatcher implements TransactionEventHandler, AccountEventHandler, CurrencyEventHandler {
 
+	/**
+	 * The list of Transaction event handlers
+	 */
 	protected List<TransactionEventHandler> transactionEventHandler = new LinkedList<>();
+	/**
+	 * The list of Account event handlers
+	 */
 	protected List<AccountEventHandler> accountEventHandler = new LinkedList<>();
+	/**
+	 * The list of Currency event handlers
+	 */
 	protected List<CurrencyEventHandler> currencyEventHandler = new LinkedList<>();
 
+	/**
+	 * Default constructor
+	 */
 	public FinanceDataEventDispatcher() {
 	}
 
+	/**
+	 * Adds an Transaction event handler
+	 *
+	 * @param handler the new Transaction event handler
+	 */
 	public void addTransactionEventHandler(TransactionEventHandler handler) {
 		transactionEventHandler.add(handler);
 	}
 
+	/**
+	 * Adds an Account event handler
+	 *
+	 * @param handler the new Account event handler
+	 */
 	public void addAccountEventHandler(AccountEventHandler handler) {
 		accountEventHandler.add(handler);
 	}
 
+	/**
+	 * Adds a Currency event handler
+	 *
+	 * @param handler the new Currency event handler
+	 */
 	public void addCurrencyEventHandler(CurrencyEventHandler handler) {
 		currencyEventHandler.add(handler);
 	}

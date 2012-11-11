@@ -39,6 +39,7 @@ public class MessageDialog implements Initializable {
 	 */
 	public static void showDialog(String title, String message, boolean callerIsBackgroundThread) {
 		if (!callerIsBackgroundThread) {
+			//Load FXML
 			Stage dialogStage = new Stage();
 			dialogStage.initModality(Modality.APPLICATION_MODAL);
 			Parent root = null;
@@ -49,6 +50,7 @@ public class MessageDialog implements Initializable {
 			} catch (IOException ex) {
 				Logger.getLogger(MessageDialog.class.getName()).log(Level.SEVERE, null, ex);
 			}
+			//Initialize the scene properties
 			if (root != null) {
 				Scene scene = new Scene(root);
 				dialogStage.setTitle(title);
@@ -57,6 +59,7 @@ public class MessageDialog implements Initializable {
 				dialogStage.showAndWait();
 			}
 		} else {
+			//Required for JavaFX, otherwise dialog won't be displayed
 			Platform.runLater(new Runnable() {
 				private String title;
 				private String message;
@@ -74,11 +77,23 @@ public class MessageDialog implements Initializable {
 			}.setParameters(title, message));
 		}
 	}
+	/**
+	 * The "OK" button
+	 */
 	@FXML
 	private Button okButton;
+	/**
+	 * The message label
+	 */
 	@FXML
 	private Label messageText;
 
+	/**
+	 * Initializes the Dialog
+	 *
+	 * @param url the FXML URL
+	 * @param rb the FXML ResourceBundle
+	 */
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 	}

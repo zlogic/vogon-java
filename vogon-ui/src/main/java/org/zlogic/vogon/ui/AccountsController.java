@@ -36,28 +36,54 @@ import org.zlogic.vogon.ui.adapter.ObjectWithStatus;
 import org.zlogic.vogon.ui.adapter.ReportingAccount;
 
 /**
+ * The Accounts pane
  *
  * @author Dmitry Zolotukhin
  */
 public class AccountsController implements Initializable {
 
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
+	/**
+	 * The associated FinanceData instance
+	 */
 	protected FinanceData financeData;
+	/**
+	 * The Accounts table
+	 */
 	@FXML
-	protected TableView<AccountInterface> accountsTable;
+	private TableView<AccountInterface> accountsTable;
+	/**
+	 * The Name column
+	 */
 	@FXML
-	protected TableColumn<AccountInterface, ObjectWithStatus<String, Boolean>> columnName;
+	private TableColumn<AccountInterface, ObjectWithStatus<String, Boolean>> columnName;
+	/**
+	 * The Currency column
+	 */
 	@FXML
-	protected TableColumn<AccountInterface, ObjectWithStatus<CurrencyModelAdapter, Boolean>> columnCurrency;
+	private TableColumn<AccountInterface, ObjectWithStatus<CurrencyModelAdapter, Boolean>> columnCurrency;
+	/**
+	 * The Balance column
+	 */
 	@FXML
-	protected TableColumn<AccountInterface, String> columnBalance;
+	private TableColumn<AccountInterface, String> columnBalance;
+	/**
+	 * The Include in total column
+	 */
 	@FXML
-	protected TableColumn<AccountInterface, ObjectWithStatus<BooleanProperty, Boolean>> columnIncludeInTotal;
+	private TableColumn<AccountInterface, ObjectWithStatus<BooleanProperty, Boolean>> columnIncludeInTotal;
 
+	/**
+	 * Initializes the Accounts Controller
+	 *
+	 * @param url the FXML URL
+	 * @param rb the FXML ResourceBundle
+	 */
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		accountsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
+		//Configure the cells
 		columnName.setCellFactory(new Callback<TableColumn<AccountInterface, ObjectWithStatus<String, Boolean>>, TableCell<AccountInterface, ObjectWithStatus<String, Boolean>>>() {
 			@Override
 			public TableCell<AccountInterface, ObjectWithStatus<String, Boolean>> call(TableColumn<AccountInterface, ObjectWithStatus<String, Boolean>> p) {
@@ -126,9 +152,16 @@ public class AccountsController implements Initializable {
 		});
 	}
 
+	/**
+	 * Assigns the FinanceData instance
+	 *
+	 * @param financeData the FinanceData instance
+	 */
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
 		updateAccounts();
+
+		//Listen for Account events
 		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
 			((FinanceDataEventDispatcher) financeData.getAccountListener()).addAccountEventHandler(new AccountEventHandler() {
 				protected FinanceData financeData;
@@ -162,6 +195,7 @@ public class AccountsController implements Initializable {
 			}.setFinanceData(financeData));
 		}
 
+		//Listen for Currency events
 		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
 			((FinanceDataEventDispatcher) financeData.getAccountListener()).addCurrencyEventHandler(new CurrencyEventHandler() {
 				@Override
@@ -172,19 +206,30 @@ public class AccountsController implements Initializable {
 		}
 	}
 
+	/**
+	 * Create account button
+	 */
 	@FXML
 	protected void handleCreateAccount() {
 		FinanceAccount account = new FinanceAccount("", financeData.getDefaultCurrency()); //NOI18N
 		financeData.createAccount(account);
 	}
 
+	/**
+	 * Delete account button
+	 */
 	@FXML
-	protected void handleDeleteAccount() {
+	private void handleDeleteAccount() {
 		AccountInterface selectedItem = accountsTable.getSelectionModel().getSelectedItem();
 		if (selectedItem instanceof AccountModelAdapter)
 			financeData.deleteAccount(((AccountModelAdapter) selectedItem).getAccount());
 	}
 
+	/**
+	 * Obtains the currencies list
+	 *
+	 * @return the currencies list
+	 */
 	protected List<ObjectWithStatus<CurrencyModelAdapter, Boolean>> getCurrenciesList() {
 		List<ObjectWithStatus<CurrencyModelAdapter, Boolean>> result = new LinkedList<>();
 		for (CurrencyModelAdapter adapter : CurrencyModelAdapter.getCurrenciesList())
@@ -192,7 +237,10 @@ public class AccountsController implements Initializable {
 		return result;
 	}
 
-	protected void updateAccounts() {
+	/**
+	 * Updates the accounts table from database
+	 */
+	private void updateAccounts() {
 		accountsTable.getItems().removeAll(accountsTable.getItems());
 		for (FinanceAccount account : financeData.getAccounts())
 			accountsTable.getItems().add(new AccountModelAdapter(account, financeData));

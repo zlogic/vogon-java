@@ -27,20 +27,38 @@ import org.zlogic.vogon.ui.adapter.CurrencyModelAdapter;
 import org.zlogic.vogon.ui.adapter.CurrencyRateModelAdapter;
 
 /**
- *
+ * Currencies pane controller.
  * @author Dmitry Zolotukhin
  */
 public class CurrenciesController implements Initializable {
 
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
+	/**
+	 * The associated FinanceData instance
+	 */
 	protected FinanceData financeData;
+	/**
+	 * The currencies table
+	 */
 	@FXML
 	protected TableView<CurrencyRateModelAdapter> currenciesTable;
+	/**
+	 * The exchange rate column
+	 */
 	@FXML
 	protected TableColumn<CurrencyRateModelAdapter, Double> columnExchangeRate;
+	/**
+	 * The default currency combo box
+	 */
 	@FXML
 	protected ComboBox<CurrencyModelAdapter> defaultCurrency;
 
+	/**
+	 * Initializes the Currencies Controller
+	 *
+	 * @param url the FXML URL
+	 * @param rb the FXML ResourceBundle
+	 */
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		currenciesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -56,10 +74,16 @@ public class CurrenciesController implements Initializable {
 		});
 	}
 
+	/**
+	 * Assigns the FinanceData instance
+	 *
+	 * @param financeData the FinanceData instance
+	 */
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
 		updateCurrencies();
 
+		//Listen for Currency events
 		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
 			((FinanceDataEventDispatcher) financeData.getCurrencyListener()).addCurrencyEventHandler(new CurrencyEventHandler() {
 				protected FinanceData financeData;
@@ -71,7 +95,7 @@ public class CurrenciesController implements Initializable {
 
 				@Override
 				public void currenciesUpdated() {
-					//TODO
+					updateCurrencies();
 				}
 			}.setFinanceData(financeData));
 			defaultCurrency.valueProperty().addListener(new ChangeListener<CurrencyModelAdapter>() {
@@ -90,11 +114,16 @@ public class CurrenciesController implements Initializable {
 		}
 	}
 
+	/**
+	 * Updates all currency-related widgets from database
+	 */
 	protected void updateCurrencies() {
+		//Update currencies table
 		currenciesTable.getItems().removeAll(currenciesTable.getItems());
 		for (CurrencyRate rate : financeData.getCurrencyRates())
 			currenciesTable.getItems().add(new CurrencyRateModelAdapter(rate, financeData));
 
+		//Update the default currency combo box
 		defaultCurrency.getItems().removeAll(defaultCurrency.getItems());
 		defaultCurrency.getItems().addAll(CurrencyModelAdapter.getCurrenciesList());
 		Currency currentDefaultCurrency = financeData.getDefaultCurrency();
