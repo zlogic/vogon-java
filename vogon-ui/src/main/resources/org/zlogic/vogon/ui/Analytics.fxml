@@ -2,6 +2,7 @@
 
 <?import java.lang.*?>
 <?import java.util.*?>
+<?import javafx.collections.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
@@ -22,9 +23,9 @@
                 <GridPane AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                   <children>
                     <Label text="%START_DATE" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                    <TextField fx:id="startDateField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                    <TextField fx:id="startDateField" onAction="#handleGenerateReport" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                     <Label text="%END_DATE" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                    <TextField fx:id="endDateField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                    <TextField fx:id="endDateField" onAction="#handleGenerateReport" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                     <CheckBox fx:id="transferTransactionsCheckbox" mnemonicParsing="false" text="%TRANSFER_TRANSACTIONS" GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.rowIndex="2" />
                     <CheckBox fx:id="incomeTransactionsCheckbox" mnemonicParsing="false" selected="true" text="%INCOME_TRANSACTIONS" GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" />
                     <CheckBox fx:id="expenseTransactionsCheckbox" mnemonicParsing="false" selected="true" text="%EXPENSE_TRANSACTIONS" GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
@@ -98,7 +99,7 @@
                 </TableColumn>
               </columns>
             </TableView>
-            <PieChart id="PieChart" fx:id="tagsChart" prefHeight="150.0" prefWidth="249.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="350.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            <PieChart id="PieChart" fx:id="tagsChart" legendSide="RIGHT" prefHeight="150.0" prefWidth="249.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="350.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
           </children>
         </AnchorPane>
         <AnchorPane>
@@ -122,7 +123,14 @@
                 </TableColumn>
               </columns>
             </TableView>
-            <PieChart id="PieChart" fx:id="transactionsChart" prefHeight="155.0" prefWidth="250.5" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="350.0" AnchorPane.rightAnchor="-1.5" AnchorPane.topAnchor="0.0" />
+            <LineChart fx:id="balanceChart" legendVisible="false" prefHeight="155.0" prefWidth="250.5" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="350.0" AnchorPane.rightAnchor="-1.5" AnchorPane.topAnchor="0.0">
+              <xAxis>
+                <CategoryAxis side="BOTTOM" />
+              </xAxis>
+              <yAxis>
+                <NumberAxis forceZeroInRange="false" side="LEFT" />
+              </yAxis>
+            </LineChart>
           </children>
         </AnchorPane>
       </items>

@@ -7,15 +7,18 @@ package org.zlogic.vogon.ui;
 
 import java.net.URL;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Currency;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -23,9 +26,14 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.PieChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -34,6 +42,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
+import javafx.concurrent.Task;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
@@ -61,6 +70,7 @@ public class AnalyticsController implements Initializable {
 	 */
 	protected FinanceData financeData;
 	protected DateFormat dateFormat;
+	protected Callback<Task, Void> backgroundTaskProcessor;
 	@FXML
 	protected TextField startDateField;
 	@FXML
@@ -97,6 +107,10 @@ public class AnalyticsController implements Initializable {
 	protected TableColumn<TransactionResultAdapter, Date> transactionsResultDateColumn;
 	@FXML
 	protected TableColumn<TransactionResultAdapter, AmountModelAdapter> transactionsResultAmountColumn;
+	@FXML
+	protected PieChart tagsChart;
+	@FXML
+	protected LineChart<String, Double> balanceChart;
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
@@ -166,30 +180,67 @@ public class AnalyticsController implements Initializable {
 
 	@FXML
 	protected void handleGenerateReport() {
-		//Set report parameters
-		try {
-			report.setEarliestDate(dateFormat.parse(startDateField.getText()));
-			report.setLatestDate(dateFormat.parse(endDateField.getText()));
-		} catch (ParseException ex) {
-			Logger.getLogger(AnalyticsController.class.getName()).log(Level.SEVERE, null, ex);
-		}
+		Task task = new Task() {
+			@Override
+			protected Void call() {
+				updateProgress(-1, 1);
+				updateMessage(messages.getString("TASK_GENERATING_REPORT"));
+				//Set report parameters
+				try {
+					report.setEarliestDate(dateFormat.parse(startDateField.getText()));
+					report.setLatestDate(dateFormat.parse(endDateField.getText()));
+				} catch (ParseException ex) {
+					MessageDialog.showDialog(messages.getString("ANALYTICS_REPORT_EXCEPTION_DIALOG_TITLE"), new MessageFormat(messages.getString("ANALYTICS_REPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), true);
+					Logger.getLogger(AnalyticsController.class.getName()).log(Level.SEVERE, null, ex);
+				}
 
-		List<FinanceAccount> selectedAccounts = new LinkedList<>();
-		for (AccountSelectionAdapter accountAdapter : accountsSelectionTable.getItems())
-			selectedAccounts.add(accountAdapter.accountProperty().get().getAccount());
-		report.setSelectedAccounts(selectedAccounts);
+				List<FinanceAccount> selectedAccounts = new LinkedList<>();
+				for (AccountSelectionAdapter accountAdapter : accountsSelectionTable.getItems())
+					selectedAccounts.add(accountAdapter.accountProperty().get().getAccount());
+				report.setSelectedAccounts(selectedAccounts);
 
-		List<String> selectedTags = new LinkedList<>();
-		for (TagSelectionAdapter tagAdapter : tagsSelectionTable.getItems())
-			selectedTags.add(tagAdapter.tagProperty().get());
-		report.setSelectedTags(selectedTags);
+				List<String> selectedTags = new LinkedList<>();
+				for (TagSelectionAdapter tagAdapter : tagsSelectionTable.getItems())
+					selectedTags.add(tagAdapter.tagProperty().get());
+				report.setSelectedTags(selectedTags);
 
-		report.setEnabledTransferTransactions(transferTransactionsCheckbox.selectedProperty().get());
-		report.setEnabledIncomeTransactions(incomeTransactionsCheckbox.selectedProperty().get());
-		report.setEnabledExpenseTransactions(expenseTransactionsCheckbox.selectedProperty().get());
+				report.setEnabledTransferTransactions(transferTransactionsCheckbox.selectedProperty().get());
+				report.setEnabledIncomeTransactions(incomeTransactionsCheckbox.selectedProperty().get());
+				report.setEnabledExpenseTransactions(expenseTransactionsCheckbox.selectedProperty().get());
 
-		updateTagsResultTable(report.getTagExpenses());
-		updateTransactionsResultTable(report.getTransactions());//TODO: add paging
+				List<Report.TagExpense> tagExpenses = report.getTagExpenses();
+				List<FinanceTransaction> transactions = report.getTransactions();
+				Map<Date, Double> balanceGraph = report.getAccountsBalanceGraph();
+				Platform.runLater(new Runnable() {
+					protected List<Report.TagExpense> tagExpenses;
+					protected List<FinanceTransaction> transactions;
+					protected Map<Date, Double> balanceGraph;
+
+					public Runnable setData(List<Report.TagExpense> tagExpenses, List<FinanceTransaction> transactions, Map<Date, Double> balanceGraph) {
+						this.tagExpenses = tagExpenses;
+						this.transactions = transactions;
+						this.balanceGraph = balanceGraph;
+						return this;
+					}
+
+					@Override
+					public void run() {
+						updateTagsResultTable(tagExpenses);
+						updateTransactionsResultTable(transactions);//TODO: add paging
+						updateTagsChart(tagExpenses);
+						updateBalanceChart(balanceGraph);
+					}
+				}.setData(tagExpenses, transactions, balanceGraph));
+
+				updateProgress(1, 1);
+				updateMessage("");//NOI18N
+				return null;
+			}
+		};
+		if (backgroundTaskProcessor == null)
+			task.run();
+		else
+			backgroundTaskProcessor.call(task);
 	}
 
 	protected void updateTagsSelectionTable() {
@@ -205,13 +256,39 @@ public class AnalyticsController implements Initializable {
 	}
 
 	protected void updateTagsResultTable(List<Report.TagExpense> values) {
+		tagsResultTable.getItems().removeAll(tagsResultTable.getItems());
 		for (Report.TagExpense tagExpense : values)
 			tagsResultTable.getItems().add(new TagResultAdapter(tagExpense.getTag(), tagExpense.getAmount(), tagExpense.getCurrency(), tagExpense.isCurrencyConverted()));
 	}
 
 	protected void updateTransactionsResultTable(List<FinanceTransaction> values) {
+		transactionsResultTable.getItems().removeAll(transactionsResultTable.getItems());
 		for (FinanceTransaction transaction : values)
 			transactionsResultTable.getItems().add(new TransactionResultAdapter(transaction, financeData));
+	}
+
+	protected void updateTagsChart(List<Report.TagExpense> values) {
+		ObservableList<PieChart.Data> data = FXCollections.observableList(new LinkedList<PieChart.Data>());
+		for (Report.TagExpense tagExpense : values) {
+			TagResultAdapter tagResult = new TagResultAdapter(tagExpense.getTag(), tagExpense.getAmount(), tagExpense.getCurrency(), tagExpense.isCurrencyConverted());
+			String tagLabel = MessageFormat.format(messages.getString("PIECHART_TAG_FORMAT"), new Object[]{tagExpense.getTag(), tagResult.amountProperty().get().toString()});
+			data.add(new PieChart.Data(tagLabel, financeData.getExchangeRate(tagExpense.getCurrency(), financeData.getDefaultCurrency())
+					* Math.abs(tagExpense.getAmount())));
+		}
+
+		tagsChart.dataProperty().set(data);
+	}
+
+	protected void updateBalanceChart(Map<Date, Double> values) {
+		if (!balanceChart.getData().isEmpty())
+			balanceChart.getXAxis().invalidateRange(new LinkedList<String>());
+
+		balanceChart.getData().clear();
+
+		XYChart.Series<String, Double> series = new XYChart.Series<>();
+		for (Map.Entry<Date, Double> entry : values.entrySet())
+			series.getData().add(new XYChart.Data<>(DateFormat.getDateInstance(DateFormat.FULL).format(entry.getKey()), entry.getValue(), entry.getKey()));
+		balanceChart.getData().add(series);
 	}
 
 	public void setFinanceData(FinanceData financeData) {
@@ -270,6 +347,10 @@ public class AnalyticsController implements Initializable {
 		}
 		updateTagsSelectionTable();
 		updateAccountsSelectionTable();
+	}
+
+	public void setBackgroundTaskProcessor(Callback<Task, Void> backgroundTaskProcessor) {
+		this.backgroundTaskProcessor = backgroundTaskProcessor;
 	}
 
 	protected class AccountSelectionAdapter {
