@@ -33,6 +33,9 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 	 * The editor parent container
 	 */
 	protected Parent editor;
+	/**
+	 * The popup editor
+	 */
 	protected Popup popup;
 	/**
 	 * The editor controller
@@ -70,7 +73,7 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 	}
 
 	/**
-	 * Prepares the cell for editing
+	 * Prepares the cell for editing and shows the popup control
 	 */
 	@Override
 	public void startEdit() {
@@ -87,7 +90,7 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 	}
 
 	/**
-	 * Cancels cell editing
+	 * Cancels cell editing and hides the popup control
 	 */
 	@Override
 	public void cancelEdit() {
@@ -97,6 +100,10 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 		popup.hide();
 	}
 
+	/**
+	 * Commits the edit and hides the popup control
+	 * @param item the updated item
+	 */
 	@Override
 	public void commitEdit(TransactionModelAdapter item) {
 		super.commitEdit(item);
