@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.zlogic.vogon.ui.MessageDialog;
 
 /**
  * String cell editor with date validation & parsing
@@ -48,7 +49,7 @@ public class DateCellEditor<BaseType> extends StringCellEditor<BaseType, Date> {
 	@Override
 	protected String getString() {
 		if (getItem() == null)
-			return "";
+			return "";//NOI18N
 		if (isEditing())
 			return MessageFormat.format(messages.getString("FORMAT_DATE"), new Object[]{getItem()});
 		else

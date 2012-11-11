@@ -6,6 +6,7 @@
 package org.zlogic.vogon.ui.adapter;
 
 import java.util.Objects;
+import java.util.ResourceBundle;
 import javafx.util.StringConverter;
 
 /**
@@ -15,6 +16,7 @@ import javafx.util.StringConverter;
  */
 public class ObjectWithStatus<ObjectType, StatusType> {
 
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	protected final ObjectType value;
 	protected final StatusType status;
 

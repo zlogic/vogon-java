@@ -47,7 +47,7 @@ public class Launcher extends Application {
 		FXMLLoader loader;
 		try {
 			//Load FXML
-			loader = new FXMLLoader(getClass().getResource("MainWindow.fxml"));
+			loader = new FXMLLoader(getClass().getResource("MainWindow.fxml")); //NOI18N
 			loader.setResources(messages);//NOI18N
 			loader.setLocation(getClass().getResource("MainWindow.fxml")); //NOI18N
 			root = (Parent) loader.load(); //NOI18N
@@ -118,7 +118,7 @@ public class Launcher extends Application {
 		List<Image> images = new LinkedList<>();
 		int[] iconSizes = new int[]{16, 24, 32, 48, 64, 128, 256, 512};
 		for (int iconName : iconSizes)
-			images.add(new Image("org/zlogic/vogon/ui/icon/vogon-tilt-" + Integer.toString(iconName) + ".png"));
+			images.add(new Image("org/zlogic/vogon/ui/icon/vogon-tilt-" + Integer.toString(iconName) + ".png")); //NOI18N
 		return images;
 	}
 

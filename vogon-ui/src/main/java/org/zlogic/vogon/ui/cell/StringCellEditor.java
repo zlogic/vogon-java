@@ -138,6 +138,6 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 	 * @return the string value of the edited property
 	 */
 	protected String getString() {
-		return getItem() == null ? "" : getItem().toString();
+		return getItem() == null ? "" : getItem().toString();//NOI18N
 	}
 }
