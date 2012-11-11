@@ -56,44 +56,98 @@ public class MainWindowController implements Initializable {
 	 * Easy access to preference storage
 	 */
 	protected java.util.prefs.Preferences preferenceStorage = java.util.prefs.Preferences.userNodeForPackage(Launcher.class);
+	/**
+	 * The background task thread (used for synchronization & clean termination)
+	 */
 	protected Thread backgroundThread;
+	/**
+	 * The background task
+	 */
 	protected Task backgroundTask;
+	/**
+	 * The root container
+	 */
 	@FXML
 	private VBox mainWindow;
+	/**
+	 * The status pane
+	 */
 	@FXML
 	private HBox statusPane;
+	/**
+	 * The controller for the Transactions pane
+	 */
 	@FXML
 	private TransactionsController transactionsPaneController;
+	/**
+	 * The controller for the Accounts pane
+	 */
 	@FXML
 	private AccountsController accountsPaneController;
+	/**
+	 * The controller for the Analytics pane
+	 */
 	@FXML
 	private AnalyticsController analyticsPaneController;
+	/**
+	 * The controller for the Currencies pane
+	 */
 	@FXML
 	private CurrenciesController currenciesPaneController;
+	/**
+	 * The progress indicator for background tasks
+	 */
 	@FXML
 	private ProgressIndicator progressIndicator;
+	/**
+	 * The label displaying the current background task's progress
+	 */
 	@FXML
 	private Label progressLabel;
+	/**
+	 * The Export menu item
+	 */
 	@FXML
 	private MenuItem menuItemImport;
+	/**
+	 * The Import menu item
+	 */
 	@FXML
 	private MenuItem menuItemExport;
+	/**
+	 * The Recalculate Balance
+	 */
 	@FXML
 	private MenuItem menuItemRecalculateBalance;
+	/**
+	 * The Cleanup DB menu item
+	 */
 	@FXML
 	private MenuItem menuItemCleanupDB;
+	/**
+	 * The Accordion control
+	 */
 	@FXML
 	private Accordion accordion;
+	/**
+	 * The Transactions pane inside the Accordion
+	 */
 	@FXML
 	private TitledPane transactionsAccordionPane;
 
+	/**
+	 * Exit menu item
+	 */
 	@FXML
-	protected void handleMenuExitAction() {
+	private void handleMenuExitAction() {
 		completeTaskThread();
 		DatabaseManager.getInstance().shutdown();
 		Platform.exit();
 	}
 
+	/**
+	 * Import menu item
+	 */
 	@FXML
 	private void handleMenuImportAction() {
 		// Prepare file chooser dialog
@@ -161,6 +215,9 @@ public class MainWindowController implements Initializable {
 		}
 	}
 
+	/**
+	 * Export menu item
+	 */
 	@FXML
 	private void handleMenuExportAction() {
 		// Prepare file chooser dialog
@@ -217,6 +274,9 @@ public class MainWindowController implements Initializable {
 		}
 	}
 
+	/**
+	 * Cleanup DB menu item
+	 */
 	@FXML
 	private void handleMenuCleanupDBAction() {
 		//Prepare the task
@@ -237,6 +297,9 @@ public class MainWindowController implements Initializable {
 		startTaskThread(task);
 	}
 
+	/**
+	 * Recalculate balance menu item
+	 */
 	@FXML
 	private void handleMenuRecalculateBalanceAction() {
 		//Prepare the task
@@ -258,7 +321,11 @@ public class MainWindowController implements Initializable {
 		startTaskThread(task);
 	}
 
-	protected void beginBackgroundTask() {
+	/**
+	 * Starts the background task (disables task-related components, show the
+	 * progress pane)
+	 */
+	private void beginBackgroundTask() {
 		statusPane.setVisible(true);
 		menuItemImport.setDisable(true);
 		menuItemExport.setDisable(true);
@@ -266,7 +333,11 @@ public class MainWindowController implements Initializable {
 		menuItemCleanupDB.setDisable(true);
 	}
 
-	protected void endBackgroundTask() {
+	/**
+	 * Ends the background task (enables task-related components, hides the
+	 * progress pane)
+	 */
+	private void endBackgroundTask() {
 		statusPane.setVisible(false);
 		menuItemImport.setDisable(false);
 		menuItemExport.setDisable(false);
@@ -274,14 +345,21 @@ public class MainWindowController implements Initializable {
 		menuItemCleanupDB.setDisable(false);
 	}
 
+	/**
+	 * Starts a task in a background thread
+	 *
+	 * @param task the task to be started
+	 */
 	protected void startTaskThread(Task task) {
 		synchronized (this) {
+			//Wait for previous task to compete
 			completeTaskThread();
 			backgroundTask = task;
 
 			progressIndicator.progressProperty().bind(task.progressProperty());
 			progressLabel.textProperty().bind(task.messageProperty());
 
+			//Automatically run beginTask/endTask before the actual task is processed
 			backgroundThread = new Thread(
 					new Runnable() {
 						protected Task task;
@@ -303,6 +381,9 @@ public class MainWindowController implements Initializable {
 		}
 	}
 
+	/**
+	 * Waits for the current task to complete
+	 */
 	protected void completeTaskThread() {
 		synchronized (this) {
 			if (backgroundThread != null) {
@@ -321,6 +402,12 @@ public class MainWindowController implements Initializable {
 		}
 	}
 
+	/**
+	 * Initializes the Main Window Controller
+	 *
+	 * @param url the FXML URL
+	 * @param rb the FXML ResourceBundle
+	 */
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		//Restore settings
@@ -345,10 +432,11 @@ public class MainWindowController implements Initializable {
 		});
 	}
 
-	public FinanceData getFinanceData() {
-		return financeData;
-	}
-
+	/**
+	 * Assigns the FinanceData instance
+	 *
+	 * @param financeData the FinanceData instance
+	 */
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
 		transactionsPaneController.setFinanceData(financeData);

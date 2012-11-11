@@ -19,7 +19,7 @@ import org.zlogic.vogon.data.FinanceTransaction;
 
 /**
  * Class for storing an account with an overloaded toString method for better
- * customization of how it's rendered in a combo box.
+ * customization of how it's rendered in a combo box and other similar places.
  *
  * @author Dmitry Zolotukhin
  */
@@ -30,16 +30,33 @@ public class AccountModelAdapter implements AccountInterface {
 	 * The account
 	 */
 	protected FinanceAccount account;
+	/**
+	 * The FinanceData instance
+	 */
 	protected FinanceData financeData;
+	/**
+	 * The account name property
+	 */
 	private final ObjectProperty<ObjectWithStatus<String, Boolean>> name = new SimpleObjectProperty();
+	/**
+	 * The account balance property (formatted string)
+	 */
 	private final StringProperty balance = new SimpleStringProperty();
+	/**
+	 * The currency property
+	 */
 	private final ObjectProperty<ObjectWithStatus<CurrencyModelAdapter, Boolean>> currency = new SimpleObjectProperty();
+	/**
+	 * The property indicating if account should be included in the reporting
+	 * account's total balance
+	 */
 	private final ObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>> includeInTotal = new SimpleObjectProperty(new ObjectWithStatus<>(new SimpleBooleanProperty(true), true));
 
 	/**
 	 * Default constructor
 	 *
 	 * @param account the account for this item
+	 * @param financeData the FinanceData instance
 	 */
 	public AccountModelAdapter(final FinanceAccount account, FinanceData financeData) {
 		this.account = account;
@@ -150,6 +167,10 @@ public class AccountModelAdapter implements AccountInterface {
 		return includeInTotal;
 	}
 
+	/**
+	 * Updates the properties from the current account, causing ChangeListeners
+	 * to trigger.
+	 */
 	private void updateProperties() {
 		if (account != null) {
 			balance.set(new AmountModelAdapter(account.getBalance(), true, account.getCurrency(), false, FinanceTransaction.Type.UNDEFINED).toString());
@@ -160,6 +181,12 @@ public class AccountModelAdapter implements AccountInterface {
 		}
 	}
 
+	/**
+	 * Updates the properties from a supplied account, causing ChangeListeners
+	 * to trigger.
+	 *
+	 * @param account the account to be used for properties update
+	 */
 	public void refresh(FinanceAccount account) {
 		this.account = account;
 		updateProperties();

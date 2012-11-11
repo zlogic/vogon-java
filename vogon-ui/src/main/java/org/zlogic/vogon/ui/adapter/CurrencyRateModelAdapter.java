@@ -26,18 +26,26 @@ public class CurrencyRateModelAdapter {
 	 * The rate
 	 */
 	protected CurrencyRate rate;
+	/**
+	 * The FinanceData instance
+	 */
 	protected FinanceData financeData;
+	/**
+	 * The currency rate value property
+	 */
 	private final DoubleProperty value = new SimpleDoubleProperty();
 
 	/**
 	 * Default constructor
 	 *
 	 * @param rate the currency rate for this item
+	 * @param financeData the FinanceData instance
 	 */
 	public CurrencyRateModelAdapter(CurrencyRate rate, FinanceData financeData) {
 		this.rate = rate;
 		updateProperties();
 
+		//Add change listener
 		value.addListener(new ChangeListener<Double>() {
 			protected FinanceData financeData;
 			protected CurrencyRate rate;
@@ -72,18 +80,38 @@ public class CurrencyRateModelAdapter {
 		return hash;
 	}
 
+	/**
+	 * Returns the source currency
+	 *
+	 * @return
+	 */
 	public Currency getSourceCurrency() {
 		return rate.getSource();
 	}
 
+	/**
+	 * Returns the destination currency
+	 *
+	 * @return
+	 */
 	public Currency getDestinationCurrency() {
 		return rate.getDestination();
 	}
 
+	/**
+	 * Returns the rate property (changes are applied to FinanceData
+	 * automatically)
+	 *
+	 * @return the rate property
+	 */
 	public DoubleProperty exchangeRateProperty() {
 		return value;
 	}
 
+	/**
+	 * Updates the properties from the current currency rate, causing
+	 * ChangeListeners to trigger.
+	 */
 	private void updateProperties() {
 		value.set(rate.getExchangeRate());
 	}

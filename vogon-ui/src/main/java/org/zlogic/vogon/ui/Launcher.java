@@ -38,7 +38,6 @@ public class Launcher extends Application {
 	 * Java FX entry point
 	 *
 	 * @param stage the Java FX stage
-	 * @throws Exception
 	 */
 	@Override
 	public void start(Stage stage) {

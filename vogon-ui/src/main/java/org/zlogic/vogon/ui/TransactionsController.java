@@ -34,36 +34,61 @@ import org.zlogic.vogon.ui.cell.DateCellEditor;
 import org.zlogic.vogon.ui.cell.TransactionEditor;
 
 /**
- * Transactions tab controller.
+ * Transactions pane controller.
  *
  * @author Dmitry Zolotukhin
  */
 public class TransactionsController implements Initializable {
 
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
+	/**
+	 * The FinanceData instance
+	 */
 	protected FinanceData financeData;
+	/**
+	 * The transactions list table
+	 */
 	@FXML
-	protected TableView<TransactionModelAdapter> transactionsTable;
+	private TableView<TransactionModelAdapter> transactionsTable;
+	/**
+	 * The transaction description column
+	 */
 	@FXML
-	protected TableColumn<TransactionModelAdapter, String> columnDescription;
+	private TableColumn<TransactionModelAdapter, String> columnDescription;
+	/**
+	 * The transaction date column
+	 */
 	@FXML
-	protected TableColumn<TransactionModelAdapter, Date> columnDate;
+	private TableColumn<TransactionModelAdapter, Date> columnDate;
+	/**
+	 * The transaction tags column
+	 */
 	@FXML
-	protected TableColumn<TransactionModelAdapter, List<String>> columnTags;
+	private TableColumn<TransactionModelAdapter, List<String>> columnTags;
+	/**
+	 * The transaction amount column
+	 */
 	@FXML
-	protected TableColumn<TransactionModelAdapter, TransactionModelAdapter> columnAmount;
+	private TableColumn<TransactionModelAdapter, TransactionModelAdapter> columnAmount;
 	@FXML
-	protected TableColumn<TransactionModelAdapter, TransactionModelAdapter> columnAccount;
+	private Pagination transactionsTablePagination;
 	@FXML
-	protected Pagination transactionsTablePagination;
-	@FXML
-	protected VBox transactionsVBox;
+	private VBox transactionsVBox;
+	/**
+	 * The list of currently editing TransactionEditors
+	 */
 	protected List<TransactionEditor> editingTransactionEditors = new LinkedList<>();
 	/**
 	 * Page size
 	 */
 	protected int pageSize = 100;
 
+	/**
+	 * Initializes the Transactions Controller
+	 *
+	 * @param url the FXML URL
+	 * @param rb the FXML ResourceBundle
+	 */
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		//Column sizes
@@ -73,7 +98,7 @@ public class TransactionsController implements Initializable {
 		transactionsTable.managedProperty().bind(transactionsTable.visibleProperty());
 		transactionsVBox.getChildren().remove(transactionsTable);
 
-		//COnfigure paging
+		//Configure paging
 		transactionsTablePagination.setPageFactory(new Callback<Integer, Node>() {
 			@Override
 			public Node call(Integer p) {
@@ -149,8 +174,11 @@ public class TransactionsController implements Initializable {
 
 	/**
 	 * Updates transactions for current page from database
+	 *
+	 * @param currentPage the currently selected page
 	 */
 	protected void updatePageTransactions(int currentPage) {
+		//Configure the transactions indexes
 		int firstTransactionIndex = currentPage * pageSize;
 		int lastTransactionIndex = firstTransactionIndex + pageSize - 1;
 		lastTransactionIndex = Math.min(lastTransactionIndex, financeData.getTransactionCount() - 1);
@@ -159,6 +187,7 @@ public class TransactionsController implements Initializable {
 		List<FinanceTransaction> transactions = financeData.getTransactions(Math.min(firstTransactionIndex, lastTransactionIndex), Math.max(firstTransactionIndex, lastTransactionIndex));
 		Collections.reverse(transactions);
 
+		//Update the tables
 		List<TransactionModelAdapter> transactionsList = new LinkedList<>();
 		for (FinanceTransaction transaction : transactions)
 			transactionsList.add(new TransactionModelAdapter(transaction, financeData));
@@ -166,15 +195,17 @@ public class TransactionsController implements Initializable {
 		transactionsTable.getItems().addAll(transactionsList);
 	}
 
+	/**
+	 * Updates the transactions table
+	 */
 	protected void updateTransactions() {
 		transactionsTablePagination.setPageCount(getPageCount());
 		updatePageTransactions(transactionsTablePagination.getCurrentPageIndex());
 	}
 
-	public FinanceData getFinanceData() {
-		return financeData;
-	}
-
+	/**
+	 * Cancels editing of TransactionEditors (needed on a tab switch)
+	 */
 	public void cancelEdit() {
 		for (TransactionEditor editor : editingTransactionEditors)
 			if (editor.isEditing())
@@ -182,10 +213,16 @@ public class TransactionsController implements Initializable {
 		editingTransactionEditors.clear();
 	}
 
+	/**
+	 * Assigns the FinanceData instance
+	 *
+	 * @param financeData the FinanceData instance
+	 */
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
 		updateTransactions();
 
+		//Listen for Transaction events
 		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
 			((FinanceDataEventDispatcher) financeData.getAccountListener()).addTransactionEventHandler(new TransactionEventHandler() {
 				protected FinanceData financeData;
@@ -222,6 +259,7 @@ public class TransactionsController implements Initializable {
 			}.setFinanceData(financeData));
 		}
 
+		//Listen for Account events
 		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
 			((FinanceDataEventDispatcher) financeData.getAccountListener()).addAccountEventHandler(new AccountEventHandler() {
 				@Override
@@ -248,45 +286,11 @@ public class TransactionsController implements Initializable {
 	}
 
 	/**
-	 * Returns the page for a model row
-	 *
-	 * @param rowIndex the model row
-	 * @return the page number
-	 */
-	protected int getRowPage(int rowIndex) {
-		if (transactionsTablePagination.getCurrentPageIndex() < getPageCount())
-			return rowIndex / pageSize;
-		else
-			return -1;
-	}
-
-	/**
 	 * Returns the number of pages
 	 *
 	 * @return the number of pages
 	 */
 	public int getPageCount() {
 		return financeData.getTransactionCount() / pageSize + 1;
-	}
-
-	/**
-	 * Returns the generic page size
-	 *
-	 * @return the page size
-	 */
-	public int getPageSize() {
-		return pageSize;
-	}
-
-	/**
-	 * Returns the page size for a specific page (last page may be smaller)
-	 *
-	 * @param pageIndex the page number
-	 * @return the page size for a specific page
-	 */
-	public int getPageSize(int pageIndex) {
-		if (financeData == null)
-			return 0;
-		return Math.min(pageSize, financeData.getTransactionCount() - transactionsTablePagination.getCurrentPageIndex() * pageSize);
 	}
 }

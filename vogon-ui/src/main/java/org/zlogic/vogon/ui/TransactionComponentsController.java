@@ -31,27 +31,54 @@ import org.zlogic.vogon.ui.cell.AmountCellEditor;
 import org.zlogic.vogon.ui.cell.StringValidatorDouble;
 
 /**
+ * Controller for editing a transaction's components.
  *
  * @author Dmitry Zolotukhin
  */
 public class TransactionComponentsController implements Initializable {
 
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
+	/**
+	 * The FinanceData instance
+	 */
 	protected FinanceData financeData;
+	/**
+	 * The edited transaction
+	 */
 	protected FinanceTransaction transaction;
+	/**
+	 * The transaction components table
+	 */
 	@FXML
 	private TableView<TransactionComponentModelAdapter> transactionComponents;
+	/**
+	 * The transaction type combo box
+	 */
 	@FXML
-	protected ComboBox<TransactionTypeComboItem> transactionType;
+	private ComboBox<TransactionTypeComboItem> transactionType;
+	/**
+	 * The account column
+	 */
 	@FXML
-	protected TableColumn<TransactionComponentModelAdapter, AccountModelAdapter> columnAccount;
+	private TableColumn<TransactionComponentModelAdapter, AccountModelAdapter> columnAccount;
+	/**
+	 * The amount column
+	 */
 	@FXML
-	protected TableColumn<TransactionComponentModelAdapter, AmountModelAdapter> columnAmount;
+	private TableColumn<TransactionComponentModelAdapter, AmountModelAdapter> columnAmount;
 
+	/**
+	 * Initializes the Transaction Components editor
+	 *
+	 * @param url the FXML URL
+	 * @param rb the FXML ResourceBundle
+	 */
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		transactionComponents.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
+		//TODO: use ChangeListeners in TransactionComponentModelAdapter instead
+		//Cell editors
 		columnAccount.setCellFactory(new Callback<TableColumn<TransactionComponentModelAdapter, AccountModelAdapter>, TableCell<TransactionComponentModelAdapter, AccountModelAdapter>>() {
 			@Override
 			public TableCell<TransactionComponentModelAdapter, AccountModelAdapter> call(TableColumn<TransactionComponentModelAdapter, AccountModelAdapter> p) {
@@ -83,18 +110,31 @@ public class TransactionComponentsController implements Initializable {
 		});
 	}
 
+	/**
+	 * Sets the edited transaction
+	 *
+	 * @param transaction the edited transaction
+	 */
 	public void setTransaction(FinanceTransaction transaction) {
 		this.transaction = transaction;
 		updateTransactionTypeCombo(transaction.getType());
 		updateComponents();
 	}
 
+	/**
+	 * Assigns the FinanceData instance
+	 *
+	 * @param financeData the FinanceData instance
+	 */
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
 	}
 
+	/**
+	 * Add component button
+	 */
 	@FXML
-	protected void handleAddComponent(ActionEvent event) {
+	private void handleAddComponent() {
 		TransactionComponent component = new TransactionComponent(null, transaction, 0);
 		financeData.createTransactionComponent(component);
 		TransactionComponentModelAdapter newComponentAdapter = new TransactionComponentModelAdapter(component, financeData);
@@ -102,29 +142,43 @@ public class TransactionComponentsController implements Initializable {
 		transactionComponents.getSelectionModel().select(newComponentAdapter);
 	}
 
+	/**
+	 * Delete component button
+	 */
 	@FXML
-	protected void handleDeleteComponent(ActionEvent event) {
+	private void handleDeleteComponent() {
 		TransactionComponentModelAdapter selectedItem = transactionComponents.getSelectionModel().getSelectedItem();
 		if (selectedItem != null)
 			financeData.deleteTransactionComponent(selectedItem.getTransactionComponent());
 		transactionComponents.getItems().remove(selectedItem);
 	}
 
+	/**
+	 * Transaction type combo box has changed
+	 */
 	@FXML
-	protected void handleSetTransactionType(ActionEvent event) {
+	private void handleSetTransactionType() {
 		TransactionTypeComboItem newType = transactionType.getSelectionModel().getSelectedItem();
 		if (newType != null)
 			financeData.setTransactionType(transaction, newType.getType());
 	}
 
-	protected void updateComponents() {
+	/**
+	 * Updates the transaction components table from database
+	 */
+	private void updateComponents() {
 		transactionComponents.getItems().removeAll(transactionComponents.getItems());
 		transactionComponents.getItems().clear();
 		for (TransactionComponent component : transaction.getComponents())
 			transactionComponents.getItems().add(new TransactionComponentModelAdapter(component, financeData));
 	}
 
-	protected void updateTransactionTypeCombo(FinanceTransaction.Type type) {
+	/**
+	 * Updates the transaction type combo box
+	 *
+	 * @param type the transaction type to be selected
+	 */
+	private void updateTransactionTypeCombo(FinanceTransaction.Type type) {
 		transactionType.setDisable(true);
 		transactionType.getItems().removeAll(transactionType.getItems());
 		transactionType.getItems().clear();
