@@ -27,6 +27,7 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.util.Callback;
 import org.zlogic.vogon.data.DatabaseManager;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
@@ -138,7 +139,6 @@ public class MainWindowController implements Initializable {
 					try {
 						updateMessage(messages.getString("TASK_IMPORTING_DATA"));
 						updateProgress(-1, 1);
-						beginBackgroundTask();
 						if (importer == null)
 							throw new VogonImportLogicalException(messages.getString("UNKNOWN_FILE_TYPE"));
 						financeData.importData(importer);
@@ -150,7 +150,6 @@ public class MainWindowController implements Initializable {
 						Logger.getLogger(MainWindowController.class.getName()).log(Level.SEVERE, null, ex);
 						MessageDialog.showDialog(messages.getString("IMPORT_EXCEPTION_DIALOG_TITLE"), new MessageFormat(messages.getString("IMPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), true);
 					} finally {
-						endBackgroundTask();
 						updateProgress(1, 1);
 						updateMessage("");//NOI18N
 					}
@@ -198,7 +197,6 @@ public class MainWindowController implements Initializable {
 					try {
 						updateMessage(messages.getString("TASK_EXPORTING_DATA"));
 						updateProgress(-1, 1);
-						beginBackgroundTask();
 
 						financeData.exportData(exporter);
 					} catch (VogonExportException ex) {
@@ -208,7 +206,6 @@ public class MainWindowController implements Initializable {
 						Logger.getLogger(MainWindowController.class.getName()).log(Level.SEVERE, null, ex);
 						MessageDialog.showDialog(messages.getString("EXPORT_EXCEPTION_DIALOG_TITLE"), new MessageFormat(messages.getString("EXPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), true);
 					} finally {
-						endBackgroundTask();
 						updateProgress(1, 1);
 						updateMessage("");//NOI18N
 					}
@@ -228,11 +225,9 @@ public class MainWindowController implements Initializable {
 			protected Void call() throws Exception {
 				updateMessage(messages.getString("TASK_CLEANING_UP_DB"));
 				updateProgress(-1, 1);
-				beginBackgroundTask();
 
 				financeData.cleanup();
 
-				endBackgroundTask();
 				updateProgress(1, 1);
 				updateMessage("");//NOI18N
 				return null;
@@ -250,12 +245,10 @@ public class MainWindowController implements Initializable {
 			protected Void call() throws Exception {
 				updateMessage(messages.getString("TASK_RECALCULATING_BALANCE"));
 				updateProgress(-1, 1);
-				beginBackgroundTask();
 
 				for (FinanceAccount account : financeData.getAccounts())
 					financeData.refreshAccountBalance(account);
 
-				endBackgroundTask();
 				updateProgress(1, 1);
 				updateMessage("");//NOI18N
 				return null;
@@ -265,7 +258,7 @@ public class MainWindowController implements Initializable {
 		startTaskThread(task);
 	}
 
-	private void beginBackgroundTask() {
+	protected void beginBackgroundTask() {
 		statusPane.setVisible(true);
 		menuItemImport.setDisable(true);
 		menuItemExport.setDisable(true);
@@ -273,7 +266,7 @@ public class MainWindowController implements Initializable {
 		menuItemCleanupDB.setDisable(true);
 	}
 
-	private void endBackgroundTask() {
+	protected void endBackgroundTask() {
 		statusPane.setVisible(false);
 		menuItemImport.setDisable(false);
 		menuItemExport.setDisable(false);
@@ -281,7 +274,7 @@ public class MainWindowController implements Initializable {
 		menuItemCleanupDB.setDisable(false);
 	}
 
-	private void startTaskThread(Task task) {
+	protected void startTaskThread(Task task) {
 		synchronized (this) {
 			completeTaskThread();
 			backgroundTask = task;
@@ -289,13 +282,28 @@ public class MainWindowController implements Initializable {
 			progressIndicator.progressProperty().bind(task.progressProperty());
 			progressLabel.textProperty().bind(task.messageProperty());
 
-			backgroundThread = new Thread(task);
+			backgroundThread = new Thread(
+					new Runnable() {
+						protected Task task;
+
+						public Runnable setTask(Task task) {
+							this.task = task;
+							return this;
+						}
+
+						@Override
+						public void run() {
+							beginBackgroundTask();
+							task.run();
+							endBackgroundTask();
+						}
+					}.setTask(task));
 			backgroundThread.setDaemon(true);
 			backgroundThread.start();
 		}
 	}
 
-	public void completeTaskThread() {
+	protected void completeTaskThread() {
 		synchronized (this) {
 			if (backgroundThread != null) {
 				try {
@@ -326,6 +334,13 @@ public class MainWindowController implements Initializable {
 			public void changed(ObservableValue<? extends TitledPane> ov, TitledPane t, TitledPane t1) {
 				if (t == transactionsAccordionPane && t1 != transactionsAccordionPane)
 					transactionsPaneController.cancelEdit();
+			}
+		});
+		analyticsPaneController.setBackgroundTaskProcessor(new Callback<Task, Void>() {
+			@Override
+			public Void call(Task p) {
+				startTaskThread(p);
+				return null;
 			}
 		});
 	}
