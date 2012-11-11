@@ -9,8 +9,6 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -77,7 +75,8 @@ public class TransactionComponentsController implements Initializable {
 	public void initialize(URL url, ResourceBundle rb) {
 		transactionComponents.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-		//TODO: use ChangeListeners in TransactionComponentModelAdapter instead
+		updateTransactionTypeCombo();
+
 		//Cell editors
 		columnAccount.setCellFactory(new Callback<TableColumn<TransactionComponentModelAdapter, AccountModelAdapter>, TableCell<TransactionComponentModelAdapter, AccountModelAdapter>>() {
 			@Override
@@ -85,12 +84,6 @@ public class TransactionComponentsController implements Initializable {
 				ComboBoxTableCell cell = new ComboBoxTableCell<>();
 				cell.getItems().addAll(getAccountsComboList());
 				return cell;
-			}
-		});
-		columnAccount.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionComponentModelAdapter, AccountModelAdapter>>() {
-			@Override
-			public void handle(TableColumn.CellEditEvent<TransactionComponentModelAdapter, AccountModelAdapter> t) {
-				t.getRowValue().setAccount(t.getNewValue().getAccount());
 			}
 		});
 
@@ -102,12 +95,6 @@ public class TransactionComponentsController implements Initializable {
 				return cell;
 			}
 		});
-		columnAmount.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<TransactionComponentModelAdapter, AmountModelAdapter>>() {
-			@Override
-			public void handle(TableColumn.CellEditEvent<TransactionComponentModelAdapter, AmountModelAdapter> t) {
-				t.getRowValue().setAmount(t.getNewValue().getAmount());
-			}
-		});
 	}
 
 	/**
@@ -116,8 +103,9 @@ public class TransactionComponentsController implements Initializable {
 	 * @param transaction the edited transaction
 	 */
 	public void setTransaction(FinanceTransaction transaction) {
+		this.transaction = null;
+		transactionType.getSelectionModel().select(new TransactionTypeComboItem(transaction.getType()));
 		this.transaction = transaction;
-		updateTransactionTypeCombo(transaction.getType());
 		updateComponents();
 	}
 
@@ -159,7 +147,7 @@ public class TransactionComponentsController implements Initializable {
 	@FXML
 	private void handleSetTransactionType() {
 		TransactionTypeComboItem newType = transactionType.getSelectionModel().getSelectedItem();
-		if (newType != null)
+		if (transaction != null && newType != null)
 			financeData.setTransactionType(transaction, newType.getType());
 	}
 
@@ -167,31 +155,20 @@ public class TransactionComponentsController implements Initializable {
 	 * Updates the transaction components table from database
 	 */
 	private void updateComponents() {
-		transactionComponents.getItems().removeAll(transactionComponents.getItems());
 		transactionComponents.getItems().clear();
 		for (TransactionComponent component : transaction.getComponents())
 			transactionComponents.getItems().add(new TransactionComponentModelAdapter(component, financeData));
 	}
 
 	/**
-	 * Updates the transaction type combo box
-	 *
-	 * @param type the transaction type to be selected
+	 * Populates the transaction type combo box
 	 */
-	private void updateTransactionTypeCombo(FinanceTransaction.Type type) {
-		transactionType.setDisable(true);
-		transactionType.getItems().removeAll(transactionType.getItems());
-		transactionType.getItems().clear();
-		TransactionTypeComboItem selectedItem = null;
+	private void updateTransactionTypeCombo() {
 		for (FinanceTransaction.Type currentType : FinanceTransaction.Type.values())
 			if (currentType != FinanceTransaction.Type.UNDEFINED) {
 				TransactionTypeComboItem currentItem = new TransactionTypeComboItem(currentType);
 				transactionType.getItems().add(currentItem);
-				if (type == currentType)
-					selectedItem = currentItem;
 			}
-		transactionType.getSelectionModel().select(selectedItem);
-		transactionType.setDisable(false);
 	}
 
 	/**
@@ -248,6 +225,18 @@ public class TransactionComponentsController implements Initializable {
 		 */
 		public FinanceTransaction.Type getType() {
 			return type;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			return obj instanceof TransactionTypeComboItem && ((TransactionTypeComboItem) obj).type.equals(type);
+		}
+
+		@Override
+		public int hashCode() {
+			int hash = 5;
+			hash = 53 * hash + (this.type != null ? this.type.hashCode() : 0);
+			return hash;
 		}
 	}
 }

@@ -10,6 +10,7 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -125,6 +126,16 @@ public class TransactionModelAdapter implements CellStatus {
 					financeData.setTransactionDate(transaction, t1);
 			}
 		}.setData(transaction, financeData));
+	}
+
+	/**
+	 * Returns this class instance (used in JavaFX to use a
+	 * TransactionModelAdapter as its own property)
+	 *
+	 * @return this class instance
+	 */
+	public TransactionModelAdapter getModelTransaction() {
+		return this;
 	}
 
 	/**
@@ -267,14 +278,22 @@ public class TransactionModelAdapter implements CellStatus {
 			return this == null;
 		if (transaction == null)
 			return obj instanceof TransactionModelAdapter && ((TransactionModelAdapter) obj).transaction == null;
-		if (obj instanceof FinanceTransaction)
-			return transaction.equals((FinanceTransaction) obj);
-		return obj instanceof TransactionModelAdapter && transaction.equals(((TransactionModelAdapter) obj).transaction);
+		if (!(obj instanceof TransactionModelAdapter))
+			return false;
+		TransactionModelAdapter adapter = (TransactionModelAdapter) obj;
+		return transaction.equals(adapter.transaction) && account.equals(adapter.account) && amount.equals(adapter.amount) && date.equals(adapter.date) && description.equals(adapter.description) && tags.equals(adapter.tags);
 	}
 
 	@Override
 	public int hashCode() {
-		return transaction.hashCode();
+		int hash = 3;
+		hash = 89 * hash + Objects.hashCode(this.transaction);
+		hash = 89 * hash + Objects.hashCode(this.description);
+		hash = 89 * hash + Objects.hashCode(this.tags);
+		hash = 89 * hash + Objects.hashCode(this.date);
+		hash = 89 * hash + Objects.hashCode(this.amount);
+		hash = 89 * hash + Objects.hashCode(this.account);
+		return hash;
 	}
 
 	/**

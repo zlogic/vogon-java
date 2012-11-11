@@ -28,6 +28,7 @@ import org.zlogic.vogon.ui.adapter.CurrencyRateModelAdapter;
 
 /**
  * Currencies pane controller.
+ *
  * @author Dmitry Zolotukhin
  */
 public class CurrenciesController implements Initializable {
@@ -119,12 +120,12 @@ public class CurrenciesController implements Initializable {
 	 */
 	protected void updateCurrencies() {
 		//Update currencies table
-		currenciesTable.getItems().removeAll(currenciesTable.getItems());
+		currenciesTable.getItems().clear();
 		for (CurrencyRate rate : financeData.getCurrencyRates())
 			currenciesTable.getItems().add(new CurrencyRateModelAdapter(rate, financeData));
 
 		//Update the default currency combo box
-		defaultCurrency.getItems().removeAll(defaultCurrency.getItems());
+		defaultCurrency.getItems().clear();
 		defaultCurrency.getItems().addAll(CurrencyModelAdapter.getCurrenciesList());
 		Currency currentDefaultCurrency = financeData.getDefaultCurrency();
 		if (currentDefaultCurrency != null)

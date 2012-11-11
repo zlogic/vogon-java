@@ -191,7 +191,7 @@ public class TransactionsController implements Initializable {
 		List<TransactionModelAdapter> transactionsList = new LinkedList<>();
 		for (FinanceTransaction transaction : transactions)
 			transactionsList.add(new TransactionModelAdapter(transaction, financeData));
-		transactionsTable.getItems().removeAll(transactionsTable.getItems());
+		transactionsTable.getItems().clear();
 		transactionsTable.getItems().addAll(transactionsList);
 	}
 
@@ -207,6 +207,7 @@ public class TransactionsController implements Initializable {
 	 * Cancels editing of TransactionEditors (needed on a tab switch)
 	 */
 	public void cancelEdit() {
+		//TODO: also cancel when the window loses focus
 		for (TransactionEditor editor : editingTransactionEditors)
 			if (editor.isEditing())
 				editor.cancelEdit();
@@ -235,17 +236,18 @@ public class TransactionsController implements Initializable {
 				@Override
 				public void transactionCreated(FinanceTransaction newTransaction) {
 					transactionsTablePagination.setCurrentPageIndex(0);
-					int index = transactionsTable.getItems().indexOf(newTransaction);
-					if (index >= 0)
-						transactionsTable.getSelectionModel().select(index);
+					for (TransactionModelAdapter adapter : transactionsTable.getItems())
+						if (adapter.getTransaction().equals(newTransaction)) {
+							transactionsTable.getSelectionModel().select(adapter);
+							break;
+						}
 				}
 
 				@Override
 				public void transactionUpdated(FinanceTransaction updatedTransaction) {
-					TransactionModelAdapter updatedTransactionModelAdapter = new TransactionModelAdapter(updatedTransaction, financeData);
-					int index = transactionsTable.getItems().indexOf(updatedTransactionModelAdapter);
-					if (index >= 0)
-						transactionsTable.getItems().set(index, updatedTransactionModelAdapter);
+					for (int i = 0; i < transactionsTable.getItems().size(); i++)
+						if (transactionsTable.getItems().get(i).getTransaction().equals(updatedTransaction))
+							transactionsTable.getItems().set(i, new TransactionModelAdapter(updatedTransaction, financeData));
 				}
 
 				@Override

@@ -173,9 +173,11 @@ public class AccountsController implements Initializable {
 
 				@Override
 				public void accountCreated(FinanceAccount newAccount) {
-					int accountIndex = accountsTable.getItems().indexOf(newAccount);
-					if (accountIndex >= 0)
-						accountsTable.getSelectionModel().select(accountIndex);
+					for (AccountInterface adapter : accountsTable.getItems())
+						if (adapter instanceof AccountModelAdapter && ((AccountModelAdapter) adapter).getAccount().equals(newAccount)) {
+							accountsTable.getSelectionModel().select(adapter);
+							break;
+						}
 				}
 
 				@Override
@@ -241,7 +243,7 @@ public class AccountsController implements Initializable {
 	 * Updates the accounts table from database
 	 */
 	private void updateAccounts() {
-		accountsTable.getItems().removeAll(accountsTable.getItems());
+		accountsTable.getItems().clear();
 		for (FinanceAccount account : financeData.getAccounts())
 			accountsTable.getItems().add(new AccountModelAdapter(account, financeData));
 

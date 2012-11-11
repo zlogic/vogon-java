@@ -52,7 +52,7 @@ public class CurrencyModelAdapter implements Comparable<CurrencyModelAdapter> {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof CurrencyModelAdapter)
-			return currency == ((CurrencyModelAdapter) obj).currency;
+			return currency == ((CurrencyModelAdapter) obj).currency && value.equals(((CurrencyModelAdapter) obj).value);
 		if (obj instanceof Currency)
 			return currency == (Currency) obj;
 		return false;
@@ -61,7 +61,8 @@ public class CurrencyModelAdapter implements Comparable<CurrencyModelAdapter> {
 	@Override
 	public int hashCode() {
 		int hash = 7;
-		hash = 71 * hash + Objects.hashCode(this.currency);
+		hash = 59 * hash + Objects.hashCode(this.currency);
+		hash = 59 * hash + Objects.hashCode(this.value);
 		return hash;
 	}
 
