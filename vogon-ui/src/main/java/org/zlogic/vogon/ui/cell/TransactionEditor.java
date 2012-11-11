@@ -102,6 +102,7 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 
 	/**
 	 * Commits the edit and hides the popup control
+	 *
 	 * @param item the updated item
 	 */
 	@Override
@@ -163,6 +164,6 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 	 * @return the string value of the edited property
 	 */
 	protected String getString() {
-		return getItem() == null ? "" : getItem().getAmount().toString();
+		return getItem() == null ? "" : getItem().getAmount().toString();//NOI18N
 	}
 }

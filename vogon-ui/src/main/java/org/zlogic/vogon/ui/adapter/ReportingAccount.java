@@ -6,6 +6,7 @@
 package org.zlogic.vogon.ui.adapter;
 
 import java.util.Currency;
+import java.util.ResourceBundle;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -19,6 +20,7 @@ import javafx.beans.property.StringProperty;
  */
 public class ReportingAccount implements AccountInterface {
 
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	private final ObjectProperty<ObjectWithStatus<String, Boolean>> name = new SimpleObjectProperty();
 	private final StringProperty balance = new SimpleStringProperty();
 	private final ObjectProperty<ObjectWithStatus<CurrencyModelAdapter, Boolean>> currency = new SimpleObjectProperty();

@@ -40,7 +40,7 @@ public class AmountCellEditor<BaseType> extends StringCellEditor<BaseType, Amoun
 	@Override
 	protected String getString() {
 		if (getItem() == null)
-			return "";
+			return "";//NOI18N
 		if (isEditing())
 			return Double.toString(getItem().getAmount());
 		else

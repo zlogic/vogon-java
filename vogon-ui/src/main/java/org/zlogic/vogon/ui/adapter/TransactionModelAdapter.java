@@ -116,7 +116,7 @@ public class TransactionModelAdapter implements CellStatus {
 
 			@Override
 			public List<String> fromString(String string) {
-				return FXCollections.observableList(Arrays.asList(string.split(",")));
+				return FXCollections.observableList(Arrays.asList(string.split(",")));//NOI18N
 			}
 		};
 	}

@@ -116,7 +116,7 @@ public class MainWindowController implements Initializable {
 
 			//Choose the importer based on the file extension
 			FileImporter importer = null;
-			String extension = selectedFile.isFile() ? selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".")) : null;
+			String extension = selectedFile.isFile() ? selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".")) : null; //NOI18N
 			extension = extensionFilters.get(extension);
 			if (extension == null)
 				importer = null;
@@ -178,9 +178,9 @@ public class MainWindowController implements Initializable {
 			preferenceStorage.put("lastDirectory", lastDirectory.toString()); //NOI18N
 
 			//Set extension if necessary
-			String extension = selectedFile.getName().contains(".") ? selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".")) : null;
+			String extension = selectedFile.getName().contains(".") ? selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".")) : null; //NOI18N
 			if (extension == null || extension.isEmpty())
-				selectedFile = new File(selectedFile.getParentFile(), selectedFile.getName() + ".xml");
+				selectedFile = new File(selectedFile.getParentFile(), selectedFile.getName() + ".xml"); //NOI18N
 
 			FileExporter exporter = new XmlExporter(selectedFile);
 			//Prepare the background task
