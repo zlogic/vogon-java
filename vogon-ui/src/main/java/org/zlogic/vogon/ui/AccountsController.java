@@ -164,29 +164,18 @@ public class AccountsController implements Initializable {
 		//Listen for Account events
 		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
 			((FinanceDataEventDispatcher) financeData.getAccountListener()).addAccountEventHandler(new AccountEventHandler() {
-				protected FinanceData financeData;
-
-				public AccountEventHandler setFinanceData(FinanceData financeData) {
-					this.financeData = financeData;
-					return this;
-				}
-
 				@Override
-				public void accountCreated(FinanceAccount newAccount) {
-					for (AccountInterface adapter : accountsTable.getItems())
-						if (adapter instanceof AccountModelAdapter && ((AccountModelAdapter) adapter).getAccount().equals(newAccount)) {
-							accountsTable.getSelectionModel().select(adapter);
-							break;
-						}
-				}
-
-				@Override
-				public void accountUpdated(FinanceAccount updatedAccount) {
+				public void accountCreated(long accountId) {
 					updateAccounts();
 				}
 
 				@Override
-				public void accountDeleted(FinanceAccount deletedAccount) {
+				public void accountUpdated(long accountId) {
+					updateAccounts();
+				}
+
+				@Override
+				public void accountDeleted(long accountId) {
 					updateAccounts();
 				}
 
@@ -194,7 +183,7 @@ public class AccountsController implements Initializable {
 				public void accountsUpdated() {
 					updateAccounts();
 				}
-			}.setFinanceData(financeData));
+			});
 		}
 
 		//Listen for Currency events
@@ -212,7 +201,7 @@ public class AccountsController implements Initializable {
 	 * Create account button
 	 */
 	@FXML
-	protected void handleCreateAccount() {
+	private void handleCreateAccount() {
 		FinanceAccount account = new FinanceAccount("", financeData.getDefaultCurrency()); //NOI18N
 		financeData.createAccount(account);
 	}

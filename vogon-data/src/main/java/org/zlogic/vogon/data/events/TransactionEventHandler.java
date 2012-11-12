@@ -16,27 +16,30 @@ import org.zlogic.vogon.data.FinanceTransaction;
  * @author Dmitry Zolotukhin
  */
 public interface TransactionEventHandler {
-		/**
-		 * A transaction created callback
-		 *
-		 * @param newTransaction the transaction that was created
-		 */
-		void transactionCreated(FinanceTransaction newTransaction);
-		/**
-		 * A transaction updated callback
-		 *
-		 * @param updatedTransaction the transaction that was updated
-		 */
-		void transactionUpdated(FinanceTransaction updatedTransaction);
 
-		/**
-		 * A transaction updated handler (transaction list has been updated)
-		 */
-		void transactionsUpdated();
-		/**
-		 * A transaction deleted callback
-		 *
-		 * @param deletedTransaction the deleted transaction
-		 */
-		void transactionDeleted(FinanceTransaction deletedTransaction);
+	/**
+	 * A transaction created callback
+	 *
+	 * @param transactionId the transaction that was created
+	 */
+	void transactionCreated(long transactionId);
+
+	/**
+	 * A transaction updated callback
+	 *
+	 * @param transactionId the transaction that was updated
+	 */
+	void transactionUpdated(long transactionId);
+
+	/**
+	 * A transaction updated handler (transaction list has been updated)
+	 */
+	void transactionsUpdated();
+
+	/**
+	 * A transaction deleted callback
+	 *
+	 * @param transactionId the deleted transaction
+	 */
+	void transactionDeleted(long transactionId);
 }

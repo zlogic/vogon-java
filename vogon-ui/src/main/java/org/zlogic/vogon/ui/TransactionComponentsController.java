@@ -22,9 +22,11 @@ import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
+import org.zlogic.vogon.data.events.TransactionEventHandler;
 import org.zlogic.vogon.ui.adapter.AccountModelAdapter;
 import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
 import org.zlogic.vogon.ui.adapter.TransactionComponentModelAdapter;
+import org.zlogic.vogon.ui.adapter.TransactionModelAdapter;
 import org.zlogic.vogon.ui.cell.AmountCellEditor;
 import org.zlogic.vogon.ui.cell.StringValidatorDouble;
 
@@ -116,6 +118,37 @@ public class TransactionComponentsController implements Initializable {
 	 */
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
+		
+		//Listen for Transaction events
+		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
+			((FinanceDataEventDispatcher) financeData.getAccountListener()).addTransactionEventHandler(new TransactionEventHandler() {
+				protected FinanceData financeData;
+
+				public TransactionEventHandler setFinanceData(FinanceData financeData) {
+					this.financeData = financeData;
+					return this;
+				}
+
+				@Override
+				public void transactionCreated(long transactionId) {
+				}
+
+				@Override
+				public void transactionUpdated(long transactionId) {
+					if(transaction!=null && transactionId==transaction.getId())
+						updateComponents();
+				}
+
+				@Override
+				public void transactionDeleted(long transactionId) {
+				}
+
+				@Override
+				public void transactionsUpdated() {
+					updateComponents();
+				}
+			}.setFinanceData(financeData));
+		}
 	}
 
 	/**
@@ -126,8 +159,6 @@ public class TransactionComponentsController implements Initializable {
 		TransactionComponent component = new TransactionComponent(null, transaction, 0);
 		financeData.createTransactionComponent(component);
 		TransactionComponentModelAdapter newComponentAdapter = new TransactionComponentModelAdapter(component, financeData);
-		transactionComponents.getItems().add(newComponentAdapter);
-		transactionComponents.getSelectionModel().select(newComponentAdapter);
 	}
 
 	/**
@@ -155,6 +186,7 @@ public class TransactionComponentsController implements Initializable {
 	 * Updates the transaction components table from database
 	 */
 	private void updateComponents() {
+		transaction = financeData.getUpdatedTransactionFromDatabase(transaction);
 		transactionComponents.getItems().clear();
 		for (TransactionComponent component : transaction.getComponents())
 			transactionComponents.getItems().add(new TransactionComponentModelAdapter(component, financeData));

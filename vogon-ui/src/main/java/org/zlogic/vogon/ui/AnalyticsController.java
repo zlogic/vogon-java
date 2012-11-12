@@ -350,12 +350,12 @@ public class AnalyticsController implements Initializable {
 		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
 			((FinanceDataEventDispatcher) financeData.getAccountListener()).addAccountEventHandler(new AccountEventHandler() {
 				@Override
-				public void accountCreated(FinanceAccount newAccount) {
+				public void accountCreated(long accountId) {
 					updateAccountsSelectionTable();
 				}
 
 				@Override
-				public void accountUpdated(FinanceAccount updatedAccount) {
+				public void accountUpdated(long accountId) {
 					updateAccountsSelectionTable();
 				}
 
@@ -365,7 +365,7 @@ public class AnalyticsController implements Initializable {
 				}
 
 				@Override
-				public void accountDeleted(FinanceAccount deletedAccount) {
+				public void accountDeleted(long accountId) {
 					updateAccountsSelectionTable();
 				}
 			});
@@ -375,12 +375,12 @@ public class AnalyticsController implements Initializable {
 		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
 			((FinanceDataEventDispatcher) financeData.getAccountListener()).addTransactionEventHandler(new TransactionEventHandler() {
 				@Override
-				public void transactionCreated(FinanceTransaction newTransaction) {
+				public void transactionCreated(long transactionId) {
 					updateTagsSelectionTable();
 				}
 
 				@Override
-				public void transactionUpdated(FinanceTransaction updatedTransaction) {
+				public void transactionUpdated(long transactionId) {
 					updateTagsSelectionTable();
 				}
 
@@ -389,7 +389,7 @@ public class AnalyticsController implements Initializable {
 				}
 
 				@Override
-				public void transactionDeleted(FinanceTransaction deletedTransaction) {
+				public void transactionDeleted(long transactionId) {
 					updateTagsSelectionTable();
 				}
 			});
