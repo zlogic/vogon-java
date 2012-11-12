@@ -59,7 +59,7 @@ public class AccountModelAdapter implements AccountInterface {
 	 * @param account the account for this item
 	 * @param financeData the FinanceData instance
 	 */
-	public AccountModelAdapter(final FinanceAccount account, FinanceData financeData) {
+	public AccountModelAdapter(FinanceAccount account, FinanceData financeData) {
 		this.account = account;
 		this.financeData = financeData;
 

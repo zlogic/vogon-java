@@ -70,8 +70,14 @@ public class TransactionsController implements Initializable {
 	 */
 	@FXML
 	private TableColumn<TransactionModelAdapter, TransactionModelAdapter> columnAmount;
+	/**
+	 * Pagination control
+	 */
 	@FXML
 	private Pagination transactionsTablePagination;
+	/**
+	 * Toplevel control
+	 */
 	@FXML
 	private VBox transactionsVBox;
 	/**
@@ -151,8 +157,10 @@ public class TransactionsController implements Initializable {
 					public void changed(ObservableValue<? extends Boolean> ov, Boolean t, Boolean t1) {
 						if (t1 && t1 != t)
 							transactionEditors.add(cell);
-						if (!t1 && t1 != t)
+						if (!t1 && t1 != t){
 							transactionEditors.remove(cell);
+							updateTransactions();
+						}
 					}
 				}.setData(editingTransactionEditors, cell));
 				return cell;
@@ -199,6 +207,9 @@ public class TransactionsController implements Initializable {
 	 * Updates the transactions table
 	 */
 	protected void updateTransactions() {
+		//Update only if editors are not active
+		if(!editingTransactionEditors.isEmpty())
+			return;
 		transactionsTablePagination.setPageCount(getPageCount());
 		updatePageTransactions(transactionsTablePagination.getCurrentPageIndex());
 	}
@@ -234,28 +245,35 @@ public class TransactionsController implements Initializable {
 				}
 
 				@Override
-				public void transactionCreated(FinanceTransaction newTransaction) {
+				public void transactionCreated(long transactionId) {
+					//Update only if editors are not active
+					if(!editingTransactionEditors.isEmpty())
+						return;
 					transactionsTablePagination.setCurrentPageIndex(0);
 					for (TransactionModelAdapter adapter : transactionsTable.getItems())
-						if (adapter.getTransaction().equals(newTransaction)) {
+						if (adapter.getTransaction().getId() == transactionId) {
 							transactionsTable.getSelectionModel().select(adapter);
 							break;
 						}
 				}
 
 				@Override
-				public void transactionUpdated(FinanceTransaction updatedTransaction) {
-					for (int i = 0; i < transactionsTable.getItems().size(); i++)
-						if (transactionsTable.getItems().get(i).getTransaction().equals(updatedTransaction))
-							transactionsTable.getItems().set(i, new TransactionModelAdapter(updatedTransaction, financeData));
+				public void transactionUpdated(long transactionId) {
+					//Update only if editors are not active
+					if(!editingTransactionEditors.isEmpty())
+						return;
+					updateTransactions();
 				}
 
 				@Override
-				public void transactionDeleted(FinanceTransaction deletedTransaction) {
+				public void transactionDeleted(long transactionId) {
 				}
 
 				@Override
 				public void transactionsUpdated() {
+					//Update only if editors are not active
+					if(!editingTransactionEditors.isEmpty())
+						return;
 					updateTransactions();
 				}
 			}.setFinanceData(financeData));
@@ -265,17 +283,18 @@ public class TransactionsController implements Initializable {
 		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
 			((FinanceDataEventDispatcher) financeData.getAccountListener()).addAccountEventHandler(new AccountEventHandler() {
 				@Override
-				public void accountCreated(FinanceAccount newAccount) {
+				public void accountCreated(long accountId) {
 					updateTransactions();
 				}
 
 				@Override
-				public void accountUpdated(FinanceAccount updatedAccount) {
+				public void accountUpdated(long accountId) {
 					updateTransactions();
 				}
 
 				@Override
-				public void accountDeleted(FinanceAccount deletedAccount) {
+				public void accountDeleted(long accountId) {
+					cancelEdit();
 					updateTransactions();
 				}
 

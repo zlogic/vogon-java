@@ -67,15 +67,15 @@ public class FinanceDataEventDispatcher implements TransactionEventHandler, Acco
 	}
 
 	@Override
-	public void transactionCreated(FinanceTransaction newTransaction) {
+	public void transactionCreated(long transactionId) {
 		for (TransactionEventHandler handler : transactionEventHandler)
-			handler.transactionCreated(newTransaction);
+			handler.transactionCreated(transactionId);
 	}
 
 	@Override
-	public void transactionUpdated(FinanceTransaction updatedTransaction) {
+	public void transactionUpdated(long transactionId) {
 		for (TransactionEventHandler handler : transactionEventHandler)
-			handler.transactionUpdated(updatedTransaction);
+			handler.transactionUpdated(transactionId);
 	}
 
 	@Override
@@ -85,21 +85,21 @@ public class FinanceDataEventDispatcher implements TransactionEventHandler, Acco
 	}
 
 	@Override
-	public void transactionDeleted(FinanceTransaction deletedTransaction) {
+	public void transactionDeleted(long transactionId) {
 		for (TransactionEventHandler handler : transactionEventHandler)
-			handler.transactionDeleted(deletedTransaction);
+			handler.transactionDeleted(transactionId);
 	}
 
 	@Override
-	public void accountCreated(FinanceAccount newAccount) {
+	public void accountCreated(long accountId) {
 		for (AccountEventHandler handler : accountEventHandler)
-			handler.accountCreated(newAccount);
+			handler.accountCreated(accountId);
 	}
 
 	@Override
-	public void accountUpdated(FinanceAccount updatedAccount) {
+	public void accountUpdated(long accountId) {
 		for (AccountEventHandler handler : accountEventHandler)
-			handler.accountUpdated(updatedAccount);
+			handler.accountUpdated(accountId);
 	}
 
 	@Override
@@ -109,9 +109,9 @@ public class FinanceDataEventDispatcher implements TransactionEventHandler, Acco
 	}
 
 	@Override
-	public void accountDeleted(FinanceAccount deletedAccount) {
+	public void accountDeleted(long accountId) {
 		for (AccountEventHandler handler : accountEventHandler)
-			handler.accountDeleted(deletedAccount);
+			handler.accountDeleted(accountId);
 	}
 
 	@Override

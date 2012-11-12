@@ -14,6 +14,7 @@ package org.zlogic.vogon.data.events;
  * @author Dmitry Zolotukhin
  */
 public interface CurrencyEventHandler {
+
 	/**
 	 * A currencies updated handler (all currencies have been updated)
 	 */

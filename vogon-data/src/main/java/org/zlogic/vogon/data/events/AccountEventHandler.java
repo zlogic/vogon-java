@@ -20,16 +20,16 @@ public interface AccountEventHandler {
 	/**
 	 * An account created callback
 	 *
-	 * @param newAccount the account that was created
+	 * @param accountId the account that was created
 	 */
-	void accountCreated(FinanceAccount newAccount);
+	void accountCreated(long accountId);
 
 	/**
 	 * An account updated callback
 	 *
-	 * @param updatedAccount the account that was updated
+	 * @param accountId the account that was updated
 	 */
-	void accountUpdated(FinanceAccount updatedAccount);
+	void accountUpdated(long accountId);
 
 	/**
 	 * An account updated handler (account list has been updated)
@@ -39,7 +39,7 @@ public interface AccountEventHandler {
 	/**
 	 * An account deleted callback
 	 *
-	 * @param deletedAccount the deleted account
+	 * @param accountId the deleted account
 	 */
-	void accountDeleted(FinanceAccount deletedAccount);
+	void accountDeleted(long accountId);
 }
