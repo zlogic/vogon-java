@@ -13,6 +13,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import org.zlogic.vogon.data.FinanceTransaction;
 
 /**
  * Class for displaying a virtual summary/report account (e.g. the total amount
@@ -50,7 +51,7 @@ public class ReportingAccount implements AccountInterface {
 	 */
 	public ReportingAccount(String description, double balance, Currency currency) {
 		this.name.set(new ObjectWithStatus<>(description, false));
-		this.balance.set(Double.toString(balance));
+		this.balance.set(new AmountModelAdapter(balance, true, currency, false, FinanceTransaction.Type.UNDEFINED).toString());
 		this.currency.set(new ObjectWithStatus<>(new CurrencyModelAdapter(currency), false));
 	}
 
