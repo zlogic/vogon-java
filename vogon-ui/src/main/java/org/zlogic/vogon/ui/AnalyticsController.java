@@ -10,6 +10,7 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.LinkedList;
@@ -205,12 +206,14 @@ public class AnalyticsController implements Initializable {
 
 				List<FinanceAccount> selectedAccounts = new LinkedList<>();
 				for (AccountSelectionAdapter accountAdapter : accountsSelectionTable.getItems())
-					selectedAccounts.add(accountAdapter.accountProperty().get().getAccount());
+					if (accountAdapter.enabledProperty().get())
+						selectedAccounts.add(accountAdapter.accountProperty().get().getAccount());
 				report.setSelectedAccounts(selectedAccounts);
 
 				List<String> selectedTags = new LinkedList<>();
 				for (TagSelectionAdapter tagAdapter : tagsSelectionTable.getItems())
-					selectedTags.add(tagAdapter.tagProperty().get());
+					if (tagAdapter.enabledProperty().get())
+						selectedTags.add(tagAdapter.tagProperty().get());
 				report.setSelectedTags(selectedTags);
 
 				report.setEnabledTransferTransactions(transferTransactionsCheckbox.selectedProperty().get());
@@ -260,7 +263,9 @@ public class AnalyticsController implements Initializable {
 	 */
 	private void updateTagsSelectionTable() {
 		tagsSelectionTable.getItems().clear();
-		for (String tag : report.getAllTags())
+		List<String> tags = report.getAllTags();
+		Collections.sort(tags);
+		for (String tag : tags)
 			tagsSelectionTable.getItems().add(new TagSelectionAdapter(tag, true));
 	}
 
