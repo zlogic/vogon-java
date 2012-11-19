@@ -99,7 +99,7 @@ public class AccountsController implements Initializable {
 						}
 					}
 				};
-				cell.setConverter(ObjectWithStatus.getConverter(String.class,Boolean.class));
+				cell.setConverter(ObjectWithStatus.getConverter(String.class, Boolean.class));
 				return cell;
 			}
 		});
@@ -147,7 +147,7 @@ public class AccountsController implements Initializable {
 							setEditable(item.getStatus());
 					}
 				};
-				cell.setConverter(ObjectWithStatus.getConverter(BooleanProperty.class,Boolean.class));
+				cell.setConverter(ObjectWithStatus.getConverter(BooleanProperty.class, Boolean.class));
 				cell.setAlignment(Pos.CENTER);
 				return cell;
 			}

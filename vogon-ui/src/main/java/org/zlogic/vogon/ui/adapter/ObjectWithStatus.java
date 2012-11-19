@@ -34,8 +34,9 @@ public class ObjectWithStatus<TypeObject, TypeStatus> {
 	 * Default constructor
 	 */
 	public ObjectWithStatus() {
-		this(null,null);
+		this(null, null);
 	}
+
 	/**
 	 * Constructor for ObjectWithStatus
 	 *
@@ -91,6 +92,7 @@ public class ObjectWithStatus<TypeObject, TypeStatus> {
 
 	/**
 	 * Returns the StringConverter for this class (uses only the object's value)
+	 *
 	 * @param objectClass the TypeObject class (the object's type)
 	 * @param statusClass the TypeStatus class (the object's status type)
 	 * @param <T> the object's type
@@ -98,30 +100,29 @@ public class ObjectWithStatus<TypeObject, TypeStatus> {
 	 *
 	 * @return the StringConverter for this class
 	 */
-	public static <T,S> StringConverter<ObjectWithStatus<T, S>> getConverter(Class<T> objectClass,Class<S> statusClass) {
+	public static <T, S> StringConverter<ObjectWithStatus<T, S>> getConverter(Class<T> objectClass, Class<S> statusClass) {
 		return new StringConverter<ObjectWithStatus<T, S>>() {
 			private Class<T> objectClass;
-			public StringConverter<ObjectWithStatus<T, S>> setObjectClass(Class<T> objectClass){
+
+			public StringConverter<ObjectWithStatus<T, S>> setObjectClass(Class<T> objectClass) {
 				this.objectClass = objectClass;
 				return this;
 			}
+
 			@Override
 			public String toString(ObjectWithStatus<T, S> t) {
 				return t.getValue().toString();
 			}
 
 			@Override
-			public ObjectWithStatus<T,S> fromString(String string) {
-				if(objectClass.isAssignableFrom(String.class))
+			public ObjectWithStatus<T, S> fromString(String string) {
+				if (objectClass.isAssignableFrom(String.class))
 					try {
-						return new ObjectWithStatus<T,S>(objectClass.getConstructor(String.class).newInstance(string), null);
-					} catch (InstantiationException | IllegalAccessException
-							| IllegalArgumentException
-							| InvocationTargetException | NoSuchMethodException
-							| SecurityException ex) {
+						return new ObjectWithStatus<T, S>(objectClass.getConstructor(String.class).newInstance(string), null);
+					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
 						Logger.getLogger(ObjectWithStatus.class.getName()).log(Level.SEVERE, null, ex);
 					}
-				return new ObjectWithStatus<T,S>(null, null);
+				return new ObjectWithStatus<T, S>(null, null);
 			}
 		}.setObjectClass(objectClass);
 	}

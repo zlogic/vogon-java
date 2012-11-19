@@ -171,7 +171,7 @@ public class FinanceData {
 		List<FinanceTransaction> result = query.getResultList();
 
 		//Post-fetch components
-		if(!result.isEmpty()){
+		if (!result.isEmpty()) {
 			CriteriaQuery<FinanceTransaction> transactionsComponentsFetchCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
 			Root<FinanceTransaction> trComponentsFetch = transactionsComponentsFetchCriteriaQuery.from(FinanceTransaction.class);
 			transactionsComponentsFetchCriteriaQuery.where(tr.in(result));

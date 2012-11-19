@@ -157,7 +157,7 @@ public class TransactionsController implements Initializable {
 					public void changed(ObservableValue<? extends Boolean> ov, Boolean t, Boolean t1) {
 						if (t1 && t1 != t)
 							transactionEditors.add(cell);
-						if (!t1 && t1 != t){
+						if (!t1 && t1 != t) {
 							transactionEditors.remove(cell);
 							updateTransactions();
 						}
@@ -214,7 +214,7 @@ public class TransactionsController implements Initializable {
 	 */
 	protected void updateTransactions() {
 		//Update only if editors are not active
-		if(!editingTransactionEditors.isEmpty())
+		if (!editingTransactionEditors.isEmpty())
 			return;
 		transactionsTablePagination.setPageCount(getPageCount());
 		updatePageTransactions(transactionsTablePagination.getCurrentPageIndex());
@@ -246,7 +246,7 @@ public class TransactionsController implements Initializable {
 				@Override
 				public void transactionCreated(long transactionId) {
 					//Update only if editors are not active
-					if(!editingTransactionEditors.isEmpty())
+					if (!editingTransactionEditors.isEmpty())
 						return;
 					transactionsTablePagination.setCurrentPageIndex(0);
 					for (TransactionModelAdapter adapter : transactionsTable.getItems())
@@ -259,7 +259,7 @@ public class TransactionsController implements Initializable {
 				@Override
 				public void transactionUpdated(long transactionId) {
 					//Update only if editors are not active
-					if(!editingTransactionEditors.isEmpty())
+					if (!editingTransactionEditors.isEmpty())
 						return;
 					updateTransactions();
 				}
@@ -271,7 +271,7 @@ public class TransactionsController implements Initializable {
 				@Override
 				public void transactionsUpdated() {
 					//Update only if editors are not active
-					if(!editingTransactionEditors.isEmpty())
+					if (!editingTransactionEditors.isEmpty())
 						return;
 					updateTransactions();
 				}

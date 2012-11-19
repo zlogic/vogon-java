@@ -119,7 +119,7 @@ public class TransactionComponentsController implements Initializable {
 	 */
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
-		
+
 		//Listen for Transaction events
 		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
 			((FinanceDataEventDispatcher) financeData.getAccountListener()).addTransactionEventHandler(new TransactionEventHandler() {
@@ -129,7 +129,7 @@ public class TransactionComponentsController implements Initializable {
 
 				@Override
 				public void transactionUpdated(long transactionId) {
-					if(transaction!=null && transactionId==transaction.getId())
+					if (transaction != null && transactionId == transaction.getId())
 						updateComponents();
 				}
 
