@@ -22,30 +22,14 @@
 		</resources>
 		<plugins>
 			<plugin>
-				<groupId>org.bsc.maven</groupId>
-				<artifactId>maven-processor-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>process</goal>
-						</goals>
-						<phase>generate-sources</phase>
-						<configuration>
-							<addOutputDirectoryToCompilationSources>true</addOutputDirectoryToCompilationSources>
-							<processors>
-								<processor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</processor>
-							</processors>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<source>${version.java}</source>
 					<target>${version.java}</target>
-					<compilerArgument>-proc:none</compilerArgument>
+					<processors>
+						<processor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</processor>
+					</processors>
 				</configuration>
 			</plugin>
 		</plugins>

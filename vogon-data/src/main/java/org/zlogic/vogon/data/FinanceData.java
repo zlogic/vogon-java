@@ -171,12 +171,13 @@ public class FinanceData {
 		List<FinanceTransaction> result = query.getResultList();
 
 		//Post-fetch components
-		CriteriaQuery<FinanceTransaction> transactionsComponentsFetchCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
-		Root<FinanceTransaction> trComponentsFetch = transactionsComponentsFetchCriteriaQuery.from(FinanceTransaction.class);
-		transactionsComponentsFetchCriteriaQuery.where(tr.in(result));
-		trComponentsFetch.fetch(FinanceTransaction_.components, JoinType.LEFT).fetch(TransactionComponent_.account, JoinType.LEFT);
-		entityManager.createQuery(transactionsComponentsFetchCriteriaQuery).getResultList();
-
+		if(!result.isEmpty()){
+			CriteriaQuery<FinanceTransaction> transactionsComponentsFetchCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
+			Root<FinanceTransaction> trComponentsFetch = transactionsComponentsFetchCriteriaQuery.from(FinanceTransaction.class);
+			transactionsComponentsFetchCriteriaQuery.where(tr.in(result));
+			trComponentsFetch.fetch(FinanceTransaction_.components, JoinType.LEFT).fetch(TransactionComponent_.account, JoinType.LEFT);
+			entityManager.createQuery(transactionsComponentsFetchCriteriaQuery).getResultList();
+		}
 		entityManager.close();
 		return result;
 	}
