@@ -5,36 +5,41 @@
  */
 package org.zlogic.vogon.ui.adapter;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
-import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javafx.util.StringConverter;
 
 /**
  * Helper class for storing an object and a status (e.g. for validation).
  *
- * @param <ObjectType> the object's type
- * @param <StatusType> the object's status type (e.g. Boolean or enum)
+ * @param <TypeObject> the object's type
+ * @param <TypeStatus> the object's status type (e.g. Boolean or enum)
  * @author Dmitry Zolotukhin
  */
-public class ObjectWithStatus<ObjectType, StatusType> {
+public class ObjectWithStatus<TypeObject, TypeStatus> {
 
-	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * The object
 	 */
-	protected final ObjectType value;
+	protected final TypeObject value;
 	/**
 	 * The object's status
 	 */
-	protected final StatusType status;
+	protected final TypeStatus status;
 
+	public ObjectWithStatus() {
+		this(null,null);
+	}
 	/**
 	 * Constructor for ObjectWithStatus
 	 *
 	 * @param value the object's value
 	 * @param status the object's status
 	 */
-	public ObjectWithStatus(ObjectType value, StatusType status) {
+	public ObjectWithStatus(TypeObject value, TypeStatus status) {
 		this.value = value;
 		this.status = status;
 	}
@@ -44,7 +49,7 @@ public class ObjectWithStatus<ObjectType, StatusType> {
 	 *
 	 * @return the object's value
 	 */
-	public ObjectType getValue() {
+	public TypeObject getValue() {
 		return value;
 	}
 
@@ -53,7 +58,7 @@ public class ObjectWithStatus<ObjectType, StatusType> {
 	 *
 	 * @return the object's status
 	 */
-	public StatusType getStatus() {
+	public TypeStatus getStatus() {
 		return status;
 	}
 
@@ -65,8 +70,8 @@ public class ObjectWithStatus<ObjectType, StatusType> {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj != null && obj instanceof ObjectWithStatus) {
-			ObjectWithStatus other = (ObjectWithStatus) obj;
-			return this.value != null ? this.value.equals(other.value) : false && this.status != null ? this.status.equals(other.status) : false;
+			ObjectWithStatus<?, ?> other = (ObjectWithStatus<?, ?>) obj;
+			return (this.value != null ? this.value.equals(other.value) : false) && (this.status != null ? this.status.equals(other.status) : false);
 		} else if (obj != null && obj.getClass().equals(value.getClass()))
 			return obj.equals(value);
 		else
@@ -86,17 +91,31 @@ public class ObjectWithStatus<ObjectType, StatusType> {
 	 *
 	 * @return the StringConverter for this class
 	 */
-	public static StringConverter getConverter() {
-		return new StringConverter<ObjectWithStatus>() {
+	public static <T,S> StringConverter<ObjectWithStatus<T, S>> getConverter(Class<T> objectClass,Class<S> statusClass) {
+		return new StringConverter<ObjectWithStatus<T, S>>() {
+			private Class<T> objectClass;
+			public StringConverter<ObjectWithStatus<T, S>> setObjectClass(Class<T> objectClass){
+				this.objectClass = objectClass;
+				return this;
+			}
 			@Override
-			public String toString(ObjectWithStatus t) {
+			public String toString(ObjectWithStatus<T, S> t) {
 				return t.getValue().toString();
 			}
 
 			@Override
-			public ObjectWithStatus fromString(String string) {
-				return new ObjectWithStatus<>(string, null);
+			public ObjectWithStatus<T,S> fromString(String string) {
+				if(objectClass.isAssignableFrom(String.class))
+					try {
+						return new ObjectWithStatus<T,S>(objectClass.getConstructor(String.class).newInstance(string), null);
+					} catch (InstantiationException | IllegalAccessException
+							| IllegalArgumentException
+							| InvocationTargetException | NoSuchMethodException
+							| SecurityException ex) {
+						Logger.getLogger(ObjectWithStatus.class.getName()).log(Level.SEVERE, null, ex);
+					}
+				return new ObjectWithStatus<T,S>(null, null);
 			}
-		};
+		}.setObjectClass(objectClass);
 	}
 }

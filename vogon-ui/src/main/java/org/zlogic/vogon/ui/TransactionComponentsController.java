@@ -9,6 +9,7 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
+
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -18,6 +19,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.util.Callback;
+
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
@@ -26,7 +28,6 @@ import org.zlogic.vogon.data.events.TransactionEventHandler;
 import org.zlogic.vogon.ui.adapter.AccountModelAdapter;
 import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
 import org.zlogic.vogon.ui.adapter.TransactionComponentModelAdapter;
-import org.zlogic.vogon.ui.adapter.TransactionModelAdapter;
 import org.zlogic.vogon.ui.cell.AmountCellEditor;
 import org.zlogic.vogon.ui.cell.StringValidatorDouble;
 
@@ -83,7 +84,7 @@ public class TransactionComponentsController implements Initializable {
 		columnAccount.setCellFactory(new Callback<TableColumn<TransactionComponentModelAdapter, AccountModelAdapter>, TableCell<TransactionComponentModelAdapter, AccountModelAdapter>>() {
 			@Override
 			public TableCell<TransactionComponentModelAdapter, AccountModelAdapter> call(TableColumn<TransactionComponentModelAdapter, AccountModelAdapter> p) {
-				ComboBoxTableCell cell = new ComboBoxTableCell<>();
+				ComboBoxTableCell<TransactionComponentModelAdapter, AccountModelAdapter> cell = new ComboBoxTableCell<>();
 				cell.getItems().addAll(getAccountsComboList());
 				return cell;
 			}
@@ -92,7 +93,7 @@ public class TransactionComponentsController implements Initializable {
 		columnAmount.setCellFactory(new Callback<TableColumn<TransactionComponentModelAdapter, AmountModelAdapter>, TableCell<TransactionComponentModelAdapter, AmountModelAdapter>>() {
 			@Override
 			public TableCell<TransactionComponentModelAdapter, AmountModelAdapter> call(TableColumn<TransactionComponentModelAdapter, AmountModelAdapter> p) {
-				AmountCellEditor cell = new AmountCellEditor<>(new StringValidatorDouble());
+				AmountCellEditor<TransactionComponentModelAdapter> cell = new AmountCellEditor<>(new StringValidatorDouble());
 				cell.setAlignment(Pos.CENTER_RIGHT);
 				return cell;
 			}
@@ -122,13 +123,6 @@ public class TransactionComponentsController implements Initializable {
 		//Listen for Transaction events
 		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
 			((FinanceDataEventDispatcher) financeData.getAccountListener()).addTransactionEventHandler(new TransactionEventHandler() {
-				protected FinanceData financeData;
-
-				public TransactionEventHandler setFinanceData(FinanceData financeData) {
-					this.financeData = financeData;
-					return this;
-				}
-
 				@Override
 				public void transactionCreated(long transactionId) {
 				}
@@ -147,7 +141,7 @@ public class TransactionComponentsController implements Initializable {
 				public void transactionsUpdated() {
 					updateComponents();
 				}
-			}.setFinanceData(financeData));
+			});
 		}
 	}
 
@@ -158,7 +152,6 @@ public class TransactionComponentsController implements Initializable {
 	private void handleAddComponent() {
 		TransactionComponent component = new TransactionComponent(null, transaction, 0);
 		financeData.createTransactionComponent(component);
-		TransactionComponentModelAdapter newComponentAdapter = new TransactionComponentModelAdapter(component, financeData);
 	}
 
 	/**

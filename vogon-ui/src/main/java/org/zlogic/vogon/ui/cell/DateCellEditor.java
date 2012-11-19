@@ -31,7 +31,7 @@ public class DateCellEditor<BaseType> extends StringCellEditor<BaseType, Date> {
 	 * Creates a date editor
 	 */
 	public DateCellEditor() {
-		super(new StringValidatorDate(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages").getString("PARSER_DATE")));
+		super(new StringValidatorDate(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages").getString("PARSER_DATE")),Date.class);
 		dateFormat = new SimpleDateFormat(messages.getString("PARSER_DATE"));
 	}
 

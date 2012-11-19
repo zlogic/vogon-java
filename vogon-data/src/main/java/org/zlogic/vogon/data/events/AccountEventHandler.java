@@ -5,8 +5,6 @@
  */
 package org.zlogic.vogon.data.events;
 
-import org.zlogic.vogon.data.FinanceAccount;
-
 /**
  * Interface for accepting Account events. If several listeners are used, the
  * implementation is responsible for distributing the event. Event handling

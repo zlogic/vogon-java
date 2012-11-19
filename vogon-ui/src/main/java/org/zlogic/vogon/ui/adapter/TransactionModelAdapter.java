@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -21,8 +22,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ListChangeListener.Change;
 import javafx.util.StringConverter;
+
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
@@ -51,15 +52,15 @@ public class TransactionModelAdapter implements CellStatus {
 	/**
 	 * The transaction tags property
 	 */
-	private final ListProperty<String> tags = new SimpleListProperty(FXCollections.observableList(new LinkedList<String>()));
+	private final ListProperty<String> tags = new SimpleListProperty<>(FXCollections.observableList(new LinkedList<String>()));
 	/**
 	 * The transaction date property
 	 */
-	private final ObjectProperty<Date> date = new SimpleObjectProperty();
+	private final ObjectProperty<Date> date = new SimpleObjectProperty<>();
 	/**
 	 * The transaction amount property
 	 */
-	private final ObjectProperty<AmountModelAdapter> amount = new SimpleObjectProperty();
+	private final ObjectProperty<AmountModelAdapter> amount = new SimpleObjectProperty<>();
 	/**
 	 * The transaction account(s) property (rendered string)
 	 */
@@ -81,7 +82,7 @@ public class TransactionModelAdapter implements CellStatus {
 			protected FinanceData financeData;
 			protected FinanceTransaction transaction;
 
-			public ChangeListener setData(FinanceTransaction transaction, FinanceData financeData) {
+			public ChangeListener<String> setData(FinanceTransaction transaction, FinanceData financeData) {
 				this.transaction = transaction;
 				this.financeData = financeData;
 				return this;
@@ -98,7 +99,7 @@ public class TransactionModelAdapter implements CellStatus {
 			protected FinanceData financeData;
 			protected FinanceTransaction transaction;
 
-			public ListChangeListener setData(FinanceTransaction transaction, FinanceData financeData) {
+			public ListChangeListener<String> setData(FinanceTransaction transaction, FinanceData financeData) {
 				this.transaction = transaction;
 				this.financeData = financeData;
 				return this;
@@ -114,7 +115,7 @@ public class TransactionModelAdapter implements CellStatus {
 			protected FinanceData financeData;
 			protected FinanceTransaction transaction;
 
-			public ChangeListener setData(FinanceTransaction transaction, FinanceData financeData) {
+			public ChangeListener<Date> setData(FinanceTransaction transaction, FinanceData financeData) {
 				this.transaction = transaction;
 				this.financeData = financeData;
 				return this;
@@ -152,7 +153,7 @@ public class TransactionModelAdapter implements CellStatus {
 	 *
 	 * @return the converter for tags
 	 */
-	public static StringConverter getTagsListConverter() {
+	public static StringConverter<List<String>> getTagsListConverter() {
 		return new StringConverter<List<String>>() {
 			@Override
 			public String toString(List<String> t) {

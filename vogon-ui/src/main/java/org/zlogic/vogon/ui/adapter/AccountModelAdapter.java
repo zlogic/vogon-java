@@ -6,6 +6,7 @@
 package org.zlogic.vogon.ui.adapter;
 
 import java.util.Objects;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -14,6 +15,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
@@ -38,7 +40,7 @@ public class AccountModelAdapter implements AccountInterface {
 	/**
 	 * The account name property
 	 */
-	private final ObjectProperty<ObjectWithStatus<String, Boolean>> name = new SimpleObjectProperty();
+	private final ObjectProperty<ObjectWithStatus<String, Boolean>> name = new SimpleObjectProperty<>();
 	/**
 	 * The account balance property (formatted string)
 	 */
@@ -46,12 +48,12 @@ public class AccountModelAdapter implements AccountInterface {
 	/**
 	 * The currency property
 	 */
-	private final ObjectProperty<ObjectWithStatus<CurrencyModelAdapter, Boolean>> currency = new SimpleObjectProperty();
+	private final ObjectProperty<ObjectWithStatus<CurrencyModelAdapter, Boolean>> currency = new SimpleObjectProperty<>();
 	/**
 	 * The property indicating if account should be included in the reporting
 	 * account's total balance
 	 */
-	private final ObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>> includeInTotal = new SimpleObjectProperty(new ObjectWithStatus<>(new SimpleBooleanProperty(true), true));
+	private final ObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>> includeInTotal = new SimpleObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>>(new ObjectWithStatus<BooleanProperty, Boolean>(new SimpleBooleanProperty(true), true));
 
 	/**
 	 * Default constructor
@@ -70,7 +72,7 @@ public class AccountModelAdapter implements AccountInterface {
 			protected FinanceData financeData;
 			protected FinanceAccount account;
 
-			public ChangeListener setData(FinanceAccount account, FinanceData financeData) {
+			public ChangeListener<Boolean> setData(FinanceAccount account, FinanceData financeData) {
 				this.account = account;
 				this.financeData = financeData;
 				return this;
@@ -87,7 +89,7 @@ public class AccountModelAdapter implements AccountInterface {
 			protected FinanceData financeData;
 			protected FinanceAccount account;
 
-			public ChangeListener setData(FinanceAccount account, FinanceData financeData) {
+			public ChangeListener<ObjectWithStatus<String, Boolean>> setData(FinanceAccount account, FinanceData financeData) {
 				this.account = account;
 				this.financeData = financeData;
 				return this;
@@ -104,7 +106,7 @@ public class AccountModelAdapter implements AccountInterface {
 			protected FinanceData financeData;
 			protected FinanceAccount account;
 
-			public ChangeListener setData(FinanceAccount account, FinanceData financeData) {
+			public ChangeListener<ObjectWithStatus<CurrencyModelAdapter, Boolean>> setData(FinanceAccount account, FinanceData financeData) {
 				this.account = account;
 				this.financeData = financeData;
 				return this;

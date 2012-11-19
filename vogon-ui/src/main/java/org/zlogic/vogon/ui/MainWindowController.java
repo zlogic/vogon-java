@@ -13,6 +13,7 @@ import java.util.ResourceBundle;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -28,6 +29,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
+
 import org.zlogic.vogon.data.DatabaseManager;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
@@ -63,7 +65,7 @@ public class MainWindowController implements Initializable {
 	/**
 	 * The background task
 	 */
-	protected Task backgroundTask;
+	protected Task<Void> backgroundTask;
 	/**
 	 * The root container
 	 */
@@ -183,7 +185,7 @@ public class MainWindowController implements Initializable {
 			Task<Void> task = new Task<Void>() {
 				private FileImporter importer;
 
-				public Task setImporter(FileImporter importer) {
+				public Task<Void> setImporter(FileImporter importer) {
 					this.importer = importer;
 					return this;
 				}
@@ -244,7 +246,7 @@ public class MainWindowController implements Initializable {
 			Task<Void> task = new Task<Void>() {
 				private FileExporter exporter;
 
-				public Task setExporter(FileExporter exporter) {
+				public Task<Void> setExporter(FileExporter exporter) {
 					this.exporter = exporter;
 					return this;
 				}
@@ -350,7 +352,7 @@ public class MainWindowController implements Initializable {
 	 *
 	 * @param task the task to be started
 	 */
-	protected void startTaskThread(Task task) {
+	protected void startTaskThread(Task<Void> task) {
 		synchronized (this) {
 			//Wait for previous task to compete
 			completeTaskThread();
@@ -362,9 +364,9 @@ public class MainWindowController implements Initializable {
 			//Automatically run beginTask/endTask before the actual task is processed
 			backgroundThread = new Thread(
 					new Runnable() {
-						protected Task task;
+						protected Task<Void> task;
 
-						public Runnable setTask(Task task) {
+						public Runnable setTask(Task<Void> task) {
 							this.task = task;
 							return this;
 						}
@@ -423,9 +425,9 @@ public class MainWindowController implements Initializable {
 					transactionsPaneController.cancelEdit();
 			}
 		});
-		analyticsPaneController.setBackgroundTaskProcessor(new Callback<Task, Void>() {
+		analyticsPaneController.setBackgroundTaskProcessor(new Callback<Task<Void>, Void>() {
 			@Override
-			public Void call(Task p) {
+			public Void call(Task<Void> p) {
 				startTaskThread(p);
 				return null;
 			}

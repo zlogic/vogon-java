@@ -7,10 +7,12 @@ package org.zlogic.vogon.ui.adapter;
 
 import java.util.Currency;
 import java.util.Objects;
+
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+
 import org.zlogic.vogon.data.CurrencyRate;
 import org.zlogic.vogon.data.FinanceData;
 
@@ -21,7 +23,6 @@ import org.zlogic.vogon.data.FinanceData;
  */
 public class CurrencyRateModelAdapter {
 
-	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * The rate
 	 */
@@ -46,20 +47,20 @@ public class CurrencyRateModelAdapter {
 		updateProperties();
 
 		//Add change listener
-		value.addListener(new ChangeListener<Double>() {
+		value.addListener(new ChangeListener<Number>() {
 			protected FinanceData financeData;
 			protected CurrencyRate rate;
 
-			public ChangeListener setData(CurrencyRate rate, FinanceData financeData) {
+			public ChangeListener<Number> setData(CurrencyRate rate, FinanceData financeData) {
 				this.rate = rate;
 				this.financeData = financeData;
 				return this;
 			}
 
 			@Override
-			public void changed(ObservableValue<? extends Double> ov, Double t, Double t1) {
-				if (rate.getExchangeRate() != t1)
-					financeData.setExchangeRate(rate, t1);
+			public void changed(ObservableValue<? extends Number> ov, Number t, Number t1) {
+				if (rate.getExchangeRate() != t1.doubleValue())
+					financeData.setExchangeRate(rate, t1.doubleValue());
 			}
 		}.setData(rate, financeData));
 	}

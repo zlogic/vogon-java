@@ -6,13 +6,14 @@
 package org.zlogic.vogon.ui.adapter;
 
 import java.util.Currency;
-import java.util.ResourceBundle;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+
 import org.zlogic.vogon.data.FinanceTransaction;
 
 /**
@@ -23,11 +24,10 @@ import org.zlogic.vogon.data.FinanceTransaction;
  */
 public class ReportingAccount implements AccountInterface {
 
-	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * The account name property
 	 */
-	private final ObjectProperty<ObjectWithStatus<String, Boolean>> name = new SimpleObjectProperty();
+	private final ObjectProperty<ObjectWithStatus<String, Boolean>> name = new SimpleObjectProperty<>();
 	/**
 	 * The account balance property (formatted string)
 	 */
@@ -35,12 +35,12 @@ public class ReportingAccount implements AccountInterface {
 	/**
 	 * The currency property
 	 */
-	private final ObjectProperty<ObjectWithStatus<CurrencyModelAdapter, Boolean>> currency = new SimpleObjectProperty();
+	private final ObjectProperty<ObjectWithStatus<CurrencyModelAdapter, Boolean>> currency = new SimpleObjectProperty<>();
 	/**
 	 * The property indicating if account should be included in the reporting
 	 * account's total balance
 	 */
-	private final ObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>> includeInTotal = new SimpleObjectProperty(new ObjectWithStatus<>(new SimpleBooleanProperty(true), false));
+	private final ObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>> includeInTotal = new SimpleObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>>(new ObjectWithStatus<BooleanProperty, Boolean>(new SimpleBooleanProperty(true), false));
 
 	/**
 	 * Constructor for ReportingAccount

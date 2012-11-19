@@ -5,6 +5,10 @@
  */
 package org.zlogic.vogon.ui.cell;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javafx.event.EventHandler;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TextField;
@@ -20,6 +24,8 @@ import javafx.scene.input.KeyEvent;
  */
 public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType, PropertyType> {
 
+	private Class<PropertyType> classPropertyType;
+	
 	/**
 	 * The editor component
 	 */
@@ -34,8 +40,9 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 	 *
 	 * @param validator the value validator
 	 */
-	public StringCellEditor(StringCellValidator validator) {
+	public StringCellEditor(StringCellValidator validator,Class<PropertyType> classPropertyType) {
 		this.validator = validator;
+		this.classPropertyType = classPropertyType;
 	}
 
 	/**
@@ -129,7 +136,15 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 	 * @return value, converted to the cell class type
 	 */
 	protected PropertyType propertyFromString(String value) {
-		return (PropertyType) value;
+		if(classPropertyType.isAssignableFrom(String.class))
+			try {
+				return classPropertyType.getConstructor(String.class).newInstance(value);
+			} catch (InstantiationException | IllegalAccessException
+					| IllegalArgumentException | InvocationTargetException
+					| NoSuchMethodException | SecurityException ex) {
+				Logger.getLogger(StringCellEditor.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		return null;
 	}
 
 	/**

@@ -8,6 +8,7 @@ package org.zlogic.vogon.ui;
 import java.net.URL;
 import java.util.Currency;
 import java.util.ResourceBundle;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -20,6 +21,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 import javafx.util.converter.DoubleStringConverter;
+
 import org.zlogic.vogon.data.CurrencyRate;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.events.CurrencyEventHandler;
@@ -33,7 +35,6 @@ import org.zlogic.vogon.ui.adapter.CurrencyRateModelAdapter;
  */
 public class CurrenciesController implements Initializable {
 
-	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * The associated FinanceData instance
 	 */
@@ -67,7 +68,7 @@ public class CurrenciesController implements Initializable {
 		columnExchangeRate.setCellFactory(new Callback<TableColumn<CurrencyRateModelAdapter, Double>, TableCell<CurrencyRateModelAdapter, Double>>() {
 			@Override
 			public TableCell<CurrencyRateModelAdapter, Double> call(TableColumn<CurrencyRateModelAdapter, Double> p) {
-				TextFieldTableCell cell = new TextFieldTableCell<>();
+				TextFieldTableCell<CurrencyRateModelAdapter, Double> cell = new TextFieldTableCell<>();
 				cell.setConverter(new DoubleStringConverter());
 				cell.setAlignment(Pos.CENTER_RIGHT);
 				return cell;
@@ -87,18 +88,11 @@ public class CurrenciesController implements Initializable {
 		//Listen for Currency events
 		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
 			((FinanceDataEventDispatcher) financeData.getCurrencyListener()).addCurrencyEventHandler(new CurrencyEventHandler() {
-				protected FinanceData financeData;
-
-				public CurrencyEventHandler setFinanceData(FinanceData financeData) {
-					this.financeData = financeData;
-					return this;
-				}
-
 				@Override
 				public void currenciesUpdated() {
 					updateCurrencies();
 				}
-			}.setFinanceData(financeData));
+			});
 			defaultCurrency.valueProperty().addListener(new ChangeListener<CurrencyModelAdapter>() {
 				protected FinanceData financeData;
 

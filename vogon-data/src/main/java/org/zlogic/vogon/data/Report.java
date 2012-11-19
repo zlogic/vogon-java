@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Tuple;
@@ -294,8 +295,8 @@ public class Report {
 	protected class ConstructedPredicate {
 
 		private Predicate predicate;
-		private Join componentsJoin;
-		private Join tagsJoin;
+		private Join<FinanceTransaction, TransactionComponent> componentsJoin;
+		private Join<FinanceTransaction, String> tagsJoin;
 
 		/**
 		 * Default constructor
@@ -304,7 +305,7 @@ public class Report {
 		 * @param componentsJoin the transaction components join
 		 * @param tagsJoin the transaction tags join
 		 */
-		public ConstructedPredicate(Predicate predicate, Join componentsJoin, Join tagsJoin) {
+		public ConstructedPredicate(Predicate predicate, Join<FinanceTransaction, TransactionComponent> componentsJoin, Join<FinanceTransaction, String> tagsJoin) {
 			this.predicate = predicate;
 			this.componentsJoin = componentsJoin;
 			this.tagsJoin = tagsJoin;
@@ -324,7 +325,7 @@ public class Report {
 		 *
 		 * @return the transaction components join
 		 */
-		public Join getComponentsJoin() {
+		public Join<FinanceTransaction, TransactionComponent> getComponentsJoin() {
 			return componentsJoin;
 		}
 
@@ -333,7 +334,7 @@ public class Report {
 		 *
 		 * @return the transaction tags join
 		 */
-		public Join getTagsJoin() {
+		public Join<FinanceTransaction, String> getTagsJoin() {
 			return tagsJoin;
 		}
 	}
@@ -347,7 +348,7 @@ public class Report {
 	 * @return the predicate for filtering transactions and joins which should
 	 * be used in groupBy if result of selection is not a unique FinanceAccount
 	 */
-	protected ConstructedPredicate getFilteredTransactionsPredicate(CriteriaBuilder criteriaBuilder, Root<FinanceTransaction> tr, EnumSet appliedFilters) {
+	protected ConstructedPredicate getFilteredTransactionsPredicate(CriteriaBuilder criteriaBuilder, Root<FinanceTransaction> tr, EnumSet<FilterType> appliedFilters) {
 		//Date filter
 		Predicate datePredicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), earliestDate),
 				criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), latestDate));
@@ -368,11 +369,11 @@ public class Report {
 			expenseTypePredicate = criteriaBuilder.or(expenseTypePredicate, criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.amount), new Long(0)));
 
 		//Tags jon
-		Join tagsJoin = tr.join(FinanceTransaction_.tags);
+		Join<FinanceTransaction, String> tagsJoin = tr.join(FinanceTransaction_.tags);
 		Predicate tagsPredicate = (selectedTags != null && !selectedTags.isEmpty()) ? tagsJoin.in(criteriaBuilder.literal(selectedTags)) : criteriaBuilder.disjunction();
 
 		//Transaction components join
-		Join componentsJoin = tr.join(FinanceTransaction_.components);
+		Join<FinanceTransaction, TransactionComponent> componentsJoin = tr.join(FinanceTransaction_.components);
 		Predicate accountsPredicate = (selectedAccounts != null && !selectedAccounts.isEmpty()) ? componentsJoin.get(TransactionComponent_.account).in(criteriaBuilder.literal(selectedAccounts)) : criteriaBuilder.disjunction();
 
 		//Combine all filters
@@ -403,7 +404,7 @@ public class Report {
 	 * @param lastTransaction the last transaction number to be selected
 	 * @return list of all transactions matching the set filters
 	 */
-	public List<FinanceTransaction> getTransactions(SingularAttribute orderBy, boolean orderAsc, boolean orderAbsolute, EnumSet appliedFilters, int firstTransaction, int lastTransaction) {
+	public <OrderByClass> List<FinanceTransaction> getTransactions(SingularAttribute<FinanceTransaction,OrderByClass> orderBy, boolean orderAsc, boolean orderAbsolute, EnumSet<FilterType> appliedFilters, int firstTransaction, int lastTransaction) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Tuple> transactionsCriteriaQuery = criteriaBuilder.createTupleQuery();
@@ -414,16 +415,28 @@ public class Report {
 		transactionsCriteriaQuery.where(predicate.getPredicate());
 
 		//Configure the query
-		Expression userOrderBy = tr.get(orderBy);
-
-		if (orderAbsolute)
-			userOrderBy = criteriaBuilder.abs(userOrderBy);
+		Expression<?> userOrderBy = tr.get(orderBy);
+		
+		if (orderAbsolute){
+			if (orderBy.getType().getJavaType().isInstance(Number.class))
+				userOrderBy = criteriaBuilder.abs(userOrderBy.as(Number.class));
+			else if (orderBy.getType().getJavaType() == Short.TYPE)
+				userOrderBy = criteriaBuilder.abs(userOrderBy.as(Short.TYPE));
+			else if (orderBy.getType().getJavaType() == Integer.TYPE)
+				userOrderBy = criteriaBuilder.abs(userOrderBy.as(Integer.TYPE));
+			else if (orderBy.getType().getJavaType() == Long.TYPE)
+				userOrderBy = criteriaBuilder.abs(userOrderBy.as(Long.TYPE));
+			else if (orderBy.getType().getJavaType() == Float.TYPE)
+				userOrderBy = criteriaBuilder.abs(userOrderBy.as(Float.TYPE));
+			else if (orderBy.getType().getJavaType() == Double.TYPE)
+				userOrderBy = criteriaBuilder.abs(userOrderBy.as(Double.TYPE));
+		}
 		Order userOrder = orderAsc ? criteriaBuilder.asc(userOrderBy) : criteriaBuilder.desc(userOrderBy);
 		Order idOrder = orderAsc ? criteriaBuilder.asc(tr.get(FinanceTransaction_.id)) : criteriaBuilder.desc(tr.get(FinanceTransaction_.id));
 
 		transactionsCriteriaQuery.multiselect(tr, userOrderBy).distinct(true);
+		transactionsCriteriaQuery.orderBy(userOrder,idOrder);
 		transactionsCriteriaQuery.groupBy(tr, userOrderBy, predicate.getComponentsJoin(), predicate.getTagsJoin());
-		transactionsCriteriaQuery.orderBy(idOrder, userOrder);
 
 		//Fetch data
 		TypedQuery<Tuple> query = entityManager.createQuery(transactionsCriteriaQuery);
@@ -493,8 +506,8 @@ public class Report {
 		CriteriaQuery<Long> transactionsCriteriaQuery = criteriaBuilder.createQuery(Long.class);
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 
-		Join componentsJoin = tr.join(FinanceTransaction_.components);
-		Path joinedAccount = componentsJoin.get(TransactionComponent_.account);
+		Join<FinanceTransaction,TransactionComponent> componentsJoin = tr.join(FinanceTransaction_.components);
+		Path<FinanceAccount> joinedAccount = componentsJoin.get(TransactionComponent_.account);
 
 		Predicate accountsPredicate = criteriaBuilder.equal(componentsJoin.get(TransactionComponent_.account), account);
 		Predicate datePredicate = criteriaBuilder.lessThan(tr.get(FinanceTransaction_.transactionDate), byDate);
@@ -543,7 +556,6 @@ public class Report {
 		//Process transactions in batches
 		Map<Date, Long> currentBalance = new TreeMap<>();
 		boolean done = false;
-		int currentTransaction = 0;
 		while (!done) {
 			//Fetch next batch
 			List<FinanceTransaction> transactions = getTransactions(
@@ -551,7 +563,7 @@ public class Report {
 					EnumSet.of(FilterType.DATE, FilterType.ACCOUNTS),
 					//currentTransaction, currentTransaction + Constants.batchFetchSize-1);
 					-1, -1);
-			currentTransaction += transactions.size();
+			transactions.size();
 			//done = transactions.isEmpty();
 			done = true;
 

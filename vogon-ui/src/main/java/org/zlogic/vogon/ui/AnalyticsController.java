@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -44,6 +45,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
+
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
@@ -52,7 +54,6 @@ import org.zlogic.vogon.data.events.AccountEventHandler;
 import org.zlogic.vogon.data.events.TransactionEventHandler;
 import org.zlogic.vogon.ui.adapter.AccountModelAdapter;
 import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
-import org.zlogic.vogon.ui.adapter.ObjectWithStatus;
 import org.zlogic.vogon.ui.cell.DateConverter;
 
 /**
@@ -78,7 +79,7 @@ public class AnalyticsController implements Initializable {
 	/**
 	 * The processor for background tasks
 	 */
-	private Callback<Task, Void> backgroundTaskProcessor;
+	private Callback<Task<Void>, Void> backgroundTaskProcessor;
 	@FXML
 	private TextField startDateField;
 	@FXML
@@ -131,8 +132,7 @@ public class AnalyticsController implements Initializable {
 		tagsSelectionShowColumn.setCellFactory(new Callback<TableColumn<TagSelectionAdapter, Boolean>, TableCell<TagSelectionAdapter, Boolean>>() {
 			@Override
 			public TableCell<TagSelectionAdapter, Boolean> call(TableColumn<TagSelectionAdapter, Boolean> p) {
-				CheckBoxTableCell cell = new CheckBoxTableCell<>();
-				cell.setConverter(ObjectWithStatus.getConverter());
+				CheckBoxTableCell<TagSelectionAdapter, Boolean> cell = new CheckBoxTableCell<>();
 				cell.setEditable(true);
 				cell.setAlignment(Pos.CENTER);
 				return cell;
@@ -142,7 +142,7 @@ public class AnalyticsController implements Initializable {
 		accountsSelectionShowColumn.setCellFactory(new Callback<TableColumn<AccountSelectionAdapter, Boolean>, TableCell<AccountSelectionAdapter, Boolean>>() {
 			@Override
 			public TableCell<AccountSelectionAdapter, Boolean> call(TableColumn<AccountSelectionAdapter, Boolean> p) {
-				CheckBoxTableCell cell = new CheckBoxTableCell<>();
+				CheckBoxTableCell<AccountSelectionAdapter, Boolean> cell = new CheckBoxTableCell<>();
 				cell.setSelectedStateCallback(new Callback<Integer, ObservableValue<Boolean>>() {
 					@Override
 					public ObservableValue<Boolean> call(Integer p) {
@@ -159,7 +159,7 @@ public class AnalyticsController implements Initializable {
 		tagsResultAmountColumn.setCellFactory(new Callback<TableColumn<TagResultAdapter, AmountModelAdapter>, TableCell<TagResultAdapter, AmountModelAdapter>>() {
 			@Override
 			public TableCell<TagResultAdapter, AmountModelAdapter> call(TableColumn<TagResultAdapter, AmountModelAdapter> p) {
-				TextFieldTableCell cell = new TextFieldTableCell<>();
+				TextFieldTableCell<TagResultAdapter, AmountModelAdapter> cell = new TextFieldTableCell<>();
 				cell.setAlignment(Pos.CENTER_RIGHT);
 				return cell;
 			}
@@ -168,7 +168,7 @@ public class AnalyticsController implements Initializable {
 		transactionsResultAmountColumn.setCellFactory(new Callback<TableColumn<TransactionResultAdapter, AmountModelAdapter>, TableCell<TransactionResultAdapter, AmountModelAdapter>>() {
 			@Override
 			public TableCell<TransactionResultAdapter, AmountModelAdapter> call(TableColumn<TransactionResultAdapter, AmountModelAdapter> p) {
-				TextFieldTableCell cell = new TextFieldTableCell<>();
+				TextFieldTableCell<TransactionResultAdapter, AmountModelAdapter> cell = new TextFieldTableCell<>();
 				cell.setAlignment(Pos.CENTER_RIGHT);
 				return cell;
 			}
@@ -177,7 +177,7 @@ public class AnalyticsController implements Initializable {
 		transactionsResultDateColumn.setCellFactory(new Callback<TableColumn<TransactionResultAdapter, Date>, TableCell<TransactionResultAdapter, Date>>() {
 			@Override
 			public TableCell<TransactionResultAdapter, Date> call(TableColumn<TransactionResultAdapter, Date> p) {
-				TextFieldTableCell cell = new TextFieldTableCell<>();
+				TextFieldTableCell<TransactionResultAdapter, Date> cell = new TextFieldTableCell<>();
 				cell.setConverter(new DateConverter(DateFormat.getDateInstance(DateFormat.LONG)));
 				cell.setAlignment(Pos.CENTER_RIGHT);
 				return cell;
@@ -190,7 +190,7 @@ public class AnalyticsController implements Initializable {
 	 */
 	@FXML
 	private void handleGenerateReport() {
-		Task task = new Task() {
+		Task<Void> task = new Task<Void>() {
 			@Override
 			protected Void call() {
 				updateProgress(-1, 1);
@@ -407,7 +407,7 @@ public class AnalyticsController implements Initializable {
 	 * @param backgroundTaskProcessor the background task processor callback
 	 * (otherwise the report generation will run in the current thread)
 	 */
-	public void setBackgroundTaskProcessor(Callback<Task, Void> backgroundTaskProcessor) {
+	public void setBackgroundTaskProcessor(Callback<Task<Void>, Void> backgroundTaskProcessor) {
 		this.backgroundTaskProcessor = backgroundTaskProcessor;
 	}
 
@@ -420,7 +420,7 @@ public class AnalyticsController implements Initializable {
 		/**
 		 * The associated account property
 		 */
-		private final ObjectProperty<AccountModelAdapter> account = new SimpleObjectProperty();
+		private final ObjectProperty<AccountModelAdapter> account = new SimpleObjectProperty<>();
 		/**
 		 * The account enabled property
 		 */
