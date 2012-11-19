@@ -84,7 +84,7 @@ public class CurrencyRateModelAdapter {
 	/**
 	 * Returns the source currency
 	 *
-	 * @return
+	 * @return the source currency
 	 */
 	public Currency getSourceCurrency() {
 		return rate.getSource();
@@ -93,7 +93,7 @@ public class CurrencyRateModelAdapter {
 	/**
 	 * Returns the destination currency
 	 *
-	 * @return
+	 * @return the destination currency
 	 */
 	public Currency getDestinationCurrency() {
 		return rate.getDestination();

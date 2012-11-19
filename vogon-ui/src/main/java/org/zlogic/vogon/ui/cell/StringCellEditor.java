@@ -24,6 +24,9 @@ import javafx.scene.input.KeyEvent;
  */
 public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType, PropertyType> {
 
+	/**
+	 * The PropertyType class
+	 */
 	private Class<PropertyType> classPropertyType;
 	
 	/**
@@ -39,6 +42,7 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 	 * Constructs a StringCellEditor with a validator
 	 *
 	 * @param validator the value validator
+	 * @param classPropertyType the PropertyType class
 	 */
 	public StringCellEditor(StringCellValidator validator,Class<PropertyType> classPropertyType) {
 		this.validator = validator;

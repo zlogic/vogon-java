@@ -53,6 +53,9 @@ public class MainWindowController implements Initializable {
 	 * Last opened directory
 	 */
 	private File lastDirectory;
+	/**
+	 * The FinanceData instance
+	 */
 	private FinanceData financeData;
 	/**
 	 * Easy access to preference storage

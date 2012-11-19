@@ -99,6 +99,9 @@ public class MessageDialog implements Initializable {
 	public void initialize(URL url, ResourceBundle rb) {
 	}
 
+	/**
+	 * OK button pressed
+	 */
 	@FXML
 	private void handleOkAction() {
 		((Stage) okButton.getScene().getWindow()).close();

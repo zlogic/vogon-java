@@ -16,10 +16,9 @@ import java.util.logging.Logger;
  * @author Dmitry Zolotukhin
  */
 public class StringValidatorDate implements StringCellValidator {
-	/*
+	/**
 	 * The date format to be used
 	 */
-
 	private String format;
 
 	/**

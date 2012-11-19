@@ -293,9 +293,17 @@ public class Report {
 	 * groupBy to avoid duplicate results)
 	 */
 	protected class ConstructedPredicate {
-
+		/**
+		 * The generated predicate
+		 */
 		private Predicate predicate;
+		/**
+		 * The components join
+		 */
 		private Join<FinanceTransaction, TransactionComponent> componentsJoin;
+		/**
+		 * The tags join
+		 */
 		private Join<FinanceTransaction, String> tagsJoin;
 
 		/**
@@ -393,7 +401,7 @@ public class Report {
 
 	/**
 	 * Returns all transactions matching the set filters
-	 *
+	 * @param <OrderByClass> type of ordering field
 	 * @param orderBy field for ordering the result
 	 * @param orderAsc true if results should be ordered ascending, false if
 	 * descending

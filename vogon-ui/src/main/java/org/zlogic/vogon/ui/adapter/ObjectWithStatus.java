@@ -30,6 +30,9 @@ public class ObjectWithStatus<TypeObject, TypeStatus> {
 	 */
 	protected final TypeStatus status;
 
+	/**
+	 * Default constructor
+	 */
 	public ObjectWithStatus() {
 		this(null,null);
 	}
@@ -88,6 +91,10 @@ public class ObjectWithStatus<TypeObject, TypeStatus> {
 
 	/**
 	 * Returns the StringConverter for this class (uses only the object's value)
+	 * @param objectClass the TypeObject class (the object's type)
+	 * @param statusClass the TypeStatus class (the object's status type)
+	 * @param <T> the object's type
+	 * @param <S> the object's status type
 	 *
 	 * @return the StringConverter for this class
 	 */

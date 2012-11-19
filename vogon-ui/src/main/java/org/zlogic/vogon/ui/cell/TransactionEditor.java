@@ -133,7 +133,7 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 		}
 	}
 
-	/*
+	/**
 	 * Creates the Transaction components cell editor
 	 */
 	private void createEditor() {
