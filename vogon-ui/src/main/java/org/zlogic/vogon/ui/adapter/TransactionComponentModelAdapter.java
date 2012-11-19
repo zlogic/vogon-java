@@ -9,6 +9,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
@@ -53,7 +54,7 @@ public class TransactionComponentModelAdapter {
 			protected FinanceData financeData;
 			protected TransactionComponent transactionComponent;
 
-			public ChangeListener setData(TransactionComponent transactionComponent, FinanceData financeData) {
+			public ChangeListener<AccountModelAdapter> setData(TransactionComponent transactionComponent, FinanceData financeData) {
 				this.transactionComponent = transactionComponent;
 				this.financeData = financeData;
 				return this;
@@ -68,7 +69,7 @@ public class TransactionComponentModelAdapter {
 			protected FinanceData financeData;
 			protected TransactionComponent transactionComponent;
 
-			public ChangeListener setData(TransactionComponent transactionComponent, FinanceData financeData) {
+			public ChangeListener<AmountModelAdapter> setData(TransactionComponent transactionComponent, FinanceData financeData) {
 				this.transactionComponent = transactionComponent;
 				this.financeData = financeData;
 				return this;

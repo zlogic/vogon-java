@@ -5,8 +5,6 @@
  */
 package org.zlogic.vogon.data.events;
 
-import org.zlogic.vogon.data.FinanceTransaction;
-
 /**
  * Interface for accepting Transaction events. If several listeners are used,
  * the implementation is responsible for distributing the event. Event handling

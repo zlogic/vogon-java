@@ -8,6 +8,7 @@ package org.zlogic.vogon.data;
 import java.io.Serializable;
 import java.util.Currency;
 import java.util.Map;
+
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -22,7 +23,10 @@ import javax.persistence.Transient;
  */
 @Entity
 public class Preferences implements Serializable {
-
+	/**
+	 * Version UID
+	 */
+	private static final long serialVersionUID = 1L;
 	@Transient
 	private static String CURRENCY = "Currency"; //NOI18N
 	/**

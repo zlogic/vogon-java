@@ -92,6 +92,7 @@
 										<PropertyValueFactory property="tag" />
 									</cellValueFactory>
 								</TableColumn>
+								<!-- TODO: make this column sorted by default -->
 								<TableColumn prefWidth="75.0" text="%TRANSACTION_AMOUNT" fx:id="tagsResultAmountColumn">
 									<cellValueFactory>
 										<PropertyValueFactory property="amount" />

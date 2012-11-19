@@ -11,6 +11,7 @@ import java.util.Currency;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -25,6 +26,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.util.Callback;
+
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.events.AccountEventHandler;
@@ -87,7 +89,7 @@ public class AccountsController implements Initializable {
 		columnName.setCellFactory(new Callback<TableColumn<AccountInterface, ObjectWithStatus<String, Boolean>>, TableCell<AccountInterface, ObjectWithStatus<String, Boolean>>>() {
 			@Override
 			public TableCell<AccountInterface, ObjectWithStatus<String, Boolean>> call(TableColumn<AccountInterface, ObjectWithStatus<String, Boolean>> p) {
-				TextFieldTableCell cell = new TextFieldTableCell<AccountInterface, ObjectWithStatus<String, Boolean>>() {
+				TextFieldTableCell<AccountInterface, ObjectWithStatus<String, Boolean>> cell = new TextFieldTableCell<AccountInterface, ObjectWithStatus<String, Boolean>>() {
 					@Override
 					public void updateItem(ObjectWithStatus<String, Boolean> item, boolean empty) {
 						super.updateItem(item, empty);
@@ -97,7 +99,7 @@ public class AccountsController implements Initializable {
 						}
 					}
 				};
-				cell.setConverter(ObjectWithStatus.getConverter());
+				cell.setConverter(ObjectWithStatus.getConverter(String.class,Boolean.class));
 				return cell;
 			}
 		});
@@ -105,7 +107,7 @@ public class AccountsController implements Initializable {
 		columnBalance.setCellFactory(new Callback<TableColumn<AccountInterface, String>, TableCell<AccountInterface, String>>() {
 			@Override
 			public TableCell<AccountInterface, String> call(TableColumn<AccountInterface, String> p) {
-				TextFieldTableCell cell = new TextFieldTableCell<>();
+				TextFieldTableCell<AccountInterface, String> cell = new TextFieldTableCell<>();
 				cell.setAlignment(Pos.CENTER_RIGHT);
 				return cell;
 			}
@@ -115,7 +117,7 @@ public class AccountsController implements Initializable {
 			@Override
 			public TableCell<AccountInterface, ObjectWithStatus<CurrencyModelAdapter, Boolean>> call(TableColumn<AccountInterface, ObjectWithStatus<CurrencyModelAdapter, Boolean>> p) {
 				//TODO: sometimes the balance is not correctly updated in case of a change in currency. Most likely is a Java FX bug.
-				ComboBoxTableCell cell = new ComboBoxTableCell<AccountInterface, ObjectWithStatus<CurrencyModelAdapter, Boolean>>() {
+				ComboBoxTableCell<AccountInterface, ObjectWithStatus<CurrencyModelAdapter, Boolean>> cell = new ComboBoxTableCell<AccountInterface, ObjectWithStatus<CurrencyModelAdapter, Boolean>>() {
 					@Override
 					public void updateItem(ObjectWithStatus<CurrencyModelAdapter, Boolean> item, boolean empty) {
 						super.updateItem(item, empty);
@@ -131,7 +133,7 @@ public class AccountsController implements Initializable {
 		columnIncludeInTotal.setCellFactory(new Callback<TableColumn<AccountInterface, ObjectWithStatus<BooleanProperty, Boolean>>, TableCell<AccountInterface, ObjectWithStatus<BooleanProperty, Boolean>>>() {
 			@Override
 			public TableCell<AccountInterface, ObjectWithStatus<BooleanProperty, Boolean>> call(TableColumn<AccountInterface, ObjectWithStatus<BooleanProperty, Boolean>> p) {
-				CheckBoxTableCell cell = new CheckBoxTableCell<AccountInterface, ObjectWithStatus<BooleanProperty, Boolean>>() {
+				CheckBoxTableCell<AccountInterface, ObjectWithStatus<BooleanProperty, Boolean>> cell = new CheckBoxTableCell<AccountInterface, ObjectWithStatus<BooleanProperty, Boolean>>() {
 					@Override
 					public void updateItem(ObjectWithStatus<BooleanProperty, Boolean> item, boolean empty) {
 						super.updateItem(item, empty);
@@ -145,7 +147,7 @@ public class AccountsController implements Initializable {
 							setEditable(item.getStatus());
 					}
 				};
-				cell.setConverter(ObjectWithStatus.getConverter());
+				cell.setConverter(ObjectWithStatus.getConverter(BooleanProperty.class,Boolean.class));
 				cell.setAlignment(Pos.CENTER);
 				return cell;
 			}

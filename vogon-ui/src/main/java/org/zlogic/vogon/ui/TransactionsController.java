@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
+
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -24,7 +25,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import javafx.util.converter.DefaultStringConverter;
-import org.zlogic.vogon.data.FinanceAccount;
+
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.events.AccountEventHandler;
@@ -40,7 +41,6 @@ import org.zlogic.vogon.ui.cell.TransactionEditor;
  */
 public class TransactionsController implements Initializable {
 
-	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * The FinanceData instance
 	 */
@@ -117,7 +117,7 @@ public class TransactionsController implements Initializable {
 		columnDescription.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, String>, TableCell<TransactionModelAdapter, String>>() {
 			@Override
 			public TableCell<TransactionModelAdapter, String> call(TableColumn<TransactionModelAdapter, String> p) {
-				TextFieldTableCell cell = new TextFieldTableCell<>();
+				TextFieldTableCell<TransactionModelAdapter, String> cell = new TextFieldTableCell<>();
 				cell.setConverter(new DefaultStringConverter());
 				return cell;
 			}
@@ -125,7 +125,7 @@ public class TransactionsController implements Initializable {
 		columnTags.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, List<String>>, TableCell<TransactionModelAdapter, List<String>>>() {
 			@Override
 			public TableCell<TransactionModelAdapter, List<String>> call(TableColumn<TransactionModelAdapter, List<String>> p) {
-				TextFieldTableCell cell = new TextFieldTableCell<>();
+				TextFieldTableCell<TransactionModelAdapter, List<String>> cell = new TextFieldTableCell<>();
 				cell.setConverter(TransactionModelAdapter.getTagsListConverter());
 				return cell;
 			}
@@ -133,7 +133,7 @@ public class TransactionsController implements Initializable {
 		columnDate.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, Date>, TableCell<TransactionModelAdapter, Date>>() {
 			@Override
 			public TableCell<TransactionModelAdapter, Date> call(TableColumn<TransactionModelAdapter, Date> p) {
-				DateCellEditor cell = new DateCellEditor<>();
+				DateCellEditor<TransactionModelAdapter> cell = new DateCellEditor<>();
 				cell.setAlignment(Pos.CENTER_RIGHT);
 				return cell;
 			}
@@ -237,13 +237,6 @@ public class TransactionsController implements Initializable {
 		//Listen for Transaction events
 		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
 			((FinanceDataEventDispatcher) financeData.getAccountListener()).addTransactionEventHandler(new TransactionEventHandler() {
-				protected FinanceData financeData;
-
-				public TransactionEventHandler setFinanceData(FinanceData financeData) {
-					this.financeData = financeData;
-					return this;
-				}
-
 				@Override
 				public void transactionCreated(long transactionId) {
 					//Update only if editors are not active
@@ -276,7 +269,7 @@ public class TransactionsController implements Initializable {
 						return;
 					updateTransactions();
 				}
-			}.setFinanceData(financeData));
+			});
 		}
 
 		//Listen for Account events

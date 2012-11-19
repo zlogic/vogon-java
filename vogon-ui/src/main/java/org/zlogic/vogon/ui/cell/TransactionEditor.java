@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
@@ -16,6 +17,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.TableCell;
 import javafx.scene.paint.Color;
 import javafx.stage.Popup;
+
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.ui.MessageDialog;
 import org.zlogic.vogon.ui.TransactionComponentsController;

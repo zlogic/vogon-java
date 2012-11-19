@@ -10,12 +10,14 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
+
 import org.zlogic.vogon.data.events.AccountEventHandler;
 import org.zlogic.vogon.data.events.CurrencyEventHandler;
 import org.zlogic.vogon.data.events.TransactionEventHandler;
@@ -160,7 +162,7 @@ public class FinanceData {
 		transactionsCriteriaQuery.select(tr).distinct(true);
 
 		//Limit the number of transactions retreived
-		TypedQuery query = entityManager.createQuery(transactionsCriteriaQuery);
+		TypedQuery<FinanceTransaction> query = entityManager.createQuery(transactionsCriteriaQuery);
 		if (firstTransaction >= 0)
 			query = query.setFirstResult(firstTransaction);
 		if (lastTransaction >= 0 && firstTransaction >= 0)
@@ -209,7 +211,7 @@ public class FinanceData {
 
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<FinanceAccount> accountsCriteriaQuery = criteriaBuilder.createQuery(FinanceAccount.class);
-		Root<FinanceAccount> acc = accountsCriteriaQuery.from(FinanceAccount.class);
+		accountsCriteriaQuery.from(FinanceAccount.class);
 
 		List<FinanceAccount> result = entityManager.createQuery(accountsCriteriaQuery).getResultList();
 		entityManager.close();
@@ -244,7 +246,7 @@ public class FinanceData {
 	protected Preferences getPreferencesFromDatabase(EntityManager entityManager) {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Preferences> preferencesCriteriaQuery = criteriaBuilder.createQuery(Preferences.class);
-		Root<Preferences> prf = preferencesCriteriaQuery.from(Preferences.class);
+		preferencesCriteriaQuery.from(Preferences.class);
 		Preferences preferences = null;
 		try {
 			preferences = entityManager.createQuery(preferencesCriteriaQuery).getSingleResult();
@@ -1025,7 +1027,7 @@ public class FinanceData {
 		EntityManager tempEntityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = tempEntityManager.getCriteriaBuilder();
 		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
-		Root<FinanceTransaction> ftr = transactionsCriteriaQuery.from(FinanceTransaction.class);
+		transactionsCriteriaQuery.from(FinanceTransaction.class);
 		FinanceAccount tempAccount = tempEntityManager.find(FinanceAccount.class, account.id);
 
 		//Recalculate balance from related transactions
@@ -1061,11 +1063,11 @@ public class FinanceData {
 		EntityManager tempEntityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder componentCriteriaBuilder = tempEntityManager.getCriteriaBuilder();
 		CriteriaQuery<TransactionComponent> componentsCriteriaQuery = componentCriteriaBuilder.createQuery(TransactionComponent.class);
-		Root<TransactionComponent> trc = componentsCriteriaQuery.from(TransactionComponent.class);
+		componentsCriteriaQuery.from(TransactionComponent.class);
 
 		CriteriaBuilder transactionCriteriaBuilder = tempEntityManager.getCriteriaBuilder();
 		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = transactionCriteriaBuilder.createQuery(FinanceTransaction.class);
-		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
+		transactionsCriteriaQuery.from(FinanceTransaction.class);
 
 		tempEntityManager.getTransaction().begin();
 
