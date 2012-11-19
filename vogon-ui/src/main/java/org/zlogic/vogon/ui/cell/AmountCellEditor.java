@@ -24,7 +24,7 @@ public class AmountCellEditor<BaseType> extends StringCellEditor<BaseType, Amoun
 	 * @param validator the value validator
 	 */
 	public AmountCellEditor(StringCellValidator validator) {
-		super(validator,AmountModelAdapter.class);
+		super(validator, AmountModelAdapter.class);
 	}
 
 	@Override

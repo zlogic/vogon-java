@@ -28,7 +28,6 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 	 * The PropertyType class
 	 */
 	private Class<PropertyType> classPropertyType;
-	
 	/**
 	 * The editor component
 	 */
@@ -44,7 +43,7 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 	 * @param validator the value validator
 	 * @param classPropertyType the PropertyType class
 	 */
-	public StringCellEditor(StringCellValidator validator,Class<PropertyType> classPropertyType) {
+	public StringCellEditor(StringCellValidator validator, Class<PropertyType> classPropertyType) {
 		this.validator = validator;
 		this.classPropertyType = classPropertyType;
 	}
@@ -140,12 +139,10 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 	 * @return value, converted to the cell class type
 	 */
 	protected PropertyType propertyFromString(String value) {
-		if(classPropertyType.isAssignableFrom(String.class))
+		if (classPropertyType.isAssignableFrom(String.class))
 			try {
 				return classPropertyType.getConstructor(String.class).newInstance(value);
-			} catch (InstantiationException | IllegalAccessException
-					| IllegalArgumentException | InvocationTargetException
-					| NoSuchMethodException | SecurityException ex) {
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
 				Logger.getLogger(StringCellEditor.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		return null;

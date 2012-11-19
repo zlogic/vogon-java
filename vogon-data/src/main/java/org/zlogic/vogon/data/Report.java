@@ -293,6 +293,7 @@ public class Report {
 	 * groupBy to avoid duplicate results)
 	 */
 	protected class ConstructedPredicate {
+
 		/**
 		 * The generated predicate
 		 */
@@ -401,6 +402,7 @@ public class Report {
 
 	/**
 	 * Returns all transactions matching the set filters
+	 *
 	 * @param <OrderByClass> type of ordering field
 	 * @param orderBy field for ordering the result
 	 * @param orderAsc true if results should be ordered ascending, false if
@@ -412,7 +414,7 @@ public class Report {
 	 * @param lastTransaction the last transaction number to be selected
 	 * @return list of all transactions matching the set filters
 	 */
-	public <OrderByClass> List<FinanceTransaction> getTransactions(SingularAttribute<FinanceTransaction,OrderByClass> orderBy, boolean orderAsc, boolean orderAbsolute, EnumSet<FilterType> appliedFilters, int firstTransaction, int lastTransaction) {
+	public <OrderByClass> List<FinanceTransaction> getTransactions(SingularAttribute<FinanceTransaction, OrderByClass> orderBy, boolean orderAsc, boolean orderAbsolute, EnumSet<FilterType> appliedFilters, int firstTransaction, int lastTransaction) {
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Tuple> transactionsCriteriaQuery = criteriaBuilder.createTupleQuery();
@@ -424,8 +426,8 @@ public class Report {
 
 		//Configure the query
 		Expression<?> userOrderBy = tr.get(orderBy);
-		
-		if (orderAbsolute){
+
+		if (orderAbsolute) {
 			if (orderBy.getType().getJavaType().isInstance(Number.class))
 				userOrderBy = criteriaBuilder.abs(userOrderBy.as(Number.class));
 			else if (orderBy.getType().getJavaType() == Short.TYPE)
@@ -443,7 +445,7 @@ public class Report {
 		Order idOrder = orderAsc ? criteriaBuilder.asc(tr.get(FinanceTransaction_.id)) : criteriaBuilder.desc(tr.get(FinanceTransaction_.id));
 
 		transactionsCriteriaQuery.multiselect(tr, userOrderBy).distinct(true);
-		transactionsCriteriaQuery.orderBy(userOrder,idOrder);
+		transactionsCriteriaQuery.orderBy(userOrder, idOrder);
 		transactionsCriteriaQuery.groupBy(tr, userOrderBy, predicate.getComponentsJoin(), predicate.getTagsJoin());
 
 		//Fetch data
@@ -514,7 +516,7 @@ public class Report {
 		CriteriaQuery<Long> transactionsCriteriaQuery = criteriaBuilder.createQuery(Long.class);
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 
-		Join<FinanceTransaction,TransactionComponent> componentsJoin = tr.join(FinanceTransaction_.components);
+		Join<FinanceTransaction, TransactionComponent> componentsJoin = tr.join(FinanceTransaction_.components);
 		Path<FinanceAccount> joinedAccount = componentsJoin.get(TransactionComponent_.account);
 
 		Predicate accountsPredicate = criteriaBuilder.equal(componentsJoin.get(TransactionComponent_.account), account);

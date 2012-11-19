@@ -23,6 +23,7 @@ import javax.persistence.Transient;
  */
 @Entity
 public class Preferences implements Serializable {
+
 	/**
 	 * Version UID
 	 */
