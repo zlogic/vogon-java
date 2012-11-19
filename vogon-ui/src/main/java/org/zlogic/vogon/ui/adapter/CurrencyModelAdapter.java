@@ -79,7 +79,7 @@ public class CurrencyModelAdapter implements Comparable<CurrencyModelAdapter> {
 	/**
 	 * Sets the currency and updates the currency property
 	 *
-	 * @param currency
+	 * @param currency the currency
 	 */
 	public void setCurrency(Currency currency) {
 		this.currency = currency;

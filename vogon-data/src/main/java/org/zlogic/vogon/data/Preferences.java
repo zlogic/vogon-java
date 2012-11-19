@@ -27,6 +27,9 @@ public class Preferences implements Serializable {
 	 * Version UID
 	 */
 	private static final long serialVersionUID = 1L;
+	/**
+	 * The "Currency" key in preferences
+	 */
 	@Transient
 	private static String CURRENCY = "Currency"; //NOI18N
 	/**

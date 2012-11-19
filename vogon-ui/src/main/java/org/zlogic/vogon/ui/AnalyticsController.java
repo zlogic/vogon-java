@@ -80,36 +80,84 @@ public class AnalyticsController implements Initializable {
 	 * The processor for background tasks
 	 */
 	private Callback<Task<Void>, Void> backgroundTaskProcessor;
+	/**
+	 * Start date text field
+	 */
 	@FXML
 	private TextField startDateField;
+	/**
+	 * End date text field
+	 */
 	@FXML
 	private TextField endDateField;
+	/**
+	 * Transfer transactions checkbox
+	 */
 	@FXML
 	private CheckBox transferTransactionsCheckbox;
+	/**
+	 * Income transactions checkbox
+	 */
 	@FXML
 	private CheckBox incomeTransactionsCheckbox;
+	/**
+	 * Expense transactions checkbox
+	 */
 	@FXML
 	private CheckBox expenseTransactionsCheckbox;
+	/**
+	 * The tags selection table
+	 */
 	@FXML
 	private TableView<TagSelectionAdapter> tagsSelectionTable;
+	/**
+	 * The tags selection table's checkbox column
+	 */
 	@FXML
 	private TableColumn<TagSelectionAdapter, Boolean> tagsSelectionShowColumn;
+	/**
+	 * The accounts selection table
+	 */
 	@FXML
 	private TableView<AccountSelectionAdapter> accountsSelectionTable;
+	/**
+	 * The accounts selection table's checkbox column
+	 */
 	@FXML
 	private TableColumn<AccountSelectionAdapter, Boolean> accountsSelectionShowColumn;
+	/**
+	 * The tags reporting table
+	 */
 	@FXML
 	private TableView<TagResultAdapter> tagsResultTable;
+	/**
+	 * The tags reporting table amount column
+	 */
 	@FXML
 	private TableColumn<TagResultAdapter, AmountModelAdapter> tagsResultAmountColumn;
+	/**
+	 * The transactions reporting table
+	 */
 	@FXML
 	private TableView<TransactionResultAdapter> transactionsResultTable;
+	/**
+	 * The transactions reporting table date column
+	 */
 	@FXML
 	private TableColumn<TransactionResultAdapter, Date> transactionsResultDateColumn;
+	/**
+	 * The transactions reporting table amount column
+	 */
 	@FXML
 	private TableColumn<TransactionResultAdapter, AmountModelAdapter> transactionsResultAmountColumn;
+	/**
+	 * The tags chart
+	 */
 	@FXML
 	private PieChart tagsChart;
+	/**
+	 * The balance chart
+	 */
 	@FXML
 	private LineChart<String, Double> balanceChart;
 

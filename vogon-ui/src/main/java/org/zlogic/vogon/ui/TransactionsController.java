@@ -168,11 +168,17 @@ public class TransactionsController implements Initializable {
 		});
 	}
 
+	/**
+	 * Create transaction button
+	 */
 	@FXML
 	private void handleCreateTransaction() {
 		financeData.createTransaction(new FinanceTransaction("", new String[0], new Date(), FinanceTransaction.Type.EXPENSEINCOME));//NOI18N
 	}
 
+	/**
+	 * Delete transaction button
+	 */
 	@FXML
 	private void handleDeleteTransaction() {
 		TransactionModelAdapter selectedItem = transactionsTable.getSelectionModel().getSelectedItem();
