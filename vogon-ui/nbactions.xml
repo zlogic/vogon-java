@@ -10,7 +10,7 @@
 			<exec.args>-classpath %classpath org.zlogic.vogon.ui.Launcher</exec.args>
 			<exec.executable>java</exec.executable>
 			<exec.classpathScope>runtime</exec.classpathScope>
-			<exec.workingdir>C:\Users\Dmitry\Documents\Development\Vogon\Database</exec.workingdir>
+			<exec.workingdir>C:\Users\Zlogic\Documents\Development\Vogon\Database</exec.workingdir>
 		</properties>
 	</action>
 	<action>
@@ -24,7 +24,7 @@
 			<exec.executable>java</exec.executable>
 			<exec.classpathScope>runtime</exec.classpathScope>
 			<jpda.listen>true</jpda.listen>
-			<exec.workingdir>C:\Users\Dmitry\Documents\Development\Vogon\Database</exec.workingdir>
+			<exec.workingdir>C:\Users\Zlogic\Documents\Development\Vogon\Database</exec.workingdir>
 		</properties>
 	</action>
 	<action>
@@ -36,7 +36,7 @@
 		<properties>
 			<exec.args>${profiler.args} -classpath %classpath org.zlogic.vogon.ui.Launcher</exec.args>
 			<exec.executable>${profiler.java}</exec.executable>
-			<exec.workingdir>C:\Users\Dmitry\Documents\Development\Vogon\Database</exec.workingdir>
+			<exec.workingdir>C:\Users\Zlogic\Documents\Development\Vogon\Database</exec.workingdir>
 		</properties>
 	</action>
 </actions>
