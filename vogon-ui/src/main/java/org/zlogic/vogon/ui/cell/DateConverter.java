@@ -10,7 +10,6 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javafx.util.StringConverter;
 
 /**

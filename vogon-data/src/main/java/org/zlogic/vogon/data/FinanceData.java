@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -116,6 +117,9 @@ public class FinanceData {
 	 * @return the transaction
 	 */
 	public FinanceTransaction getUpdatedTransactionFromDatabase(FinanceTransaction transaction) {
+		if (transaction == null)
+			return null;
+
 		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
@@ -125,8 +129,13 @@ public class FinanceData {
 		tr.fetch(FinanceTransaction_.tags, JoinType.LEFT);
 		transactionsCriteriaQuery.where(criteriaBuilder.equal(tr.get(FinanceTransaction_.id), transaction.id));
 
-
-		FinanceTransaction result = entityManager.createQuery(transactionsCriteriaQuery).getSingleResult();
+		FinanceTransaction result;
+		try {
+			result = entityManager.createQuery(transactionsCriteriaQuery).getSingleResult();
+		} catch (NoResultException ex) {
+			entityManager.close();
+			return null;
+		}
 
 		//Post-fetch components
 		CriteriaQuery<FinanceTransaction> transactionsComponentsFetchCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);

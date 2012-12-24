@@ -9,7 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import javafx.beans.property.Property;
 import javafx.util.StringConverter;
 
 /**
@@ -75,7 +75,28 @@ public class ObjectWithStatus<TypeObject, TypeStatus> {
 	public boolean equals(Object obj) {
 		if (obj != null && obj instanceof ObjectWithStatus) {
 			ObjectWithStatus<?, ?> other = (ObjectWithStatus<?, ?>) obj;
-			return (this.value != null ? this.value.equals(other.value) : false) && (this.status != null ? this.status.equals(other.status) : false);
+			boolean valueEquals;
+			if (this.value == null)
+				valueEquals = other.value == null;
+			else {
+				Object thisValue = (value instanceof Property) ? ((Property) value).getValue() : value;
+				Object otherValue = (other.value instanceof Property) ? ((Property) other.value).getValue() : other.value;
+				valueEquals = thisValue.equals(otherValue);
+			}
+
+			if (!valueEquals)
+				return false;
+
+			boolean statusEqueals;
+			if (this.status == null)
+				statusEqueals = other.status == null;
+			else {
+				Object thisStatus = (status instanceof Property) ? ((Property) status).getValue() : status;
+				Object otherStatus = (other.status instanceof Property) ? ((Property) other.status).getValue() : other.status;
+				statusEqueals = thisStatus.equals(otherStatus);
+			}
+
+			return statusEqueals;
 		} else if (obj != null && obj.getClass().equals(value.getClass()))
 			return obj.equals(value);
 		else

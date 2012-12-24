@@ -6,7 +6,6 @@
 package org.zlogic.vogon.ui.adapter;
 
 import java.util.Objects;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -15,7 +14,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
@@ -53,7 +51,7 @@ public class AccountModelAdapter implements AccountInterface {
 	 * The property indicating if account should be included in the reporting
 	 * account's total balance
 	 */
-	private final ObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>> includeInTotal = new SimpleObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>>(new ObjectWithStatus<BooleanProperty, Boolean>(new SimpleBooleanProperty(true), true));
+	private final ObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>> includeInTotal = new SimpleObjectProperty<>(new ObjectWithStatus<BooleanProperty, Boolean>(new SimpleBooleanProperty(true), true));
 
 	/**
 	 * Default constructor
@@ -136,7 +134,7 @@ public class AccountModelAdapter implements AccountInterface {
 		if (!(obj instanceof AccountModelAdapter))
 			return false;
 		AccountModelAdapter adapter = (AccountModelAdapter) obj;
-		return account.equals(adapter.account) && balance.equals(adapter.balance) && currency.equals(adapter.currency) && includeInTotal.equals(adapter.includeInTotal) && name.equals(adapter.name);
+		return account.equals(adapter.account) && balance.get().equals(adapter.balance.get()) && currency.get().equals(adapter.currency.get()) && includeInTotal.get().equals(adapter.includeInTotal.get()) && name.get().equals(adapter.name.get());
 	}
 
 	@Override

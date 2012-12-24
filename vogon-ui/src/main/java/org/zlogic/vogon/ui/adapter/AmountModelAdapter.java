@@ -8,7 +8,6 @@ package org.zlogic.vogon.ui.adapter;
 import java.text.MessageFormat;
 import java.util.Currency;
 import java.util.ResourceBundle;
-
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.ui.cell.CellStatus;
 

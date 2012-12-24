@@ -8,7 +8,6 @@ package org.zlogic.vogon.data;
 import java.io.Serializable;
 import java.util.Currency;
 import java.util.Map;
-
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

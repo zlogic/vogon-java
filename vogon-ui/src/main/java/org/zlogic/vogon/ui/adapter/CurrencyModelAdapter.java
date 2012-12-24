@@ -10,7 +10,6 @@ import java.util.Currency;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -53,7 +52,7 @@ public class CurrencyModelAdapter implements Comparable<CurrencyModelAdapter> {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof CurrencyModelAdapter)
-			return currency == ((CurrencyModelAdapter) obj).currency && value.equals(((CurrencyModelAdapter) obj).value);
+			return currency == ((CurrencyModelAdapter) obj).currency && value.get().equals(((CurrencyModelAdapter) obj).value.get());
 		if (obj instanceof Currency)
 			return currency == (Currency) obj;
 		return false;

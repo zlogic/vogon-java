@@ -7,7 +7,6 @@ package org.zlogic.vogon.ui;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import org.zlogic.vogon.data.events.AccountEventHandler;
 import org.zlogic.vogon.data.events.CurrencyEventHandler;
 import org.zlogic.vogon.data.events.TransactionEventHandler;

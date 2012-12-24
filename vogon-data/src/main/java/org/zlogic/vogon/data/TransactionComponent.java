@@ -6,7 +6,6 @@
 package org.zlogic.vogon.data;
 
 import java.io.Serializable;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;

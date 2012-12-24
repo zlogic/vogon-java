@@ -8,7 +8,6 @@ package org.zlogic.vogon.ui;
 import java.net.URL;
 import java.util.Currency;
 import java.util.ResourceBundle;
-
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -21,7 +20,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 import javafx.util.converter.DoubleStringConverter;
-
 import org.zlogic.vogon.data.CurrencyRate;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.events.CurrencyEventHandler;

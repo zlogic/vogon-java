@@ -11,12 +11,13 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
-
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Pagination;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -25,7 +26,6 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import javafx.util.converter.DefaultStringConverter;
-
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.events.AccountEventHandler;
@@ -166,6 +166,32 @@ public class TransactionsController implements Initializable {
 				return cell;
 			}
 		});
+
+		//Add listeners to scene once the scene is assigned
+		transactionsTable.sceneProperty().addListener(new ChangeListener<Scene>() {
+			private List<ChangeListener<Boolean>> listeners = new LinkedList<>();
+
+			public ChangeListener<Scene> createListeners() {
+				listeners.add(new ChangeListener<Boolean>() {
+					@Override
+					public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
+						if (oldValue != newValue && !newValue)
+							cancelEdit();
+					}
+				});
+				return this;
+			}
+
+			@Override
+			public void changed(ObservableValue<? extends Scene> ov, Scene oldScene, Scene newScene) {
+				for (ChangeListener listener : listeners) {
+					if (oldScene != null && oldScene.getWindow() != null)
+						oldScene.getWindow().focusedProperty().removeListener(listener);
+					if (newScene != null && newScene.getWindow() != null)
+						newScene.getWindow().focusedProperty().addListener(listener);
+				}
+			}
+		}.createListeners());
 	}
 
 	/**
@@ -173,6 +199,7 @@ public class TransactionsController implements Initializable {
 	 */
 	@FXML
 	private void handleCreateTransaction() {
+		cancelEdit();
 		financeData.createTransaction(new FinanceTransaction("", new String[0], new Date(), FinanceTransaction.Type.EXPENSEINCOME));//NOI18N
 	}
 
@@ -182,8 +209,10 @@ public class TransactionsController implements Initializable {
 	@FXML
 	private void handleDeleteTransaction() {
 		TransactionModelAdapter selectedItem = transactionsTable.getSelectionModel().getSelectedItem();
-		if (selectedItem != null)
-			financeData.deleteTransaction(selectedItem.getTransaction());
+		FinanceTransaction deleteTransaction = selectedItem != null ? selectedItem.getTransaction() : null;
+		cancelEdit();
+		if (deleteTransaction != null)
+			financeData.deleteTransaction(deleteTransaction);
 	}
 
 	/**
@@ -224,7 +253,6 @@ public class TransactionsController implements Initializable {
 	 * Cancels editing of TransactionEditors (needed on a tab switch)
 	 */
 	public void cancelEdit() {
-		//TODO: also cancel when the window loses focus
 		for (TransactionEditor editor : editingTransactionEditors)
 			if (editor.isEditing())
 				editor.cancelEdit();

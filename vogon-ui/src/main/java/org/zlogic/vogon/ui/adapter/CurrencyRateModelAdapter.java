@@ -7,12 +7,10 @@ package org.zlogic.vogon.ui.adapter;
 
 import java.util.Currency;
 import java.util.Objects;
-
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-
 import org.zlogic.vogon.data.CurrencyRate;
 import org.zlogic.vogon.data.FinanceData;
 
@@ -68,7 +66,7 @@ public class CurrencyRateModelAdapter {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof CurrencyRateModelAdapter)
-			return rate.equals(((CurrencyRateModelAdapter) obj).rate) && value.equals(((CurrencyRateModelAdapter) obj).value);
+			return rate.equals(((CurrencyRateModelAdapter) obj).rate) && value.get() == ((CurrencyRateModelAdapter) obj).value.get();
 		if (obj instanceof CurrencyRate)
 			return rate.equals((CurrencyRate) obj);
 		return false;
