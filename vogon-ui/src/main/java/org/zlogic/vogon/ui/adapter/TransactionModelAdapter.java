@@ -11,7 +11,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -23,7 +22,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.util.StringConverter;
-
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
@@ -282,7 +280,7 @@ public class TransactionModelAdapter implements CellStatus {
 		if (!(obj instanceof TransactionModelAdapter))
 			return false;
 		TransactionModelAdapter adapter = (TransactionModelAdapter) obj;
-		return transaction.equals(adapter.transaction) && account.equals(adapter.account) && amount.equals(adapter.amount) && date.equals(adapter.date) && description.equals(adapter.description) && tags.equals(adapter.tags);
+		return transaction.equals(adapter.transaction) && account.get().equals(adapter.account.get()) && amount.get().equals(adapter.amount.get()) && date.get().equals(adapter.date.get()) && description.get().equals(adapter.description.get()) && tags.get().equals(adapter.tags.get());
 	}
 
 	@Override

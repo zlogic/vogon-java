@@ -9,7 +9,8 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
-
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -19,11 +20,11 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.util.Callback;
-
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
+import org.zlogic.vogon.data.events.AccountEventHandler;
 import org.zlogic.vogon.data.events.TransactionEventHandler;
 import org.zlogic.vogon.ui.adapter.AccountModelAdapter;
 import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
@@ -67,6 +68,7 @@ public class TransactionComponentsController implements Initializable {
 	 */
 	@FXML
 	private TableColumn<TransactionComponentModelAdapter, AmountModelAdapter> columnAmount;
+	protected ObservableList<AccountModelAdapter> accountsComboList = FXCollections.observableList(new LinkedList<AccountModelAdapter>());
 
 	/**
 	 * Initializes the Transaction Components editor
@@ -84,8 +86,7 @@ public class TransactionComponentsController implements Initializable {
 		columnAccount.setCellFactory(new Callback<TableColumn<TransactionComponentModelAdapter, AccountModelAdapter>, TableCell<TransactionComponentModelAdapter, AccountModelAdapter>>() {
 			@Override
 			public TableCell<TransactionComponentModelAdapter, AccountModelAdapter> call(TableColumn<TransactionComponentModelAdapter, AccountModelAdapter> p) {
-				ComboBoxTableCell<TransactionComponentModelAdapter, AccountModelAdapter> cell = new ComboBoxTableCell<>();
-				cell.getItems().addAll(getAccountsComboList());
+				ComboBoxTableCell<TransactionComponentModelAdapter, AccountModelAdapter> cell = new ComboBoxTableCell<>(accountsComboList);
 				return cell;
 			}
 		});
@@ -107,7 +108,8 @@ public class TransactionComponentsController implements Initializable {
 	 */
 	public void setTransaction(FinanceTransaction transaction) {
 		this.transaction = null;
-		transactionType.getSelectionModel().select(new TransactionTypeComboItem(transaction.getType()));
+		if (transaction != null)
+			transactionType.getSelectionModel().select(new TransactionTypeComboItem(transaction.getType()));
 		this.transaction = transaction;
 		updateComponents();
 	}
@@ -120,9 +122,11 @@ public class TransactionComponentsController implements Initializable {
 	public void setFinanceData(FinanceData financeData) {
 		this.financeData = financeData;
 
+		updateAccountsComboList();
+
 		//Listen for Transaction events
-		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
-			((FinanceDataEventDispatcher) financeData.getAccountListener()).addTransactionEventHandler(new TransactionEventHandler() {
+		if (financeData.getTransactionListener() instanceof FinanceDataEventDispatcher) {
+			((FinanceDataEventDispatcher) financeData.getTransactionListener()).addTransactionEventHandler(new TransactionEventHandler() {
 				@Override
 				public void transactionCreated(long transactionId) {
 				}
@@ -140,6 +144,31 @@ public class TransactionComponentsController implements Initializable {
 				@Override
 				public void transactionsUpdated() {
 					updateComponents();
+				}
+			});
+		}
+
+		//Listen for Account events
+		if (financeData.getTransactionListener() instanceof FinanceDataEventDispatcher) {
+			((FinanceDataEventDispatcher) financeData.getTransactionListener()).addAccountEventHandler(new AccountEventHandler() {
+				@Override
+				public void accountCreated(long accountId) {
+					updateAccountsComboList();
+				}
+
+				@Override
+				public void accountUpdated(long accountId) {
+					updateAccountsComboList();
+				}
+
+				@Override
+				public void accountsUpdated() {
+					updateAccountsComboList();
+				}
+
+				@Override
+				public void accountDeleted(long accountId) {
+					updateAccountsComboList();
 				}
 			});
 		}
@@ -181,6 +210,8 @@ public class TransactionComponentsController implements Initializable {
 	private void updateComponents() {
 		transaction = financeData.getUpdatedTransactionFromDatabase(transaction);
 		transactionComponents.getItems().clear();
+		if (transaction == null)
+			return;
 		for (TransactionComponent component : transaction.getComponents())
 			transactionComponents.getItems().add(new TransactionComponentModelAdapter(component, financeData));
 	}
@@ -197,18 +228,26 @@ public class TransactionComponentsController implements Initializable {
 	}
 
 	/**
-	 * Returns a list of account items which can be rendered in a Combo box
-	 * (used to specifically detect the selected item)
-	 *
-	 * @return the list of account items
+	 * Updates the list of account items which will be rendered in a Combo box
 	 */
-	public List<AccountModelAdapter> getAccountsComboList() {
-		//TODO: check how this handles adding/hiding of accounts. Swing simply updates the accounts combo box on any changes.
+	private void updateAccountsComboList() {
+		//Prepare updated list, try to reuse items as much as possible
 		List<AccountModelAdapter> items = new LinkedList<>();
-		for (FinanceAccount account : financeData.getAccounts())
-			if (account.getIncludeInTotal())
-				items.add(new AccountModelAdapter(account, financeData));
-		return items;
+		if (financeData != null)
+			for (FinanceAccount account : financeData.getAccounts())
+				if (account.getIncludeInTotal()) {
+					AccountModelAdapter accountAdapter = null;
+					for (AccountModelAdapter adapter : accountsComboList)
+						if (adapter.getAccount().equals(account) && adapter.nameProperty().get().getValue().equals(account.getName())) {
+							accountAdapter = adapter;
+							break;
+						}
+					accountAdapter = accountAdapter == null ? new AccountModelAdapter(account, financeData) : accountAdapter;
+					items.add(accountAdapter);
+				}
+		//Recreate list ONLY if it's changed. Otherwier this messes up list selection operations.
+		if (!items.equals(accountsComboList))
+			accountsComboList.setAll(items);
 	}
 
 	/**

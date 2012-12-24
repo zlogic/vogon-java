@@ -7,7 +7,6 @@ package org.zlogic.vogon.ui.cell;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
 
 /**
