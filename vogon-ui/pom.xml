@@ -41,8 +41,8 @@
 			<artifactId>vogon-data</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.zlogic.vogon.ui</groupId>
-			<artifactId>vogon-javafx-repack</artifactId>
+			<groupId>org.zlogic.misc</groupId>
+			<artifactId>javafx-repack</artifactId>
 		</dependency>
 	</dependencies>
 </project>
