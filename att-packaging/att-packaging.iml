@@ -11,7 +11,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="att-resources" />
     <orderEntry type="module" module-name="att-ui" />
-    <orderEntry type="module" module-name="vogon-javafx-repack" />
+    <orderEntry type="module" module-name="javafx-repack" />
   </component>
 </module>
 
