@@ -61,9 +61,9 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.zlogic.vogon.ui</groupId>
-				<artifactId>vogon-javafx-repack</artifactId>
-				<version>${project.version}</version>
+				<groupId>org.zlogic.misc</groupId>
+				<artifactId>javafx-repack</artifactId>
+				<version>1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.zlogic.vogon.resources</groupId>
