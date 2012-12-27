@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<artifactId>top</artifactId>
+		<groupId>org.zlogic.att</groupId>
+		<version>0.1-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>att-packaging</artifactId>
+
+	<packaging>pom</packaging>
+
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>att-resources</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>att-ui</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>distro-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<archive>
+								<manifest>
+									<mainClass>org.zlogic.att.ui.Launcher</mainClass>
+								</manifest>
+							</archive>
+							<finalName>awesome-time-tracker-${project.version}</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.akathist.maven.plugins.launch4j</groupId>
+				<artifactId>launch4j-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>l4j-clui</id>
+						<phase>package</phase>
+						<goals>
+							<goal>launch4j</goal>
+						</goals>
+						<configuration>
+							<headerType>gui</headerType>
+							<outfile>target/awesome-time-tracker-${project.version}.exe</outfile>
+							<jar>target/awesome-time-tracker-${project.version}.jar</jar>
+							<errTitle>Awesome Time Tracker</errTitle>
+							<!--<icon>src/main/resources/ATT.ico</icon>-->
+							<classPath>
+								<mainClass>org.zlogic.att.ui.Launcher</mainClass>
+								<addDependencies>true</addDependencies>
+								<preCp>anything</preCp>
+							</classPath>
+							<jre>
+								<minVersion>1.7.0</minVersion>
+								<opts>
+									<!--<opt>-Djava.util.logging.config.file=logging.properties</opt>-->
+								</opts>
+							</jre>
+							<versionInfo>
+								<fileVersion>${version.windows}</fileVersion>
+								<txtFileVersion>${project.version}</txtFileVersion>
+								<fileDescription>Awesome Time Tracker for Windows</fileDescription>
+								<copyright>Zlogic</copyright>
+								<productVersion>${version.windows}</productVersion>
+								<txtProductVersion>${project.version}</txtProductVersion>
+								<productName>Awesome Time Tracker</productName>
+								<internalName>Awesome Time Tracker</internalName>
+								<originalFilename>awesome-time-tracker-${project.version}.exe</originalFilename>
+							</versionInfo>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
