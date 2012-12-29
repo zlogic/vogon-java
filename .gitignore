@@ -1,0 +1,6 @@
+att-data/target/
+att-ui/target/
+att-packaging/target/
+att-resources/target/
+.idea/libraries
+*.fxml.bak
