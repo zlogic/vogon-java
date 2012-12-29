@@ -1,25 +1,28 @@
 package org.zlogic.att.ui;
 
 import javafx.application.Application;
-import javafx.event.EventHandler;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created with IntelliJ IDEA.
- * User: Zlogic
+ * Java FX launcher/initializer
+ * <p/>
+ * User: Dmitry Zolotukhin <zlogic@gmail.com>
  * Date: 27.12.12
  * Time: 21:06
- * To change this template use File | Settings | File Templates.
  */
 public class Launcher extends Application {
+	private final static Logger log = Logger.getLogger(Launcher.class.getName());
 
 	@Override
 	public void start(Stage stage) throws Exception {
@@ -32,7 +35,7 @@ public class Launcher extends Application {
 			loader.setLocation(getClass().getResource("MainWindow.fxml"));
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
-			java.util.logging.Logger.getLogger(Launcher.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+			log.log(java.util.logging.Level.SEVERE, null, ex);
 			return;
 		}
 
@@ -44,23 +47,52 @@ public class Launcher extends Application {
 
 		stage.setScene(scene);
 
-		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-			@Override
-			public void handle(WindowEvent windowEvent) {
-				//TODO
-			}
-		});
+		stage.getIcons().addAll(getIconImages());
 
 		stage.show();
+		initTrayIcon(stage);
+	}
+
+	@Override
+	public void stop() {
+		//TODO: perform final cleanup here
+	}
+
+	private void initTrayIcon(Stage primaryStage) {
+		Platform.setImplicitExit(false);
+		Platform.runLater(new Runnable() {
+			private Stage primaryStage;
+
+			public Runnable setStage(Stage primaryStage) {
+				this.primaryStage = primaryStage;
+				return this;
+			}
+
+			@Override
+			public void run() {
+				new TrayIcon(primaryStage);
+			}
+		}.setStage(primaryStage));
+	}
+
+	/**
+	 * Returns the list of icons
+	 *
+	 * @return the list of icons
+	 */
+	public List<Image> getIconImages() {
+		List<Image> images = new LinkedList<>();
+		int[] iconSizes = new int[]{16/*, 24, 32, 48, 64, 128, 256, 512*/};//TODO: Create other icons as well
+		for (int iconName : iconSizes)
+			images.add(new Image("org/zlogic/att/ui/icon/att-" + Integer.toString(iconName) + ".png"));
+		return images;
 	}
 
 	/**
 	 * Performs initialization of application's dependencies
 	 */
 	private void initApplication() {
-		/*
-		 * Configure logging to load config from classpath
-		 */
+		//Configure logging to load config from classpath
 		String loggingFile = System.getProperty("java.util.logging.config.file");
 		if (loggingFile == null || loggingFile.isEmpty()) {
 			try {
@@ -68,7 +100,7 @@ public class Launcher extends Application {
 				if (url != null)
 					java.util.logging.LogManager.getLogManager().readConfiguration(url.openStream());
 			} catch (IOException | SecurityException e) {
-				Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Error when loading logging configuration", e);
+				log.log(Level.SEVERE, "Error when loading logging configuration", e);
 			}
 		}
 	}

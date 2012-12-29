@@ -10,19 +10,21 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>att-ui</artifactId>
-	<description>Awesome Time Tracker :: UI</description>
+	<name>Awesome Time Tracker :: UI</name>
 	<packaging>jar</packaging>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.zlogic.misc</groupId>
 			<artifactId>javafx-repack</artifactId>
-			<version>1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>att-resources</artifactId>
-			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>att-data</artifactId>
 		</dependency>
 	</dependencies>
 	<build>

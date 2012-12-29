@@ -10,19 +10,17 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>att-packaging</artifactId>
-
+	<name>Awesome Time Tracker :: Packaging</name>
 	<packaging>pom</packaging>
 
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>att-resources</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>att-ui</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 
@@ -72,7 +70,7 @@
 							<outfile>target/awesome-time-tracker-${project.version}.exe</outfile>
 							<jar>target/awesome-time-tracker-${project.version}.jar</jar>
 							<errTitle>Awesome Time Tracker</errTitle>
-							<!--<icon>src/main/resources/ATT.ico</icon>-->
+							<icon>src/main/resources/att.ico</icon>
 							<classPath>
 								<mainClass>org.zlogic.att.ui.Launcher</mainClass>
 								<addDependencies>true</addDependencies>
