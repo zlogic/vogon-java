@@ -4,6 +4,7 @@ import org.joda.time.Period;
 
 import javax.persistence.*;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Entity class for a tracked task.
@@ -22,12 +23,14 @@ public class Task {
 	private String name;
 	@OneToMany
 	private Set<TimeSegment> timeSegments;
-	private Boolean complete;
+	private Boolean completed;
 
 	public Task() {
+		id = -1;
 		description = "";
 		name = "";
-		complete = new Boolean(false);
+		completed = false;
+		timeSegments = new TreeSet<>();
 	}
 
 	public void addSegment(TimeSegment segment) {
@@ -61,11 +64,16 @@ public class Task {
 		this.name = name;
 	}
 
-	public Boolean getComplete() {
-		return complete;
+	public Boolean getCompleted() {
+		return completed;
 	}
 
-	public void setComplete(Boolean complete) {
-		this.complete = complete;
+	public void setCompleted(Boolean complete) {
+		this.completed = complete;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof Task && id == ((Task) obj).id;
 	}
 }

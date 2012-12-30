@@ -2,9 +2,11 @@ package org.zlogic.att.ui;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 import javafx.util.converter.DefaultStringConverter;
@@ -36,8 +38,12 @@ public class MainWindowController implements Initializable {
 	@FXML
 	private TableColumn<TaskAdapter, String> columnTaskName;
 
+	@FXML
+	private TableColumn<TaskAdapter, Boolean> columnTaskEnabled;
+
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
+		taskList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		reloadTasks();
 		//Cell editors
 		columnTaskName.setCellFactory(new Callback<TableColumn<TaskAdapter, String>, TableCell<TaskAdapter, String>>() {
@@ -48,12 +54,25 @@ public class MainWindowController implements Initializable {
 				return cell;
 			}
 		});
+		columnTaskEnabled.setCellFactory(new Callback<TableColumn<TaskAdapter, Boolean>, TableCell<TaskAdapter, Boolean>>() {
+			@Override
+			public TableCell<TaskAdapter, Boolean> call(TableColumn<TaskAdapter, Boolean> taskAdapterBooleanTableColumn) {
+				return new CheckBoxTableCell<>();
+			}
+		});
+
+		//Set column sizes
+		//TODO: make sure this keeps working correctly
+		//taskList.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		columnTaskName.prefWidthProperty().bind(taskList.widthProperty().multiply(9).divide(10));
+		columnTaskEnabled.prefWidthProperty().bind(taskList.widthProperty().multiply(1).divide(10).subtract(15));
 	}
 
 	private void reloadTasks() {
 		taskList.getItems().clear();
 		for (Task task : storageManager.getAllTasks())
 			taskList.getItems().add(new TaskAdapter(task));
+		taskEditorController.setEditedTaskList(taskList.getSelectionModel().getSelectedItems());
 	}
 
 	@FXML

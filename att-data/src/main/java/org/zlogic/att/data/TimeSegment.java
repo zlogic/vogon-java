@@ -28,9 +28,16 @@ public class TimeSegment {
 	@ManyToOne
 	private Task owner;
 
-	public TimeSegment() {
+	protected TimeSegment() {
+		id = -1;
 		startTime = new Date();
 		endTime = new Date();
+		description = "";
+	}
+
+	public TimeSegment(Task owner) {
+		this();
+		setOwner(owner);
 	}
 
 	public Date getStartTime() {
@@ -62,10 +69,21 @@ public class TimeSegment {
 	}
 
 	public void setOwner(Task owner) {
+		//TODO: test inside transactions
+		if (this.owner != null) {
+			this.owner.removeSegment(this);
+			this.owner = null;
+		}
 		this.owner = owner;
+		owner.addSegment(this);
 	}
 
 	public Period getDuration() {
 		return new Interval(new DateTime(startTime), new DateTime(endTime)).toPeriod();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof TimeSegment && id == ((TimeSegment) obj).id;
 	}
 }

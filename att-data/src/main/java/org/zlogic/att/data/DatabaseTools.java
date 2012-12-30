@@ -29,7 +29,6 @@ public class DatabaseTools {
 	}
 
 	public EntityManager createEntityManager() {
-		EntityManager entityManager = entityManagerFactory.createEntityManager();
-		return entityManager;
+		return entityManagerFactory.createEntityManager();
 	}
 }

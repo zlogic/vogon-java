@@ -2,41 +2,74 @@
 
 <?import java.lang.*?>
 <?import java.util.*?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 
-<BorderPane id="BorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns:fx="http://javafx.com/fxml">
-  <center>
-    <AnchorPane prefHeight="200.0" prefWidth="200.0">
-      <children>
-        <TableView AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-          <columns>
-            <TableColumn prefWidth="75.0" text="Start date" />
-            <TableColumn prefWidth="75.0" text="End date" />
-            <TableColumn prefWidth="75.0" text="Description" />
-            <TableColumn prefWidth="75.0" text="Task" />
-          </columns>
-        </TableView>
-      </children>
-    </AnchorPane>
-  </center>
-  <top>
-    <GridPane>
-      <children>
-        <TextField prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-        <TextArea prefWidth="200.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-        <Label text="Name" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-        <Label text="Description" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-      </children>
-      <columnConstraints>
-        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
-      </columnConstraints>
-      <rowConstraints>
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
-      </rowConstraints>
-    </GridPane>
-  </top>
-</BorderPane>
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+			prefHeight="397.0" prefWidth="403.0" xmlns:fx="http://javafx.com/fxml"
+			fx:controller="org.zlogic.att.ui.TaskEditorController">
+	<children>
+		<SplitPane dividerPositions="0.4" focusTraversable="true" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0"
+				   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+			<items>
+				<AnchorPane minHeight="80.0">
+					<children>
+						<GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+								  AnchorPane.topAnchor="0.0">
+							<children>
+								<TextField id="taskName" fx:id="name" GridPane.columnIndex="1" GridPane.rowIndex="0">
+									<GridPane.margin>
+										<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1"/>
+									</GridPane.margin>
+								</TextField>
+								<TextArea fx:id="description" wrapText="true" GridPane.columnIndex="1"
+										  GridPane.margin="$x1" GridPane.rowIndex="1"/>
+								<Label text="Name" GridPane.columnIndex="0" GridPane.margin="$x1"
+									   GridPane.rowIndex="0"/>
+								<Label text="Description" GridPane.columnIndex="0" GridPane.margin="$x1"
+									   GridPane.rowIndex="1"/>
+								<AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2"
+											GridPane.rowIndex="0" GridPane.rowSpan="2147483647">
+									<children>
+										<Button fx:id="startStop" mnemonicParsing="false" onAction="#handleStartStop"
+												prefHeight="115.0" prefWidth="101.0" text="Start/Stop"
+												AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0"
+												AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0"/>
+									</children>
+									<GridPane.margin>
+										<Insets/>
+									</GridPane.margin>
+								</AnchorPane>
+							</children>
+							<columnConstraints>
+								<ColumnConstraints hgrow="SOMETIMES" maxWidth="71.0" minWidth="10.0" prefWidth="71.0"/>
+								<ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0"
+												   prefWidth="204.0"/>
+								<ColumnConstraints hgrow="ALWAYS" maxWidth="163.0" minWidth="10.0" prefWidth="126.0"/>
+							</columnConstraints>
+							<rowConstraints>
+								<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+								<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS"/>
+							</rowConstraints>
+						</GridPane>
+					</children>
+				</AnchorPane>
+				<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+					<children>
+						<TableView prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0"
+								   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+							<columns>
+								<TableColumn prefWidth="75.0" text="Start date"/>
+								<TableColumn prefWidth="75.0" text="End date"/>
+								<TableColumn prefWidth="75.0" text="Description"/>
+								<TableColumn prefWidth="75.0" text="Task"/>
+							</columns>
+						</TableView>
+					</children>
+				</AnchorPane>
+			</items>
+		</SplitPane>
+	</children>
+</AnchorPane>

@@ -29,11 +29,10 @@ public class PersistenceHelper {
 	public TimeSegment createTimeSegment(Task parent) {
 		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-		TimeSegment segment = new TimeSegment();
+		TimeSegment segment = new TimeSegment(parent);
 		entityManager.persist(segment);
 		if (!entityManager.contains(parent))
 			entityManager.refresh(parent);
-		parent.addSegment(segment);
 		entityManager.merge(parent);
 		entityManager.getTransaction().commit();
 		entityManager.close();
