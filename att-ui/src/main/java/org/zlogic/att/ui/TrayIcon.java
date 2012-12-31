@@ -10,13 +10,14 @@ import java.util.logging.Logger;
 /**
  * Class for creating and showing the tray icon.
  * TODO: Replace with native Java FX version from Java FX 3.0
- * <p/>
  * User: Dmitry Zolotukhin <zlogic@gmail.com>
  * Date: 30.12.12
  * Time: 1:34
  */
 public class TrayIcon {
 	private final static Logger log = Logger.getLogger(TrayIcon.class.getName());
+
+	private java.awt.TrayIcon trayIcon;
 
 	public TrayIcon(Stage primaryStage) {
 		if (SystemTray.isSupported()) {
@@ -28,22 +29,14 @@ public class TrayIcon {
 
 			popup.add(item);
 
-			java.awt.TrayIcon trayIcon = new java.awt.TrayIcon(image, "Awesome Time Tracker", popup);
+			trayIcon = new java.awt.TrayIcon(image, "Awesome Time Tracker", popup);
 
 			ActionListener listener = new ActionListener() {
-				private java.awt.TrayIcon trayIcon;
-
-				public ActionListener setStage(java.awt.TrayIcon trayIcon) {
-					this.trayIcon = trayIcon;
-					return this;
-				}
-
 				@Override
 				public void actionPerformed(java.awt.event.ActionEvent arg0) {
-					SystemTray.getSystemTray().remove(trayIcon);
-					Platform.exit();
+					exitApplication();
 				}
-			}.setStage(trayIcon);
+			};
 
 			ActionListener listenerTray = new ActionListener() {
 				private Stage stage;
@@ -78,5 +71,12 @@ public class TrayIcon {
 		} else {
 			log.severe("System tray is unavailable");
 		}
+	}
+
+	public void exitApplication() {
+		if (trayIcon != null)
+			SystemTray.getSystemTray().remove(trayIcon);
+		trayIcon = null;
+		Platform.exit();
 	}
 }

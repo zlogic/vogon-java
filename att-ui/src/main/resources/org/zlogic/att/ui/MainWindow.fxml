@@ -13,8 +13,28 @@
 			prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml"
 			fx:controller="org.zlogic.att.ui.MainWindowController">
 	<children>
-		<BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-					AnchorPane.topAnchor="0.0">
+		<MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+			<menus>
+				<Menu mnemonicParsing="false" text="File">
+					<items>
+						<MenuItem mnemonicParsing="false" onAction="#exit" text="Exit"/>
+					</items>
+				</Menu>
+				<Menu mnemonicParsing="false" text="Edit">
+					<items>
+						<MenuItem mnemonicParsing="false" onAction="#showCustomFieldEditor"
+								  text="Edit custom fields..."/>
+					</items>
+				</Menu>
+				<Menu mnemonicParsing="false" text="Help">
+					<items>
+						<MenuItem mnemonicParsing="false" text="About"/>
+					</items>
+				</Menu>
+			</menus>
+		</MenuBar>
+		<BorderPane prefHeight="376.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+					AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="24.0">
 			<bottom>
 				<AnchorPane prefHeight="200.0" prefWidth="200.0">
 					<children>
@@ -24,7 +44,7 @@
 							<columns>
 								<TableColumn prefWidth="75.0" text="Task name" fx:id="columnTaskName">
 									<cellValueFactory>
-										<PropertyValueFactory property="description"/>
+										<PropertyValueFactory property="name"/>
 									</cellValueFactory>
 								</TableColumn>
 								<TableColumn prefWidth="75.0" text="Enabled" fx:id="columnTaskEnabled">

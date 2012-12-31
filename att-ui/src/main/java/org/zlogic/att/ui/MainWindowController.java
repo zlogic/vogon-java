@@ -1,26 +1,32 @@
 package org.zlogic.att.ui;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.converter.DefaultStringConverter;
 import org.zlogic.att.data.PersistenceHelper;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.ui.adapters.TaskAdapter;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Controller for the main window
- * <p/>
  * User: Dmitry Zolotukhin <zlogic@gmail.com>
  * Date: 29.12.12
  * Time: 22:18
@@ -28,6 +34,10 @@ import java.util.logging.Logger;
 public class MainWindowController implements Initializable {
 	private final static Logger log = Logger.getLogger(MainWindowController.class.getName());
 	private PersistenceHelper storageManager = new PersistenceHelper();
+
+	private Runnable shutdownProcedure;
+
+	private Stage customFieldEditorStage;
 
 	@FXML
 	private TaskEditorController taskEditorController;
@@ -66,6 +76,34 @@ public class MainWindowController implements Initializable {
 		//taskList.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		columnTaskName.prefWidthProperty().bind(taskList.widthProperty().multiply(9).divide(10));
 		columnTaskEnabled.prefWidthProperty().bind(taskList.widthProperty().multiply(1).divide(10).subtract(15));
+
+		//Load other windows
+		loadWindowCustomFieldEditor();
+	}
+
+	public void setShutdownProcedure(Runnable shutdownProcedure) {
+		this.shutdownProcedure = shutdownProcedure;
+	}
+
+	private void loadWindowCustomFieldEditor() {
+		//Load FXML
+		customFieldEditorStage = new Stage();
+		customFieldEditorStage.initModality(Modality.NONE);
+		Parent root = null;
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("CustomFieldEditor.fxml")); //NOI18N
+		loader.setLocation(getClass().getResource("CustomFieldEditor.fxml")); //NOI18N
+		try {
+			root = (Parent) loader.load();
+		} catch (IOException ex) {
+			Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Error loading FXML", ex);
+		}
+		//Initialize the scene properties
+		if (root != null) {
+			Scene scene = new Scene(root);
+			customFieldEditorStage.setTitle("Custom field editor");
+			customFieldEditorStage.setScene(scene);
+			//((CustomFieldEditorController) loader.getController()).messageText.setText(message);
+		}
 	}
 
 	private void reloadTasks() {
@@ -75,8 +113,24 @@ public class MainWindowController implements Initializable {
 		taskEditorController.setEditedTaskList(taskList.getSelectionModel().getSelectedItems());
 	}
 
+	/*
+	Callbacks
+	 */
 	@FXML
 	private void createNewTask() {
-		taskList.getItems().add(new TaskAdapter(storageManager.createTask()));
+		TaskAdapter newTask = new TaskAdapter(storageManager.createTask());
+		taskList.getItems().add(newTask);
+		taskList.getSelectionModel().select(newTask);
+	}
+
+	@FXML
+	private void showCustomFieldEditor() {
+		customFieldEditorStage.showAndWait();
+	}
+
+	@FXML
+	private void exit() {
+		if (shutdownProcedure != null)
+			shutdownProcedure.run();
 	}
 }

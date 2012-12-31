@@ -12,7 +12,6 @@ import javax.persistence.EntityManager;
 
 /**
  * Adapter to interface JPA with Java FX observable properties for TimeSegment classes.
- * <p/>
  * User: Dmitry Zolotukhin <zlogic@gmail.com>
  * Date: 30.12.12
  * Time: 0:15

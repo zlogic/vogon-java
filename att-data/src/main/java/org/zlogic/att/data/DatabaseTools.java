@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 
 /**
  * Class with database-related helper tools.
- * <p/>
  * User: Dmitry Zolotukhin <zlogic@gmail.com>
  * Date: 29.12.12
  * Time: 21:51

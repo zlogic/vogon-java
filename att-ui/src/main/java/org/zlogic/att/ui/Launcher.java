@@ -16,7 +16,6 @@ import java.util.logging.Logger;
 
 /**
  * Java FX launcher/initializer
- * <p/>
  * User: Dmitry Zolotukhin <zlogic@gmail.com>
  * Date: 27.12.12
  * Time: 21:06
@@ -44,13 +43,12 @@ public class Launcher extends Application {
 
 		//Set scene properties
 		stage.setTitle("Awesome Time Tracker");
-
 		stage.setScene(scene);
-
 		stage.getIcons().addAll(getIconImages());
 
+		MainWindowController controller = loader.getController();
+		initTrayIcon(stage, controller);
 		stage.show();
-		initTrayIcon(stage);
 	}
 
 	@Override
@@ -58,21 +56,36 @@ public class Launcher extends Application {
 		//TODO: perform final cleanup here
 	}
 
-	private void initTrayIcon(Stage primaryStage) {
+	private void initTrayIcon(Stage primaryStage, MainWindowController controller) {
 		Platform.setImplicitExit(false);
 		Platform.runLater(new Runnable() {
 			private Stage primaryStage;
+			private MainWindowController controller;
 
-			public Runnable setStage(Stage primaryStage) {
+			public Runnable setParameters(Stage primaryStage, MainWindowController controller) {
 				this.primaryStage = primaryStage;
+				this.controller = controller;
 				return this;
 			}
 
 			@Override
 			public void run() {
-				new TrayIcon(primaryStage);
+				TrayIcon trayIcon = new TrayIcon(primaryStage);
+				controller.setShutdownProcedure(new Runnable() {
+					private TrayIcon trayIcon;
+
+					public Runnable setTrayIcon(TrayIcon trayIcon) {
+						this.trayIcon = trayIcon;
+						return this;
+					}
+
+					@Override
+					public void run() {
+						trayIcon.exitApplication();
+					}
+				}.setTrayIcon(trayIcon));
 			}
-		}.setStage(primaryStage));
+		}.setParameters(primaryStage, controller));
 	}
 
 	/**

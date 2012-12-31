@@ -3,19 +3,21 @@ package org.zlogic.att.data;
 import org.joda.time.Period;
 
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
  * Entity class for a tracked task.
  * Each task's time is tracked with TimeSegments.
- * <p/>
  * User: Dmitry Zolotukhin <zlogic@gmail.com>
  * Date: 29.12.12
  * Time: 21:03
  */
 @Entity
-public class Task {
+public class Task implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private long id;
@@ -23,6 +25,8 @@ public class Task {
 	private String name;
 	@OneToMany
 	private Set<TimeSegment> timeSegments;
+	@OneToMany(targetEntity = CustomField.class, fetch = FetchType.EAGER)
+	private Map<CustomField, String> customFields;
 	private Boolean completed;
 
 	public Task() {
@@ -31,6 +35,7 @@ public class Task {
 		name = "";
 		completed = false;
 		timeSegments = new TreeSet<>();
+		customFields = new TreeMap<>();
 	}
 
 	public void addSegment(TimeSegment segment) {
@@ -70,6 +75,18 @@ public class Task {
 
 	public void setCompleted(Boolean complete) {
 		this.completed = complete;
+	}
+
+	public String getCustomField(CustomField field) {
+		return customFields.get(field);
+	}
+
+	public void setCustomField(CustomField customField, String value) {
+		customFields.put(customField, value);
+	}
+
+	public long getId() {
+		return id;
 	}
 
 	@Override

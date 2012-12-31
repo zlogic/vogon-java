@@ -18,7 +18,6 @@ import java.util.logging.Logger;
 
 /**
  * Controller for task editor
- * <p/>
  * User: Dmitry Zolotukhin <zlogic@gmail.com>
  * Date: 29.12.12
  * Time: 22:36

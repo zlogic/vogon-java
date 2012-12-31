@@ -5,6 +5,7 @@ import org.joda.time.Interval;
 import org.joda.time.Period;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -16,7 +17,7 @@ import java.util.Date;
  * Time: 13:47
  */
 @Entity
-public class TimeSegment {
+public class TimeSegment implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private long id;
@@ -76,6 +77,10 @@ public class TimeSegment {
 		}
 		this.owner = owner;
 		owner.addSegment(this);
+	}
+
+	public long getId() {
+		return id;
 	}
 
 	public Period getDuration() {

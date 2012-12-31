@@ -5,6 +5,7 @@
 	<persistence-unit name="AwesomeTimeTrackerPersistenceUnit" transaction-type="RESOURCE_LOCAL">
 		<provider>org.hibernate.ejb.HibernatePersistence</provider>
 		<class>org.zlogic.att.data.TimeSegment</class>
+		<class>org.zlogic.att.data.CustomField</class>
 		<class>org.zlogic.att.data.Task</class>
 		<properties>
 			<property name="javax.persistence.jdbc.url" value="jdbc:h2:AwesomeTimeTracker"/>
