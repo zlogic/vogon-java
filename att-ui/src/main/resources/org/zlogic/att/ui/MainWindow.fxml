@@ -10,7 +10,7 @@
 <?import javafx.scene.paint.*?>
 
 <AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-			prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml"
+			prefHeight="700.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml"
 			fx:controller="org.zlogic.att.ui.MainWindowController">
 	<children>
 		<MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -28,44 +28,52 @@
 				</Menu>
 				<Menu mnemonicParsing="false" text="Help">
 					<items>
-						<MenuItem mnemonicParsing="false" text="About"/>
+						<MenuItem disable="true" mnemonicParsing="false" text="About"/>
 					</items>
 				</Menu>
 			</menus>
 		</MenuBar>
-		<BorderPane prefHeight="376.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-					AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="24.0">
-			<bottom>
-				<AnchorPane prefHeight="200.0" prefWidth="200.0">
+		<SplitPane id="SplitPane" dividerPositions="0.48813056379821956" orientation="VERTICAL"
+				   prefHeight="675.9999000000025" prefWidth="800.0" AnchorPane.bottomAnchor="0.0"
+				   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="24.0">
+			<items>
+				<AnchorPane>
+					<fx:include fx:id="taskEditor" source="TaskEditor.fxml" prefHeight="200.0" prefWidth="600.0"
+								AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+								AnchorPane.topAnchor="0.0"/>
+				</AnchorPane>
+				<AnchorPane>
 					<children>
-						<TableView fx:id="taskList" editable="true" prefHeight="179.0" prefWidth="600.0"
+						<FlowPane prefHeight="24.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0"
+								  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+							<children>
+								<Button fx:id="createTransactionButton" mnemonicParsing="false"
+										onAction="#createNewTask" text="New task">
+									<FlowPane.margin>
+										<Insets bottom="4.0" left="4.0" right="4.0" top="4.0"/>
+									</FlowPane.margin>
+								</Button>
+							</children>
+						</FlowPane>
+						<TableView fx:id="taskList" editable="true" prefHeight="313.0" prefWidth="798.0"
 								   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-								   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="21.0">
+								   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="29.0">
 							<columns>
 								<TableColumn prefWidth="75.0" text="Task name" fx:id="columnTaskName">
 									<cellValueFactory>
 										<PropertyValueFactory property="name"/>
 									</cellValueFactory>
 								</TableColumn>
-								<TableColumn prefWidth="75.0" text="Enabled" fx:id="columnTaskEnabled">
+								<TableColumn prefWidth="75.0" text="Completed" fx:id="columnTaskCompleted">
 									<cellValueFactory>
 										<PropertyValueFactory property="completed"/>
 									</cellValueFactory>
 								</TableColumn>
 							</columns>
 						</TableView>
-						<Button fx:id="createTransactionButton" mnemonicParsing="false" onAction="#createNewTask"
-								text="New task"/>
 					</children>
 				</AnchorPane>
-			</bottom>
-			<top>
-				<AnchorPane prefHeight="200.0" prefWidth="200.0">
-					<fx:include fx:id="taskEditor" source="TaskEditor.fxml" prefHeight="200.0" prefWidth="600.0"
-								AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-								AnchorPane.topAnchor="0.0"/>
-				</AnchorPane>
-			</top>
-		</BorderPane>
+			</items>
+		</SplitPane>
 	</children>
 </AnchorPane>

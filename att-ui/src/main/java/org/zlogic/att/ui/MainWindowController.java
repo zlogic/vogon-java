@@ -49,7 +49,7 @@ public class MainWindowController implements Initializable {
 	private TableColumn<TaskAdapter, String> columnTaskName;
 
 	@FXML
-	private TableColumn<TaskAdapter, Boolean> columnTaskEnabled;
+	private TableColumn<TaskAdapter, Boolean> columnTaskCompleted;
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -64,7 +64,7 @@ public class MainWindowController implements Initializable {
 				return cell;
 			}
 		});
-		columnTaskEnabled.setCellFactory(new Callback<TableColumn<TaskAdapter, Boolean>, TableCell<TaskAdapter, Boolean>>() {
+		columnTaskCompleted.setCellFactory(new Callback<TableColumn<TaskAdapter, Boolean>, TableCell<TaskAdapter, Boolean>>() {
 			@Override
 			public TableCell<TaskAdapter, Boolean> call(TableColumn<TaskAdapter, Boolean> taskAdapterBooleanTableColumn) {
 				return new CheckBoxTableCell<>();
@@ -75,7 +75,7 @@ public class MainWindowController implements Initializable {
 		//TODO: make sure this keeps working correctly
 		//taskList.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		columnTaskName.prefWidthProperty().bind(taskList.widthProperty().multiply(9).divide(10));
-		columnTaskEnabled.prefWidthProperty().bind(taskList.widthProperty().multiply(1).divide(10).subtract(15));
+		columnTaskCompleted.prefWidthProperty().bind(taskList.widthProperty().multiply(1).divide(10).subtract(15));
 
 		//Load other windows
 		loadWindowCustomFieldEditor();
@@ -104,6 +104,8 @@ public class MainWindowController implements Initializable {
 			customFieldEditorStage.setScene(scene);
 			//((CustomFieldEditorController) loader.getController()).messageText.setText(message);
 		}
+		//Set the custom fields list reference
+		taskEditorController.setCustomFields(((CustomFieldEditorController) loader.getController()).getCustomFields());
 	}
 
 	private void reloadTasks() {

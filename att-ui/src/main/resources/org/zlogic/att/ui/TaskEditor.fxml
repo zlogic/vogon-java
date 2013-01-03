@@ -4,15 +4,18 @@
 <?import java.util.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.*?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 
 <AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-			prefHeight="397.0" prefWidth="403.0" xmlns:fx="http://javafx.com/fxml"
+			prefHeight="369.0" prefWidth="531.0" xmlns:fx="http://javafx.com/fxml"
 			fx:controller="org.zlogic.att.ui.TaskEditorController">
 	<children>
-		<SplitPane dividerPositions="0.4" focusTraversable="true" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0"
-				   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+		<SplitPane dividerPositions="0.22615803814713897" focusTraversable="true" orientation="VERTICAL"
+				   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+				   AnchorPane.topAnchor="0.0">
 			<items>
 				<AnchorPane minHeight="80.0">
 					<children>
@@ -24,12 +27,8 @@
 										<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1"/>
 									</GridPane.margin>
 								</TextField>
-								<TextArea fx:id="description" wrapText="true" GridPane.columnIndex="1"
-										  GridPane.margin="$x1" GridPane.rowIndex="1"/>
 								<Label text="Name" GridPane.columnIndex="0" GridPane.margin="$x1"
 									   GridPane.rowIndex="0"/>
-								<Label text="Description" GridPane.columnIndex="0" GridPane.margin="$x1"
-									   GridPane.rowIndex="1"/>
 								<AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2"
 											GridPane.rowIndex="0" GridPane.rowSpan="2147483647">
 									<children>
@@ -42,6 +41,61 @@
 										<Insets/>
 									</GridPane.margin>
 								</AnchorPane>
+								<AnchorPane id="AnchorPane" minHeight="-Infinity" minWidth="-Infinity"
+											GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="1"
+											GridPane.valignment="TOP">
+									<children>
+										<TitledPane animated="false" expanded="false" text="More properties"
+													AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+													AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+											<content>
+												<GridPane>
+													<children>
+														<Label text="Description" GridPane.columnIndex="0"
+															   GridPane.margin="$x1" GridPane.rowIndex="0"/>
+														<TextArea fx:id="description" wrapText="true"
+																  GridPane.columnIndex="1" GridPane.rowIndex="0">
+															<GridPane.margin>
+																<Insets/>
+															</GridPane.margin>
+														</TextArea>
+														<Label text="Custom properties" GridPane.columnIndex="0"
+															   GridPane.rowIndex="1"/>
+														<TableView fx:id="customProperties" editable="true"
+																   GridPane.columnIndex="1" GridPane.rowIndex="1">
+															<columns>
+																<TableColumn prefWidth="75.0" text="Property"
+																			 fx:id="columnField">
+																	<cellValueFactory>
+																		<PropertyValueFactory property="name"/>
+																	</cellValueFactory>
+																</TableColumn>
+																<TableColumn prefWidth="75.0" text="Value"
+																			 fx:id="columnFieldValue">
+																	<cellValueFactory>
+																		<PropertyValueFactory property="value"/>
+																	</cellValueFactory>
+																</TableColumn>
+															</columns>
+														</TableView>
+													</children>
+													<columnConstraints>
+														<ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity"
+																		   minWidth="10.0" prefWidth="100.0"/>
+														<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
+																		   prefWidth="100.0"/>
+													</columnConstraints>
+													<rowConstraints>
+														<RowConstraints minHeight="10.0" prefHeight="30.0"
+																		vgrow="SOMETIMES"/>
+														<RowConstraints minHeight="10.0" prefHeight="30.0"
+																		vgrow="SOMETIMES"/>
+													</rowConstraints>
+												</GridPane>
+											</content>
+										</TitledPane>
+									</children>
+								</AnchorPane>
 							</children>
 							<columnConstraints>
 								<ColumnConstraints hgrow="SOMETIMES" maxWidth="71.0" minWidth="10.0" prefWidth="71.0"/>
@@ -51,20 +105,20 @@
 							</columnConstraints>
 							<rowConstraints>
 								<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-								<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS"/>
+								<RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="ALWAYS"/>
 							</rowConstraints>
 						</GridPane>
 					</children>
 				</AnchorPane>
 				<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
 					<children>
-						<TableView prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0"
-								   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+						<TableView fx:id="timeSegments" editable="true" prefHeight="200.0" prefWidth="200.0"
+								   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+								   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 							<columns>
-								<TableColumn prefWidth="75.0" text="Start date"/>
-								<TableColumn prefWidth="75.0" text="End date"/>
-								<TableColumn prefWidth="75.0" text="Description"/>
-								<TableColumn prefWidth="75.0" text="Task"/>
+								<TableColumn prefWidth="75.0" text="Start" fx:id="columnStart"/>
+								<TableColumn prefWidth="75.0" text="End" fx:id="columnEnd"/>
+								<TableColumn prefWidth="75.0" text="Description" fx:id="columnDescription"/>
 							</columns>
 						</TableView>
 					</children>

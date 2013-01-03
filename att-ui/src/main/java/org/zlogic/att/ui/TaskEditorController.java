@@ -5,10 +5,14 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.util.Callback;
+import javafx.util.converter.DefaultStringConverter;
+import org.zlogic.att.ui.adapters.CustomFieldAdapter;
+import org.zlogic.att.ui.adapters.CustomFieldValueAdapter;
 import org.zlogic.att.ui.adapters.TaskAdapter;
+import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 
 import java.net.URL;
 import java.util.LinkedList;
@@ -38,11 +42,57 @@ public class TaskEditorController implements Initializable {
 	@FXML
 	private Button startStop;
 
+	@FXML
+	private TableColumn<TimeSegmentAdapter, ?> columnEnd;
+
+	@FXML
+	private TableColumn<TimeSegmentAdapter, ?> columnStart;
+
+	@FXML
+	private TableColumn<TimeSegmentAdapter, ?> columnDescription;
+
+	@FXML
+	private TableView<TimeSegmentAdapter> timeSegments;
+
+	@FXML
+	private TableColumn<CustomFieldValueAdapter, String> columnFieldValue;
+	@FXML
+	private TableView<CustomFieldValueAdapter> customProperties;
+
 	boolean isTimingTask = false;
+
+	private ObservableList<CustomFieldAdapter> customFields;
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
 		updateStartStopText();
+		//Cell editors
+		columnFieldValue.setCellFactory(new Callback<TableColumn<CustomFieldValueAdapter, String>, TableCell<CustomFieldValueAdapter, String>>() {
+			@Override
+			public TableCell<CustomFieldValueAdapter, String> call(TableColumn<CustomFieldValueAdapter, String> p) {
+				TextFieldTableCell<CustomFieldValueAdapter, String> cell = new TextFieldTableCell<>();
+				cell.setConverter(new DefaultStringConverter());
+				return cell;
+			}
+		});
+
+		//Set column sizes
+		//TODO: make sure this keeps working correctly
+		customProperties.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		columnStart.prefWidthProperty().bind(timeSegments.widthProperty().multiply(3).divide(10));
+		columnEnd.prefWidthProperty().bind(timeSegments.widthProperty().multiply(3).divide(10));
+		columnDescription.prefWidthProperty().bind(timeSegments.widthProperty().multiply(4).divide(10).subtract(15));
+	}
+
+	public void setCustomFields(ObservableList<CustomFieldAdapter> customFields) {
+		this.customFields = customFields;
+		updateCustomFields();
+		customFields.addListener(new ListChangeListener<CustomFieldAdapter>() {
+			@Override
+			public void onChanged(Change<? extends CustomFieldAdapter> change) {
+				updateCustomFields();
+			}
+		});//TODO: remove listener if setCustomFields is called once more
 	}
 
 	public void setEditedTaskList(ObservableList<TaskAdapter> editedTaskList) {
@@ -53,6 +103,18 @@ public class TaskEditorController implements Initializable {
 				updateEditingTasks();
 			}
 		});
+	}
+
+	private void updateCustomFields() {
+		customProperties.getItems().clear();
+		for (CustomFieldAdapter customFieldAdapter : customFields) {
+			customProperties.getItems().add(new CustomFieldValueAdapter(customFieldAdapter));
+		}
+		if (editedTaskList != null && editedTaskList.size() == 1) {
+			TaskAdapter task = editedTaskList.get(0);
+			for (CustomFieldValueAdapter customFieldValueAdapter : customProperties.getItems())
+				customFieldValueAdapter.setTask(task);
+		}
 	}
 
 	private void updateEditingTasks() {
@@ -66,6 +128,8 @@ public class TaskEditorController implements Initializable {
 			name.textProperty().bindBidirectional(task.nameProperty());
 			description.textProperty().bindBidirectional(task.descriptionProperty());
 			boundTasks.add(task);
+			for (CustomFieldValueAdapter customFieldValueAdapter : customProperties.getItems())
+				customFieldValueAdapter.setTask(task);
 			isTimingTask = false;//TODO
 			updateStartStopText();
 		} else {
@@ -77,10 +141,8 @@ public class TaskEditorController implements Initializable {
 	}
 
 	protected void updateStartStopText() {
-		if (isTimingTask)
-			startStop.setText("Stop");
-		else
-			startStop.setText("Start");
+		startStop.setDisable(boundTasks.isEmpty());
+		startStop.setText(isTimingTask ? "Stop" : "Start");
 	}
 
 	@FXML

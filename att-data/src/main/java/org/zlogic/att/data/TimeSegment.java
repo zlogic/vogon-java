@@ -91,4 +91,9 @@ public class TimeSegment implements Serializable {
 	public boolean equals(Object obj) {
 		return obj instanceof TimeSegment && id == ((TimeSegment) obj).id;
 	}
+
+	@Override
+	public int hashCode() {
+		return new Long(id).hashCode();
+	}
 }

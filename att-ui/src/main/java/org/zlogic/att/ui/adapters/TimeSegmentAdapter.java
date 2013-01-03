@@ -27,7 +27,8 @@ public class TimeSegmentAdapter {
 		this.description.addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
-				if (!oldValue.equals(newValue))
+				if (!oldValue.equals(newValue)) {
+					//TODO: detect if the change was actually initiated by us
 					persistenceHelper.performTransactedChange(new TransactedChange() {
 						private String newDescription;
 
@@ -42,6 +43,8 @@ public class TimeSegmentAdapter {
 							getTimeSegment().setDescription(newDescription);
 						}
 					}.setNewDescription(newValue));
+					updateFxProperties();
+				}
 			}
 		});
 	}

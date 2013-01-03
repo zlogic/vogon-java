@@ -25,7 +25,7 @@ public class Task implements Serializable {
 	private String name;
 	@OneToMany
 	private Set<TimeSegment> timeSegments;
-	@OneToMany(targetEntity = CustomField.class, fetch = FetchType.EAGER)
+	@ElementCollection
 	private Map<CustomField, String> customFields;
 	private Boolean completed;
 
@@ -92,5 +92,10 @@ public class Task implements Serializable {
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof Task && id == ((Task) obj).id;
+	}
+
+	@Override
+	public int hashCode() {
+		return new Long(id).hashCode();
 	}
 }

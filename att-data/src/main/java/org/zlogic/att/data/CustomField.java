@@ -38,7 +38,11 @@ public class CustomField implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof CustomField && ((CustomField) obj).getId() == getId();
+		return obj instanceof CustomField && ((CustomField) obj).id == id;
 	}
 
+	@Override
+	public int hashCode() {
+		return new Long(id).hashCode();
+	}
 }

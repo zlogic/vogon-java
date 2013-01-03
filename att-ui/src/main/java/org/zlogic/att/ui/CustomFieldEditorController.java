@@ -1,5 +1,6 @@
 package org.zlogic.att.ui;
 
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableCell;
@@ -64,6 +65,10 @@ public class CustomFieldEditorController implements Initializable {
 		customFields.getItems().clear();
 		for (CustomField customField : storageManager.getCustomFields())
 			customFields.getItems().add(new CustomFieldAdapter(customField));
+	}
+
+	public ObservableList<CustomFieldAdapter> getCustomFields() {
+		return customFields.getItems();
 	}
 
 	@FXML

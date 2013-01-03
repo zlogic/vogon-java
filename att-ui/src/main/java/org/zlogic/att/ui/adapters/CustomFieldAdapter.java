@@ -30,7 +30,8 @@ public class CustomFieldAdapter {
 		this.name.addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
-				if (!oldValue.equals(newValue))
+				if (!oldValue.equals(newValue)) {
+					//TODO: detect if the change was actually initiated by us
 					persistenceHelper.performTransactedChange(new TransactedChange() {
 						private String newValue;
 
@@ -45,7 +46,8 @@ public class CustomFieldAdapter {
 							getCustomField().setName(newValue);
 						}
 					}.setNewValue(newValue));
-				updateFxProperties();
+					updateFxProperties();
+				}
 			}
 		});
 	}

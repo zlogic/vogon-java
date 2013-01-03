@@ -1,11 +1,9 @@
 package org.zlogic.att.ui.adapters;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import org.zlogic.att.data.CustomField;
 import org.zlogic.att.data.PersistenceHelper;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TransactedChange;
@@ -23,6 +21,7 @@ public class TaskAdapter {
 	private StringProperty description = new SimpleStringProperty();
 	private StringProperty name = new SimpleStringProperty();
 	private BooleanProperty completed = new SimpleBooleanProperty();
+	private MapProperty<CustomField, String> customFields = new SimpleMapProperty<>();
 	private Task task;
 
 	public TaskAdapter(Task task) {
@@ -34,7 +33,8 @@ public class TaskAdapter {
 		this.description.addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
-				if (!oldValue.equals(newValue))
+				if (!oldValue.equals(newValue)) {
+					//TODO: detect if the change was actually initiated by us
 					persistenceHelper.performTransactedChange(new TransactedChange() {
 						private String newValue;
 
@@ -49,7 +49,8 @@ public class TaskAdapter {
 							getTask().setDescription(newValue);
 						}
 					}.setNewValue(newValue));
-				updateFxProperties();
+					updateFxProperties();
+				}
 			}
 		});
 
@@ -120,7 +121,7 @@ public class TaskAdapter {
 		return task;
 	}
 
-	private void setTask(Task task) {
-		this.task = task;
+	protected void setTask(Task task) {
+		this.task = task;//Doesn't update any properties!
 	}
 }
