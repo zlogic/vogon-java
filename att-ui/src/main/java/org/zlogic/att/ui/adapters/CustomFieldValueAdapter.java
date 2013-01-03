@@ -6,6 +6,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import org.zlogic.att.data.CustomField;
 import org.zlogic.att.data.PersistenceHelper;
+import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TransactedChange;
 
 import javax.persistence.EntityManager;
@@ -45,8 +46,8 @@ public class CustomFieldValueAdapter {
 
 						@Override
 						public void performChange(EntityManager entityManager) {
-							getTask().setTask(entityManager.merge(getTask().getTask()));
-							CustomField foundCustomField = entityManager.merge(customFieldAdapter.getCustomField());
+							getTask().setTask(entityManager.find(Task.class, getTask().getTask().getId()));
+							CustomField foundCustomField = entityManager.find(CustomField.class, customFieldAdapter.getCustomField().getId());
 							getTask().getTask().setCustomField(foundCustomField, newValue);
 						}
 					}.setNewValue(getCustomField(), newValue));

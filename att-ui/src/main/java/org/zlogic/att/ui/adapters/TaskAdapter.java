@@ -51,7 +51,7 @@ public class TaskAdapter {
 
 						@Override
 						public void performChange(EntityManager entityManager) {
-							setTask(entityManager.merge(getTask()));
+							setTask(entityManager.find(Task.class, getTask().getId()));
 							getTask().setDescription(newValue);
 						}
 					}.setNewValue(newValue));
@@ -74,7 +74,7 @@ public class TaskAdapter {
 
 						@Override
 						public void performChange(EntityManager entityManager) {
-							setTask(entityManager.merge(getTask()));
+							setTask(entityManager.find(Task.class, getTask().getId()));
 							getTask().setName(newValue);
 						}
 					}.setNewValue(newValue));
@@ -96,7 +96,7 @@ public class TaskAdapter {
 
 						@Override
 						public void performChange(EntityManager entityManager) {
-							setTask(entityManager.merge(getTask()));
+							setTask(entityManager.find(Task.class, getTask().getId()));
 							getTask().setCompleted(newValue);
 						}
 					}.setNewValue(newValue));

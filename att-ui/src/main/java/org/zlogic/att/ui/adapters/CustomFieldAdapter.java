@@ -42,7 +42,7 @@ public class CustomFieldAdapter {
 
 						@Override
 						public void performChange(EntityManager entityManager) {
-							setCustomField(entityManager.merge(getCustomField()));
+							setCustomField(entityManager.find(CustomField.class, getCustomField().getId()));
 							getCustomField().setName(newValue);
 						}
 					}.setNewValue(newValue));

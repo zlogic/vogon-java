@@ -44,7 +44,7 @@ public class TimeSegmentAdapter {
 
 						@Override
 						public void performChange(EntityManager entityManager) {
-							setTimeSegment(entityManager.merge(getTimeSegment()));
+							setTimeSegment(entityManager.find(TimeSegment.class, getTimeSegment().getId()));
 							getTimeSegment().setDescription(newDescription);
 						}
 					}.setNewDescription(newValue));
@@ -68,7 +68,7 @@ public class TimeSegmentAdapter {
 
 						@Override
 						public void performChange(EntityManager entityManager) {
-							setTimeSegment(entityManager.merge(getTimeSegment()));
+							setTimeSegment(entityManager.find(TimeSegment.class, getTimeSegment().getId()));
 							getTimeSegment().setStartTime(newDate);
 						}
 					}.setNewDate(newValue));
@@ -92,7 +92,7 @@ public class TimeSegmentAdapter {
 
 						@Override
 						public void performChange(EntityManager entityManager) {
-							setTimeSegment(entityManager.merge(getTimeSegment()));
+							setTimeSegment(entityManager.find(TimeSegment.class, getTimeSegment().getId()));
 							getTimeSegment().setEndTime(newDate);
 						}
 					}.setNewDate(newValue));
