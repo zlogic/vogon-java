@@ -98,4 +98,8 @@ public class Task implements Serializable {
 	public int hashCode() {
 		return new Long(id).hashCode();
 	}
+
+	public Set<TimeSegment> getTimeSegments() {
+		return timeSegments;
+	}
 }

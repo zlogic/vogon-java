@@ -1,14 +1,20 @@
 package org.zlogic.att.ui.adapters;
 
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import org.zlogic.att.data.CustomField;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.zlogic.att.data.PersistenceHelper;
 import org.zlogic.att.data.Task;
+import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.TransactedChange;
 
 import javax.persistence.EntityManager;
+import java.util.LinkedList;
 
 /**
  * Adapter to interface JPA with Java FX observable properties for Task classes.
@@ -21,8 +27,8 @@ public class TaskAdapter {
 	private StringProperty description = new SimpleStringProperty();
 	private StringProperty name = new SimpleStringProperty();
 	private BooleanProperty completed = new SimpleBooleanProperty();
-	private MapProperty<CustomField, String> customFields = new SimpleMapProperty<>();
 	private Task task;
+	private ObservableList<TimeSegmentAdapter> timeSegments = FXCollections.observableList(new LinkedList<TimeSegmentAdapter>());
 
 	public TaskAdapter(Task task) {
 		this.task = task;
@@ -111,10 +117,18 @@ public class TaskAdapter {
 		return completed;
 	}
 
+	public ObservableList<TimeSegmentAdapter> timeSegmentsProperty() {
+		return timeSegments;
+	}
+
 	public void updateFxProperties() {
 		description.setValue(task.getDescription());
 		name.setValue(task.getName());
 		completed.setValue(task.getCompleted());
+		timeSegments.retainAll(task.getTimeSegments());
+		for (TimeSegment segment : task.getTimeSegments())
+			if (!timeSegments.contains(segment))
+				timeSegments.add(new TimeSegmentAdapter(segment));
 	}
 
 	public Task getTask() {

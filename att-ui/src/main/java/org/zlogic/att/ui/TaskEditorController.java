@@ -8,13 +8,17 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
+import javafx.util.converter.DateTimeStringConverter;
 import javafx.util.converter.DefaultStringConverter;
+import org.zlogic.att.data.PersistenceHelper;
+import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
 import org.zlogic.att.ui.adapters.CustomFieldValueAdapter;
 import org.zlogic.att.ui.adapters.TaskAdapter;
 import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 
 import java.net.URL;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -33,6 +37,10 @@ public class TaskEditorController implements Initializable {
 
 	private List<TaskAdapter> boundTasks = new LinkedList<>();
 
+	private ObservableList<CustomFieldAdapter> customFields;
+
+	private PersistenceHelper storageManager = new PersistenceHelper();
+
 	@FXML
 	private TextArea description;
 
@@ -43,13 +51,13 @@ public class TaskEditorController implements Initializable {
 	private Button startStop;
 
 	@FXML
-	private TableColumn<TimeSegmentAdapter, ?> columnEnd;
+	private TableColumn<TimeSegmentAdapter, Date> columnStart;
 
 	@FXML
-	private TableColumn<TimeSegmentAdapter, ?> columnStart;
+	private TableColumn<TimeSegmentAdapter, Date> columnEnd;
 
 	@FXML
-	private TableColumn<TimeSegmentAdapter, ?> columnDescription;
+	private TableColumn<TimeSegmentAdapter, String> columnDescription;
 
 	@FXML
 	private TableView<TimeSegmentAdapter> timeSegments;
@@ -59,9 +67,9 @@ public class TaskEditorController implements Initializable {
 	@FXML
 	private TableView<CustomFieldValueAdapter> customProperties;
 
-	boolean isTimingTask = false;
+	private boolean isTimingTask = false;
 
-	private ObservableList<CustomFieldAdapter> customFields;
+	private TimeSegmentAdapter currentSegment;
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -75,13 +83,38 @@ public class TaskEditorController implements Initializable {
 				return cell;
 			}
 		});
-
+		columnDescription.setCellFactory(new Callback<TableColumn<TimeSegmentAdapter, String>, TableCell<TimeSegmentAdapter, String>>() {
+			@Override
+			public TableCell<TimeSegmentAdapter, String> call(TableColumn<TimeSegmentAdapter, String> p) {
+				TextFieldTableCell<TimeSegmentAdapter, String> cell = new TextFieldTableCell<>();
+				cell.setConverter(new DefaultStringConverter());
+				return cell;
+			}
+		});
+		columnStart.setCellFactory(new Callback<TableColumn<TimeSegmentAdapter, Date>, TableCell<TimeSegmentAdapter, Date>>() {
+			@Override
+			public TableCell<TimeSegmentAdapter, Date> call(TableColumn<TimeSegmentAdapter, Date> p) {
+				TextFieldTableCell<TimeSegmentAdapter, Date> cell = new TextFieldTableCell<>();
+				cell.setConverter(new DateTimeStringConverter());
+				return cell;
+			}
+		});
+		columnEnd.setCellFactory(new Callback<TableColumn<TimeSegmentAdapter, Date>, TableCell<TimeSegmentAdapter, Date>>() {
+			@Override
+			public TableCell<TimeSegmentAdapter, Date> call(TableColumn<TimeSegmentAdapter, Date> p) {
+				TextFieldTableCell<TimeSegmentAdapter, Date> cell = new TextFieldTableCell<>();
+				cell.setConverter(new DateTimeStringConverter());
+				return cell;
+			}
+		});
 		//Set column sizes
 		//TODO: make sure this keeps working correctly
 		customProperties.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		columnStart.prefWidthProperty().bind(timeSegments.widthProperty().multiply(3).divide(10));
 		columnEnd.prefWidthProperty().bind(timeSegments.widthProperty().multiply(3).divide(10));
 		columnDescription.prefWidthProperty().bind(timeSegments.widthProperty().multiply(4).divide(10).subtract(15));
+
+		timeSegments.getSortOrder().add(columnStart);
 	}
 
 	public void setCustomFields(ObservableList<CustomFieldAdapter> customFields) {
@@ -130,6 +163,7 @@ public class TaskEditorController implements Initializable {
 			boundTasks.add(task);
 			for (CustomFieldValueAdapter customFieldValueAdapter : customProperties.getItems())
 				customFieldValueAdapter.setTask(task);
+			timeSegments.setItems(task.timeSegmentsProperty());
 			isTimingTask = false;//TODO
 			updateStartStopText();
 		} else {
@@ -147,6 +181,16 @@ public class TaskEditorController implements Initializable {
 
 	@FXML
 	private void handleStartStop(ActionEvent event) {
+		if (isTimingTask) {
+			currentSegment.endProperty().setValue(new Date());
+			currentSegment = null;
+		} else if (editedTaskList != null && editedTaskList.size() == 1) {
+			TaskAdapter task = editedTaskList.get(0);
+			TimeSegment newSegment = storageManager.createTimeSegment(task.getTask());
+			TimeSegmentAdapter newSegmentAdapter = new TimeSegmentAdapter(newSegment);
+			currentSegment = newSegmentAdapter;
+			timeSegments.getItems().add(newSegmentAdapter);
+		}
 		isTimingTask = !isTimingTask;
 		updateStartStopText();
 	}
