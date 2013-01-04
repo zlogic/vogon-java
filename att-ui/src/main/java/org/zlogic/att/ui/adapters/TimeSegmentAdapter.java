@@ -12,6 +12,8 @@ import org.zlogic.att.data.TransactedChange;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Adapter to interface JPA with Java FX observable properties for TimeSegment classes.
@@ -24,6 +26,7 @@ public class TimeSegmentAdapter {
 	private StringProperty description = new SimpleStringProperty();
 	private ObjectProperty<Date> start = new SimpleObjectProperty<>(), end = new SimpleObjectProperty<>();
 	private TimeSegment segment;
+	private Timer timer;
 
 	public TimeSegmentAdapter(TimeSegment segment) {
 		this.segment = segment;
@@ -114,6 +117,32 @@ public class TimeSegmentAdapter {
 		return description;
 	}
 
+	public void startTiming() {
+		startProperty().setValue(new Date());
+		if (timer != null)
+			timer.cancel();
+		timer = new Timer(true);
+		timer.scheduleAtFixedRate(new TimerTask() {
+			private ObjectProperty<Date> endProperty;
+
+			public TimerTask setEndProperty(ObjectProperty<Date> endProperty) {
+				this.endProperty = endProperty;
+				return this;
+			}
+
+			@Override
+			public void run() {
+				endProperty.setValue(new Date());
+			}
+		}.setEndProperty(endProperty()), 0, 1000);
+	}
+
+	public void stopTiming() {
+		timer.cancel();
+		timer = null;
+		endProperty().setValue(new Date());
+	}
+
 	public void updateFxProperties() {
 		description.setValue(segment.getDescription());
 		start.setValue(segment.getStartTime());
@@ -134,9 +163,6 @@ public class TimeSegmentAdapter {
 			return obj.equals(segment);
 		else if (obj instanceof TimeSegmentAdapter)
 			return ((TimeSegmentAdapter) obj).getTimeSegment().equals(segment);
-		else if (obj == null)
-			return segment == null;
-		else
-			return false;
+		else return obj == null && segment == null;
 	}
 }

@@ -2,7 +2,6 @@ package org.zlogic.att.ui;
 
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -18,10 +17,7 @@ import org.zlogic.att.ui.adapters.TaskAdapter;
 import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 
 import java.net.URL;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -114,7 +110,19 @@ public class TaskEditorController implements Initializable {
 		columnEnd.prefWidthProperty().bind(timeSegments.widthProperty().multiply(3).divide(10));
 		columnDescription.prefWidthProperty().bind(timeSegments.widthProperty().multiply(4).divide(10).subtract(15));
 
+		//Default sort order
 		timeSegments.getSortOrder().add(columnStart);
+		columnStart.setSortType(TableColumn.SortType.DESCENDING);
+
+		//Date comparator
+		Comparator<Date> dateComparator = new Comparator<Date>() {
+			@Override
+			public int compare(Date o1, Date o2) {
+				return o1.compareTo(o2);
+			}
+		};
+		columnStart.setComparator(dateComparator);
+		columnEnd.setComparator(dateComparator);
 	}
 
 	public void setCustomFields(ObservableList<CustomFieldAdapter> customFields) {
@@ -164,6 +172,7 @@ public class TaskEditorController implements Initializable {
 			for (CustomFieldValueAdapter customFieldValueAdapter : customProperties.getItems())
 				customFieldValueAdapter.setTask(task);
 			timeSegments.setItems(task.timeSegmentsProperty());
+			updateSortOrder();
 			isTimingTask = false;//TODO
 			updateStartStopText();
 		} else {
@@ -174,15 +183,22 @@ public class TaskEditorController implements Initializable {
 		}
 	}
 
-	protected void updateStartStopText() {
+	private void updateSortOrder() {
+		//TODO: Remove this after it's fixed in Java FX
+		TableColumn<TimeSegmentAdapter, ?>[] sortOrder = timeSegments.getSortOrder().toArray(new TableColumn[0]);
+		timeSegments.getSortOrder().clear();
+		timeSegments.getSortOrder().addAll(sortOrder);
+	}
+
+	private void updateStartStopText() {
 		startStop.setDisable(boundTasks.isEmpty());
 		startStop.setText(isTimingTask ? "Stop" : "Start");
 	}
 
 	@FXML
-	private void handleStartStop(ActionEvent event) {
+	private void handleStartStop() {
 		if (isTimingTask) {
-			currentSegment.endProperty().setValue(new Date());
+			currentSegment.stopTiming();
 			currentSegment = null;
 		} else if (editedTaskList != null && editedTaskList.size() == 1) {
 			TaskAdapter task = editedTaskList.get(0);
@@ -190,6 +206,8 @@ public class TaskEditorController implements Initializable {
 			TimeSegmentAdapter newSegmentAdapter = new TimeSegmentAdapter(newSegment);
 			currentSegment = newSegmentAdapter;
 			timeSegments.getItems().add(newSegmentAdapter);
+			updateSortOrder();
+			currentSegment.startTiming();
 		}
 		isTimingTask = !isTimingTask;
 		updateStartStopText();
