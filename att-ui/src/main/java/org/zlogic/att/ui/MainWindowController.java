@@ -1,5 +1,15 @@
+/*
+ * Awesome Time Tracker project.
+ * License TBD.
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ */
 package org.zlogic.att.ui;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -19,35 +29,23 @@ import org.zlogic.att.data.PersistenceHelper;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.ui.adapters.TaskAdapter;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * Controller for the main window
- * User: Dmitry Zolotukhin <zlogic@gmail.com>
- * Date: 29.12.12
- * Time: 22:18
+ *
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class MainWindowController implements Initializable {
+
 	private final static Logger log = Logger.getLogger(MainWindowController.class.getName());
 	private PersistenceHelper storageManager = new PersistenceHelper();
-
 	private Runnable shutdownProcedure;
-
 	private Stage customFieldEditorStage;
-
 	@FXML
 	private TaskEditorController taskEditorController;
-
 	@FXML
 	private TableView<TaskAdapter> taskList;
-
 	@FXML
 	private TableColumn<TaskAdapter, String> columnTaskName;
-
 	@FXML
 	private TableColumn<TaskAdapter, Boolean> columnTaskCompleted;
 
@@ -116,7 +114,7 @@ public class MainWindowController implements Initializable {
 	}
 
 	/*
-	Callbacks
+	 Callbacks
 	 */
 	@FXML
 	private void createNewTask() {

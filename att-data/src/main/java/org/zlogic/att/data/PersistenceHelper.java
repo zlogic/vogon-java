@@ -1,19 +1,25 @@
+/*
+ * Awesome Time Tracker project.
+ * License TBD.
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ */
 package org.zlogic.att.data;
 
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
-import java.util.List;
 
 /**
- * Helper class to perform routine entity modifications and create a single point where EntityManager is used.
- * User: Dmitry Zolotukhin <zlogic@gmail.com>
- * Date: 29.12.12
- * Time: 23:13
+ * Helper class to perform routine entity modifications and create a single
+ * point where EntityManager is used.
+ *
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class PersistenceHelper {
+
 	/**
 	 * Default constructor
 	 */

@@ -1,22 +1,32 @@
+/*
+ * Awesome Time Tracker project.
+ * License TBD.
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ */
 package org.zlogic.att.data;
 
+import java.io.Serializable;
+import java.util.Date;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.Date;
-
 /**
- * Entity class for a time segment
- * Each task's time is tracked with TimeSegments.
- * User: Dmitry Zolotukhin <zlogic@gmail.com>
- * Date: 29.12.12
- * Time: 13:47
+ * Entity class for a time segment Each task's time is tracked with
+ * TimeSegments.
+ *
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 @Entity
 public class TimeSegment implements Serializable {
+
 	/**
 	 * JPA ID
 	 */
@@ -127,8 +137,8 @@ public class TimeSegment implements Serializable {
 	}
 
 	/**
-	 * Assigns a new owner task
-	 * Removed this segment from the previous owner (if present)
+	 * Assigns a new owner task. Removes this segment from the previous owner
+	 * (if present)
 	 *
 	 * @param owner the new owner task
 	 */

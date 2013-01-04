@@ -1,10 +1,27 @@
+/*
+ * Awesome Time Tracker project.
+ * License TBD.
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ */
 package org.zlogic.att.ui;
 
+import java.net.URL;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.logging.Logger;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 import javafx.util.converter.DateTimeStringConverter;
@@ -16,55 +33,37 @@ import org.zlogic.att.ui.adapters.CustomFieldValueAdapter;
 import org.zlogic.att.ui.adapters.TaskAdapter;
 import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 
-import java.net.URL;
-import java.util.*;
-import java.util.logging.Logger;
-
 /**
  * Controller for task editor
- * User: Dmitry Zolotukhin <zlogic@gmail.com>
- * Date: 29.12.12
- * Time: 22:36
+ *
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class TaskEditorController implements Initializable {
+
 	private final static Logger log = Logger.getLogger(MainWindowController.class.getName());
-
 	private ObservableList<TaskAdapter> editedTaskList;
-
 	private List<TaskAdapter> boundTasks = new LinkedList<>();
-
 	private ObservableList<CustomFieldAdapter> customFields;
-
 	private PersistenceHelper storageManager = new PersistenceHelper();
-
 	@FXML
 	private TextArea description;
-
 	@FXML
 	private TextField name;
-
 	@FXML
 	private Button startStop;
-
 	@FXML
 	private TableColumn<TimeSegmentAdapter, Date> columnStart;
-
 	@FXML
 	private TableColumn<TimeSegmentAdapter, Date> columnEnd;
-
 	@FXML
 	private TableColumn<TimeSegmentAdapter, String> columnDescription;
-
 	@FXML
 	private TableView<TimeSegmentAdapter> timeSegments;
-
 	@FXML
 	private TableColumn<CustomFieldValueAdapter, String> columnFieldValue;
 	@FXML
 	private TableView<CustomFieldValueAdapter> customProperties;
-
 	private boolean isTimingTask = false;
-
 	private TimeSegmentAdapter currentSegment;
 
 	@Override

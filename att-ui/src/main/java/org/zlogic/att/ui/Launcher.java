@@ -1,5 +1,15 @@
+/*
+ * Awesome Time Tracker project.
+ * License TBD.
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ */
 package org.zlogic.att.ui;
 
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -8,19 +18,13 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * Java FX launcher/initializer
- * User: Dmitry Zolotukhin <zlogic@gmail.com>
- * Date: 27.12.12
- * Time: 21:06
+ *
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class Launcher extends Application {
+
 	private final static Logger log = Logger.getLogger(Launcher.class.getName());
 
 	@Override

@@ -1,20 +1,25 @@
+/*
+ * Awesome Time Tracker project.
+ * License TBD.
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ */
 package org.zlogic.att.data;
 
+import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import java.io.Serializable;
 
 /**
- * Entity class for a custom field.
- * Each task's time is tracked with TimeSegments.
- * User: Dmitry Zolotukhin <zlogic@gmail.com>
- * Date: 31.12.12
- * Time: 1:24
+ * Entity class for a custom field. Each task's time is tracked with
+ * TimeSegments.
+ *
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 @Entity
 public class CustomField implements Serializable {
+
 	/**
 	 * JPA ID
 	 */

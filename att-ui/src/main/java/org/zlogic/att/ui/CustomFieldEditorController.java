@@ -1,5 +1,12 @@
+/*
+ * Awesome Time Tracker project.
+ * License TBD.
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ */
 package org.zlogic.att.ui;
 
+import java.net.URL;
+import java.util.ResourceBundle;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -13,21 +20,16 @@ import org.zlogic.att.data.CustomField;
 import org.zlogic.att.data.PersistenceHelper;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
 
-import java.net.URL;
-import java.util.ResourceBundle;
-
 /**
  * Controller for custom field editor
- * User: Dmitry Zolotukhin <zlogic@gmail.com>
- * Date: 31.12.12
- * Time: 3:22
+ *
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class CustomFieldEditorController implements Initializable {
-	private PersistenceHelper storageManager = new PersistenceHelper();
 
+	private PersistenceHelper storageManager = new PersistenceHelper();
 	@FXML
 	private TableColumn<CustomFieldAdapter, String> columnCustomField;
-
 	@FXML
 	private TableView<CustomFieldAdapter> customFields;
 

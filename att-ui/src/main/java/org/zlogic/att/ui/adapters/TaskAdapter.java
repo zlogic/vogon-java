@@ -1,5 +1,11 @@
+/*
+ * Awesome Time Tracker project.
+ * License TBD.
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ */
 package org.zlogic.att.ui.adapters;
 
+import java.util.LinkedList;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -8,21 +14,19 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javax.persistence.EntityManager;
 import org.zlogic.att.data.PersistenceHelper;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.TransactedChange;
 
-import javax.persistence.EntityManager;
-import java.util.LinkedList;
-
 /**
  * Adapter to interface JPA with Java FX observable properties for Task classes.
- * User: Dmitry Zolotukhin <zlogic@gmail.com>
- * Date: 30.12.12
- * Time: 0:51
+ *
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class TaskAdapter {
+
 	protected static PersistenceHelper persistenceHelper = new PersistenceHelper();
 	private StringProperty description = new SimpleStringProperty();
 	private StringProperty name = new SimpleStringProperty();

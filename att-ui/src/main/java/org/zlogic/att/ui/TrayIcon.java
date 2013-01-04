@@ -1,22 +1,29 @@
+/*
+ * Awesome Time Tracker project.
+ * License TBD.
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ */
 package org.zlogic.att.ui;
 
+import java.awt.Image;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.Toolkit;
+import java.awt.event.ActionListener;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 
-import java.awt.*;
-import java.awt.event.ActionListener;
-import java.util.logging.Logger;
-
 /**
  * Class for creating and showing the tray icon.
- * TODO: Replace with native Java FX version from Java FX 3.0
- * User: Dmitry Zolotukhin <zlogic@gmail.com>
- * Date: 30.12.12
- * Time: 1:34
+ *
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
+//TODO: Replace with native Java FX version from Java FX 3.0
 public class TrayIcon {
-	private final static Logger log = Logger.getLogger(TrayIcon.class.getName());
 
+	private final static Logger log = Logger.getLogger(TrayIcon.class.getName());
 	private java.awt.TrayIcon trayIcon;
 
 	public TrayIcon(Stage primaryStage) {

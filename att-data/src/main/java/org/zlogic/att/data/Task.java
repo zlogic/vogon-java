@@ -1,23 +1,32 @@
+/*
+ * Awesome Time Tracker project.
+ * License TBD.
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ */
 package org.zlogic.att.data;
 
-import org.joda.time.Period;
-
-import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import org.joda.time.Period;
 
 /**
- * Entity class for a tracked task.
- * Each task's time is tracked with TimeSegments.
- * User: Dmitry Zolotukhin <zlogic@gmail.com>
- * Date: 29.12.12
- * Time: 21:03
+ * Entity class for a tracked task. Each task's time is tracked with
+ * TimeSegments.
+ *
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 @Entity
 public class Task implements Serializable {
+
 	/**
 	 * JPA ID
 	 */
@@ -157,7 +166,7 @@ public class Task implements Serializable {
 	 * Sets the task's custom field value
 	 *
 	 * @param customField the custom field to be set
-	 * @param value       the new value for customField
+	 * @param value the new value for customField
 	 */
 	public void setCustomField(CustomField customField, String value) {
 		customFields.put(customField, value);

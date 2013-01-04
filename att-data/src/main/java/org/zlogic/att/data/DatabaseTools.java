@@ -1,16 +1,21 @@
+/*
+ * Awesome Time Tracker project.
+ * License TBD.
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ */
 package org.zlogic.att.data;
 
+import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import java.util.logging.Logger;
 
 /**
  * Class with database-related helper tools.
- * User: Dmitry Zolotukhin <zlogic@gmail.com>
- * Date: 29.12.12
- * Time: 21:51
+ *
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class DatabaseTools {
+
 	/**
 	 * The logger
 	 */

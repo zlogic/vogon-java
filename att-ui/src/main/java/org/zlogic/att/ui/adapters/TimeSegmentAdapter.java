@@ -1,27 +1,32 @@
+/*
+ * Awesome Time Tracker project.
+ * License TBD.
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ */
 package org.zlogic.att.ui.adapters;
 
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javax.persistence.EntityManager;
 import org.zlogic.att.data.PersistenceHelper;
 import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.TransactedChange;
 
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
-
 /**
- * Adapter to interface JPA with Java FX observable properties for TimeSegment classes.
- * User: Dmitry Zolotukhin <zlogic@gmail.com>
- * Date: 30.12.12
- * Time: 0:15
+ * Adapter to interface JPA with Java FX observable properties for TimeSegment
+ * classes.
+ *
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class TimeSegmentAdapter {
+
 	protected static PersistenceHelper persistenceHelper = new PersistenceHelper();
 	private StringProperty description = new SimpleStringProperty();
 	private ObjectProperty<Date> start = new SimpleObjectProperty<>(), end = new SimpleObjectProperty<>();
@@ -163,6 +168,7 @@ public class TimeSegmentAdapter {
 			return obj.equals(segment);
 		else if (obj instanceof TimeSegmentAdapter)
 			return ((TimeSegmentAdapter) obj).getTimeSegment().equals(segment);
-		else return obj == null && segment == null;
+		else
+			return obj == null && segment == null;
 	}
 }
