@@ -14,9 +14,17 @@ import java.util.List;
  * Time: 23:13
  */
 public class PersistenceHelper {
+	/**
+	 * Default constructor
+	 */
 	public PersistenceHelper() {
 	}
 
+	/**
+	 * Creates a Task entity
+	 *
+	 * @return the new Task entity, persisted in JPA
+	 */
 	public Task createTask() {
 		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
@@ -27,6 +35,12 @@ public class PersistenceHelper {
 		return task;
 	}
 
+	/**
+	 * Creates a TimeSegment entity
+	 *
+	 * @param parent the parent Task
+	 * @return the new TimeSegment entity, persisted in JPA
+	 */
 	public TimeSegment createTimeSegment(Task parent) {
 		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
@@ -39,6 +53,11 @@ public class PersistenceHelper {
 		return segment;
 	}
 
+	/**
+	 * Creates a CustomField entity
+	 *
+	 * @return the new CustomField entity, persisted in JPA
+	 */
 	public CustomField createCustomField() {
 		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
@@ -49,6 +68,11 @@ public class PersistenceHelper {
 		return customField;
 	}
 
+	/**
+	 * Performs a requested change with a supplied TransactedChange
+	 *
+	 * @param requestedChange a TransactedChange implementation
+	 */
 	public void performTransactedChange(TransactedChange requestedChange) {
 		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
@@ -57,6 +81,11 @@ public class PersistenceHelper {
 		entityManager.close();
 	}
 
+	/**
+	 * Returns all tasks from database
+	 *
+	 * @return all tasks from database
+	 */
 	public List<Task> getAllTasks() {
 		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
 
@@ -80,6 +109,11 @@ public class PersistenceHelper {
 		return result;
 	}
 
+	/**
+	 * Returns all custom fields from database
+	 *
+	 * @return all custom fields from database
+	 */
 	public List<CustomField> getCustomFields() {
 		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
 
@@ -92,6 +126,11 @@ public class PersistenceHelper {
 		return result;
 	}
 
+	/**
+	 * Deletes a custom field from the database
+	 *
+	 * @param customField the custom field to be deleted
+	 */
 	public void deleteCustomField(CustomField customField) {
 		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
