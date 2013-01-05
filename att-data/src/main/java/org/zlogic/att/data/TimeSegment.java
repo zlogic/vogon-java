@@ -25,7 +25,7 @@ import org.joda.time.Period;
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 @Entity
-public class TimeSegment implements Serializable {
+public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 
 	/**
 	 * JPA ID
@@ -178,5 +178,10 @@ public class TimeSegment implements Serializable {
 	@Override
 	public int hashCode() {
 		return new Long(id).hashCode();
+	}
+
+	@Override
+	public int compareTo(TimeSegment timeSegment) {
+		return Long.compare(id, timeSegment.id);
 	}
 }

@@ -9,61 +9,47 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 
-<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-			prefHeight="200.0" prefWidth="531.0" xmlns:fx="http://javafx.com/fxml"
-			fx:controller="org.zlogic.att.ui.TaskEditorController">
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="531.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.TaskEditorController">
 	<children>
-		<AnchorPane minHeight="80.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-					AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+		<AnchorPane minHeight="80.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 			<children>
-				<GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-						  AnchorPane.topAnchor="0.0">
+				<GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 					<children>
-						<TextField id="taskName" fx:id="name" GridPane.columnIndex="1" GridPane.columnSpan="1"
-								   GridPane.rowIndex="0" GridPane.rowSpan="1">
+						<TextField id="taskName" fx:id="name" GridPane.columnIndex="1" GridPane.columnSpan="1" GridPane.rowIndex="0" GridPane.rowSpan="1">
 							<GridPane.margin>
-								<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1"/>
+								<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
 							</GridPane.margin>
 						</TextField>
-						<Label text="Name" GridPane.columnIndex="0" GridPane.columnSpan="1" GridPane.margin="$x1"
-							   GridPane.rowIndex="0" GridPane.rowSpan="1"/>
-						<AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2"
-									GridPane.columnSpan="1" GridPane.rowIndex="0" GridPane.rowSpan="2147483647">
+						<Label text="Name" GridPane.columnIndex="0" GridPane.columnSpan="1" GridPane.margin="$x1" GridPane.rowIndex="0" GridPane.rowSpan="1" />
+						<AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.columnSpan="1" GridPane.rowIndex="0" GridPane.rowSpan="2147483647">
 							<children>
-								<Button fx:id="startStop" mnemonicParsing="false" onAction="#handleStartStop"
-										prefHeight="115.0" prefWidth="101.0" text="Start/Stop"
-										AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0"
-										AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0"/>
+								<Button fx:id="startStop" mnemonicParsing="false" onAction="#handleStartStop" prefHeight="115.0" prefWidth="101.0" text="Start/Stop" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
 							</children>
 							<GridPane.margin>
-								<Insets/>
+								<Insets />
 							</GridPane.margin>
 						</AnchorPane>
-						<Accordion GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="1"
-								   GridPane.rowSpan="1">
+						<Accordion GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="1" GridPane.rowSpan="1">
 							<expandedPane>
-								<TitledPane fx:id="x2" animated="false" text="Time slots">
+								<TitledPane fx:id="x2" text="Time slots">
 									<content>
 										<AnchorPane id="Content">
 											<children>
-												<TableView fx:id="timeSegments" editable="true"
-														   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-														   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+												<TableView fx:id="timeSegments" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 													<columns>
 														<TableColumn prefWidth="75.0" text="Start" fx:id="columnStart">
 															<cellValueFactory>
-																<PropertyValueFactory property="start"/>
+																<PropertyValueFactory property="start" />
 															</cellValueFactory>
 														</TableColumn>
 														<TableColumn prefWidth="75.0" text="End" fx:id="columnEnd">
 															<cellValueFactory>
-																<PropertyValueFactory property="end"/>
+																<PropertyValueFactory property="end" />
 															</cellValueFactory>
 														</TableColumn>
-														<TableColumn prefWidth="75.0" text="Description"
-																	 fx:id="columnDescription">
+														<TableColumn prefWidth="75.0" text="Description" fx:id="columnDescription">
 															<cellValueFactory>
-																<PropertyValueFactory property="description"/>
+																<PropertyValueFactory property="description" />
 															</cellValueFactory>
 														</TableColumn>
 													</columns>
@@ -74,63 +60,55 @@
 								</TitledPane>
 							</expandedPane>
 							<panes>
-								<TitledPane animated="false" text="More properties">
+								<TitledPane text="More properties">
 									<content>
 										<GridPane>
 											<children>
-												<Label text="Description" GridPane.columnIndex="0" GridPane.margin="$x1"
-													   GridPane.rowIndex="0"/>
-												<TextArea fx:id="description" wrapText="true" GridPane.columnIndex="1"
-														  GridPane.rowIndex="0">
+												<Label text="Description" GridPane.columnIndex="0" GridPane.margin="$x1" GridPane.rowIndex="0" />
+												<TextArea fx:id="description" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="0">
 													<GridPane.margin>
-														<Insets/>
+														<Insets />
 													</GridPane.margin>
 												</TextArea>
-												<Label text="Custom properties" GridPane.columnIndex="0"
-													   GridPane.rowIndex="1"/>
-												<TableView fx:id="customProperties" editable="true"
-														   GridPane.columnIndex="1" GridPane.rowIndex="1">
+												<Label text="Custom properties" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+												<TableView fx:id="customProperties" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
 													<columns>
-														<TableColumn prefWidth="75.0" text="Property"
-																	 fx:id="columnField">
+														<TableColumn prefWidth="75.0" text="Property" fx:id="columnField">
 															<cellValueFactory>
-																<PropertyValueFactory property="name"/>
+																<PropertyValueFactory property="name" />
 															</cellValueFactory>
 														</TableColumn>
-														<TableColumn prefWidth="75.0" text="Value"
-																	 fx:id="columnFieldValue">
+														<TableColumn prefWidth="75.0" text="Value" fx:id="columnFieldValue">
 															<cellValueFactory>
-																<PropertyValueFactory property="value"/>
+																<PropertyValueFactory property="value" />
 															</cellValueFactory>
 														</TableColumn>
 													</columns>
 												</TableView>
 											</children>
 											<columnConstraints>
-												<ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity"
-																   minWidth="10.0" prefWidth="100.0"/>
-												<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+												<ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="100.0" />
+												<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
 											</columnConstraints>
 											<rowConstraints>
-												<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-												<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+												<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+												<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
 											</rowConstraints>
 										</GridPane>
 									</content>
 								</TitledPane>
-								<fx:reference source="x2"/>
+								<fx:reference source="x2" />
 							</panes>
 						</Accordion>
 					</children>
 					<columnConstraints>
-						<ColumnConstraints hgrow="SOMETIMES" maxWidth="71.0" minWidth="10.0" prefWidth="71.0"/>
-						<ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0"
-										   prefWidth="204.0"/>
-						<ColumnConstraints hgrow="ALWAYS" maxWidth="163.0" minWidth="10.0" prefWidth="126.0"/>
+						<ColumnConstraints hgrow="SOMETIMES" maxWidth="71.0" minWidth="10.0" prefWidth="71.0" />
+						<ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="204.0" />
+						<ColumnConstraints hgrow="ALWAYS" maxWidth="163.0" minWidth="10.0" prefWidth="126.0" />
 					</columnConstraints>
 					<rowConstraints>
-						<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-						<RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="ALWAYS"/>
+						<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+						<RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="ALWAYS" />
 					</rowConstraints>
 				</GridPane>
 			</children>

@@ -9,64 +9,55 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 
-<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-			prefHeight="700.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml"
-			fx:controller="org.zlogic.att.ui.MainWindowController">
+<AnchorPane id="AnchorPane" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.MainWindowController">
 	<children>
 		<MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 			<menus>
 				<Menu mnemonicParsing="false" text="File">
 					<items>
-						<MenuItem mnemonicParsing="false" onAction="#exit" text="Exit"/>
+						<MenuItem mnemonicParsing="false" onAction="#importGrindstoneData" text="Import Grindstone data..." />
+						<SeparatorMenuItem mnemonicParsing="false" />
+						<MenuItem mnemonicParsing="false" onAction="#exit" text="Exit" />
 					</items>
 				</Menu>
 				<Menu mnemonicParsing="false" text="Edit">
 					<items>
-						<MenuItem mnemonicParsing="false" onAction="#showCustomFieldEditor"
-								  text="Edit custom fields..."/>
+						<MenuItem mnemonicParsing="false" onAction="#showCustomFieldEditor" text="Edit custom fields..." />
 					</items>
 				</Menu>
 				<Menu mnemonicParsing="false" text="Help">
 					<items>
-						<MenuItem disable="true" mnemonicParsing="false" text="About"/>
+						<MenuItem disable="true" mnemonicParsing="false" text="About" />
 					</items>
 				</Menu>
 			</menus>
 		</MenuBar>
-		<SplitPane id="SplitPane" dividerPositions="0.48813056379821956" orientation="VERTICAL"
-				   prefHeight="675.9999000000025" prefWidth="800.0" AnchorPane.bottomAnchor="0.0"
-				   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="24.0">
+		<SplitPane id="SplitPane" dividerPositions="0.48813056379821956" orientation="VERTICAL" prefHeight="675.9999000000025" prefWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="24.0">
 			<items>
 				<AnchorPane>
-					<fx:include fx:id="taskEditor" source="TaskEditor.fxml" prefHeight="200.0" prefWidth="600.0"
-								AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-								AnchorPane.topAnchor="0.0"/>
+					<fx:include fx:id="taskEditor" source="TaskEditor.fxml" prefHeight="200.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
 				</AnchorPane>
 				<AnchorPane>
 					<children>
-						<FlowPane prefHeight="24.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0"
-								  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+						<FlowPane prefHeight="24.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 							<children>
-								<Button fx:id="createTransactionButton" mnemonicParsing="false"
-										onAction="#createNewTask" text="New task">
+								<Button fx:id="createTransactionButton" mnemonicParsing="false" onAction="#createNewTask" text="New task">
 									<FlowPane.margin>
-										<Insets bottom="4.0" left="4.0" right="4.0" top="4.0"/>
+										<Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
 									</FlowPane.margin>
 								</Button>
 							</children>
 						</FlowPane>
-						<TableView fx:id="taskList" editable="true" prefHeight="313.0" prefWidth="798.0"
-								   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-								   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="29.0">
+						<TableView fx:id="taskList" editable="true" prefHeight="313.0" prefWidth="798.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="29.0">
 							<columns>
 								<TableColumn prefWidth="75.0" text="Task name" fx:id="columnTaskName">
 									<cellValueFactory>
-										<PropertyValueFactory property="name"/>
+										<PropertyValueFactory property="name" />
 									</cellValueFactory>
 								</TableColumn>
 								<TableColumn prefWidth="75.0" text="Completed" fx:id="columnTaskCompleted">
 									<cellValueFactory>
-										<PropertyValueFactory property="completed"/>
+										<PropertyValueFactory property="completed" />
 									</cellValueFactory>
 								</TableColumn>
 							</columns>

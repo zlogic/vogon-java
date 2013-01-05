@@ -18,7 +18,7 @@ import javax.persistence.Id;
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 @Entity
-public class CustomField implements Serializable {
+public class CustomField implements Serializable, Comparable<CustomField> {
 
 	/**
 	 * JPA ID
@@ -73,5 +73,10 @@ public class CustomField implements Serializable {
 	@Override
 	public int hashCode() {
 		return new Long(id).hashCode();
+	}
+
+	@Override
+	public int compareTo(CustomField customField) {
+		return Long.compare(id, customField.id);
 	}
 }

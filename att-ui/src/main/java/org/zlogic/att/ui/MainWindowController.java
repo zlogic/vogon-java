@@ -5,6 +5,7 @@
  */
 package org.zlogic.att.ui;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -21,12 +22,16 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.layout.AnchorPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.converter.DefaultStringConverter;
 import org.zlogic.att.data.PersistenceHelper;
 import org.zlogic.att.data.Task;
+import org.zlogic.att.data.converters.GrindstoneImporter;
+import org.zlogic.att.data.converters.Importer;
 import org.zlogic.att.ui.adapters.TaskAdapter;
 
 /**
@@ -40,6 +45,13 @@ public class MainWindowController implements Initializable {
 	private PersistenceHelper storageManager = new PersistenceHelper();
 	private Runnable shutdownProcedure;
 	private Stage customFieldEditorStage;
+	private File lastDirectory;
+	/**
+	 * Easy access to preference storage
+	 */
+	protected java.util.prefs.Preferences preferenceStorage = java.util.prefs.Preferences.userNodeForPackage(Launcher.class);
+	@FXML
+	private AnchorPane rootPane;
 	@FXML
 	private TaskEditorController taskEditorController;
 	@FXML
@@ -53,6 +65,8 @@ public class MainWindowController implements Initializable {
 	public void initialize(URL url, ResourceBundle resourceBundle) {
 		taskList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		reloadTasks();
+		//Restore settings
+		lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null : new File(preferenceStorage.get("lastDirectory", null)); //NOI18N
 		//Cell editors
 		columnTaskName.setCellFactory(new Callback<TableColumn<TaskAdapter, String>, TableCell<TaskAdapter, String>>() {
 			@Override
@@ -132,5 +146,37 @@ public class MainWindowController implements Initializable {
 	private void exit() {
 		if (shutdownProcedure != null)
 			shutdownProcedure.run();
+	}
+
+	@FXML
+	private void importGrindstoneData() {
+		// Prepare file chooser dialog
+		FileChooser fileChooser = new FileChooser();
+		if (lastDirectory != null && lastDirectory.exists())
+			fileChooser.setInitialDirectory(lastDirectory);
+		fileChooser.setTitle("Choose file to import");
+		//Prepare file chooser filter
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Exported Grindstone XML files", "*.xml"));
+
+		//Show the dialog
+		File selectedFile;
+		if ((selectedFile = fileChooser.showOpenDialog(rootPane.getScene().getWindow())) != null) {
+			lastDirectory = selectedFile.isDirectory() ? selectedFile : selectedFile.getParentFile();
+			preferenceStorage.put("lastDirectory", lastDirectory.toString());
+
+			//Choose the importer based on the file extension
+			Importer importer = null;
+			String extension = selectedFile.isFile() ? selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".")) : null; //NOI18N
+			if (extension.equals(".xml")) {
+				log.fine("Extension matched");
+				importer = new GrindstoneImporter(selectedFile);
+			}
+			//Import data
+			if (importer != null)
+				storageManager.importData(importer);
+			else
+				log.fine("Extension not recognized");
+			reloadTasks();
+		}
 	}
 }
