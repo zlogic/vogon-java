@@ -99,9 +99,9 @@ public class Launcher extends Application {
 	 */
 	public List<Image> getIconImages() {
 		List<Image> images = new LinkedList<>();
-		int[] iconSizes = new int[]{16/*, 24, 32, 48, 64, 128, 256, 512*/};//TODO: Create other icons as well
+		int[] iconSizes = new int[]{16, 24, 32, 48, 64, 128, 256, 512};
 		for (int iconName : iconSizes)
-			images.add(new Image("org/zlogic/att/ui/icon/att-" + Integer.toString(iconName) + ".png"));
+			images.add(new Image("org/zlogic/att/ui/icon/att-tilt-" + Integer.toString(iconName) + ".png"));
 		return images;
 	}
 

@@ -29,7 +29,7 @@ public class TrayIcon {
 	public TrayIcon(Stage primaryStage) {
 		if (SystemTray.isSupported()) {
 			SystemTray tray = SystemTray.getSystemTray();
-			Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("icon/att-16.png"));
+			Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("icon/att-tilt-16.png"));
 
 			PopupMenu popup = new PopupMenu();
 			MenuItem item = new MenuItem("Exit");
@@ -37,6 +37,7 @@ public class TrayIcon {
 			popup.add(item);
 
 			trayIcon = new java.awt.TrayIcon(image, "Awesome Time Tracker", popup);
+			trayIcon.setImageAutoSize(true);
 
 			ActionListener listener = new ActionListener() {
 				@Override

@@ -4,3 +4,5 @@ att-packaging/target/
 att-resources/target/
 .idea/libraries
 *.fxml.bak
+/att-distribution/target/
+/Target/

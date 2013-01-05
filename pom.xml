@@ -14,7 +14,7 @@
 		<module>att-data</module>
 		<module>att-ui</module>
 		<module>att-resources</module>
-		<module>att-packaging</module>
+		<module>att-distribution</module>
 	</modules>
 
 	<build>

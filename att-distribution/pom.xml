@@ -9,8 +9,8 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>att-packaging</artifactId>
-	<name>Awesome Time Tracker :: Packaging</name>
+	<artifactId>att-distribution</artifactId>
+	<name>Awesome Time Tracker :: Distribution</name>
 	<packaging>pom</packaging>
 
 	<dependencies>
