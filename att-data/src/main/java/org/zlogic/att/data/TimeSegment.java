@@ -177,7 +177,9 @@ public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 
 	@Override
 	public int hashCode() {
-		return new Long(id).hashCode();
+		int hash = 7;
+		hash = 11 * hash + (int) (this.id ^ (this.id >>> 32));
+		return hash;
 	}
 
 	@Override

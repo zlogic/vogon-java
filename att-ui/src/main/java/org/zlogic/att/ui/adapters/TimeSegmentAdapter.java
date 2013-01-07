@@ -6,9 +6,12 @@
 package org.zlogic.att.ui.adapters;
 
 import java.util.Date;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -32,6 +35,7 @@ public class TimeSegmentAdapter {
 	private ObjectProperty<Date> start = new SimpleObjectProperty<>(), end = new SimpleObjectProperty<>();
 	private TimeSegment segment;
 	private Timer timer;
+	private BooleanProperty timingProperty = new SimpleBooleanProperty(false);
 
 	public TimeSegmentAdapter(TimeSegment segment) {
 		this.segment = segment;
@@ -122,7 +126,12 @@ public class TimeSegmentAdapter {
 		return description;
 	}
 
+	public BooleanProperty isTimingProperty() {
+		return timingProperty;
+	}
+
 	public void startTiming() {
+		timingProperty.set(true);
 		startProperty().setValue(new Date());
 		if (timer != null)
 			timer.cancel();
@@ -146,9 +155,10 @@ public class TimeSegmentAdapter {
 		timer.cancel();
 		timer = null;
 		endProperty().setValue(new Date());
+		timingProperty.set(false);
 	}
 
-	public void updateFxProperties() {
+	private void updateFxProperties() {
 		description.setValue(segment.getDescription());
 		start.setValue(segment.getStartTime());
 		end.setValue(segment.getEndTime());
@@ -170,5 +180,12 @@ public class TimeSegmentAdapter {
 			return ((TimeSegmentAdapter) obj).getTimeSegment().equals(segment);
 		else
 			return obj == null && segment == null;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 3;
+		hash = 47 * hash + Objects.hashCode(this.segment.hashCode());
+		return hash;
 	}
 }

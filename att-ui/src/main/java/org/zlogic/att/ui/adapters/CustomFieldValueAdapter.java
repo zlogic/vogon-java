@@ -65,7 +65,7 @@ public class CustomFieldValueAdapter {
 	public void updateFxProperties() {
 		if (taskAdapter != null && taskAdapter.getTask() != null) {
 			String customFieldValue = taskAdapter.getTask().getCustomField(customFieldAdapter.getCustomField());
-			value.setValue(customFieldValue == null ? "null" : customFieldValue);
+			value.setValue(customFieldValue == null ? "" : customFieldValue);
 		}
 	}
 

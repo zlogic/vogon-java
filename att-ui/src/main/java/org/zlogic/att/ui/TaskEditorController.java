@@ -12,6 +12,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -63,8 +67,7 @@ public class TaskEditorController implements Initializable {
 	private TableColumn<CustomFieldValueAdapter, String> columnFieldValue;
 	@FXML
 	private TableView<CustomFieldValueAdapter> customProperties;
-	private boolean isTimingTask = false;
-	private TimeSegmentAdapter currentSegment;
+	private ObjectProperty<TimeSegmentAdapter> currentSegment = new SimpleObjectProperty<>();
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -100,6 +103,25 @@ public class TaskEditorController implements Initializable {
 				TextFieldTableCell<TimeSegmentAdapter, Date> cell = new TextFieldTableCell<>();
 				cell.setConverter(new DateTimeStringConverter());
 				return cell;
+			}
+		});
+		//Update start/stop button text
+		currentSegment.addListener(new ChangeListener<TimeSegmentAdapter>() {
+			private ChangeListener<Boolean> startStopListener = new ChangeListener<Boolean>() {
+				@Override
+				public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
+					if (newValue != null && !newValue)
+						currentSegment.set(null);
+					updateStartStopText();
+				}
+			};
+
+			@Override
+			public void changed(ObservableValue<? extends TimeSegmentAdapter> ov, TimeSegmentAdapter oldValue, TimeSegmentAdapter newValue) {
+				if (oldValue != null)
+					oldValue.isTimingProperty().removeListener(startStopListener);
+				if (newValue != null)
+					newValue.isTimingProperty().addListener(startStopListener);
 			}
 		});
 		//Set column sizes
@@ -145,16 +167,19 @@ public class TaskEditorController implements Initializable {
 		});
 	}
 
+	public ObjectProperty<TimeSegmentAdapter> timingSegmentProperty() {
+		return currentSegment;
+	}
+
 	private void updateCustomFields() {
 		customProperties.getItems().clear();
 		for (CustomFieldAdapter customFieldAdapter : customFields) {
 			customProperties.getItems().add(new CustomFieldValueAdapter(customFieldAdapter));
 		}
-		if (editedTaskList != null && editedTaskList.size() == 1) {
-			TaskAdapter task = editedTaskList.get(0);
+		TaskAdapter task = getEditedTask();
+		if (task != null)
 			for (CustomFieldValueAdapter customFieldValueAdapter : customProperties.getItems())
 				customFieldValueAdapter.setTask(task);
-		}
 	}
 
 	private void updateEditingTasks() {
@@ -163,23 +188,28 @@ public class TaskEditorController implements Initializable {
 			description.textProperty().unbindBidirectional(adapter.descriptionProperty());
 		}
 		boundTasks.clear();
-		if (editedTaskList != null && editedTaskList.size() == 1) {
-			TaskAdapter task = editedTaskList.get(0);
-			name.textProperty().bindBidirectional(task.nameProperty());
-			description.textProperty().bindBidirectional(task.descriptionProperty());
-			boundTasks.add(task);
+		TaskAdapter editedTask = getEditedTask();
+		if (editedTask != null) {
+			name.textProperty().bindBidirectional(editedTask.nameProperty());
+			description.textProperty().bindBidirectional(editedTask.descriptionProperty());
+			boundTasks.add(editedTask);
 			for (CustomFieldValueAdapter customFieldValueAdapter : customProperties.getItems())
-				customFieldValueAdapter.setTask(task);
-			timeSegments.setItems(task.timeSegmentsProperty());
+				customFieldValueAdapter.setTask(editedTask);
+			timeSegments.setItems(editedTask.timeSegmentsProperty());
 			updateSortOrder();
-			isTimingTask = false;//TODO
 			updateStartStopText();
 		} else {
-			isTimingTask = false;//TODO
 			updateStartStopText();
 			if (editedTaskList.size() > 1)
 				log.severe("Can only edit a single task at a time");//TODO
 		}
+	}
+
+	//TODO: add support for editing multiple tasks
+	protected TaskAdapter getEditedTask() {
+		if (editedTaskList != null && editedTaskList.size() == 1)
+			return editedTaskList.get(0);
+		return null;
 	}
 
 	private void updateSortOrder() {
@@ -189,26 +219,34 @@ public class TaskEditorController implements Initializable {
 		timeSegments.getSortOrder().addAll(sortOrder);
 	}
 
+	private boolean isTimingCurrentTask() {
+		TaskAdapter editedTask = getEditedTask();
+		if (editedTask == null || currentSegment == null)
+			return false;
+		return editedTask.timeSegmentsProperty().contains(currentSegment.get());
+	}
+
 	private void updateStartStopText() {
 		startStop.setDisable(boundTasks.isEmpty());
-		startStop.setText(isTimingTask ? "Stop" : "Start");
+		startStop.setText(isTimingCurrentTask() ? "Stop" : "Start");
 	}
 
 	@FXML
 	private void handleStartStop() {
-		if (isTimingTask) {
-			currentSegment.stopTiming();
-			currentSegment = null;
-		} else if (editedTaskList != null && editedTaskList.size() == 1) {
-			TaskAdapter task = editedTaskList.get(0);
-			TimeSegment newSegment = storageManager.createTimeSegment(task.getTask());
-			TimeSegmentAdapter newSegmentAdapter = new TimeSegmentAdapter(newSegment);
-			currentSegment = newSegmentAdapter;
-			timeSegments.getItems().add(newSegmentAdapter);
-			updateSortOrder();
-			currentSegment.startTiming();
+		if (currentSegment.get() != null) {
+			currentSegment.get().stopTiming();
+			currentSegment.set(null);
+		} else {
+			TaskAdapter task = getEditedTask();
+			if (task != null) {
+				TimeSegment newSegment = storageManager.createTimeSegment(task.getTask());
+				TimeSegmentAdapter newSegmentAdapter = new TimeSegmentAdapter(newSegment);
+				currentSegment.setValue(newSegmentAdapter);
+				timeSegments.getItems().add(newSegmentAdapter);
+				updateSortOrder();
+				currentSegment.get().startTiming();
+			}
 		}
-		isTimingTask = !isTimingTask;
 		updateStartStopText();
 	}
 }

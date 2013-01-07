@@ -197,6 +197,8 @@ public class Task implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return new Long(id).hashCode();
+		int hash = 3;
+		hash = 37 * hash + (int) (this.id ^ (this.id >>> 32));
+		return hash;
 	}
 }

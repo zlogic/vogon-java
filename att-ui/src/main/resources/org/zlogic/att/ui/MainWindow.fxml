@@ -9,62 +9,75 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 
-<AnchorPane id="AnchorPane" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.MainWindowController">
-	<children>
-		<MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-			<menus>
-				<Menu mnemonicParsing="false" text="File">
-					<items>
-						<MenuItem mnemonicParsing="false" onAction="#importGrindstoneData" text="Import Grindstone data..." />
-						<SeparatorMenuItem mnemonicParsing="false" />
-						<MenuItem mnemonicParsing="false" onAction="#exit" text="Exit" />
-					</items>
-				</Menu>
-				<Menu mnemonicParsing="false" text="Edit">
-					<items>
-						<MenuItem mnemonicParsing="false" onAction="#showCustomFieldEditor" text="Edit custom fields..." />
-					</items>
-				</Menu>
-				<Menu mnemonicParsing="false" text="Help">
-					<items>
-						<MenuItem disable="true" mnemonicParsing="false" text="About" />
-					</items>
-				</Menu>
-			</menus>
-		</MenuBar>
-		<SplitPane id="SplitPane" dividerPositions="0.48813056379821956" orientation="VERTICAL" prefHeight="675.9999000000025" prefWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="24.0">
-			<items>
-				<AnchorPane>
-					<fx:include fx:id="taskEditor" source="TaskEditor.fxml" prefHeight="200.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-				</AnchorPane>
-				<AnchorPane>
-					<children>
-						<FlowPane prefHeight="24.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-							<children>
-								<Button fx:id="createTransactionButton" mnemonicParsing="false" onAction="#createNewTask" text="New task">
-									<FlowPane.margin>
-										<Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
-									</FlowPane.margin>
-								</Button>
-							</children>
-						</FlowPane>
-						<TableView fx:id="taskList" editable="true" prefHeight="313.0" prefWidth="798.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="29.0">
-							<columns>
-								<TableColumn prefWidth="75.0" text="Task name" fx:id="columnTaskName">
-									<cellValueFactory>
-										<PropertyValueFactory property="name" />
-									</cellValueFactory>
-								</TableColumn>
-								<TableColumn prefWidth="75.0" text="Completed" fx:id="columnTaskCompleted">
-									<cellValueFactory>
-										<PropertyValueFactory property="completed" />
-									</cellValueFactory>
-								</TableColumn>
-							</columns>
-						</TableView>
-					</children>
-				</AnchorPane>
-			</items>
-		</SplitPane>
-	</children>
-</AnchorPane>
+<VBox id="VBox" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.MainWindowController">
+  <children>
+    <MenuBar>
+      <menus>
+        <Menu mnemonicParsing="false" text="File">
+          <items>
+            <MenuItem mnemonicParsing="false" onAction="#importGrindstoneData" text="Import Grindstone data..." />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" onAction="#exit" text="Exit" />
+          </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Edit">
+          <items>
+            <MenuItem mnemonicParsing="false" onAction="#showCustomFieldEditor" text="Edit custom fields..." />
+          </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Help">
+          <items>
+            <MenuItem disable="true" mnemonicParsing="false" text="About" />
+          </items>
+        </Menu>
+      </menus>
+    </MenuBar>
+    <SplitPane id="SplitPane" dividerPositions="0.526706231454006" orientation="VERTICAL" prefHeight="681.0" prefWidth="800.0" VBox.vgrow="ALWAYS">
+      <items>
+        <VBox id="VBox" alignment="CENTER" spacing="5.0">
+          <children>
+            <HBox id="activeTaskPanel" fx:id="activeTaskPane" VBox.vgrow="NEVER">
+              <children>
+                <Label text="Currently timing task:">
+                  <HBox.margin>
+                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+                  </HBox.margin>
+                </Label>
+                <Label fx:id="activeTaskLabel" HBox.margin="$x1" />
+                <Button mnemonicParsing="false" onAction="#stopTimingTask" text="Stop" HBox.margin="$x1" />
+              </children>
+            </HBox>
+            <AnchorPane id="AnchorPane" minHeight="311.0" prefHeight="311.0" VBox.vgrow="ALWAYS">
+              <children>
+                <fx:include fx:id="taskEditor" source="TaskEditor.fxml" prefHeight="311.0" prefWidth="798.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+              </children>
+            </AnchorPane>
+          </children>
+        </VBox>
+        <VBox id="VBox" alignment="CENTER">
+          <children>
+            <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
+              <children>
+                <Button fx:id="createTransactionButton" mnemonicParsing="false" onAction="#createNewTask" text="New task" HBox.margin="$x1" />
+              </children>
+            </HBox>
+            <TableView fx:id="taskList" editable="true" prefHeight="268.0" prefWidth="798.0" VBox.vgrow="ALWAYS">
+              <columns>
+                <TableColumn prefWidth="75.0" text="Task name" fx:id="columnTaskName">
+                  <cellValueFactory>
+                    <PropertyValueFactory property="name" />
+                  </cellValueFactory>
+                </TableColumn>
+                <TableColumn prefWidth="75.0" text="Completed" fx:id="columnTaskCompleted">
+                  <cellValueFactory>
+                    <PropertyValueFactory property="completed" />
+                  </cellValueFactory>
+                </TableColumn>
+              </columns>
+            </TableView>
+          </children>
+        </VBox>
+      </items>
+    </SplitPane>
+  </children>
+</VBox>

@@ -125,7 +125,7 @@ public class TaskAdapter {
 		return timeSegments;
 	}
 
-	public void updateFxProperties() {
+	private void updateFxProperties() {
 		description.setValue(task.getDescription());
 		name.setValue(task.getName());
 		completed.setValue(task.getCompleted());
@@ -135,6 +135,16 @@ public class TaskAdapter {
 				timeSegments.add(new TimeSegmentAdapter(segment));
 	}
 
+	public boolean isTiming() {
+		for (TimeSegmentAdapter segment : timeSegments)
+			if (segment.isTimingProperty().get())
+				return true;
+		return false;
+	}
+
+	/*
+	 * Getters/Setters
+	 */
 	public Task getTask() {
 		return task;
 	}
