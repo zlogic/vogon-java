@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -44,7 +45,7 @@ public class Task implements Serializable {
 	/**
 	 * The list of this task's time segments
 	 */
-	@OneToMany
+	@OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
 	private Set<TimeSegment> timeSegments;
 	/**
 	 * Values of custom fields
@@ -169,7 +170,10 @@ public class Task implements Serializable {
 	 * @param value the new value for customField
 	 */
 	public void setCustomField(CustomField customField, String value) {
-		customFields.put(customField, value);
+		if (value == null)
+			customFields.remove(customField);
+		else
+			customFields.put(customField, value);
 	}
 
 	/**

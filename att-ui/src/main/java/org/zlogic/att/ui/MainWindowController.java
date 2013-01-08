@@ -18,6 +18,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
@@ -32,11 +33,10 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.converter.DefaultStringConverter;
-import org.zlogic.att.data.PersistenceHelper;
-import org.zlogic.att.data.Task;
 import org.zlogic.att.data.converters.GrindstoneImporter;
 import org.zlogic.att.data.converters.Importer;
 import org.zlogic.att.ui.adapters.TaskAdapter;
+import org.zlogic.att.ui.adapters.TaskManager;
 import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 
 /**
@@ -47,7 +47,7 @@ import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 public class MainWindowController implements Initializable {
 
 	private final static Logger log = Logger.getLogger(MainWindowController.class.getName());
-	private PersistenceHelper storageManager = new PersistenceHelper();
+	private TaskManager taskManager;
 	private File lastDirectory;
 	/**
 	 * Easy access to preference storage
@@ -55,6 +55,7 @@ public class MainWindowController implements Initializable {
 	protected java.util.prefs.Preferences preferenceStorage = java.util.prefs.Preferences.userNodeForPackage(Launcher.class);
 	private Runnable shutdownProcedure;
 	private Stage customFieldEditorStage;
+	private CustomFieldEditorController customFieldEditorController;
 	@FXML
 	private VBox rootPane;
 	@FXML
@@ -68,12 +69,17 @@ public class MainWindowController implements Initializable {
 	@FXML
 	private Label activeTaskLabel;
 	@FXML
+	private Button deleteTaskButton;
+	@FXML
 	private HBox activeTaskPane;
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
-		taskList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+		//Create the task manager
+		taskManager = new TaskManager(taskList.getItems());
 		reloadTasks();
+
+		taskList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		//Bind the current task panel
 		activeTaskPane.managedProperty().bind(activeTaskPane.visibleProperty());
 		activeTaskPane.visibleProperty().bind(taskEditorController.timingSegmentProperty().isNotNull());
@@ -84,9 +90,11 @@ public class MainWindowController implements Initializable {
 					return;
 				activeTaskLabel.textProperty().unbind();
 				if (newValue != null)
-					activeTaskLabel.textProperty().bind(newValue.descriptionProperty());
+					activeTaskLabel.textProperty().bind(newValue.descriptionProperty());//TODO: Display the task, not the segment
 			}
 		});
+
+		deleteTaskButton.disableProperty().bind(taskList.getSelectionModel().selectedItemProperty().isNull());
 		//Restore settings
 		lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null : new File(preferenceStorage.get("lastDirectory", null)); //NOI18N
 		//Cell editors
@@ -113,6 +121,7 @@ public class MainWindowController implements Initializable {
 
 		//Load other windows
 		loadWindowCustomFieldEditor();
+		taskEditorController.setTaskManager(taskManager);
 	}
 
 	public void setShutdownProcedure(Runnable shutdownProcedure) {
@@ -138,25 +147,37 @@ public class MainWindowController implements Initializable {
 			customFieldEditorStage.setScene(scene);
 			//((CustomFieldEditorController) loader.getController()).messageText.setText(message);
 		}
+		//Set the task manager
+		customFieldEditorController = loader.getController();
+		customFieldEditorController.setTaskManager(taskManager);
 		//Set the custom fields list reference
-		taskEditorController.setCustomFields(((CustomFieldEditorController) loader.getController()).getCustomFields());
+		taskEditorController.setCustomFields(customFieldEditorController.getCustomFields());
 	}
 
-	private void reloadTasks() {
-		taskList.getItems().clear();
-		for (Task task : storageManager.getAllTasks())
-			taskList.getItems().add(new TaskAdapter(task));
+	protected void reloadTasks() {
+		taskManager.reloadTasks();
 		taskEditorController.setEditedTaskList(taskList.getSelectionModel().getSelectedItems());
 	}
 
+	protected void reloadCustomFields() {
+		customFieldEditorController.reloadCustomFields();
+	}
+
 	/*
-	 Callbacks
+	 * Callbacks
 	 */
 	@FXML
 	private void createNewTask() {
-		TaskAdapter newTask = new TaskAdapter(storageManager.createTask());
+		TaskAdapter newTask = new TaskAdapter(taskManager.getPersistenceHelper().createTask(), taskManager);
 		taskList.getItems().add(newTask);
 		taskList.getSelectionModel().select(newTask);
+	}
+
+	@FXML
+	private void deleteSelectedTasks() {
+		for (TaskAdapter selectedTask : taskList.getSelectionModel().getSelectedItems()) {
+			taskManager.deleteTask(selectedTask);
+		}
 	}
 
 	@FXML
@@ -195,10 +216,11 @@ public class MainWindowController implements Initializable {
 			}
 			//Import data
 			if (importer != null)
-				storageManager.importData(importer);
+				taskManager.getPersistenceHelper().importData(importer);
 			else
 				log.fine("Extension not recognized");
 			reloadTasks();
+			reloadCustomFields();
 		}
 	}
 

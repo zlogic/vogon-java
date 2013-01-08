@@ -18,7 +18,6 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javax.persistence.EntityManager;
-import org.zlogic.att.data.PersistenceHelper;
 import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.TransactedChange;
 
@@ -30,15 +29,16 @@ import org.zlogic.att.data.TransactedChange;
  */
 public class TimeSegmentAdapter {
 
-	protected static PersistenceHelper persistenceHelper = new PersistenceHelper();
 	private StringProperty description = new SimpleStringProperty();
 	private ObjectProperty<Date> start = new SimpleObjectProperty<>(), end = new SimpleObjectProperty<>();
 	private TimeSegment segment;
+	private TaskManager taskManager;
 	private Timer timer;
 	private BooleanProperty timingProperty = new SimpleBooleanProperty(false);
 
-	public TimeSegmentAdapter(TimeSegment segment) {
+	public TimeSegmentAdapter(TimeSegment segment, TaskManager taskList) {
 		this.segment = segment;
+		this.taskManager = taskList;
 
 		updateFxProperties();
 		this.description.addListener(new ChangeListener<String>() {
@@ -46,7 +46,7 @@ public class TimeSegmentAdapter {
 			public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
 				if (!oldValue.equals(newValue)) {
 					//TODO: detect if the change was actually initiated by us
-					persistenceHelper.performTransactedChange(new TransactedChange() {
+					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private String newDescription;
 
 						public TransactedChange setNewDescription(String newDescription) {
@@ -56,7 +56,7 @@ public class TimeSegmentAdapter {
 
 						@Override
 						public void performChange(EntityManager entityManager) {
-							setTimeSegment(entityManager.find(TimeSegment.class, getTimeSegment().getId()));
+							entityManager.find(TimeSegment.class, getTimeSegment().getId()).setDescription(newDescription);
 							getTimeSegment().setDescription(newDescription);
 						}
 					}.setNewDescription(newValue));
@@ -70,7 +70,7 @@ public class TimeSegmentAdapter {
 			public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
 				if (!oldValue.equals(newValue)) {
 					//TODO: detect if the change was actually initiated by us
-					persistenceHelper.performTransactedChange(new TransactedChange() {
+					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private Date newDate;
 
 						public TransactedChange setNewDate(Date newDate) {
@@ -80,7 +80,7 @@ public class TimeSegmentAdapter {
 
 						@Override
 						public void performChange(EntityManager entityManager) {
-							setTimeSegment(entityManager.find(TimeSegment.class, getTimeSegment().getId()));
+							entityManager.find(TimeSegment.class, getTimeSegment().getId()).setStartTime(newDate);
 							getTimeSegment().setStartTime(newDate);
 						}
 					}.setNewDate(newValue));
@@ -94,7 +94,7 @@ public class TimeSegmentAdapter {
 			public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
 				if (!oldValue.equals(newValue)) {
 					//TODO: detect if the change was actually initiated by us
-					persistenceHelper.performTransactedChange(new TransactedChange() {
+					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private Date newDate;
 
 						public TransactedChange setNewDate(Date newDate) {
@@ -104,7 +104,7 @@ public class TimeSegmentAdapter {
 
 						@Override
 						public void performChange(EntityManager entityManager) {
-							setTimeSegment(entityManager.find(TimeSegment.class, getTimeSegment().getId()));
+							entityManager.find(TimeSegment.class, getTimeSegment().getId()).setEndTime(newDate);
 							getTimeSegment().setEndTime(newDate);
 						}
 					}.setNewDate(newValue));
@@ -158,6 +158,10 @@ public class TimeSegmentAdapter {
 		timingProperty.set(false);
 	}
 
+	private TaskManager getTaskManager() {
+		return taskManager;
+	}
+
 	private void updateFxProperties() {
 		description.setValue(segment.getDescription());
 		start.setValue(segment.getStartTime());
@@ -168,15 +172,9 @@ public class TimeSegmentAdapter {
 		return segment;
 	}
 
-	private void setTimeSegment(TimeSegment segment) {
-		this.segment = segment;
-	}
-
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof TimeSegment)
-			return obj.equals(segment);
-		else if (obj instanceof TimeSegmentAdapter)
+		if (obj instanceof TimeSegmentAdapter)
 			return ((TimeSegmentAdapter) obj).getTimeSegment().equals(segment);
 		else
 			return obj == null && segment == null;

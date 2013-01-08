@@ -7,7 +7,6 @@ package org.zlogic.att.data.converters;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -132,6 +131,7 @@ public class GrindstoneImporter implements Importer {
 				Task task = persistenceHelper.createTask(entityManager);
 				task.setName(entry.get("Name"));
 				task.setCompleted(entry.containsKey("Complete"));
+				task.setDescription(entry.get("Notes"));
 				tasks.put(entry.get("Id"), task);
 			}
 

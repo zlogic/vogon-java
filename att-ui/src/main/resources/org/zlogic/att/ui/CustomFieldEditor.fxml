@@ -27,7 +27,7 @@
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
           </HBox.margin>
         </Button>
-        <Button mnemonicParsing="false" onAction="#deleteCustomField" text="Delete" HBox.margin="$x1" />
+        <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteCustomField" text="Delete" HBox.margin="$x1" />
         <Button defaultButton="true" mnemonicParsing="false" onAction="#hideWindow" text="OK" HBox.margin="$x1" />
       </children>
       <VBox.margin>

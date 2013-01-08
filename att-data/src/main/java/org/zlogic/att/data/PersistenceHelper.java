@@ -127,11 +127,26 @@ public class PersistenceHelper {
 	/**
 	 * Returns all tasks from database
 	 *
+	 * @param entityManager the EntityManager where the new CustomField will be
+	 * persisted
 	 * @return all tasks from database
 	 */
 	public List<Task> getAllTasks() {
 		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
 
+		List<Task> result = getAllTasks(entityManager);
+
+		entityManager.close();
+		return result;
+	}
+
+	/**
+	 * Returns all tasks from database inside an existing
+	 * EntityManager/transaction
+	 *
+	 * @return all tasks from database
+	 */
+	public List<Task> getAllTasks(EntityManager entityManager) {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Task> tasksCriteriaQuery = criteriaBuilder.createQuery(Task.class);
 		Root<Task> taskRoot = tasksCriteriaQuery.from(Task.class);
@@ -147,8 +162,6 @@ public class PersistenceHelper {
 			taskFetch.fetch(Task_.customFields, JoinType.LEFT);
 			entityManager.createQuery(timeSegmentFetchCriteriaQuery).getResultList();
 		}
-
-		entityManager.close();
 		return result;
 	}
 

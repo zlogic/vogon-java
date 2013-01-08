@@ -6,6 +6,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.control.cell.*?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.effect.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 
@@ -38,12 +39,16 @@
           <children>
             <HBox id="activeTaskPanel" fx:id="activeTaskPane" VBox.vgrow="NEVER">
               <children>
-                <Label text="Currently timing task:">
+                <Label id="" style="&#10;" text="Currently timing task:">
                   <HBox.margin>
                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
                   </HBox.margin>
                 </Label>
-                <Label fx:id="activeTaskLabel" HBox.margin="$x1" />
+                <Label fx:id="activeTaskLabel" HBox.margin="$x1">
+                  <effect>
+                    <Reflection />
+                  </effect>
+                </Label>
                 <Button mnemonicParsing="false" onAction="#stopTimingTask" text="Stop" HBox.margin="$x1" />
               </children>
             </HBox>
@@ -59,6 +64,11 @@
             <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
               <children>
                 <Button fx:id="createTransactionButton" mnemonicParsing="false" onAction="#createNewTask" text="New task" HBox.margin="$x1" />
+                <Button fx:id="deleteTaskButton" mnemonicParsing="false" onAction="#deleteSelectedTasks" text="Delete task">
+                  <HBox.margin>
+                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+                  </HBox.margin>
+                </Button>
               </children>
             </HBox>
             <TableView fx:id="taskList" editable="true" prefHeight="268.0" prefWidth="798.0" VBox.vgrow="ALWAYS">

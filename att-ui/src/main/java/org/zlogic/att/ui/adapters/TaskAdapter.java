@@ -15,7 +15,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javax.persistence.EntityManager;
-import org.zlogic.att.data.PersistenceHelper;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.TransactedChange;
@@ -27,15 +26,16 @@ import org.zlogic.att.data.TransactedChange;
  */
 public class TaskAdapter {
 
-	protected static PersistenceHelper persistenceHelper = new PersistenceHelper();
 	private StringProperty description = new SimpleStringProperty();
 	private StringProperty name = new SimpleStringProperty();
 	private BooleanProperty completed = new SimpleBooleanProperty();
 	private Task task;
+	private TaskManager taskManager;
 	private ObservableList<TimeSegmentAdapter> timeSegments = FXCollections.observableList(new LinkedList<TimeSegmentAdapter>());
 
-	public TaskAdapter(Task task) {
+	public TaskAdapter(Task task, TaskManager taskList) {
 		this.task = task;
+		this.taskManager = taskList;
 
 		updateFxProperties();
 
@@ -45,7 +45,7 @@ public class TaskAdapter {
 			public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
 				if (!oldValue.equals(newValue)) {
 					//TODO: detect if the change was actually initiated by us
-					persistenceHelper.performTransactedChange(new TransactedChange() {
+					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private String newValue;
 
 						public TransactedChange setNewValue(String newValue) {
@@ -55,10 +55,10 @@ public class TaskAdapter {
 
 						@Override
 						public void performChange(EntityManager entityManager) {
-							setTask(entityManager.find(Task.class, getTask().getId()));
-							getTask().setDescription(newValue);
+							entityManager.find(Task.class, getTask().getId()).setDescription(newValue);
 						}
 					}.setNewValue(newValue));
+					getTask().setDescription(newValue);
 					updateFxProperties();
 				}
 			}
@@ -68,7 +68,7 @@ public class TaskAdapter {
 			@Override
 			public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
 				if (!oldValue.equals(newValue))
-					persistenceHelper.performTransactedChange(new TransactedChange() {
+					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private String newValue;
 
 						public TransactedChange setNewValue(String newValue) {
@@ -78,10 +78,10 @@ public class TaskAdapter {
 
 						@Override
 						public void performChange(EntityManager entityManager) {
-							setTask(entityManager.find(Task.class, getTask().getId()));
-							getTask().setName(newValue);
+							entityManager.find(Task.class, getTask().getId()).setName(newValue);
 						}
 					}.setNewValue(newValue));
+				getTask().setName(newValue);
 				updateFxProperties();
 			}
 		});
@@ -90,7 +90,7 @@ public class TaskAdapter {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
 				if (!oldValue.equals(newValue))
-					persistenceHelper.performTransactedChange(new TransactedChange() {
+					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private boolean newValue;
 
 						public TransactedChange setNewValue(boolean newValue) {
@@ -100,10 +100,10 @@ public class TaskAdapter {
 
 						@Override
 						public void performChange(EntityManager entityManager) {
-							setTask(entityManager.find(Task.class, getTask().getId()));
-							getTask().setCompleted(newValue);
+							entityManager.find(Task.class, getTask().getId()).setCompleted(newValue);
 						}
 					}.setNewValue(newValue));
+				getTask().setCompleted(newValue);
 				updateFxProperties();
 			}
 		});
@@ -125,14 +125,25 @@ public class TaskAdapter {
 		return timeSegments;
 	}
 
+	private TaskManager getTaskManager() {
+		return taskManager;
+	}
+
 	private void updateFxProperties() {
 		description.setValue(task.getDescription());
 		name.setValue(task.getName());
 		completed.setValue(task.getCompleted());
 		timeSegments.retainAll(task.getTimeSegments());
 		for (TimeSegment segment : task.getTimeSegments())
-			if (!timeSegments.contains(segment))
-				timeSegments.add(new TimeSegmentAdapter(segment));
+			if (findTimeSegment(segment) == null)
+				timeSegments.add(new TimeSegmentAdapter(segment, taskManager));
+	}
+
+	private TimeSegmentAdapter findTimeSegment(TimeSegment findSegment) {
+		for (TimeSegmentAdapter segment : timeSegments)
+			if (segment.getTimeSegment().equals(findSegment))
+				return segment;
+		return null;
 	}
 
 	public boolean isTiming() {
@@ -147,9 +158,5 @@ public class TaskAdapter {
 	 */
 	public Task getTask() {
 		return task;
-	}
-
-	protected void setTask(Task task) {
-		this.task = task;//Doesn't update any properties!
 	}
 }

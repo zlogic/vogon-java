@@ -30,11 +30,11 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 import javafx.util.converter.DateTimeStringConverter;
 import javafx.util.converter.DefaultStringConverter;
-import org.zlogic.att.data.PersistenceHelper;
 import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
 import org.zlogic.att.ui.adapters.CustomFieldValueAdapter;
 import org.zlogic.att.ui.adapters.TaskAdapter;
+import org.zlogic.att.ui.adapters.TaskManager;
 import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 
 /**
@@ -48,7 +48,7 @@ public class TaskEditorController implements Initializable {
 	private ObservableList<TaskAdapter> editedTaskList;
 	private List<TaskAdapter> boundTasks = new LinkedList<>();
 	private ObservableList<CustomFieldAdapter> customFields;
-	private PersistenceHelper storageManager = new PersistenceHelper();
+	private TaskManager taskManager;
 	@FXML
 	private TextArea description;
 	@FXML
@@ -146,6 +146,10 @@ public class TaskEditorController implements Initializable {
 		columnEnd.setComparator(dateComparator);
 	}
 
+	public void setTaskManager(TaskManager taskManager) {
+		this.taskManager = taskManager;
+	}
+
 	public void setCustomFields(ObservableList<CustomFieldAdapter> customFields) {
 		this.customFields = customFields;
 		updateCustomFields();
@@ -231,6 +235,9 @@ public class TaskEditorController implements Initializable {
 		startStop.setText(isTimingCurrentTask() ? "Stop" : "Start");
 	}
 
+	/*
+	 * Callbacks
+	 */
 	@FXML
 	private void handleStartStop() {
 		if (currentSegment.get() != null) {
@@ -239,14 +246,37 @@ public class TaskEditorController implements Initializable {
 		} else {
 			TaskAdapter task = getEditedTask();
 			if (task != null) {
-				TimeSegment newSegment = storageManager.createTimeSegment(task.getTask());
-				TimeSegmentAdapter newSegmentAdapter = new TimeSegmentAdapter(newSegment);
+				TimeSegmentAdapter newSegmentAdapter = createTimeSegment();
+
 				currentSegment.setValue(newSegmentAdapter);
-				timeSegments.getItems().add(newSegmentAdapter);
-				updateSortOrder();
 				currentSegment.get().startTiming();
 			}
 		}
 		updateStartStopText();
+	}
+
+	@FXML
+	private TimeSegmentAdapter createTimeSegment() {
+		TaskAdapter task = getEditedTask();
+		if (task != null) {
+			TimeSegment newSegment = taskManager.getPersistenceHelper().createTimeSegment(task.getTask());
+			TimeSegmentAdapter newSegmentAdapter = new TimeSegmentAdapter(newSegment, taskManager);
+			timeSegments.getItems().add(newSegmentAdapter);
+			updateSortOrder();
+			return newSegmentAdapter;
+		}
+		return null;
+	}
+
+	@FXML
+	private void deleteTimeSegment() {
+		for (TimeSegmentAdapter segment : timeSegments.getSelectionModel().getSelectedItems()) {
+			if (segment.equals(currentSegment.get())) {
+				currentSegment.get().stopTiming();
+				currentSegment.set(null);
+			}
+			taskManager.deleteSegment(segment);
+			timeSegments.getItems().remove(segment);
+		}
 	}
 }

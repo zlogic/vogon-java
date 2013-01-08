@@ -51,9 +51,9 @@ public class CustomFieldValueAdapter {
 
 						@Override
 						public void performChange(EntityManager entityManager) {
-							getTask().setTask(entityManager.find(Task.class, getTask().getTask().getId()));
 							CustomField foundCustomField = entityManager.find(CustomField.class, customFieldAdapter.getCustomField().getId());
-							getTask().getTask().setCustomField(foundCustomField, newValue);
+							(entityManager.find(Task.class, getTask().getTask().getId())).setCustomField(foundCustomField, newValue);
+							getTask().getTask().setCustomField(customFieldAdapter.getCustomField(), newValue);
 						}
 					}.setNewValue(getCustomField(), newValue));
 					updateFxProperties();
@@ -62,7 +62,7 @@ public class CustomFieldValueAdapter {
 		});
 	}
 
-	public void updateFxProperties() {
+	private void updateFxProperties() {
 		if (taskAdapter != null && taskAdapter.getTask() != null) {
 			String customFieldValue = taskAdapter.getTask().getCustomField(customFieldAdapter.getCustomField());
 			value.setValue(customFieldValue == null ? "" : customFieldValue);
