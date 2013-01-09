@@ -8,6 +8,8 @@ package org.zlogic.att.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,15 +25,18 @@ import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.converter.DateTimeStringConverter;
 import javafx.util.converter.DefaultStringConverter;
 import org.zlogic.att.data.converters.GrindstoneImporter;
 import org.zlogic.att.data.converters.Importer;
@@ -64,6 +69,12 @@ public class MainWindowController implements Initializable {
 	private TableView<TaskAdapter> taskList;
 	@FXML
 	private TableColumn<TaskAdapter, String> columnTaskName;
+	 @FXML
+	 private TableColumn<TaskAdapter, String> columnTotalTime;
+	 @FXML
+	 private TableColumn<TaskAdapter,Date> columnFirstTime;
+	 @FXML
+	 private TableColumn<TaskAdapter, Date> columnLastTime;
 	@FXML
 	private TableColumn<TaskAdapter, Boolean> columnTaskCompleted;
 	@FXML
@@ -110,6 +121,27 @@ public class MainWindowController implements Initializable {
 		//Restore settings
 		lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null : new File(preferenceStorage.get("lastDirectory", null)); //NOI18N
 		//Cell editors
+		taskList.setRowFactory(new Callback<TableView<TaskAdapter>, TableRow<TaskAdapter>>(){
+
+			@Override
+			public TableRow<TaskAdapter> call(TableView<TaskAdapter> p) {
+				TableRow<TaskAdapter> row = new TableRow<>();
+				row.itemProperty().addListener(new ChangeListener<TaskAdapter>() {
+					private TableRow<TaskAdapter> row;
+					public ChangeListener<TaskAdapter> setRow(TableRow<TaskAdapter> row){
+						this.row = row;
+						return this;
+					}
+					@Override
+					public void changed(ObservableValue<? extends TaskAdapter> ov, TaskAdapter t, TaskAdapter t1) {
+						//TODO: Set the row background based on the timing property
+						//if(t1!=null)
+						//row.styleProperty().set(t1.nameProperty().get().equals("Support Alcatel 5529OAD MVP reconnection") ?"-fx-background-color: cornsilk; ":"");
+					}
+				}.setRow(row));
+				return row;
+			}
+		});
 		columnTaskName.setCellFactory(new Callback<TableColumn<TaskAdapter, String>, TableCell<TaskAdapter, String>>() {
 			@Override
 			public TableCell<TaskAdapter, String> call(TableColumn<TaskAdapter, String> p) {
@@ -124,13 +156,51 @@ public class MainWindowController implements Initializable {
 				return new CheckBoxTableCell<>();
 			}
 		});
-
+		columnFirstTime.setCellFactory(new Callback<TableColumn<TaskAdapter, Date>, TableCell<TaskAdapter, Date>>() {
+			@Override
+			public TableCell<TaskAdapter, Date> call(TableColumn<TaskAdapter, Date> p) {
+				TextFieldTableCell<TaskAdapter, Date> cell = new TextFieldTableCell<>();
+				cell.setConverter(new DateTimeStringConverter());
+				return cell;
+			}
+		});
+		columnTotalTime.setCellFactory(new Callback<TableColumn<TaskAdapter, String>, TableCell<TaskAdapter, String>>() {
+			@Override
+			public TableCell<TaskAdapter, String> call(TableColumn<TaskAdapter, String> p) {
+				TextFieldTableCell<TaskAdapter, String> cell = new TextFieldTableCell<>();
+				cell.setConverter(new DefaultStringConverter());
+				return cell;
+			}
+		});
+		columnLastTime.setCellFactory(new Callback<TableColumn<TaskAdapter, Date>, TableCell<TaskAdapter, Date>>() {
+			@Override
+			public TableCell<TaskAdapter, Date> call(TableColumn<TaskAdapter, Date> p) {
+				TextFieldTableCell<TaskAdapter, Date> cell = new TextFieldTableCell<>();
+				cell.setConverter(new DateTimeStringConverter());
+				return cell;
+			}
+		});
 		//Set column sizes
 		//TODO: make sure this keeps working correctly
 		//taskList.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-		columnTaskName.prefWidthProperty().bind(taskList.widthProperty().multiply(9).divide(10));
+		columnTaskName.prefWidthProperty().bind(taskList.widthProperty().multiply(5).divide(10));
+		columnTotalTime.prefWidthProperty().bind(taskList.widthProperty().multiply(2).divide(10));
+		columnFirstTime.prefWidthProperty().bind(taskList.widthProperty().multiply(1).divide(10));
+		columnLastTime.prefWidthProperty().bind(taskList.widthProperty().multiply(1).divide(10));
 		columnTaskCompleted.prefWidthProperty().bind(taskList.widthProperty().multiply(1).divide(10).subtract(15));
 
+		//Default sort order
+		taskList.getSortOrder().add(columnLastTime);
+		columnLastTime.setSortType(TableColumn.SortType.DESCENDING);
+		//Task comparator
+		Comparator<Date> TaskComparator = new Comparator<Date>() {
+			@Override
+			public int compare(Date o1, Date o2) {
+				return o1.compareTo(o2);
+			}
+		};
+		columnLastTime.setComparator(TaskComparator);
+		
 		//Load other windows
 		loadWindowCustomFieldEditor();
 		taskEditorController.setTaskManager(taskManager);
@@ -169,10 +239,19 @@ public class MainWindowController implements Initializable {
 	protected void reloadTasks() {
 		taskManager.reloadTasks();
 		taskEditorController.setEditedTaskList(taskList.getSelectionModel().getSelectedItems());
+		updateSortOrder();
 	}
 
 	protected void reloadCustomFields() {
 		customFieldEditorController.reloadCustomFields();
+	}
+	
+	private void updateSortOrder() {
+		//TODO: Remove this after it's fixed in Java FX
+		//TODO: call this on task updates?
+		TableColumn<TaskAdapter, ?>[] sortOrder = taskList.getSortOrder().toArray(new TableColumn[0]);
+		taskList.getSortOrder().clear();
+		taskList.getSortOrder().addAll(sortOrder);
 	}
 
 	/*
@@ -183,6 +262,7 @@ public class MainWindowController implements Initializable {
 		TaskAdapter newTask = new TaskAdapter(taskManager.getPersistenceHelper().createTask(), taskManager);
 		taskList.getItems().add(newTask);
 		taskList.getSelectionModel().select(newTask);
+		updateSortOrder();
 	}
 
 	@FXML
@@ -190,6 +270,7 @@ public class MainWindowController implements Initializable {
 		for (TaskAdapter selectedTask : taskList.getSelectionModel().getSelectedItems()) {
 			taskManager.deleteTask(selectedTask);
 		}
+		updateSortOrder();
 	}
 
 	@FXML

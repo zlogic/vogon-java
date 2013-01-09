@@ -5,9 +5,12 @@
  */
 package org.zlogic.att.ui.adapters;
 
+import java.util.Date;
 import java.util.LinkedList;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -34,6 +37,8 @@ public class TaskAdapter {
 	private Task task;
 	private TaskManager taskManager;
 	private ObservableList<TimeSegmentAdapter> timeSegments = FXCollections.observableList(new LinkedList<TimeSegmentAdapter>());
+	private ObjectProperty<Date> firstTime = new SimpleObjectProperty<>();
+	private ObjectProperty<Date> lastTime = new SimpleObjectProperty<>();
 
 	public TaskAdapter(Task task, TaskManager taskManager) {
 		this.task = task;
@@ -126,6 +131,12 @@ public class TaskAdapter {
 	public StringProperty totalTimeProperty() {
 		return totalTime;
 	}
+	public ObjectProperty<Date> firstTimeProperty() {
+		return firstTime;
+	}
+	public ObjectProperty<Date> lastTimeProperty() {
+		return lastTime;
+	}
 
 	public BooleanProperty completedProperty() {
 		return completed;
@@ -161,6 +172,8 @@ public class TaskAdapter {
 	}
 
 	protected void updateTimeProperty() {
+		firstTime.setValue(getEarliestTime());
+		lastTime.setValue(getLatestTime());
 		totalTime.setValue(task.getTotalTime().toString(PeriodFormat.wordBased()));
 	}
 
@@ -178,6 +191,22 @@ public class TaskAdapter {
 		return false;
 	}
 
+	public Date getLatestTime(){
+		Date lastDate = null;
+		for(TimeSegment segment : task.getTimeSegments())
+			if(lastDate==null || segment.getEndTime().after(lastDate))
+				lastDate = segment.getEndTime();
+		return lastDate;
+	}
+	
+	public Date getEarliestTime(){
+		Date firstDate = null;
+		for(TimeSegment segment : task.getTimeSegments())
+			if(firstDate==null || segment.getStartTime().before(firstDate))
+				firstDate = segment.getStartTime();
+		return firstDate;
+	}
+	
 	/*
 	 * Getters/Setters
 	 */

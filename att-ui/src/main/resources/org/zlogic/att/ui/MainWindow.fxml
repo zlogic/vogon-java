@@ -74,6 +74,21 @@
                     <PropertyValueFactory property="name" />
                   </cellValueFactory>
                 </TableColumn>
+                <TableColumn editable="false" prefWidth="75.0" text="Total time" fx:id="columnTotalTime">
+                  <cellValueFactory>
+                    <PropertyValueFactory property="totalTime" />
+                  </cellValueFactory>
+                </TableColumn>
+                <TableColumn editable="false" prefWidth="75.0" text="First time" fx:id="columnFirstTime">
+                  <cellValueFactory>
+                    <PropertyValueFactory property="firstTime" />
+                  </cellValueFactory>
+                </TableColumn>
+                <TableColumn editable="false" prefWidth="75.0" text="Last time" fx:id="columnLastTime">
+                  <cellValueFactory>
+                    <PropertyValueFactory property="lastTime" />
+                  </cellValueFactory>
+                </TableColumn>
                 <TableColumn prefWidth="75.0" text="Completed" fx:id="columnTaskCompleted">
                   <cellValueFactory>
                     <PropertyValueFactory property="completed" />
