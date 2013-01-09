@@ -69,12 +69,12 @@ public class MainWindowController implements Initializable {
 	private TableView<TaskAdapter> taskList;
 	@FXML
 	private TableColumn<TaskAdapter, String> columnTaskName;
-	 @FXML
-	 private TableColumn<TaskAdapter, String> columnTotalTime;
-	 @FXML
-	 private TableColumn<TaskAdapter,Date> columnFirstTime;
-	 @FXML
-	 private TableColumn<TaskAdapter, Date> columnLastTime;
+	@FXML
+	private TableColumn<TaskAdapter, String> columnTotalTime;
+	@FXML
+	private TableColumn<TaskAdapter, Date> columnFirstTime;
+	@FXML
+	private TableColumn<TaskAdapter, Date> columnLastTime;
 	@FXML
 	private TableColumn<TaskAdapter, Boolean> columnTaskCompleted;
 	@FXML
@@ -121,17 +121,18 @@ public class MainWindowController implements Initializable {
 		//Restore settings
 		lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null : new File(preferenceStorage.get("lastDirectory", null)); //NOI18N
 		//Cell editors
-		taskList.setRowFactory(new Callback<TableView<TaskAdapter>, TableRow<TaskAdapter>>(){
-
+		taskList.setRowFactory(new Callback<TableView<TaskAdapter>, TableRow<TaskAdapter>>() {
 			@Override
 			public TableRow<TaskAdapter> call(TableView<TaskAdapter> p) {
 				TableRow<TaskAdapter> row = new TableRow<>();
 				row.itemProperty().addListener(new ChangeListener<TaskAdapter>() {
 					private TableRow<TaskAdapter> row;
-					public ChangeListener<TaskAdapter> setRow(TableRow<TaskAdapter> row){
+
+					public ChangeListener<TaskAdapter> setRow(TableRow<TaskAdapter> row) {
 						this.row = row;
 						return this;
 					}
+
 					@Override
 					public void changed(ObservableValue<? extends TaskAdapter> ov, TaskAdapter t, TaskAdapter t1) {
 						//TODO: Set the row background based on the timing property
@@ -200,7 +201,7 @@ public class MainWindowController implements Initializable {
 			}
 		};
 		columnLastTime.setComparator(TaskComparator);
-		
+
 		//Load other windows
 		loadWindowCustomFieldEditor();
 		taskEditorController.setTaskManager(taskManager);
@@ -245,7 +246,7 @@ public class MainWindowController implements Initializable {
 	protected void reloadCustomFields() {
 		customFieldEditorController.reloadCustomFields();
 	}
-	
+
 	private void updateSortOrder() {
 		//TODO: Remove this after it's fixed in Java FX
 		//TODO: call this on task updates?

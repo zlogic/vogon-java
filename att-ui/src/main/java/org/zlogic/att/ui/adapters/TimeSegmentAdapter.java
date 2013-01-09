@@ -46,7 +46,9 @@ public class TimeSegmentAdapter {
 		this.description.addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
-				if (!oldValue.equals(newValue)) {
+				oldValue = oldValue == null ? "" : oldValue;
+				newValue = newValue == null ? "" : newValue;
+				if (!oldValue.equals(newValue) && getTaskManager() != null) {
 					//TODO: detect if the change was actually initiated by us
 					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private String newValue;
@@ -70,7 +72,7 @@ public class TimeSegmentAdapter {
 		this.start.addListener(new ChangeListener<Date>() {
 			@Override
 			public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
-				if (!oldValue.equals(newValue)) {
+				if (!oldValue.equals(newValue) && getTaskManager() != null) {
 					//TODO: detect if the change was actually initiated by us
 					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private Date newValue;
@@ -94,7 +96,7 @@ public class TimeSegmentAdapter {
 		this.end.addListener(new ChangeListener<Date>() {
 			@Override
 			public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
-				if (!oldValue.equals(newValue)) {
+				if (!oldValue.equals(newValue) && getTaskManager() != null) {
 					//TODO: detect if the change was actually initiated by us
 					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private Date newValue;

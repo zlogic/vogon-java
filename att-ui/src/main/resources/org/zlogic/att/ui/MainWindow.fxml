@@ -11,94 +11,94 @@
 <?import javafx.scene.paint.*?>
 
 <VBox id="VBox" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.MainWindowController">
-  <children>
-    <MenuBar>
-      <menus>
-        <Menu mnemonicParsing="false" text="File">
-          <items>
-            <MenuItem mnemonicParsing="false" onAction="#importGrindstoneData" text="Import Grindstone data..." />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" onAction="#exit" text="Exit" />
-          </items>
-        </Menu>
-        <Menu mnemonicParsing="false" text="Edit">
-          <items>
-            <MenuItem mnemonicParsing="false" onAction="#showCustomFieldEditor" text="Edit custom fields..." />
-          </items>
-        </Menu>
-        <Menu mnemonicParsing="false" text="Help">
-          <items>
-            <MenuItem disable="true" mnemonicParsing="false" text="About" />
-          </items>
-        </Menu>
-      </menus>
-    </MenuBar>
-    <SplitPane id="SplitPane" dividerPositions="0.526706231454006" orientation="VERTICAL" prefHeight="681.0" prefWidth="800.0" VBox.vgrow="ALWAYS">
-      <items>
-        <VBox id="VBox" alignment="CENTER" spacing="5.0">
-          <children>
-            <HBox id="activeTaskPanel" fx:id="activeTaskPane" VBox.vgrow="NEVER">
-              <children>
-                <Label id="" style="&#10;" text="Currently timing task:">
-                  <HBox.margin>
-                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
-                  </HBox.margin>
-                </Label>
-                <Label id="" fx:id="activeTaskLabel" style="-fx-font-style: italic;&#10;-fx-font-weight: bold;" HBox.margin="$x1" />
-                <Button mnemonicParsing="false" onAction="#stopTimingTask" text="Stop" HBox.margin="$x1" />
-              </children>
-            </HBox>
-            <AnchorPane id="AnchorPane" minHeight="311.0" prefHeight="311.0" VBox.vgrow="ALWAYS">
-              <children>
-                <fx:include fx:id="taskEditor" source="TaskEditor.fxml" prefHeight="311.0" prefWidth="798.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-              </children>
-            </AnchorPane>
-          </children>
-        </VBox>
-        <VBox id="VBox" alignment="CENTER">
-          <children>
-            <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
-              <children>
-                <Button fx:id="createTransactionButton" mnemonicParsing="false" onAction="#createNewTask" text="New task" HBox.margin="$x1" />
-                <Button fx:id="deleteTaskButton" mnemonicParsing="false" onAction="#deleteSelectedTasks" text="Delete task">
-                  <HBox.margin>
-                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
-                  </HBox.margin>
-                </Button>
-              </children>
-            </HBox>
-            <TableView fx:id="taskList" editable="true" prefHeight="268.0" prefWidth="798.0" VBox.vgrow="ALWAYS">
-              <columns>
-                <TableColumn prefWidth="75.0" text="Task name" fx:id="columnTaskName">
-                  <cellValueFactory>
-                    <PropertyValueFactory property="name" />
-                  </cellValueFactory>
-                </TableColumn>
-                <TableColumn editable="false" prefWidth="75.0" text="Total time" fx:id="columnTotalTime">
-                  <cellValueFactory>
-                    <PropertyValueFactory property="totalTime" />
-                  </cellValueFactory>
-                </TableColumn>
-                <TableColumn editable="false" prefWidth="75.0" text="First time" fx:id="columnFirstTime">
-                  <cellValueFactory>
-                    <PropertyValueFactory property="firstTime" />
-                  </cellValueFactory>
-                </TableColumn>
-                <TableColumn editable="false" prefWidth="75.0" text="Last time" fx:id="columnLastTime">
-                  <cellValueFactory>
-                    <PropertyValueFactory property="lastTime" />
-                  </cellValueFactory>
-                </TableColumn>
-                <TableColumn prefWidth="75.0" text="Completed" fx:id="columnTaskCompleted">
-                  <cellValueFactory>
-                    <PropertyValueFactory property="completed" />
-                  </cellValueFactory>
-                </TableColumn>
-              </columns>
-            </TableView>
-          </children>
-        </VBox>
-      </items>
-    </SplitPane>
-  </children>
+	<children>
+		<MenuBar>
+			<menus>
+				<Menu mnemonicParsing="false" text="File">
+					<items>
+						<MenuItem mnemonicParsing="false" onAction="#importGrindstoneData" text="Import Grindstone data..." />
+						<SeparatorMenuItem mnemonicParsing="false" />
+						<MenuItem mnemonicParsing="false" onAction="#exit" text="Exit" />
+					</items>
+				</Menu>
+				<Menu mnemonicParsing="false" text="Edit">
+					<items>
+						<MenuItem mnemonicParsing="false" onAction="#showCustomFieldEditor" text="Edit custom fields..." />
+					</items>
+				</Menu>
+				<Menu mnemonicParsing="false" text="Help">
+					<items>
+						<MenuItem disable="true" mnemonicParsing="false" text="About" />
+					</items>
+				</Menu>
+			</menus>
+		</MenuBar>
+		<SplitPane id="SplitPane" dividerPositions="0.526706231454006" orientation="VERTICAL" prefHeight="681.0" prefWidth="800.0" VBox.vgrow="ALWAYS">
+			<items>
+				<VBox id="VBox" alignment="CENTER" spacing="5.0">
+					<children>
+						<HBox id="activeTaskPanel" fx:id="activeTaskPane" VBox.vgrow="NEVER">
+							<children>
+								<Label id="" style="&#10;" text="Currently timing task:">
+									<HBox.margin>
+										<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+									</HBox.margin>
+								</Label>
+								<Label id="" fx:id="activeTaskLabel" style="-fx-font-style: italic;&#10;-fx-font-weight: bold;" HBox.margin="$x1" />
+								<Button mnemonicParsing="false" onAction="#stopTimingTask" text="Stop" HBox.margin="$x1" />
+							</children>
+						</HBox>
+						<AnchorPane id="AnchorPane" minHeight="311.0" prefHeight="311.0" VBox.vgrow="ALWAYS">
+							<children>
+								<fx:include fx:id="taskEditor" source="TaskEditor.fxml" prefHeight="311.0" prefWidth="798.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+							</children>
+						</AnchorPane>
+					</children>
+				</VBox>
+				<VBox id="VBox" alignment="CENTER">
+					<children>
+						<HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
+							<children>
+								<Button fx:id="createTransactionButton" mnemonicParsing="false" onAction="#createNewTask" text="New task" HBox.margin="$x1" />
+								<Button fx:id="deleteTaskButton" mnemonicParsing="false" onAction="#deleteSelectedTasks" text="Delete task">
+									<HBox.margin>
+										<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+									</HBox.margin>
+								</Button>
+							</children>
+						</HBox>
+						<TableView fx:id="taskList" editable="true" prefHeight="268.0" prefWidth="798.0" VBox.vgrow="ALWAYS">
+							<columns>
+								<TableColumn prefWidth="75.0" text="Task name" fx:id="columnTaskName">
+									<cellValueFactory>
+										<PropertyValueFactory property="name" />
+									</cellValueFactory>
+								</TableColumn>
+								<TableColumn editable="false" prefWidth="75.0" text="Total time" fx:id="columnTotalTime">
+									<cellValueFactory>
+										<PropertyValueFactory property="totalTime" />
+									</cellValueFactory>
+								</TableColumn>
+								<TableColumn editable="false" prefWidth="75.0" text="First time" fx:id="columnFirstTime">
+									<cellValueFactory>
+										<PropertyValueFactory property="firstTime" />
+									</cellValueFactory>
+								</TableColumn>
+								<TableColumn editable="false" prefWidth="75.0" text="Last time" fx:id="columnLastTime">
+									<cellValueFactory>
+										<PropertyValueFactory property="lastTime" />
+									</cellValueFactory>
+								</TableColumn>
+								<TableColumn prefWidth="75.0" text="Completed" fx:id="columnTaskCompleted">
+									<cellValueFactory>
+										<PropertyValueFactory property="completed" />
+									</cellValueFactory>
+								</TableColumn>
+							</columns>
+						</TableView>
+					</children>
+				</VBox>
+			</items>
+		</SplitPane>
+	</children>
 </VBox>

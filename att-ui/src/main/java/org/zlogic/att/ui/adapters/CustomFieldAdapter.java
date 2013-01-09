@@ -35,7 +35,9 @@ public class CustomFieldAdapter {
 		this.name.addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
-				if (!oldValue.equals(newValue)) {
+				oldValue = oldValue == null ? "" : oldValue;
+				newValue = newValue == null ? "" : newValue;
+				if (!oldValue.equals(newValue) && getTaskManager() != null) {
 					//TODO: detect if the change was actually initiated by us
 					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private String newValue;

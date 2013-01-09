@@ -50,7 +50,9 @@ public class TaskAdapter {
 		this.description.addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
-				if (!oldValue.equals(newValue)) {
+				oldValue = oldValue == null ? "" : oldValue;
+				newValue = newValue == null ? "" : newValue;
+				if (!oldValue.equals(newValue) && getTaskManager() != null) {
 					//TODO: detect if the change was actually initiated by us
 					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private String newValue;
@@ -74,7 +76,9 @@ public class TaskAdapter {
 		this.name.addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
-				if (!oldValue.equals(newValue)) {
+				oldValue = oldValue == null ? "" : oldValue;
+				newValue = newValue == null ? "" : newValue;
+				if (!oldValue.equals(newValue) && getTaskManager() != null) {
 					//TODO: detect if the change was actually initiated by us
 					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private String newValue;
@@ -98,7 +102,7 @@ public class TaskAdapter {
 		this.completed.addListener(new ChangeListener<Boolean>() {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
-				if (!oldValue.equals(newValue)) {
+				if (!oldValue.equals(newValue) && getTaskManager() != null) {
 					//TODO: detect if the change was actually initiated by us
 					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private boolean newValue;
@@ -131,9 +135,11 @@ public class TaskAdapter {
 	public StringProperty totalTimeProperty() {
 		return totalTime;
 	}
+
 	public ObjectProperty<Date> firstTimeProperty() {
 		return firstTime;
 	}
+
 	public ObjectProperty<Date> lastTimeProperty() {
 		return lastTime;
 	}
@@ -191,22 +197,22 @@ public class TaskAdapter {
 		return false;
 	}
 
-	public Date getLatestTime(){
+	public Date getLatestTime() {
 		Date lastDate = null;
-		for(TimeSegment segment : task.getTimeSegments())
-			if(lastDate==null || segment.getEndTime().after(lastDate))
+		for (TimeSegment segment : task.getTimeSegments())
+			if (lastDate == null || segment.getEndTime().after(lastDate))
 				lastDate = segment.getEndTime();
 		return lastDate;
 	}
-	
-	public Date getEarliestTime(){
+
+	public Date getEarliestTime() {
 		Date firstDate = null;
-		for(TimeSegment segment : task.getTimeSegments())
-			if(firstDate==null || segment.getStartTime().before(firstDate))
+		for (TimeSegment segment : task.getTimeSegments())
+			if (firstDate == null || segment.getStartTime().before(firstDate))
 				firstDate = segment.getStartTime();
 		return firstDate;
 	}
-	
+
 	/*
 	 * Getters/Setters
 	 */
