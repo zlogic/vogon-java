@@ -10,123 +10,123 @@
 <?import javafx.scene.paint.*?>
 
 <AnchorPane prefHeight="200.0" prefWidth="531.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.TaskEditorController">
-	<children>
-		<GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-			<Label text="Name" GridPane.columnIndex="0" GridPane.columnSpan="1" GridPane.margin="$x1" GridPane.rowIndex="0" GridPane.rowSpan="1">
-				<labelFor>
-					<TextField id="taskName" fx:id="name" GridPane.columnIndex="1" GridPane.columnSpan="1" GridPane.rowIndex="0" GridPane.rowSpan="1">
-						<GridPane.margin>
-							<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
-						</GridPane.margin>
-					</TextField>
-				</labelFor>
-			</Label>
-			<fx:reference source="name" />
-			<Label text="Total time" GridPane.columnIndex="0" GridPane.margin="$x1" GridPane.rowIndex="1">
-				<labelFor>
-					<TextField fx:id="totalTime" disable="true" editable="false" focusTraversable="false" GridPane.columnIndex="1" GridPane.margin="$x1" GridPane.rowIndex="1" />
-				</labelFor>
-			</Label>
-			<columnConstraints>
-				<ColumnConstraints hgrow="SOMETIMES" maxWidth="71.0" minWidth="10.0" prefWidth="71.0" />
-				<ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="204.0" />
-				<ColumnConstraints hgrow="ALWAYS" maxWidth="163.0" minWidth="10.0" prefWidth="126.0" />
-			</columnConstraints>
-			<rowConstraints>
-				<RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
-				<RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
-				<RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="ALWAYS" />
-			</rowConstraints>
-			<fx:reference source="totalTime" />
-			<AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.columnSpan="1" GridPane.rowIndex="0" GridPane.rowSpan="2147483647">
-				<children>
-					<Button fx:id="startStop" mnemonicParsing="false" onAction="#handleStartStop" prefHeight="115.0" prefWidth="101.0" text="Start/Stop" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
-				</children>
-				<GridPane.margin>
-					<Insets />
-				</GridPane.margin>
-			</AnchorPane>
-			<Accordion GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="2" GridPane.rowSpan="1">
-				<expandedPane>
-					<TitledPane fx:id="x2" text="Time slots">
-						<content>
-							<VBox id="VBox" alignment="CENTER">
-								<children>
-									<HBox prefHeight="100.0" prefWidth="200.0">
-										<children>
-											<Button mnemonicParsing="false" onAction="#createTimeSegment" text="Add manually" HBox.margin="$x1" />
-											<Button fx:id="delete" mnemonicParsing="false" onAction="#deleteTimeSegment" text="Delete" HBox.margin="$x1" />
-										</children>
-									</HBox>
-									<AnchorPane id="Content">
-										<children>
-											<TableView fx:id="timeSegments" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-												<columns>
-													<TableColumn prefWidth="75.0" text="Start" fx:id="columnStart">
-														<cellValueFactory>
-															<PropertyValueFactory property="start" />
-														</cellValueFactory>
-													</TableColumn>
-													<TableColumn prefWidth="75.0" text="End" fx:id="columnEnd">
-														<cellValueFactory>
-															<PropertyValueFactory property="end" />
-														</cellValueFactory>
-													</TableColumn>
-													<TableColumn prefWidth="75.0" text="Description" fx:id="columnDescription">
-														<cellValueFactory>
-															<PropertyValueFactory property="description" />
-														</cellValueFactory>
-													</TableColumn>
-												</columns>
-											</TableView>
-										</children>
-									</AnchorPane>
-								</children>
-							</VBox>
-						</content>
-					</TitledPane>
-				</expandedPane>
-				<panes>
-					<fx:reference source="x2" />
-					<TitledPane text="More properties">
-						<content>
-							<GridPane>
-								<children>
-									<Label text="Description" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-									<TextArea fx:id="description" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="0">
-										<GridPane.margin>
-											<Insets />
-										</GridPane.margin>
-									</TextArea>
-									<Label text="Custom properties" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-									<TableView fx:id="customProperties" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
-										<columns>
-											<TableColumn prefWidth="75.0" text="Property" fx:id="columnField">
-												<cellValueFactory>
-													<PropertyValueFactory property="name" />
-												</cellValueFactory>
-											</TableColumn>
-											<TableColumn prefWidth="75.0" text="Value" fx:id="columnFieldValue">
-												<cellValueFactory>
-													<PropertyValueFactory property="value" />
-												</cellValueFactory>
-											</TableColumn>
-										</columns>
-									</TableView>
-								</children>
-								<columnConstraints>
-									<ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="100.0" />
-									<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-								</columnConstraints>
-								<rowConstraints>
-									<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-									<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-								</rowConstraints>
-							</GridPane>
-						</content>
-					</TitledPane>
-				</panes>
-			</Accordion>
-		</GridPane>
-	</children>
+  <children>
+    <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <Label text="Name" GridPane.columnIndex="0" GridPane.columnSpan="1" GridPane.margin="$x1" GridPane.rowIndex="0" GridPane.rowSpan="1">
+        <labelFor>
+          <TextField id="taskName" fx:id="name" GridPane.columnIndex="1" GridPane.columnSpan="1" GridPane.rowIndex="0" GridPane.rowSpan="1">
+            <GridPane.margin>
+              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+            </GridPane.margin>
+          </TextField>
+        </labelFor>
+      </Label>
+      <fx:reference source="name" />
+      <Label text="Total time" GridPane.columnIndex="0" GridPane.margin="$x1" GridPane.rowIndex="1">
+        <labelFor>
+          <TextField fx:id="totalTime" disable="true" editable="false" focusTraversable="false" GridPane.columnIndex="1" GridPane.margin="$x1" GridPane.rowIndex="1" />
+        </labelFor>
+      </Label>
+      <columnConstraints>
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="71.0" minWidth="10.0" prefWidth="71.0" />
+        <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="204.0" />
+        <ColumnConstraints hgrow="ALWAYS" maxWidth="163.0" minWidth="10.0" prefWidth="126.0" />
+      </columnConstraints>
+      <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="ALWAYS" />
+      </rowConstraints>
+      <fx:reference source="totalTime" />
+      <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.columnSpan="1" GridPane.rowIndex="0" GridPane.rowSpan="2147483647">
+        <children>
+          <Button fx:id="startStop" mnemonicParsing="false" onAction="#handleStartStop" prefHeight="115.0" prefWidth="101.0" text="Start/Stop" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+        </children>
+        <GridPane.margin>
+          <Insets />
+        </GridPane.margin>
+      </AnchorPane>
+      <Accordion GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="2" GridPane.rowSpan="1">
+        <expandedPane>
+          <TitledPane fx:id="x2" text="Time slots">
+            <content>
+              <VBox id="VBox" alignment="CENTER">
+                <children>
+                  <HBox prefHeight="100.0" prefWidth="200.0">
+                    <children>
+                      <Button mnemonicParsing="false" onAction="#createTimeSegment" text="Add manually" HBox.margin="$x1" />
+                      <Button fx:id="delete" mnemonicParsing="false" onAction="#deleteTimeSegment" text="Delete" HBox.margin="$x1" />
+                    </children>
+                  </HBox>
+                  <AnchorPane id="Content">
+                    <children>
+                      <TableView fx:id="timeSegments" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <columns>
+                          <TableColumn prefWidth="75.0" text="Start" fx:id="columnStart">
+                            <cellValueFactory>
+                              <PropertyValueFactory property="start" />
+                            </cellValueFactory>
+                          </TableColumn>
+                          <TableColumn prefWidth="75.0" text="End" fx:id="columnEnd">
+                            <cellValueFactory>
+                              <PropertyValueFactory property="end" />
+                            </cellValueFactory>
+                          </TableColumn>
+                          <TableColumn prefWidth="75.0" text="Description" fx:id="columnDescription">
+                            <cellValueFactory>
+                              <PropertyValueFactory property="description" />
+                            </cellValueFactory>
+                          </TableColumn>
+                        </columns>
+                      </TableView>
+                    </children>
+                  </AnchorPane>
+                </children>
+              </VBox>
+            </content>
+          </TitledPane>
+        </expandedPane>
+        <panes>
+          <fx:reference source="x2" />
+          <TitledPane text="More properties">
+            <content>
+              <GridPane>
+                <children>
+                  <Label text="Description" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                  <TextArea fx:id="description" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <GridPane.margin>
+                      <Insets />
+                    </GridPane.margin>
+                  </TextArea>
+                  <Label text="Custom properties" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                  <TableView fx:id="customProperties" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                    <columns>
+                      <TableColumn prefWidth="75.0" text="Property" fx:id="columnField">
+                        <cellValueFactory>
+                          <PropertyValueFactory property="name" />
+                        </cellValueFactory>
+                      </TableColumn>
+                      <TableColumn prefWidth="75.0" text="Value" fx:id="columnFieldValue">
+                        <cellValueFactory>
+                          <PropertyValueFactory property="value" />
+                        </cellValueFactory>
+                      </TableColumn>
+                    </columns>
+                  </TableView>
+                </children>
+                <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                </columnConstraints>
+                <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                </rowConstraints>
+              </GridPane>
+            </content>
+          </TitledPane>
+        </panes>
+      </Accordion>
+    </GridPane>
+  </children>
 </AnchorPane>
