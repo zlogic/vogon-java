@@ -39,7 +39,7 @@
 					<children>
 						<HBox id="activeTaskPanel" fx:id="activeTaskPane" VBox.vgrow="NEVER">
 							<children>
-								<Label id="" style="&#10;" text="Currently timing task:">
+								<Label id="" text="Currently timing task:">
 									<HBox.margin>
 										<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
 									</HBox.margin>
