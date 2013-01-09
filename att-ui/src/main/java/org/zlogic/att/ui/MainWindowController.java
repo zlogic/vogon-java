@@ -85,6 +85,23 @@ public class MainWindowController implements Initializable {
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
+		//Default sort order
+		taskList.getSortOrder().add(columnLastTime);
+		columnLastTime.setSortType(TableColumn.SortType.DESCENDING);
+		//Task comparator
+		Comparator<Date> TaskComparator = new Comparator<Date>() {
+			@Override
+			public int compare(Date o1, Date o2) {
+				if (o1 == null && o2 != null)
+					return 1;
+				if (o1 != null && o2 == null)
+					return -1;
+				if (o1 == null && o2 == null)
+					return 0;
+				return o1.compareTo(o2);
+			}
+		};
+		columnLastTime.setComparator(TaskComparator);
 		//Create the task manager
 		taskManager = new TaskManager(taskList.getItems());
 		reloadTasks();
@@ -188,18 +205,6 @@ public class MainWindowController implements Initializable {
 		columnFirstTime.prefWidthProperty().bind(taskList.widthProperty().multiply(1).divide(10));
 		columnLastTime.prefWidthProperty().bind(taskList.widthProperty().multiply(1).divide(10));
 		columnTaskCompleted.prefWidthProperty().bind(taskList.widthProperty().multiply(1).divide(10).subtract(15));
-
-		//Default sort order
-		taskList.getSortOrder().add(columnLastTime);
-		columnLastTime.setSortType(TableColumn.SortType.DESCENDING);
-		//Task comparator
-		Comparator<Date> TaskComparator = new Comparator<Date>() {
-			@Override
-			public int compare(Date o1, Date o2) {
-				return o1.compareTo(o2);
-			}
-		};
-		columnLastTime.setComparator(TaskComparator);
 
 		//Load other windows
 		loadWindowCustomFieldEditor();
