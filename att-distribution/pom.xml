@@ -78,6 +78,7 @@
 							</classPath>
 							<jre>
 								<minVersion>1.7.0</minVersion>
+								<path>jre7</path>
 								<opts>
 									<!--<opt>-Djava.util.logging.config.file=logging.properties</opt>-->
 								</opts>
