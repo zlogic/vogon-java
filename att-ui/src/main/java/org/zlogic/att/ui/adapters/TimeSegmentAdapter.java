@@ -88,6 +88,7 @@ public class TimeSegmentAdapter {
 							getTimeSegment().setStartTime(newValue);
 						}
 					}.setNewValue(newValue));
+					ownerTaskProperty().get().updateFromDatabase();
 					updateFxProperties();
 				}
 			}
@@ -112,6 +113,7 @@ public class TimeSegmentAdapter {
 							getTimeSegment().setEndTime(newValue);
 						}
 					}.setNewValue(newValue));
+					ownerTaskProperty().get().updateFromDatabase();
 					updateFxProperties();
 				}
 			}
@@ -157,7 +159,6 @@ public class TimeSegmentAdapter {
 			@Override
 			public void run() {
 				endProperty.setValue(new Date());
-				ownerTask.get().updateFromDatabase();
 			}
 		}.setEndProperty(endProperty()), 0, 1000);
 	}
@@ -175,11 +176,15 @@ public class TimeSegmentAdapter {
 
 	private void updateFxProperties() {
 		description.setValue(segment.getDescription());
-		start.setValue(segment.getStartTime());
-		end.setValue(segment.getEndTime());
-		ownerTask.get().updateTimeProperty();
+		if (start.get() == null || !start.get().equals(segment.getStartTime()))
+			start.setValue(segment.getStartTime());
+		if (end.get() == null || !end.get().equals(segment.getEndTime()))
+			end.setValue(segment.getEndTime());
 	}
 
+	/*
+	 * Getters/setters
+	 */
 	public TimeSegment getTimeSegment() {
 		return segment;
 	}

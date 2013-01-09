@@ -30,7 +30,7 @@ import org.zlogic.att.data.TransactedChange;
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class TaskAdapter {
-	
+
 	private StringProperty description = new SimpleStringProperty();
 	private StringProperty name = new SimpleStringProperty();
 	private BooleanProperty completed = new SimpleBooleanProperty();
@@ -40,11 +40,11 @@ public class TaskAdapter {
 	private ObservableList<TimeSegmentAdapter> timeSegments = FXCollections.observableList(new LinkedList<TimeSegmentAdapter>());
 	private ObjectProperty<Date> firstTime = new SimpleObjectProperty<>();
 	private ObjectProperty<Date> lastTime = new SimpleObjectProperty<>();
-	
+
 	public TaskAdapter(Task task, TaskManager taskManager) {
 		this.task = task;
 		this.taskManager = taskManager;
-		
+
 		updateFxProperties();
 
 		//Change listeners
@@ -57,12 +57,12 @@ public class TaskAdapter {
 					//TODO: detect if the change was actually initiated by us
 					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private String newValue;
-						
+
 						public TransactedChange setNewValue(String newValue) {
 							this.newValue = newValue;
 							return this;
 						}
-						
+
 						@Override
 						public void performChange(EntityManager entityManager) {
 							setTask(getTaskManager().getPersistenceHelper().getTaskFromDatabase(getTask().getId(), entityManager));
@@ -73,7 +73,7 @@ public class TaskAdapter {
 				}
 			}
 		});
-		
+
 		this.name.addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
@@ -83,12 +83,12 @@ public class TaskAdapter {
 					//TODO: detect if the change was actually initiated by us
 					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private String newValue;
-						
+
 						public TransactedChange setNewValue(String newValue) {
 							this.newValue = newValue;
 							return this;
 						}
-						
+
 						@Override
 						public void performChange(EntityManager entityManager) {
 							setTask(getTaskManager().getPersistenceHelper().getTaskFromDatabase(getTask().getId(), entityManager));
@@ -99,7 +99,7 @@ public class TaskAdapter {
 				}
 			}
 		});
-		
+
 		this.completed.addListener(new ChangeListener<Boolean>() {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
@@ -107,12 +107,12 @@ public class TaskAdapter {
 					//TODO: detect if the change was actually initiated by us
 					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private boolean newValue;
-						
+
 						public TransactedChange setNewValue(boolean newValue) {
 							this.newValue = newValue;
 							return this;
 						}
-						
+
 						@Override
 						public void performChange(EntityManager entityManager) {
 							setTask(getTaskManager().getPersistenceHelper().getTaskFromDatabase(getTask().getId(), entityManager));
@@ -124,39 +124,39 @@ public class TaskAdapter {
 			}
 		});
 	}
-	
+
 	public StringProperty descriptionProperty() {
 		return description;
 	}
-	
+
 	public StringProperty nameProperty() {
 		return name;
 	}
-	
+
 	public StringProperty totalTimeProperty() {
 		return totalTime;
 	}
-	
+
 	public ObjectProperty<Date> firstTimeProperty() {
 		return firstTime;
 	}
-	
+
 	public ObjectProperty<Date> lastTimeProperty() {
 		return lastTime;
 	}
-	
+
 	public BooleanProperty completedProperty() {
 		return completed;
 	}
-	
+
 	public ObservableList<TimeSegmentAdapter> timeSegmentsProperty() {
 		return timeSegments;
 	}
-	
+
 	private TaskManager getTaskManager() {
 		return taskManager;
 	}
-	
+
 	public void updateFromDatabase() {
 		getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 			@Override
@@ -166,7 +166,7 @@ public class TaskAdapter {
 		});
 		updateFxProperties();
 	}
-	
+
 	private void updateFxProperties() {
 		description.setValue(task.getDescription());
 		name.setValue(task.getName());
@@ -181,27 +181,27 @@ public class TaskAdapter {
 				timeSegments.add(new TimeSegmentAdapter(segment, this, taskManager));
 		updateTimeProperty();
 	}
-	
+
 	protected void updateTimeProperty() {
 		firstTime.setValue(getEarliestTime());
 		lastTime.setValue(getLatestTime());
 		totalTime.setValue(task.getTotalTime().toString(PeriodFormat.wordBased()));
 	}
-	
+
 	private TimeSegmentAdapter findTimeSegment(TimeSegment findSegment) {
 		for (TimeSegmentAdapter segment : timeSegments)
 			if (segment.getTimeSegment().equals(findSegment))
 				return segment;
 		return null;
 	}
-	
+
 	public boolean isTiming() {
 		for (TimeSegmentAdapter segment : timeSegments)
 			if (segment.isTimingProperty().get())
 				return true;
 		return false;
 	}
-	
+
 	public Date getLatestTime() {
 		Date lastDate = null;
 		for (TimeSegment segment : task.getTimeSegments())
@@ -209,7 +209,7 @@ public class TaskAdapter {
 				lastDate = segment.getEndTime();
 		return lastDate;
 	}
-	
+
 	public Date getEarliestTime() {
 		Date firstDate = null;
 		for (TimeSegment segment : task.getTimeSegments())
@@ -218,13 +218,22 @@ public class TaskAdapter {
 		return firstDate;
 	}
 
+	public TimeSegmentAdapter createTimeSegment() {
+		TimeSegment newSegment = taskManager.getPersistenceHelper().createTimeSegment(task);
+		TimeSegmentAdapter newSegmentAdapter = new TimeSegmentAdapter(newSegment, this, taskManager);
+		if (!timeSegments.contains(newSegmentAdapter))
+			timeSegments.add(newSegmentAdapter);
+		updateTimeProperty();
+		return newSegmentAdapter;
+	}
+
 	/*
 	 * Getters/Setters
 	 */
 	public Task getTask() {
 		return task;
 	}
-	
+
 	private void setTask(Task task) {
 		this.task = task;
 	}

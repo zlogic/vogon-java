@@ -30,7 +30,6 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 import javafx.util.converter.DateTimeStringConverter;
 import javafx.util.converter.DefaultStringConverter;
-import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
 import org.zlogic.att.ui.adapters.CustomFieldValueAdapter;
 import org.zlogic.att.ui.adapters.TaskAdapter;
@@ -249,10 +248,12 @@ public class TaskEditorController implements Initializable {
 	 */
 	@FXML
 	private void handleStartStop() {
+		boolean startNewTaskInstead = !getEditedTask().timeSegmentsProperty().contains(currentSegment.get());
 		if (currentSegment.get() != null) {
 			currentSegment.get().stopTiming();
 			currentSegment.set(null);
-		} else {
+		}
+		if (startNewTaskInstead) {
 			TaskAdapter task = getEditedTask();
 			if (task != null) {
 				TimeSegmentAdapter newSegmentAdapter = createTimeSegment();
@@ -267,9 +268,7 @@ public class TaskEditorController implements Initializable {
 	private TimeSegmentAdapter createTimeSegment() {
 		TaskAdapter task = getEditedTask();
 		if (task != null) {
-			TimeSegment newSegment = taskManager.getPersistenceHelper().createTimeSegment(task.getTask());
-			TimeSegmentAdapter newSegmentAdapter = new TimeSegmentAdapter(newSegment, task, taskManager);
-			timeSegments.getItems().add(newSegmentAdapter);
+			TimeSegmentAdapter newSegmentAdapter = task.createTimeSegment();
 			updateSortOrder();
 			return newSegmentAdapter;
 		}
@@ -285,6 +284,7 @@ public class TaskEditorController implements Initializable {
 			}
 			taskManager.deleteSegment(segment);
 			timeSegments.getItems().remove(segment);
+			segment.ownerTaskProperty().get().updateFromDatabase();
 		}
 	}
 }

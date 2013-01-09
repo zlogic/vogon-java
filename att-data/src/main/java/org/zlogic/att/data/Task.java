@@ -96,7 +96,7 @@ public class Task implements Serializable {
 		Period totalTime = new Period();
 		for (TimeSegment segment : timeSegments)
 			totalTime = totalTime.plus(segment.getDuration());
-		return totalTime;
+		return totalTime.normalizedStandard();
 	}
 
 	/**

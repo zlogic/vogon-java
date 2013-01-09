@@ -24,7 +24,7 @@
       <fx:reference source="name" />
       <Label text="Total time" GridPane.columnIndex="0" GridPane.margin="$x1" GridPane.rowIndex="1">
         <labelFor>
-          <TextField fx:id="totalTime" disable="true" editable="false" focusTraversable="false" GridPane.columnIndex="1" GridPane.margin="$x1" GridPane.rowIndex="1" />
+          <TextField fx:id="totalTime" editable="false" focusTraversable="false" GridPane.columnIndex="1" GridPane.margin="$x1" GridPane.rowIndex="1" />
         </labelFor>
       </Label>
       <columnConstraints>
@@ -38,7 +38,7 @@
         <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="ALWAYS" />
       </rowConstraints>
       <fx:reference source="totalTime" />
-      <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.columnSpan="1" GridPane.rowIndex="0" GridPane.rowSpan="2147483647">
+      <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.columnSpan="1" GridPane.rowIndex="0" GridPane.rowSpan="2">
         <children>
           <Button fx:id="startStop" mnemonicParsing="false" onAction="#handleStartStop" prefHeight="115.0" prefWidth="101.0" text="Start/Stop" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
         </children>
@@ -46,7 +46,7 @@
           <Insets />
         </GridPane.margin>
       </AnchorPane>
-      <Accordion GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="2" GridPane.rowSpan="1">
+      <Accordion GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.rowIndex="2" GridPane.rowSpan="1">
         <expandedPane>
           <TitledPane fx:id="x2" text="Time slots">
             <content>

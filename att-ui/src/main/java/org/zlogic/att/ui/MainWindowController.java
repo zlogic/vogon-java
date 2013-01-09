@@ -266,6 +266,7 @@ public class MainWindowController implements Initializable {
 	private void createNewTask() {
 		TaskAdapter newTask = new TaskAdapter(taskManager.getPersistenceHelper().createTask(), taskManager);
 		taskList.getItems().add(newTask);
+		taskList.getSelectionModel().clearSelection();
 		taskList.getSelectionModel().select(newTask);
 		updateSortOrder();
 	}
