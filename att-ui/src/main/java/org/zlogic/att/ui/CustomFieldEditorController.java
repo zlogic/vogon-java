@@ -35,11 +35,11 @@ public class CustomFieldEditorController implements Initializable {
 	private TableColumn<CustomFieldAdapter, String> columnCustomField;
 	@FXML
 	private TableView<CustomFieldAdapter> customFields;
-	
+
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
 		customFields.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-		
+
 		deleteButton.disableProperty().bind(customFields.getSelectionModel().selectedItemProperty().isNull());
 
 		//Cell editors
@@ -52,18 +52,18 @@ public class CustomFieldEditorController implements Initializable {
 			}
 		});
 	}
-	
+
 	public void setTaskManager(TaskManager taskManager) {
 		this.taskManager = taskManager;
 		reloadCustomFields();
 	}
-	
+
 	protected void reloadCustomFields() {
 		customFields.getItems().clear();
 		for (CustomField customField : taskManager.getPersistenceHelper().getCustomFields())
-			customFields.getItems().add(new CustomFieldAdapter(customField));
+			customFields.getItems().add(new CustomFieldAdapter(customField, taskManager));
 	}
-	
+
 	public ObservableList<CustomFieldAdapter> getCustomFields() {
 		return customFields.getItems();
 	}
@@ -78,11 +78,11 @@ public class CustomFieldEditorController implements Initializable {
 
 	@FXML
 	private void addCustomField() {
-		CustomFieldAdapter newCustomField = new CustomFieldAdapter(taskManager.getPersistenceHelper().createCustomField());
+		CustomFieldAdapter newCustomField = new CustomFieldAdapter(taskManager.getPersistenceHelper().createCustomField(), taskManager);
 		customFields.getItems().add(newCustomField);
 		customFields.getSelectionModel().select(newCustomField);
 	}
-	
+
 	@FXML
 	private void deleteCustomField() {
 		for (CustomFieldAdapter customField : customFields.getSelectionModel().getSelectedItems())

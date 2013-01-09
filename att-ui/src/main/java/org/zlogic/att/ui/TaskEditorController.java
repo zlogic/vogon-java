@@ -54,7 +54,11 @@ public class TaskEditorController implements Initializable {
 	@FXML
 	private TextField name;
 	@FXML
+	private TextField totalTime;
+	@FXML
 	private Button startStop;
+	@FXML
+	private Button delete;
 	@FXML
 	private TableColumn<TimeSegmentAdapter, Date> columnStart;
 	@FXML
@@ -124,6 +128,9 @@ public class TaskEditorController implements Initializable {
 					newValue.isTimingProperty().addListener(startStopListener);
 			}
 		});
+
+		delete.disableProperty().bind(timeSegments.getSelectionModel().selectedItemProperty().isNull());
+
 		//Set column sizes
 		//TODO: make sure this keeps working correctly
 		customProperties.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -178,7 +185,7 @@ public class TaskEditorController implements Initializable {
 	private void updateCustomFields() {
 		customProperties.getItems().clear();
 		for (CustomFieldAdapter customFieldAdapter : customFields) {
-			customProperties.getItems().add(new CustomFieldValueAdapter(customFieldAdapter));
+			customProperties.getItems().add(new CustomFieldValueAdapter(customFieldAdapter, taskManager));
 		}
 		TaskAdapter task = getEditedTask();
 		if (task != null)
@@ -190,12 +197,14 @@ public class TaskEditorController implements Initializable {
 		for (TaskAdapter adapter : boundTasks) {
 			name.textProperty().unbindBidirectional(adapter.nameProperty());
 			description.textProperty().unbindBidirectional(adapter.descriptionProperty());
+			totalTime.textProperty().unbind();
 		}
 		boundTasks.clear();
 		TaskAdapter editedTask = getEditedTask();
 		if (editedTask != null) {
 			name.textProperty().bindBidirectional(editedTask.nameProperty());
 			description.textProperty().bindBidirectional(editedTask.descriptionProperty());
+			totalTime.textProperty().bind(editedTask.totalTimeProperty());
 			boundTasks.add(editedTask);
 			for (CustomFieldValueAdapter customFieldValueAdapter : customProperties.getItems())
 				customFieldValueAdapter.setTask(editedTask);
@@ -247,7 +256,6 @@ public class TaskEditorController implements Initializable {
 			TaskAdapter task = getEditedTask();
 			if (task != null) {
 				TimeSegmentAdapter newSegmentAdapter = createTimeSegment();
-
 				currentSegment.setValue(newSegmentAdapter);
 				currentSegment.get().startTiming();
 			}
@@ -260,7 +268,7 @@ public class TaskEditorController implements Initializable {
 		TaskAdapter task = getEditedTask();
 		if (task != null) {
 			TimeSegment newSegment = taskManager.getPersistenceHelper().createTimeSegment(task.getTask());
-			TimeSegmentAdapter newSegmentAdapter = new TimeSegmentAdapter(newSegment, taskManager);
+			TimeSegmentAdapter newSegmentAdapter = new TimeSegmentAdapter(newSegment, task, taskManager);
 			timeSegments.getItems().add(newSegmentAdapter);
 			updateSortOrder();
 			return newSegmentAdapter;

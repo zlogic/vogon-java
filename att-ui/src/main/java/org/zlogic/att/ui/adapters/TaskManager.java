@@ -5,7 +5,6 @@
  */
 package org.zlogic.att.ui.adapters;
 
-import java.util.List;
 import javafx.collections.ObservableList;
 import javax.persistence.EntityManager;
 import org.zlogic.att.data.CustomField;

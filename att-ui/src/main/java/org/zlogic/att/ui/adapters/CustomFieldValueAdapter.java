@@ -11,7 +11,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javax.persistence.EntityManager;
 import org.zlogic.att.data.CustomField;
-import org.zlogic.att.data.PersistenceHelper;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TransactedChange;
 
@@ -23,13 +22,14 @@ import org.zlogic.att.data.TransactedChange;
  */
 public class CustomFieldValueAdapter {
 
-	protected static PersistenceHelper persistenceHelper = new PersistenceHelper();
+	private TaskManager taskManager;
 	private StringProperty value = new SimpleStringProperty();
 	private CustomFieldAdapter customFieldAdapter;
 	private TaskAdapter taskAdapter;
 
-	public CustomFieldValueAdapter(CustomFieldAdapter customFieldAdapter) {
+	public CustomFieldValueAdapter(CustomFieldAdapter customFieldAdapter, TaskManager taskManager) {
 		this.customFieldAdapter = customFieldAdapter;
+		this.taskManager = taskManager;
 
 		updateFxProperties();
 
@@ -39,7 +39,7 @@ public class CustomFieldValueAdapter {
 			public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
 				if (oldValue != null && newValue != null && !oldValue.equals(newValue)) {
 					//TODO: detect if the change was actually initiated by us
-					persistenceHelper.performTransactedChange(new TransactedChange() {
+					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private String newValue;
 						private CustomFieldAdapter customFieldAdapter;
 
@@ -60,6 +60,10 @@ public class CustomFieldValueAdapter {
 				}
 			}
 		});
+	}
+
+	private TaskManager getTaskManager() {
+		return taskManager;
 	}
 
 	private void updateFxProperties() {

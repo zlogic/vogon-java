@@ -45,7 +45,7 @@ public class Task implements Serializable {
 	/**
 	 * The list of this task's time segments
 	 */
-	@OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<TimeSegment> timeSegments;
 	/**
 	 * Values of custom fields
@@ -95,7 +95,7 @@ public class Task implements Serializable {
 	public Period getTotalTime() {
 		Period totalTime = new Period();
 		for (TimeSegment segment : timeSegments)
-			totalTime.plus(segment.getDuration());
+			totalTime = totalTime.plus(segment.getDuration());
 		return totalTime;
 	}
 

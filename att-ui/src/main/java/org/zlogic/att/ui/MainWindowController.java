@@ -84,13 +84,25 @@ public class MainWindowController implements Initializable {
 		activeTaskPane.managedProperty().bind(activeTaskPane.visibleProperty());
 		activeTaskPane.visibleProperty().bind(taskEditorController.timingSegmentProperty().isNotNull());
 		taskEditorController.timingSegmentProperty().addListener(new ChangeListener<TimeSegmentAdapter>() {
+			private ChangeListener<TaskAdapter> taskChangedListener = new ChangeListener<TaskAdapter>() {
+				@Override
+				public void changed(ObservableValue<? extends TaskAdapter> ov, TaskAdapter oldValue, TaskAdapter newValue) {
+					activeTaskLabel.textProperty().unbind();
+					activeTaskLabel.textProperty().bind(newValue.nameProperty());
+				}
+			};
+
 			@Override
 			public void changed(ObservableValue<? extends TimeSegmentAdapter> ov, TimeSegmentAdapter oldValue, TimeSegmentAdapter newValue) {
 				if (newValue != null && newValue.equals(oldValue))
 					return;
-				activeTaskLabel.textProperty().unbind();
-				if (newValue != null)
-					activeTaskLabel.textProperty().bind(newValue.descriptionProperty());//TODO: Display the task, not the segment
+				if (oldValue != null)
+					oldValue.ownerTaskProperty().removeListener(taskChangedListener);
+				if (newValue != null) {
+					activeTaskLabel.textProperty().unbind();
+					activeTaskLabel.textProperty().bind(newValue.ownerTaskProperty().get().nameProperty());
+					newValue.ownerTaskProperty().addListener(taskChangedListener);
+				}
 			}
 		});
 

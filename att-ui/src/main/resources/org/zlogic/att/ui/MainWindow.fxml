@@ -44,11 +44,7 @@
                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
                   </HBox.margin>
                 </Label>
-                <Label fx:id="activeTaskLabel" HBox.margin="$x1">
-                  <effect>
-                    <Reflection />
-                  </effect>
-                </Label>
+                <Label id="" fx:id="activeTaskLabel" style="-fx-font-style: italic;&#10;-fx-font-weight: bold;" HBox.margin="$x1" />
                 <Button mnemonicParsing="false" onAction="#stopTimingTask" text="Stop" HBox.margin="$x1" />
               </children>
             </HBox>

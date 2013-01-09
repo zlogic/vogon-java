@@ -81,6 +81,7 @@ public class PersistenceHelper {
 		parent = entityManager.find(Task.class, parent.getId());
 		TimeSegment segment = new TimeSegment(parent);
 		entityManager.persist(segment);
+		entityManager.merge(parent);
 		return segment;
 	}
 
@@ -92,7 +93,7 @@ public class PersistenceHelper {
 	public CustomField createCustomField() {
 		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-		CustomField customField = createCustomField();
+		CustomField customField = createCustomField(entityManager);
 		entityManager.getTransaction().commit();
 		entityManager.close();
 		return customField;
@@ -125,6 +126,20 @@ public class PersistenceHelper {
 	}
 
 	/**
+	 * Performs an EntityManager.merge operation in a new EntityManager
+	 * instance/transaction
+	 *
+	 * @param entity the entity to be merged
+	 */
+	public void mergeEntity(Object entity) {
+		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
+		entityManager.getTransaction().begin();
+		entityManager.merge(entity);
+		entityManager.getTransaction().commit();
+		entityManager.close();
+	}
+
+	/**
 	 * Returns all tasks from database
 	 *
 	 * @param entityManager the EntityManager where the new CustomField will be
@@ -138,6 +153,53 @@ public class PersistenceHelper {
 
 		entityManager.close();
 		return result;
+	}
+
+	/**
+	 * Fetches the latest version of the task in the database, along with
+	 * associated objects
+	 *
+	 * @param id the task's ID
+	 * @return the task or null if it's not found
+	 */
+	public Task getTaskFromDatabase(long id) {
+		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
+
+		Task task = getTaskFromDatabase(id, entityManager);
+
+		entityManager.close();
+		return task;
+	}
+
+	/**
+	 * Fetches the latest version of the task in the database, along with
+	 * associated objects inside an existing EntityManager/transaction
+	 *
+	 * @param id the task's ID
+	 * @param entityManager the EntityManager which will be used for lookup
+	 * @return the task or null if it's not found
+	 */
+	public Task getTaskFromDatabase(long id, EntityManager entityManager) {
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Task> tasksCriteriaQuery = criteriaBuilder.createQuery(Task.class);
+		Root<Task> taskRoot = tasksCriteriaQuery.from(Task.class);
+		tasksCriteriaQuery.where(criteriaBuilder.equal(taskRoot.get(Task_.id), id));
+
+		List<Task> result = entityManager.createQuery(tasksCriteriaQuery).getResultList();
+
+		//Post-fetch dependencies
+		if (!result.isEmpty()) {
+			CriteriaQuery<Task> timeSegmentFetchCriteriaQuery = criteriaBuilder.createQuery(Task.class);
+			Root<Task> taskFetch = timeSegmentFetchCriteriaQuery.from(Task.class);
+			timeSegmentFetchCriteriaQuery.where(taskRoot.in(result));
+			taskFetch.fetch(Task_.timeSegments, JoinType.LEFT);
+			taskFetch.fetch(Task_.customFields, JoinType.LEFT);
+			entityManager.createQuery(timeSegmentFetchCriteriaQuery).getResultList();
+		}
+		if (result.size() == 1)
+			return result.get(0);
+		else
+			return null;
 	}
 
 	/**
@@ -180,24 +242,6 @@ public class PersistenceHelper {
 		List<CustomField> result = entityManager.createQuery(fieldsCriteriaQuery).getResultList();
 		entityManager.close();
 		return result;
-	}
-
-	/**
-	 * Deletes a custom field from the database
-	 *
-	 * @param customField the custom field to be deleted
-	 */
-	public void deleteCustomField(CustomField customField) {
-		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
-		entityManager.getTransaction().begin();
-
-		customField = entityManager.find(CustomField.class, customField.getId());
-		if (customField != null)
-			entityManager.remove(customField);
-		//TODO: remove field from all tasks
-
-		entityManager.getTransaction().commit();
-		entityManager.close();
 	}
 
 	/**

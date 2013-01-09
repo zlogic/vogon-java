@@ -15,6 +15,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javax.persistence.EntityManager;
+import org.joda.time.format.PeriodFormat;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.TransactedChange;
@@ -29,13 +30,14 @@ public class TaskAdapter {
 	private StringProperty description = new SimpleStringProperty();
 	private StringProperty name = new SimpleStringProperty();
 	private BooleanProperty completed = new SimpleBooleanProperty();
+	private StringProperty totalTime = new SimpleStringProperty();
 	private Task task;
 	private TaskManager taskManager;
 	private ObservableList<TimeSegmentAdapter> timeSegments = FXCollections.observableList(new LinkedList<TimeSegmentAdapter>());
 
-	public TaskAdapter(Task task, TaskManager taskList) {
+	public TaskAdapter(Task task, TaskManager taskManager) {
 		this.task = task;
-		this.taskManager = taskList;
+		this.taskManager = taskManager;
 
 		updateFxProperties();
 
@@ -55,10 +57,10 @@ public class TaskAdapter {
 
 						@Override
 						public void performChange(EntityManager entityManager) {
-							entityManager.find(Task.class, getTask().getId()).setDescription(newValue);
+							setTask(getTaskManager().getPersistenceHelper().getTaskFromDatabase(getTask().getId(), entityManager));
+							getTask().setDescription(newValue);
 						}
 					}.setNewValue(newValue));
-					getTask().setDescription(newValue);
 					updateFxProperties();
 				}
 			}
@@ -67,7 +69,8 @@ public class TaskAdapter {
 		this.name.addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
-				if (!oldValue.equals(newValue))
+				if (!oldValue.equals(newValue)) {
+					//TODO: detect if the change was actually initiated by us
 					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private String newValue;
 
@@ -78,18 +81,20 @@ public class TaskAdapter {
 
 						@Override
 						public void performChange(EntityManager entityManager) {
-							entityManager.find(Task.class, getTask().getId()).setName(newValue);
+							setTask(getTaskManager().getPersistenceHelper().getTaskFromDatabase(getTask().getId(), entityManager));
+							getTask().setName(newValue);
 						}
 					}.setNewValue(newValue));
-				getTask().setName(newValue);
-				updateFxProperties();
+					updateFxProperties();
+				}
 			}
 		});
 
 		this.completed.addListener(new ChangeListener<Boolean>() {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
-				if (!oldValue.equals(newValue))
+				if (!oldValue.equals(newValue)) {
+					//TODO: detect if the change was actually initiated by us
 					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private boolean newValue;
 
@@ -100,11 +105,12 @@ public class TaskAdapter {
 
 						@Override
 						public void performChange(EntityManager entityManager) {
-							entityManager.find(Task.class, getTask().getId()).setCompleted(newValue);
+							setTask(getTaskManager().getPersistenceHelper().getTaskFromDatabase(getTask().getId(), entityManager));
+							getTask().setCompleted(newValue);
 						}
 					}.setNewValue(newValue));
-				getTask().setCompleted(newValue);
-				updateFxProperties();
+					updateFxProperties();
+				}
 			}
 		});
 	}
@@ -115,6 +121,10 @@ public class TaskAdapter {
 
 	public StringProperty nameProperty() {
 		return name;
+	}
+
+	public StringProperty totalTimeProperty() {
+		return totalTime;
 	}
 
 	public BooleanProperty completedProperty() {
@@ -129,6 +139,16 @@ public class TaskAdapter {
 		return taskManager;
 	}
 
+	public void updateFromDatabase() {
+		getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+			@Override
+			public void performChange(EntityManager entityManager) {
+				setTask(getTaskManager().getPersistenceHelper().getTaskFromDatabase(getTask().getId(), entityManager));
+			}
+		});
+		updateFxProperties();
+	}
+
 	private void updateFxProperties() {
 		description.setValue(task.getDescription());
 		name.setValue(task.getName());
@@ -136,7 +156,12 @@ public class TaskAdapter {
 		timeSegments.retainAll(task.getTimeSegments());
 		for (TimeSegment segment : task.getTimeSegments())
 			if (findTimeSegment(segment) == null)
-				timeSegments.add(new TimeSegmentAdapter(segment, taskManager));
+				timeSegments.add(new TimeSegmentAdapter(segment, this, taskManager));
+		updateTimeProperty();
+	}
+
+	protected void updateTimeProperty() {
+		totalTime.setValue(task.getTotalTime().toString(PeriodFormat.wordBased()));
 	}
 
 	private TimeSegmentAdapter findTimeSegment(TimeSegment findSegment) {
@@ -158,5 +183,9 @@ public class TaskAdapter {
 	 */
 	public Task getTask() {
 		return task;
+	}
+
+	private void setTask(Task task) {
+		this.task = task;
 	}
 }

@@ -7,6 +7,7 @@ package org.zlogic.att.data;
 
 import java.io.Serializable;
 import java.util.Date;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -50,7 +51,7 @@ public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 	/**
 	 * The Task owning this TimeSegment
 	 */
-	@ManyToOne
+	@ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
 	private Task owner;
 
 	/**
@@ -70,7 +71,19 @@ public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 	 */
 	public TimeSegment(Task owner) {
 		this();
-		setOwner(owner);
+		((TimeSegment) this).setOwner(owner);
+	}
+
+	/**
+	 * Constructs the time segment with a predefined owner Task. Uses the ID
+	 * from the supplied TimeSegment
+	 *
+	 * @param idOwner the TimeSegment which will be used for copying the ID
+	 * @param owner the owner of this TimeSegment
+	 */
+	protected TimeSegment(TimeSegment idOwner, Task owner) {
+		this(owner);
+		this.id = idOwner.getId();
 	}
 
 	/**
