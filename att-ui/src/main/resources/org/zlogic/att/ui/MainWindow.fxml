@@ -33,7 +33,7 @@
         </Menu>
       </menus>
     </MenuBar>
-    <SplitPane id="SplitPane" dividerPositions="0.526706231454006" orientation="VERTICAL" prefHeight="681.0" prefWidth="800.0" VBox.vgrow="ALWAYS">
+    <SplitPane id="SplitPane" dividerPositions="0.5" orientation="VERTICAL" prefHeight="681.0" prefWidth="800.0" VBox.vgrow="ALWAYS">
       <items>
         <VBox id="VBox" alignment="CENTER" spacing="5.0">
           <children>
@@ -48,9 +48,9 @@
                 <Button mnemonicParsing="false" onAction="#stopTimingTask" text="Stop" HBox.margin="$x1" />
               </children>
             </HBox>
-            <AnchorPane id="AnchorPane" minHeight="311.0" prefHeight="311.0" VBox.vgrow="ALWAYS">
+            <AnchorPane id="AnchorPane" VBox.vgrow="ALWAYS">
               <children>
-                <fx:include fx:id="taskEditor" source="TaskEditor.fxml" prefHeight="311.0" prefWidth="798.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                <fx:include fx:id="taskEditor" source="TaskEditor.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
               </children>
             </AnchorPane>
           </children>
@@ -67,7 +67,7 @@
                 </Button>
               </children>
             </HBox>
-            <TableView fx:id="taskList" editable="true" prefHeight="268.0" prefWidth="798.0" VBox.vgrow="ALWAYS">
+            <TableView fx:id="taskList" editable="true" VBox.vgrow="ALWAYS">
               <columns>
                 <TableColumn prefWidth="75.0" text="Task name" fx:id="columnTaskName">
                   <cellValueFactory>

@@ -156,7 +156,6 @@ public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 	 * @param owner the new owner task
 	 */
 	public void setOwner(Task owner) {
-		//TODO: test inside transactions
 		if (this.owner != null) {
 			this.owner.removeSegment(this);
 			this.owner = null;

@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 
-<AnchorPane prefHeight="200.0" prefWidth="531.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.TaskEditorController">
+<AnchorPane prefHeight="330.0000999999975" prefWidth="517.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.TaskEditorController">
   <children>
     <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <Label text="Name" GridPane.columnIndex="0" GridPane.columnSpan="1" GridPane.margin="$x1" GridPane.rowIndex="0" GridPane.rowSpan="1">

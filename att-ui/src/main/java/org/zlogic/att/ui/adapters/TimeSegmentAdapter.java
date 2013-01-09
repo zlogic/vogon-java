@@ -18,6 +18,7 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javax.persistence.EntityManager;
+import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.TransactedChange;
 
@@ -43,6 +44,10 @@ public class TimeSegmentAdapter {
 		this.ownerTask.setValue(ownerTask);
 
 		updateFxProperties();
+		setChangeListeners();
+	}
+
+	private void setChangeListeners() {
 		this.description.addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
@@ -118,6 +123,40 @@ public class TimeSegmentAdapter {
 				}
 			}
 		});
+
+		this.ownerTask.addListener(new ChangeListener<TaskAdapter>() {
+			private TimeSegmentAdapter adapter;
+
+			public ChangeListener<TaskAdapter> setAdapter(TimeSegmentAdapter adapter) {
+				this.adapter = adapter;
+				return this;
+			}
+
+			@Override
+			public void changed(ObservableValue<? extends TaskAdapter> ov, TaskAdapter oldValue, TaskAdapter newValue) {
+				if (!oldValue.equals(newValue) && getTaskManager() != null) {
+					//TODO: detect if the change was actually initiated by us
+					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+						private TaskAdapter newValue;
+
+						public TransactedChange setNewValue(TaskAdapter newValue) {
+							this.newValue = newValue;
+							return this;
+						}
+
+						@Override
+						public void performChange(EntityManager entityManager) {
+							setTimeSegment(entityManager.find(TimeSegment.class, getTimeSegment().getId()));
+							Task newTask = entityManager.find(Task.class, newValue.getTask().getId());
+							getTimeSegment().setOwner(newTask);
+						}
+					}.setNewValue(newValue));
+					oldValue.updateFromDatabase();
+					newValue.updateFromDatabase();
+					updateFxProperties();
+				}
+			}
+		}.setAdapter(this));
 	}
 
 	public ObjectProperty<Date> startProperty() {

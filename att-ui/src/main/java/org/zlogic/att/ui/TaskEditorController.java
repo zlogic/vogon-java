@@ -18,15 +18,21 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.util.Callback;
 import javafx.util.converter.DateTimeStringConverter;
 import javafx.util.converter.DefaultStringConverter;
@@ -128,6 +134,21 @@ public class TaskEditorController implements Initializable {
 			}
 		});
 
+		//Drag'n'drop support
+		timeSegments.setOnDragDetected(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				Dragboard dragBoard = timeSegments.startDragAndDrop(TransferMode.MOVE);
+				ClipboardContent content = new ClipboardContent();
+				TimeSegmentAdapter selectedItem = timeSegments.getSelectionModel().getSelectedItem();
+				if (selectedItem != null && selectedItem.descriptionProperty().get() != null)
+					content.putString(selectedItem.descriptionProperty().get());
+				dragBoard.setContent(content);
+
+				event.consume();
+			}
+		});
+		//Enable/disable Delete button
 		delete.disableProperty().bind(timeSegments.getSelectionModel().selectedItemProperty().isNull());
 
 		//Set column sizes
