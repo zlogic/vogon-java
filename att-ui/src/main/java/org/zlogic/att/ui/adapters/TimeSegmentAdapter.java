@@ -70,6 +70,7 @@ public class TimeSegmentAdapter {
 						}
 					}.setNewValue(newValue));
 					updateFxProperties();
+					getTaskManager().signalTaskUpdate();
 				}
 			}
 		});
@@ -95,6 +96,7 @@ public class TimeSegmentAdapter {
 					}.setNewValue(newValue));
 					ownerTaskProperty().get().updateFromDatabase();
 					updateFxProperties();
+					getTaskManager().signalTaskUpdate();
 				}
 			}
 		});
@@ -120,6 +122,7 @@ public class TimeSegmentAdapter {
 					}.setNewValue(newValue));
 					ownerTaskProperty().get().updateFromDatabase();
 					updateFxProperties();
+					getTaskManager().signalTaskUpdate();
 				}
 			}
 		});

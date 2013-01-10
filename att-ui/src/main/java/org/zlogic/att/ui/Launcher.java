@@ -5,6 +5,7 @@
  */
 package org.zlogic.att.ui;
 
+import com.sun.glass.ui.Launchable;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -113,7 +114,7 @@ public class Launcher extends Application {
 		String loggingFile = System.getProperty("java.util.logging.config.file");
 		if (loggingFile == null || loggingFile.isEmpty()) {
 			try {
-				java.net.URL url = ClassLoader.getSystemClassLoader().getResource("logging.properties");
+				java.net.URL url = Launchable.class.getResource("/logging.properties");
 				if (url != null)
 					java.util.logging.LogManager.getLogManager().readConfiguration(url.openStream());
 			} catch (IOException | SecurityException e) {

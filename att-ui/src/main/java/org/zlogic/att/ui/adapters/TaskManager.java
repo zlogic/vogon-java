@@ -5,6 +5,10 @@
  */
 package org.zlogic.att.ui.adapters;
 
+import java.util.Date;
+import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javax.persistence.EntityManager;
 import org.zlogic.att.data.CustomField;
@@ -23,6 +27,7 @@ public class TaskManager {
 
 	private ObservableList<TaskAdapter> tasks;
 	private PersistenceHelper persistenceHelper = new PersistenceHelper();
+	private ObjectProperty<Date> lastTaskUpdate = new SimpleObjectProperty<>();
 
 	public TaskManager(ObservableList<TaskAdapter> tasks) {
 		this.tasks = tasks;
@@ -30,6 +35,10 @@ public class TaskManager {
 
 	public ObservableList<TaskAdapter> getTaskList() {
 		return tasks;
+	}
+
+	public ObjectProperty<Date> taskUpdatedProperty() {
+		return lastTaskUpdate;
 	}
 
 	public PersistenceHelper getPersistenceHelper() {
@@ -47,6 +56,15 @@ public class TaskManager {
 			if (taskAdapter.getTask().equals(task))
 				return taskAdapter;
 		return null;
+	}
+
+	protected void signalTaskUpdate() {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				lastTaskUpdate.set(new Date());
+			}
+		});
 	}
 
 	/*

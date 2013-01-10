@@ -70,6 +70,7 @@ public class TaskAdapter {
 						}
 					}.setNewValue(newValue));
 					updateFxProperties();
+					getTaskManager().signalTaskUpdate();
 				}
 			}
 		});
@@ -96,6 +97,7 @@ public class TaskAdapter {
 						}
 					}.setNewValue(newValue));
 					updateFxProperties();
+					getTaskManager().signalTaskUpdate();
 				}
 			}
 		});
@@ -120,6 +122,7 @@ public class TaskAdapter {
 						}
 					}.setNewValue(newValue));
 					updateFxProperties();
+					getTaskManager().signalTaskUpdate();
 				}
 			}
 		});

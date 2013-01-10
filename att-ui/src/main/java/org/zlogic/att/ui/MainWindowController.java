@@ -52,7 +52,7 @@ import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class MainWindowController implements Initializable {
-	
+
 	private final static Logger log = Logger.getLogger(MainWindowController.class.getName());
 	private TaskManager taskManager;
 	private File lastDirectory;
@@ -85,7 +85,7 @@ public class MainWindowController implements Initializable {
 	private Button deleteTaskButton;
 	@FXML
 	private HBox activeTaskPane;
-	
+
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
 		//Default sort order
@@ -108,7 +108,15 @@ public class MainWindowController implements Initializable {
 		//Create the task manager
 		taskManager = new TaskManager(taskList.getItems());
 		reloadTasks();
-		
+
+		//Auto update sort order
+		taskManager.taskUpdatedProperty().addListener(new ChangeListener<Date>() {
+			@Override
+			public void changed(ObservableValue<? extends Date> ov, Date oldValue, Date newValue) {
+				updateSortOrder();
+			}
+		});
+
 		taskList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		//Bind the current task panel
 		activeTaskPane.managedProperty().bind(activeTaskPane.visibleProperty());
@@ -121,7 +129,7 @@ public class MainWindowController implements Initializable {
 					activeTaskLabel.textProperty().bind(newValue.nameProperty());
 				}
 			};
-			
+
 			@Override
 			public void changed(ObservableValue<? extends TimeSegmentAdapter> ov, TimeSegmentAdapter oldValue, TimeSegmentAdapter newValue) {
 				if (newValue != null && newValue.equals(oldValue))
@@ -135,7 +143,7 @@ public class MainWindowController implements Initializable {
 				}
 			}
 		});
-		
+
 		deleteTaskButton.disableProperty().bind(taskList.getSelectionModel().selectedItemProperty().isNull());
 		//Restore settings
 		lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null : new File(preferenceStorage.get("lastDirectory", null)); //NOI18N
@@ -146,12 +154,12 @@ public class MainWindowController implements Initializable {
 				TableRow<TaskAdapter> row = new TableRow<>();
 				row.itemProperty().addListener(new ChangeListener<TaskAdapter>() {
 					private TableRow<TaskAdapter> row;
-					
+
 					public ChangeListener<TaskAdapter> setRow(TableRow<TaskAdapter> row) {
 						this.row = row;
 						return this;
 					}
-					
+
 					@Override
 					public void changed(ObservableValue<? extends TaskAdapter> ov, TaskAdapter t, TaskAdapter t1) {
 						//TODO: Set the row background based on the timing property
@@ -163,12 +171,12 @@ public class MainWindowController implements Initializable {
 				//TODO: create a separate class
 				row.setOnDragEntered(new EventHandler<DragEvent>() {
 					private TableRow<TaskAdapter> row;
-					
+
 					public EventHandler<DragEvent> setRow(TableRow<TaskAdapter> row) {
 						this.row = row;
 						return this;
 					}
-					
+
 					@Override
 					public void handle(DragEvent event) {
 						if (event.getGestureSource() instanceof TableView && ((TableView) event.getGestureSource()).getSelectionModel().getSelectedItem() instanceof TimeSegmentAdapter)
@@ -178,12 +186,12 @@ public class MainWindowController implements Initializable {
 				}.setRow(row));
 				row.setOnDragExited(new EventHandler<DragEvent>() {
 					private TableRow<TaskAdapter> row;
-					
+
 					public EventHandler<DragEvent> setRow(TableRow<TaskAdapter> row) {
 						this.row = row;
 						return this;
 					}
-					
+
 					@Override
 					public void handle(DragEvent event) {
 						row.setStyle("");//TODO: solve conflicts with active task
@@ -200,12 +208,12 @@ public class MainWindowController implements Initializable {
 				});
 				row.setOnDragDropped(new EventHandler<DragEvent>() {
 					private TableRow<TaskAdapter> row;
-					
+
 					public EventHandler<DragEvent> setRow(TableRow<TaskAdapter> row) {
 						this.row = row;
 						return this;
 					}
-					
+
 					@Override
 					public void handle(DragEvent event) {
 						boolean success = false;
@@ -276,11 +284,11 @@ public class MainWindowController implements Initializable {
 		loadWindowCustomFieldEditor();
 		taskEditorController.setTaskManager(taskManager);
 	}
-	
+
 	public void setShutdownProcedure(Runnable shutdownProcedure) {
 		this.shutdownProcedure = shutdownProcedure;
 	}
-	
+
 	private void loadWindowCustomFieldEditor() {
 		//Load FXML
 		customFieldEditorStage = new Stage();
@@ -306,17 +314,17 @@ public class MainWindowController implements Initializable {
 		//Set the custom fields list reference
 		taskEditorController.setCustomFields(customFieldEditorController.getCustomFields());
 	}
-	
+
 	protected void reloadTasks() {
 		taskManager.reloadTasks();
 		taskEditorController.setEditedTaskList(taskList.getSelectionModel().getSelectedItems());
 		updateSortOrder();
 	}
-	
+
 	protected void reloadCustomFields() {
 		customFieldEditorController.reloadCustomFields();
 	}
-	
+
 	private void updateSortOrder() {
 		//TODO: Remove this after it's fixed in Java FX
 		//TODO: call this on task updates?
@@ -336,7 +344,7 @@ public class MainWindowController implements Initializable {
 		taskList.getSelectionModel().select(newTask);
 		updateSortOrder();
 	}
-	
+
 	@FXML
 	private void deleteSelectedTasks() {
 		for (TaskAdapter selectedTask : taskList.getSelectionModel().getSelectedItems()) {
@@ -344,18 +352,18 @@ public class MainWindowController implements Initializable {
 		}
 		updateSortOrder();
 	}
-	
+
 	@FXML
 	private void showCustomFieldEditor() {
 		customFieldEditorStage.showAndWait();
 	}
-	
+
 	@FXML
 	private void exit() {
 		if (shutdownProcedure != null)
 			shutdownProcedure.run();
 	}
-	
+
 	@FXML
 	private void importGrindstoneData() {
 		// Prepare file chooser dialog
@@ -388,7 +396,7 @@ public class MainWindowController implements Initializable {
 			reloadCustomFields();
 		}
 	}
-	
+
 	@FXML
 	public void stopTimingTask() {
 		TimeSegmentAdapter segment = taskEditorController.timingSegmentProperty().get();

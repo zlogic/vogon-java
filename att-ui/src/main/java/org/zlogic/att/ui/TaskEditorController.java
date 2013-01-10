@@ -24,7 +24,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -175,6 +174,7 @@ public class TaskEditorController implements Initializable {
 
 	public void setTaskManager(TaskManager taskManager) {
 		this.taskManager = taskManager;
+		updateCustomFields();
 	}
 
 	public void setCustomFields(ObservableList<CustomFieldAdapter> customFields) {
@@ -204,9 +204,8 @@ public class TaskEditorController implements Initializable {
 
 	private void updateCustomFields() {
 		customProperties.getItems().clear();
-		for (CustomFieldAdapter customFieldAdapter : customFields) {
+		for (CustomFieldAdapter customFieldAdapter : customFields)
 			customProperties.getItems().add(new CustomFieldValueAdapter(customFieldAdapter, taskManager));
-		}
 		TaskAdapter task = getEditedTask();
 		if (task != null)
 			for (CustomFieldValueAdapter customFieldValueAdapter : customProperties.getItems())
