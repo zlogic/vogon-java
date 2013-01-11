@@ -7,7 +7,6 @@ package org.zlogic.att.ui;
 
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -17,7 +16,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 import javafx.util.converter.DefaultStringConverter;
-import org.zlogic.att.data.CustomField;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
 import org.zlogic.att.ui.adapters.TaskManager;
 
@@ -55,17 +53,7 @@ public class CustomFieldEditorController implements Initializable {
 
 	public void setTaskManager(TaskManager taskManager) {
 		this.taskManager = taskManager;
-		reloadCustomFields();
-	}
-
-	protected void reloadCustomFields() {
-		customFields.getItems().clear();
-		for (CustomField customField : taskManager.getPersistenceHelper().getCustomFields())
-			customFields.getItems().add(new CustomFieldAdapter(customField, taskManager));
-	}
-
-	public ObservableList<CustomFieldAdapter> getCustomFields() {
-		return customFields.getItems();
+		customFields.setItems(taskManager.getCustomFields());
 	}
 
 	/*

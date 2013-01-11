@@ -311,18 +311,12 @@ public class MainWindowController implements Initializable {
 		//Set the task manager
 		customFieldEditorController = loader.getController();
 		customFieldEditorController.setTaskManager(taskManager);
-		//Set the custom fields list reference
-		taskEditorController.setCustomFields(customFieldEditorController.getCustomFields());
 	}
 
 	protected void reloadTasks() {
 		taskManager.reloadTasks();
 		taskEditorController.setEditedTaskList(taskList.getSelectionModel().getSelectedItems());
 		updateSortOrder();
-	}
-
-	protected void reloadCustomFields() {
-		customFieldEditorController.reloadCustomFields();
 	}
 
 	private void updateSortOrder() {
@@ -393,7 +387,6 @@ public class MainWindowController implements Initializable {
 			else
 				log.fine("Extension not recognized");
 			reloadTasks();
-			reloadCustomFields();
 		}
 	}
 

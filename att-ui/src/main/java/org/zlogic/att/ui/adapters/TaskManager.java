@@ -6,9 +6,14 @@
 package org.zlogic.att.ui.adapters;
 
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javax.persistence.EntityManager;
 import org.zlogic.att.data.CustomField;
@@ -28,9 +33,12 @@ public class TaskManager {
 	private ObservableList<TaskAdapter> tasks;
 	private PersistenceHelper persistenceHelper = new PersistenceHelper();
 	private ObjectProperty<Date> lastTaskUpdate = new SimpleObjectProperty<>();
+	private Map<CustomFieldAdapter, ObservableList<String>> customFieldValues = new TreeMap<>();
+	private ObservableList<CustomFieldAdapter> customFields = FXCollections.observableList(new LinkedList<CustomFieldAdapter>());
 
 	public TaskManager(ObservableList<TaskAdapter> tasks) {
-		this.tasks = tasks;
+		this.tasks = tasks;//TODO: load from database instead
+		((TaskManager) this).reloadCustomFields();
 	}
 
 	public ObservableList<TaskAdapter> getTaskList() {
@@ -41,6 +49,10 @@ public class TaskManager {
 		return lastTaskUpdate;
 	}
 
+	public ObservableList<CustomFieldAdapter> getCustomFields() {
+		return customFields;
+	}
+
 	public PersistenceHelper getPersistenceHelper() {
 		return persistenceHelper;
 	}
@@ -49,6 +61,36 @@ public class TaskManager {
 		tasks.clear();
 		for (Task task : persistenceHelper.getAllTasks())
 			tasks.add(new TaskAdapter(task, this));
+		reloadCustomFields();
+	}
+
+	public void reloadCustomFields() {
+		customFieldValues.clear();
+		customFields.clear();
+		for (CustomField customField : persistenceHelper.getCustomFields())
+			customFields.add(new CustomFieldAdapter(customField, this));
+		for (TaskAdapter task : tasks)
+			for (CustomFieldAdapter adapter : customFields)
+				addCustomFieldValue(adapter, task.getTask().getCustomField(adapter.getCustomField()));
+	}
+
+	protected void addCustomFieldValue(CustomFieldAdapter adapter, String value) {
+		if (value == null)
+			return;
+		if (!customFieldValues.containsKey(adapter))
+			customFieldValues.put(adapter, FXCollections.observableList(new LinkedList<String>()));
+		ObservableList<String> values = customFieldValues.get(adapter);
+		if (!values.contains(value)) {
+			values.add(value);
+			FXCollections.sort(values);
+		}
+	}
+
+	protected boolean removeCustomFieldValue(CustomFieldAdapter adapter, String value) {
+		if (!customFieldValues.containsKey(adapter))
+			customFieldValues.put(adapter, FXCollections.observableList(new LinkedList<String>()));
+		List<String> values = customFieldValues.get(adapter);
+		return values.remove(value);
 	}
 
 	public TaskAdapter findTaskAdapter(Task task) {
@@ -56,6 +98,10 @@ public class TaskManager {
 			if (taskAdapter.getTask().equals(task))
 				return taskAdapter;
 		return null;
+	}
+
+	public ObservableList<String> getCustomFieldValues(CustomFieldAdapter adapter) {
+		return customFieldValues.get(adapter);
 	}
 
 	protected void signalTaskUpdate() {

@@ -38,8 +38,7 @@ public class CustomFieldValueAdapter {
 			@Override
 			public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
 				oldValue = oldValue == null ? "" : oldValue;
-				newValue = newValue == null ? "" : newValue;
-				if (!oldValue.equals(newValue) && getTaskManager() != null) {
+				if (newValue != null && !oldValue.equals(newValue) && getTaskManager() != null) {
 					//TODO: detect if the change was actually initiated by us
 					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 						private String newValue;
@@ -55,10 +54,13 @@ public class CustomFieldValueAdapter {
 						public void performChange(EntityManager entityManager) {
 							CustomField foundCustomField = entityManager.find(CustomField.class, customFieldAdapter.getCustomField().getId());
 							(entityManager.find(Task.class, getTask().getTask().getId())).setCustomField(foundCustomField, newValue);
-							getTask().getTask().setCustomField(customFieldAdapter.getCustomField(), newValue);
+							getTask().getTask().setCustomField(foundCustomField, newValue);
 						}
 					}.setNewValue(getCustomField(), newValue));
+					getTask().updateFromDatabase();
 					updateFxProperties();
+					getTaskManager().removeCustomFieldValue(getCustomField(), oldValue);
+					getTaskManager().addCustomFieldValue(getCustomField(), newValue);
 				}
 			}
 		});

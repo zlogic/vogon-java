@@ -24,9 +24,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellEditEvent;
+import javafx.scene.control.TablePosition;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
@@ -51,7 +55,6 @@ public class TaskEditorController implements Initializable {
 	private final static Logger log = Logger.getLogger(MainWindowController.class.getName());
 	private ObservableList<TaskAdapter> editedTaskList;
 	private List<TaskAdapter> boundTasks = new LinkedList<>();
-	private ObservableList<CustomFieldAdapter> customFields;
 	private TaskManager taskManager;
 	@FXML
 	private TextArea description;
@@ -84,8 +87,23 @@ public class TaskEditorController implements Initializable {
 		columnFieldValue.setCellFactory(new Callback<TableColumn<CustomFieldValueAdapter, String>, TableCell<CustomFieldValueAdapter, String>>() {
 			@Override
 			public TableCell<CustomFieldValueAdapter, String> call(TableColumn<CustomFieldValueAdapter, String> p) {
-				TextFieldTableCell<CustomFieldValueAdapter, String> cell = new TextFieldTableCell<>();
+				ComboBoxTableCell<CustomFieldValueAdapter, String> cell = new ComboBoxTableCell<>();
 				cell.setConverter(new DefaultStringConverter());
+				cell.setComboBoxEditable(true);
+				cell.tableRowProperty().addListener(new ChangeListener<TableRow>() {
+					private ComboBoxTableCell<CustomFieldValueAdapter, String> cell;
+
+					public ChangeListener<TableRow> setCell(ComboBoxTableCell<CustomFieldValueAdapter, String> cell) {
+						this.cell = cell;
+						return this;
+					}
+
+					@Override
+					public void changed(ObservableValue<? extends TableRow> ov, TableRow oldValue, TableRow newValue) {
+						if (newValue != null && newValue.getItem() instanceof CustomFieldValueAdapter)
+							cell.getItems().setAll(taskManager.getCustomFieldValues(((CustomFieldValueAdapter) newValue.getItem()).getCustomField()));
+					}
+				}.setCell(cell));
 				return cell;
 			}
 		});
@@ -174,15 +192,11 @@ public class TaskEditorController implements Initializable {
 
 	public void setTaskManager(TaskManager taskManager) {
 		this.taskManager = taskManager;
-		updateCustomFields();
-	}
 
-	public void setCustomFields(ObservableList<CustomFieldAdapter> customFields) {
-		this.customFields = customFields;
 		updateCustomFields();
-		customFields.addListener(new ListChangeListener<CustomFieldAdapter>() {
+		taskManager.getCustomFields().addListener(new ListChangeListener<CustomFieldAdapter>() {
 			@Override
-			public void onChanged(Change<? extends CustomFieldAdapter> change) {
+			public void onChanged(ListChangeListener.Change<? extends CustomFieldAdapter> change) {
 				updateCustomFields();
 			}
 		});//TODO: remove listener if setCustomFields is called once more
@@ -204,7 +218,7 @@ public class TaskEditorController implements Initializable {
 
 	private void updateCustomFields() {
 		customProperties.getItems().clear();
-		for (CustomFieldAdapter customFieldAdapter : customFields)
+		for (CustomFieldAdapter customFieldAdapter : taskManager.getCustomFields())
 			customProperties.getItems().add(new CustomFieldValueAdapter(customFieldAdapter, taskManager));
 		TaskAdapter task = getEditedTask();
 		if (task != null)

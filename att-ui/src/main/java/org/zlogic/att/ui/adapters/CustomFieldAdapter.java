@@ -19,7 +19,7 @@ import org.zlogic.att.data.TransactedChange;
  *
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
-public class CustomFieldAdapter {
+public class CustomFieldAdapter implements Comparable<CustomFieldAdapter> {
 
 	private TaskManager taskManager;
 	private StringProperty name = new SimpleStringProperty();
@@ -77,5 +77,10 @@ public class CustomFieldAdapter {
 
 	private void setCustomField(CustomField task) {
 		this.customField = task;
+	}
+
+	@Override
+	public int compareTo(CustomFieldAdapter o) {
+		return customField.compareTo(o.customField);
 	}
 }
