@@ -217,7 +217,8 @@ public class TimeSegmentAdapter {
 	}
 
 	private void updateFxProperties() {
-		description.setValue(segment.getDescription());
+		if (description.get() == null || !description.get().equals(segment.getDescription()))
+			description.setValue(segment.getDescription());
 		if (start.get() == null || !start.get().equals(segment.getStartTime()))
 			start.setValue(segment.getStartTime());
 		if (end.get() == null || !end.get().equals(segment.getEndTime()))

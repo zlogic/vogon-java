@@ -24,8 +24,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableColumn.CellEditEvent;
-import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
@@ -56,6 +54,7 @@ public class TaskEditorController implements Initializable {
 	private ObservableList<TaskAdapter> editedTaskList;
 	private List<TaskAdapter> boundTasks = new LinkedList<>();
 	private TaskManager taskManager;
+	private boolean ignoreEditedTaskUpdates = false;
 	@FXML
 	private TextArea description;
 	@FXML
@@ -207,13 +206,22 @@ public class TaskEditorController implements Initializable {
 		editedTaskList.addListener(new ListChangeListener<TaskAdapter>() {
 			@Override
 			public void onChanged(Change<? extends TaskAdapter> change) {
-				updateEditingTasks();
+				if (!isIgnoreEditedTaskUpdates())
+					updateEditingTasks();
 			}
 		});
 	}
 
 	public ObjectProperty<TimeSegmentAdapter> timingSegmentProperty() {
 		return currentSegment;
+	}
+
+	public boolean isIgnoreEditedTaskUpdates() {
+		return ignoreEditedTaskUpdates;
+	}
+
+	public void setIgnoreEditedTaskUpdates(boolean ignoreEditedTaskUpdates) {
+		this.ignoreEditedTaskUpdates = ignoreEditedTaskUpdates;
 	}
 
 	private void updateCustomFields() {
@@ -227,6 +235,8 @@ public class TaskEditorController implements Initializable {
 	}
 
 	private void updateEditingTasks() {
+		if (boundTasks.containsAll(editedTaskList) && editedTaskList.containsAll(boundTasks))
+			return;
 		for (TaskAdapter adapter : boundTasks) {
 			name.textProperty().unbindBidirectional(adapter.nameProperty());
 			description.textProperty().unbindBidirectional(adapter.descriptionProperty());

@@ -323,8 +323,10 @@ public class MainWindowController implements Initializable {
 		//TODO: Remove this after it's fixed in Java FX
 		//TODO: call this on task updates?
 		TableColumn<TaskAdapter, ?>[] sortOrder = taskList.getSortOrder().toArray(new TableColumn[0]);
+		taskEditorController.setIgnoreEditedTaskUpdates(true);
 		taskList.getSortOrder().clear();
 		taskList.getSortOrder().addAll(sortOrder);
+		taskEditorController.setIgnoreEditedTaskUpdates(false);
 	}
 
 	/*

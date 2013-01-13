@@ -82,8 +82,9 @@ public class CustomFieldValueAdapter {
 	}
 
 	public void setTask(TaskAdapter taskAdapter) {
+		if (this.taskAdapter == null)
+			this.value.setValue(null);
 		this.taskAdapter = taskAdapter;
-		this.value.setValue(null);
 		updateFxProperties();
 	}
 
