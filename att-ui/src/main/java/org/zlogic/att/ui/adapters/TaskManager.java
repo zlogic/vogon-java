@@ -58,7 +58,7 @@ public class TaskManager {
 	/**
 	 * The currently active (timing) segment
 	 */
-	private ObjectProperty<TimeSegmentAdapter> timingTimeSegment = new SimpleObjectProperty<>();
+	private ObjectProperty<TimeSegmentAdapter> timingSegment = new SimpleObjectProperty<>();
 
 	/**
 	 * Creates a TaskManager instance
@@ -142,17 +142,17 @@ public class TaskManager {
 	public void startTiming(TimeSegmentAdapter segment) {
 		//Stop existing task (if any)
 		stopTiming();
-		timingTimeSegment.setValue(segment);
-		timingTimeSegment.get().startTiming();
+		timingSegment.setValue(segment);
+		timingSegment.get().startTiming();
 	}
 
 	/**
 	 * Stops timing the active TimeSegment (if any)
 	 */
 	public void stopTiming() {
-		if (timingTimeSegment.get() != null) {
-			timingTimeSegment.get().stopTiming();
-			timingTimeSegment.setValue(null);
+		if (timingSegment.get() != null) {
+			timingSegment.get().stopTiming();
+			timingSegment.setValue(null);
 		}
 	}
 
@@ -351,7 +351,7 @@ public class TaskManager {
 	 * @return currently timing TimeSegment
 	 */
 	public ObjectProperty<TimeSegmentAdapter> timingSegmentProperty() {
-		return timingTimeSegment;
+		return timingSegment;
 	}
 
 	/**

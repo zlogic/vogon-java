@@ -62,7 +62,7 @@ public class TimeSegmentAdapter {
 	 */
 	private Timer timer;
 	/**
-	 * Property to indicate if the task is currently timing
+	 * Property to indicate if the segment is currently timing
 	 */
 	private BooleanProperty timingProperty = new SimpleBooleanProperty(false);
 	/*
@@ -174,6 +174,11 @@ public class TimeSegmentAdapter {
 						getTimeSegment().setOwner(newTask);
 					}
 				}.setNewValue(newValue));
+				if (isTimingProperty().get()) {
+					oldValue.isTimingProperty().unbind();
+					oldValue.isTimingProperty().set(false);
+					newValue.isTimingProperty().bind(isTimingProperty());
+				}
 				oldValue.updateFromDatabase();
 				newValue.updateFromDatabase();
 				updateFxProperties();
@@ -205,10 +210,8 @@ public class TimeSegmentAdapter {
 	 * Starts timing this segment
 	 */
 	public void startTiming() {
+		ownerTask.get().isTimingProperty().bind(timingProperty);
 		timingProperty.set(true);
-		Date currentDate = new Date();
-		endProperty().setValue(currentDate);
-		startProperty().setValue(currentDate);
 		if (timer != null)
 			timer.cancel();
 		//Start the timer
@@ -237,6 +240,7 @@ public class TimeSegmentAdapter {
 		endProperty().setValue(new Date());
 		timingProperty.set(false);
 		taskManager.timingSegmentProperty().set(null);
+		ownerTask.get().isTimingProperty().unbind();
 	}
 
 	/*
@@ -270,10 +274,10 @@ public class TimeSegmentAdapter {
 	}
 
 	/**
-	 * The task currently timing state property (true is is timing, false if
-	 * timer is not running)
+	 * The time segment currently timing state property (true if is timing,
+	 * false if timer is not running)
 	 *
-	 * @return the task timing state property
+	 * @return the time segment timing state property
 	 */
 	public BooleanProperty isTimingProperty() {
 		return timingProperty;

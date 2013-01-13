@@ -80,6 +80,40 @@ public class TaskEditorController implements Initializable {
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
 		updateStartStopText();
+		//Row properties
+		timeSegments.setRowFactory(new Callback<TableView<TimeSegmentAdapter>, TableRow<TimeSegmentAdapter>>() {
+			@Override
+			public TableRow<TimeSegmentAdapter> call(TableView<TimeSegmentAdapter> p) {
+				TableRow<TimeSegmentAdapter> row = new TableRow<>();
+				row.itemProperty().addListener(new ChangeListener<TimeSegmentAdapter>() {
+					private TableRow<TimeSegmentAdapter> row;
+					private ChangeListener timingChangeListener = new ChangeListener<Boolean>() {
+						@Override
+						public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
+							if (newValue != null)
+								row.setStyle(newValue ? "-fx-background-color: honeydew; " : "");
+						}
+					};
+
+					public ChangeListener<TimeSegmentAdapter> setRow(TableRow<TimeSegmentAdapter> row) {
+						this.row = row;
+						return this;
+					}
+
+					@Override
+					public void changed(ObservableValue<? extends TimeSegmentAdapter> ov, TimeSegmentAdapter oldValue, TimeSegmentAdapter newValue) {
+						if (oldValue != null)
+							oldValue.isTimingProperty().removeListener(timingChangeListener);
+						if (newValue != null) {
+							newValue.isTimingProperty().addListener(timingChangeListener);
+							timingChangeListener.changed(newValue.isTimingProperty(), oldValue != null ? oldValue.isTimingProperty().get() : false, newValue.isTimingProperty().get());
+						}
+					}
+				}.setRow(row));
+				return row;
+			}
+		});
+
 		//Cell editors
 		columnFieldValue.setCellFactory(new Callback<TableColumn<CustomFieldValueAdapter, String>, TableCell<CustomFieldValueAdapter, String>>() {
 			@Override

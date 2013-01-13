@@ -73,6 +73,10 @@ public class TaskAdapter {
 	 */
 	private ObjectProperty<Date> lastTime = new SimpleObjectProperty<>();
 	/**
+	 * Property to indicate if the task is currently timing
+	 */
+	private BooleanProperty timingProperty = new SimpleBooleanProperty(false);
+	/**
 	 * TaskManager reference
 	 */
 	private TaskManager taskManager;
@@ -265,9 +269,19 @@ public class TaskAdapter {
 		return lastTime;
 	}
 
+	/**
+	 * The task currently timing state property (true if is timing, false if
+	 * timer is not running)
+	 *
+	 * @return the task timing state property
+	 */
+	public BooleanProperty isTimingProperty() {
+		return timingProperty;
+	}
 	/*
 	 * Getters/setters
 	 */
+
 	/**
 	 * Returns the associated Task entity
 	 *
@@ -284,18 +298,6 @@ public class TaskAdapter {
 	 */
 	private void setTask(Task task) {
 		this.task = task;
-	}
-
-	/**
-	 * Returns true if one of this task's time segments is currently timing
-	 *
-	 * @return true if one of this task's time segments is currently timing
-	 */
-	public boolean isTiming() {
-		for (TimeSegmentAdapter segment : timeSegments)
-			if (segment.isTimingProperty().get())
-				return true;
-		return false;
 	}
 	//TODO: other Getters/setters
 

@@ -149,13 +149,20 @@ public class MainWindowController implements Initializable {
 		deleteTaskButton.disableProperty().bind(taskList.getSelectionModel().selectedItemProperty().isNull());
 		//Restore settings
 		lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null : new File(preferenceStorage.get("lastDirectory", null)); //NOI18N
-		//Cell editors
+		//Row properties
 		taskList.setRowFactory(new Callback<TableView<TaskAdapter>, TableRow<TaskAdapter>>() {
 			@Override
 			public TableRow<TaskAdapter> call(TableView<TaskAdapter> p) {
 				TableRow<TaskAdapter> row = new TableRow<>();
 				row.itemProperty().addListener(new ChangeListener<TaskAdapter>() {
 					private TableRow<TaskAdapter> row;
+					private ChangeListener timingChangeListener = new ChangeListener<Boolean>() {
+						@Override
+						public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
+							if (newValue != null)
+								row.setStyle(newValue ? "-fx-background-color: honeydew; " : "");
+						}
+					};
 
 					public ChangeListener<TaskAdapter> setRow(TableRow<TaskAdapter> row) {
 						this.row = row;
@@ -163,10 +170,13 @@ public class MainWindowController implements Initializable {
 					}
 
 					@Override
-					public void changed(ObservableValue<? extends TaskAdapter> ov, TaskAdapter t, TaskAdapter t1) {
-						//TODO: Set the row background based on the timing property
-						//if(t1!=null)
-						//row.styleProperty().set(t1.nameProperty().get().equals("Support Alcatel 5529OAD MVP reconnection") ?"-fx-background-color: cornsilk; ":"");
+					public void changed(ObservableValue<? extends TaskAdapter> ov, TaskAdapter oldValue, TaskAdapter newValue) {
+						if (oldValue != null)
+							oldValue.isTimingProperty().removeListener(timingChangeListener);
+						if (newValue != null) {
+							newValue.isTimingProperty().addListener(timingChangeListener);
+							timingChangeListener.changed(newValue.isTimingProperty(), oldValue != null ? oldValue.isTimingProperty().get() : false, newValue.isTimingProperty().get());
+						}
 					}
 				}.setRow(row));
 				//Drag'n'drop support
@@ -196,7 +206,7 @@ public class MainWindowController implements Initializable {
 
 					@Override
 					public void handle(DragEvent event) {
-						row.setStyle("");//TODO: solve conflicts with active task
+						row.setStyle(row.getItem().isTimingProperty().get() ? "-fx-background-color: honeydew; " : "");
 						event.consume();
 					}
 				}.setRow(row));
@@ -234,6 +244,7 @@ public class MainWindowController implements Initializable {
 			}
 		;
 		});
+		//Cell editors
 		columnTaskName.setCellFactory(new Callback<TableColumn<TaskAdapter, String>, TableCell<TaskAdapter, String>>() {
 			@Override
 			public TableCell<TaskAdapter, String> call(TableColumn<TaskAdapter, String> p) {
