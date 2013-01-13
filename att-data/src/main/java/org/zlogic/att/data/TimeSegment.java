@@ -65,28 +65,6 @@ public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 	}
 
 	/**
-	 * Constructs the time segment with a predefined owner Task
-	 *
-	 * @param owner the owner of this TimeSegment
-	 */
-	public TimeSegment(Task owner) {
-		this();
-		((TimeSegment) this).setOwner(owner);
-	}
-
-	/**
-	 * Constructs the time segment with a predefined owner Task. Uses the ID
-	 * from the supplied TimeSegment
-	 *
-	 * @param idOwner the TimeSegment which will be used for copying the ID
-	 * @param owner the owner of this TimeSegment
-	 */
-	protected TimeSegment(TimeSegment idOwner, Task owner) {
-		this(owner);
-		this.id = idOwner.getId();
-	}
-
-	/**
 	 * Returns the start time
 	 *
 	 * @return the start time
@@ -101,6 +79,8 @@ public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 	 * @param startTime the new start time
 	 */
 	public void setStartTime(Date startTime) {
+		if (endTime.before(startTime))
+			throw new java.lang.IllegalArgumentException("Start time cannot be later than end time");
 		this.startTime = startTime;
 	}
 
@@ -119,6 +99,8 @@ public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 	 * @param endTime the new end time
 	 */
 	public void setEndTime(Date endTime) {
+		if (endTime.before(startTime))
+			throw new java.lang.IllegalArgumentException("End time cannot be earlier than start time");
 		this.endTime = endTime;
 	}
 

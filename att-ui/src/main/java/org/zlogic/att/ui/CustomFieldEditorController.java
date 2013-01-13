@@ -66,8 +66,8 @@ public class CustomFieldEditorController implements Initializable {
 
 	@FXML
 	private void addCustomField() {
-		CustomFieldAdapter newCustomField = new CustomFieldAdapter(taskManager.getPersistenceHelper().createCustomField(), taskManager);
-		customFields.getItems().add(newCustomField);
+		CustomFieldAdapter newCustomField = taskManager.createCustomField();
+		customFields.getSelectionModel().clearSelection();
 		customFields.getSelectionModel().select(newCustomField);
 	}
 

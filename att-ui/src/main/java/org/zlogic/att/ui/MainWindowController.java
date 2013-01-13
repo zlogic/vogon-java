@@ -19,6 +19,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -107,7 +108,7 @@ public class MainWindowController implements Initializable {
 		columnLastTime.setComparator(TaskComparator);
 		//Create the task manager
 		taskManager = new TaskManager();
-		taskList.setItems(taskManager.getTaskList());
+		taskList.setItems(taskManager.tasksProperty());
 		reloadTasks();
 
 		//Auto update sort order
@@ -121,8 +122,8 @@ public class MainWindowController implements Initializable {
 		taskList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		//Bind the current task panel
 		activeTaskPane.managedProperty().bind(activeTaskPane.visibleProperty());
-		activeTaskPane.visibleProperty().bind(taskEditorController.timingSegmentProperty().isNotNull());
-		taskEditorController.timingSegmentProperty().addListener(new ChangeListener<TimeSegmentAdapter>() {
+		activeTaskPane.visibleProperty().bind(taskManager.timingSegmentProperty().isNotNull());
+		taskManager.timingSegmentProperty().addListener(new ChangeListener<TimeSegmentAdapter>() {
 			private ChangeListener<TaskAdapter> taskChangedListener = new ChangeListener<TaskAdapter>() {
 				@Override
 				public void changed(ObservableValue<? extends TaskAdapter> ov, TaskAdapter oldValue, TaskAdapter newValue) {
@@ -244,14 +245,8 @@ public class MainWindowController implements Initializable {
 		columnTaskCompleted.setCellFactory(new Callback<TableColumn<TaskAdapter, Boolean>, TableCell<TaskAdapter, Boolean>>() {
 			@Override
 			public TableCell<TaskAdapter, Boolean> call(TableColumn<TaskAdapter, Boolean> taskAdapterBooleanTableColumn) {
-				return new CheckBoxTableCell<>();
-			}
-		});
-		columnFirstTime.setCellFactory(new Callback<TableColumn<TaskAdapter, Date>, TableCell<TaskAdapter, Date>>() {
-			@Override
-			public TableCell<TaskAdapter, Date> call(TableColumn<TaskAdapter, Date> p) {
-				TextFieldTableCell<TaskAdapter, Date> cell = new TextFieldTableCell<>();
-				cell.setConverter(new DateTimeStringConverter());
+				CheckBoxTableCell<TaskAdapter, Boolean> cell = new CheckBoxTableCell<>();
+				cell.setAlignment(Pos.CENTER);
 				return cell;
 			}
 		});
@@ -260,6 +255,16 @@ public class MainWindowController implements Initializable {
 			public TableCell<TaskAdapter, String> call(TableColumn<TaskAdapter, String> p) {
 				TextFieldTableCell<TaskAdapter, String> cell = new TextFieldTableCell<>();
 				cell.setConverter(new DefaultStringConverter());
+				cell.setAlignment(Pos.CENTER_RIGHT);
+				return cell;
+			}
+		});
+		columnFirstTime.setCellFactory(new Callback<TableColumn<TaskAdapter, Date>, TableCell<TaskAdapter, Date>>() {
+			@Override
+			public TableCell<TaskAdapter, Date> call(TableColumn<TaskAdapter, Date> p) {
+				TextFieldTableCell<TaskAdapter, Date> cell = new TextFieldTableCell<>();
+				cell.setConverter(new DateTimeStringConverter());
+				cell.setAlignment(Pos.CENTER_RIGHT);
 				return cell;
 			}
 		});
@@ -268,6 +273,7 @@ public class MainWindowController implements Initializable {
 			public TableCell<TaskAdapter, Date> call(TableColumn<TaskAdapter, Date> p) {
 				TextFieldTableCell<TaskAdapter, Date> cell = new TextFieldTableCell<>();
 				cell.setConverter(new DateTimeStringConverter());
+				cell.setAlignment(Pos.CENTER_RIGHT);
 				return cell;
 			}
 		});
@@ -275,11 +281,11 @@ public class MainWindowController implements Initializable {
 		//Set column sizes
 		//TODO: make sure this keeps working correctly
 		//taskList.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-		columnTaskName.prefWidthProperty().bind(taskList.widthProperty().multiply(5).divide(10));
-		columnTotalTime.prefWidthProperty().bind(taskList.widthProperty().multiply(2).divide(10));
-		columnFirstTime.prefWidthProperty().bind(taskList.widthProperty().multiply(1).divide(10));
-		columnLastTime.prefWidthProperty().bind(taskList.widthProperty().multiply(1).divide(10));
-		columnTaskCompleted.prefWidthProperty().bind(taskList.widthProperty().multiply(1).divide(10).subtract(15));
+		columnTaskName.prefWidthProperty().bind(taskList.widthProperty().multiply(10).divide(20));
+		columnTotalTime.prefWidthProperty().bind(taskList.widthProperty().multiply(2).divide(20));
+		columnFirstTime.prefWidthProperty().bind(taskList.widthProperty().multiply(3).divide(20));
+		columnLastTime.prefWidthProperty().bind(taskList.widthProperty().multiply(3).divide(20));
+		columnTaskCompleted.prefWidthProperty().bind(taskList.widthProperty().multiply(2).divide(20).subtract(15));
 
 		//Load other windows
 		loadWindowCustomFieldEditor();
@@ -335,8 +341,7 @@ public class MainWindowController implements Initializable {
 	 */
 	@FXML
 	private void createNewTask() {
-		TaskAdapter newTask = new TaskAdapter(taskManager.getPersistenceHelper().createTask(), taskManager);
-		taskList.getItems().add(newTask);
+		TaskAdapter newTask = taskManager.createTask();
 		taskList.getSelectionModel().clearSelection();
 		taskList.getSelectionModel().select(newTask);
 		updateSortOrder();
@@ -395,7 +400,7 @@ public class MainWindowController implements Initializable {
 
 	@FXML
 	public void stopTimingTask() {
-		TimeSegmentAdapter segment = taskEditorController.timingSegmentProperty().get();
+		TimeSegmentAdapter segment = taskManager.timingSegmentProperty().get();
 		if (segment != null)
 			segment.stopTiming();
 	}

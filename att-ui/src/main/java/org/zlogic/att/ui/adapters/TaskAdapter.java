@@ -8,6 +8,8 @@ package org.zlogic.att.ui.adapters;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -19,7 +21,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javax.persistence.EntityManager;
-import org.joda.time.format.PeriodFormat;
+import org.joda.time.format.PeriodFormatterBuilder;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.TransactedChange;
@@ -31,6 +33,10 @@ import org.zlogic.att.data.TransactedChange;
  */
 public class TaskAdapter {
 
+	/**
+	 * The logger
+	 */
+	private final static Logger log = Logger.getLogger(TaskAdapter.class.getName());
 	/**
 	 * Assigned entity
 	 */
@@ -166,6 +172,10 @@ public class TaskAdapter {
 	public TaskAdapter(Task task, TaskManager taskManager) {
 		this.task = task;
 		this.taskManager = taskManager;
+
+		//Populate time segments
+		for (TimeSegment timeSegment : task.getTimeSegments())
+			taskManager.timeSegmentsProperty().add(new TimeSegmentAdapter(timeSegment, this, taskManager));
 
 		updateFxProperties();
 		//Change listeners
@@ -313,14 +323,7 @@ public class TaskAdapter {
 		description.setValue(task.getDescription());
 		name.setValue(task.getName());
 		completed.setValue(task.getCompleted());
-		List<TimeSegmentAdapter> orphanedSegments = new LinkedList<>();
-		for (TimeSegmentAdapter segment : timeSegments)
-			if (!task.getTimeSegments().contains(segment.getTimeSegment()))
-				orphanedSegments.add(segment);
-		timeSegments.removeAll(orphanedSegments);
-		for (TimeSegment segment : task.getTimeSegments())
-			if (findTimeSegment(segment) == null)
-				timeSegments.add(new TimeSegmentAdapter(segment, this, taskManager));
+		updateTimeSegments();
 		updateTimeProperty();
 		//Restore listeners
 		this.description.addListener(descriptionChangeListener);
@@ -329,25 +332,32 @@ public class TaskAdapter {
 	}
 
 	/**
+	 * Updated the timeSegments array from the entity
+	 */
+	protected void updateTimeSegments() {
+		List<TimeSegmentAdapter> orphanedSegments = new LinkedList<>();
+		for (TimeSegmentAdapter segment : timeSegments)
+			if (!task.getTimeSegments().contains(segment.getTimeSegment()))
+				orphanedSegments.add(segment);
+		timeSegments.removeAll(orphanedSegments);
+		for (TimeSegment segment : task.getTimeSegments()) {
+			TimeSegmentAdapter segmentAdapter = taskManager.findTimeSegmentAdapter(segment);
+			if (segmentAdapter == null) {
+				log.log(Level.SEVERE, "Cannot find time segment {0} ({1}) during updateTimeSegments", new Object[]{segment.getId(), segment.getDescription()});
+				continue;
+			}
+			if (!timeSegments.contains(segmentAdapter))
+				timeSegments.add(segmentAdapter);
+		}
+	}
+
+	/**
 	 * Updates time-associated (generated) properties
 	 */
 	protected void updateTimeProperty() {
 		firstTime.setValue(getEarliestTime());
 		lastTime.setValue(getLatestTime());
-		totalTime.setValue(task.getTotalTime().toString(PeriodFormat.wordBased()));
-	}
-
-	/**
-	 * Returns a TimeSegmentAdapter associated with a specific TimeSegment
-	 *
-	 * @param findSegment the TimeSegment to find
-	 * @return the associated TimeSegmentAdapter or null if not found
-	 */
-	private TimeSegmentAdapter findTimeSegment(TimeSegment findSegment) {
-		for (TimeSegmentAdapter segment : timeSegments)
-			if (segment.getTimeSegment().equals(findSegment))
-				return segment;
-		return null;
+		totalTime.setValue(task.getTotalTime().toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter()));
 	}
 
 	/**
@@ -387,11 +397,8 @@ public class TaskAdapter {
 	 * @return the new TimeSegment
 	 */
 	public TimeSegmentAdapter createTimeSegment() {
-		TimeSegment newSegment = taskManager.getPersistenceHelper().createTimeSegment(task);
-		TimeSegmentAdapter newSegmentAdapter = new TimeSegmentAdapter(newSegment, this, taskManager);
-		if (!timeSegments.contains(newSegmentAdapter))
-			timeSegments.add(newSegmentAdapter);
-		updateTimeProperty();
-		return newSegmentAdapter;
+		TimeSegmentAdapter newSegment = taskManager.createTimeSegment(this);
+		updateFromDatabase();
+		return newSegment;
 	}
 }

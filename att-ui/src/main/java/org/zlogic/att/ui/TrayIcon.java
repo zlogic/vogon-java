@@ -11,6 +11,7 @@ import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -20,12 +21,24 @@ import javafx.stage.Stage;
  *
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
-//TODO: Replace with native Java FX version from Java FX 3.0
+//FIXME: Replace with native Java FX version from Java FX 3.0
 public class TrayIcon {
 
+	/**
+	 * The logger
+	 */
 	private final static Logger log = Logger.getLogger(TrayIcon.class.getName());
+	/**
+	 * The Tray Icon
+	 */
 	private java.awt.TrayIcon trayIcon;
 
+	/**
+	 * Constructs the Tray Icon
+	 *
+	 * @param primaryStage the stage to be shown/hidden by double-clicking the
+	 * icon
+	 */
 	public TrayIcon(Stage primaryStage) {
 		if (SystemTray.isSupported()) {
 			SystemTray tray = SystemTray.getSystemTray();
@@ -74,13 +87,16 @@ public class TrayIcon {
 			try {
 				tray.add(trayIcon);
 			} catch (Exception e) {
-				log.severe("Cannot add icon to tray");
+				log.log(Level.SEVERE, "Cannot add icon to tray", e);
 			}
 		} else {
 			log.severe("System tray is unavailable");
 		}
 	}
 
+	/**
+	 * Removes icon from the tray, then proceeds with stopping Java FX
+	 */
 	public void exitApplication() {
 		if (trayIcon != null)
 			SystemTray.getSystemTray().remove(trayIcon);

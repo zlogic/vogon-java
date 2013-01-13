@@ -29,14 +29,19 @@ import org.zlogic.att.data.TransactedChange;
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class TaskManager {
+	/*
+	 * The persistence helper instance
+	 */
+
+	private PersistenceHelper persistenceHelper = new PersistenceHelper();
 	/**
 	 * List of all tasks
 	 */
 	private ObservableList<TaskAdapter> tasks = FXCollections.observableList(new LinkedList<TaskAdapter>());
-	/*
-	 * The persistence helper instance
+	/**
+	 * Map of all time segments, id=key
 	 */
-	private PersistenceHelper persistenceHelper = new PersistenceHelper();
+	private ObservableList<TimeSegmentAdapter> timeSegments = FXCollections.observableList(new LinkedList<TimeSegmentAdapter>());
 	/*
 	 * The last update date
 	 */
@@ -50,6 +55,10 @@ public class TaskManager {
 	 * List of all custom fields
 	 */
 	private ObservableList<CustomFieldAdapter> customFields = FXCollections.observableList(new LinkedList<CustomFieldAdapter>());
+	/**
+	 * The currently active (timing) segment
+	 */
+	private ObjectProperty<TimeSegmentAdapter> timingTimeSegment = new SimpleObjectProperty<>();
 
 	/**
 	 * Creates a TaskManager instance
@@ -60,7 +69,8 @@ public class TaskManager {
 
 	/**
 	 * Adds a new value to the list of possible CustomField values.
-	 * @param adapter the custom field 
+	 *
+	 * @param adapter the custom field
 	 * @param value the value to be added
 	 */
 	protected void addCustomFieldValue(CustomFieldAdapter adapter, String value) {
@@ -76,7 +86,9 @@ public class TaskManager {
 	}
 
 	/**
-	 * Removes a value from the list of possible CustomField values. Performs this only if the value is not used in any custom field.
+	 * Removes a value from the list of possible CustomField values. Performs
+	 * this only if the value is not used in any custom field.
+	 *
 	 * @param adapter the custom field
 	 * @param value the value of the Custom Field
 	 * @return true if the value was removed
@@ -85,10 +97,10 @@ public class TaskManager {
 		if (!customFieldValues.containsKey(adapter))
 			customFieldValues.put(adapter, FXCollections.observableList(new LinkedList<String>()));
 		//Check if value is no longer used
-		for(CustomFieldAdapter customField : customFields)
-			for(TaskAdapter  task : tasks){
+		for (CustomFieldAdapter customField : customFields)
+			for (TaskAdapter task : tasks) {
 				String taskCustomFieldValue = task.getTask().getCustomField(customField.getCustomField());
-				if(taskCustomFieldValue!=null && taskCustomFieldValue.equals(value))
+				if (taskCustomFieldValue != null && taskCustomFieldValue.equals(value))
 					return false;
 			}
 		//Remove the value
@@ -98,6 +110,7 @@ public class TaskManager {
 
 	/**
 	 * Finds the TaskAdapter associated with a Task entity
+	 *
 	 * @param task the Task entity to be searched
 	 * @return the associated TaskAdapter instance, or null
 	 */
@@ -107,16 +120,56 @@ public class TaskManager {
 				return taskAdapter;
 		return null;
 	}
+
 	/**
-	 * Returns a list of all possible CustomField values for a specific CustomField. Used for autocomplete.
+	 * Finds the TimeSegmentAdapter associated with a TimeSegment entity
+	 *
+	 * @param timeSegment the TimeSegment entity to be searched
+	 * @return the associated TimeSegmentAdapter instance, or null
+	 */
+	public TimeSegmentAdapter findTimeSegmentAdapter(TimeSegment timeSegment) {
+		for (TimeSegmentAdapter timeSegmentAdapter : timeSegments)
+			if (timeSegmentAdapter.getTimeSegment().equals(timeSegment))
+				return timeSegmentAdapter;
+		return null;
+	}
+
+	/**
+	 * Starts timing a TimeSegment, stopping any already timed tasks
+	 *
+	 * @param segment the segment to be timed
+	 */
+	public void startTiming(TimeSegmentAdapter segment) {
+		//Stop existing task (if any)
+		stopTiming();
+		timingTimeSegment.setValue(segment);
+		timingTimeSegment.get().startTiming();
+	}
+
+	/**
+	 * Stops timing the active TimeSegment (if any)
+	 */
+	public void stopTiming() {
+		if (timingTimeSegment.get() != null) {
+			timingTimeSegment.get().stopTiming();
+			timingTimeSegment.setValue(null);
+		}
+	}
+
+	/**
+	 * Returns a list of all possible CustomField values for a specific
+	 * CustomField. Used for autocomplete.
+	 *
 	 * @param adapter the CustomFieldAdapter for which values will be retrieved
 	 * @return the list of all possible CustomField values
 	 */
 	public ObservableList<String> getCustomFieldValues(CustomFieldAdapter adapter) {
 		return customFieldValues.get(adapter);
 	}
+
 	/**
-	 * Updates the lastTaskUpdate property, signaling that the task list has updated.
+	 * Updates the lastTaskUpdate property, signaling that the task list has
+	 * updated.
 	 */
 	protected void signalTaskUpdate() {
 		Platform.runLater(new Runnable() {
@@ -129,17 +182,22 @@ public class TaskManager {
 	/*
 	 * Database functions
 	 */
+
 	/**
 	 * Reloads the tasks from database. Forgets old TaskAdapters.
 	 */
 	public void reloadTasks() {
 		tasks.clear();
-		for (Task task : persistenceHelper.getAllTasks())
+		timeSegments.clear();
+		for (Task task : persistenceHelper.getAllTasks()) {
 			tasks.add(new TaskAdapter(task, this));
+		}
 		reloadCustomFields();
 	}
+
 	/**
-	 * Reloads the custom fields from database. Forgets old CustomFieldAdapters, replaces CustomFieldValueAdapters in tasks with the updated version.
+	 * Reloads the custom fields from database. Forgets old CustomFieldAdapters,
+	 * replaces CustomFieldValueAdapters in tasks with the updated version.
 	 */
 	public void reloadCustomFields() {
 		customFieldValues.clear();
@@ -150,15 +208,52 @@ public class TaskManager {
 			for (CustomFieldAdapter adapter : customFields)
 				addCustomFieldValue(adapter, task.getTask().getCustomField(adapter.getCustomField()));
 	}
-	//TODO: keep all entity-properties here and update from database if necessary
-	//TODO: handle creations here as well
+
+	/**
+	 * Creates and persists a new TimeSegment. It's recommended to use
+	 * TaskAdapter.createTimeSegment() instead.
+	 *
+	 * @param owner the owner TaskAdapter
+	 * @return the TimeSegmentAdapter associated with the new TimeSegment
+	 */
+	public TimeSegmentAdapter createTimeSegment(TaskAdapter owner) {
+		TimeSegmentAdapter newSegment = new TimeSegmentAdapter(persistenceHelper.createTimeSegment(owner.getTask()), owner, this);
+		if (!timeSegments.contains(newSegment))
+			timeSegments.add(newSegment);
+		return newSegment;
+	}
+
+	/**
+	 * Creates and persists a new Task
+	 *
+	 * @return the TaskAdapter associated with the new Task
+	 */
+	public TaskAdapter createTask() {
+		TaskAdapter newTask = new TaskAdapter(persistenceHelper.createTask(), this);
+		tasks.add(newTask);
+		return newTask;
+	}
+
+	/**
+	 * Creates and persists a new CustomField
+	 *
+	 * @return the CustomFieldAdapter associated with the new CustomField
+	 */
+	public CustomFieldAdapter createCustomField() {
+		CustomFieldAdapter customField = new CustomFieldAdapter(persistenceHelper.createCustomField(), this);
+		customFields.add(customField);
+		return customField;
+	}
+
 	/**
 	 * Deletes a time segment
+	 *
 	 * @param segment the segment to be deleted
 	 */
 	public void deleteSegment(TimeSegmentAdapter segment) {
+		if (segment.isTimingProperty().get())
+			segment.stopTiming();
 		TaskAdapter ownerTask = findTaskAdapter(segment.getTimeSegment().getOwner());
-		ownerTask.timeSegmentsProperty().remove(segment);
 		persistenceHelper.performTransactedChange(new TransactedChange() {
 			private TimeSegment deleteSegment;
 
@@ -175,11 +270,13 @@ public class TaskManager {
 				entityManager.remove(segment);
 			}
 		}.setDeleteSegment(segment.getTimeSegment()));
-		ownerTask.getTask().removeSegment(segment.getTimeSegment());
+		timeSegments.remove(segment);
+		ownerTask.updateFromDatabase();
 	}
 
 	/**
 	 * Deletes a task
+	 *
 	 * @param task the task to be deleted
 	 */
 	public void deleteTask(TaskAdapter task) {
@@ -194,58 +291,90 @@ public class TaskManager {
 			@Override
 			public void performChange(EntityManager entityManager) {
 				Task task = entityManager.find(Task.class, deleteTask.getId());
-				//TODO: check that time segments will be deleted
+				//TODO: check that time segments will be deleted from database
 				entityManager.remove(task);
 			}
 		}.setDeleteTask(task.getTask()));
+		for (TimeSegmentAdapter timeSegment : task.timeSegmentsProperty())
+			timeSegments.remove(timeSegment);
 		tasks.remove(task);
 	}
 
 	/**
 	 * Deletes a custom field. Removes values for this field stored in tasks.
+	 *
 	 * @param customField the custom field to be deleted
 	 */
 	public void deleteCustomField(CustomFieldAdapter customField) {
+		List<Task> affectedTasks = new LinkedList<>();
 		persistenceHelper.performTransactedChange(new TransactedChange() {
 			private CustomField deleteCustomField;
+			private List<Task> affectedTasks;
 
 			public TransactedChange setDeleteCustomField(CustomField deleteCustomField) {
 				this.deleteCustomField = deleteCustomField;
 				return this;
 			}
 
+			public TransactedChange setAffectedTasks(List<Task> affectedTasks) {
+				this.affectedTasks = affectedTasks;
+				return this;
+			}
+
 			@Override
 			public void performChange(EntityManager entityManager) {
 				CustomField customField = entityManager.find(CustomField.class, deleteCustomField.getId());
-				for (Task task : persistenceHelper.getAllTasks(entityManager))
+				for (Task task : persistenceHelper.getAllTasks(entityManager)) {
+					if (task.getCustomField(customField) != null && !affectedTasks.contains(task))
+						affectedTasks.add(task);
 					task.setCustomField(customField, null);
+				}
 				entityManager.remove(customField);
 			}
 		}.setDeleteCustomField(customField.getCustomField()));
-		//TODO: Remove from custom fields observableList in the future
+		customFields.remove(customField);
+		customFieldValues.remove(customField);
+		for (Task affectedTask : affectedTasks) {
+			TaskAdapter taskAdapter = findTaskAdapter(affectedTask);
+			if (taskAdapter != null)
+				taskAdapter.updateFromDatabase();
+		}
 	}
-	
+
 	/*
-	 * Getters/setters
+	 * Java FX properties
 	 */
 	/**
+	 * The currently timing TimeSegment property (value may be null if nothing's
+	 * being timed)
+	 *
+	 * @return currently timing TimeSegment
+	 */
+	public ObjectProperty<TimeSegmentAdapter> timingSegmentProperty() {
+		return timingTimeSegment;
+	}
+
+	/**
 	 * Returns the list of all tasks
+	 *
 	 * @return the list of all tasks
 	 */
-	public ObservableList<TaskAdapter> getTaskList() {
+	public ObservableList<TaskAdapter> tasksProperty() {
 		return tasks;
 	}
 
 	/**
-	 * Last task update date property
-	 * @return the last task update date property
+	 * Returns the list of all time segments
+	 *
+	 * @return the list of all time segments
 	 */
-	public ObjectProperty<Date> taskUpdatedProperty() {
-		return lastTaskUpdate;
+	public ObservableList<TimeSegmentAdapter> timeSegmentsProperty() {
+		return timeSegments;
 	}
 
 	/**
 	 * Custom fields list property
+	 *
 	 * @return the custom fields property
 	 */
 	public ObservableList<CustomFieldAdapter> getCustomFields() {
@@ -253,7 +382,20 @@ public class TaskManager {
 	}
 
 	/**
+	 * Last task update date property
+	 *
+	 * @return the last task update date property
+	 */
+	public ObjectProperty<Date> taskUpdatedProperty() {
+		return lastTaskUpdate;
+	}
+	/*
+	 * Getters/setters
+	 */
+
+	/**
 	 * Returns the PersistenceHelper instance
+	 *
 	 * @return the PersistenceHelper instance
 	 */
 	public PersistenceHelper getPersistenceHelper() {

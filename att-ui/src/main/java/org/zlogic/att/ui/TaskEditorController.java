@@ -12,8 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -21,6 +19,7 @@ import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -77,7 +76,6 @@ public class TaskEditorController implements Initializable {
 	private TableColumn<CustomFieldValueAdapter, String> columnFieldValue;
 	@FXML
 	private TableView<CustomFieldValueAdapter> customProperties;
-	private ObjectProperty<TimeSegmentAdapter> currentSegment = new SimpleObjectProperty<>();
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -103,6 +101,20 @@ public class TaskEditorController implements Initializable {
 							cell.getItems().setAll(taskManager.getCustomFieldValues(((CustomFieldValueAdapter) newValue.getItem()).getCustomField()));
 					}
 				}.setCell(cell));
+				cell.itemProperty().addListener(new ChangeListener<String>() {
+					private ComboBoxTableCell<CustomFieldValueAdapter, String> cell;
+
+					public ChangeListener<String> setCell(ComboBoxTableCell<CustomFieldValueAdapter, String> cell) {
+						this.cell = cell;
+						return this;
+					}
+
+					@Override
+					public void changed(ObservableValue<? extends String> ov, String oldValue, String newValue) {
+						if (newValue != null && cell.getTableRow().getItem() instanceof CustomFieldValueAdapter)
+							cell.getItems().setAll(taskManager.getCustomFieldValues(((CustomFieldValueAdapter) cell.getTableRow().getItem()).getCustomField()));
+					}
+				}.setCell(cell));
 				return cell;
 			}
 		});
@@ -119,6 +131,7 @@ public class TaskEditorController implements Initializable {
 			public TableCell<TimeSegmentAdapter, Date> call(TableColumn<TimeSegmentAdapter, Date> p) {
 				TextFieldTableCell<TimeSegmentAdapter, Date> cell = new TextFieldTableCell<>();
 				cell.setConverter(new DateTimeStringConverter());
+				cell.setAlignment(Pos.CENTER_RIGHT);
 				return cell;
 			}
 		});
@@ -127,26 +140,8 @@ public class TaskEditorController implements Initializable {
 			public TableCell<TimeSegmentAdapter, Date> call(TableColumn<TimeSegmentAdapter, Date> p) {
 				TextFieldTableCell<TimeSegmentAdapter, Date> cell = new TextFieldTableCell<>();
 				cell.setConverter(new DateTimeStringConverter());
+				cell.setAlignment(Pos.CENTER_RIGHT);
 				return cell;
-			}
-		});
-		//Update start/stop button text
-		currentSegment.addListener(new ChangeListener<TimeSegmentAdapter>() {
-			private ChangeListener<Boolean> startStopListener = new ChangeListener<Boolean>() {
-				@Override
-				public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
-					if (newValue != null && !newValue)
-						currentSegment.set(null);
-					updateStartStopText();
-				}
-			};
-
-			@Override
-			public void changed(ObservableValue<? extends TimeSegmentAdapter> ov, TimeSegmentAdapter oldValue, TimeSegmentAdapter newValue) {
-				if (oldValue != null)
-					oldValue.isTimingProperty().removeListener(startStopListener);
-				if (newValue != null)
-					newValue.isTimingProperty().addListener(startStopListener);
 			}
 		});
 
@@ -193,12 +188,30 @@ public class TaskEditorController implements Initializable {
 		this.taskManager = taskManager;
 
 		updateCustomFields();
+		//TODO: remove listeners if setCustomFields is called once more
 		taskManager.getCustomFields().addListener(new ListChangeListener<CustomFieldAdapter>() {
 			@Override
 			public void onChanged(ListChangeListener.Change<? extends CustomFieldAdapter> change) {
 				updateCustomFields();
 			}
-		});//TODO: remove listener if setCustomFields is called once more
+		});
+		//Update start/stop button text
+		taskManager.timingSegmentProperty().addListener(new ChangeListener<TimeSegmentAdapter>() {
+			private ChangeListener<Boolean> startStopListener = new ChangeListener<Boolean>() {
+				@Override
+				public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
+					updateStartStopText();
+				}
+			};
+
+			@Override
+			public void changed(ObservableValue<? extends TimeSegmentAdapter> ov, TimeSegmentAdapter oldValue, TimeSegmentAdapter newValue) {
+				if (oldValue != null)
+					oldValue.isTimingProperty().removeListener(startStopListener);
+				if (newValue != null)
+					newValue.isTimingProperty().addListener(startStopListener);
+			}
+		});
 	}
 
 	public void setEditedTaskList(ObservableList<TaskAdapter> editedTaskList) {
@@ -210,10 +223,6 @@ public class TaskEditorController implements Initializable {
 					updateEditingTasks();
 			}
 		});
-	}
-
-	public ObjectProperty<TimeSegmentAdapter> timingSegmentProperty() {
-		return currentSegment;
 	}
 
 	public boolean isIgnoreEditedTaskUpdates() {
@@ -269,7 +278,7 @@ public class TaskEditorController implements Initializable {
 	}
 
 	private void updateSortOrder() {
-		//TODO: Remove this after it's fixed in Java FX
+		//FIXME: Remove this after it's fixed in Java FX
 		TableColumn<TimeSegmentAdapter, ?>[] sortOrder = timeSegments.getSortOrder().toArray(new TableColumn[0]);
 		timeSegments.getSortOrder().clear();
 		timeSegments.getSortOrder().addAll(sortOrder);
@@ -277,9 +286,9 @@ public class TaskEditorController implements Initializable {
 
 	private boolean isTimingCurrentTask() {
 		TaskAdapter editedTask = getEditedTask();
-		if (editedTask == null || currentSegment == null)
+		if (editedTask == null || taskManager.timingSegmentProperty().get() == null)
 			return false;
-		return editedTask.timeSegmentsProperty().contains(currentSegment.get());
+		return editedTask.timeSegmentsProperty().contains(taskManager.timingSegmentProperty().get());
 	}
 
 	private void updateStartStopText() {
@@ -292,17 +301,13 @@ public class TaskEditorController implements Initializable {
 	 */
 	@FXML
 	private void handleStartStop() {
-		boolean startNewTaskInstead = !getEditedTask().timeSegmentsProperty().contains(currentSegment.get());
-		if (currentSegment.get() != null) {
-			currentSegment.get().stopTiming();
-			currentSegment.set(null);
-		}
+		boolean startNewTaskInstead = !getEditedTask().timeSegmentsProperty().contains(taskManager.timingSegmentProperty().get());
+		taskManager.stopTiming();
 		if (startNewTaskInstead) {
 			TaskAdapter task = getEditedTask();
 			if (task != null) {
 				TimeSegmentAdapter newSegmentAdapter = createTimeSegment();
-				currentSegment.setValue(newSegmentAdapter);
-				currentSegment.get().startTiming();
+				taskManager.startTiming(newSegmentAdapter);
 			}
 		}
 		updateStartStopText();
@@ -322,12 +327,7 @@ public class TaskEditorController implements Initializable {
 	@FXML
 	private void deleteTimeSegment() {
 		for (TimeSegmentAdapter segment : timeSegments.getSelectionModel().getSelectedItems()) {
-			if (segment.equals(currentSegment.get())) {
-				currentSegment.get().stopTiming();
-				currentSegment.set(null);
-			}
 			taskManager.deleteSegment(segment);
-			timeSegments.getItems().remove(segment);
 			segment.ownerTaskProperty().get().updateFromDatabase();
 		}
 	}

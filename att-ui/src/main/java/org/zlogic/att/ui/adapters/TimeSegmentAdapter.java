@@ -103,6 +103,7 @@ public class TimeSegmentAdapter {
 		@Override
 		public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
 			if (!oldValue.equals(newValue) && getTaskManager() != null) {
+				//TODO: catch exceptions & revert
 				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private Date newValue;
 
@@ -130,6 +131,7 @@ public class TimeSegmentAdapter {
 		@Override
 		public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
 			if (!oldValue.equals(newValue) && getTaskManager() != null) {
+				//TODO: catch exceptions & revert
 				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private Date newValue;
 
@@ -234,6 +236,7 @@ public class TimeSegmentAdapter {
 		timer = null;
 		endProperty().setValue(new Date());
 		timingProperty.set(false);
+		taskManager.timingSegmentProperty().set(null);
 	}
 
 	/*

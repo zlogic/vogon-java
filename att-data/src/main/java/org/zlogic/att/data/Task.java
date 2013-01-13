@@ -18,6 +18,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import org.joda.time.Period;
+import org.joda.time.PeriodType;
 
 /**
  * Entity class for a tracked task. Each task's time is tracked with
@@ -70,6 +71,17 @@ public class Task implements Serializable {
 	}
 
 	/**
+	 * Creates a new TimeSegment for this task
+	 *
+	 * @return the created TimeSegment
+	 */
+	public TimeSegment createSegment() {
+		TimeSegment segment = new TimeSegment();
+		segment.setOwner(this);
+		return segment;
+	}
+
+	/**
 	 * Adds a time segment to this task
 	 *
 	 * @param segment the new time segment
@@ -96,7 +108,7 @@ public class Task implements Serializable {
 		Period totalTime = new Period();
 		for (TimeSegment segment : timeSegments)
 			totalTime = totalTime.plus(segment.getDuration());
-		return totalTime.normalizedStandard();
+		return totalTime.normalizedStandard(PeriodType.time());
 	}
 
 	/**

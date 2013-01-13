@@ -25,8 +25,17 @@ import javafx.stage.Stage;
  */
 public class Launcher extends Application {
 
+	/**
+	 * The logger
+	 */
 	private final static Logger log = Logger.getLogger(Launcher.class.getName());
 
+	/**
+	 * Creates the JavaFX scene and associated objects
+	 *
+	 * @param stage the root stage
+	 * @throws Exception if an initialization exception occurs
+	 */
 	@Override
 	public void start(Stage stage) throws Exception {
 		initApplication();
@@ -39,7 +48,7 @@ public class Launcher extends Application {
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
 			log.log(java.util.logging.Level.SEVERE, null, ex);
-			return;
+			throw ex;
 		}
 
 		//Create scene
@@ -55,11 +64,21 @@ public class Launcher extends Application {
 		stage.show();
 	}
 
+	/**
+	 * Performs the final cleanup before stopping the Java FX application
+	 */
 	@Override
 	public void stop() {
-		//TODO: perform final cleanup here
+		//PENDING: perform final cleanup here
 	}
 
+	/**
+	 * Initializes the tray icon
+	 *
+	 * @param primaryStage the stage to be shown/hidden
+	 * @param controller MainWindowController instance which will be assigned a
+	 * ShutdownProcedure
+	 */
 	private void initTrayIcon(Stage primaryStage, MainWindowController controller) {
 		Platform.setImplicitExit(false);
 		Platform.runLater(new Runnable() {
@@ -122,6 +141,11 @@ public class Launcher extends Application {
 		}
 	}
 
+	/**
+	 * Java main method
+	 *
+	 * @param args application arguments
+	 */
 	public static void main(String[] args) {
 		launch(args);
 	}
