@@ -142,8 +142,6 @@ public class PersistenceHelper {
 	/**
 	 * Returns all tasks from database
 	 *
-	 * @param entityManager the EntityManager where the new CustomField will be
-	 * persisted
 	 * @return all tasks from database
 	 */
 	public List<Task> getAllTasks() {
@@ -206,6 +204,8 @@ public class PersistenceHelper {
 	 * Returns all tasks from database inside an existing
 	 * EntityManager/transaction
 	 *
+	 * @param entityManager the EntityManager where the new CustomField will be
+	 * persisted
 	 * @return all tasks from database
 	 */
 	public List<Task> getAllTasks(EntityManager entityManager) {

@@ -30,158 +30,178 @@ import org.zlogic.att.data.TransactedChange;
  */
 public class TimeSegmentAdapter {
 
-	private StringProperty description = new SimpleStringProperty();
-	private ObjectProperty<Date> start = new SimpleObjectProperty<>(), end = new SimpleObjectProperty<>();
+	/**
+	 * Assigned entity
+	 */
 	private TimeSegment segment;
-	private TaskManager taskManager;
-	private Timer timer;
+	/*
+	 * Java FX 
+	 */
+	/**
+	 * Description property
+	 */
+	private StringProperty description = new SimpleStringProperty();
+	/**
+	 * Start time property
+	 */
+	private ObjectProperty<Date> start = new SimpleObjectProperty<>();
+	/**
+	 * End time property
+	 */
+	private ObjectProperty<Date> end = new SimpleObjectProperty<>();
+	/**
+	 * Owner task property
+	 */
 	private ObjectProperty<TaskAdapter> ownerTask = new SimpleObjectProperty<>();
+	/**
+	 * TaskManager reference
+	 */
+	private TaskManager taskManager;
+	/**
+	 * Timer for automatically updating the time
+	 */
+	private Timer timer;
+	/**
+	 * Property to indicate if the task is currently timing
+	 */
 	private BooleanProperty timingProperty = new SimpleBooleanProperty(false);
+	/*
+	 * Change listeners
+	 */
+	/**
+	 * Description change listener
+	 */
+	private ChangeListener<String> descriptionChangeListener = new ChangeListener<String>() {
+		@Override
+		public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
+			oldValue = oldValue == null ? "" : oldValue;
+			newValue = newValue == null ? "" : newValue;
+			if (!oldValue.equals(newValue) && getTaskManager() != null) {
+				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+					private String newValue;
 
+					public TransactedChange setNewValue(String newValue) {
+						this.newValue = newValue;
+						return this;
+					}
+
+					@Override
+					public void performChange(EntityManager entityManager) {
+						setTimeSegment(entityManager.find(TimeSegment.class, getTimeSegment().getId()));
+						getTimeSegment().setDescription(newValue);
+					}
+				}.setNewValue(newValue));
+				updateFxProperties();
+				getTaskManager().signalTaskUpdate();
+			}
+		}
+	};
+	/**
+	 * Start time change listener
+	 */
+	private ChangeListener<Date> startChangeListener = new ChangeListener<Date>() {
+		@Override
+		public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
+			if (!oldValue.equals(newValue) && getTaskManager() != null) {
+				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+					private Date newValue;
+
+					public TransactedChange setNewValue(Date newValue) {
+						this.newValue = newValue;
+						return this;
+					}
+
+					@Override
+					public void performChange(EntityManager entityManager) {
+						setTimeSegment(entityManager.find(TimeSegment.class, getTimeSegment().getId()));
+						getTimeSegment().setStartTime(newValue);
+					}
+				}.setNewValue(newValue));
+				ownerTaskProperty().get().updateFromDatabase();
+				updateFxProperties();
+				getTaskManager().signalTaskUpdate();
+			}
+		}
+	};
+	/**
+	 * End time change listener
+	 */
+	private ChangeListener<Date> endChangeListener = new ChangeListener<Date>() {
+		@Override
+		public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
+			if (!oldValue.equals(newValue) && getTaskManager() != null) {
+				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+					private Date newValue;
+
+					public TransactedChange setNewValue(Date newValue) {
+						this.newValue = newValue;
+						return this;
+					}
+
+					@Override
+					public void performChange(EntityManager entityManager) {
+						setTimeSegment(entityManager.find(TimeSegment.class, getTimeSegment().getId()));
+						getTimeSegment().setEndTime(newValue);
+					}
+				}.setNewValue(newValue));
+				ownerTaskProperty().get().updateFromDatabase();
+				updateFxProperties();
+				getTaskManager().signalTaskUpdate();
+			}
+		}
+	};
+	/**
+	 * Owner task change listener
+	 */
+	private ChangeListener<TaskAdapter> ownerTaskChangeListener = new ChangeListener<TaskAdapter>() {
+		@Override
+		public void changed(ObservableValue<? extends TaskAdapter> ov, TaskAdapter oldValue, TaskAdapter newValue) {
+			if (!oldValue.equals(newValue) && getTaskManager() != null) {
+				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+					private TaskAdapter newValue;
+
+					public TransactedChange setNewValue(TaskAdapter newValue) {
+						this.newValue = newValue;
+						return this;
+					}
+
+					@Override
+					public void performChange(EntityManager entityManager) {
+						setTimeSegment(entityManager.find(TimeSegment.class, getTimeSegment().getId()));
+						Task newTask = entityManager.find(Task.class, newValue.getTask().getId());
+						getTimeSegment().setOwner(newTask);
+					}
+				}.setNewValue(newValue));
+				oldValue.updateFromDatabase();
+				newValue.updateFromDatabase();
+				updateFxProperties();
+			}
+		}
+	};
+
+	/**
+	 * Creates a TimeSegmentAdapter instance
+	 *
+	 * @param segment the associated entity
+	 * @param ownerTask the owner TaskAdapter reference
+	 * @param taskManager the TaskManager reference
+	 */
 	public TimeSegmentAdapter(TimeSegment segment, TaskAdapter ownerTask, TaskManager taskManager) {
 		this.segment = segment;
 		this.taskManager = taskManager;
 		this.ownerTask.setValue(ownerTask);
 
 		updateFxProperties();
-		setChangeListeners();
+		//Set change listeners
+		this.description.addListener(descriptionChangeListener);
+		this.start.addListener(startChangeListener);
+		this.end.addListener(endChangeListener);
+		this.ownerTask.addListener(ownerTaskChangeListener);
 	}
 
-	private void setChangeListeners() {
-		this.description.addListener(new ChangeListener<String>() {
-			@Override
-			public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
-				oldValue = oldValue == null ? "" : oldValue;
-				newValue = newValue == null ? "" : newValue;
-				if (!oldValue.equals(newValue) && getTaskManager() != null) {
-					//TODO: detect if the change was actually initiated by us
-					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
-						private String newValue;
-
-						public TransactedChange setNewValue(String newValue) {
-							this.newValue = newValue;
-							return this;
-						}
-
-						@Override
-						public void performChange(EntityManager entityManager) {
-							setTimeSegment(entityManager.find(TimeSegment.class, getTimeSegment().getId()));
-							getTimeSegment().setDescription(newValue);
-						}
-					}.setNewValue(newValue));
-					updateFxProperties();
-					getTaskManager().signalTaskUpdate();
-				}
-			}
-		});
-
-		this.start.addListener(new ChangeListener<Date>() {
-			@Override
-			public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
-				if (!oldValue.equals(newValue) && getTaskManager() != null) {
-					//TODO: detect if the change was actually initiated by us
-					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
-						private Date newValue;
-
-						public TransactedChange setNewValue(Date newValue) {
-							this.newValue = newValue;
-							return this;
-						}
-
-						@Override
-						public void performChange(EntityManager entityManager) {
-							setTimeSegment(entityManager.find(TimeSegment.class, getTimeSegment().getId()));
-							getTimeSegment().setStartTime(newValue);
-						}
-					}.setNewValue(newValue));
-					ownerTaskProperty().get().updateFromDatabase();
-					updateFxProperties();
-					getTaskManager().signalTaskUpdate();
-				}
-			}
-		});
-
-		this.end.addListener(new ChangeListener<Date>() {
-			@Override
-			public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
-				if (!oldValue.equals(newValue) && getTaskManager() != null) {
-					//TODO: detect if the change was actually initiated by us
-					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
-						private Date newValue;
-
-						public TransactedChange setNewValue(Date newValue) {
-							this.newValue = newValue;
-							return this;
-						}
-
-						@Override
-						public void performChange(EntityManager entityManager) {
-							setTimeSegment(entityManager.find(TimeSegment.class, getTimeSegment().getId()));
-							getTimeSegment().setEndTime(newValue);
-						}
-					}.setNewValue(newValue));
-					ownerTaskProperty().get().updateFromDatabase();
-					updateFxProperties();
-					getTaskManager().signalTaskUpdate();
-				}
-			}
-		});
-
-		this.ownerTask.addListener(new ChangeListener<TaskAdapter>() {
-			private TimeSegmentAdapter adapter;
-
-			public ChangeListener<TaskAdapter> setAdapter(TimeSegmentAdapter adapter) {
-				this.adapter = adapter;
-				return this;
-			}
-
-			@Override
-			public void changed(ObservableValue<? extends TaskAdapter> ov, TaskAdapter oldValue, TaskAdapter newValue) {
-				if (!oldValue.equals(newValue) && getTaskManager() != null) {
-					//TODO: detect if the change was actually initiated by us
-					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
-						private TaskAdapter newValue;
-
-						public TransactedChange setNewValue(TaskAdapter newValue) {
-							this.newValue = newValue;
-							return this;
-						}
-
-						@Override
-						public void performChange(EntityManager entityManager) {
-							setTimeSegment(entityManager.find(TimeSegment.class, getTimeSegment().getId()));
-							Task newTask = entityManager.find(Task.class, newValue.getTask().getId());
-							getTimeSegment().setOwner(newTask);
-						}
-					}.setNewValue(newValue));
-					oldValue.updateFromDatabase();
-					newValue.updateFromDatabase();
-					updateFxProperties();
-				}
-			}
-		}.setAdapter(this));
-	}
-
-	public ObjectProperty<Date> startProperty() {
-		return start;
-	}
-
-	public ObjectProperty<Date> endProperty() {
-		return end;
-	}
-
-	public StringProperty descriptionProperty() {
-		return description;
-	}
-
-	public BooleanProperty isTimingProperty() {
-		return timingProperty;
-	}
-
-	public ObjectProperty<TaskAdapter> ownerTaskProperty() {
-		return ownerTask;
-	}
-
+	/**
+	 * Starts timing this segment
+	 */
 	public void startTiming() {
 		timingProperty.set(true);
 		Date currentDate = new Date();
@@ -189,6 +209,7 @@ public class TimeSegmentAdapter {
 		startProperty().setValue(currentDate);
 		if (timer != null)
 			timer.cancel();
+		//Start the timer
 		timer = new Timer(true);
 		timer.scheduleAtFixedRate(new TimerTask() {
 			private ObjectProperty<Date> endProperty;
@@ -205,6 +226,9 @@ public class TimeSegmentAdapter {
 		}.setEndProperty(endProperty()), 0, 1000);
 	}
 
+	/**
+	 * Stops timing this segment
+	 */
 	public void stopTiming() {
 		timer.cancel();
 		timer = null;
@@ -212,28 +236,108 @@ public class TimeSegmentAdapter {
 		timingProperty.set(false);
 	}
 
+	/*
+	 * JavaFX properties
+	 */
+	/**
+	 * Start time property
+	 *
+	 * @return the start time property
+	 */
+	public ObjectProperty<Date> startProperty() {
+		return start;
+	}
+
+	/**
+	 * End time property
+	 *
+	 * @return the end time property
+	 */
+	public ObjectProperty<Date> endProperty() {
+		return end;
+	}
+
+	/**
+	 * Description property
+	 *
+	 * @return the description property
+	 */
+	public StringProperty descriptionProperty() {
+		return description;
+	}
+
+	/**
+	 * The task currently timing state property (true is is timing, false if
+	 * timer is not running)
+	 *
+	 * @return the task timing state property
+	 */
+	public BooleanProperty isTimingProperty() {
+		return timingProperty;
+	}
+
+	/**
+	 * The owner task property
+	 *
+	 * @return the owner task property
+	 */
+	public ObjectProperty<TaskAdapter> ownerTaskProperty() {
+		return ownerTask;
+	}
+
+	/*
+	 * Getters/setters
+	 */
+	/**
+	 * Returns the associated TimeSegment entity
+	 *
+	 * @return the associated TimeSegment entity
+	 */
+	public TimeSegment getTimeSegment() {
+		return segment;
+	}
+
+	/**
+	 * Changes the associated TimeSegment entity
+	 *
+	 * @param segment the new (or updated) segment
+	 */
+	private void setTimeSegment(TimeSegment segment) {
+		this.segment = segment;
+	}
+	//TODO: other Getters/setters
+
+	/*
+	 * Internal methods
+	 */
+	/**
+	 * Returns the TaskManager reference
+	 *
+	 * @return the TaskManager reference
+	 */
 	private TaskManager getTaskManager() {
 		return taskManager;
 	}
 
+	/**
+	 * Updates Java FX properties from the associated entity
+	 */
 	private void updateFxProperties() {
+		//Remove listeners since the update is initiated by us
+		description.removeListener(descriptionChangeListener);
+		start.removeListener(startChangeListener);
+		end.removeListener(endChangeListener);
+		//Perform update
 		if (description.get() == null || !description.get().equals(segment.getDescription()))
 			description.setValue(segment.getDescription());
 		if (start.get() == null || !start.get().equals(segment.getStartTime()))
 			start.setValue(segment.getStartTime());
 		if (end.get() == null || !end.get().equals(segment.getEndTime()))
 			end.setValue(segment.getEndTime());
-	}
-
-	/*
-	 * Getters/setters
-	 */
-	public TimeSegment getTimeSegment() {
-		return segment;
-	}
-
-	private void setTimeSegment(TimeSegment segment) {
-		this.segment = segment;
+		//Restore listener
+		description.addListener(descriptionChangeListener);
+		start.addListener(startChangeListener);
+		end.addListener(endChangeListener);
 	}
 
 	@Override

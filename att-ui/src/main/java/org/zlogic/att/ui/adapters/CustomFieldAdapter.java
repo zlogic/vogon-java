@@ -21,10 +21,58 @@ import org.zlogic.att.data.TransactedChange;
  */
 public class CustomFieldAdapter implements Comparable<CustomFieldAdapter> {
 
-	private TaskManager taskManager;
-	private StringProperty name = new SimpleStringProperty();
+	/**
+	 * Associated entity
+	 */
 	private CustomField customField;
+	/**
+	 * TaskManager reference
+	 */
+	private TaskManager taskManager;
+	/*
+	 * Java FX
+	 */
+	/**
+	 * Name property
+	 */
+	private StringProperty name = new SimpleStringProperty();
+	/*
+	 * Change listeners
+	 */
+	/**
+	 * Name change listener
+	 */
+	private ChangeListener<String> nameChangeListener = new ChangeListener<String>() {
+		@Override
+		public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
+			oldValue = oldValue == null ? "" : oldValue;
+			newValue = newValue == null ? "" : newValue;
+			if (!oldValue.equals(newValue) && getTaskManager() != null) {
+				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+					private String newValue;
 
+					public TransactedChange setNewValue(String newValue) {
+						this.newValue = newValue;
+						return this;
+					}
+
+					@Override
+					public void performChange(EntityManager entityManager) {
+						setCustomField(entityManager.find(CustomField.class, getCustomField().getId()));
+						getCustomField().setName(newValue);
+					}
+				}.setNewValue(newValue));
+				updateFxProperties();
+			}
+		}
+	};
+
+	/**
+	 * Creates a CustomFieldValueAdapter instance
+	 *
+	 * @param customField the associated entity
+	 * @param taskManager the TaskManager reference
+	 */
 	public CustomFieldAdapter(CustomField customField, TaskManager taskManager) {
 		this.customField = customField;
 		this.taskManager = taskManager;
@@ -32,55 +80,68 @@ public class CustomFieldAdapter implements Comparable<CustomFieldAdapter> {
 		updateFxProperties();
 
 		//Change listeners
-		this.name.addListener(new ChangeListener<String>() {
-			@Override
-			public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
-				oldValue = oldValue == null ? "" : oldValue;
-				newValue = newValue == null ? "" : newValue;
-				if (!oldValue.equals(newValue) && getTaskManager() != null) {
-					//TODO: detect if the change was actually initiated by us
-					getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
-						private String newValue;
-
-						public TransactedChange setNewValue(String newValue) {
-							this.newValue = newValue;
-							return this;
-						}
-
-						@Override
-						public void performChange(EntityManager entityManager) {
-							setCustomField(entityManager.find(CustomField.class, getCustomField().getId()));
-							getCustomField().setName(newValue);
-						}
-					}.setNewValue(newValue));
-					updateFxProperties();
-				}
-			}
-		});
+		this.name.addListener(nameChangeListener);
 	}
 
+	/*
+	 * Internal methods
+	 */
+	/**
+	 * Returns the TaskManager reference
+	 *
+	 * @return the TaskManager reference
+	 */
 	private TaskManager getTaskManager() {
 		return taskManager;
 	}
 
-	private void updateFxProperties() {
-		name.setValue(customField.getName());
-	}
-
+	/*
+	 * Java FX properties
+	 */
+	/**
+	 * Name property
+	 *
+	 * @return the name property
+	 */
 	public StringProperty nameProperty() {
 		return name;
 	}
 
+	/**
+	 * Custom field property
+	 *
+	 * @return the associated CustomField entity property
+	 */
 	public CustomField getCustomField() {
 		return customField;
 	}
 
-	private void setCustomField(CustomField task) {
-		this.customField = task;
+	/**
+	 * Updates the associated custom field
+	 *
+	 * @param customField the new (or updated) custom field
+	 */
+	private void setCustomField(CustomField customField) {
+		this.customField = customField;
 	}
 
 	@Override
 	public int compareTo(CustomFieldAdapter o) {
 		return customField.compareTo(o.customField);
+	}
+
+	/*
+	 * Internal methods
+	 */
+	/**
+	 * Updates Java FX properties from the associated entity
+	 */
+	private void updateFxProperties() {
+		//Remove listener since the update is initiated by us
+		name.removeListener(nameChangeListener);
+		//Perform update
+		name.setValue(customField.getName());
+		//Restore listener
+		name.addListener(nameChangeListener);
 	}
 }

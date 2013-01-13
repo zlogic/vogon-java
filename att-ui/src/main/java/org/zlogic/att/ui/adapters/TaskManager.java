@@ -29,51 +29,40 @@ import org.zlogic.att.data.TransactedChange;
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class TaskManager {
-
-	private ObservableList<TaskAdapter> tasks;
+	/**
+	 * List of all tasks
+	 */
+	private ObservableList<TaskAdapter> tasks = FXCollections.observableList(new LinkedList<TaskAdapter>());
+	/*
+	 * The persistence helper instance
+	 */
 	private PersistenceHelper persistenceHelper = new PersistenceHelper();
+	/*
+	 * The last update date
+	 */
+	//FIXME: Remove one Java FX 3.0 fixes sorting
 	private ObjectProperty<Date> lastTaskUpdate = new SimpleObjectProperty<>();
+	/**
+	 * Possible values of custom fields, used for autocomplete
+	 */
 	private Map<CustomFieldAdapter, ObservableList<String>> customFieldValues = new TreeMap<>();
+	/**
+	 * List of all custom fields
+	 */
 	private ObservableList<CustomFieldAdapter> customFields = FXCollections.observableList(new LinkedList<CustomFieldAdapter>());
 
-	public TaskManager(ObservableList<TaskAdapter> tasks) {
-		this.tasks = tasks;//TODO: load from database instead
-		((TaskManager) this).reloadCustomFields();
+	/**
+	 * Creates a TaskManager instance
+	 */
+	public TaskManager() {
+		/*((TaskManager) this).reloadTasks();*/
 	}
 
-	public ObservableList<TaskAdapter> getTaskList() {
-		return tasks;
-	}
-
-	public ObjectProperty<Date> taskUpdatedProperty() {
-		return lastTaskUpdate;
-	}
-
-	public ObservableList<CustomFieldAdapter> getCustomFields() {
-		return customFields;
-	}
-
-	public PersistenceHelper getPersistenceHelper() {
-		return persistenceHelper;
-	}
-
-	public void reloadTasks() {
-		tasks.clear();
-		for (Task task : persistenceHelper.getAllTasks())
-			tasks.add(new TaskAdapter(task, this));
-		reloadCustomFields();
-	}
-
-	public void reloadCustomFields() {
-		customFieldValues.clear();
-		customFields.clear();
-		for (CustomField customField : persistenceHelper.getCustomFields())
-			customFields.add(new CustomFieldAdapter(customField, this));
-		for (TaskAdapter task : tasks)
-			for (CustomFieldAdapter adapter : customFields)
-				addCustomFieldValue(adapter, task.getTask().getCustomField(adapter.getCustomField()));
-	}
-
+	/**
+	 * Adds a new value to the list of possible CustomField values.
+	 * @param adapter the custom field 
+	 * @param value the value to be added
+	 */
 	protected void addCustomFieldValue(CustomFieldAdapter adapter, String value) {
 		if (value == null)
 			return;
@@ -86,24 +75,49 @@ public class TaskManager {
 		}
 	}
 
+	/**
+	 * Removes a value from the list of possible CustomField values. Performs this only if the value is not used in any custom field.
+	 * @param adapter the custom field
+	 * @param value the value of the Custom Field
+	 * @return true if the value was removed
+	 */
 	protected boolean removeCustomFieldValue(CustomFieldAdapter adapter, String value) {
 		if (!customFieldValues.containsKey(adapter))
 			customFieldValues.put(adapter, FXCollections.observableList(new LinkedList<String>()));
+		//Check if value is no longer used
+		for(CustomFieldAdapter customField : customFields)
+			for(TaskAdapter  task : tasks){
+				String taskCustomFieldValue = task.getTask().getCustomField(customField.getCustomField());
+				if(taskCustomFieldValue!=null && taskCustomFieldValue.equals(value))
+					return false;
+			}
+		//Remove the value
 		List<String> values = customFieldValues.get(adapter);
 		return values.remove(value);
 	}
 
+	/**
+	 * Finds the TaskAdapter associated with a Task entity
+	 * @param task the Task entity to be searched
+	 * @return the associated TaskAdapter instance, or null
+	 */
 	public TaskAdapter findTaskAdapter(Task task) {
 		for (TaskAdapter taskAdapter : tasks)
 			if (taskAdapter.getTask().equals(task))
 				return taskAdapter;
 		return null;
 	}
-
+	/**
+	 * Returns a list of all possible CustomField values for a specific CustomField. Used for autocomplete.
+	 * @param adapter the CustomFieldAdapter for which values will be retrieved
+	 * @return the list of all possible CustomField values
+	 */
 	public ObservableList<String> getCustomFieldValues(CustomFieldAdapter adapter) {
 		return customFieldValues.get(adapter);
 	}
-
+	/**
+	 * Updates the lastTaskUpdate property, signaling that the task list has updated.
+	 */
 	protected void signalTaskUpdate() {
 		Platform.runLater(new Runnable() {
 			@Override
@@ -112,12 +126,35 @@ public class TaskManager {
 			}
 		});
 	}
-
 	/*
-	 * TODO: keep all entity-properties here and update from database if necessary
+	 * Database functions
 	 */
-	/*
-	 * TODO: handle creations here as well
+	/**
+	 * Reloads the tasks from database. Forgets old TaskAdapters.
+	 */
+	public void reloadTasks() {
+		tasks.clear();
+		for (Task task : persistenceHelper.getAllTasks())
+			tasks.add(new TaskAdapter(task, this));
+		reloadCustomFields();
+	}
+	/**
+	 * Reloads the custom fields from database. Forgets old CustomFieldAdapters, replaces CustomFieldValueAdapters in tasks with the updated version.
+	 */
+	public void reloadCustomFields() {
+		customFieldValues.clear();
+		customFields.clear();
+		for (CustomField customField : persistenceHelper.getCustomFields())
+			customFields.add(new CustomFieldAdapter(customField, this));
+		for (TaskAdapter task : tasks)
+			for (CustomFieldAdapter adapter : customFields)
+				addCustomFieldValue(adapter, task.getTask().getCustomField(adapter.getCustomField()));
+	}
+	//TODO: keep all entity-properties here and update from database if necessary
+	//TODO: handle creations here as well
+	/**
+	 * Deletes a time segment
+	 * @param segment the segment to be deleted
 	 */
 	public void deleteSegment(TimeSegmentAdapter segment) {
 		TaskAdapter ownerTask = findTaskAdapter(segment.getTimeSegment().getOwner());
@@ -141,6 +178,10 @@ public class TaskManager {
 		ownerTask.getTask().removeSegment(segment.getTimeSegment());
 	}
 
+	/**
+	 * Deletes a task
+	 * @param task the task to be deleted
+	 */
 	public void deleteTask(TaskAdapter task) {
 		persistenceHelper.performTransactedChange(new TransactedChange() {
 			private Task deleteTask;
@@ -160,6 +201,10 @@ public class TaskManager {
 		tasks.remove(task);
 	}
 
+	/**
+	 * Deletes a custom field. Removes values for this field stored in tasks.
+	 * @param customField the custom field to be deleted
+	 */
 	public void deleteCustomField(CustomFieldAdapter customField) {
 		persistenceHelper.performTransactedChange(new TransactedChange() {
 			private CustomField deleteCustomField;
@@ -178,5 +223,40 @@ public class TaskManager {
 			}
 		}.setDeleteCustomField(customField.getCustomField()));
 		//TODO: Remove from custom fields observableList in the future
+	}
+	
+	/*
+	 * Getters/setters
+	 */
+	/**
+	 * Returns the list of all tasks
+	 * @return the list of all tasks
+	 */
+	public ObservableList<TaskAdapter> getTaskList() {
+		return tasks;
+	}
+
+	/**
+	 * Last task update date property
+	 * @return the last task update date property
+	 */
+	public ObjectProperty<Date> taskUpdatedProperty() {
+		return lastTaskUpdate;
+	}
+
+	/**
+	 * Custom fields list property
+	 * @return the custom fields property
+	 */
+	public ObservableList<CustomFieldAdapter> getCustomFields() {
+		return customFields;
+	}
+
+	/**
+	 * Returns the PersistenceHelper instance
+	 * @return the PersistenceHelper instance
+	 */
+	public PersistenceHelper getPersistenceHelper() {
+		return persistenceHelper;
 	}
 }

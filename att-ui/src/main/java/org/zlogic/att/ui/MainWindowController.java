@@ -106,7 +106,8 @@ public class MainWindowController implements Initializable {
 		};
 		columnLastTime.setComparator(TaskComparator);
 		//Create the task manager
-		taskManager = new TaskManager(taskList.getItems());
+		taskManager = new TaskManager();
+		taskList.setItems(taskManager.getTaskList());
 		reloadTasks();
 
 		//Auto update sort order
@@ -320,7 +321,7 @@ public class MainWindowController implements Initializable {
 	}
 
 	private void updateSortOrder() {
-		//TODO: Remove this after it's fixed in Java FX
+		//FIXME: Remove this after it's fixed in Java FX
 		//TODO: call this on task updates?
 		TableColumn<TaskAdapter, ?>[] sortOrder = taskList.getSortOrder().toArray(new TableColumn[0]);
 		taskEditorController.setIgnoreEditedTaskUpdates(true);
