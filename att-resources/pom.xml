@@ -12,5 +12,4 @@
 	<artifactId>att-resources</artifactId>
 	<name>Awesome Time Tracker :: Resources</name>
 	<packaging>jar</packaging>
-
 </project>
