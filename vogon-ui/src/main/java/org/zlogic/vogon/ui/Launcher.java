@@ -100,7 +100,7 @@ public class Launcher extends Application {
 		String loggingFile = System.getProperty("java.util.logging.config.file"); //NOI18N
 		if (loggingFile == null || loggingFile.isEmpty()) {
 			try {
-				java.net.URL url = ClassLoader.getSystemClassLoader().getResource("logging.properties"); //NOI18N
+				java.net.URL url = Launcher.class.getClassLoader().getResource("logging.properties"); //NOI18N
 				if (url != null)
 					java.util.logging.LogManager.getLogManager().readConfiguration(url.openStream());
 			} catch (IOException | SecurityException e) {
