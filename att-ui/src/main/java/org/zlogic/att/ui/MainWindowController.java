@@ -159,8 +159,12 @@ public class MainWindowController implements Initializable {
 					private ChangeListener timingChangeListener = new ChangeListener<Boolean>() {
 						@Override
 						public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
-							if (newValue != null)
-								row.setStyle(newValue ? "-fx-background-color: honeydew; " : "");
+							if (newValue != null) {
+								if (newValue)
+									row.getStyleClass().add("timing-segment");
+								else
+									row.getStyleClass().remove("timing-segment");
+							}
 						}
 					};
 
@@ -192,7 +196,7 @@ public class MainWindowController implements Initializable {
 					@Override
 					public void handle(DragEvent event) {
 						if (event.getGestureSource() instanceof TableView && ((TableView) event.getGestureSource()).getSelectionModel().getSelectedItem() instanceof TimeSegmentAdapter)
-							row.setStyle("-fx-background-color: cornsilk; ");
+							row.getStyleClass().add("drag-accept-task");
 						event.consume();
 					}
 				}.setRow(row));
@@ -206,7 +210,7 @@ public class MainWindowController implements Initializable {
 
 					@Override
 					public void handle(DragEvent event) {
-						row.setStyle(row.getItem().isTimingProperty().get() ? "-fx-background-color: honeydew; " : "");
+						row.getStyleClass().remove("drag-accept-task");
 						event.consume();
 					}
 				}.setRow(row));
@@ -340,6 +344,8 @@ public class MainWindowController implements Initializable {
 	private void updateSortOrder() {
 		//FIXME: Remove this after it's fixed in Java FX
 		//TODO: call this on task updates?
+		if (taskList.getEditingCell() != null)
+			return;
 		TableColumn<TaskAdapter, ?>[] sortOrder = taskList.getSortOrder().toArray(new TableColumn[0]);
 		taskEditorController.setIgnoreEditedTaskUpdates(true);
 		taskList.getSortOrder().clear();

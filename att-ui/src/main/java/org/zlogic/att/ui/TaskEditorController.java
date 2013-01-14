@@ -90,8 +90,12 @@ public class TaskEditorController implements Initializable {
 					private ChangeListener timingChangeListener = new ChangeListener<Boolean>() {
 						@Override
 						public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
-							if (newValue != null)
-								row.setStyle(newValue ? "-fx-background-color: honeydew; " : "");
+							if (newValue != null) {
+								if (newValue)
+									row.getStyleClass().add("timing-segment");
+								else
+									row.getStyleClass().remove("timing-segment");
+							}
 						}
 					};
 

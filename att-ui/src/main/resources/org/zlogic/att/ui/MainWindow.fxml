@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.lang.*?>
+<?import java.net.*?>
+<?import java.net.URL?>
 <?import java.util.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -9,6 +11,7 @@
 <?import javafx.scene.effect.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
+<?scenebuilder-stylesheet Style.css?>
 
 <VBox id="VBox" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.MainWindowController">
   <children>
@@ -59,15 +62,15 @@
           <children>
             <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
               <children>
-                <Button fx:id="createTransactionButton" mnemonicParsing="false" onAction="#createNewTask" text="New task" HBox.margin="$x1" />
+                <Button fx:id="createTransactionButton" mnemonicParsing="false" onAction="#createNewTask" text="New task" />
                 <Button fx:id="deleteTaskButton" mnemonicParsing="false" onAction="#deleteSelectedTasks" text="Delete task">
                   <HBox.margin>
-                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x2" />
                   </HBox.margin>
                 </Button>
               </children>
             </HBox>
-            <TableView fx:id="taskList" editable="true" VBox.vgrow="ALWAYS">
+            <TableView fx:id="taskList" editable="true" style="&#10;" VBox.vgrow="ALWAYS">
               <columns>
                 <TableColumn prefWidth="75.0" text="Task name" fx:id="columnTaskName">
                   <cellValueFactory>
@@ -101,4 +104,7 @@
       </items>
     </SplitPane>
   </children>
+  <stylesheets>
+    <URL value="@Style.css" />
+  </stylesheets>
 </VBox>

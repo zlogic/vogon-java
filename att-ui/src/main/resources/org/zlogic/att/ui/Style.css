@@ -1,0 +1,15 @@
+@import url("/com/sun/javafx/scene/control/skin/caspian/caspian.bss");
+
+.timing-segment {
+	-fx-accent:honeydew;
+	-fx-control-inner-background:honeydew;	/* Inactive row */
+	-fx-background-color: honeydew;			/* Inactive row in unfocused table */
+}
+.timing-segment .text-field {
+	-fx-accent: #0093ff;					/* Text selection color */
+}
+.drag-accept-task {
+	-fx-accent:cornsilk;
+	-fx-control-inner-background:cornsilk;	/* Inactive row */
+	-fx-background-color:cornsilk;			/* Inactive row in unfocused table */
+}
