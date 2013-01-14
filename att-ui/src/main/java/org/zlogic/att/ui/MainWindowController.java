@@ -43,6 +43,8 @@ import javafx.util.converter.DateTimeStringConverter;
 import javafx.util.converter.DefaultStringConverter;
 import org.zlogic.att.data.converters.GrindstoneImporter;
 import org.zlogic.att.data.converters.Importer;
+import org.zlogic.att.ui.adapters.CustomFieldAdapter;
+import org.zlogic.att.ui.adapters.CustomFieldValueAdapter;
 import org.zlogic.att.ui.adapters.TaskAdapter;
 import org.zlogic.att.ui.adapters.TaskManager;
 import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
@@ -82,6 +84,8 @@ public class MainWindowController implements Initializable {
 	private TableColumn<TaskAdapter, Boolean> columnTaskCompleted;
 	@FXML
 	private Label activeTaskLabel;
+	@FXML
+	private Button duplicateTaskButton;
 	@FXML
 	private Button deleteTaskButton;
 	@FXML
@@ -147,6 +151,7 @@ public class MainWindowController implements Initializable {
 		});
 
 		deleteTaskButton.disableProperty().bind(taskList.getSelectionModel().selectedItemProperty().isNull());
+		duplicateTaskButton.disableProperty().bind(taskList.getSelectionModel().selectedItemProperty().isNull());
 		//Restore settings
 		lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null : new File(preferenceStorage.get("lastDirectory", null)); //NOI18N
 		//Row properties
@@ -344,7 +349,7 @@ public class MainWindowController implements Initializable {
 	private void updateSortOrder() {
 		//FIXME: Remove this after it's fixed in Java FX
 		//TODO: call this on task updates?
-		if (taskList.getEditingCell() != null)
+		if (taskList.getEditingCell() != null && taskList.getEditingCell().getRow() >= 0)
 			return;
 		TableColumn<TaskAdapter, ?>[] sortOrder = taskList.getSortOrder().toArray(new TableColumn[0]);
 		taskEditorController.setIgnoreEditedTaskUpdates(true);
@@ -360,14 +365,29 @@ public class MainWindowController implements Initializable {
 	private void createNewTask() {
 		TaskAdapter newTask = taskManager.createTask();
 		taskList.getSelectionModel().clearSelection();
-		taskList.getSelectionModel().select(newTask);
 		updateSortOrder();
+		taskList.getSelectionModel().select(newTask);
 	}
 
 	@FXML
 	private void deleteSelectedTasks() {
 		for (TaskAdapter selectedTask : taskList.getSelectionModel().getSelectedItems()) {
 			taskManager.deleteTask(selectedTask);
+		}
+		updateSortOrder();
+	}
+
+	@FXML
+	private void duplicateSelectedTasks() {
+		for (TaskAdapter selectedTask : taskList.getSelectionModel().getSelectedItems()) {
+			TaskAdapter newTask = taskManager.createTask();
+			newTask.nameProperty().set(selectedTask.nameProperty().get());
+			newTask.descriptionProperty().set(selectedTask.descriptionProperty().get());
+			for (CustomFieldAdapter customField : taskManager.getCustomFields()) {
+				CustomFieldValueAdapter customFieldValue = new CustomFieldValueAdapter(customField, taskManager);
+				customFieldValue.setTask(newTask);
+				customFieldValue.valueProperty().set(selectedTask.getTask().getCustomField(customField.getCustomField()));
+			}
 		}
 		updateSortOrder();
 	}
