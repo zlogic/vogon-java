@@ -1,15 +1,46 @@
 @import url("/com/sun/javafx/scene/control/skin/caspian/caspian.bss");
 
+/*
+ * Timing item
+*/
 .timing-segment {
-	-fx-accent:honeydew;
-	-fx-control-inner-background:honeydew;	/* Inactive row */
-	-fx-background-color: honeydew;			/* Inactive row in unfocused table */
+	-fx-accent: honeydew;
+	-fx-control-inner-background: honeydew;
 }
-.timing-segment .text-field {
-	-fx-accent: #0093ff;					/* Text selection color */
+/* Unfocused table */
+.table-row-cell:filled:selected:focused .timing-segment, .table-row-cell:filled:selected .timing-segment {
+	-fx-background-color: honeydew;
 }
-.drag-accept-task {
-	-fx-accent:cornsilk;
-	-fx-control-inner-background:cornsilk;	/* Inactive row */
-	-fx-background-color:cornsilk;			/* Inactive row in unfocused table */
+/* Focused table */
+.table-view:focused .table-row-cell:filled:focused:selected .timing-segment {
+	-fx-background-color: -fx-focus-color, -fx-cell-focus-inner-border, -fx-selection-bar;
+	-fx-background-insets: 0, 1, 2;
+}
+.table-view:focused .table-row-cell:filled:selected .timing-segment {
+	-fx-background-color: -fx-selection-bar;
+}
+/* Text selection color */
+.text-field .timing-segment {
+	-fx-accent: #0093ff;
+}
+
+/*
+ * Dragged item
+*/
+.table-row-cell .drag-accept-task {
+	-fx-accent: cornsilk;
+	-fx-background: cornsilk;
+	-fx-background-color: -fx-selection-bar;
+}
+/* Unfocused table */
+.table-row-cell:filled:selected:focused .drag-accept-task, .table-row-cell:filled:selected .drag-accept-task {
+	-fx-background-color: -fx-selection-bar;
+}
+/* Focused table */
+.table-view:focused .table-row-cell:filled:focused:selected .drag-accept-task {
+	-fx-background-color: -fx-focus-color, -fx-cell-focus-inner-border, -fx-selection-bar;
+	-fx-background-insets: 0, 1, 2;
+}
+.table-view:focused .table-row-cell:filled:selected .drag-accept-task {
+	-fx-background-color: -fx-selection-bar;
 }
