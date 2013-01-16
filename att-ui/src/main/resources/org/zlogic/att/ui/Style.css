@@ -4,12 +4,12 @@
  * Timing item
 */
 .timing-segment {
-	-fx-accent: honeydew;
-	-fx-control-inner-background: honeydew;
+	-fx-accent: palegreen;
+	-fx-control-inner-background: palegreen;
 }
 /* Unfocused table */
 .table-row-cell:filled:selected:focused .timing-segment, .table-row-cell:filled:selected .timing-segment {
-	-fx-background-color: honeydew;
+	-fx-background-color: palegreen;
 }
 /* Focused table */
 .table-view:focused .table-row-cell:filled:focused:selected .timing-segment {
@@ -20,7 +20,7 @@
 	-fx-background-color: -fx-selection-bar;
 }
 /* Text selection color */
-.text-field .timing-segment {
+.timing-segment .table-cell .text-field  {
 	-fx-accent: #0093ff;
 }
 
