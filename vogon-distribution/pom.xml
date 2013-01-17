@@ -27,6 +27,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>vogon-${project.version}</finalName>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -34,25 +35,36 @@
 		</resources>
 		<plugins>
 			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
+				<!-- javafx-maven-plugin workaround -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>distro-assembly</id>
-						<phase>package</phase>
+						<id>create-empty-dir</id>
+						<phase>process-resources</phase>
 						<goals>
-							<goal>single</goal>
+							<goal>run</goal>
 						</goals>
 						<configuration>
-							<archive>
-								<manifest>
-									<mainClass>org.zlogic.vogon.ui.Launcher</mainClass>
-								</manifest>
-							</archive>
-							<finalName>vogon-${project.version}</finalName>
-							<appendAssemblyId>false</appendAssemblyId>
-							<descriptorRefs>
-								<descriptorRef>jar-with-dependencies</descriptorRef>
-							</descriptorRefs>
+							<tasks>
+								<mkdir dir="${project.build.outputDirectory}"/>
+							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.zenjava</groupId>
+				<artifactId>javafx-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>build-jar</goal>
+						</goals>
+						<configuration>
+							<mainClass>org.zlogic.vogon.ui.Launcher</mainClass>
+							<bundleType>ALL</bundleType>
 						</configuration>
 					</execution>
 				</executions>
@@ -69,26 +81,18 @@
 						</goals>
 						<configuration>
 							<headerType>gui</headerType>
-							<outfile>target/vogon-${project.version}.exe</outfile>
-							<jar>target/vogon-${project.version}.jar</jar>
-							<errTitle>encc</errTitle>
+							<outfile>target/${project.build.finalName}.exe</outfile>
+							<jar>target/${project.build.finalName}-jfx.jar</jar>
+							<errTitle>Vogon</errTitle>
 							<icon>src/main/resources/Vogon.ico</icon>
-							<classPath>
-								<mainClass>org.zlogic.vogon.ui.Launcher</mainClass>
-								<addDependencies>true</addDependencies>
-								<preCp>anything</preCp>
-							</classPath>
 							<jre>
-								<minVersion>1.7.0</minVersion>
-								<opts>
-									<!--<opt>-Djava.util.logging.config.file=logging.properties</opt>-->
-								</opts>
+								<minVersion>${version.java.launch4j}</minVersion>
 							</jre>
 							<versionInfo>
 								<fileVersion>${version.windows}</fileVersion>
 								<txtFileVersion>${project.version}</txtFileVersion>
 								<fileDescription>Vogon personal finance tracker</fileDescription>
-								<copyright>Zlogic</copyright>
+								<copyright>${project.organization.name}</copyright>
 								<productVersion>${version.windows}</productVersion>
 								<txtProductVersion>${project.version}</txtProductVersion>
 								<productName>Vogon</productName>
