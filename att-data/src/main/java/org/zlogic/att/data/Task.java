@@ -13,6 +13,7 @@ import java.util.TreeSet;
 import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -46,12 +47,12 @@ public class Task implements Serializable {
 	/**
 	 * The list of this task's time segments
 	 */
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private Set<TimeSegment> timeSegments;
 	/**
 	 * Values of custom fields
 	 */
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
 	private Map<CustomField, String> customFields;
 	/**
 	 * Boolean setting indicating the task is completed

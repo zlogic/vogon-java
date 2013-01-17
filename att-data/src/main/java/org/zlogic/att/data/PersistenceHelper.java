@@ -9,7 +9,6 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
 import org.zlogic.att.data.converters.Importer;
 
@@ -185,15 +184,6 @@ public class PersistenceHelper {
 
 		List<Task> result = entityManager.createQuery(tasksCriteriaQuery).getResultList();
 
-		//Post-fetch dependencies
-		if (!result.isEmpty()) {
-			CriteriaQuery<Task> timeSegmentFetchCriteriaQuery = criteriaBuilder.createQuery(Task.class);
-			Root<Task> taskFetch = timeSegmentFetchCriteriaQuery.from(Task.class);
-			timeSegmentFetchCriteriaQuery.where(taskRoot.in(result));
-			taskFetch.fetch(Task_.timeSegments, JoinType.LEFT);
-			taskFetch.fetch(Task_.customFields, JoinType.LEFT);
-			entityManager.createQuery(timeSegmentFetchCriteriaQuery).getResultList();
-		}
 		if (result.size() == 1)
 			return result.get(0);
 		else
@@ -211,19 +201,10 @@ public class PersistenceHelper {
 	public List<Task> getAllTasks(EntityManager entityManager) {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Task> tasksCriteriaQuery = criteriaBuilder.createQuery(Task.class);
-		Root<Task> taskRoot = tasksCriteriaQuery.from(Task.class);
+		tasksCriteriaQuery.from(Task.class);
 
 		List<Task> result = entityManager.createQuery(tasksCriteriaQuery).getResultList();
 
-		//Post-fetch dependencies
-		if (!result.isEmpty()) {
-			CriteriaQuery<Task> timeSegmentFetchCriteriaQuery = criteriaBuilder.createQuery(Task.class);
-			Root<Task> taskFetch = timeSegmentFetchCriteriaQuery.from(Task.class);
-			timeSegmentFetchCriteriaQuery.where(taskRoot.in(result));
-			taskFetch.fetch(Task_.timeSegments, JoinType.LEFT);
-			taskFetch.fetch(Task_.customFields, JoinType.LEFT);
-			entityManager.createQuery(timeSegmentFetchCriteriaQuery).getResultList();
-		}
 		return result;
 	}
 
