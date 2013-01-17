@@ -9,27 +9,26 @@
 
 	<name>Vogon :: Top</name>
 
+	<organization>
+		<name>Zlogic</name>
+	</organization>
+
+	<properties>
+		<version.java>1.7</version.java>
+		<version.java.launch4j>1.7.0</version.java.launch4j>
+		<version.windows>0.0.5.0</version.windows>
+	</properties>
+
 	<modules>
 		<module>vogon-data</module>
-		<module>javafx-repack</module>
 		<module>vogon-ui</module>
 		<module>vogon-resources</module>
 		<module>vogon-distribution</module>
 	</modules>
 
-	<properties>
-		<version.java>1.7</version.java>
-		<version.windows>0.0.5.0</version.windows>
-	</properties>
-
 	<build>
 		<pluginManagement>
 			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-assembly-plugin</artifactId>
-					<version>2.4</version>
-				</plugin>
 				<plugin>
 					<groupId>com.akathist.maven.plugins.launch4j</groupId>
 					<artifactId>launch4j-maven-plugin</artifactId>
@@ -41,9 +40,25 @@
 					<version>3.0</version>
 				</plugin>
 				<plugin>
+					<groupId>com.zenjava</groupId>
+					<artifactId>javafx-maven-plugin</artifactId>
+					<version>1.3</version>
+					<!--
+					<dependencies>
+						<dependency>
+							<groupId>com.oracle</groupId>
+							<artifactId>javafx-jar</artifactId>
+							<version>2.2</version>
+							<scope>system</scope>
+							<systemPath>${java.home}/lib/jfxrt.jar</systemPath>
+						</dependency>
+					</dependencies>
+					-->
+				</plugin>
+				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-install-plugin</artifactId>
-					<version>2.4</version>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>1.7</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -59,11 +74,6 @@
 				<groupId>org.zlogic.vogon.ui</groupId>
 				<artifactId>vogon-ui</artifactId>
 				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.zlogic.misc</groupId>
-				<artifactId>javafx-repack</artifactId>
-				<version>1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.zlogic.vogon.resources</groupId>
