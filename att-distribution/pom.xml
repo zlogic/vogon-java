@@ -23,8 +23,8 @@
 			<artifactId>att-ui</artifactId>
 		</dependency>
 	</dependencies>
-
 	<build>
+		<finalName>awesome-time-tracker-${project.version}</finalName>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -32,25 +32,36 @@
 		</resources>
 		<plugins>
 			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
+				<!-- javafx-maven-plugin workaround -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>distro-assembly</id>
-						<phase>package</phase>
+						<id>create-empty-dir</id>
+						<phase>process-resources</phase>
 						<goals>
-							<goal>single</goal>
+							<goal>run</goal>
 						</goals>
 						<configuration>
-							<archive>
-								<manifest>
-									<mainClass>org.zlogic.att.ui.Launcher</mainClass>
-								</manifest>
-							</archive>
-							<finalName>awesome-time-tracker-${project.version}</finalName>
-							<appendAssemblyId>false</appendAssemblyId>
-							<descriptorRefs>
-								<descriptorRef>jar-with-dependencies</descriptorRef>
-							</descriptorRefs>
+							<tasks>
+								<mkdir dir="${project.build.outputDirectory}"/>
+							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.zenjava</groupId>
+				<artifactId>javafx-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>build-jar</goal>
+						</goals>
+						<configuration>
+							<mainClass>org.zlogic.att.ui.Launcher</mainClass>
+							<bundleType>ALL</bundleType>
 						</configuration>
 					</execution>
 				</executions>
@@ -67,27 +78,19 @@
 						</goals>
 						<configuration>
 							<headerType>gui</headerType>
-							<outfile>target/awesome-time-tracker-${project.version}.exe</outfile>
-							<jar>target/awesome-time-tracker-${project.version}.jar</jar>
+							<outfile>target/${project.build.finalName}.exe</outfile>
+							<jar>target/${project.build.finalName}-jfx.jar</jar>
 							<errTitle>Awesome Time Tracker</errTitle>
 							<icon>src/main/resources/att.ico</icon>
-							<classPath>
-								<mainClass>org.zlogic.att.ui.Launcher</mainClass>
-								<addDependencies>true</addDependencies>
-								<preCp>anything</preCp>
-							</classPath>
 							<jre>
-								<minVersion>1.7.0</minVersion>
+								<minVersion>${version.java.launch4j}</minVersion>
 								<path>jre7</path>
-								<opts>
-									<!--<opt>-Djava.util.logging.config.file=logging.properties</opt>-->
-								</opts>
 							</jre>
 							<versionInfo>
 								<fileVersion>${version.windows}</fileVersion>
 								<txtFileVersion>${project.version}</txtFileVersion>
 								<fileDescription>Awesome Time Tracker for Windows</fileDescription>
-								<copyright>Zlogic</copyright>
+								<copyright>${project.organization.name}</copyright>
 								<productVersion>${version.windows}</productVersion>
 								<txtProductVersion>${project.version}</txtProductVersion>
 								<productName>Awesome Time Tracker</productName>
@@ -100,5 +103,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>

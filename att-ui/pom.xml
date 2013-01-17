@@ -15,10 +15,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.zlogic.misc</groupId>
-			<artifactId>javafx-repack</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>att-data</artifactId>
 		</dependency>
