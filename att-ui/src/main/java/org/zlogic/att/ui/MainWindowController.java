@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -24,6 +25,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -63,6 +66,14 @@ public class MainWindowController implements Initializable {
 	 * Easy access to preference storage
 	 */
 	protected java.util.prefs.Preferences preferenceStorage = java.util.prefs.Preferences.userNodeForPackage(Launcher.class);
+	/**
+	 * The background task thread (used for synchronization & clean termination)
+	 */
+	protected Thread backgroundThread;
+	/**
+	 * The background task
+	 */
+	protected Task<Void> backgroundTask;
 	private Runnable shutdownProcedure;
 	private Stage customFieldEditorStage;
 	private CustomFieldEditorController customFieldEditorController;
@@ -90,6 +101,14 @@ public class MainWindowController implements Initializable {
 	private Button deleteTaskButton;
 	@FXML
 	private HBox activeTaskPane;
+	@FXML
+	private HBox statusPane;
+	@FXML
+	private ProgressIndicator progressIndicator;
+	@FXML
+	private Label progressLabel;
+	@FXML
+	private MenuItem menuItemCleanupDB;
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -307,6 +326,11 @@ public class MainWindowController implements Initializable {
 		columnLastTime.prefWidthProperty().bind(taskList.widthProperty().multiply(3).divide(20));
 		columnTaskCompleted.prefWidthProperty().bind(taskList.widthProperty().multiply(2).divide(20).subtract(15));
 
+		//Menu items and status pane
+		menuItemCleanupDB.disableProperty().bind(statusPane.visibleProperty());
+		statusPane.managedProperty().bind(statusPane.visibleProperty());
+		statusPane.setVisible(false);
+
 		//Load other windows
 		loadWindowCustomFieldEditor();
 		taskEditorController.setTaskManager(taskManager);
@@ -356,6 +380,82 @@ public class MainWindowController implements Initializable {
 		taskList.getSortOrder().clear();
 		taskList.getSortOrder().addAll(sortOrder);
 		taskEditorController.setIgnoreEditedTaskUpdates(false);
+	}
+
+	/*
+	 * Background task processing
+	 */
+	/**
+	 * Starts the background task (disables task-related components, show the
+	 * progress pane)
+	 */
+	private void beginBackgroundTask() {
+		statusPane.setVisible(true);
+	}
+
+	/**
+	 * Ends the background task (enables task-related components, hides the
+	 * progress pane)
+	 */
+	private void endBackgroundTask() {
+		statusPane.setVisible(false);
+	}
+
+	/**
+	 * Starts a task in a background thread
+	 *
+	 * @param task the task to be started
+	 */
+	protected void startTaskThread(Task<Void> task) {
+		synchronized (this) {
+			//Wait for previous task to compete
+			completeTaskThread();
+			backgroundTask = task;
+
+			progressIndicator.progressProperty().bind(task.progressProperty());
+			progressLabel.textProperty().bind(task.messageProperty());
+
+			//Automatically run beginTask/endTask before the actual task is processed
+			backgroundThread = new Thread(
+					new Runnable() {
+						protected Task<Void> task;
+
+						public Runnable setTask(Task<Void> task) {
+							this.task = task;
+							return this;
+						}
+
+						@Override
+						public void run() {
+							beginBackgroundTask();
+							task.run();
+							endBackgroundTask();
+						}
+					}.setTask(task));
+			backgroundThread.setDaemon(true);
+			backgroundThread.start();
+		}
+	}
+
+	/**
+	 * Waits for the current task to complete
+	 */
+	protected void completeTaskThread() {
+		synchronized (this) {
+			if (backgroundThread != null) {
+				try {
+					backgroundThread.join();
+					backgroundThread = null;
+				} catch (InterruptedException ex) {
+					Logger.getLogger(MainWindowController.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
+			if (backgroundTask != null) {
+				progressIndicator.progressProperty().unbind();
+				progressLabel.textProperty().unbind();
+				backgroundTask = null;
+			}
+		}
 	}
 
 	/*
@@ -436,9 +536,29 @@ public class MainWindowController implements Initializable {
 	}
 
 	@FXML
-	public void stopTimingTask() {
+	private void stopTimingTask() {
 		TimeSegmentAdapter segment = taskManager.timingSegmentProperty().get();
 		if (segment != null)
 			segment.stopTiming();
+	}
+
+	@FXML
+	private void cleanupDB() {
+		//Prepare the task
+		Task<Void> task = new Task<Void>() {
+			@Override
+			protected Void call() throws Exception {
+				updateMessage("Cleaning up DB");
+				updateProgress(-1, 1);
+
+				taskManager.getPersistenceHelper().cleanupDB();
+
+				updateProgress(1, 1);
+				updateMessage("");
+				return null;
+			}
+		};
+		//Run the task
+		startTaskThread(task);
 	}
 }

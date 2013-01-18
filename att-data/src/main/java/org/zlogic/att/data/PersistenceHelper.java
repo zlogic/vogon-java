@@ -6,6 +6,8 @@
 package org.zlogic.att.data;
 
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -145,9 +147,9 @@ public class PersistenceHelper {
 	 */
 	public List<Task> getAllTasks() {
 		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
-
+		
 		List<Task> result = getAllTasks(entityManager);
-
+		
 		entityManager.close();
 		return result;
 	}
@@ -161,9 +163,9 @@ public class PersistenceHelper {
 	 */
 	public Task getTaskFromDatabase(long id) {
 		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
-
+		
 		Task task = getTaskFromDatabase(id, entityManager);
-
+		
 		entityManager.close();
 		return task;
 	}
@@ -181,9 +183,9 @@ public class PersistenceHelper {
 		CriteriaQuery<Task> tasksCriteriaQuery = criteriaBuilder.createQuery(Task.class);
 		Root<Task> taskRoot = tasksCriteriaQuery.from(Task.class);
 		tasksCriteriaQuery.where(criteriaBuilder.equal(taskRoot.get(Task_.id), id));
-
+		
 		List<Task> result = entityManager.createQuery(tasksCriteriaQuery).getResultList();
-
+		
 		if (result.size() == 1)
 			return result.get(0);
 		else
@@ -202,9 +204,9 @@ public class PersistenceHelper {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Task> tasksCriteriaQuery = criteriaBuilder.createQuery(Task.class);
 		tasksCriteriaQuery.from(Task.class);
-
+		
 		List<Task> result = entityManager.createQuery(tasksCriteriaQuery).getResultList();
-
+		
 		return result;
 	}
 
@@ -215,11 +217,11 @@ public class PersistenceHelper {
 	 */
 	public List<CustomField> getCustomFields() {
 		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
-
+		
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<CustomField> fieldsCriteriaQuery = criteriaBuilder.createQuery(CustomField.class);
 		fieldsCriteriaQuery.from(CustomField.class);
-
+		
 		List<CustomField> result = entityManager.createQuery(fieldsCriteriaQuery).getResultList();
 		entityManager.close();
 		return result;
@@ -234,9 +236,37 @@ public class PersistenceHelper {
 	public void importData(Importer importer) {
 		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
 		entityManager.getTransaction().begin();
-
+		
 		importer.importData(entityManager);
+		
+		entityManager.getTransaction().commit();
+		entityManager.close();
+	}
 
+	/**
+	 * Removes any orphaned entities
+	 */
+	public void cleanupDB() {
+		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
+		entityManager.getTransaction().begin();
+		List<Task> tasks = getAllTasks(entityManager);
+		
+		//Cleanup time segments
+		Set<TimeSegment> ownedTimeSegments = new TreeSet<>();
+		Set<TimeSegment> allTimeSegments = new TreeSet<>();
+		for (Task task : tasks)
+			ownedTimeSegments.addAll(task.getTimeSegments());
+		
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<TimeSegment> timeSegmentsCriteriaQuery = criteriaBuilder.createQuery(TimeSegment.class);
+		timeSegmentsCriteriaQuery.from(TimeSegment.class);
+		
+		allTimeSegments.addAll(entityManager.createQuery(timeSegmentsCriteriaQuery).getResultList());
+		allTimeSegments.removeAll(ownedTimeSegments);
+		
+		for (TimeSegment timeSegment : allTimeSegments)
+			entityManager.remove(timeSegment);
+				
 		entityManager.getTransaction().commit();
 		entityManager.close();
 	}

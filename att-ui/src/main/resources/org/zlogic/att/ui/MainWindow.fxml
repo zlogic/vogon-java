@@ -19,7 +19,8 @@
       <menus>
         <Menu mnemonicParsing="false" text="File">
           <items>
-            <MenuItem mnemonicParsing="false" onAction="#importGrindstoneData" text="Import Grindstone data..." />
+            <MenuItem disable="true" mnemonicParsing="false" onAction="#importGrindstoneData" text="Import Grindstone data..." visible="false" />
+            <MenuItem disable="true" mnemonicParsing="false" onAction="#cleanupDB" text="Cleanup DB" visible="false" fx:id="menuItemCleanupDB" />
             <SeparatorMenuItem mnemonicParsing="false" />
             <MenuItem mnemonicParsing="false" onAction="#exit" text="Exit" />
           </items>
@@ -36,7 +37,7 @@
         </Menu>
       </menus>
     </MenuBar>
-    <SplitPane id="SplitPane" dividerPositions="0.5" orientation="VERTICAL" prefHeight="681.0" prefWidth="800.0" VBox.vgrow="ALWAYS">
+    <SplitPane id="SplitPane" dividerPositions="0.5015432098765432" orientation="VERTICAL" prefHeight="681.0" prefWidth="800.0" VBox.vgrow="ALWAYS">
       <items>
         <VBox id="VBox" alignment="CENTER" spacing="5.0">
           <children>
@@ -104,6 +105,20 @@
         </VBox>
       </items>
     </SplitPane>
+    <HBox fx:id="statusPane" alignment="CENTER_LEFT" prefHeight="-1.0" prefWidth="-1.0" visible="false">
+      <children>
+        <ProgressIndicator fx:id="progressIndicator" progress="0.0">
+          <HBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x3" />
+          </HBox.margin>
+        </ProgressIndicator>
+        <Label fx:id="progressLabel" text="">
+          <HBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x3" />
+          </HBox.margin>
+        </Label>
+      </children>
+    </HBox>
   </children>
   <stylesheets>
     <URL value="@Style.css" />

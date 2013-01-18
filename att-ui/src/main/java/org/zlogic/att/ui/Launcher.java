@@ -29,6 +29,8 @@ public class Launcher extends Application {
 	 * The logger
 	 */
 	private final static Logger log = Logger.getLogger(Launcher.class.getName());
+	
+	private MainWindowController controller;
 
 	/**
 	 * Creates the JavaFX scene and associated objects
@@ -59,7 +61,7 @@ public class Launcher extends Application {
 		stage.setScene(scene);
 		stage.getIcons().addAll(getIconImages());
 
-		MainWindowController controller = loader.getController();
+		controller = loader.getController();
 		initTrayIcon(stage, controller);
 		stage.show();
 	}
@@ -69,7 +71,8 @@ public class Launcher extends Application {
 	 */
 	@Override
 	public void stop() {
-		//PENDING: perform final cleanup here
+		if(controller!=null)
+			controller.completeTaskThread();
 	}
 
 	/**
