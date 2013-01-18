@@ -13,8 +13,12 @@ import java.util.Date;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ListChangeListener.Change;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -109,6 +113,8 @@ public class MainWindowController implements Initializable {
 	private Label progressLabel;
 	@FXML
 	private MenuItem menuItemCleanupDB;
+	@FXML
+	private IntegerProperty taskSelectionSize = new SimpleIntegerProperty(0);
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -142,6 +148,14 @@ public class MainWindowController implements Initializable {
 			}
 		});
 
+		//Update the selection size property
+		taskList.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<TaskAdapter>() {
+			@Override
+			public void onChanged(Change<? extends TaskAdapter> change) {
+				taskSelectionSize.set(change.getList().size());
+			}
+		});
+
 		taskList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		//Bind the current task panel
 		activeTaskPane.managedProperty().bind(activeTaskPane.visibleProperty());
@@ -169,8 +183,8 @@ public class MainWindowController implements Initializable {
 			}
 		});
 
-		deleteTaskButton.disableProperty().bind(taskList.getSelectionModel().selectedItemProperty().isNull());
-		duplicateTaskButton.disableProperty().bind(taskList.getSelectionModel().selectedItemProperty().isNull());
+		deleteTaskButton.disableProperty().bind(taskSelectionSize.lessThanOrEqualTo(0));
+		duplicateTaskButton.disableProperty().bind(taskSelectionSize.lessThanOrEqualTo(0));
 		//Restore settings
 		lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null : new File(preferenceStorage.get("lastDirectory", null)); //NOI18N
 		//Row properties
@@ -471,9 +485,8 @@ public class MainWindowController implements Initializable {
 
 	@FXML
 	private void deleteSelectedTasks() {
-		for (TaskAdapter selectedTask : taskList.getSelectionModel().getSelectedItems()) {
+		for (TaskAdapter selectedTask : taskList.getSelectionModel().getSelectedItems())
 			taskManager.deleteTask(selectedTask);
-		}
 		updateSortOrder();
 	}
 

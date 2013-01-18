@@ -280,6 +280,9 @@ public class TaskManager {
 	 * @param task the task to be deleted
 	 */
 	public void deleteTask(TaskAdapter task) {
+		for (TimeSegmentAdapter timeSegment : task.timeSegmentsProperty())
+			if (timeSegment.isTimingProperty().get())
+				timeSegment.stopTiming();
 		persistenceHelper.performTransactedChange(new TransactedChange() {
 			private Task deleteTask;
 
