@@ -132,11 +132,12 @@ public class Launcher extends Application {
 		String loggingFile = System.getProperty("java.util.logging.config.file");
 		if (loggingFile == null || loggingFile.isEmpty()) {
 			try {
-				java.net.URL url = Launcher.class.getClassLoader().getResource("logging.properties");
+				java.net.URL url = Thread.currentThread().getContextClassLoader().getResource("logging.properties");
 				if (url != null)
 					java.util.logging.LogManager.getLogManager().readConfiguration(url.openStream());
 			} catch (IOException | SecurityException e) {
 				log.log(Level.SEVERE, "Error when loading logging configuration", e);
+				System.err.println("Error when loading logging configuration");
 			}
 		}
 	}
