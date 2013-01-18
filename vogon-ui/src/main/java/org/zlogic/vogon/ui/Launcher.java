@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -100,10 +102,12 @@ public class Launcher extends Application {
 		String loggingFile = System.getProperty("java.util.logging.config.file"); //NOI18N
 		if (loggingFile == null || loggingFile.isEmpty()) {
 			try {
-				java.net.URL url = Launcher.class.getClassLoader().getResource("logging.properties"); //NOI18N
+				java.net.URL url = Thread.currentThread().getContextClassLoader().getResource("logging.properties"); //NOI18N
 				if (url != null)
 					java.util.logging.LogManager.getLogManager().readConfiguration(url.openStream());
-			} catch (IOException | SecurityException e) {
+			} catch (IOException | SecurityException ex) {
+				Logger.getLogger(Launcher.class.getName()).log(Level.SEVERE, messages.getString("ERROR_LOADING_LOGGING_CONFIGURATION"), ex);
+				System.err.println(messages.getString("ERROR_LOADING_LOGGING_CONFIGURATION"));
 			}
 		}
 	}
