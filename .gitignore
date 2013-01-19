@@ -6,3 +6,5 @@ att-resources/target/
 *.fxml.bak
 /att-distribution/target/
 /Target/
+/att-resources - Copy/target/
+/jasper-fonts/target/

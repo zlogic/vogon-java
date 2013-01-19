@@ -18,6 +18,18 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>att-data</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>jasper-fonts</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.dynamicreports</groupId>
+			<artifactId>dynamicreports-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports</artifactId>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

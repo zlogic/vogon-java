@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.web.*?>
+
+<VBox id="VBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.ReportController">
+  <children>
+    <GridPane VBox.vgrow="SOMETIMES">
+      <children>
+        <Label text="Start date" GridPane.columnIndex="0" GridPane.rowIndex="0">
+          <GridPane.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+          </GridPane.margin>
+        </Label>
+        <Label text="End date" GridPane.columnIndex="0" GridPane.margin="$x1" GridPane.rowIndex="1" />
+        <AnchorPane id="AnchorPane" minHeight="-Infinity" minWidth="-Infinity" prefHeight="-1.0" prefWidth="-1.0" GridPane.columnIndex="2" GridPane.rowIndex="0" GridPane.rowSpan="2" GridPane.valignment="TOP">
+          <children>
+            <Button fx:id="buildReportButton" mnemonicParsing="false" onAction="#buildReport" text="Build report" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+          </children>
+          <GridPane.margin>
+            <Insets fx:id="x2" />
+          </GridPane.margin>
+        </AnchorPane>
+        <TextField fx:id="startDate" prefWidth="200.0" text="" GridPane.columnIndex="1" GridPane.margin="$x1" GridPane.rowIndex="0" />
+        <TextField fx:id="endDate" prefWidth="200.0" GridPane.columnIndex="1" GridPane.margin="$x1" GridPane.rowIndex="1" />
+      </children>
+      <columnConstraints>
+        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+      </columnConstraints>
+      <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      </rowConstraints>
+    </GridPane>
+    <HBox fx:id="statusPane" alignment="CENTER_RIGHT" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="SOMETIMES">
+      <children>
+        <Label fx:id="progressLabel" text="Generating report...">
+          <HBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x3" />
+          </HBox.margin>
+        </Label>
+        <ProgressIndicator fx:id="progressIndicator" progress="0.0">
+          <HBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="$x3" />
+          </HBox.margin>
+        </ProgressIndicator>
+      </children>
+    </HBox>
+    <GridPane fx:id="saveGridPane" VBox.vgrow="SOMETIMES">
+      <children>
+        <Label style="-fx-font-weight: bold;" text="Preview report:" GridPane.columnIndex="0" GridPane.rowIndex="0">
+          <GridPane.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+          </GridPane.margin>
+        </Label>
+        <Button fx:id="saveReportButton" mnemonicParsing="false" onAction="#saveReport" text="Save as..." GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.margin="$x1" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
+      </children>
+      <columnConstraints>
+        <ColumnConstraints hgrow="SOMETIMES" minWidth="-1.0" prefWidth="-1.0" />
+        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+      </columnConstraints>
+      <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      </rowConstraints>
+    </GridPane>
+    <WebView fx:id="viewer" prefHeight="271.0" prefWidth="479.0" VBox.margin="$x2" VBox.vgrow="ALWAYS" />
+  </children>
+</VBox>

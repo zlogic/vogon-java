@@ -29,7 +29,6 @@ public class Launcher extends Application {
 	 * The logger
 	 */
 	private final static Logger log = Logger.getLogger(Launcher.class.getName());
-	
 	private MainWindowController controller;
 
 	/**
@@ -71,7 +70,7 @@ public class Launcher extends Application {
 	 */
 	@Override
 	public void stop() {
-		if(controller!=null)
+		if (controller != null)
 			controller.completeTaskThread();
 	}
 

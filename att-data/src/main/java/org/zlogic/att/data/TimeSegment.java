@@ -19,6 +19,7 @@ import javax.persistence.TemporalType;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.joda.time.PeriodType;
 
 /**
  * Entity class for a time segment Each task's time is tracked with
@@ -162,7 +163,23 @@ public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 	 * @return the calculated time segment duration
 	 */
 	public Period getDuration() {
-		return new Interval(new DateTime(startTime), new DateTime(endTime)).toPeriod();
+		return new Interval(new DateTime(startTime), new DateTime(endTime)).toPeriod().normalizedStandard(PeriodType.time());
+	}
+
+	/**
+	 * Returns the calculated time segment duration, clipped to fit into the
+	 * specified time period
+	 *
+	 * @param clipStartTime start time of clip period
+	 * @param clipEndTime end time of clip period
+	 * @return the calculated time segment duration
+	 */
+	public Period getClippedDuration(Date clipStartTime, Date clipEndTime) {
+		Date clippedStartTime = clipStartTime.before(startTime) ? startTime : clipStartTime;
+		Date clippedEndTime = clipEndTime.after(endTime) ? clipEndTime : clipEndTime;
+		if (clippedStartTime.after(clippedEndTime))
+			return new Period();
+		return new Interval(new DateTime(clippedStartTime), new DateTime(clippedEndTime)).toPeriod().normalizedStandard(PeriodType.time());
 	}
 
 	@Override

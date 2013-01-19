@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -23,6 +24,11 @@ import org.zlogic.att.data.converters.Importer;
 public class PersistenceHelper {
 
 	/**
+	 * Entity manager factory
+	 */
+	EntityManagerFactory entityManagerFactory = javax.persistence.Persistence.createEntityManagerFactory("AwesomeTimeTrackerPersistenceUnit");
+
+	/**
 	 * Default constructor
 	 */
 	public PersistenceHelper() {
@@ -34,7 +40,7 @@ public class PersistenceHelper {
 	 * @return the new Task entity, persisted in JPA
 	 */
 	public Task createTask() {
-		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		entityManager.getTransaction().begin();
 		Task task = createTask(entityManager);
 		entityManager.getTransaction().commit();
@@ -62,7 +68,7 @@ public class PersistenceHelper {
 	 * @return the new TimeSegment entity, persisted in JPA
 	 */
 	public TimeSegment createTimeSegment(Task parent) {
-		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		entityManager.getTransaction().begin();
 		TimeSegment segment = createTimeSegment(entityManager, parent);
 		entityManager.getTransaction().commit();
@@ -92,7 +98,7 @@ public class PersistenceHelper {
 	 * @return the new CustomField entity, persisted in JPA
 	 */
 	public CustomField createCustomField() {
-		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		entityManager.getTransaction().begin();
 		CustomField customField = createCustomField(entityManager);
 		entityManager.getTransaction().commit();
@@ -119,7 +125,7 @@ public class PersistenceHelper {
 	 * @param requestedChange a TransactedChange implementation
 	 */
 	public void performTransactedChange(TransactedChange requestedChange) {
-		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		entityManager.getTransaction().begin();
 		requestedChange.performChange(entityManager);
 		entityManager.getTransaction().commit();
@@ -133,7 +139,7 @@ public class PersistenceHelper {
 	 * @param entity the entity to be merged
 	 */
 	public void mergeEntity(Object entity) {
-		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		entityManager.getTransaction().begin();
 		entityManager.merge(entity);
 		entityManager.getTransaction().commit();
@@ -146,10 +152,10 @@ public class PersistenceHelper {
 	 * @return all tasks from database
 	 */
 	public List<Task> getAllTasks() {
-		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
-		
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
+
 		List<Task> result = getAllTasks(entityManager);
-		
+
 		entityManager.close();
 		return result;
 	}
@@ -162,10 +168,10 @@ public class PersistenceHelper {
 	 * @return the task or null if it's not found
 	 */
 	public Task getTaskFromDatabase(long id) {
-		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
-		
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
+
 		Task task = getTaskFromDatabase(id, entityManager);
-		
+
 		entityManager.close();
 		return task;
 	}
@@ -183,9 +189,9 @@ public class PersistenceHelper {
 		CriteriaQuery<Task> tasksCriteriaQuery = criteriaBuilder.createQuery(Task.class);
 		Root<Task> taskRoot = tasksCriteriaQuery.from(Task.class);
 		tasksCriteriaQuery.where(criteriaBuilder.equal(taskRoot.get(Task_.id), id));
-		
+
 		List<Task> result = entityManager.createQuery(tasksCriteriaQuery).getResultList();
-		
+
 		if (result.size() == 1)
 			return result.get(0);
 		else
@@ -204,9 +210,9 @@ public class PersistenceHelper {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Task> tasksCriteriaQuery = criteriaBuilder.createQuery(Task.class);
 		tasksCriteriaQuery.from(Task.class);
-		
+
 		List<Task> result = entityManager.createQuery(tasksCriteriaQuery).getResultList();
-		
+
 		return result;
 	}
 
@@ -216,12 +222,12 @@ public class PersistenceHelper {
 	 * @return all custom fields from database
 	 */
 	public List<CustomField> getCustomFields() {
-		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
-		
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
+
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<CustomField> fieldsCriteriaQuery = criteriaBuilder.createQuery(CustomField.class);
 		fieldsCriteriaQuery.from(CustomField.class);
-		
+
 		List<CustomField> result = entityManager.createQuery(fieldsCriteriaQuery).getResultList();
 		entityManager.close();
 		return result;
@@ -234,11 +240,11 @@ public class PersistenceHelper {
 	 * @param importer the importer to be used
 	 */
 	public void importData(Importer importer) {
-		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		entityManager.getTransaction().begin();
-		
+
 		importer.importData(entityManager);
-		
+
 		entityManager.getTransaction().commit();
 		entityManager.close();
 	}
@@ -247,26 +253,26 @@ public class PersistenceHelper {
 	 * Removes any orphaned entities
 	 */
 	public void cleanupDB() {
-		EntityManager entityManager = DatabaseTools.getInstance().createEntityManager();
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		entityManager.getTransaction().begin();
 		List<Task> tasks = getAllTasks(entityManager);
-		
+
 		//Cleanup time segments
 		Set<TimeSegment> ownedTimeSegments = new TreeSet<>();
 		Set<TimeSegment> allTimeSegments = new TreeSet<>();
 		for (Task task : tasks)
 			ownedTimeSegments.addAll(task.getTimeSegments());
-		
+
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<TimeSegment> timeSegmentsCriteriaQuery = criteriaBuilder.createQuery(TimeSegment.class);
 		timeSegmentsCriteriaQuery.from(TimeSegment.class);
-		
+
 		allTimeSegments.addAll(entityManager.createQuery(timeSegmentsCriteriaQuery).getResultList());
 		allTimeSegments.removeAll(ownedTimeSegments);
-		
+
 		for (TimeSegment timeSegment : allTimeSegments)
 			entityManager.remove(timeSegment);
-				
+
 		entityManager.getTransaction().commit();
 		entityManager.close();
 	}

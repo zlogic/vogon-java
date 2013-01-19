@@ -14,7 +14,9 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -65,7 +67,7 @@ public class MainWindowController implements Initializable {
 
 	private final static Logger log = Logger.getLogger(MainWindowController.class.getName());
 	private TaskManager taskManager;
-	private File lastDirectory;
+	private ObjectProperty<File> lastDirectory = new SimpleObjectProperty<>();
 	/**
 	 * Easy access to preference storage
 	 */
@@ -81,6 +83,8 @@ public class MainWindowController implements Initializable {
 	private Runnable shutdownProcedure;
 	private Stage customFieldEditorStage;
 	private CustomFieldEditorController customFieldEditorController;
+	private Stage reportStage;
+	private ReportController reportController;
 	@FXML
 	private VBox rootPane;
 	@FXML
@@ -186,7 +190,13 @@ public class MainWindowController implements Initializable {
 		deleteTaskButton.disableProperty().bind(taskSelectionSize.lessThanOrEqualTo(0));
 		duplicateTaskButton.disableProperty().bind(taskSelectionSize.lessThanOrEqualTo(0));
 		//Restore settings
-		lastDirectory = preferenceStorage.get("lastDirectory", null) == null ? null : new File(preferenceStorage.get("lastDirectory", null)); //NOI18N
+		lastDirectory.addListener(new ChangeListener<File>() {
+			@Override
+			public void changed(ObservableValue<? extends File> ov, File oldFile, File newFile) {
+				preferenceStorage.put("lastDirectory", newFile.toString());
+			}
+		});
+		lastDirectory.set(preferenceStorage.get("lastDirectory", null) == null ? null : new File(preferenceStorage.get("lastDirectory", null))); //NOI18N
 		//Row properties
 		taskList.setRowFactory(new Callback<TableView<TaskAdapter>, TableRow<TaskAdapter>>() {
 			@Override
@@ -347,6 +357,7 @@ public class MainWindowController implements Initializable {
 
 		//Load other windows
 		loadWindowCustomFieldEditor();
+		loadWindowReport();
 		taskEditorController.setTaskManager(taskManager);
 	}
 
@@ -371,11 +382,34 @@ public class MainWindowController implements Initializable {
 			Scene scene = new Scene(root);
 			customFieldEditorStage.setTitle("Custom field editor");
 			customFieldEditorStage.setScene(scene);
-			//((CustomFieldEditorController) loader.getController()).messageText.setText(message);
 		}
 		//Set the task manager
 		customFieldEditorController = loader.getController();
 		customFieldEditorController.setTaskManager(taskManager);
+	}
+
+	private void loadWindowReport() {
+		//Load FXML
+		reportStage = new Stage();
+		reportStage.initModality(Modality.NONE);
+		Parent root = null;
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("Report.fxml")); //NOI18N
+		loader.setLocation(getClass().getResource("Report.fxml")); //NOI18N
+		try {
+			root = (Parent) loader.load();
+		} catch (IOException ex) {
+			Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Error loading FXML", ex);
+		}
+		//Initialize the scene properties
+		if (root != null) {
+			Scene scene = new Scene(root);
+			reportStage.setTitle("Report");
+			reportStage.setScene(scene);
+		}
+		//Set the task manager
+		reportController = loader.getController();
+		reportController.setTaskManager(taskManager);
+		reportController.setlastDirectory(lastDirectory);
 	}
 
 	protected void reloadTasks() {
@@ -507,7 +541,8 @@ public class MainWindowController implements Initializable {
 
 	@FXML
 	private void showCustomFieldEditor() {
-		customFieldEditorStage.showAndWait();
+		customFieldEditorStage.getIcons().setAll(((Stage) rootPane.getScene().getWindow()).getIcons());
+		customFieldEditorStage.show();
 	}
 
 	@FXML
@@ -520,8 +555,8 @@ public class MainWindowController implements Initializable {
 	private void importGrindstoneData() {
 		// Prepare file chooser dialog
 		FileChooser fileChooser = new FileChooser();
-		if (lastDirectory != null && lastDirectory.exists())
-			fileChooser.setInitialDirectory(lastDirectory);
+		if (lastDirectory.get() != null && lastDirectory.get().exists())
+			fileChooser.setInitialDirectory(lastDirectory.get());
 		fileChooser.setTitle("Choose file to import");
 		//Prepare file chooser filter
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Exported Grindstone XML files", "*.xml"));
@@ -529,8 +564,7 @@ public class MainWindowController implements Initializable {
 		//Show the dialog
 		File selectedFile;
 		if ((selectedFile = fileChooser.showOpenDialog(rootPane.getScene().getWindow())) != null) {
-			lastDirectory = selectedFile.isDirectory() ? selectedFile : selectedFile.getParentFile();
-			preferenceStorage.put("lastDirectory", lastDirectory.toString());
+			lastDirectory.set(selectedFile.isDirectory() ? selectedFile : selectedFile.getParentFile());
 
 			//Choose the importer based on the file extension
 			Importer importer = null;
@@ -573,5 +607,11 @@ public class MainWindowController implements Initializable {
 		};
 		//Run the task
 		startTaskThread(task);
+	}
+
+	@FXML
+	private void showReportWindow() {
+		reportStage.getIcons().setAll(((Stage) rootPane.getScene().getWindow()).getIcons());
+		reportStage.show();
 	}
 }

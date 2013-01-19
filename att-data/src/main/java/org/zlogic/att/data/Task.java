@@ -6,6 +6,7 @@
 package org.zlogic.att.data;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -109,6 +110,21 @@ public class Task implements Serializable {
 		Period totalTime = new Period();
 		for (TimeSegment segment : timeSegments)
 			totalTime = totalTime.plus(segment.getDuration());
+		return totalTime.normalizedStandard(PeriodType.time());
+	}
+
+	/**
+	 * Calculates the total time for all time segments associated with this
+	 * task, clipped to fit into the specified time period
+	 *
+	 * @param clipStartTime start time of clip period
+	 * @param clipEndTime end time of clip period
+	 * @return the total time for this task
+	 */
+	public Period getTotalTime(Date clipStartTime, Date clipEndTime) {
+		Period totalTime = new Period();
+		for (TimeSegment segment : timeSegments)
+			totalTime = totalTime.plus(segment.getClippedDuration(clipStartTime, clipEndTime));
 		return totalTime.normalizedStandard(PeriodType.time());
 	}
 

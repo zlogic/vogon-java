@@ -35,7 +35,13 @@ import org.zlogic.att.data.TimeSegment;
  */
 public class GrindstoneImporter implements Importer {
 
+	/**
+	 * File to be imported
+	 */
 	private File importFile;
+	/**
+	 * The logger
+	 */
 	private final static Logger log = Logger.getLogger(GrindstoneImporter.class.getName());
 
 	/**

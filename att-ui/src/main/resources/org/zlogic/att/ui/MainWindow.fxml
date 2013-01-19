@@ -19,6 +19,7 @@
       <menus>
         <Menu mnemonicParsing="false" text="File">
           <items>
+            <MenuItem mnemonicParsing="false" onAction="#showReportWindow" text="Build report..." />
             <MenuItem disable="true" mnemonicParsing="false" onAction="#importGrindstoneData" text="Import Grindstone data..." visible="false" />
             <MenuItem disable="true" mnemonicParsing="false" onAction="#cleanupDB" text="Cleanup DB" visible="false" fx:id="menuItemCleanupDB" />
             <SeparatorMenuItem mnemonicParsing="false" />
@@ -63,8 +64,12 @@
           <children>
             <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
               <children>
-                <Button fx:id="createTransactionButton" mnemonicParsing="false" onAction="#createNewTask" text="New task" />
-                <Button id="deleteTaskButton" fx:id="duplicateTaskButton" mnemonicParsing="false" onAction="#duplicateSelectedTasks" text="Duplicate task" />
+                <Button fx:id="createTransactionButton" mnemonicParsing="false" onAction="#createNewTask" text="New task">
+                  <HBox.margin>
+                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+                  </HBox.margin>
+                </Button>
+                <Button id="deleteTaskButton" fx:id="duplicateTaskButton" mnemonicParsing="false" onAction="#duplicateSelectedTasks" text="Duplicate task" HBox.margin="$x1" />
                 <Button fx:id="deleteTaskButton" mnemonicParsing="false" onAction="#deleteSelectedTasks" text="Delete task">
                   <HBox.margin>
                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x2" />
@@ -114,7 +119,7 @@
         </ProgressIndicator>
         <Label fx:id="progressLabel" text="">
           <HBox.margin>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x3" />
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="$x3" />
           </HBox.margin>
         </Label>
       </children>

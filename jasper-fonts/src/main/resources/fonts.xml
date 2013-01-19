@@ -1,0 +1,14 @@
+<fontFamilies>
+	<fontFamily name="Liberation">
+		<normal>org/zlogic/att/fonts/OpenSans/OpenSans-Regular.ttf</normal>
+		<bold>org/zlogic/att/fonts/OpenSans/OpenSans-Bold.ttf</bold>
+		<italic>org/zlogic/att/fonts/OpenSans/OpenSans-Italic.ttf</italic>
+		<boldItalic>org/zlogic/att/fonts/OpenSans/OpenSans-BoldItalic.ttf</boldItalic>
+		<pdfEncoding>Identity-H</pdfEncoding>
+		<pdfEmbedded>true</pdfEmbedded>
+		<exportFonts>
+			<export key="net.sf.jasperreports.html">Segoe UI,'Arial',Times New Roman, Helvetica, sans-serif</export>
+			<export key="net.sf.jasperreports.xhtml">Segoe UI,'Arial',Times New Roman, Helvetica, sans-serif</export>
+		</exportFonts>
+	</fontFamily>
+</fontFamilies>

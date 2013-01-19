@@ -22,6 +22,7 @@
 
 	<modules>
 		<module>att-data</module>
+		<module>jasper-fonts</module>
 		<module>att-ui</module>
 		<module>att-resources</module>
 		<module>att-distribution</module>
@@ -88,6 +89,16 @@
 				<version>2.1</version>
 			</dependency>
 			<dependency>
+				<groupId>net.sourceforge.dynamicreports</groupId>
+				<artifactId>dynamicreports-core</artifactId>
+				<version>3.1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>net.sf.jasperreports</groupId>
+				<artifactId>jasperreports</artifactId>
+				<version>5.0.1</version>
+			</dependency>
+			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>att-data</artifactId>
 				<version>${project.version}</version>
@@ -100,6 +111,11 @@
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>att-resources</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>jasper-fonts</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>
