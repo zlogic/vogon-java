@@ -167,6 +167,40 @@ public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 	}
 
 	/**
+	 * Returns the end time, clipped to fit into the specified time period, or
+	 * null if this segment doesn't belong to the clipping time period
+	 *
+	 * @param clipStartTime start time of clip period
+	 * @param clipEndTime end time of clip period
+	 * @return the clipped start time
+	 */
+	public Date getClippedStartTime(Date clipStartTime, Date clipEndTime) {
+		Date clippedStartTime = clipStartTime.before(startTime) ? startTime : clipStartTime;
+		Date clippedEndTime = clipEndTime.after(endTime) ? endTime : clipEndTime;
+		if (clippedStartTime.after(clippedEndTime))
+			return null;
+		else
+			return clippedStartTime;
+	}
+
+	/**
+	 * Returns the start time, clipped to fit into the specified time period, or
+	 * null if this segment doesn't belong to the clipping time period
+	 *
+	 * @param clipStartTime start time of clip period
+	 * @param clipEndTime end time of clip period
+	 * @return the clipped end time
+	 */
+	public Date getClippedEndTime(Date clipStartTime, Date clipEndTime) {
+		Date clippedStartTime = clipStartTime.before(startTime) ? startTime : clipStartTime;
+		Date clippedEndTime = clipEndTime.after(endTime) ? endTime : clipEndTime;
+		if (clippedStartTime.after(clippedEndTime))
+			return null;
+		else
+			return clippedEndTime;
+	}
+
+	/**
 	 * Returns the calculated time segment duration, clipped to fit into the
 	 * specified time period
 	 *
@@ -176,10 +210,20 @@ public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 	 */
 	public Period getClippedDuration(Date clipStartTime, Date clipEndTime) {
 		Date clippedStartTime = clipStartTime.before(startTime) ? startTime : clipStartTime;
-		Date clippedEndTime = clipEndTime.after(endTime) ? clipEndTime : clipEndTime;
+		Date clippedEndTime = clipEndTime.after(endTime) ? endTime : clipEndTime;
 		if (clippedStartTime.after(clippedEndTime))
 			return new Period();
 		return new Interval(new DateTime(clippedStartTime), new DateTime(clippedEndTime)).toPeriod().normalizedStandard(PeriodType.time());
+	}
+
+	/**
+	 * Returns this class instance (return this); required for some reflection
+	 * fuctions
+	 *
+	 * @return this timesegment instance
+	 */
+	public TimeSegment getTimeSegment() {
+		return this;
 	}
 
 	@Override

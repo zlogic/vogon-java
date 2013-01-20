@@ -20,7 +20,7 @@
         <Label text="End date" GridPane.columnIndex="0" GridPane.margin="$x1" GridPane.rowIndex="1" />
         <AnchorPane id="AnchorPane" minHeight="-Infinity" minWidth="-Infinity" prefHeight="-1.0" prefWidth="-1.0" GridPane.columnIndex="2" GridPane.rowIndex="0" GridPane.rowSpan="2" GridPane.valignment="TOP">
           <children>
-            <Button fx:id="buildReportButton" mnemonicParsing="false" onAction="#buildReport" text="Build report" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+            <Button fx:id="buildReportButton" defaultButton="true" mnemonicParsing="false" onAction="#buildReport" text="Build report" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
           </children>
           <GridPane.margin>
             <Insets fx:id="x2" />
@@ -53,23 +53,20 @@
         </ProgressIndicator>
       </children>
     </HBox>
-    <GridPane fx:id="saveGridPane" VBox.vgrow="SOMETIMES">
+    <HBox id="HBox" fx:id="previewReportPane" alignment="CENTER" spacing="5.0">
       <children>
-        <Label style="-fx-font-weight: bold;" text="Preview report:" GridPane.columnIndex="0" GridPane.rowIndex="0">
-          <GridPane.margin>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
-          </GridPane.margin>
-        </Label>
-        <Button fx:id="saveReportButton" mnemonicParsing="false" onAction="#saveReport" text="Save as..." GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.margin="$x1" GridPane.rowIndex="0" GridPane.valignment="CENTER" />
+        <Label style="-fx-font-weight: bold;" text="Preview report:" />
       </children>
-      <columnConstraints>
-        <ColumnConstraints hgrow="SOMETIMES" minWidth="-1.0" prefWidth="-1.0" />
-        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
-      </columnConstraints>
-      <rowConstraints>
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-      </rowConstraints>
-    </GridPane>
+    </HBox>
     <WebView fx:id="viewer" prefHeight="271.0" prefWidth="479.0" VBox.margin="$x2" VBox.vgrow="ALWAYS" />
+    <HBox id="saveGridPane" fx:id="savePane" alignment="CENTER" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="SOMETIMES">
+      <children>
+        <Button fx:id="saveReportButton" defaultButton="false" mnemonicParsing="false" onAction="#saveReport" text="Save PDF..." underline="false">
+          <HBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x4" />
+          </HBox.margin>
+        </Button>
+      </children>
+    </HBox>
   </children>
 </VBox>

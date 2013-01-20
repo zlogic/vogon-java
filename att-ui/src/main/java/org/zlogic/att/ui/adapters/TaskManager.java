@@ -29,10 +29,10 @@ import org.zlogic.att.data.TransactedChange;
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class TaskManager {
-	/*
+
+	/**
 	 * The persistence helper instance
 	 */
-
 	private PersistenceHelper persistenceHelper = new PersistenceHelper();
 	/**
 	 * List of all tasks
@@ -42,11 +42,10 @@ public class TaskManager {
 	 * Map of all time segments, id=key
 	 */
 	private ObservableList<TimeSegmentAdapter> timeSegments = FXCollections.observableList(new LinkedList<TimeSegmentAdapter>());
-	/*
+	/**
 	 * The last update date
 	 */
-	//FIXME: Remove one Java FX 3.0 fixes sorting
-	private ObjectProperty<Date> lastTaskUpdate = new SimpleObjectProperty<>();
+	private ObjectProperty<Date> lastTaskUpdate = new SimpleObjectProperty<>();//FIXME: Remove once Java FX 3.0 fixes sorting
 	/**
 	 * Possible values of custom fields, used for autocomplete
 	 */

@@ -26,7 +26,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
@@ -59,7 +58,9 @@ public class ReportController implements Initializable {
 	@FXML
 	private Button buildReportButton;
 	@FXML
-	private GridPane saveGridPane;
+	private HBox previewReportPane;
+	@FXML
+	private HBox savePane;
 	@FXML
 	private Button saveReportButton;
 	private ObjectProperty<Date> startDateValue = new SimpleObjectProperty<>();
@@ -77,8 +78,13 @@ public class ReportController implements Initializable {
 		statusPane.managedProperty().bind(statusPane.visibleProperty());
 		statusPane.visibleProperty().bind(reportTaskThread.isNotNull());
 		buildReportButton.disableProperty().bind(reportTaskThread.isNotNull());
-		saveGridPane.managedProperty().bind(saveGridPane.visibleProperty());
-		saveGridPane.visibleProperty().bind(generatedReport.isNotNull());
+
+		//Configure preview & save panes
+		previewReportPane.managedProperty().bind(previewReportPane.visibleProperty());
+		previewReportPane.visibleProperty().bind(generatedReport.isNotNull());
+		savePane.managedProperty().bind(savePane.visibleProperty());
+		savePane.visibleProperty().bind(generatedReport.isNotNull());
+		saveReportButton.disableProperty().bind(generatedReport.isNull());
 
 		//Configure dates
 		Calendar calendar = new GregorianCalendar();
@@ -161,7 +167,7 @@ public class ReportController implements Initializable {
 
 		//Show the dialog
 		File selectedFile;
-		if ((selectedFile = fileChooser.showSaveDialog(saveGridPane.getScene().getWindow())) != null) {
+		if ((selectedFile = fileChooser.showSaveDialog(savePane.getScene().getWindow())) != null) {
 			lastDirectory.set(selectedFile.isDirectory() ? selectedFile : selectedFile.getParentFile());
 
 			//Set extension if necessary

@@ -223,6 +223,16 @@ public class Task implements Serializable {
 		return id;
 	}
 
+	/**
+	 * Returns this class instance (return this); required for some reflection
+	 * fuctions
+	 *
+	 * @return this task instance
+	 */
+	public Task getTask() {
+		return this;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof Task && id == ((Task) obj).id;
