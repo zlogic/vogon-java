@@ -7,6 +7,7 @@ package org.zlogic.att.data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.ResourceBundle;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -30,6 +31,10 @@ import org.joda.time.PeriodType;
 @Entity
 public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 
+	/**
+	 * Localization messages
+	 */
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/data/messages");
 	/**
 	 * JPA ID
 	 */
@@ -63,7 +68,7 @@ public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 		id = -1;
 		startTime = new Date();
 		endTime = new Date();
-		description = "";
+		description = ""; //NOI18N
 	}
 
 	/**
@@ -82,7 +87,7 @@ public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 	 */
 	public void setStartTime(Date startTime) {
 		if (endTime.before(startTime))
-			throw new java.lang.IllegalArgumentException("Start time cannot be later than end time");
+			throw new java.lang.IllegalArgumentException(messages.getString("START_TIME_CANNOT_BE_LATER_THAN_END_TIME"));
 		this.startTime = startTime;
 	}
 
@@ -102,7 +107,7 @@ public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 	 */
 	public void setEndTime(Date endTime) {
 		if (endTime.before(startTime))
-			throw new java.lang.IllegalArgumentException("End time cannot be earlier than start time");
+			throw new java.lang.IllegalArgumentException(messages.getString("END_TIME_CANNOT_BE_EARLIER_THAN_START_TIME"));
 		this.endTime = endTime;
 	}
 

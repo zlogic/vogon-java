@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,6 +44,10 @@ public class GrindstoneImporter implements Importer {
 	 * The logger
 	 */
 	private final static Logger log = Logger.getLogger(GrindstoneImporter.class.getName());
+	/**
+	 * Localization messages
+	 */
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/data/messages");
 
 	/**
 	 * Constructor for the importer
@@ -66,16 +71,16 @@ public class GrindstoneImporter implements Importer {
 		//Convert element-attributes
 		for (Node currentNode = node.getFirstChild(); currentNode != null; currentNode = currentNode.getNextSibling())
 			if ((currentNode.getNodeType() == Node.ELEMENT_NODE) && (!currentNode.hasChildNodes() || (currentNode.getChildNodes().getLength() == 1 && currentNode.getFirstChild().getNodeType() == Node.TEXT_NODE))) {
-				log.log(Level.FINER, "Converting element-attribute {0}={1}", new Object[]{currentNode.getNodeName(), currentNode.getTextContent()});
+				log.log(Level.FINER, messages.getString("CONVERTING_ELEMENT-ATTRIBUTE"), new Object[]{currentNode.getNodeName(), currentNode.getTextContent()});
 				nodeMap.put(currentNode.getNodeName(), currentNode.getTextContent());
 			} else {
-				log.log(Level.FINER, "Skipping element-attribute {0} because it has child nodes", currentNode.getNodeName());
+				log.log(Level.FINER, messages.getString("SKIPPING_ELEMENT-ATTRIBUTE_BECAUSE_IT_HAS_CHILD_NODES"), currentNode.getNodeName());
 			}
 		//Convert attributes (override element-attributes)
 		NamedNodeMap attributes = node.getAttributes();
 		for (int i = 0; i < attributes.getLength(); i++) {
 			Node attributeNode = attributes.item(i);
-			log.log(Level.FINER, "Converting attribute {0}={1}", new Object[]{attributeNode.getNodeName(), attributeNode.getTextContent()});
+			log.log(Level.FINER, messages.getString("CONVERTING_ATTRIBUTE"), new Object[]{attributeNode.getNodeName(), attributeNode.getTextContent()});
 			nodeMap.put(attributeNode.getNodeName(), attributeNode.getNodeValue());
 		}
 		return nodeMap;
@@ -83,7 +88,7 @@ public class GrindstoneImporter implements Importer {
 
 	@Override
 	public void importData(EntityManager entityManager) {
-		log.log(Level.FINER, "Importing file (file={0})", importFile.toString());
+		log.log(Level.FINER, messages.getString("IMPORTING_FILE"), importFile.toString());
 		PersistenceHelper persistenceHelper = new PersistenceHelper();
 		try {
 			//Read XML
@@ -95,28 +100,28 @@ public class GrindstoneImporter implements Importer {
 			//Get root node
 			Node rootNode = doc.getFirstChild();
 			if (rootNode == null || !rootNode.getNodeName().equals("Grindstone"))
-				throw new ImportException("Cannot find root XML element");
+				throw new ImportException(messages.getString("CANNOT_FIND_ROOT_XML_ELEMENT"));
 
 			Map<String, List<Map<String, String>>> tables = new TreeMap<>();
 
 			//Iterate through exported tables
 			for (Node currentNode = rootNode.getFirstChild(); currentNode != null; currentNode = currentNode.getNextSibling()) {
-				log.log(Level.FINER, "Converting node {0}", currentNode.getNodeName());
+				log.log(Level.FINER, messages.getString("CONVERTING_NODE"), currentNode.getNodeName());
 				if (currentNode.getNodeName().equals("NewDataSet")) {
 					//Iterate through values from a single table
 					for (Node entryNode = currentNode.getFirstChild(); entryNode != null; entryNode = entryNode.getNextSibling()) {
 						if (entryNode.getNodeName().equals("xs:schema"))
-							log.log(Level.FINER, "Skipping schema node {0}", currentNode.getNodeName());
+							log.log(Level.FINER, messages.getString("SKIPPING_SCHEMA_NODE"), currentNode.getNodeName());
 						else if (entryNode.getNodeType() == Node.ELEMENT_NODE) {
 							String nodeType = entryNode.getNodeName();
-							log.log(Level.FINER, "Processing node {0}", nodeType);
+							log.log(Level.FINER, messages.getString("PROCESSING_NODE"), nodeType);
 							if (!tables.containsKey(nodeType))
 								tables.put(nodeType, new LinkedList<Map<String, String>>());
 							List<Map<String, String>> nodesList = tables.get(nodeType);
 							Map<String, String> nodeAttributes = convertNodeToMap(entryNode);
 							nodesList.add(nodeAttributes);
 						} else
-							log.log(Level.FINER, "Skipping node type {0}", entryNode.getNodeType());
+							log.log(Level.FINER, messages.getString("SKIPPING_NODE_TYPE"), entryNode.getNodeType());
 					}
 				}
 			}
@@ -146,7 +151,7 @@ public class GrindstoneImporter implements Importer {
 				Task task = tasks.get(entry.get("TaskId"));
 				CustomField customField = customFields.get(entry.get("CustomFieldId"));
 				if (task == null || customField == null)
-					throw new ImportException("Cannot match custom field with task for custom value");
+					throw new ImportException(messages.getString("CANNOT_MATCH_CUSTOM_FIELD_WITH_TASK_FOR_CUSTOM_VALUE"));
 				task.setCustomField(customField, entry.get("Value"));
 			}
 
@@ -154,7 +159,7 @@ public class GrindstoneImporter implements Importer {
 			for (Map<String, String> entry : tables.get("Times")) {
 				Task task = tasks.get(entry.get("TaskId"));
 				if (task == null)
-					throw new ImportException("Cannot match time with task");
+					throw new ImportException(messages.getString("CANNOT_MATCH_TIME_WITH_TASK"));
 				TimeSegment timeSegment = persistenceHelper.createTimeSegment(entityManager, task);
 				timeSegment.setStartTime(DatatypeConverter.parseDateTime(entry.get("Start")).getTime());
 				timeSegment.setEndTime(DatatypeConverter.parseDateTime(entry.get("End")).getTime());

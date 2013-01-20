@@ -65,8 +65,8 @@ public class Task implements Serializable {
 	 */
 	protected Task() {
 		id = -1;
-		description = "";
-		name = "";
+		description = ""; //NOI18N
+		name = ""; //NOI18N
 		completed = false;
 		timeSegments = new TreeSet<>();
 		customFields = new TreeMap<>();

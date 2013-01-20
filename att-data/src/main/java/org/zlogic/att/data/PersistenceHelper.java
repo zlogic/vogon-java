@@ -26,7 +26,7 @@ public class PersistenceHelper {
 	/**
 	 * Entity manager factory
 	 */
-	EntityManagerFactory entityManagerFactory = javax.persistence.Persistence.createEntityManagerFactory("AwesomeTimeTrackerPersistenceUnit");
+	EntityManagerFactory entityManagerFactory = javax.persistence.Persistence.createEntityManagerFactory("AwesomeTimeTrackerPersistenceUnit"); //NOI18N
 
 	/**
 	 * Default constructor

@@ -35,7 +35,7 @@ public class CustomField implements Serializable, Comparable<CustomField> {
 	 * Default constructor
 	 */
 	protected CustomField() {
-		name = "";
+		name = ""; //NOI18N
 	}
 
 	/**
