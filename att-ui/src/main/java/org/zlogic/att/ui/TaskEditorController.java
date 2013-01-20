@@ -49,37 +49,97 @@ import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
  */
 public class TaskEditorController implements Initializable {
 
+	/**
+	 * The logger
+	 */
 	private final static Logger log = Logger.getLogger(MainWindowController.class.getName());
+	/**
+	 * Localization messages
+	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/messages");
+	/**
+	 * List of currently edited tasks
+	 */
 	private ObservableList<TaskAdapter> editedTaskList;
+	/**
+	 * List of bound tasks which sets most of this form's fields
+	 */
 	private List<TaskAdapter> boundTasks = new LinkedList<>();
+	/**
+	 * TaskManager reference
+	 */
 	private TaskManager taskManager;
+	/**
+	 * True to ignore updates to edited task (e.g. while editing a time segment)
+	 */
 	private boolean ignoreEditedTaskUpdates = false;
+	/**
+	 * Task description
+	 */
 	@FXML
 	private TextArea description;
+	/**
+	 * Task name
+	 */
 	@FXML
 	private TextField name;
+	/**
+	 * Total time for task
+	 */
 	@FXML
 	private TextField totalTime;
+	/**
+	 * Start/Stop button
+	 */
 	@FXML
 	private Button startStop;
+	/**
+	 * Delete segment button
+	 */
 	@FXML
 	private Button delete;
+	/**
+	 * Time segment start column
+	 */
 	@FXML
 	private TableColumn<TimeSegmentAdapter, Date> columnStart;
+	/**
+	 * Time segment end column
+	 */
 	@FXML
 	private TableColumn<TimeSegmentAdapter, Date> columnEnd;
+	/**
+	 * Time segment duration column
+	 */
 	@FXML
 	private TableColumn<TimeSegmentAdapter, String> columnDuration;
+	/**
+	 * Time segment description column
+	 */
 	@FXML
 	private TableColumn<TimeSegmentAdapter, String> columnDescription;
+	/**
+	 * Time segments table
+	 */
 	@FXML
 	private TableView<TimeSegmentAdapter> timeSegments;
+	/**
+	 * Custom field value column
+	 */
 	@FXML
 	private TableColumn<CustomFieldValueAdapter, String> columnFieldValue;
+	/**
+	 * Custom field values table
+	 */
 	@FXML
 	private TableView<CustomFieldValueAdapter> customProperties;
 
+	/**
+	 * Initializes the controller
+	 *
+	 * @param url initialization URL
+	 * @param resourceBundle supplied resources
+	 */
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
 		updateStartStopText();
@@ -235,6 +295,11 @@ public class TaskEditorController implements Initializable {
 		columnEnd.setComparator(dateComparator);
 	}
 
+	/**
+	 * Sets the TaskManager reference
+	 *
+	 * @param taskManager the TaskManager reference
+	 */
 	public void setTaskManager(TaskManager taskManager) {
 		this.taskManager = taskManager;
 
@@ -265,6 +330,11 @@ public class TaskEditorController implements Initializable {
 		});
 	}
 
+	/**
+	 * Sets the list of tasks to be edited
+	 *
+	 * @param editedTaskList the list of tasks to be edited
+	 */
 	public void setEditedTaskList(ObservableList<TaskAdapter> editedTaskList) {
 		this.editedTaskList = editedTaskList;
 		editedTaskList.addListener(new ListChangeListener<TaskAdapter>() {
@@ -276,14 +346,28 @@ public class TaskEditorController implements Initializable {
 		});
 	}
 
+	/**
+	 * Returns true if this controller is ignoring updates to edited tasks
+	 *
+	 * @return true if this controller is ignoring updates to edited tasks
+	 */
 	public boolean isIgnoreEditedTaskUpdates() {
 		return ignoreEditedTaskUpdates;
 	}
 
+	/**
+	 * Sets if this controller should ignore updates to edited tasks
+	 *
+	 * @param ignoreEditedTaskUpdates true if this controller is ignoring
+	 * updates to edited
+	 */
 	public void setIgnoreEditedTaskUpdates(boolean ignoreEditedTaskUpdates) {
 		this.ignoreEditedTaskUpdates = ignoreEditedTaskUpdates;
 	}
 
+	/**
+	 * Updates the custom fields table
+	 */
 	private void updateCustomFields() {
 		customProperties.getItems().clear();
 		for (CustomFieldAdapter customFieldAdapter : taskManager.getCustomFields())
@@ -294,6 +378,10 @@ public class TaskEditorController implements Initializable {
 				customFieldValueAdapter.setTask(task);
 	}
 
+	/**
+	 * Updates the currently editing task list, re-binds form elements to new
+	 * tasks
+	 */
 	private void updateEditingTasks() {
 		if (boundTasks.containsAll(editedTaskList) && editedTaskList.containsAll(boundTasks))
 			return;
@@ -322,12 +410,20 @@ public class TaskEditorController implements Initializable {
 	}
 
 	//TODO: add support for editing multiple tasks
+	/**
+	 * Returns the edited task, or null if several or no tasks are being edited
+	 *
+	 * @return the edited task
+	 */
 	protected TaskAdapter getEditedTask() {
 		if (editedTaskList != null && editedTaskList.size() == 1)
 			return editedTaskList.get(0);
 		return null;
 	}
 
+	/**
+	 * Updates the time segments sort order
+	 */
 	private void updateSortOrder() {
 		//FIXME: Remove this after it's fixed in Java FX
 		TableColumn<TimeSegmentAdapter, ?>[] sortOrder = timeSegments.getSortOrder().toArray(new TableColumn[0]);
@@ -335,6 +431,11 @@ public class TaskEditorController implements Initializable {
 		timeSegments.getSortOrder().addAll(sortOrder);
 	}
 
+	/**
+	 * Returns true if the currently edited task is timing
+	 *
+	 * @return
+	 */
 	private boolean isTimingCurrentTask() {
 		TaskAdapter editedTask = getEditedTask();
 		if (editedTask == null || taskManager.timingSegmentProperty().get() == null)
@@ -342,6 +443,9 @@ public class TaskEditorController implements Initializable {
 		return editedTask.timeSegmentsProperty().contains(taskManager.timingSegmentProperty().get());
 	}
 
+	/**
+	 * Updates the Start/Stop button text based on the currently timing task
+	 */
 	private void updateStartStopText() {
 		startStop.setDisable(boundTasks.isEmpty());
 		startStop.setText(isTimingCurrentTask() ? messages.getString("STOP") : messages.getString("START"));
@@ -349,6 +453,9 @@ public class TaskEditorController implements Initializable {
 
 	/*
 	 * Callbacks
+	 */
+	/**
+	 * Start/Stop button
 	 */
 	@FXML
 	private void handleStartStop() {
@@ -364,6 +471,11 @@ public class TaskEditorController implements Initializable {
 		updateStartStopText();
 	}
 
+	/**
+	 * Create time segment
+	 *
+	 * @return the created time segment
+	 */
 	@FXML
 	private TimeSegmentAdapter createTimeSegment() {
 		TaskAdapter task = getEditedTask();
@@ -375,6 +487,9 @@ public class TaskEditorController implements Initializable {
 		return null;
 	}
 
+	/**
+	 * Delete selected time segments
+	 */
 	@FXML
 	private void deleteTimeSegment() {
 		for (TimeSegmentAdapter segment : timeSegments.getSelectionModel().getSelectedItems()) {

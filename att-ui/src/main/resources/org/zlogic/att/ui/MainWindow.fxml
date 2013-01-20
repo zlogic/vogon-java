@@ -45,12 +45,16 @@
           <children>
             <HBox id="activeTaskPanel" fx:id="activeTaskPane" VBox.vgrow="NEVER">
               <children>
-                <Label id="" text="%CURRENTLY_TIMING_TASK:">
-                  <HBox.margin>
-                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
-                  </HBox.margin>
+                <Label id="" text="%CURRENTLY_TIMING_TASK:" HBox.margin="$x1">
+                  <labelFor>
+                    <Label id="" fx:id="activeTaskLabel" style="-fx-font-style: italic;&#10;-fx-font-weight: bold;">
+                      <HBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+                      </HBox.margin>
+                    </Label>
+                  </labelFor>
                 </Label>
-                <Label id="" fx:id="activeTaskLabel" style="-fx-font-style: italic;&#10;-fx-font-weight: bold;" HBox.margin="$x1" />
+                <fx:reference source="activeTaskLabel" />
                 <Button mnemonicParsing="false" onAction="#stopTimingTask" text="%STOP" HBox.margin="$x1" />
               </children>
             </HBox>
@@ -72,12 +76,12 @@
                 </Button>
                 <Button id="deleteTaskButton" fx:id="duplicateTaskButton" mnemonicParsing="false" onAction="#duplicateSelectedTasks" text="%DUPLICATE_TASK">
                   <HBox.margin>
-                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x2" />
+                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x3" />
                   </HBox.margin>
                 </Button>
                 <Button fx:id="deleteTaskButton" mnemonicParsing="false" onAction="#deleteSelectedTasks" text="%DELETE_TASK">
                   <HBox.margin>
-                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x3" />
+                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x4" />
                   </HBox.margin>
                 </Button>
               </children>
@@ -119,12 +123,12 @@
       <children>
         <ProgressIndicator fx:id="progressIndicator" progress="0.0">
           <HBox.margin>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x4" />
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x5" />
           </HBox.margin>
         </ProgressIndicator>
-        <Label fx:id="progressLabel" text="">
+        <Label fx:id="progressLabel" labelFor="$progressIndicator" text="">
           <HBox.margin>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="$x4" />
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="$x5" />
           </HBox.margin>
         </Label>
       </children>

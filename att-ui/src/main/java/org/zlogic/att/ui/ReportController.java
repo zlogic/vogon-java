@@ -40,36 +40,93 @@ import org.zlogic.att.ui.report.Report;
  */
 public class ReportController implements Initializable {
 
+	/**
+	 * Localization messages
+	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/messages");
+	/**
+	 * TaskManager reference
+	 */
 	private TaskManager taskManager;
+	/**
+	 * Last opened directory
+	 */
 	private ObjectProperty<File> lastDirectory;
+	/**
+	 * Report preview browser
+	 */
 	@FXML
 	private WebView viewer;
-	@FXML
-	private TextField endDate;
+	/**
+	 * Start date field
+	 */
 	@FXML
 	private TextField startDate;
+	/**
+	 * End date field
+	 */
+	@FXML
+	private TextField endDate;
+	/**
+	 * Status pane
+	 */
 	@FXML
 	private HBox statusPane;
+	/**
+	 * Progress indicator
+	 */
 	@FXML
 	private ProgressIndicator progressIndicator;
+	/**
+	 * Progress indicator label
+	 */
 	@FXML
 	private Label progressLabel;
+	/**
+	 * Build report button
+	 */
 	@FXML
 	private Button buildReportButton;
+	/**
+	 * Preview report label pane
+	 */
 	@FXML
 	private HBox previewReportPane;
+	/**
+	 * Save report button pane
+	 */
 	@FXML
 	private HBox savePane;
+	/**
+	 * Save report button
+	 */
 	@FXML
 	private Button saveReportButton;
+	/**
+	 * Extracted start date
+	 */
 	private ObjectProperty<Date> startDateValue = new SimpleObjectProperty<>();
+	/**
+	 * Extracted end date
+	 */
 	private ObjectProperty<Date> endDateValue = new SimpleObjectProperty<>();
+	/**
+	 * Report generation task thread
+	 */
 	private ObjectProperty<Thread> reportTaskThread = new SimpleObjectProperty<>();
+	/**
+	 * Generated report
+	 */
 	private ObjectProperty<Report> generatedReport = new SimpleObjectProperty<>();
 
+	/**
+	 * Initializes the controller
+	 *
+	 * @param url initialization URL
+	 * @param resourceBundle supplied resources
+	 */
 	@Override
-	public void initialize(URL url, ResourceBundle rb) {
+	public void initialize(URL url, ResourceBundle resourceBundle) {
 		//Configure date fields
 		startDate.textProperty().bindBidirectional(startDateValue, new DateStringConverter());
 		endDate.textProperty().bindBidirectional(endDateValue, new DateStringConverter());
@@ -91,14 +148,27 @@ public class ReportController implements Initializable {
 		endDateValue.set(DateTools.getInstance().convertDateToEndOfMonth(new Date()));
 	}
 
+	/**
+	 * Sets the TaskManager reference
+	 *
+	 * @param taskManager the TaskManager reference
+	 */
 	public void setTaskManager(TaskManager taskManager) {
 		this.taskManager = taskManager;
 	}
 
-	public void setlastDirectory(ObjectProperty<File> lastDirectory) {
+	/**
+	 * Sets the last directory property
+	 *
+	 * @param lastDirectory the last directory property
+	 */
+	public void setLastDirectory(ObjectProperty<File> lastDirectory) {
 		this.lastDirectory = lastDirectory;
 	}
 
+	/**
+	 * Builds the report
+	 */
 	@FXML
 	private void buildReport() {
 		if (reportTaskThread.getValue() != null)
@@ -150,6 +220,9 @@ public class ReportController implements Initializable {
 		reportTaskThread.get().start();
 	}
 
+	/**
+	 * Saves the report
+	 */
 	@FXML
 	void saveReport() {
 		if (generatedReport.get() == null)

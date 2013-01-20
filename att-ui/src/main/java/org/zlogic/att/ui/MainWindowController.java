@@ -65,9 +65,21 @@ import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
  */
 public class MainWindowController implements Initializable {
 
+	/**
+	 * The logger
+	 */
 	private final static Logger log = Logger.getLogger(MainWindowController.class.getName());
+	/**
+	 * Localization messages
+	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/messages");
+	/**
+	 * TaskManager reference
+	 */
 	private TaskManager taskManager;
+	/**
+	 * Last opened directory
+	 */
 	private ObjectProperty<File> lastDirectory = new SimpleObjectProperty<>();
 	/**
 	 * Easy access to preference storage
@@ -81,46 +93,118 @@ public class MainWindowController implements Initializable {
 	 * The background task
 	 */
 	protected Task<Void> backgroundTask;
+	/**
+	 * Task to be performed before shutdown/exit
+	 */
 	private Runnable shutdownProcedure;
+	/**
+	 * Custom field editor stage
+	 */
 	private Stage customFieldEditorStage;
+	/**
+	 * Custom field editor controller
+	 */
 	private CustomFieldEditorController customFieldEditorController;
+	/**
+	 * Report stage
+	 */
 	private Stage reportStage;
+	/**
+	 * Report controller
+	 */
 	private ReportController reportController;
+	/**
+	 * Root pane
+	 */
 	@FXML
 	private VBox rootPane;
+	/**
+	 * Task editor controller
+	 */
 	@FXML
 	private TaskEditorController taskEditorController;
+	/**
+	 * Tasks list table
+	 */
 	@FXML
 	private TableView<TaskAdapter> taskList;
+	/**
+	 * Task name column
+	 */
 	@FXML
 	private TableColumn<TaskAdapter, String> columnTaskName;
+	/**
+	 * Task total time column
+	 */
 	@FXML
 	private TableColumn<TaskAdapter, String> columnTotalTime;
+	/**
+	 * Task first time column
+	 */
 	@FXML
 	private TableColumn<TaskAdapter, Date> columnFirstTime;
+	/**
+	 * Task last time column
+	 */
 	@FXML
 	private TableColumn<TaskAdapter, Date> columnLastTime;
+	/**
+	 * Task completed column
+	 */
 	@FXML
 	private TableColumn<TaskAdapter, Boolean> columnTaskCompleted;
+	/**
+	 * Label to indicate the active task
+	 */
 	@FXML
 	private Label activeTaskLabel;
+	/**
+	 * Duplicate task button
+	 */
 	@FXML
 	private Button duplicateTaskButton;
+	/**
+	 * Delete task button
+	 */
 	@FXML
 	private Button deleteTaskButton;
+	/**
+	 * Active task pane (can be hidden)
+	 */
 	@FXML
 	private HBox activeTaskPane;
+	/**
+	 * Status pane
+	 */
 	@FXML
 	private HBox statusPane;
+	/**
+	 * Progress indicator
+	 */
 	@FXML
 	private ProgressIndicator progressIndicator;
+	/**
+	 * Progress indicator label
+	 */
 	@FXML
 	private Label progressLabel;
+	/**
+	 * Cleanup DB menu item
+	 */
 	@FXML
 	private MenuItem menuItemCleanupDB;
+	/**
+	 * Property to store the number of selected tasks
+	 */
 	@FXML
 	private IntegerProperty taskSelectionSize = new SimpleIntegerProperty(0);
 
+	/**
+	 * Initializes the controller
+	 *
+	 * @param url initialization URL
+	 * @param resourceBundle supplied resources
+	 */
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
 		//Default sort order
@@ -362,10 +446,19 @@ public class MainWindowController implements Initializable {
 		taskEditorController.setTaskManager(taskManager);
 	}
 
+	/**
+	 * Assigns the shutdown procedure to be performed before quitting Java FX
+	 * application
+	 *
+	 * @param shutdownProcedure the shutdown procedure
+	 */
 	public void setShutdownProcedure(Runnable shutdownProcedure) {
 		this.shutdownProcedure = shutdownProcedure;
 	}
 
+	/**
+	 * Loads the custom field editor FXML
+	 */
 	private void loadWindowCustomFieldEditor() {
 		//Load FXML
 		customFieldEditorStage = new Stage();
@@ -389,6 +482,9 @@ public class MainWindowController implements Initializable {
 		customFieldEditorController.setTaskManager(taskManager);
 	}
 
+	/**
+	 * Loads the report FXML
+	 */
 	private void loadWindowReport() {
 		//Load FXML
 		reportStage = new Stage();
@@ -410,15 +506,21 @@ public class MainWindowController implements Initializable {
 		//Set the task manager
 		reportController = loader.getController();
 		reportController.setTaskManager(taskManager);
-		reportController.setlastDirectory(lastDirectory);
+		reportController.setLastDirectory(lastDirectory);
 	}
 
+	/**
+	 * Reloads tasks
+	 */
 	protected void reloadTasks() {
 		taskManager.reloadTasks();
 		taskEditorController.setEditedTaskList(taskList.getSelectionModel().getSelectedItems());
 		updateSortOrder();
 	}
 
+	/**
+	 * Updates the tasks sort order
+	 */
 	private void updateSortOrder() {
 		//FIXME: Remove this after it's fixed in Java FX
 		//TODO: call this on task updates?
@@ -510,6 +612,9 @@ public class MainWindowController implements Initializable {
 	/*
 	 * Callbacks
 	 */
+	/**
+	 * Create a new task
+	 */
 	@FXML
 	private void createNewTask() {
 		TaskAdapter newTask = taskManager.createTask();
@@ -518,6 +623,9 @@ public class MainWindowController implements Initializable {
 		taskList.getSelectionModel().select(newTask);
 	}
 
+	/**
+	 * Delete all selected tasks
+	 */
 	@FXML
 	private void deleteSelectedTasks() {
 		for (TaskAdapter selectedTask : taskList.getSelectionModel().getSelectedItems())
@@ -525,6 +633,9 @@ public class MainWindowController implements Initializable {
 		updateSortOrder();
 	}
 
+	/**
+	 * Duplicate all selected tasks
+	 */
 	@FXML
 	private void duplicateSelectedTasks() {
 		for (TaskAdapter selectedTask : taskList.getSelectionModel().getSelectedItems()) {
@@ -540,18 +651,36 @@ public class MainWindowController implements Initializable {
 		updateSortOrder();
 	}
 
+	/**
+	 * Show the custom field editor window
+	 */
 	@FXML
 	private void showCustomFieldEditor() {
 		customFieldEditorStage.getIcons().setAll(((Stage) rootPane.getScene().getWindow()).getIcons());
 		customFieldEditorStage.show();
 	}
 
+	/**
+	 * Show the custom report window
+	 */
+	@FXML
+	private void showReportWindow() {
+		reportStage.getIcons().setAll(((Stage) rootPane.getScene().getWindow()).getIcons());
+		reportStage.show();
+	}
+
+	/**
+	 * Exit the application
+	 */
 	@FXML
 	private void exit() {
 		if (shutdownProcedure != null)
 			shutdownProcedure.run();
 	}
 
+	/**
+	 * Import Grindstone data
+	 */
 	@FXML
 	private void importGrindstoneData() {
 		// Prepare file chooser dialog
@@ -583,6 +712,9 @@ public class MainWindowController implements Initializable {
 		}
 	}
 
+	/**
+	 * Stop timing the currently timing task
+	 */
 	@FXML
 	private void stopTimingTask() {
 		TimeSegmentAdapter segment = taskManager.timingSegmentProperty().get();
@@ -590,6 +722,9 @@ public class MainWindowController implements Initializable {
 			segment.stopTiming();
 	}
 
+	/**
+	 * Perform DB cleanup functions
+	 */
 	@FXML
 	private void cleanupDB() {
 		//Prepare the task
@@ -608,11 +743,5 @@ public class MainWindowController implements Initializable {
 		};
 		//Run the task
 		startTaskThread(task);
-	}
-
-	@FXML
-	private void showReportWindow() {
-		reportStage.getIcons().setAll(((Stage) rootPane.getScene().getWindow()).getIcons());
-		reportStage.show();
 	}
 }

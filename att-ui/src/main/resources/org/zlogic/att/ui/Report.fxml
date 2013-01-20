@@ -13,12 +13,20 @@
   <children>
     <GridPane VBox.vgrow="SOMETIMES">
       <children>
-        <Label text="%START_DATE" GridPane.columnIndex="0" GridPane.rowIndex="0">
-          <GridPane.margin>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
-          </GridPane.margin>
+        <Label text="%START_DATE" GridPane.columnIndex="0" GridPane.margin="$x1" GridPane.rowIndex="0">
+          <labelFor>
+            <TextField fx:id="startDate" prefWidth="200.0" text="" GridPane.columnIndex="1" GridPane.rowIndex="0">
+              <GridPane.margin>
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+              </GridPane.margin>
+            </TextField>
+          </labelFor>
         </Label>
-        <Label text="%END_DATE" GridPane.columnIndex="0" GridPane.margin="$x1" GridPane.rowIndex="1" />
+        <Label text="%END_DATE" GridPane.columnIndex="0" GridPane.margin="$x1" GridPane.rowIndex="1">
+          <labelFor>
+            <TextField fx:id="endDate" prefWidth="200.0" GridPane.columnIndex="1" GridPane.margin="$x1" GridPane.rowIndex="1" />
+          </labelFor>
+        </Label>
         <AnchorPane id="AnchorPane" minHeight="-Infinity" minWidth="-Infinity" prefHeight="-1.0" prefWidth="-1.0" GridPane.columnIndex="2" GridPane.rowIndex="0" GridPane.rowSpan="2" GridPane.valignment="TOP">
           <children>
             <Button fx:id="buildReportButton" defaultButton="true" mnemonicParsing="false" onAction="#buildReport" text="%BUILD_REPORT" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
@@ -27,8 +35,8 @@
             <Insets fx:id="x2" />
           </GridPane.margin>
         </AnchorPane>
-        <TextField fx:id="startDate" prefWidth="200.0" text="" GridPane.columnIndex="1" GridPane.margin="$x1" GridPane.rowIndex="0" />
-        <TextField fx:id="endDate" prefWidth="200.0" GridPane.columnIndex="1" GridPane.margin="$x1" GridPane.rowIndex="1" />
+        <fx:reference source="startDate" />
+        <fx:reference source="endDate" />
       </children>
       <columnConstraints>
         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -43,15 +51,18 @@
     <HBox fx:id="statusPane" alignment="CENTER_RIGHT" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="SOMETIMES">
       <children>
         <Label fx:id="progressLabel" text="%GENERATING_REPORT...">
+          <labelFor>
+            <ProgressIndicator fx:id="progressIndicator" progress="0.0">
+              <HBox.margin>
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="$x3" />
+              </HBox.margin>
+            </ProgressIndicator>
+          </labelFor>
           <HBox.margin>
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x3" />
           </HBox.margin>
         </Label>
-        <ProgressIndicator fx:id="progressIndicator" progress="0.0">
-          <HBox.margin>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="$x3" />
-          </HBox.margin>
-        </ProgressIndicator>
+        <fx:reference source="progressIndicator" />
       </children>
     </HBox>
     <HBox id="HBox" fx:id="previewReportPane" alignment="CENTER" spacing="5.0">

@@ -26,14 +26,32 @@ import org.zlogic.att.ui.adapters.TaskManager;
  */
 public class CustomFieldEditorController implements Initializable {
 
+	/**
+	 * TaskManager reference
+	 */
 	private TaskManager taskManager;
+	/**
+	 * Delete button
+	 */
 	@FXML
 	private Button deleteButton;
+	/**
+	 * Custom field column
+	 */
 	@FXML
 	private TableColumn<CustomFieldAdapter, String> columnCustomField;
+	/**
+	 * Custom fields table
+	 */
 	@FXML
 	private TableView<CustomFieldAdapter> customFields;
 
+	/**
+	 * Initializes the controller
+	 *
+	 * @param url initialization URL
+	 * @param resourceBundle supplied resources
+	 */
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
 		customFields.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -51,6 +69,11 @@ public class CustomFieldEditorController implements Initializable {
 		});
 	}
 
+	/**
+	 * Sets the TaskManager reference
+	 *
+	 * @param taskManager the TaskManager reference
+	 */
 	public void setTaskManager(TaskManager taskManager) {
 		this.taskManager = taskManager;
 		customFields.setItems(taskManager.getCustomFields());
@@ -59,11 +82,17 @@ public class CustomFieldEditorController implements Initializable {
 	/*
 	 * Callbacks
 	 */
+	/**
+	 * Hides the window
+	 */
 	@FXML
 	private void hideWindow() {
 		customFields.getScene().getWindow().hide();
 	}
 
+	/**
+	 * Adds a new custom field
+	 */
 	@FXML
 	private void addCustomField() {
 		CustomFieldAdapter newCustomField = taskManager.createCustomField();
@@ -71,6 +100,9 @@ public class CustomFieldEditorController implements Initializable {
 		customFields.getSelectionModel().select(newCustomField);
 	}
 
+	/**
+	 * Deletes a custom field
+	 */
 	@FXML
 	private void deleteCustomField() {
 		for (CustomFieldAdapter customField : customFields.getSelectionModel().getSelectedItems())
