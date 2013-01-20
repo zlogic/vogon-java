@@ -8,12 +8,13 @@
 <?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
+<?scenebuilder-preview-i18n-resource messages.properties?>
 
 <VBox id="VBox" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.CustomFieldEditorController">
   <children>
     <TableView fx:id="customFields" editable="true" VBox.vgrow="ALWAYS">
       <columns>
-        <TableColumn prefWidth="75.0" text="Custom field" fx:id="columnCustomField">
+        <TableColumn prefWidth="75.0" text="%CUSTOM_FIELD" fx:id="columnCustomField">
           <cellValueFactory>
             <PropertyValueFactory property="name" />
           </cellValueFactory>
@@ -22,13 +23,13 @@
     </TableView>
     <HBox alignment="CENTER_RIGHT" VBox.vgrow="NEVER">
       <children>
-        <Button mnemonicParsing="false" onAction="#addCustomField" text="Add">
+        <Button mnemonicParsing="false" onAction="#addCustomField" text="%ADD">
           <HBox.margin>
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
           </HBox.margin>
         </Button>
-        <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteCustomField" text="Delete" HBox.margin="$x1" />
-        <Button defaultButton="true" mnemonicParsing="false" onAction="#hideWindow" text="OK" HBox.margin="$x1" />
+        <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteCustomField" text="%DELETE" HBox.margin="$x1" />
+        <Button defaultButton="true" mnemonicParsing="false" onAction="#hideWindow" text="%OK" HBox.margin="$x1" />
       </children>
       <VBox.margin>
         <Insets />

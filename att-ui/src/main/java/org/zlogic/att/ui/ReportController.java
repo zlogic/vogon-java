@@ -40,6 +40,7 @@ import org.zlogic.att.ui.report.Report;
  */
 public class ReportController implements Initializable {
 
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/messages");
 	private TaskManager taskManager;
 	private ObjectProperty<File> lastDirectory;
 	@FXML
@@ -106,7 +107,7 @@ public class ReportController implements Initializable {
 		Task reportTask = new Task<Void>() {
 			@Override
 			protected Void call() throws Exception {
-				updateMessage("Generating report...");
+				updateMessage(messages.getString("GENERATING_REPORT..."));
 				Report report = new Report(taskManager);
 				report.setStartDate(startDateValue.get());
 				report.setEndDate(endDateValue.get());
@@ -157,9 +158,9 @@ public class ReportController implements Initializable {
 		FileChooser fileChooser = new FileChooser();
 		if (lastDirectory.get() != null && lastDirectory.get().exists())
 			fileChooser.setInitialDirectory(lastDirectory.get());
-		fileChooser.setTitle("Choose where to save the report");
+		fileChooser.setTitle(messages.getString("CHOOSE_WHERE_TO_SAVE_THE_REPORT"));
 		//Prepare file chooser filter
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF files", "*.pdf"));//NOI18N
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(messages.getString("PDF_FILES"), "*.pdf")); //NOI18N
 
 		//Show the dialog
 		File selectedFile;

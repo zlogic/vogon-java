@@ -66,6 +66,7 @@ import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 public class MainWindowController implements Initializable {
 
 	private final static Logger log = Logger.getLogger(MainWindowController.class.getName());
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/messages");
 	private TaskManager taskManager;
 	private ObjectProperty<File> lastDirectory = new SimpleObjectProperty<>();
 	/**
@@ -193,7 +194,7 @@ public class MainWindowController implements Initializable {
 		lastDirectory.addListener(new ChangeListener<File>() {
 			@Override
 			public void changed(ObservableValue<? extends File> ov, File oldFile, File newFile) {
-				preferenceStorage.put("lastDirectory", newFile.toString());
+				preferenceStorage.put("lastDirectory", newFile.toString()); //NOI18N
 			}
 		});
 		lastDirectory.set(preferenceStorage.get("lastDirectory", null) == null ? null : new File(preferenceStorage.get("lastDirectory", null))); //NOI18N
@@ -209,9 +210,9 @@ public class MainWindowController implements Initializable {
 						public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
 							if (newValue != null) {
 								if (newValue)
-									row.getStyleClass().add("timing-segment");
+									row.getStyleClass().add("timing-segment"); //NOI18N
 								else
-									row.getStyleClass().remove("timing-segment");
+									row.getStyleClass().remove("timing-segment"); //NOI18N
 							}
 						}
 					};
@@ -244,7 +245,7 @@ public class MainWindowController implements Initializable {
 					@Override
 					public void handle(DragEvent event) {
 						if (event.getGestureSource() instanceof TableView && ((TableView) event.getGestureSource()).getSelectionModel().getSelectedItem() instanceof TimeSegmentAdapter)
-							row.getStyleClass().add("drag-accept-task");
+							row.getStyleClass().add("drag-accept-task"); //NOI18N
 						event.consume();
 					}
 				}.setRow(row));
@@ -258,7 +259,7 @@ public class MainWindowController implements Initializable {
 
 					@Override
 					public void handle(DragEvent event) {
-						row.getStyleClass().remove("drag-accept-task");
+						row.getStyleClass().remove("drag-accept-task"); //NOI18N
 						event.consume();
 					}
 				}.setRow(row));
@@ -370,17 +371,17 @@ public class MainWindowController implements Initializable {
 		customFieldEditorStage = new Stage();
 		customFieldEditorStage.initModality(Modality.NONE);
 		Parent root = null;
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("CustomFieldEditor.fxml")); //NOI18N
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("CustomFieldEditor.fxml"), messages); //NOI18N
 		loader.setLocation(getClass().getResource("CustomFieldEditor.fxml")); //NOI18N
 		try {
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
-			Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Error loading FXML", ex);
+			Logger.getLogger(getClass().getName()).log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Initialize the scene properties
 		if (root != null) {
 			Scene scene = new Scene(root);
-			customFieldEditorStage.setTitle("Custom field editor");
+			customFieldEditorStage.setTitle(messages.getString("CUSTOM_FIELD_EDITOR"));
 			customFieldEditorStage.setScene(scene);
 		}
 		//Set the task manager
@@ -393,17 +394,17 @@ public class MainWindowController implements Initializable {
 		reportStage = new Stage();
 		reportStage.initModality(Modality.NONE);
 		Parent root = null;
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("Report.fxml")); //NOI18N
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("Report.fxml"), messages); //NOI18N
 		loader.setLocation(getClass().getResource("Report.fxml")); //NOI18N
 		try {
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
-			Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Error loading FXML", ex);
+			Logger.getLogger(getClass().getName()).log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Initialize the scene properties
 		if (root != null) {
 			Scene scene = new Scene(root);
-			reportStage.setTitle("Report");
+			reportStage.setTitle(messages.getString("REPORT"));
 			reportStage.setScene(scene);
 		}
 		//Set the task manager
@@ -557,9 +558,9 @@ public class MainWindowController implements Initializable {
 		FileChooser fileChooser = new FileChooser();
 		if (lastDirectory.get() != null && lastDirectory.get().exists())
 			fileChooser.setInitialDirectory(lastDirectory.get());
-		fileChooser.setTitle("Choose file to import");
+		fileChooser.setTitle(messages.getString("CHOOSE_FILE_TO_IMPORT"));
 		//Prepare file chooser filter
-		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Exported Grindstone XML files", "*.xml"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(messages.getString("EXPORTED_GRINDSTONE_XML_FILES"), "*.xml")); //NOI18N
 
 		//Show the dialog
 		File selectedFile;
@@ -569,15 +570,15 @@ public class MainWindowController implements Initializable {
 			//Choose the importer based on the file extension
 			Importer importer = null;
 			String extension = selectedFile.isFile() ? selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".")) : null; //NOI18N
-			if (extension.equals(".xml")) {
-				log.fine("Extension matched");
+			if (extension.equals(".xml")) { //NOI18N
+				log.fine(messages.getString("EXTENSION_MATCHED"));
 				importer = new GrindstoneImporter(selectedFile);
 			}
 			//Import data
 			if (importer != null)
 				taskManager.getPersistenceHelper().importData(importer);
 			else
-				log.fine("Extension not recognized");
+				log.fine(messages.getString("EXTENSION_NOT_RECOGNIZED"));
 			reloadTasks();
 		}
 	}
@@ -595,13 +596,13 @@ public class MainWindowController implements Initializable {
 		Task<Void> task = new Task<Void>() {
 			@Override
 			protected Void call() throws Exception {
-				updateMessage("Cleaning up DB");
+				updateMessage(messages.getString("CLEANING_UP_DB"));
 				updateProgress(-1, 1);
 
 				taskManager.getPersistenceHelper().cleanupDB();
 
 				updateProgress(1, 1);
-				updateMessage("");
+				updateMessage(""); //NOI18N
 				return null;
 			}
 		};

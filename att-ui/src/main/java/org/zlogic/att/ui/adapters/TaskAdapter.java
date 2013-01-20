@@ -38,6 +38,9 @@ public class TaskAdapter {
 	 * The logger
 	 */
 	private final static Logger log = Logger.getLogger(TaskAdapter.class.getName());
+	/**
+	 * Localization messages
+	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/adapters/messages");
 	/**
 	 * Assigned entity

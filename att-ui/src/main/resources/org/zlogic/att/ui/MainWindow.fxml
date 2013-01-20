@@ -11,29 +11,30 @@
 <?import javafx.scene.effect.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
+<?scenebuilder-preview-i18n-resource messages.properties?>
 <?scenebuilder-stylesheet Style.css?>
 
 <VBox id="VBox" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.MainWindowController">
   <children>
     <MenuBar>
       <menus>
-        <Menu mnemonicParsing="false" text="File">
+        <Menu mnemonicParsing="false" text="%FILE">
           <items>
-            <MenuItem mnemonicParsing="false" onAction="#showReportWindow" text="Build report..." />
-            <MenuItem disable="true" mnemonicParsing="false" onAction="#importGrindstoneData" text="Import Grindstone data..." visible="false" />
-            <MenuItem disable="true" mnemonicParsing="false" onAction="#cleanupDB" text="Cleanup DB" visible="false" fx:id="menuItemCleanupDB" />
+            <MenuItem mnemonicParsing="false" onAction="#showReportWindow" text="%BUILD_REPORT" />
+            <MenuItem disable="true" mnemonicParsing="false" onAction="#importGrindstoneData" text="%IMPORT_GRINDSTONE_DATA..." visible="false" />
+            <MenuItem disable="true" mnemonicParsing="false" onAction="#cleanupDB" text="%CLEANUP_DB" visible="false" fx:id="menuItemCleanupDB" />
             <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" onAction="#exit" text="Exit" />
+            <MenuItem mnemonicParsing="false" onAction="#exit" text="%EXIT" />
           </items>
         </Menu>
-        <Menu mnemonicParsing="false" text="Edit">
+        <Menu mnemonicParsing="false" text="%EDIT">
           <items>
-            <MenuItem mnemonicParsing="false" onAction="#showCustomFieldEditor" text="Edit custom fields..." />
+            <MenuItem mnemonicParsing="false" onAction="#showCustomFieldEditor" text="%EDIT_CUSTOM_FIELDS..." />
           </items>
         </Menu>
-        <Menu mnemonicParsing="false" text="Help">
+        <Menu mnemonicParsing="false" text="%HELP">
           <items>
-            <MenuItem disable="true" mnemonicParsing="false" text="About" />
+            <MenuItem disable="true" mnemonicParsing="false" text="%ABOUT" />
           </items>
         </Menu>
       </menus>
@@ -44,13 +45,13 @@
           <children>
             <HBox id="activeTaskPanel" fx:id="activeTaskPane" VBox.vgrow="NEVER">
               <children>
-                <Label id="" text="Currently timing task:">
+                <Label id="" text="%CURRENTLY_TIMING_TASK:">
                   <HBox.margin>
                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
                   </HBox.margin>
                 </Label>
                 <Label id="" fx:id="activeTaskLabel" style="-fx-font-style: italic;&#10;-fx-font-weight: bold;" HBox.margin="$x1" />
-                <Button mnemonicParsing="false" onAction="#stopTimingTask" text="Stop" HBox.margin="$x1" />
+                <Button mnemonicParsing="false" onAction="#stopTimingTask" text="%STOP" HBox.margin="$x1" />
               </children>
             </HBox>
             <AnchorPane id="AnchorPane" VBox.vgrow="ALWAYS">
@@ -64,42 +65,46 @@
           <children>
             <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
               <children>
-                <Button fx:id="createTransactionButton" mnemonicParsing="false" onAction="#createNewTask" text="New task">
-                  <HBox.margin>
-                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
-                  </HBox.margin>
-                </Button>
-                <Button id="deleteTaskButton" fx:id="duplicateTaskButton" mnemonicParsing="false" onAction="#duplicateSelectedTasks" text="Duplicate task" HBox.margin="$x1" />
-                <Button fx:id="deleteTaskButton" mnemonicParsing="false" onAction="#deleteSelectedTasks" text="Delete task">
+                <Button fx:id="createTransactionButton" mnemonicParsing="false" onAction="#createNewTask" text="%NEW_TASK">
                   <HBox.margin>
                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x2" />
+                  </HBox.margin>
+                </Button>
+                <Button id="deleteTaskButton" fx:id="duplicateTaskButton" mnemonicParsing="false" onAction="#duplicateSelectedTasks" text="%DUPLICATE_TASK">
+                  <HBox.margin>
+                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x2" />
+                  </HBox.margin>
+                </Button>
+                <Button fx:id="deleteTaskButton" mnemonicParsing="false" onAction="#deleteSelectedTasks" text="%DELETE_TASK">
+                  <HBox.margin>
+                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x3" />
                   </HBox.margin>
                 </Button>
               </children>
             </HBox>
             <TableView fx:id="taskList" editable="true" style="&#10;" VBox.vgrow="ALWAYS">
               <columns>
-                <TableColumn prefWidth="75.0" text="Task name" fx:id="columnTaskName">
+                <TableColumn prefWidth="75.0" text="%TASK_NAME" fx:id="columnTaskName">
                   <cellValueFactory>
                     <PropertyValueFactory property="name" />
                   </cellValueFactory>
                 </TableColumn>
-                <TableColumn editable="false" prefWidth="75.0" text="Total time" fx:id="columnTotalTime">
+                <TableColumn editable="false" prefWidth="75.0" text="%TOTAL_TIME" fx:id="columnTotalTime">
                   <cellValueFactory>
                     <PropertyValueFactory property="totalTime" />
                   </cellValueFactory>
                 </TableColumn>
-                <TableColumn editable="false" prefWidth="75.0" text="First time" fx:id="columnFirstTime">
+                <TableColumn editable="false" prefWidth="75.0" text="%FIRST_TIME" fx:id="columnFirstTime">
                   <cellValueFactory>
                     <PropertyValueFactory property="firstTime" />
                   </cellValueFactory>
                 </TableColumn>
-                <TableColumn editable="false" prefWidth="75.0" text="Last time" fx:id="columnLastTime">
+                <TableColumn editable="false" prefWidth="75.0" text="%LAST_TIME" fx:id="columnLastTime">
                   <cellValueFactory>
                     <PropertyValueFactory property="lastTime" />
                   </cellValueFactory>
                 </TableColumn>
-                <TableColumn prefWidth="75.0" text="Completed" fx:id="columnTaskCompleted">
+                <TableColumn prefWidth="75.0" text="%COMPLETED" fx:id="columnTaskCompleted">
                   <cellValueFactory>
                     <PropertyValueFactory property="completed" />
                   </cellValueFactory>
@@ -114,12 +119,12 @@
       <children>
         <ProgressIndicator fx:id="progressIndicator" progress="0.0">
           <HBox.margin>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x3" />
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x4" />
           </HBox.margin>
         </ProgressIndicator>
         <Label fx:id="progressLabel" text="">
           <HBox.margin>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="$x3" />
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="$x4" />
           </HBox.margin>
         </Label>
       </children>

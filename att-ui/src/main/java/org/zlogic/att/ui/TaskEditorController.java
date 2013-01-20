@@ -50,6 +50,7 @@ import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 public class TaskEditorController implements Initializable {
 
 	private final static Logger log = Logger.getLogger(MainWindowController.class.getName());
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/messages");
 	private ObservableList<TaskAdapter> editedTaskList;
 	private List<TaskAdapter> boundTasks = new LinkedList<>();
 	private TaskManager taskManager;
@@ -94,9 +95,9 @@ public class TaskEditorController implements Initializable {
 						public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
 							if (newValue != null) {
 								if (newValue)
-									row.getStyleClass().add("timing-segment");
+									row.getStyleClass().add("timing-segment"); //NOI18N
 								else
-									row.getStyleClass().remove("timing-segment");
+									row.getStyleClass().remove("timing-segment"); //NOI18N
 							}
 						}
 					};
@@ -316,7 +317,7 @@ public class TaskEditorController implements Initializable {
 		} else {
 			updateStartStopText();
 			if (editedTaskList.size() > 1)
-				log.severe("Can only edit a single task at a time");//TODO
+				log.severe(messages.getString("CAN_ONLY_EDIT_A_SINGLE_TASK_AT_A_TIME"));//TODO
 		}
 	}
 
@@ -343,7 +344,7 @@ public class TaskEditorController implements Initializable {
 
 	private void updateStartStopText() {
 		startStop.setDisable(boundTasks.isEmpty());
-		startStop.setText(isTimingCurrentTask() ? "Stop" : "Start");
+		startStop.setText(isTimingCurrentTask() ? messages.getString("STOP") : messages.getString("START"));
 	}
 
 	/*

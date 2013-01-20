@@ -7,20 +7,21 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.web.*?>
+<?scenebuilder-preview-i18n-resource messages.properties?>
 
 <VBox id="VBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.ReportController">
   <children>
     <GridPane VBox.vgrow="SOMETIMES">
       <children>
-        <Label text="Start date" GridPane.columnIndex="0" GridPane.rowIndex="0">
+        <Label text="%START_DATE" GridPane.columnIndex="0" GridPane.rowIndex="0">
           <GridPane.margin>
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
           </GridPane.margin>
         </Label>
-        <Label text="End date" GridPane.columnIndex="0" GridPane.margin="$x1" GridPane.rowIndex="1" />
+        <Label text="%END_DATE" GridPane.columnIndex="0" GridPane.margin="$x1" GridPane.rowIndex="1" />
         <AnchorPane id="AnchorPane" minHeight="-Infinity" minWidth="-Infinity" prefHeight="-1.0" prefWidth="-1.0" GridPane.columnIndex="2" GridPane.rowIndex="0" GridPane.rowSpan="2" GridPane.valignment="TOP">
           <children>
-            <Button fx:id="buildReportButton" defaultButton="true" mnemonicParsing="false" onAction="#buildReport" text="Build report" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+            <Button fx:id="buildReportButton" defaultButton="true" mnemonicParsing="false" onAction="#buildReport" text="%BUILD_REPORT" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
           </children>
           <GridPane.margin>
             <Insets fx:id="x2" />
@@ -41,7 +42,7 @@
     </GridPane>
     <HBox fx:id="statusPane" alignment="CENTER_RIGHT" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="SOMETIMES">
       <children>
-        <Label fx:id="progressLabel" text="Generating report...">
+        <Label fx:id="progressLabel" text="%GENERATING_REPORT...">
           <HBox.margin>
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x3" />
           </HBox.margin>
@@ -55,13 +56,13 @@
     </HBox>
     <HBox id="HBox" fx:id="previewReportPane" alignment="CENTER" spacing="5.0">
       <children>
-        <Label style="-fx-font-weight: bold;" text="Preview report:" />
+        <Label style="-fx-font-weight: bold;" text="%PREVIEW_REPORT:" />
       </children>
     </HBox>
     <WebView fx:id="viewer" prefHeight="271.0" prefWidth="479.0" VBox.margin="$x2" VBox.vgrow="ALWAYS" />
     <HBox id="saveGridPane" fx:id="savePane" alignment="CENTER" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="SOMETIMES">
       <children>
-        <Button fx:id="saveReportButton" defaultButton="false" mnemonicParsing="false" onAction="#saveReport" text="Save PDF..." underline="false">
+        <Button fx:id="saveReportButton" defaultButton="false" mnemonicParsing="false" onAction="#saveReport" text="%SAVE_PDF..." underline="false">
           <HBox.margin>
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x4" />
           </HBox.margin>

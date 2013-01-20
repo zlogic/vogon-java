@@ -6,8 +6,10 @@
 package org.zlogic.att.ui;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -29,6 +31,13 @@ public class Launcher extends Application {
 	 * The logger
 	 */
 	private final static Logger log = Logger.getLogger(Launcher.class.getName());
+	/**
+	 * Localization messages
+	 */
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/messages");
+	/**
+	 * The main window controller
+	 */
 	private MainWindowController controller;
 
 	/**
@@ -44,8 +53,8 @@ public class Launcher extends Application {
 		FXMLLoader loader;
 		try {
 			//Load FXML
-			loader = new FXMLLoader(getClass().getResource("MainWindow.fxml"));
-			loader.setLocation(getClass().getResource("MainWindow.fxml"));
+			loader = new FXMLLoader(getClass().getResource("MainWindow.fxml"), messages); //NOI18N
+			loader.setLocation(getClass().getResource("MainWindow.fxml")); //NOI18N
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
 			log.log(java.util.logging.Level.SEVERE, null, ex);
@@ -56,7 +65,7 @@ public class Launcher extends Application {
 		Scene scene = new Scene(root);
 
 		//Set scene properties
-		stage.setTitle("Awesome Time Tracker");
+		stage.setTitle(messages.getString("AWESOME_TIME_TRACKER"));
 		stage.setScene(scene);
 		stage.getIcons().addAll(getIconImages());
 
@@ -122,7 +131,7 @@ public class Launcher extends Application {
 		List<Image> images = new LinkedList<>();
 		int[] iconSizes = new int[]{16, 24, 32, 48, 64, 128, 256, 512};
 		for (int iconName : iconSizes)
-			images.add(new Image("org/zlogic/att/ui/icon/att-tilt-" + Integer.toString(iconName) + ".png"));
+			images.add(new Image(MessageFormat.format("org/zlogic/att/ui/icon/att-tilt-{0}.png", new Object[]{Integer.toString(iconName)}))); //NOI18N
 		return images;
 	}
 
@@ -131,15 +140,15 @@ public class Launcher extends Application {
 	 */
 	private void initApplication() {
 		//Configure logging to load config from classpath
-		String loggingFile = System.getProperty("java.util.logging.config.file");
+		String loggingFile = System.getProperty("java.util.logging.config.file"); //NOI18N
 		if (loggingFile == null || loggingFile.isEmpty()) {
 			try {
-				java.net.URL url = Thread.currentThread().getContextClassLoader().getResource("logging.properties");
+				java.net.URL url = Thread.currentThread().getContextClassLoader().getResource("logging.properties"); //NOI18N
 				if (url != null)
 					java.util.logging.LogManager.getLogManager().readConfiguration(url.openStream());
 			} catch (IOException | SecurityException e) {
-				log.log(Level.SEVERE, "Error when loading logging configuration", e);
-				System.err.println("Error when loading logging configuration");
+				log.log(Level.SEVERE, messages.getString("ERROR_WHEN_LOADING_LOGGING_CONFIGURATION"), e);
+				System.err.println(messages.getString("ERROR_WHEN_LOADING_LOGGING_CONFIGURATION"));
 			}
 		}
 	}
