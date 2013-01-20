@@ -12,8 +12,13 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.DoubleProperty;
@@ -27,23 +32,32 @@ import net.sf.dynamicreports.report.base.expression.AbstractValueFormatter;
 import net.sf.dynamicreports.report.builder.DynamicReports;
 import net.sf.dynamicreports.report.builder.component.ComponentBuilder;
 import net.sf.dynamicreports.report.builder.component.VerticalListBuilder;
+import net.sf.dynamicreports.report.builder.group.CustomGroupBuilder;
 import net.sf.dynamicreports.report.builder.style.StyleBuilder;
+import net.sf.dynamicreports.report.constant.GroupHeaderLayout;
 import net.sf.dynamicreports.report.constant.HorizontalAlignment;
+import net.sf.dynamicreports.report.constant.SplitType;
 import net.sf.dynamicreports.report.constant.VerticalAlignment;
+import net.sf.dynamicreports.report.datasource.DRDataSource;
 import net.sf.dynamicreports.report.definition.ReportParameters;
 import net.sf.dynamicreports.report.definition.expression.DRIExpression;
 import net.sf.dynamicreports.report.exception.DRException;
 import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.data.JRMapCollectionDataSource;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatterBuilder;
 import org.zlogic.att.data.CustomField;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
+import org.zlogic.att.data.reporting.DateTools;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
 import org.zlogic.att.ui.adapters.TaskManager;
-import reporting.ReportQuery;
+import org.zlogic.att.data.reporting.ReportQuery;
 
+/*
+ * TODO: move internal classes into other files 
+ */
 /**
  * Class for generating a report
  *
@@ -83,6 +97,35 @@ public class Report {
 		}
 	};
 
+	public class DateTimeSegment {
+
+		private Date date;
+		private TimeSegment timeSegment;
+
+		private DateTimeSegment(Date date, TimeSegment timeSegment) {
+			this.date = date;
+			this.timeSegment = timeSegment;
+		}
+
+		public Date getDate() {
+			return date;
+		}
+
+		public TimeSegment getTimeSegment() {
+			return timeSegment;
+		}
+
+		public double getDurationHours() {
+			Period period = timeSegment.getClippedDuration(startDate, endDate);
+			return ((double) period.toStandardDuration().getStandardSeconds()) / 3600;
+		}
+
+		public String getDuration() {
+			Period period = timeSegment.getClippedDuration(startDate, endDate);
+			return period.toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter());
+		}
+	}
+
 	public Report(TaskManager taskManager) {
 		this.taskManager = taskManager;
 	}
@@ -92,7 +135,7 @@ public class Report {
 	}
 
 	public void setStartDate(Date startDate) {
-		this.startDate = startDate;
+		this.startDate = DateTools.getInstance().convertDateToStartOfDay(startDate);
 	}
 
 	public Date getEndDate() {
@@ -100,7 +143,7 @@ public class Report {
 	}
 
 	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
+		this.endDate = DateTools.getInstance().convertDateToEndOfDay(endDate);
 	}
 
 	public DoubleProperty progressProperty() {
@@ -132,6 +175,11 @@ public class Report {
 			return null;
 	}
 
+	/**
+	 * Returns the style for table titles
+	 *
+	 * @return the style for table titles
+	 */
 	protected StyleBuilder getTableTitleStyle() {
 		return DynamicReports.stl.style()
 				.setHorizontalAlignment(HorizontalAlignment.CENTER)
@@ -140,6 +188,11 @@ public class Report {
 				.setBold(true);
 	}
 
+	/**
+	 * Returns the style for column titles
+	 *
+	 * @return the style for column titles
+	 */
 	protected StyleBuilder getColumnTitleStyle() {
 		return DynamicReports.stl.style()
 				.setHorizontalAlignment(HorizontalAlignment.CENTER)
@@ -148,6 +201,12 @@ public class Report {
 				.setFontSize(14);
 	}
 
+	/**
+	 * Returns the builder for the report title component
+	 *
+	 * @param reportQuery the report query (used to get the timeframe)
+	 * @return the builder for the report title component
+	 */
 	protected ComponentBuilder getTitle(ReportQuery reportQuery) {
 		String titleText = MessageFormat.format("Timesheet for {0,date,medium} - {1,date,medium}", new Object[]{reportQuery.getStartDate(), reportQuery.getEndDate()});
 		StyleBuilder titleStyle = DynamicReports.stl.style()
@@ -160,6 +219,13 @@ public class Report {
 		return titleComponentBuilder;
 	}
 
+	/**
+	 * Returns the builder for the task's name and custom fields as a vertical
+	 * list
+	 *
+	 * @return the builder for the task's name and custom fields as a vertical
+	 * list
+	 */
 	protected VerticalListBuilder getTaskWithCustomFields() {
 		//Create title and list
 		StyleBuilder titleStyle = DynamicReports.stl.style()
@@ -228,7 +294,7 @@ public class Report {
 				.sortBy(DynamicReports.asc(startTimeExpression))
 				.columns(
 				DynamicReports.col.column("Task", "owner.name", DynamicReports.type.stringType()),
-				DynamicReports.col.column("Time segment", "description", DynamicReports.type.stringType()),
+				DynamicReports.col.column("Specifics", "description", DynamicReports.type.stringType()),
 				DynamicReports.col.column("Start time", startTimeExpression).setValueFormatter(dateTimeFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT),
 				DynamicReports.col.column("End time", endTimeExpression).setValueFormatter(dateTimeFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT))
 				.setHighlightDetailEvenRows(true)
@@ -237,6 +303,18 @@ public class Report {
 	}
 
 	protected JasperReportBuilder buildTasksReport(ReportQuery reportQuery, List<Task> tasks) {
+		AbstractSimpleExpression<Date> startTimeExpression = new AbstractSimpleExpression<Date>() {
+			@Override
+			public Date evaluate(ReportParameters rp) {
+				Task task = rp.getFieldValue("task");
+				Date earliestStartDate = null;
+				for (TimeSegment timeSegment : task.getTimeSegments()) {
+					Date taskStartDate = timeSegment.getClippedStartTime(startDate, endDate);
+					earliestStartDate = (earliestStartDate == null || (taskStartDate != null && timeSegment.getStartTime().before(earliestStartDate))) ? taskStartDate : earliestStartDate;
+				}
+				return earliestStartDate;
+			}
+		};
 		AbstractSimpleExpression<Period> totalTimeExpression = new AbstractSimpleExpression<Period>() {
 			@Override
 			public Period evaluate(ReportParameters rp) {
@@ -247,6 +325,8 @@ public class Report {
 		return DynamicReports.report()
 				.title(DynamicReports.cmp.text("Tasks").setStyle(getTableTitleStyle()))
 				.addField(DynamicReports.field("task", Task.class))
+				.sortBy(DynamicReports.asc(startTimeExpression))
+				.sortBy(DynamicReports.desc(totalTimeExpression))
 				.columns(
 				DynamicReports.col.componentColumn("Task", getTaskWithCustomFields()),
 				//DynamicReports.col.column("Task", "name", DynamicReports.type.stringType()),
@@ -257,6 +337,54 @@ public class Report {
 				.setDataSource(new JRBeanCollectionDataSource(tasks));
 	}
 
+	protected JasperReportBuilder buildTimesheetReport(ReportQuery reportQuery, List<TimeSegment> timeSegments) {
+		//Date-TimeSegment association list
+		List<DateTimeSegment> dataSource = new LinkedList<>();
+		{
+			Calendar calendar = new GregorianCalendar();
+			for (calendar.setTime(startDate); !calendar.getTime().after(endDate); calendar.add(Calendar.DAY_OF_MONTH, 1)) {
+				Date dayStart = DateTools.getInstance().convertDateToStartOfDay(calendar.getTime());
+				Date dayEnd = DateTools.getInstance().convertDateToEndOfDay(calendar.getTime());
+				for (TimeSegment timeSegment : timeSegments)
+					if (!timeSegment.getClippedDuration(dayStart, dayEnd).equals(Period.ZERO))
+						dataSource.add(new DateTimeSegment(dayStart, timeSegment));
+			}
+		}
+
+		//Style for day headers
+		StyleBuilder dayHeaderStyle = DynamicReports.stl.style()
+				.setBold(true);
+
+		AbstractSimpleExpression<String> dateTitleExpression = new AbstractSimpleExpression<String>() {
+			@Override
+			public String evaluate(ReportParameters rp) {
+				Date date = rp.getFieldValue("date");
+				return MessageFormat.format("{0,date,long}", new Object[]{date});
+			}
+		};
+		CustomGroupBuilder dateGroup = DynamicReports.grp.group(dateTitleExpression)
+				.setStyle(dayHeaderStyle);
+		return DynamicReports.report()
+				.title(
+				DynamicReports.cmp.text("Timesheet")
+				.setStyle(getTableTitleStyle()))
+				.columns(
+				DynamicReports.col.column("Task", "timeSegment.owner.name", DynamicReports.type.stringType()),
+				DynamicReports.col.column("Specifics", "timeSegment.description", DynamicReports.type.stringType()),
+				//DynamicReports.col.column("Duration", "duration", DynamicReports.type.stringType()),
+				DynamicReports.col.column("Hours", "durationHours", DynamicReports.type.doubleType()))
+				.groupBy(dateGroup)
+				.sortBy(DynamicReports.asc("date", Date.class))
+				.setHighlightDetailEvenRows(true)
+				.setColumnTitleStyle(getColumnTitleStyle())
+				.setDataSource(new JRBeanCollectionDataSource(dataSource));
+	}
+
+	/**
+	 * Returns the report in HTML form
+	 *
+	 * @return the report in HTML form
+	 */
 	public String getReportHTML() {
 		return reportHTML;
 	}
@@ -273,6 +401,10 @@ public class Report {
 		report.toPdf(pdfExporter);
 	}
 
+	/**
+	 * Builds the report in DynamicReports form; prepares an HTML report for
+	 * preview.
+	 */
 	public void buildReport() {
 		try {
 			//Get data
@@ -299,7 +431,9 @@ public class Report {
 					DynamicReports.cmp.verticalGap(20),
 					DynamicReports.cmp.subreport(buildTasksReport(reportQuery, tasks)),
 					DynamicReports.cmp.pageBreak(),
-					DynamicReports.cmp.subreport(buildTimeSegmentsReport(reportQuery, timeSegments))).setDataSource(new JREmptyDataSource())
+					DynamicReports.cmp.subreport(buildTimeSegmentsReport(reportQuery, timeSegments)),
+					DynamicReports.cmp.pageBreak(),
+					DynamicReports.cmp.subreport(buildTimesheetReport(reportQuery, timeSegments))).setDataSource(new JREmptyDataSource())
 					.toHtml(htmlExporter);
 			reportHTML = stream.toString("utf-8");
 		} catch (UnsupportedEncodingException | DRException ex) {

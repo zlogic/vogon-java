@@ -63,7 +63,7 @@ public class Task implements Serializable {
 	/**
 	 * Default constructor
 	 */
-	public Task() {
+	protected Task() {
 		id = -1;
 		description = "";
 		name = "";

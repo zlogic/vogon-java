@@ -31,6 +31,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.util.converter.DateStringConverter;
 import net.sf.dynamicreports.report.exception.DRException;
+import org.zlogic.att.data.reporting.DateTools;
 import org.zlogic.att.ui.adapters.TaskManager;
 import org.zlogic.att.ui.report.Report;
 
@@ -87,11 +88,8 @@ public class ReportController implements Initializable {
 		saveReportButton.disableProperty().bind(generatedReport.isNull());
 
 		//Configure dates
-		Calendar calendar = new GregorianCalendar();
-		calendar.set(Calendar.DAY_OF_MONTH, 1);
-		startDateValue.set(calendar.getTime());
-		calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
-		endDateValue.set(calendar.getTime());
+		startDateValue.set(DateTools.getInstance().convertDateToStartOfMonth(new Date()));
+		endDateValue.set(DateTools.getInstance().convertDateToEndOfMonth(new Date()));
 	}
 
 	public void setTaskManager(TaskManager taskManager) {

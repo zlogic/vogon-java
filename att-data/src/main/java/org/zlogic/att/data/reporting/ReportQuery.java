@@ -3,7 +3,7 @@
  * License TBD.
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
-package reporting;
+package org.zlogic.att.data.reporting;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -67,13 +67,7 @@ public class ReportQuery {
 	 * @param startDate the report starting date
 	 */
 	public void setStartDate(Date startDate) {
-		Calendar calendar = new GregorianCalendar();
-		calendar.setTime(startDate);
-		calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY));
-		calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE));
-		calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND));
-		calendar.set(Calendar.MILLISECOND, calendar.getActualMinimum(Calendar.MILLISECOND));
-		this.startDate = calendar.getTime();
+		this.startDate = DateTools.getInstance().convertDateToStartOfDay(startDate);
 	}
 
 	/**
@@ -91,13 +85,7 @@ public class ReportQuery {
 	 * @param endDate the report ending date
 	 */
 	public void setEndDate(Date endDate) {
-		Calendar calendar = new GregorianCalendar();
-		calendar.setTime(endDate);
-		calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMaximum(Calendar.HOUR_OF_DAY));
-		calendar.set(Calendar.MINUTE, calendar.getActualMaximum(Calendar.MINUTE));
-		calendar.set(Calendar.SECOND, calendar.getActualMaximum(Calendar.SECOND));
-		calendar.set(Calendar.MILLISECOND, calendar.getActualMaximum(Calendar.MILLISECOND));
-		this.endDate = calendar.getTime();
+		this.endDate = DateTools.getInstance().convertDateToEndOfDay(endDate);
 	}
 
 	/**
