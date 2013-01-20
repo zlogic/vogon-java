@@ -8,6 +8,7 @@ package org.zlogic.att.ui.adapters;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.BooleanProperty;
@@ -37,6 +38,7 @@ public class TaskAdapter {
 	 * The logger
 	 */
 	private final static Logger log = Logger.getLogger(TaskAdapter.class.getName());
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/adapters/messages");
 	/**
 	 * Assigned entity
 	 */
@@ -345,7 +347,7 @@ public class TaskAdapter {
 		for (TimeSegment segment : task.getTimeSegments()) {
 			TimeSegmentAdapter segmentAdapter = taskManager.findTimeSegmentAdapter(segment);
 			if (segmentAdapter == null) {
-				log.log(Level.SEVERE, "Cannot find time segment {0} ({1}) during updateTimeSegments", new Object[]{segment.getId(), segment.getDescription()});
+				log.log(Level.SEVERE, messages.getString("CANNOT_FIND_TIME_SEGMENT_DURING_UPDATETIMESEGMENTS"), new Object[]{segment.getId(), segment.getDescription()});
 				continue;
 			}
 			if (!timeSegments.contains(segmentAdapter))

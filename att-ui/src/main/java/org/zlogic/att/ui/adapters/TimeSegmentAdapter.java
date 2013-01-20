@@ -277,7 +277,7 @@ public class TimeSegmentAdapter {
 	public StringProperty durationProperty() {
 		return duration;
 	}
-	
+
 	/**
 	 * Description property
 	 *

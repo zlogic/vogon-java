@@ -45,8 +45,8 @@ public class CustomFieldAdapter implements Comparable<CustomFieldAdapter> {
 	private ChangeListener<String> nameChangeListener = new ChangeListener<String>() {
 		@Override
 		public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
-			oldValue = oldValue == null ? "" : oldValue;
-			newValue = newValue == null ? "" : newValue;
+			oldValue = oldValue == null ? "" : oldValue; //NOI18N
+			newValue = newValue == null ? "" : newValue; //NOI18N
 			if (!oldValue.equals(newValue) && getTaskManager() != null) {
 				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private String newValue;

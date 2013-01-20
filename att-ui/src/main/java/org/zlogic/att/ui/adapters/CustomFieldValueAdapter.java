@@ -46,7 +46,7 @@ public class CustomFieldValueAdapter {
 	private ChangeListener<String> valueChangeListener = new ChangeListener<String>() {
 		@Override
 		public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
-			oldValue = oldValue == null ? "" : oldValue;
+			oldValue = oldValue == null ? "" : oldValue; //NOI18N
 			if (newValue != null && !oldValue.equals(newValue) && getTaskManager() != null) {
 				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private String newValue;
@@ -160,7 +160,7 @@ public class CustomFieldValueAdapter {
 		//Perform update
 		if (taskAdapter != null && taskAdapter.getTask() != null) {
 			String customFieldValue = taskAdapter.getTask().getCustomField(customFieldAdapter.getCustomField());
-			value.setValue(customFieldValue == null ? "" : customFieldValue);
+			value.setValue(customFieldValue == null ? "" : customFieldValue); //NOI18N
 		}
 		//Restore listener
 		value.addListener(valueChangeListener);

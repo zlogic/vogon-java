@@ -18,6 +18,7 @@ import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -64,124 +65,276 @@ import org.zlogic.att.ui.adapters.TaskManager;
  */
 public class Report {
 
+	/**
+	 * Localization messages
+	 */
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/report/messages");
+	/**
+	 * TaskManager reference
+	 */
 	private TaskManager taskManager;
+	/**
+	 * Report start date
+	 */
 	private Date startDate;
+	/**
+	 * Report end date
+	 */
 	private Date endDate;
+	/**
+	 * Property to indicate the progress (0..1)
+	 */
 	private DoubleProperty progress = new SimpleDoubleProperty(-1);
+	/**
+	 * Generated report HTML
+	 */
 	private String reportHTML;
+	/**
+	 * Generated report
+	 */
 	private JasperReportBuilder report;
+	/**
+	 * Formatter to output date and time
+	 */
 	private AbstractValueFormatter<String, Date> dateTimeFormatter = new AbstractValueFormatter<String, Date>() {
 		@Override
 		public String format(Date value, ReportParameters reportParameters) {
-			return MessageFormat.format("{0,date,short}, {0,time,medium}", new Object[]{value});
+			return MessageFormat.format(messages.getString("DATE_TIME_FORMAT"), new Object[]{value});
 		}
 	};
+	/**
+	 * Formatter to output a Joda period
+	 */
 	private AbstractValueFormatter<String, Period> periodFormatter = new AbstractValueFormatter<String, Period>() {
 		@Override
 		public String format(Period value, ReportParameters reportParameters) {
 			return value.normalizedStandard(PeriodType.time()).toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter());
 		}
 	};
+	/**
+	 * Formatter to output a custom field name
+	 */
 	private AbstractValueFormatter<String, CustomField> customFieldNameFormatter = new AbstractValueFormatter<String, CustomField>() {
 		@Override
 		public String format(CustomField value, ReportParameters reportParameters) {
 			return value.getName();
 		}
 	};
+	/**
+	 * Formatter to output a custom field value for the task
+	 */
 	private AbstractValueFormatter<String, CustomField> customFieldValueFormatter = new AbstractValueFormatter<String, CustomField>() {
 		@Override
 		public String format(CustomField value, ReportParameters reportParameters) {
-			Task task = reportParameters.getFieldValue("task");
+			Task task = reportParameters.getFieldValue("task"); //NOI18N
 			return task.getCustomField(value);
 		}
 	};
 
+	/**
+	 * Class to store a date and a time segment
+	 */
 	public class DateTimeSegment {
 
+		/**
+		 * The date
+		 */
 		private Date date;
+		/**
+		 * The times segment
+		 */
 		private TimeSegment timeSegment;
 
+		/**
+		 * Constructor of a DateTimeSegment
+		 *
+		 * @param date the date
+		 * @param timeSegment the TimeSegment
+		 */
 		private DateTimeSegment(Date date, TimeSegment timeSegment) {
 			this.date = date;
 			this.timeSegment = timeSegment;
 		}
 
+		/**
+		 * Returns the date
+		 *
+		 * @return the date
+		 */
 		public Date getDate() {
 			return date;
 		}
 
+		/**
+		 * Returns the time segment
+		 *
+		 * @return the time segment
+		 */
 		public TimeSegment getTimeSegment() {
 			return timeSegment;
 		}
 
+		/**
+		 * Returns the duration of the time segment, clipped with the report's
+		 * Start and End dates, in hours
+		 *
+		 * @return the duration of the time segment
+		 */
 		public double getDurationHours() {
 			Period period = timeSegment.getClippedDuration(startDate, endDate).normalizedStandard(PeriodType.time());
 			return ((double) period.toStandardDuration().getStandardSeconds()) / 3600;
 		}
 
+		/**
+		 * Returns the duration of the time segment, clipped with the report's
+		 * Start and End dates as a formatted HH:mm:ss string
+		 *
+		 * @return the duration of the time segment
+		 */
 		public String getDuration() {
 			Period period = timeSegment.getClippedDuration(startDate, endDate).normalizedStandard(PeriodType.time());
 			return period.toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter());
 		}
 	}
 
+	/**
+	 * Class to store a custom field value and a duration for this custom field
+	 */
 	public class CustomFieldTime {
 
+		/**
+		 * The CustomField
+		 */
 		private CustomField customField;
+		/**
+		 * The CustomField value, taken from a series of tasks
+		 */
 		private String customFieldValue;
+		/**
+		 * The duration of the CustomField's Value
+		 */
 		private Period duration;
 
+		/**
+		 * Constructor of a CustomFieldTime
+		 *
+		 * @param customField the associated CustomField
+		 * @param customFieldValue the value of the associated CustomField
+		 * @param duration the duration for this CustomFieldTime
+		 */
 		private CustomFieldTime(CustomField customField, String customFieldValue, Period duration) {
 			this.customField = customField;
 			this.customFieldValue = customFieldValue;
 			this.duration = duration;
 		}
 
+		/**
+		 * Returns the associated CustomField
+		 *
+		 * @return the associated CustomField
+		 */
 		public CustomField getCustomField() {
 			return customField;
 		}
 
+		/**
+		 * Returns the CustomField's value
+		 *
+		 * @return the CustomField's value
+		 */
 		public String getCustomFieldValue() {
 			return customFieldValue;
 		}
 
+		/**
+		 * Adds a duration to this CustomFieldTime's duration
+		 *
+		 * @param add the duration to ass
+		 */
 		public void addDuration(Period add) {
 			duration = duration.plus(add);
 		}
 
+		/**
+		 * Returns the duration for this CustomFieldTime
+		 *
+		 * @return the duration
+		 */
 		public Period getDuration() {
 			return duration;
 		}
 
+		/**
+		 * Returns the duration for this CustomFieldTime in hours
+		 *
+		 * @return the duration in hours
+		 */
 		public Double getDurationHours() {
 			return ((double) duration.normalizedStandard(PeriodType.time()).toStandardDuration().getStandardSeconds()) / 3600;
 		}
 	}
 
+	/**
+	 * Creates a report
+	 *
+	 * @param taskManager the TaskManager reference
+	 */
 	public Report(TaskManager taskManager) {
 		this.taskManager = taskManager;
 	}
 
+	/**
+	 * Returns the report starting date
+	 *
+	 * @return the report starting date
+	 */
 	public Date getStartDate() {
 		return startDate;
 	}
 
+	/**
+	 * Sets the report starting date. Only the date will be used, time is
+	 * ignored.
+	 *
+	 * @param startDate the report starting date
+	 */
 	public void setStartDate(Date startDate) {
 		this.startDate = DateTools.getInstance().convertDateToStartOfDay(startDate);
 	}
 
+	/**
+	 * Returns the report ending date.
+	 *
+	 * @return the report ending date
+	 */
 	public Date getEndDate() {
 		return endDate;
 	}
 
+	/**
+	 * Sets the report ending date. Only the date will be used, time is ignored.
+	 *
+	 * @param endDate the report ending date
+	 */
 	public void setEndDate(Date endDate) {
 		this.endDate = DateTools.getInstance().convertDateToEndOfDay(endDate);
 	}
 
+	/**
+	 * Progress property which indicates completion state of the report
+	 * generation task. Is between [0..1].
+	 *
+	 * @return the progress property
+	 */
 	public DoubleProperty progressProperty() {
 		return progress;
 	}
 
+	/**
+	 * Returns the current locale date format
+	 *
+	 * @return the current locale date format
+	 */
 	protected String getDateFormat() {
 		DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT);
 		if (dateFormat instanceof SimpleDateFormat)
@@ -190,19 +343,15 @@ public class Report {
 			return null;
 	}
 
+	/**
+	 * Returns the current locale time format
+	 *
+	 * @return the current locale time format
+	 */
 	protected String getTimeFormat() {
 		DateFormat timeFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM);
 		if (timeFormat instanceof SimpleDateFormat)
 			return ((SimpleDateFormat) timeFormat).toPattern();
-		else
-			return null;
-	}
-
-	protected String getDateTimeFormat() {
-		String dateFormat = getDateFormat();
-		String timeFormat = getTimeFormat();
-		if (dateFormat != null && timeFormat != null)
-			return dateFormat + " " + timeFormat;
 		else
 			return null;
 	}
@@ -253,7 +402,7 @@ public class Report {
 	 * @return the builder for the report title component
 	 */
 	protected ComponentBuilder getTitle(ReportQuery reportQuery) {
-		String titleText = MessageFormat.format("Timesheet for {0,date,medium} - {1,date,medium}", new Object[]{reportQuery.getStartDate(), reportQuery.getEndDate()});
+		String titleText = MessageFormat.format(messages.getString("TIMESHEET_HEADER"), new Object[]{reportQuery.getStartDate(), reportQuery.getEndDate()});
 		StyleBuilder titleStyle = DynamicReports.stl.style()
 				.setHorizontalAlignment(HorizontalAlignment.CENTER)
 				.setVerticalAlignment(VerticalAlignment.MIDDLE)
@@ -273,15 +422,14 @@ public class Report {
 		AbstractSimpleExpression<String> lastPageFooterExpression = new AbstractSimpleExpression<String>() {
 			@Override
 			public String evaluate(ReportParameters rp) {
-				return MessageFormat.format("Report generated on {0,date,long} {0,time,long} by Awesome Time Tracker", new Object[]{new Date()});
+				return MessageFormat.format(messages.getString("REPORT_FOOTER"), new Object[]{new Date()});
 			}
 		};
 		StyleBuilder lastPageFooterStyle = DynamicReports.stl.style()
 				.setItalic(true)
 				.setFontSize(10)
 				.setVerticalAlignment(VerticalAlignment.MIDDLE)
-				.setHorizontalAlignment(HorizontalAlignment.RIGHT)
-				.setFontName("OpenSans");
+				.setHorizontalAlignment(HorizontalAlignment.RIGHT);
 		return DynamicReports.cmp.text(lastPageFooterExpression).setStyle(lastPageFooterStyle).setHeight(20);
 	}
 
@@ -298,7 +446,7 @@ public class Report {
 				.setBold(true);
 		VerticalListBuilder customFieldsList = DynamicReports.cmp.verticalList()
 				.add(
-				DynamicReports.cmp.text(DynamicReports.field("name", String.class))
+				DynamicReports.cmp.text(DynamicReports.field("name", String.class)) //NOI18N
 				.setStyle(titleStyle));
 		//Style for custom field names
 		StyleBuilder customFieldNameStyle = DynamicReports.stl.style()
@@ -329,11 +477,18 @@ public class Report {
 		return customFieldsList;
 	}
 
-	protected JasperReportBuilder buildTimeSegmentsReport(ReportQuery reportQuery, List<TimeSegment> timeSegments) {
+	/**
+	 * Builds a report on all time segments: every time segment's task,
+	 * description, start and end time
+	 *
+	 * @param timeSegments the list of time segments
+	 * @return the report on time segments
+	 */
+	protected JasperReportBuilder buildTimeSegmentsReport(List<TimeSegment> timeSegments) {
 		AbstractSimpleExpression<Date> startTimeExpression = new AbstractSimpleExpression<Date>() {
 			@Override
 			public Date evaluate(ReportParameters rp) {
-				TimeSegment timeSegment = rp.getFieldValue("timeSegment");
+				TimeSegment timeSegment = rp.getFieldValue("timeSegment"); //NOI18N
 				Date clippedStartDate = timeSegment.getClippedStartTime(startDate, endDate);
 				if (clippedStartDate != null)
 					return clippedStartDate;
@@ -344,7 +499,7 @@ public class Report {
 		AbstractSimpleExpression<Date> endTimeExpression = new AbstractSimpleExpression<Date>() {
 			@Override
 			public Date evaluate(ReportParameters rp) {
-				TimeSegment timeSegment = rp.getFieldValue("timeSegment");
+				TimeSegment timeSegment = rp.getFieldValue("timeSegment"); //NOI18N
 				Date clippedEndDate = timeSegment.getClippedEndTime(startDate, endDate);
 				if (clippedEndDate != null)
 					return clippedEndDate;
@@ -353,24 +508,31 @@ public class Report {
 			}
 		};
 		return DynamicReports.report()
-				.pageHeader(DynamicReports.cmp.text("Full time report").setStyle(getPageHeaderStyle()))
-				.addField(DynamicReports.field("timeSegment", Date.class))
+				.pageHeader(DynamicReports.cmp.text(messages.getString("FULL_TIME_REPORT")).setStyle(getPageHeaderStyle()))
+				.addField(DynamicReports.field("timeSegment", Date.class)) //NOI18N
 				.sortBy(DynamicReports.asc(startTimeExpression))
 				.columns(
-				DynamicReports.col.column("Task", "owner.name", DynamicReports.type.stringType()),
-				DynamicReports.col.column("Specifics", "description", DynamicReports.type.stringType()),
-				DynamicReports.col.column("Start time", startTimeExpression).setValueFormatter(dateTimeFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT),
-				DynamicReports.col.column("End time", endTimeExpression).setValueFormatter(dateTimeFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT))
+				DynamicReports.col.column(messages.getString("TASK"), "owner.name", DynamicReports.type.stringType()), //NOI18N
+				DynamicReports.col.column(messages.getString("SPECIFICS"), "description", DynamicReports.type.stringType()), //NOI18N
+				DynamicReports.col.column(messages.getString("START_TIME"), startTimeExpression).setValueFormatter(dateTimeFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT),
+				DynamicReports.col.column(messages.getString("END_TIME"), endTimeExpression).setValueFormatter(dateTimeFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT))
 				.setHighlightDetailEvenRows(true)
 				.setColumnTitleStyle(getColumnTitleStyle())
 				.setDataSource(new JRBeanCollectionDataSource(timeSegments));
 	}
 
-	protected JasperReportBuilder buildTasksReport(ReportQuery reportQuery, List<Task> tasks) {
+	/**
+	 * Builds a report on all tasks: every task's name, description, custom
+	 * fields and total time
+	 *
+	 * @param tasks the list of tasks
+	 * @return the report on tasks
+	 */
+	protected JasperReportBuilder buildTasksReport(List<Task> tasks) {
 		AbstractSimpleExpression<Date> startTimeExpression = new AbstractSimpleExpression<Date>() {
 			@Override
 			public Date evaluate(ReportParameters rp) {
-				Task task = rp.getFieldValue("task");
+				Task task = rp.getFieldValue("task"); //NOI18N
 				Date earliestStartDate = null;
 				for (TimeSegment timeSegment : task.getTimeSegments()) {
 					Date taskStartDate = timeSegment.getClippedStartTime(startDate, endDate);
@@ -382,32 +544,40 @@ public class Report {
 		AbstractSimpleExpression<Period> totalTimeExpression = new AbstractSimpleExpression<Period>() {
 			@Override
 			public Period evaluate(ReportParameters rp) {
-				Task task = rp.getFieldValue("task");
+				Task task = rp.getFieldValue("task"); //NOI18N
 				return task.getTotalTime(startDate, endDate);
 			}
 		};
 		return DynamicReports.report()
-				.pageHeader(DynamicReports.cmp.text("Tasks").setStyle(getPageHeaderStyle()))
-				.addField(DynamicReports.field("task", Task.class))
+				.pageHeader(DynamicReports.cmp.text(messages.getString("TASKS")).setStyle(getPageHeaderStyle()))
+				.addField(DynamicReports.field("task", Task.class)) //NOI18N
 				.sortBy(DynamicReports.asc(startTimeExpression))
 				.sortBy(DynamicReports.desc(totalTimeExpression))
 				.columns(
-				DynamicReports.col.componentColumn("Task", getTaskWithCustomFields()),
+				DynamicReports.col.componentColumn(messages.getString("TASK"), getTaskWithCustomFields()),
 				//DynamicReports.col.column("Task", "name", DynamicReports.type.stringType()),
-				DynamicReports.col.column("Description", "description", DynamicReports.type.stringType()),
-				DynamicReports.col.column("Total time", totalTimeExpression).setValueFormatter(periodFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT))
+				DynamicReports.col.column(messages.getString("DESCRIPTION"), "description", DynamicReports.type.stringType()), //NOI18N
+				DynamicReports.col.column(messages.getString("TOTAL_TIME"), totalTimeExpression).setValueFormatter(periodFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT))
 				.setHighlightDetailEvenRows(true)
 				.setColumnTitleStyle(getColumnTitleStyle())
 				.setDataSource(new JRBeanCollectionDataSource(tasks));
 	}
 
-	protected JasperReportBuilder buildCustomFieldReport(ReportQuery reportQuery, List<Task> tasks, CustomField customField) {
+	/**
+	 * Builds a report on a custom field: the list of custom field values and
+	 * the total for associated task. Creates a table and a pie chart.
+	 *
+	 * @param tasks the list of tasks
+	 * @param customField the custom field
+	 * @return the report on a custom field
+	 */
+	protected JasperReportBuilder buildCustomFieldReport(List<Task> tasks, CustomField customField) {
 		//Prepare value-time map
 		Map<String, CustomFieldTime> customFieldData = new TreeMap<>();
 		for (Task task : tasks) {
 			Period duration = task.getTotalTime();
 			String customFieldValue = task.getCustomField(customField);
-			customFieldValue = customFieldValue != null ? customFieldValue : "";
+			customFieldValue = customFieldValue != null ? customFieldValue : ""; //NOI18N
 			if (customFieldData.containsKey(customFieldValue))
 				customFieldData.get(customFieldValue).addDuration(duration);
 			else
@@ -415,36 +585,49 @@ public class Report {
 		}
 		//Prepare report
 		return DynamicReports.report()
-				.title(DynamicReports.cmp.text("Statistics for " + customField.getCustomField().getName())
+				.title(DynamicReports.cmp.text(
+				MessageFormat.format(messages.getString("STATISTICS_HEADER"), new Object[]{customField.getCustomField().getName()}))
 				.setStyle(getTableTitleStyle()))
 				.summary(
 				DynamicReports.cht.pieChart()
-				.setKey("customFieldValue", String.class)
-				.series(DynamicReports.cht.serie("durationHours", Double.class))
+				.setKey("customFieldValue", String.class) //NOI18N
+				.series(DynamicReports.cht.serie("durationHours", Double.class)) //NOI18N
 				.setHeight(500))
 				.columns(
-				DynamicReports.col.column("Field", "customFieldValue", DynamicReports.type.stringType()),
-				DynamicReports.col.column("Total time", "duration", Period.class).setValueFormatter(periodFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT))
+				DynamicReports.col.column(messages.getString("FIELD"), "customFieldValue", DynamicReports.type.stringType()), //NOI18N
+				DynamicReports.col.column(messages.getString("TOTAL_TIME"), "duration", Period.class).setValueFormatter(periodFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT)) //NOI18N
 				.setHighlightDetailEvenRows(true)
 				.setColumnTitleStyle(getColumnTitleStyle())
 				.setDataSource(new JRBeanCollectionDataSource(customFieldData.values()));
 	}
 
-	protected JasperReportBuilder buildCustomFieldsReport(ReportQuery reportQuery, List<Task> tasks) {
+	/**
+	 * Builds a report on all custom fields's values.
+	 *
+	 * @param tasks the list of tasks
+	 * @return the report on custom fields
+	 */
+	protected JasperReportBuilder buildCustomFieldsReport(List<Task> tasks) {
 		List<ComponentBuilder> customFieldReports = new LinkedList<>();
 		for (CustomFieldAdapter customField : taskManager.getCustomFields()) {
 			customFieldReports.add(DynamicReports.cmp.pageBreak());
 			customFieldReports.add(
 					DynamicReports.cmp.subreport(
-					buildCustomFieldReport(reportQuery, tasks, customField.getCustomField())));
+					buildCustomFieldReport(tasks, customField.getCustomField())));
 		}
 		return DynamicReports.report()
-				.pageHeader(DynamicReports.cmp.text("Statistics").setStyle(getPageHeaderStyle()))
+				.pageHeader(DynamicReports.cmp.text(messages.getString("STATISTICS")).setStyle(getPageHeaderStyle()))
 				.detail(customFieldReports.toArray(new ComponentBuilder[0]))
 				.setDataSource(new JREmptyDataSource());
 	}
 
-	protected JasperReportBuilder buildTimesheetReport(ReportQuery reportQuery, List<TimeSegment> timeSegments) {
+	/**
+	 * Builds a timesheet report: a list of all time segments for every day
+	 *
+	 * @param timeSegments the list of time segments
+	 * @return the timesheet report
+	 */
+	protected JasperReportBuilder buildTimesheetReport(List<TimeSegment> timeSegments) {
 		//Date-TimeSegment association list
 		List<DateTimeSegment> dataSource = new LinkedList<>();
 		{
@@ -466,22 +649,22 @@ public class Report {
 		AbstractSimpleExpression<String> dateTitleExpression = new AbstractSimpleExpression<String>() {
 			@Override
 			public String evaluate(ReportParameters rp) {
-				Date date = rp.getFieldValue("date");
-				return MessageFormat.format("{0,date,long}", new Object[]{date});
+				Date date = rp.getFieldValue("date"); //NOI18N
+				return MessageFormat.format(messages.getString("DATE_FORMAT"), new Object[]{date});
 			}
 		};
 		CustomGroupBuilder dateGroup = DynamicReports.grp.group(dateTitleExpression)
 				.setStyle(dayHeaderStyle)
 				.setPadding(0);
 		return DynamicReports.report()
-				.pageHeader(DynamicReports.cmp.text("Timesheet").setStyle(getPageHeaderStyle()))
+				.pageHeader(DynamicReports.cmp.text(messages.getString("TIMESHEET")).setStyle(getPageHeaderStyle()))
 				.columns(
-				DynamicReports.col.column("Task", "timeSegment.owner.name", DynamicReports.type.stringType()),
-				DynamicReports.col.column("Specifics", "timeSegment.description", DynamicReports.type.stringType()),
+				DynamicReports.col.column(messages.getString("TASK"), "timeSegment.owner.name", DynamicReports.type.stringType()), //NOI18N
+				DynamicReports.col.column(messages.getString("SPECIFICS"), "timeSegment.description", DynamicReports.type.stringType()), //NOI18N
 				//DynamicReports.col.column("Duration", "duration", DynamicReports.type.stringType()),
-				DynamicReports.col.column("Hours", "durationHours", DynamicReports.type.doubleType()))
+				DynamicReports.col.column(messages.getString("HOURS"), "durationHours", DynamicReports.type.doubleType())) //NOI18N
 				.groupBy(dateGroup)
-				.sortBy(DynamicReports.asc("date", Date.class))
+				.sortBy(DynamicReports.asc("date", Date.class)) //NOI18N
 				.setHighlightDetailEvenRows(true)
 				.setColumnTitleStyle(getColumnTitleStyle())
 				.setDataSource(new JRBeanCollectionDataSource(dataSource));
@@ -510,7 +693,7 @@ public class Report {
 
 	/**
 	 * Builds the report in DynamicReports form; prepares an HTML report for
-	 * preview.
+	 * preview. Only the time between startDate and endDate will be used.
 	 */
 	public void buildReport() {
 		try {
@@ -540,17 +723,17 @@ public class Report {
 					.title(getTitle(reportQuery))
 					.detail(
 					DynamicReports.cmp.verticalGap(20),
-					DynamicReports.cmp.subreport(buildTasksReport(reportQuery, tasks)),
+					DynamicReports.cmp.subreport(buildTasksReport(tasks)),
 					DynamicReports.cmp.pageBreak(),
-					DynamicReports.cmp.subreport(buildCustomFieldsReport(reportQuery, tasks)),
+					DynamicReports.cmp.subreport(buildCustomFieldsReport(tasks)),
 					DynamicReports.cmp.pageBreak(),
-					DynamicReports.cmp.subreport(buildTimeSegmentsReport(reportQuery, timeSegments)),
+					DynamicReports.cmp.subreport(buildTimeSegmentsReport(timeSegments)),
 					DynamicReports.cmp.pageBreak(),
-					DynamicReports.cmp.subreport(buildTimesheetReport(reportQuery, timeSegments)))
+					DynamicReports.cmp.subreport(buildTimesheetReport(timeSegments)))
 					.lastPageFooter(getLastFooter())
-					.setDataSource(new JREmptyDataSource()).addProperty("net.sf.jasperreports.awt.ignore.missing.font", "true")
+					.setDataSource(new JREmptyDataSource())
 					.toHtml(htmlExporter);
-			reportHTML = stream.toString("utf-8");
+			reportHTML = stream.toString("utf-8"); //NOI18N
 		} catch (UnsupportedEncodingException | DRException ex) {
 			Logger.getLogger(Report.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (Throwable ex) {
