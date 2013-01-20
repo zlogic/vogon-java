@@ -69,6 +69,8 @@ public class TaskEditorController implements Initializable {
 	@FXML
 	private TableColumn<TimeSegmentAdapter, Date> columnEnd;
 	@FXML
+	private TableColumn<TimeSegmentAdapter, String> columnDuration;
+	@FXML
 	private TableColumn<TimeSegmentAdapter, String> columnDescription;
 	@FXML
 	private TableView<TimeSegmentAdapter> timeSegments;
@@ -164,6 +166,15 @@ public class TaskEditorController implements Initializable {
 				return cell;
 			}
 		});
+		columnDuration.setCellFactory(new Callback<TableColumn<TimeSegmentAdapter, String>, TableCell<TimeSegmentAdapter, String>>() {
+			@Override
+			public TableCell<TimeSegmentAdapter, String> call(TableColumn<TimeSegmentAdapter, String> p) {
+				TextFieldTableCell<TimeSegmentAdapter, String> cell = new TextFieldTableCell<>();
+				cell.setConverter(new DefaultStringConverter());
+				cell.setAlignment(Pos.CENTER_RIGHT);
+				return cell;
+			}
+		});
 		columnStart.setCellFactory(new Callback<TableColumn<TimeSegmentAdapter, Date>, TableCell<TimeSegmentAdapter, Date>>() {
 			@Override
 			public TableCell<TimeSegmentAdapter, Date> call(TableColumn<TimeSegmentAdapter, Date> p) {
@@ -203,8 +214,9 @@ public class TaskEditorController implements Initializable {
 		//Set column sizes
 		//TODO: make sure this keeps working correctly
 		customProperties.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-		columnStart.prefWidthProperty().bind(timeSegments.widthProperty().multiply(3).divide(10));
-		columnEnd.prefWidthProperty().bind(timeSegments.widthProperty().multiply(3).divide(10));
+		columnStart.prefWidthProperty().bind(timeSegments.widthProperty().multiply(2).divide(10));
+		columnEnd.prefWidthProperty().bind(timeSegments.widthProperty().multiply(2).divide(10));
+		columnDuration.prefWidthProperty().bind(timeSegments.widthProperty().multiply(2).divide(10));
 		columnDescription.prefWidthProperty().bind(timeSegments.widthProperty().multiply(4).divide(10).subtract(15));
 
 		//Default sort order

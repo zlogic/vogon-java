@@ -359,7 +359,7 @@ public class TaskAdapter {
 	protected void updateTimeProperty() {
 		firstTime.setValue(getEarliestTime());
 		lastTime.setValue(getLatestTime());
-		totalTime.setValue(task.getTotalTime().toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter()));
+		totalTime.setValue(task.getTotalTime().toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter()));//TODO: reuse this formatter
 	}
 
 	/**

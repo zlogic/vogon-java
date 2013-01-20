@@ -18,6 +18,7 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javax.persistence.EntityManager;
+import org.joda.time.format.PeriodFormatterBuilder;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.TransactedChange;
@@ -41,6 +42,10 @@ public class TimeSegmentAdapter {
 	 * Description property
 	 */
 	private StringProperty description = new SimpleStringProperty();
+	/**
+	 * Last (latest) time assigned property (generated)
+	 */
+	private StringProperty duration = new SimpleStringProperty();
 	/**
 	 * Start time property
 	 */
@@ -265,6 +270,15 @@ public class TimeSegmentAdapter {
 	}
 
 	/**
+	 * Duration property
+	 *
+	 * @return the duration property
+	 */
+	public StringProperty durationProperty() {
+		return duration;
+	}
+	
+	/**
 	 * Description property
 	 *
 	 * @return the description property
@@ -341,6 +355,7 @@ public class TimeSegmentAdapter {
 			start.setValue(segment.getStartTime());
 		if (end.get() == null || !end.get().equals(segment.getEndTime()))
 			end.setValue(segment.getEndTime());
+		duration.setValue(segment.getDuration().toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter()));
 		//Restore listener
 		description.addListener(descriptionChangeListener);
 		start.addListener(startChangeListener);

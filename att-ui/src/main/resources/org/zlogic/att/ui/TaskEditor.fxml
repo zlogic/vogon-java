@@ -71,6 +71,11 @@
                                 <PropertyValueFactory property="end" />
                               </cellValueFactory>
                             </TableColumn>
+                            <TableColumn prefWidth="75.0" text="Duration" fx:id="columnDuration">
+                              <cellValueFactory>
+                                <PropertyValueFactory property="duration" />
+                              </cellValueFactory>
+                            </TableColumn>
                             <TableColumn prefWidth="75.0" text="Description" fx:id="columnDescription">
                               <cellValueFactory>
                                 <PropertyValueFactory property="description" />
