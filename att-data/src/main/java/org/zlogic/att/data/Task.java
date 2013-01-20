@@ -225,9 +225,9 @@ public class Task implements Serializable {
 
 	/**
 	 * Returns this class instance (return this); required for some reflection
-	 * fuctions
+	 * functions
 	 *
-	 * @return this task instance
+	 * @return this Task instance
 	 */
 	public Task getTask() {
 		return this;

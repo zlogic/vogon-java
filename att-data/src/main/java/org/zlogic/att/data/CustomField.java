@@ -65,6 +65,16 @@ public class CustomField implements Serializable, Comparable<CustomField> {
 		return id;
 	}
 
+	/**
+	 * Returns this class instance (return this); required for some reflection
+	 * functions
+	 *
+	 * @return this CustomField instance
+	 */
+	public CustomField getCustomField() {
+		return this;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof CustomField && ((CustomField) obj).id == id;

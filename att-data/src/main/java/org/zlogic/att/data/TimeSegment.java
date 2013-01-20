@@ -218,9 +218,9 @@ public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 
 	/**
 	 * Returns this class instance (return this); required for some reflection
-	 * fuctions
+	 * functions
 	 *
-	 * @return this timesegment instance
+	 * @return this TimeSegment instance
 	 */
 	public TimeSegment getTimeSegment() {
 		return this;

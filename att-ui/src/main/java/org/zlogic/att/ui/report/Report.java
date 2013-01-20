@@ -34,29 +34,28 @@ import net.sf.dynamicreports.report.builder.component.ComponentBuilder;
 import net.sf.dynamicreports.report.builder.component.VerticalListBuilder;
 import net.sf.dynamicreports.report.builder.group.CustomGroupBuilder;
 import net.sf.dynamicreports.report.builder.style.StyleBuilder;
-import net.sf.dynamicreports.report.constant.GroupHeaderLayout;
 import net.sf.dynamicreports.report.constant.HorizontalAlignment;
-import net.sf.dynamicreports.report.constant.SplitType;
+import net.sf.dynamicreports.report.constant.PageOrientation;
+import net.sf.dynamicreports.report.constant.PageType;
 import net.sf.dynamicreports.report.constant.VerticalAlignment;
-import net.sf.dynamicreports.report.datasource.DRDataSource;
 import net.sf.dynamicreports.report.definition.ReportParameters;
 import net.sf.dynamicreports.report.definition.expression.DRIExpression;
 import net.sf.dynamicreports.report.exception.DRException;
 import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import net.sf.jasperreports.engine.data.JRMapCollectionDataSource;
 import org.joda.time.Period;
+import org.joda.time.PeriodType;
 import org.joda.time.format.PeriodFormatterBuilder;
 import org.zlogic.att.data.CustomField;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.reporting.DateTools;
+import org.zlogic.att.data.reporting.ReportQuery;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
 import org.zlogic.att.ui.adapters.TaskManager;
-import org.zlogic.att.data.reporting.ReportQuery;
 
 /*
- * TODO: move internal classes into other files 
+ * TODO: move internal classes into other files
  */
 /**
  * Class for generating a report
@@ -80,7 +79,7 @@ public class Report {
 	private AbstractValueFormatter<String, Period> periodFormatter = new AbstractValueFormatter<String, Period>() {
 		@Override
 		public String format(Period value, ReportParameters reportParameters) {
-			return value.toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter());
+			return value.normalizedStandard(PeriodType.time()).toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter());
 		}
 	};
 	private AbstractValueFormatter<String, CustomField> customFieldNameFormatter = new AbstractValueFormatter<String, CustomField>() {
@@ -116,13 +115,46 @@ public class Report {
 		}
 
 		public double getDurationHours() {
-			Period period = timeSegment.getClippedDuration(startDate, endDate);
+			Period period = timeSegment.getClippedDuration(startDate, endDate).normalizedStandard(PeriodType.time());
 			return ((double) period.toStandardDuration().getStandardSeconds()) / 3600;
 		}
 
 		public String getDuration() {
-			Period period = timeSegment.getClippedDuration(startDate, endDate);
+			Period period = timeSegment.getClippedDuration(startDate, endDate).normalizedStandard(PeriodType.time());
 			return period.toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter());
+		}
+	}
+
+	public class CustomFieldTime {
+
+		private CustomField customField;
+		private String customFieldValue;
+		private Period duration;
+
+		private CustomFieldTime(CustomField customField, String customFieldValue, Period duration) {
+			this.customField = customField;
+			this.customFieldValue = customFieldValue;
+			this.duration = duration;
+		}
+
+		public CustomField getCustomField() {
+			return customField;
+		}
+
+		public String getCustomFieldValue() {
+			return customFieldValue;
+		}
+
+		public void addDuration(Period add) {
+			duration = duration.plus(add);
+		}
+
+		public Period getDuration() {
+			return duration;
+		}
+
+		public Double getDurationHours() {
+			return ((double) duration.normalizedStandard(PeriodType.time()).toStandardDuration().getStandardSeconds()) / 3600;
 		}
 	}
 
@@ -202,6 +234,19 @@ public class Report {
 	}
 
 	/**
+	 * Returns the style for column titles
+	 *
+	 * @return the style for column titles
+	 */
+	protected StyleBuilder getPageHeaderStyle() {
+		return DynamicReports.stl.style()
+				.setHorizontalAlignment(HorizontalAlignment.CENTER)
+				.setVerticalAlignment(VerticalAlignment.MIDDLE)
+				.setFontSize(20)
+				.setBold(true);
+	}
+
+	/**
 	 * Returns the builder for the report title component
 	 *
 	 * @param reportQuery the report query (used to get the timeframe)
@@ -217,6 +262,27 @@ public class Report {
 				.setBold(true);
 		ComponentBuilder titleComponentBuilder = DynamicReports.cmp.text(titleText).setStyle(titleStyle);
 		return titleComponentBuilder;
+	}
+
+	/**
+	 * Returns the builder for the report's last page footer
+	 *
+	 * @return the builder for the report's last page footer
+	 */
+	protected ComponentBuilder getLastFooter() {
+		AbstractSimpleExpression<String> lastPageFooterExpression = new AbstractSimpleExpression<String>() {
+			@Override
+			public String evaluate(ReportParameters rp) {
+				return MessageFormat.format("Report generated on {0,date,long} {0,time,long} by Awesome Time Tracker", new Object[]{new Date()});
+			}
+		};
+		StyleBuilder lastPageFooterStyle = DynamicReports.stl.style()
+				.setItalic(true)
+				.setFontSize(10)
+				.setVerticalAlignment(VerticalAlignment.MIDDLE)
+				.setHorizontalAlignment(HorizontalAlignment.RIGHT)
+				.setFontName("OpenSans");
+		return DynamicReports.cmp.text(lastPageFooterExpression).setStyle(lastPageFooterStyle).setHeight(20);
 	}
 
 	/**
@@ -287,9 +353,7 @@ public class Report {
 			}
 		};
 		return DynamicReports.report()
-				.title(
-				DynamicReports.cmp.text("Full time report")
-				.setStyle(getTableTitleStyle()))
+				.pageHeader(DynamicReports.cmp.text("Full time report").setStyle(getPageHeaderStyle()))
 				.addField(DynamicReports.field("timeSegment", Date.class))
 				.sortBy(DynamicReports.asc(startTimeExpression))
 				.columns(
@@ -323,7 +387,7 @@ public class Report {
 			}
 		};
 		return DynamicReports.report()
-				.title(DynamicReports.cmp.text("Tasks").setStyle(getTableTitleStyle()))
+				.pageHeader(DynamicReports.cmp.text("Tasks").setStyle(getPageHeaderStyle()))
 				.addField(DynamicReports.field("task", Task.class))
 				.sortBy(DynamicReports.asc(startTimeExpression))
 				.sortBy(DynamicReports.desc(totalTimeExpression))
@@ -335,6 +399,49 @@ public class Report {
 				.setHighlightDetailEvenRows(true)
 				.setColumnTitleStyle(getColumnTitleStyle())
 				.setDataSource(new JRBeanCollectionDataSource(tasks));
+	}
+
+	protected JasperReportBuilder buildCustomFieldReport(ReportQuery reportQuery, List<Task> tasks, CustomField customField) {
+		//Prepare value-time map
+		Map<String, CustomFieldTime> customFieldData = new TreeMap<>();
+		for (Task task : tasks) {
+			Period duration = task.getTotalTime();
+			String customFieldValue = task.getCustomField(customField);
+			customFieldValue = customFieldValue != null ? customFieldValue : "";
+			if (customFieldData.containsKey(customFieldValue))
+				customFieldData.get(customFieldValue).addDuration(duration);
+			else
+				customFieldData.put(customFieldValue, new CustomFieldTime(customField, customFieldValue, duration));
+		}
+		//Prepare report
+		return DynamicReports.report()
+				.title(DynamicReports.cmp.text("Statistics for " + customField.getCustomField().getName())
+				.setStyle(getTableTitleStyle()))
+				.summary(
+				DynamicReports.cht.pieChart()
+				.setKey("customFieldValue", String.class)
+				.series(DynamicReports.cht.serie("durationHours", Double.class))
+				.setHeight(500))
+				.columns(
+				DynamicReports.col.column("Field", "customFieldValue", DynamicReports.type.stringType()),
+				DynamicReports.col.column("Total time", "duration", Period.class).setValueFormatter(periodFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT))
+				.setHighlightDetailEvenRows(true)
+				.setColumnTitleStyle(getColumnTitleStyle())
+				.setDataSource(new JRBeanCollectionDataSource(customFieldData.values()));
+	}
+
+	protected JasperReportBuilder buildCustomFieldsReport(ReportQuery reportQuery, List<Task> tasks) {
+		List<ComponentBuilder> customFieldReports = new LinkedList<>();
+		for (CustomFieldAdapter customField : taskManager.getCustomFields()) {
+			customFieldReports.add(DynamicReports.cmp.pageBreak());
+			customFieldReports.add(
+					DynamicReports.cmp.subreport(
+					buildCustomFieldReport(reportQuery, tasks, customField.getCustomField())));
+		}
+		return DynamicReports.report()
+				.pageHeader(DynamicReports.cmp.text("Statistics").setStyle(getPageHeaderStyle()))
+				.detail(customFieldReports.toArray(new ComponentBuilder[0]))
+				.setDataSource(new JREmptyDataSource());
 	}
 
 	protected JasperReportBuilder buildTimesheetReport(ReportQuery reportQuery, List<TimeSegment> timeSegments) {
@@ -353,7 +460,8 @@ public class Report {
 
 		//Style for day headers
 		StyleBuilder dayHeaderStyle = DynamicReports.stl.style()
-				.setBold(true);
+				.setBold(true)
+				.setAlignment(HorizontalAlignment.CENTER, VerticalAlignment.MIDDLE);
 
 		AbstractSimpleExpression<String> dateTitleExpression = new AbstractSimpleExpression<String>() {
 			@Override
@@ -363,11 +471,10 @@ public class Report {
 			}
 		};
 		CustomGroupBuilder dateGroup = DynamicReports.grp.group(dateTitleExpression)
-				.setStyle(dayHeaderStyle);
+				.setStyle(dayHeaderStyle)
+				.setPadding(0);
 		return DynamicReports.report()
-				.title(
-				DynamicReports.cmp.text("Timesheet")
-				.setStyle(getTableTitleStyle()))
+				.pageHeader(DynamicReports.cmp.text("Timesheet").setStyle(getPageHeaderStyle()))
 				.columns(
 				DynamicReports.col.column("Task", "timeSegment.owner.name", DynamicReports.type.stringType()),
 				DynamicReports.col.column("Specifics", "timeSegment.description", DynamicReports.type.stringType()),
@@ -422,18 +529,26 @@ public class Report {
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			JasperHtmlExporterBuilder htmlExporter =
 					Exporters.htmlExporter(stream)
+					.setOutputImagesToDir(false)
+					//.setImagesURI(tempDir.toUri()+File.separator)
+					//.setImagesDirName(tempDir.toString())
 					.setUsingImagesToAlign(false);
 
 			//Prepare full report
 			report = DynamicReports.report()
+					.setPageFormat(PageType.A4, PageOrientation.PORTRAIT)
 					.title(getTitle(reportQuery))
 					.detail(
 					DynamicReports.cmp.verticalGap(20),
 					DynamicReports.cmp.subreport(buildTasksReport(reportQuery, tasks)),
 					DynamicReports.cmp.pageBreak(),
+					DynamicReports.cmp.subreport(buildCustomFieldsReport(reportQuery, tasks)),
+					DynamicReports.cmp.pageBreak(),
 					DynamicReports.cmp.subreport(buildTimeSegmentsReport(reportQuery, timeSegments)),
 					DynamicReports.cmp.pageBreak(),
-					DynamicReports.cmp.subreport(buildTimesheetReport(reportQuery, timeSegments))).setDataSource(new JREmptyDataSource())
+					DynamicReports.cmp.subreport(buildTimesheetReport(reportQuery, timeSegments)))
+					.lastPageFooter(getLastFooter())
+					.setDataSource(new JREmptyDataSource()).addProperty("net.sf.jasperreports.awt.ignore.missing.font", "true")
 					.toHtml(htmlExporter);
 			reportHTML = stream.toString("utf-8");
 		} catch (UnsupportedEncodingException | DRException ex) {
