@@ -14,6 +14,13 @@
 		<name>Zlogic</name>
 	</organization>
 
+	<repositories>
+		<repository>
+			<id>jasperreports</id>
+			<url>http://jasperreports.sourceforge.net/maven2</url>
+		</repository>
+	</repositories>
+
 	<properties>
 		<version.java>1.7</version.java>
 		<version.java.launch4j>1.7.0</version.java.launch4j>
@@ -23,6 +30,7 @@
 	<modules>
 		<module>att-data</module>
 		<module>jasper-fonts</module>
+		<module>dynamicreports-shade</module>
 		<module>att-ui</module>
 		<module>att-resources</module>
 		<module>att-distribution</module>
@@ -62,6 +70,11 @@
 					<artifactId>maven-antrun-plugin</artifactId>
 					<version>1.7</version>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-shade-plugin</artifactId>
+					<version>2.0</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
@@ -99,6 +112,11 @@
 				<version>5.0.1</version>
 			</dependency>
 			<dependency>
+				<groupId>com.lowagie</groupId>
+				<artifactId>itext</artifactId>
+				<version>2.1.7.js1</version>
+			</dependency>
+			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>att-data</artifactId>
 				<version>${project.version}</version>
@@ -117,6 +135,12 @@
 				<groupId>${project.groupId}</groupId>
 				<artifactId>jasper-fonts</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>dynamicreports-shade</artifactId>
+				<version>${project.version}</version>
+				<classifier>shaded</classifier>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

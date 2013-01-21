@@ -117,7 +117,7 @@ public class ReportController implements Initializable {
 	/**
 	 * Generated report
 	 */
-	private ObjectProperty<Report> generatedReport = new SimpleObjectProperty<>();
+	private ObjectProperty<Report> generatedReport = new SimpleObjectProperty<>();//TODO: destroy on close
 
 	/**
 	 * Initializes the controller
