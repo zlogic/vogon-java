@@ -1,0 +1,27 @@
+/*
+ * Awesome Time Tracker project.
+ * License TBD.
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ */
+package org.zlogic.att.data.converters;
+
+import org.zlogic.att.data.PersistenceHelper;
+
+/**
+ * Interface for a generic exporter. The exporter should use the supplied entity
+ * manager to obtain items to be exported. All configuration should be done in
+ * the constructor.
+ *
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ */
+public interface Exporter {
+
+	/**
+	 * Export data
+	 *
+	 * @param persistenceHelper the PersistenceHelper to be used for obtaining
+	 * data
+	 * @throws ExportException exception which happens during exporting
+	 */
+	public void exportData(PersistenceHelper persistenceHelper) throws ExportException;
+}

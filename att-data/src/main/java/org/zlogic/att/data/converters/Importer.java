@@ -6,6 +6,7 @@
 package org.zlogic.att.data.converters;
 
 import javax.persistence.EntityManager;
+import org.zlogic.att.data.PersistenceHelper;
 
 /**
  * Interface for a generic importer. The importer should use the supplied entity
@@ -19,9 +20,11 @@ public interface Importer {
 	/**
 	 * Import data
 	 *
+	 * @param persistenceHelper the PersistenceHelper to be used for obtaining
+	 * data
 	 * @param entityManager the EntityManager to be used for storing new items
 	 * and checking for duplicates
 	 * @throws ImportException exception which happens during importing
 	 */
-	public void importData(EntityManager entityManager) throws ImportException;
+	public void importData(PersistenceHelper persistenceHelper, EntityManager entityManager) throws ImportException;
 }

@@ -50,8 +50,11 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.converter.DateTimeStringConverter;
 import javafx.util.converter.DefaultStringConverter;
+import org.zlogic.att.data.converters.Exporter;
 import org.zlogic.att.data.converters.GrindstoneImporter;
 import org.zlogic.att.data.converters.Importer;
+import org.zlogic.att.data.converters.XmlExporter;
+import org.zlogic.att.data.converters.XmlImporter;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
 import org.zlogic.att.ui.adapters.CustomFieldValueAdapter;
 import org.zlogic.att.ui.adapters.TaskAdapter;
@@ -193,6 +196,16 @@ public class MainWindowController implements Initializable {
 	 */
 	@FXML
 	private MenuItem menuItemCleanupDB;
+	/**
+	 * Import Awesome Time Tracker XML data menu item
+	 */
+	@FXML
+	private MenuItem menuItemImportAwesomeTimeTrackerXml;
+	/**
+	 * Export Awesome Time Tracker XML data menu item
+	 */
+	@FXML
+	private MenuItem menuItemExportAwesomeTimeTrackerXml;
 	/**
 	 * Property to store the number of selected tasks
 	 */
@@ -437,6 +450,8 @@ public class MainWindowController implements Initializable {
 
 		//Menu items and status pane
 		menuItemCleanupDB.disableProperty().bind(statusPane.visibleProperty());
+		menuItemImportAwesomeTimeTrackerXml.disableProperty().bind(statusPane.visibleProperty());
+		menuItemExportAwesomeTimeTrackerXml.disableProperty().bind(statusPane.visibleProperty());
 		statusPane.managedProperty().bind(statusPane.visibleProperty());
 		statusPane.setVisible(false);
 
@@ -683,7 +698,7 @@ public class MainWindowController implements Initializable {
 	 */
 	@FXML
 	private void importGrindstoneData() {
-		// Prepare file chooser dialog
+		//Prepare file chooser dialog
 		FileChooser fileChooser = new FileChooser();
 		if (lastDirectory.get() != null && lastDirectory.get().exists())
 			fileChooser.setInitialDirectory(lastDirectory.get());
@@ -709,6 +724,122 @@ public class MainWindowController implements Initializable {
 			else
 				log.fine(messages.getString("EXTENSION_NOT_RECOGNIZED"));
 			reloadTasks();
+		}
+	}
+
+	/**
+	 * Import XML data
+	 */
+	@FXML
+	private void importXmlData() {
+		//Prepare file chooser dialog
+		FileChooser fileChooser = new FileChooser();
+		if (lastDirectory.get() != null && lastDirectory.get().exists())
+			fileChooser.setInitialDirectory(lastDirectory.get());
+		fileChooser.setTitle(messages.getString("CHOOSE_FILE_TO_IMPORT"));
+		//Prepare file chooser filter
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(messages.getString("XML_FILES"), "*.xml")); //NOI18N
+
+		//Show the dialog
+		File selectedFile;
+		if ((selectedFile = fileChooser.showOpenDialog(rootPane.getScene().getWindow())) != null) {
+			lastDirectory.set(selectedFile.isDirectory() ? selectedFile : selectedFile.getParentFile());
+
+			//Choose the importer based on the file extension
+			Importer importer = null;
+			String extension = selectedFile.isFile() ? selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".")) : null; //NOI18N
+			if (extension.equals(".xml")) { //NOI18N
+				log.fine(messages.getString("EXTENSION_MATCHED"));
+				importer = new XmlImporter(selectedFile);
+			}
+			//Import data
+
+
+			//Prepare the task
+			Task<Void> task = new Task<Void>() {
+				private Importer importer;
+
+				public Task<Void> setImporter(Importer importer) {
+					this.importer = importer;
+					return this;
+				}
+
+				@Override
+				protected Void call() throws Exception {
+					updateMessage(messages.getString("IMPORTING_DATA"));
+					updateProgress(-1, 1);
+
+					//Import data
+					if (importer != null)
+						taskManager.getPersistenceHelper().importData(importer);
+					else
+						log.fine(messages.getString("EXTENSION_NOT_RECOGNIZED"));
+
+					updateProgress(1, 1);
+					updateMessage(""); //NOI18N
+
+					taskManager.reloadCustomFields();
+					reloadTasks();
+					return null;
+				}
+			}.setImporter(importer);
+			//Run the task
+			startTaskThread(task);
+
+		}
+	}
+
+	/**
+	 * Export XML data
+	 */
+	@FXML
+	private void exportXmlData() {
+		// Prepare file chooser dialog
+		FileChooser fileChooser = new FileChooser();
+		if (lastDirectory.get() != null && lastDirectory.get().exists())
+			fileChooser.setInitialDirectory(lastDirectory.get());
+		fileChooser.setTitle(messages.getString("CHOOSE_WHERE_TO_EXPORT"));
+		//Prepare file chooser filter
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(messages.getString("XML_FILES"), "*.xml")); //NOI18N
+
+		//Show the dialog
+		File selectedFile;
+		if ((selectedFile = fileChooser.showSaveDialog(rootPane.getScene().getWindow())) != null) {
+			lastDirectory.set(selectedFile.isDirectory() ? selectedFile : selectedFile.getParentFile());
+
+			//Append extension if needed
+			String extension = selectedFile.isFile() ? selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".")) : null; //NOI18N
+			if (extension == null || extension.isEmpty())
+				selectedFile = new File(selectedFile.getParentFile(), selectedFile.getName() + ".xml"); //NOI18N
+
+			Exporter exporter = new XmlExporter(selectedFile);
+			//Prepare the task
+			Task<Void> task = new Task<Void>() {
+				private Exporter exporter;
+
+				public Task<Void> setExporter(Exporter exporter) {
+					this.exporter = exporter;
+					return this;
+				}
+
+				@Override
+				protected Void call() throws Exception {
+					updateMessage(messages.getString("EXPORTING_DATA"));
+					updateProgress(-1, 1);
+
+					//Export data
+					if (exporter != null)
+						exporter.exportData(taskManager.getPersistenceHelper());
+					else
+						log.fine(messages.getString("EXTENSION_NOT_RECOGNIZED"));
+
+					updateProgress(1, 1);
+					updateMessage(""); //NOI18N
+					return null;
+				}
+			}.setExporter(exporter);
+			//Run the task
+			startTaskThread(task);
 		}
 	}
 

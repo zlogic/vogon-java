@@ -29,7 +29,7 @@ import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
 
 /**
- * Imported or Grindstone 3 data exported with SQL Compact Command Line Tool
+ * Importer of Grindstone 3 data exported with SQL Compact Command Line Tool
  * <http://sqlcecmd.codeplex.com/>
  *
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
@@ -87,9 +87,8 @@ public class GrindstoneImporter implements Importer {
 	}
 
 	@Override
-	public void importData(EntityManager entityManager) {
+	public void importData(PersistenceHelper persistenceHelper, EntityManager entityManager) {
 		log.log(Level.FINER, messages.getString("IMPORTING_FILE"), importFile.toString());
-		PersistenceHelper persistenceHelper = new PersistenceHelper();
 		try {
 			//Read XML
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -99,7 +98,7 @@ public class GrindstoneImporter implements Importer {
 
 			//Get root node
 			Node rootNode = doc.getFirstChild();
-			if (rootNode == null || !rootNode.getNodeName().equals("Grindstone"))
+			if (rootNode == null || !rootNode.getNodeName().equals("Grindstone")) //NOI18N
 				throw new ImportException(messages.getString("CANNOT_FIND_ROOT_XML_ELEMENT"));
 
 			Map<String, List<Map<String, String>>> tables = new TreeMap<>();
@@ -107,10 +106,10 @@ public class GrindstoneImporter implements Importer {
 			//Iterate through exported tables
 			for (Node currentNode = rootNode.getFirstChild(); currentNode != null; currentNode = currentNode.getNextSibling()) {
 				log.log(Level.FINER, messages.getString("CONVERTING_NODE"), currentNode.getNodeName());
-				if (currentNode.getNodeName().equals("NewDataSet")) {
+				if (currentNode.getNodeName().equals("NewDataSet")) { //NOI18N
 					//Iterate through values from a single table
 					for (Node entryNode = currentNode.getFirstChild(); entryNode != null; entryNode = entryNode.getNextSibling()) {
-						if (entryNode.getNodeName().equals("xs:schema"))
+						if (entryNode.getNodeName().equals("xs:schema")) //NOI18N
 							log.log(Level.FINER, messages.getString("SKIPPING_SCHEMA_NODE"), currentNode.getNodeName());
 						else if (entryNode.getNodeType() == Node.ELEMENT_NODE) {
 							String nodeType = entryNode.getNodeName();
@@ -131,39 +130,39 @@ public class GrindstoneImporter implements Importer {
 			Map<String, Task> tasks = new TreeMap<>();
 
 			//Parse custom fields
-			for (Map<String, String> entry : tables.get("CustomFields")) {
+			for (Map<String, String> entry : tables.get("CustomFields")) { //NOI18N
 				CustomField customField = persistenceHelper.createCustomField(entityManager);
-				customField.setName(entry.get("Name"));
-				customFields.put(entry.get("Id"), customField);
+				customField.setName(entry.get("Name")); //NOI18N
+				customFields.put(entry.get("Id"), customField); //NOI18N
 			}
 
 			//Parse tasks
-			for (Map<String, String> entry : tables.get("Tasks")) {
+			for (Map<String, String> entry : tables.get("Tasks")) { //NOI18N
 				Task task = persistenceHelper.createTask(entityManager);
-				task.setName(entry.get("Name"));
-				task.setCompleted(entry.containsKey("Complete"));
-				task.setDescription(entry.get("Notes"));
-				tasks.put(entry.get("Id"), task);
+				task.setName(entry.get("Name")); //NOI18N
+				task.setCompleted(entry.containsKey("Complete")); //NOI18N
+				task.setDescription(entry.get("Notes")); //NOI18N
+				tasks.put(entry.get("Id"), task); //NOI18N
 			}
 
 			//Parse custom fields values
-			for (Map<String, String> entry : tables.get("CustomValues")) {
-				Task task = tasks.get(entry.get("TaskId"));
-				CustomField customField = customFields.get(entry.get("CustomFieldId"));
+			for (Map<String, String> entry : tables.get("CustomValues")) { //NOI18N
+				Task task = tasks.get(entry.get("TaskId")); //NOI18N
+				CustomField customField = customFields.get(entry.get("CustomFieldId")); //NOI18N
 				if (task == null || customField == null)
 					throw new ImportException(messages.getString("CANNOT_MATCH_CUSTOM_FIELD_WITH_TASK_FOR_CUSTOM_VALUE"));
-				task.setCustomField(customField, entry.get("Value"));
+				task.setCustomField(customField, entry.get("Value")); //NOI18N
 			}
 
 			//Parse timeslots
-			for (Map<String, String> entry : tables.get("Times")) {
-				Task task = tasks.get(entry.get("TaskId"));
+			for (Map<String, String> entry : tables.get("Times")) { //NOI18N
+				Task task = tasks.get(entry.get("TaskId")); //NOI18N
 				if (task == null)
 					throw new ImportException(messages.getString("CANNOT_MATCH_TIME_WITH_TASK"));
 				TimeSegment timeSegment = persistenceHelper.createTimeSegment(entityManager, task);
-				timeSegment.setStartTime(DatatypeConverter.parseDateTime(entry.get("Start")).getTime());
-				timeSegment.setEndTime(DatatypeConverter.parseDateTime(entry.get("End")).getTime());
-				timeSegment.setDescription(entry.get("Notes"));
+				timeSegment.setStartTime(DatatypeConverter.parseDateTime(entry.get("Start")).getTime()); //NOI18N
+				timeSegment.setEndTime(DatatypeConverter.parseDateTime(entry.get("End")).getTime()); //NOI18N
+				timeSegment.setDescription(entry.get("Notes")); //NOI18N
 			}
 		} catch (SAXException | IOException | ParserConfigurationException ex) {
 			Logger.getLogger(GrindstoneImporter.class.getName()).log(Level.SEVERE, null, ex);

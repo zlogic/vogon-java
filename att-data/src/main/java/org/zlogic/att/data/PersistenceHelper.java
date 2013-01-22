@@ -243,7 +243,7 @@ public class PersistenceHelper {
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		entityManager.getTransaction().begin();
 
-		importer.importData(entityManager);
+		importer.importData(this, entityManager);
 
 		entityManager.getTransaction().commit();
 		entityManager.close();

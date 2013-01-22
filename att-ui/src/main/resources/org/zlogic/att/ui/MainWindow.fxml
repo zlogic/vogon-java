@@ -21,6 +21,8 @@
         <Menu mnemonicParsing="false" text="%FILE">
           <items>
             <MenuItem mnemonicParsing="false" onAction="#showReportWindow" text="%BUILD_REPORT" />
+            <MenuItem disable="false" mnemonicParsing="false" onAction="#importXmlData" text="%IMPORT_AWESOME_TIME_TRACKER_DATA..." visible="true" fx:id="menuItemImportAwesomeTimeTrackerXml" />
+            <MenuItem disable="false" mnemonicParsing="false" onAction="#exportXmlData" text="%EXPORT_AWESOME_TIME_TRACKER_DATA..." visible="true" fx:id="menuItemExportAwesomeTimeTrackerXml" />
             <MenuItem disable="true" mnemonicParsing="false" onAction="#importGrindstoneData" text="%IMPORT_GRINDSTONE_DATA..." visible="false" />
             <MenuItem disable="true" mnemonicParsing="false" onAction="#cleanupDB" text="%CLEANUP_DB" visible="false" fx:id="menuItemCleanupDB" />
             <SeparatorMenuItem mnemonicParsing="false" />

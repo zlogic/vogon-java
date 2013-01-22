@@ -107,6 +107,5 @@ public class CustomFieldEditorController implements Initializable {
 	private void deleteCustomField() {
 		for (CustomFieldAdapter customField : customFields.getSelectionModel().getSelectedItems())
 			taskManager.deleteCustomField(customField);
-		customFields.getItems().removeAll(customFields.getSelectionModel().getSelectedItems());
 	}
 }
