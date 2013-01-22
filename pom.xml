@@ -7,7 +7,7 @@
 	<groupId>org.zlogic.att</groupId>
 	<artifactId>top</artifactId>
 	<packaging>pom</packaging>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.2-SNAPSHOT</version>
 	<name>Awesome Time Tracker :: Top</name>
 
 	<organization>
