@@ -143,7 +143,7 @@ public class XmlExporter implements FileExporter {
 
 			transformer.transform(source, result);
 		} catch (ParserConfigurationException | TransformerException e) {
-			Logger.getLogger(CsvImporter.class.getName()).log(Level.SEVERE, null, e);
+			Logger.getLogger(XmlExporter.class.getName()).log(Level.SEVERE, null, e);
 			throw new VogonExportException(e);
 		}
 	}

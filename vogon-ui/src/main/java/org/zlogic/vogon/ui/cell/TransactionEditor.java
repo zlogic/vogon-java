@@ -17,7 +17,6 @@ import javafx.scene.control.TableCell;
 import javafx.scene.paint.Color;
 import javafx.stage.Popup;
 import org.zlogic.vogon.data.FinanceData;
-import org.zlogic.vogon.ui.MessageDialog;
 import org.zlogic.vogon.ui.TransactionComponentsController;
 import org.zlogic.vogon.ui.adapter.TransactionModelAdapter;
 
@@ -145,7 +144,7 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 			popup = new Popup();
 			popup.getContent().add(editor);
 		} catch (IOException ex) {
-			Logger.getLogger(MessageDialog.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(TransactionEditor.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 

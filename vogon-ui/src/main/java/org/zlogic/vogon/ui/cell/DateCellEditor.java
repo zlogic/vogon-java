@@ -40,7 +40,7 @@ public class DateCellEditor<BaseType> extends StringCellEditor<BaseType, Date> {
 		try {
 			return dateFormat.parse(value);
 		} catch (ParseException ex) {
-			Logger.getLogger(StringValidatorDate.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(DateCellEditor.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		return null;
 	}

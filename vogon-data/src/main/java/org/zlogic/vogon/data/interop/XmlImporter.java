@@ -6,6 +6,8 @@
 package org.zlogic.vogon.data.interop;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -90,11 +92,9 @@ public class XmlImporter implements FileImporter {
 			if (rootNode == null || !rootNode.getNodeName().equals("VogonFinanceData")) //NOI18N
 				throw new VogonImportLogicalException(messages.getString("MISSING_VOGONFINANCEDATA_NODE_IN_XML"));
 
-			Node currentNode;
-
 			//Iterate through root children
 			Node accountsNode = null, currenciesNode = null, transactionsNode = null;
-			for (currentNode = rootNode.getFirstChild(); currentNode != null; currentNode = currentNode.getNextSibling()) {
+			for (Node currentNode = rootNode.getFirstChild(); currentNode != null; currentNode = currentNode.getNextSibling()) {
 				if (currentNode.getNodeName().equals("Accounts")) //NOI18N
 					accountsNode = currentNode;
 				else if (currentNode.getNodeName().equals("Currencies")) //NOI18N
@@ -128,7 +128,7 @@ public class XmlImporter implements FileImporter {
 			}
 
 			//Process accounts
-			for (currentNode = accountsNode.getFirstChild(); currentNode != null; currentNode = currentNode.getNextSibling()) {
+			for (Node currentNode = accountsNode.getFirstChild(); currentNode != null; currentNode = currentNode.getNextSibling()) {
 				if (currentNode.getNodeType() != Node.ELEMENT_NODE)
 					continue;
 
@@ -164,7 +164,7 @@ public class XmlImporter implements FileImporter {
 			}
 
 			//Process currencies
-			for (currentNode = currenciesNode.getFirstChild(); currentNode != null; currentNode = currentNode.getNextSibling()) {
+			for (Node currentNode = currenciesNode.getFirstChild(); currentNode != null; currentNode = currentNode.getNextSibling()) {
 				if (currentNode.getNodeType() != Node.ELEMENT_NODE)
 					continue;
 
@@ -195,7 +195,7 @@ public class XmlImporter implements FileImporter {
 			}
 
 			//Process transactions
-			for (currentNode = transactionsNode.getFirstChild(); currentNode != null; currentNode = currentNode.getNextSibling()) {
+			for (Node currentNode = transactionsNode.getFirstChild(); currentNode != null; currentNode = currentNode.getNextSibling()) {
 				if (currentNode.getNodeType() != Node.ELEMENT_NODE)
 					continue;
 
@@ -209,13 +209,18 @@ public class XmlImporter implements FileImporter {
 				Date transactionDate = dateFormat.parse(attributes.getNamedItem("Date").getNodeValue()); //NOI18N
 
 				//Create transaction instance
-				FinanceTransaction.Type transactionTypeEnum = null;
-				if (transactionType.equals("Transfer")) //NOI18N
-					transactionTypeEnum = FinanceTransaction.Type.TRANSFER;
-				else if (transactionType.equals("ExpenseIncome")) //NOI18N
-					transactionTypeEnum = FinanceTransaction.Type.EXPENSEINCOME;
-				else
-					transactionTypeEnum = FinanceTransaction.Type.UNDEFINED;
+				FinanceTransaction.Type transactionTypeEnum;
+				switch (transactionType) {
+					case "Transfer":
+						transactionTypeEnum = FinanceTransaction.Type.TRANSFER;
+						break;
+					case "ExpenseIncome":
+						transactionTypeEnum = FinanceTransaction.Type.EXPENSEINCOME;
+						break;
+					default:
+						transactionTypeEnum = FinanceTransaction.Type.UNDEFINED;
+						break;
+				}
 				if (transactionTypeEnum == FinanceTransaction.Type.UNDEFINED)
 					throw new VogonImportLogicalException(MessageFormat.format(messages.getString("UNKNOWN_TRANSACTION_TYPE"), transactionType));
 				FinanceTransaction transaction = new FinanceTransaction(transactionDescription, null, transactionDate, transactionTypeEnum);
@@ -224,21 +229,23 @@ public class XmlImporter implements FileImporter {
 
 				//Extract transaction tags and components from XML
 				List<String> tagsList = new LinkedList<>();
-				Node childNode = null;
-				for (childNode = currentNode.getFirstChild(); childNode != null; childNode = childNode.getNextSibling()) {
+				for (Node childNode = currentNode.getFirstChild(); childNode != null; childNode = childNode.getNextSibling()) {
 					if (childNode.getNodeType() != Node.ELEMENT_NODE)
 						continue;
-					if (childNode.getNodeName().equals("Tag")) { //NOI18N
-						String tag = childNode.getTextContent();
-						tagsList.add(tag);
-					} else if (childNode.getNodeName().equals("Component")) { //NOI18N
-						//long componentId = Long.parseLong(childNode.getAttributes().getNamedItem("Id").getNodeValue());
-						long componentAccountId = Long.parseLong(childNode.getAttributes().getNamedItem("Account").getNodeValue()); //NOI18N
-						long componentAmount = Long.parseLong(childNode.getAttributes().getNamedItem("Amount").getNodeValue()); //NOI18N
-						long componentTransactionId = Long.parseLong(childNode.getAttributes().getNamedItem("Transaction").getNodeValue()); //NOI18N
-						TransactionComponent component = new TransactionComponent(accountsMap.get(componentAccountId), transactionsMap.get(componentTransactionId), componentAmount);
-						entityManager.persist(component);
-						transaction.addComponent(component);
+					switch (childNode.getNodeName()) {
+						case "Tag":	//NOI18N
+							String tag = childNode.getTextContent();
+							tagsList.add(tag);
+							break;
+						case "Component"://NOI18N
+							//long componentId = Long.parseLong(childNode.getAttributes().getNamedItem("Id").getNodeValue());
+							long componentAccountId = Long.parseLong(childNode.getAttributes().getNamedItem("Account").getNodeValue()); //NOI18N
+							long componentAmount = Long.parseLong(childNode.getAttributes().getNamedItem("Amount").getNodeValue()); //NOI18N
+							long componentTransactionId = Long.parseLong(childNode.getAttributes().getNamedItem("Transaction").getNodeValue()); //NOI18N
+							TransactionComponent component = new TransactionComponent(accountsMap.get(componentAccountId), transactionsMap.get(componentTransactionId), componentAmount);
+							entityManager.persist(component);
+							transaction.addComponent(component);
+							break;
 					}
 				}
 
@@ -246,30 +253,23 @@ public class XmlImporter implements FileImporter {
 			}
 			entityManager.getTransaction().commit();
 			entityManager.close();
-		} catch (java.io.FileNotFoundException e) {
-			Logger.getLogger(XmlImporter.class.getName()).log(Level.SEVERE, null, e);
-			throw new VogonImportException(e);
-		} catch (java.io.IOException e) {
-			Logger.getLogger(XmlImporter.class.getName()).log(Level.SEVERE, null, e);
-			throw new VogonImportException(e);
 		} catch (VogonImportLogicalException e) {
 			throw new VogonImportLogicalException(e);
-		} catch (ParserConfigurationException e) {
+		} catch (FileNotFoundException e) {
 			Logger.getLogger(XmlImporter.class.getName()).log(Level.SEVERE, null, e);
 			throw new VogonImportException(e);
-		} catch (SAXException e) {
+		} catch (IOException e) {
+			Logger.getLogger(XmlImporter.class.getName()).log(Level.SEVERE, null, e);
+			throw new VogonImportException(e);
+		} catch (ParserConfigurationException | SAXException | DOMException e) {
 			Logger.getLogger(XmlImporter.class.getName()).log(Level.SEVERE, null, e);
 			throw new VogonImportException(e);
 		} catch (NullPointerException e) {
 			Logger.getLogger(XmlImporter.class.getName()).log(Level.SEVERE, null, e);
 			throw new VogonImportLogicalException(messages.getString("MISSING_DATA_FROM_XML"), e);
-		} catch (DOMException e) {
-			Logger.getLogger(XmlImporter.class.getName()).log(Level.SEVERE, null, e);
-			throw new VogonImportException(e);
 		} catch (ParseException e) {
 			Logger.getLogger(XmlImporter.class.getName()).log(Level.SEVERE, null, e);
 			throw new VogonImportLogicalException(messages.getString("INVALID_DATA_FORMAT"), e);
 		}
-
 	}
 }
