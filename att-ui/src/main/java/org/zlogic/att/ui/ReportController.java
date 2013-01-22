@@ -146,6 +146,7 @@ public class ReportController implements Initializable {
 		//Configure dates
 		startDateValue.set(DateTools.getInstance().convertDateToStartOfMonth(new Date()));
 		endDateValue.set(DateTools.getInstance().convertDateToEndOfMonth(new Date()));
+
 	}
 
 	/**
@@ -155,6 +156,16 @@ public class ReportController implements Initializable {
 	 */
 	public void setTaskManager(TaskManager taskManager) {
 		this.taskManager = taskManager;
+		//Destroy report on stage close
+		viewer.getScene().getWindow().showingProperty().addListener(new ChangeListener<Boolean>() {
+			@Override
+			public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
+				if (oldValue && !newValue) {
+					generatedReport.set(null);
+					viewer.getEngine().load("about:blank");
+				}
+			}
+		});
 	}
 
 	/**

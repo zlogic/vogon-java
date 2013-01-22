@@ -198,8 +198,10 @@ public class TaskEditorController implements Initializable {
 
 					@Override
 					public void changed(ObservableValue<? extends TableRow> ov, TableRow oldValue, TableRow newValue) {
-						if (newValue != null && newValue.getItem() instanceof CustomFieldValueAdapter)
-							cell.getItems().setAll(taskManager.getCustomFieldValues(((CustomFieldValueAdapter) newValue.getItem()).getCustomField()));
+						if (newValue != null && newValue.getItem() instanceof CustomFieldValueAdapter) {
+							ObservableList<String> customFieldValues = taskManager.getCustomFieldValues(((CustomFieldValueAdapter) newValue.getItem()).getCustomField());
+							cell.getItems().setAll(customFieldValues != null ? customFieldValues : new LinkedList<String>());
+						}
 					}
 				}.setCell(cell));
 				cell.itemProperty().addListener(new ChangeListener<String>() {
