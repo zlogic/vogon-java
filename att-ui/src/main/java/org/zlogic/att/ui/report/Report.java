@@ -137,6 +137,16 @@ public class Report {
 			return task.getCustomField(value);
 		}
 	};
+	/**
+	 * Expression which prints on the third or later pages - resolves a bug (?)
+	 * where a subreport starts from page 2
+	 */
+	private AbstractSimpleExpression<Boolean> subreportPrintNotInFirstPageExpression = new AbstractSimpleExpression<Boolean>() {
+		@Override
+		public Boolean evaluate(ReportParameters reportParameters) {
+			return reportParameters.getPageNumber() > 2;
+		}
+	};
 
 	/**
 	 * Class to store a date and a time segment
@@ -510,12 +520,12 @@ public class Report {
 			//Extract custom field
 			DRIExpression<CustomField> customFieldExpression = new AbstractSimpleExpression<CustomField>() {
 				private CustomField customField;
-				
+
 				public AbstractSimpleExpression<CustomField> setCustomField(CustomField customField) {
 					this.customField = customField;
 					return this;
 				}
-				
+
 				@Override
 				public CustomField evaluate(ReportParameters rp) {
 					return customField;
@@ -563,8 +573,8 @@ public class Report {
 		};
 		String header = messages.getString("FULL_TIME_REPORT");
 		return DynamicReports.report()
-				.pageHeader(DynamicReports.cmp.text(header).setStyle(getPageHeaderStyle()))
-				.title(DynamicReports.cmp.text("").setTableOfContentsHeading(header))//NOI18N
+				.pageHeader(DynamicReports.cmp.text(header).setStyle(getPageHeaderStyle()).setPrintWhenExpression(subreportPrintNotInFirstPageExpression))
+				.title(DynamicReports.cmp.text(header).setTableOfContentsHeading(header).setStyle(getPageHeaderStyle()))
 				.addField(DynamicReports.field("timeSegment", Date.class)) //NOI18N
 				.sortBy(DynamicReports.asc(startTimeExpression))
 				.columns(
@@ -606,8 +616,8 @@ public class Report {
 		};
 		String header = messages.getString("TASKS");
 		return DynamicReports.report()
-				.pageHeader(DynamicReports.cmp.text(header).setStyle(getPageHeaderStyle()))
-				.title(DynamicReports.cmp.text("").setTableOfContentsHeading(header))//NOI18N
+				.pageHeader(DynamicReports.cmp.text(header).setStyle(getPageHeaderStyle()).setPrintWhenExpression(subreportPrintNotInFirstPageExpression))
+				.title(DynamicReports.cmp.text(header).setTableOfContentsHeading(header).setStyle(getPageHeaderStyle()))
 				.addField(DynamicReports.field("task", Task.class)) //NOI18N
 				.sortBy(DynamicReports.asc(startTimeExpression))
 				.sortBy(DynamicReports.desc(totalTimeExpression))
@@ -668,9 +678,8 @@ public class Report {
 		//Prepare report
 		String header = MessageFormat.format(messages.getString("STATISTICS_HEADER"), new Object[]{customField.getCustomField().getName()});
 		return DynamicReports.report()
-				.title(DynamicReports.cmp.text(header)
-				.setStyle(getTableTitleStyle())
-				.setTableOfContentsHeading(header))
+				.pageHeader(DynamicReports.cmp.text(header).setStyle(getPageHeaderStyle()).setPrintWhenExpression(subreportPrintNotInFirstPageExpression))
+				.title(DynamicReports.cmp.text(header).setTableOfContentsHeading(header).setStyle(getPageHeaderStyle()))
 				.addField(DynamicReports.field("group", Date.class)) //NOI18N
 				.summary(
 				DynamicReports.cht.pieChart()
@@ -685,7 +694,8 @@ public class Report {
 				DynamicReports.col.column(messages.getString("TOTAL_TIME"), "duration", Period.class).setValueFormatter(periodFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT)) //NOI18N
 				.setHighlightDetailEvenRows(true)
 				.setColumnTitleStyle(getColumnTitleStyle())
-				.setDataSource(new JRBeanCollectionDataSource(customFieldData.values()));
+				.setDataSource(new JRBeanCollectionDataSource(customFieldData.values()))
+				.setSummaryWithPageHeaderAndFooter(true);
 	}
 
 	/**
@@ -697,13 +707,13 @@ public class Report {
 	protected JasperReportBuilder buildCustomFieldsReport(List<Task> tasks) {
 		List<ComponentBuilder> customFieldReports = new LinkedList<>();
 		for (CustomFieldAdapter customField : taskManager.getCustomFields()) {
-			customFieldReports.add(DynamicReports.cmp.pageBreak());
+			customFieldReports.add(DynamicReports.cmp.pageBreak().removeLineWhenBlank());
 			customFieldReports.add(
 					DynamicReports.cmp.subreport(
 					buildCustomFieldReport(tasks, customField.getCustomField())));
 		}
 		return DynamicReports.report()
-				.pageHeader(DynamicReports.cmp.text(messages.getString("STATISTICS")).setStyle(getPageHeaderStyle()))
+				//.pageHeader(DynamicReports.cmp.text(messages.getString("STATISTICS")).setStyle(getPageHeaderStyle()))
 				.detail(customFieldReports.toArray(new ComponentBuilder[0]))
 				.setDataSource(new JREmptyDataSource());
 	}
@@ -732,7 +742,7 @@ public class Report {
 		StyleBuilder dayHeaderStyle = DynamicReports.stl.style()
 				.setBold(true)
 				.setAlignment(HorizontalAlignment.CENTER, VerticalAlignment.MIDDLE);
-		
+
 		AbstractSimpleExpression<String> dateTitleExpression = new AbstractSimpleExpression<String>() {
 			@Override
 			public String evaluate(ReportParameters rp) {
@@ -746,9 +756,8 @@ public class Report {
 				.setAddToTableOfContents(false);
 		String header = messages.getString("TIMESHEET");
 		return DynamicReports.report()
-				.pageHeader(DynamicReports.cmp.text(header)
-				.setStyle(getPageHeaderStyle()))
-				.title(DynamicReports.cmp.text("").setTableOfContentsHeading(header))//NOI18N
+				.pageHeader(DynamicReports.cmp.text(header).setStyle(getPageHeaderStyle()).setPrintWhenExpression(subreportPrintNotInFirstPageExpression))
+				.title(DynamicReports.cmp.text(header).setTableOfContentsHeading(header).setStyle(getPageHeaderStyle()))
 				.columns(
 				DynamicReports.col.column(messages.getString("TASK"), "timeSegment.owner.name", DynamicReports.type.stringType()), //NOI18N
 				DynamicReports.col.column(messages.getString("SPECIFICS"), "timeSegment.description", DynamicReports.type.stringType()), //NOI18N
@@ -826,7 +835,6 @@ public class Report {
 					.detail(
 					DynamicReports.cmp.verticalGap(20),
 					DynamicReports.cmp.subreport(buildTasksReport(tasks)),
-					DynamicReports.cmp.pageBreak(),
 					DynamicReports.cmp.subreport(buildCustomFieldsReport(tasks)),
 					DynamicReports.cmp.pageBreak(),
 					DynamicReports.cmp.subreport(buildTimeSegmentsReport(timeSegments)),
