@@ -13,8 +13,6 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
@@ -39,6 +37,7 @@ import net.sf.dynamicreports.report.builder.group.CustomGroupBuilder;
 import net.sf.dynamicreports.report.builder.style.StyleBuilder;
 import net.sf.dynamicreports.report.builder.tableofcontents.TableOfContentsCustomizer;
 import net.sf.dynamicreports.report.constant.HorizontalAlignment;
+import net.sf.dynamicreports.report.constant.Orientation;
 import net.sf.dynamicreports.report.constant.PageOrientation;
 import net.sf.dynamicreports.report.constant.PageType;
 import net.sf.dynamicreports.report.constant.VerticalAlignment;
@@ -96,10 +95,6 @@ public class Report {
 	 * Generated report
 	 */
 	private JasperReportBuilder report;
-	/**
-	 * Threshold to group all fields in the lower percentile
-	 */
-	private double pieChartThreshold = 0.15;
 	/**
 	 * Formatter to output date and time
 	 */
@@ -362,27 +357,6 @@ public class Report {
 	 */
 	public void setEndDate(Date endDate) {
 		this.endDate = DateTools.getInstance().convertDateToEndOfDay(endDate);
-	}
-
-	/**
-	 * Returns the threshold for grouping all fields in the lower percentile
-	 * inside a pie chart
-	 *
-	 * @return the threshold
-	 */
-	public double getMaxChartItems() {
-		return pieChartThreshold;
-	}
-
-	/**
-	 * Sets the threshold for grouping all fields in the lower percentile inside
-	 * a pie chart. Any exceeding items will be grouped together, the smallest
-	 * items will be grouped.
-	 *
-	 * @param pieChartThreshold the threshold
-	 */
-	public void setMaxChartItems(double pieChartThreshold) {
-		this.pieChartThreshold = pieChartThreshold;
 	}
 
 	/**
@@ -651,30 +625,6 @@ public class Report {
 			else
 				customFieldData.put(customFieldValue, new CustomFieldTime(customField, customFieldValue, duration, false));
 		}
-		//Prepare data for chart by grouping values
-		{
-			List<CustomFieldTime> sortedCustomFieldData = new LinkedList<>(customFieldData.values());
-			Collections.sort(sortedCustomFieldData, new Comparator<CustomFieldTime>() {
-				@Override
-				public int compare(CustomFieldTime o1, CustomFieldTime o2) {
-					return -Double.compare(o1.getDurationHours(), o2.getDurationHours());
-				}
-			});
-			Period totalTime = Period.ZERO;
-			Period collectedTime = Period.ZERO;
-			//Determine "small" entries to be combined
-			for (CustomFieldTime entry : sortedCustomFieldData)
-				totalTime = totalTime.plus(entry.getDuration());
-			for (CustomFieldTime entry : sortedCustomFieldData) {
-				if (!(((double) totalTime.minus(collectedTime)
-						.normalizedStandard(PeriodType.time()).toStandardDuration().getStandardSeconds())
-						/ totalTime
-						.normalizedStandard(PeriodType.time()).toStandardDuration().getStandardSeconds()
-						>= pieChartThreshold))
-					customFieldData.put(entry.getCustomFieldValue(), new CustomFieldTime(customField, entry.getCustomFieldValue(), entry.getDuration(), true));
-				collectedTime = collectedTime.plus(entry.getDuration());
-			}
-		}
 		//Prepare report
 		String header = MessageFormat.format(messages.getString("STATISTICS_HEADER"), new Object[]{customField.getCustomField().getName()});
 		return DynamicReports.report()
@@ -682,12 +632,13 @@ public class Report {
 				.title(DynamicReports.cmp.text(header).setTableOfContentsHeading(header).setStyle(getPageHeaderStyle()))
 				.addField(DynamicReports.field("group", Date.class)) //NOI18N
 				.summary(
-				DynamicReports.cht.pieChart()
-				.setKey("customFieldChartValue", String.class) //NOI18N
+				DynamicReports.cht.barChart()
+				.setCategory(DynamicReports.field("customFieldChartValue", String.class)) //NOI18N
 				.series(DynamicReports.cht.serie("durationHours", Double.class)) //NOI18N
 				.setHeight(700)
+				.setShowLegend(false)
 				//.setLabelFormat("{0} ({1} hours)")
-				.setDataSource(new JRBeanCollectionDataSource(customFieldData.values())))
+				.setOrientation(Orientation.HORIZONTAL))
 				.sortBy(DynamicReports.desc(DynamicReports.field("durationHours", Double.class))) //NOI18N
 				.columns(
 				DynamicReports.col.column(messages.getString("FIELD"), "customFieldValue", DynamicReports.type.stringType()), //NOI18N
@@ -707,7 +658,7 @@ public class Report {
 	protected JasperReportBuilder buildCustomFieldsReport(List<Task> tasks) {
 		List<ComponentBuilder> customFieldReports = new LinkedList<>();
 		for (CustomFieldAdapter customField : taskManager.getCustomFields()) {
-			customFieldReports.add(DynamicReports.cmp.pageBreak().removeLineWhenBlank());
+			customFieldReports.add(DynamicReports.cmp.pageBreak());
 			customFieldReports.add(
 					DynamicReports.cmp.subreport(
 					buildCustomFieldReport(tasks, customField.getCustomField())));
