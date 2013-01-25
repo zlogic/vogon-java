@@ -60,10 +60,11 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
-							<finalName>${project.artifactId}-${project.version}</finalName>
+							<finalName>${project.artifactId}-${project.version}.jar</finalName>
 							<shadedArtifactAttached>true</shadedArtifactAttached>
 							<shadedClassifierName>shaded</shadedClassifierName>
-							<promoteTransitiveDependencies>false</promoteTransitiveDependencies>
+							<promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+							<!--<minimizeJar>true</minimizeJar>-->
 							<!--<createSourcesJar>true</createSourcesJar>-->
 							<filters>
 								<filter>

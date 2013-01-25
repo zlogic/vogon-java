@@ -1,11 +1,9 @@
-att-data/target/
-att-ui/target/
-att-packaging/target/
-att-resources/target/
-.idea/libraries
 *.fxml.bak
-/att-distribution/target/
-/Target/
-/att-resources - Copy/target/
+/att-data/target/
+/att-ui/target/
+/att-resources/target/
+/.idea/libraries
 /jasper-fonts/target/
 /dynamicreports-shade/target/
+/att-packaging/att-ui-javafx/target/
+/att-packaging/att-distribution/target/

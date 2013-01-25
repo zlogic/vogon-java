@@ -25,6 +25,7 @@
 		<version.java>1.7</version.java>
 		<version.java.launch4j>1.7.0</version.java.launch4j>
 		<version.windows>0.1.0.0</version.windows>
+		<version.javafx>2.2</version.javafx>
 	</properties>
 
 	<modules>
@@ -33,7 +34,7 @@
 		<module>dynamicreports-shade</module>
 		<module>att-ui</module>
 		<module>att-resources</module>
-		<module>att-distribution</module>
+		<module>att-packaging</module>
 	</modules>
 
 	<build>
@@ -50,30 +51,33 @@
 					<version>3.0</version>
 				</plugin>
 				<plugin>
-					<groupId>com.zenjava</groupId>
-					<artifactId>javafx-maven-plugin</artifactId>
-					<version>1.3</version>
-					<!--
-					<dependencies>
-						<dependency>
-							<groupId>com.oracle</groupId>
-							<artifactId>javafx-jar</artifactId>
-							<version>2.2</version>
-							<scope>system</scope>
-							<systemPath>${java.home}/lib/jfxrt.jar</systemPath>
-						</dependency>
-					</dependencies>
-					-->
-				</plugin>
-				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>
 					<version>1.7</version>
+					<dependencies>
+						<dependency>
+							<groupId>com.oracle</groupId>
+							<artifactId>ant-javafx</artifactId>
+							<version>${version.javafx}</version>
+							<scope>system</scope>
+							<systemPath>${java.home}/../lib/ant-javafx.jar</systemPath>
+						</dependency>
+					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
 					<version>2.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>2.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>2.6</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -117,27 +121,27 @@
 				<version>2.1.7.js1</version>
 			</dependency>
 			<dependency>
-				<groupId>${project.groupId}</groupId>
+				<groupId>org.zlogic.att</groupId>
 				<artifactId>att-data</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>${project.groupId}</groupId>
+				<groupId>org.zlogic.att</groupId>
 				<artifactId>att-ui</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>${project.groupId}</groupId>
+				<groupId>org.zlogic.att</groupId>
 				<artifactId>att-resources</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>${project.groupId}</groupId>
+				<groupId>org.zlogic.att</groupId>
 				<artifactId>jasper-fonts</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>${project.groupId}</groupId>
+				<groupId>org.zlogic.att</groupId>
 				<artifactId>dynamicreports-shade</artifactId>
 				<version>${project.version}</version>
 				<classifier>shaded</classifier>

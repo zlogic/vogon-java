@@ -20,12 +20,12 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>dynamicreports-shade</artifactId>
-			<classifier>shaded</classifier>
+			<artifactId>jasper-fonts</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>jasper-fonts</artifactId>
+			<artifactId>dynamicreports-shade</artifactId>
+			<classifier>shaded</classifier>
 		</dependency>
 	</dependencies>
 	<build>
