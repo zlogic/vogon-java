@@ -1,31 +1,28 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.zlogic.vogon</groupId>
 		<artifactId>top</artifactId>
+		<groupId>org.zlogic.vogon.packaging</groupId>
 		<version>0.0.5-SNAPSHOT</version>
 	</parent>
-	<groupId>org.zlogic.vogon.distribution</groupId>
+	<modelVersion>4.0.0</modelVersion>
+
 	<artifactId>vogon-distribution</artifactId>
-	<name>Vogon :: Distribution</name>
+	<name>Vogon :: Packaging :: Distribution</name>
 	<packaging>pom</packaging>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.zlogic.vogon.data</groupId>
-			<artifactId>vogon-data</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.zlogic.vogon.ui</groupId>
-			<artifactId>vogon-ui</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.zlogic.vogon.resources</groupId>
 			<artifactId>vogon-resources</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>vogon-ui-javafx</artifactId>
+		</dependency>
 	</dependencies>
-
 	<build>
 		<finalName>vogon-${project.version}</finalName>
 		<resources>
@@ -34,41 +31,57 @@
 			</resource>
 		</resources>
 		<plugins>
+			<!-- Unpack JavaFX manifest -->
 			<plugin>
-				<!-- javafx-maven-plugin workaround -->
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
+				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>create-empty-dir</id>
+						<id>unpack</id>
 						<phase>process-resources</phase>
 						<goals>
-							<goal>run</goal>
+							<goal>unpack</goal>
 						</goals>
 						<configuration>
-							<tasks>
-								<mkdir dir="${project.build.outputDirectory}"/>
-							</tasks>
+							<artifactItems>
+								<artifactItem>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>vogon-ui-javafx</artifactId>
+									<version>${project.version}</version>
+									<type>jar</type>
+									<overWrite>false</overWrite>
+									<includes>META-INF/MANIFEST.MF</includes>
+									<outputDirectory>${project.build.directory}/vogon-ui-javafx</outputDirectory>
+								</artifactItem>
+							</artifactItems>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+			<!-- Package application -->
 			<plugin>
-				<groupId>com.zenjava</groupId>
-				<artifactId>javafx-maven-plugin</artifactId>
+				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>distro-assembly</id>
 						<phase>package</phase>
 						<goals>
-							<goal>build-jar</goal>
+							<goal>single</goal>
 						</goals>
 						<configuration>
-							<mainClass>org.zlogic.vogon.ui.Launcher</mainClass>
-							<bundleType>ALL</bundleType>
+							<finalName>${project.build.finalName}</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+							<archive>
+								<manifestFile>${project.build.directory}/vogon-ui-javafx/META-INF/MANIFEST.MF</manifestFile>
+							</archive>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+			<!-- Create Windows application -->
 			<plugin>
 				<groupId>com.akathist.maven.plugins.launch4j</groupId>
 				<artifactId>launch4j-maven-plugin</artifactId>
@@ -82,7 +95,7 @@
 						<configuration>
 							<headerType>gui</headerType>
 							<outfile>target/${project.build.finalName}.exe</outfile>
-							<jar>target/${project.build.finalName}-jfx.jar</jar>
+							<jar>target/${project.build.finalName}.jar</jar>
 							<errTitle>Vogon</errTitle>
 							<icon>src/main/resources/Vogon.ico</icon>
 							<jre>
