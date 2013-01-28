@@ -21,6 +21,7 @@ import org.zlogic.att.data.PersistenceHelper;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.TransactedChange;
+import org.zlogic.att.ui.filter.Filter;
 
 /**
  * Placeholder class to contain an ObservableList of all TaskAdapters. This
@@ -58,6 +59,10 @@ public class TaskManager {
 	 * The currently active (timing) segment
 	 */
 	private ObjectProperty<TimeSegmentAdapter> timingSegment = new SimpleObjectProperty<>();
+	/**
+	 * The currently active filters
+	 */
+	private ObservableList<Filter> filters = FXCollections.observableList(new LinkedList<Filter>());
 
 	/**
 	 * Creates a TaskManager instance
@@ -361,7 +366,7 @@ public class TaskManager {
 	 *
 	 * @return the list of all tasks
 	 */
-	public ObservableList<TaskAdapter> tasksProperty() {
+	public ObservableList<TaskAdapter> getTasks() {
 		return tasks;
 	}
 
@@ -370,17 +375,26 @@ public class TaskManager {
 	 *
 	 * @return the list of all time segments
 	 */
-	public ObservableList<TimeSegmentAdapter> timeSegmentsProperty() {
+	public ObservableList<TimeSegmentAdapter> getTimeSegments() {
 		return timeSegments;
 	}
 
 	/**
-	 * Custom fields list property
+	 * Returns the list of all custom fields
 	 *
-	 * @return the custom fields property
+	 * @return the list of all custom fields
 	 */
 	public ObservableList<CustomFieldAdapter> getCustomFields() {
 		return customFields;
+	}
+
+	/**
+	 * Returns the list of all filters
+	 *
+	 * @return the list of all filters
+	 */
+	public ObservableList<Filter> getFilters() {
+		return filters;
 	}
 
 	/**

@@ -117,6 +117,14 @@ public class MainWindowController implements Initializable {
 	 */
 	private ReportController reportController;
 	/**
+	 * Filters stage
+	 */
+	private Stage filterEditorStage;
+	/**
+	 * Report controller
+	 */
+	private FilterEditorController filterEditorController;
+	/**
 	 * Root pane
 	 */
 	@FXML
@@ -239,7 +247,7 @@ public class MainWindowController implements Initializable {
 		columnLastTime.setComparator(TaskComparator);
 		//Create the task manager
 		taskManager = new TaskManager();
-		taskList.setItems(taskManager.tasksProperty());
+		taskList.setItems(taskManager.getTasks());
 		reloadTasks();
 
 		//Auto update sort order
@@ -458,6 +466,7 @@ public class MainWindowController implements Initializable {
 		//Load other windows
 		loadWindowCustomFieldEditor();
 		loadWindowReport();
+		loadWindowFilterEditor();
 		taskEditorController.setTaskManager(taskManager);
 	}
 
@@ -510,7 +519,7 @@ public class MainWindowController implements Initializable {
 		try {
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
-			Logger.getLogger(getClass().getName()).log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
+			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Initialize the scene properties
 		if (root != null) {
@@ -522,6 +531,32 @@ public class MainWindowController implements Initializable {
 		reportController = loader.getController();
 		reportController.setTaskManager(taskManager);
 		reportController.setLastDirectory(lastDirectory);
+	}
+
+	/**
+	 * Loads the report FXML
+	 */
+	private void loadWindowFilterEditor() {
+		//Load FXML
+		filterEditorStage = new Stage();
+		filterEditorStage.initModality(Modality.NONE);
+		Parent root = null;
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("FilterEditor.fxml"), messages); //NOI18N
+		loader.setLocation(getClass().getResource("FilterEditor.fxml")); //NOI18N
+		try {
+			root = (Parent) loader.load();
+		} catch (IOException ex) {
+			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
+		}
+		//Initialize the scene properties
+		if (root != null) {
+			Scene scene = new Scene(root);
+			filterEditorStage.setTitle(messages.getString("FILTERS"));
+			filterEditorStage.setScene(scene);
+		}
+		//Set the task manager
+		filterEditorController = loader.getController();
+		filterEditorController.setTaskManager(taskManager);
 	}
 
 	/**
@@ -682,6 +717,12 @@ public class MainWindowController implements Initializable {
 	private void showReportWindow() {
 		reportStage.getIcons().setAll(((Stage) rootPane.getScene().getWindow()).getIcons());
 		reportStage.show();
+	}
+
+	@FXML
+	private void showFiltersEditor() {
+		filterEditorStage.getIcons().setAll(((Stage) rootPane.getScene().getWindow()).getIcons());
+		filterEditorStage.show();
 	}
 
 	/**

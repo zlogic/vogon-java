@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.*?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?scenebuilder-preview-i18n-resource messages.properties?>
+
+<VBox prefHeight="344.0" prefWidth="364.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.FilterEditorController">
+  <children>
+    <HBox alignment="CENTER_LEFT" fillHeight="true" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="SOMETIMES">
+      <children>
+        <Button mnemonicParsing="false" onAction="#addFilter" text="%ADD_FILTER">
+          <HBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+          </HBox.margin>
+        </Button>
+        <Button id="deleteFilterButton" fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteFilter" text="%DELETE_FILTER" HBox.margin="$x1" />
+      </children>
+    </HBox>
+    <TableView fx:id="filters" editable="true" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+      <columns>
+        <TableColumn prefWidth="75.0" text="%FILTER_TYPE" fx:id="columnFilterType">
+          <cellValueFactory>
+            <PropertyValueFactory property="type" />
+          </cellValueFactory>
+        </TableColumn>
+        <TableColumn prefWidth="75.0" text="%FILTER_EXPRESSION" fx:id="columnFilterExpression">
+          <cellValueFactory>
+            <PropertyValueFactory property="value" />
+          </cellValueFactory>
+        </TableColumn>
+      </columns>
+    </TableView>
+    <HBox alignment="CENTER_RIGHT" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="SOMETIMES">
+      <children>
+        <Button alignment="CENTER" defaultButton="true" mnemonicParsing="false" onAction="#closeWindow" text="%CLOSE" HBox.margin="$x1" />
+      </children>
+    </HBox>
+  </children>
+</VBox>

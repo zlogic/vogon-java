@@ -41,6 +41,10 @@ import org.zlogic.att.ui.report.Report;
 public class ReportController implements Initializable {
 
 	/**
+	 * The logger
+	 */
+	private final static Logger log = Logger.getLogger(ReportController.class.getName());
+	/**
 	 * Localization messages
 	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/messages");
@@ -221,7 +225,7 @@ public class ReportController implements Initializable {
 						reportTaskThread.get().join();
 						reportTaskThread.set(null);
 					} catch (InterruptedException ex) {
-						Logger.getLogger(ReportController.class.getName()).log(Level.SEVERE, null, ex);
+						log.log(Level.SEVERE, null, ex);
 					}
 				}
 			}
@@ -258,7 +262,7 @@ public class ReportController implements Initializable {
 			try {
 				generatedReport.get().savePdfReport(selectedFile);
 			} catch (FileNotFoundException | DRException ex) {
-				Logger.getLogger(ReportController.class.getName()).log(Level.SEVERE, null, ex);
+				log.log(Level.SEVERE, null, ex);
 			}
 		}
 	}
