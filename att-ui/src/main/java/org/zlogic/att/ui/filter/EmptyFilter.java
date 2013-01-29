@@ -7,8 +7,6 @@ package org.zlogic.att.ui.filter;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.ObservableList;
-import javafx.util.StringConverter;
 
 /**
  * Empty filter (default value for new filters)
@@ -17,30 +15,15 @@ import javafx.util.StringConverter;
  */
 public class EmptyFilter implements Filter<Void> {
 
-	private FilterBuilder.FilterTypeComboItem type;
+	private FilterTypeFactory type;
 	private ObjectProperty<Void> value = new SimpleObjectProperty<>();
 
-	public EmptyFilter(FilterBuilder.FilterTypeComboItem type) {
+	public EmptyFilter(FilterTypeFactory type) {
 		this.type = type;
 	}
 
 	@Override
-	public StringConverter<Void> getConverter() {
-		return null;
-	}
-
-	@Override
-	public ObservableList<Void> getAvailableValues() {
-		return null;
-	}
-
-	@Override
-	public boolean isAllowAnyValue() {
-		return false;
-	}
-
-	@Override
-	public FilterBuilder.FilterTypeComboItem getType() {
+	public FilterTypeFactory getType() {
 		return type;
 	}
 

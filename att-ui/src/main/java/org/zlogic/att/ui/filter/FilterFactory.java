@@ -9,14 +9,13 @@ import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.zlogic.att.ui.adapters.TaskManager;
-import org.zlogic.att.ui.filter.FilterBuilder.FilterTypeComboItem;
 
 /**
  * Filter factory class
  *
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
-public class FilterBuilder {
+public class FilterFactory {
 
 	/**
 	 * Localization messages
@@ -26,31 +25,31 @@ public class FilterBuilder {
 	 * TaskManager reference
 	 */
 	private TaskManager taskManager;
-	private ObservableList<FilterTypeComboItem> availableFilters = FXCollections.observableArrayList();
-	private FilterTypeComboItem defaultFilterConstructor;
+	private ObservableList<FilterTypeFactory> availableFilters = FXCollections.observableArrayList();
+	private FilterTypeFactory defaultFilterConstructor;
 
 	/**
 	 * Creates a filter factory
 	 *
 	 * @param taskManager the TaskManager reference
 	 */
-	public FilterBuilder(TaskManager taskManager) {
+	public FilterFactory(TaskManager taskManager) {
 		this.taskManager = taskManager;
 
 		//Populate available filters list
-		availableFilters.add(new FilterTypeComboItem(messages.getString("START_DATE")) {
+		availableFilters.add(new FilterTypeFactory(messages.getString("START_DATE")) {
 			@Override
 			public Filter createFilter() {
 				return new DateFilter(this, DateFilter.DateType.DATE_START);
 			}
 		});
-		availableFilters.add(new FilterTypeComboItem(messages.getString("END_DATE")) {
+		availableFilters.add(new FilterTypeFactory(messages.getString("END_DATE")) {
 			@Override
 			public Filter createFilter() {
 				return new DateFilter(this, DateFilter.DateType.DATE_END);
 			}
 		});
-		defaultFilterConstructor = new FilterTypeComboItem("") {
+		defaultFilterConstructor = new FilterTypeFactory("") {
 			@Override
 			public Filter createFilter() {
 				return new EmptyFilter(this);
@@ -58,27 +57,15 @@ public class FilterBuilder {
 		};
 	}
 
-	public ObservableList<FilterTypeComboItem> getAvailableFilters() {
+	public ObservableList<FilterTypeFactory> getAvailableFilters() {
 		return availableFilters;
+	}
+
+	public FilterTypeFactory getDefaultFilterConstructor() {
+		return defaultFilterConstructor;
 	}
 
 	public Filter createFilter() {
 		return defaultFilterConstructor.createFilter();
-	}
-
-	public abstract class FilterTypeComboItem {
-
-		private String name;
-
-		private FilterTypeComboItem(String name) {
-			this.name = name;
-		}
-
-		@Override
-		public String toString() {
-			return name;
-		}
-
-		public abstract Filter createFilter();
 	}
 }
