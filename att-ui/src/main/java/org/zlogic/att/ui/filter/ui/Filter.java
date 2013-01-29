@@ -3,9 +3,10 @@
  * License TBD.
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
-package org.zlogic.att.ui.filter;
+package org.zlogic.att.ui.filter.ui;
 
 import javafx.beans.property.ObjectProperty;
+import org.zlogic.att.ui.filter.FilterTypeFactory;
 
 /**
  * Task filter interface

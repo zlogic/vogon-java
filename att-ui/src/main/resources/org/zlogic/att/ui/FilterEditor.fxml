@@ -38,7 +38,7 @@
     </TableView>
     <HBox alignment="CENTER_RIGHT" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="SOMETIMES">
       <children>
-        <Button alignment="CENTER" defaultButton="true" mnemonicParsing="false" onAction="#closeWindow" text="%CLOSE" HBox.margin="$x1" />
+        <Button alignment="CENTER" defaultButton="true" mnemonicParsing="false" onAction="#hideWindow" text="%CLOSE" HBox.margin="$x1" />
       </children>
     </HBox>
   </children>

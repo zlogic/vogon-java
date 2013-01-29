@@ -3,7 +3,7 @@
  * License TBD.
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
-package org.zlogic.att.ui.filter;
+package org.zlogic.att.ui.filter.ui;
 
 import javafx.util.StringConverter;
 

@@ -6,12 +6,11 @@
 package org.zlogic.att.ui.filter;
 
 import java.util.Date;
-import java.util.ResourceBundle;
-import java.util.logging.Logger;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.util.StringConverter;
 import javafx.util.converter.DateStringConverter;
+import org.zlogic.att.ui.filter.ui.FilterTextValue;
 
 /**
  * Filter for start/end dates
@@ -20,12 +19,13 @@ import javafx.util.converter.DateStringConverter;
  */
 public class DateFilter implements FilterTextValue<Object> {
 
-	private final static Logger log = Logger.getLogger(DateFilter.class.getName());
 	/**
-	 * Localization messages
+	 * The date type
 	 */
-	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/messages");
 	private DateType type;
+	/**
+	 * The Date <-> String converter
+	 */
 	private StringConverter<Object> converter = new StringConverter<Object>() {
 		private DateStringConverter delegateDateConverter = new DateStringConverter();
 
@@ -44,14 +44,36 @@ public class DateFilter implements FilterTextValue<Object> {
 			return delegateDateConverter.fromString(string);
 		}
 	};
+	/**
+	 * The filter type
+	 */
 	private FilterTypeFactory filterType;
+	/**
+	 * The filter value
+	 */
 	private ObjectProperty<Object> value = new SimpleObjectProperty<>();
 
+	/**
+	 * The date filter type
+	 */
 	public enum DateType {
 
-		DATE_START, DATE_END
+		/**
+		 * This is a start date filter
+		 */
+		DATE_START,
+		/**
+		 * This is an end date filter
+		 */
+		DATE_END
 	};
 
+	/**
+	 * Constructs a CompletedFilter
+	 *
+	 * @param filterType the filter type (creator of this object)
+	 * @param type the date type
+	 */
 	public DateFilter(FilterTypeFactory filterType, DateType type) {
 		this.filterType = filterType;
 		this.type = type;

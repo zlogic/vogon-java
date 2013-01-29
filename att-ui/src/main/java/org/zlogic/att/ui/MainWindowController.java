@@ -719,6 +719,9 @@ public class MainWindowController implements Initializable {
 		reportStage.show();
 	}
 
+	/**
+	 * Show the filter editor
+	 */
 	@FXML
 	private void showFiltersEditor() {
 		filterEditorStage.getIcons().setAll(((Stage) rootPane.getScene().getWindow()).getIcons());

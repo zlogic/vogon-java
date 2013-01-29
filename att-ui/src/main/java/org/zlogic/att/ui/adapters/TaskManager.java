@@ -21,7 +21,7 @@ import org.zlogic.att.data.PersistenceHelper;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.TransactedChange;
-import org.zlogic.att.ui.filter.Filter;
+import org.zlogic.att.ui.filter.FilterHolder;
 
 /**
  * Placeholder class to contain an ObservableList of all TaskAdapters. This
@@ -62,7 +62,7 @@ public class TaskManager {
 	/**
 	 * The currently active filters
 	 */
-	private ObservableList<Filter> filters = FXCollections.observableList(new LinkedList<Filter>());
+	private ObservableList<FilterHolder> filters = FXCollections.observableList(new LinkedList<FilterHolder>());
 
 	/**
 	 * Creates a TaskManager instance
@@ -393,7 +393,7 @@ public class TaskManager {
 	 *
 	 * @return the list of all filters
 	 */
-	public ObservableList<Filter> getFilters() {
+	public ObservableList<FilterHolder> getFilters() {
 		return filters;
 	}
 

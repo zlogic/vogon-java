@@ -101,7 +101,7 @@ public class CustomFieldEditorController implements Initializable {
 	}
 
 	/**
-	 * Deletes a custom field
+	 * Delete selected custom fields
 	 */
 	@FXML
 	private void deleteCustomField() {

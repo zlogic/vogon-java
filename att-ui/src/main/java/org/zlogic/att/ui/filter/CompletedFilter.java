@@ -7,14 +7,14 @@ package org.zlogic.att.ui.filter;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import org.zlogic.att.ui.filter.ui.Filter;
+import org.zlogic.att.ui.filter.ui.FilterBooleanValue;
 
 /**
- * Empty filter (default value for new filters)
+ * Filter for a task's compeled state
  *
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
-public class EmptyFilter implements Filter<Void> {
+public class CompletedFilter implements FilterBooleanValue {
 
 	/**
 	 * The filter type
@@ -23,14 +23,15 @@ public class EmptyFilter implements Filter<Void> {
 	/**
 	 * The filter value
 	 */
-	private ObjectProperty<Void> value = new SimpleObjectProperty<>();
+	private ObjectProperty<Boolean> value = new SimpleObjectProperty<>();
 
 	/**
-	 * Constructs an EmptyFilter
+	 * Constructs a CompletedFilter
 	 *
 	 * @param filterType the filter type (creator of this object)
 	 */
-	public EmptyFilter(FilterTypeFactory filterType) {
+	public CompletedFilter(FilterTypeFactory filterType) {
+		value.set(true);
 		this.filterType = filterType;
 	}
 
@@ -40,7 +41,7 @@ public class EmptyFilter implements Filter<Void> {
 	}
 
 	@Override
-	public ObjectProperty<Void> valueProperty() {
+	public ObjectProperty<Boolean> valueProperty() {
 		return value;
 	}
 }

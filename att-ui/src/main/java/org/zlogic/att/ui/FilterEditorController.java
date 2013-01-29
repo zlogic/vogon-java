@@ -16,11 +16,10 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.util.Callback;
 import org.zlogic.att.ui.adapters.TaskManager;
-import org.zlogic.att.ui.filter.Filter;
 import org.zlogic.att.ui.filter.FilterFactory;
 import org.zlogic.att.ui.filter.FilterHolder;
 import org.zlogic.att.ui.filter.FilterTypeFactory;
-import org.zlogic.att.ui.filter.FilterValueCell;
+import org.zlogic.att.ui.filter.ui.FilterValueCell;
 
 /**
  * Controller for the filters window
@@ -30,24 +29,41 @@ import org.zlogic.att.ui.filter.FilterValueCell;
 public class FilterEditorController implements Initializable {
 
 	/**
-	 * Localization messages
+	 * The filter factory used to create filters and display the list of
+	 * available filters
 	 */
-	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/messages");
 	private FilterFactory filterBuilder;
-	@FXML
-	private TableColumn<FilterHolder, Object> columnFilterExpression;
-	@FXML
-	private TableColumn<FilterHolder, FilterTypeFactory> columnFilterType;
-	@FXML
-	private Button deleteButton;
+	/**
+	 * Filter list table
+	 */
 	@FXML
 	private TableView<FilterHolder> filters;
+	/**
+	 * Filter Expression column
+	 */
+	@FXML
+	private TableColumn<FilterHolder, Object> columnFilterExpression;
+	/**
+	 * Filter Type column
+	 */
+	@FXML
+	private TableColumn<FilterHolder, FilterTypeFactory> columnFilterType;
+	/**
+	 * Delete button
+	 */
+	@FXML
+	private Button deleteButton;
 
+	/**
+	 * Initializes the controller
+	 *
+	 * @param url initialization URL
+	 * @param resourceBundle supplied resources
+	 */
 	@Override
-	public void initialize(URL url, ResourceBundle rb) {
+	public void initialize(URL url, ResourceBundle resourceBundle) {
 		filters.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		deleteButton.disableProperty().bind(filters.getSelectionModel().selectedItemProperty().isNull());
-
 
 		//Cell editors
 		columnFilterType.setCellFactory(new Callback<TableColumn<FilterHolder, FilterTypeFactory>, TableCell<FilterHolder, FilterTypeFactory>>() {
@@ -73,25 +89,32 @@ public class FilterEditorController implements Initializable {
 	 * @param taskManager the TaskManager reference
 	 */
 	public void setTaskManager(TaskManager taskManager) {
-		filters.getItems().clear();
-		for (Filter filter : taskManager.getFilters())
-			filters.getItems().add(new FilterHolder(filter));
+		filters.setItems(taskManager.getFilters());
 		filterBuilder = new FilterFactory(taskManager);
 	}
 
 	/*
 	 * Callbacks
 	 */
+	/**
+	 * Hides the window
+	 */
+	@FXML
+	private void hideWindow() {
+		filters.getScene().getWindow().hide();
+	}
+
+	/**
+	 * Adds a new filter
+	 */
 	@FXML
 	private void addFilter() {
 		filters.getItems().add(new FilterHolder(filterBuilder.createFilter()));
 	}
 
-	@FXML
-	private void closeWindow() {
-		filters.getScene().getWindow().hide();
-	}
-
+	/**
+	 * Delete selected filters
+	 */
 	@FXML
 	private void deleteFilter() {
 		for (FilterHolder filter : filters.getSelectionModel().getSelectedItems())
