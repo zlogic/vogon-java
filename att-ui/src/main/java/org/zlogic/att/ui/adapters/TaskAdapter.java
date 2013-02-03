@@ -82,9 +82,9 @@ public class TaskAdapter {
 	 */
 	private BooleanProperty timingProperty = new SimpleBooleanProperty(false);
 	/**
-	 * TaskManager reference
+	 * DataManager reference
 	 */
-	private TaskManager taskManager;
+	private DataManager dataManager;
 
 	/*
 	 * Change listeners
@@ -95,10 +95,10 @@ public class TaskAdapter {
 	private ChangeListener<String> descriptionChangeListener = new ChangeListener<String>() {
 		@Override
 		public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
-			oldValue = oldValue == null ? "" : oldValue;
-			newValue = newValue == null ? "" : newValue;
-			if (!oldValue.equals(newValue) && getTaskManager() != null) {
-				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+			oldValue = oldValue == null ? "" : oldValue; //NOI18N
+			newValue = newValue == null ? "" : newValue; //NOI18N
+			if (!oldValue.equals(newValue) && getDataManager() != null) {
+				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private String newValue;
 
 					public TransactedChange setNewValue(String newValue) {
@@ -108,12 +108,12 @@ public class TaskAdapter {
 
 					@Override
 					public void performChange(EntityManager entityManager) {
-						setTask(getTaskManager().getPersistenceHelper().getTaskFromDatabase(getTask().getId(), entityManager));
+						setTask(getDataManager().getPersistenceHelper().getTaskFromDatabase(getTask().getId(), entityManager));
 						getTask().setDescription(newValue);
 					}
 				}.setNewValue(newValue));
 				updateFxProperties();
-				getTaskManager().signalTaskUpdate();
+				getDataManager().signalTaskUpdate();
 			}
 		}
 	};
@@ -123,10 +123,10 @@ public class TaskAdapter {
 	private ChangeListener<String> nameChangeListener = new ChangeListener<String>() {
 		@Override
 		public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
-			oldValue = oldValue == null ? "" : oldValue;
-			newValue = newValue == null ? "" : newValue;
-			if (!oldValue.equals(newValue) && getTaskManager() != null) {
-				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+			oldValue = oldValue == null ? "" : oldValue; //NOI18N
+			newValue = newValue == null ? "" : newValue; //NOI18N
+			if (!oldValue.equals(newValue) && getDataManager() != null) {
+				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private String newValue;
 
 					public TransactedChange setNewValue(String newValue) {
@@ -136,12 +136,12 @@ public class TaskAdapter {
 
 					@Override
 					public void performChange(EntityManager entityManager) {
-						setTask(getTaskManager().getPersistenceHelper().getTaskFromDatabase(getTask().getId(), entityManager));
+						setTask(getDataManager().getPersistenceHelper().getTaskFromDatabase(getTask().getId(), entityManager));
 						getTask().setName(newValue);
 					}
 				}.setNewValue(newValue));
 				updateFxProperties();
-				getTaskManager().signalTaskUpdate();
+				getDataManager().signalTaskUpdate();
 			}
 		}
 	};
@@ -151,8 +151,8 @@ public class TaskAdapter {
 	private ChangeListener<Boolean> completedChangeListener = new ChangeListener<Boolean>() {
 		@Override
 		public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
-			if (!oldValue.equals(newValue) && getTaskManager() != null) {
-				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+			if (!oldValue.equals(newValue) && getDataManager() != null) {
+				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private boolean newValue;
 
 					public TransactedChange setNewValue(boolean newValue) {
@@ -162,12 +162,12 @@ public class TaskAdapter {
 
 					@Override
 					public void performChange(EntityManager entityManager) {
-						setTask(getTaskManager().getPersistenceHelper().getTaskFromDatabase(getTask().getId(), entityManager));
+						setTask(getDataManager().getPersistenceHelper().getTaskFromDatabase(getTask().getId(), entityManager));
 						getTask().setCompleted(newValue);
 					}
 				}.setNewValue(newValue));
 				updateFxProperties();
-				getTaskManager().signalTaskUpdate();
+				getDataManager().signalTaskUpdate();
 			}
 		}
 	};
@@ -176,15 +176,15 @@ public class TaskAdapter {
 	 * Creates a TaskAdapter instance
 	 *
 	 * @param task the associated task
-	 * @param taskManager the TaskManager reference
+	 * @param dataManager the DataManager reference
 	 */
-	public TaskAdapter(Task task, TaskManager taskManager) {
+	public TaskAdapter(Task task, DataManager dataManager) {
 		this.task = task;
-		this.taskManager = taskManager;
+		this.dataManager = dataManager;
 
 		//Populate time segments
 		for (TimeSegment timeSegment : task.getTimeSegments())
-			taskManager.getTimeSegments().add(new TimeSegmentAdapter(timeSegment, this, taskManager));
+			this.dataManager.getTimeSegments().add(new TimeSegmentAdapter(timeSegment, this, this.dataManager));
 
 		updateFxProperties();
 		//Change listeners
@@ -197,10 +197,10 @@ public class TaskAdapter {
 	 * Updates the associated entity from database
 	 */
 	public void updateFromDatabase() {
-		getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+		getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 			@Override
 			public void performChange(EntityManager entityManager) {
-				setTask(getTaskManager().getPersistenceHelper().getTaskFromDatabase(getTask().getId(), entityManager));
+				setTask(getDataManager().getPersistenceHelper().getTaskFromDatabase(getTask().getId(), entityManager));
 			}
 		});
 		updateFxProperties();
@@ -310,12 +310,12 @@ public class TaskAdapter {
 	 * Internal methods
 	 */
 	/**
-	 * Returns the TaskManager reference
+	 * Returns the DataManager reference
 	 *
-	 * @return the TaskManager reference
+	 * @return the DataManager reference
 	 */
-	private TaskManager getTaskManager() {
-		return taskManager;
+	private DataManager getDataManager() {
+		return dataManager;
 	}
 
 	/**
@@ -348,7 +348,7 @@ public class TaskAdapter {
 				orphanedSegments.add(segment);
 		timeSegments.removeAll(orphanedSegments);
 		for (TimeSegment segment : task.getTimeSegments()) {
-			TimeSegmentAdapter segmentAdapter = taskManager.findTimeSegmentAdapter(segment);
+			TimeSegmentAdapter segmentAdapter = dataManager.findTimeSegmentAdapter(segment);
 			if (segmentAdapter == null) {
 				log.log(Level.SEVERE, messages.getString("CANNOT_FIND_TIME_SEGMENT_DURING_UPDATETIMESEGMENTS"), new Object[]{segment.getId(), segment.getDescription()});
 				continue;
@@ -404,7 +404,7 @@ public class TaskAdapter {
 	 * @return the new TimeSegment
 	 */
 	public TimeSegmentAdapter createTimeSegment() {
-		TimeSegmentAdapter newSegment = taskManager.createTimeSegment(this);
+		TimeSegmentAdapter newSegment = dataManager.createTimeSegment(this);
 		updateFromDatabase();
 		return newSegment;
 	}

@@ -17,7 +17,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 import javafx.util.converter.DefaultStringConverter;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
-import org.zlogic.att.ui.adapters.TaskManager;
+import org.zlogic.att.ui.adapters.DataManager;
 
 /**
  * Controller for custom field editor
@@ -27,9 +27,9 @@ import org.zlogic.att.ui.adapters.TaskManager;
 public class CustomFieldEditorController implements Initializable {
 
 	/**
-	 * TaskManager reference
+	 * DataManager reference
 	 */
-	private TaskManager taskManager;
+	private DataManager dataManager;
 	/**
 	 * Delete button
 	 */
@@ -70,13 +70,13 @@ public class CustomFieldEditorController implements Initializable {
 	}
 
 	/**
-	 * Sets the TaskManager reference
+	 * Sets the DataManager reference
 	 *
-	 * @param taskManager the TaskManager reference
+	 * @param dataManager the DataManager reference
 	 */
-	public void setTaskManager(TaskManager taskManager) {
-		this.taskManager = taskManager;
-		customFields.setItems(taskManager.getCustomFields());
+	public void setDataManager(DataManager dataManager) {
+		this.dataManager = dataManager;
+		customFields.setItems(dataManager.getCustomFields());
 	}
 
 	/*
@@ -95,7 +95,7 @@ public class CustomFieldEditorController implements Initializable {
 	 */
 	@FXML
 	private void addCustomField() {
-		CustomFieldAdapter newCustomField = taskManager.createCustomField();
+		CustomFieldAdapter newCustomField = dataManager.createCustomField();
 		customFields.getSelectionModel().clearSelection();
 		customFields.getSelectionModel().select(newCustomField);
 	}
@@ -106,6 +106,6 @@ public class CustomFieldEditorController implements Initializable {
 	@FXML
 	private void deleteCustomField() {
 		for (CustomFieldAdapter customField : customFields.getSelectionModel().getSelectedItems())
-			taskManager.deleteCustomField(customField);
+			dataManager.deleteCustomField(customField);
 	}
 }

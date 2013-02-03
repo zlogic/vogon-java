@@ -26,9 +26,9 @@ public class CustomFieldAdapter implements Comparable<CustomFieldAdapter> {
 	 */
 	private CustomField customField;
 	/**
-	 * TaskManager reference
+	 * DataManager reference
 	 */
-	private TaskManager taskManager;
+	private DataManager dataManager;
 	/*
 	 * Java FX
 	 */
@@ -47,8 +47,8 @@ public class CustomFieldAdapter implements Comparable<CustomFieldAdapter> {
 		public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
 			oldValue = oldValue == null ? "" : oldValue; //NOI18N
 			newValue = newValue == null ? "" : newValue; //NOI18N
-			if (!oldValue.equals(newValue) && getTaskManager() != null) {
-				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+			if (!oldValue.equals(newValue) && getDataManager() != null) {
+				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private String newValue;
 
 					public TransactedChange setNewValue(String newValue) {
@@ -71,11 +71,11 @@ public class CustomFieldAdapter implements Comparable<CustomFieldAdapter> {
 	 * Creates a CustomFieldValueAdapter instance
 	 *
 	 * @param customField the associated entity
-	 * @param taskManager the TaskManager reference
+	 * @param dataManager the DataManager reference
 	 */
-	public CustomFieldAdapter(CustomField customField, TaskManager taskManager) {
+	public CustomFieldAdapter(CustomField customField, DataManager dataManager) {
 		this.customField = customField;
-		this.taskManager = taskManager;
+		this.dataManager = dataManager;
 
 		updateFxProperties();
 
@@ -87,12 +87,12 @@ public class CustomFieldAdapter implements Comparable<CustomFieldAdapter> {
 	 * Internal methods
 	 */
 	/**
-	 * Returns the TaskManager reference
+	 * Returns the DataManager reference
 	 *
-	 * @return the TaskManager reference
+	 * @return the DataManager reference
 	 */
-	private TaskManager getTaskManager() {
-		return taskManager;
+	private DataManager getDataManager() {
+		return dataManager;
 	}
 
 	/*

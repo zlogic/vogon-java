@@ -57,8 +57,8 @@ import org.zlogic.att.data.converters.XmlExporter;
 import org.zlogic.att.data.converters.XmlImporter;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
 import org.zlogic.att.ui.adapters.CustomFieldValueAdapter;
+import org.zlogic.att.ui.adapters.DataManager;
 import org.zlogic.att.ui.adapters.TaskAdapter;
-import org.zlogic.att.ui.adapters.TaskManager;
 import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 
 /**
@@ -77,9 +77,9 @@ public class MainWindowController implements Initializable {
 	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/messages");
 	/**
-	 * TaskManager reference
+	 * DataManager reference
 	 */
-	private TaskManager taskManager;
+	private DataManager dataManager;
 	/**
 	 * Last opened directory
 	 */
@@ -245,13 +245,13 @@ public class MainWindowController implements Initializable {
 			}
 		};
 		columnLastTime.setComparator(TaskComparator);
-		//Create the task manager
-		taskManager = new TaskManager();
-		taskList.setItems(taskManager.getTasks());
+		//Create the data manager
+		dataManager = new DataManager();
+		taskList.setItems(dataManager.getTasks());
 		reloadTasks();
 
 		//Auto update sort order
-		taskManager.taskUpdatedProperty().addListener(new ChangeListener<Date>() {
+		dataManager.taskUpdatedProperty().addListener(new ChangeListener<Date>() {
 			@Override
 			public void changed(ObservableValue<? extends Date> ov, Date oldValue, Date newValue) {
 				updateSortOrder();
@@ -269,8 +269,8 @@ public class MainWindowController implements Initializable {
 		taskList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		//Bind the current task panel
 		activeTaskPane.managedProperty().bind(activeTaskPane.visibleProperty());
-		activeTaskPane.visibleProperty().bind(taskManager.timingSegmentProperty().isNotNull());
-		taskManager.timingSegmentProperty().addListener(new ChangeListener<TimeSegmentAdapter>() {
+		activeTaskPane.visibleProperty().bind(dataManager.timingSegmentProperty().isNotNull());
+		dataManager.timingSegmentProperty().addListener(new ChangeListener<TimeSegmentAdapter>() {
 			private ChangeListener<TaskAdapter> taskChangedListener = new ChangeListener<TaskAdapter>() {
 				@Override
 				public void changed(ObservableValue<? extends TaskAdapter> ov, TaskAdapter oldValue, TaskAdapter newValue) {
@@ -467,7 +467,7 @@ public class MainWindowController implements Initializable {
 		loadWindowCustomFieldEditor();
 		loadWindowReport();
 		loadWindowFilterEditor();
-		taskEditorController.setTaskManager(taskManager);
+		taskEditorController.setDataManager(dataManager);
 	}
 
 	/**
@@ -501,9 +501,9 @@ public class MainWindowController implements Initializable {
 			customFieldEditorStage.setTitle(messages.getString("CUSTOM_FIELD_EDITOR"));
 			customFieldEditorStage.setScene(scene);
 		}
-		//Set the task manager
+		//Set the data manager
 		customFieldEditorController = loader.getController();
-		customFieldEditorController.setTaskManager(taskManager);
+		customFieldEditorController.setDataManager(dataManager);
 	}
 
 	/**
@@ -527,9 +527,9 @@ public class MainWindowController implements Initializable {
 			reportStage.setTitle(messages.getString("REPORT"));
 			reportStage.setScene(scene);
 		}
-		//Set the task manager
+		//Set the data manager
 		reportController = loader.getController();
-		reportController.setTaskManager(taskManager);
+		reportController.setDataManager(dataManager);
 		reportController.setLastDirectory(lastDirectory);
 	}
 
@@ -554,16 +554,16 @@ public class MainWindowController implements Initializable {
 			filterEditorStage.setTitle(messages.getString("FILTERS"));
 			filterEditorStage.setScene(scene);
 		}
-		//Set the task manager
+		//Set the data manager
 		filterEditorController = loader.getController();
-		filterEditorController.setTaskManager(taskManager);
+		filterEditorController.setDataManager(dataManager);
 	}
 
 	/**
 	 * Reloads tasks
 	 */
 	protected void reloadTasks() {
-		taskManager.reloadTasks();
+		dataManager.reloadTasks();
 		taskEditorController.setEditedTaskList(taskList.getSelectionModel().getSelectedItems());
 		updateSortOrder();
 	}
@@ -667,7 +667,7 @@ public class MainWindowController implements Initializable {
 	 */
 	@FXML
 	private void createNewTask() {
-		TaskAdapter newTask = taskManager.createTask();
+		TaskAdapter newTask = dataManager.createTask();
 		taskList.getSelectionModel().clearSelection();
 		updateSortOrder();
 		taskList.getSelectionModel().select(newTask);
@@ -679,7 +679,7 @@ public class MainWindowController implements Initializable {
 	@FXML
 	private void deleteSelectedTasks() {
 		for (TaskAdapter selectedTask : taskList.getSelectionModel().getSelectedItems())
-			taskManager.deleteTask(selectedTask);
+			dataManager.deleteTask(selectedTask);
 		updateSortOrder();
 	}
 
@@ -689,11 +689,11 @@ public class MainWindowController implements Initializable {
 	@FXML
 	private void duplicateSelectedTasks() {
 		for (TaskAdapter selectedTask : taskList.getSelectionModel().getSelectedItems()) {
-			TaskAdapter newTask = taskManager.createTask();
+			TaskAdapter newTask = dataManager.createTask();
 			newTask.nameProperty().set(selectedTask.nameProperty().get());
 			newTask.descriptionProperty().set(selectedTask.descriptionProperty().get());
-			for (CustomFieldAdapter customField : taskManager.getCustomFields()) {
-				CustomFieldValueAdapter customFieldValue = new CustomFieldValueAdapter(customField, taskManager);
+			for (CustomFieldAdapter customField : dataManager.getCustomFields()) {
+				CustomFieldValueAdapter customFieldValue = new CustomFieldValueAdapter(customField, dataManager);
 				customFieldValue.setTask(newTask);
 				customFieldValue.valueProperty().set(selectedTask.getTask().getCustomField(customField.getCustomField()));
 			}
@@ -764,7 +764,7 @@ public class MainWindowController implements Initializable {
 			}
 			//Import data
 			if (importer != null)
-				taskManager.getPersistenceHelper().importData(importer);
+				dataManager.getPersistenceHelper().importData(importer);
 			else
 				log.fine(messages.getString("EXTENSION_NOT_RECOGNIZED"));
 			reloadTasks();
@@ -815,14 +815,14 @@ public class MainWindowController implements Initializable {
 
 					//Import data
 					if (importer != null)
-						taskManager.getPersistenceHelper().importData(importer);
+						dataManager.getPersistenceHelper().importData(importer);
 					else
 						log.fine(messages.getString("EXTENSION_NOT_RECOGNIZED"));
 
 					updateProgress(1, 1);
 					updateMessage(""); //NOI18N
 
-					taskManager.reloadCustomFields();
+					dataManager.reloadCustomFields();
 					reloadTasks();
 					return null;
 				}
@@ -873,7 +873,7 @@ public class MainWindowController implements Initializable {
 
 					//Export data
 					if (exporter != null)
-						exporter.exportData(taskManager.getPersistenceHelper());
+						exporter.exportData(dataManager.getPersistenceHelper());
 					else
 						log.fine(messages.getString("EXTENSION_NOT_RECOGNIZED"));
 
@@ -892,7 +892,7 @@ public class MainWindowController implements Initializable {
 	 */
 	@FXML
 	private void stopTimingTask() {
-		TimeSegmentAdapter segment = taskManager.timingSegmentProperty().get();
+		TimeSegmentAdapter segment = dataManager.timingSegmentProperty().get();
 		if (segment != null)
 			segment.stopTiming();
 	}
@@ -909,7 +909,7 @@ public class MainWindowController implements Initializable {
 				updateMessage(messages.getString("CLEANING_UP_DB"));
 				updateProgress(-1, 1);
 
-				taskManager.getPersistenceHelper().cleanupDB();
+				dataManager.getPersistenceHelper().cleanupDB();
 
 				updateProgress(1, 1);
 				updateMessage(""); //NOI18N

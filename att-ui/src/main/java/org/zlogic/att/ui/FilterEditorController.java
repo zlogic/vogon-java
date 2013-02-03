@@ -15,7 +15,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.util.Callback;
-import org.zlogic.att.ui.adapters.TaskManager;
+import org.zlogic.att.ui.adapters.DataManager;
 import org.zlogic.att.ui.filter.FilterHolder;
 import org.zlogic.att.ui.filter.FilterTypeFactory;
 import org.zlogic.att.ui.filter.FilterValueCell;
@@ -28,9 +28,9 @@ import org.zlogic.att.ui.filter.FilterValueCell;
 public class FilterEditorController implements Initializable {
 
 	/**
-	 * TaskManager reference
+	 * DataManager reference
 	 */
-	private TaskManager taskManager;
+	private DataManager dataManager;
 	/**
 	 * Filter list table
 	 */
@@ -67,7 +67,7 @@ public class FilterEditorController implements Initializable {
 		columnFilterType.setCellFactory(new Callback<TableColumn<FilterHolder, FilterTypeFactory>, TableCell<FilterHolder, FilterTypeFactory>>() {
 			@Override
 			public TableCell<FilterHolder, FilterTypeFactory> call(TableColumn<FilterHolder, FilterTypeFactory> p) {
-				ComboBoxTableCell<FilterHolder, FilterTypeFactory> cell = new ComboBoxTableCell<>(taskManager.getFilterBuilder().getAvailableFilters());
+				ComboBoxTableCell<FilterHolder, FilterTypeFactory> cell = new ComboBoxTableCell<>(dataManager.getFilterBuilder().getAvailableFilters());
 				cell.setComboBoxEditable(false);
 				return cell;
 			}
@@ -82,13 +82,13 @@ public class FilterEditorController implements Initializable {
 	}
 
 	/**
-	 * Sets the TaskManager reference
+	 * Sets the dataManager reference
 	 *
-	 * @param taskManager the TaskManager reference
+	 * @param dataManager the dataManager reference
 	 */
-	public void setTaskManager(TaskManager taskManager) {
-		this.taskManager = taskManager;
-		filters.setItems(taskManager.getFilters());
+	public void setDataManager(DataManager dataManager) {
+		this.dataManager = dataManager;
+		filters.setItems(dataManager.getFilters());
 	}
 
 	/*
@@ -107,7 +107,7 @@ public class FilterEditorController implements Initializable {
 	 */
 	@FXML
 	private void addFilter() {
-		filters.getItems().add(new FilterHolder(taskManager.getFilterBuilder().createFilter(), taskManager.getFilterBuilder().getDefaultFilterConstructor()));
+		filters.getItems().add(new FilterHolder(dataManager.getFilterBuilder().createFilter(), dataManager.getFilterBuilder().getDefaultFilterConstructor()));
 	}
 
 	/**
@@ -116,6 +116,6 @@ public class FilterEditorController implements Initializable {
 	@FXML
 	private void deleteFilter() {
 		for (FilterHolder filter : filters.getSelectionModel().getSelectedItems())
-			taskManager.getFilterBuilder().deleteFilter(filter.filterProperty().get());
+			dataManager.getFilterBuilder().deleteFilter(filter.filterProperty().get());
 	}
 }

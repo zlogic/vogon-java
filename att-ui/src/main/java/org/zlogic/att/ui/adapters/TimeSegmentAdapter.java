@@ -59,9 +59,9 @@ public class TimeSegmentAdapter {
 	 */
 	private ObjectProperty<TaskAdapter> ownerTask = new SimpleObjectProperty<>();
 	/**
-	 * TaskManager reference
+	 * DataManager reference
 	 */
-	private TaskManager taskManager;
+	private DataManager dataManager;
 	/**
 	 * Timer for automatically updating the time
 	 */
@@ -79,10 +79,10 @@ public class TimeSegmentAdapter {
 	private ChangeListener<String> descriptionChangeListener = new ChangeListener<String>() {
 		@Override
 		public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
-			oldValue = oldValue == null ? "" : oldValue;
-			newValue = newValue == null ? "" : newValue;
-			if (!oldValue.equals(newValue) && getTaskManager() != null) {
-				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+			oldValue = oldValue == null ? "" : oldValue; //NOI18N
+			newValue = newValue == null ? "" : newValue; //NOI18N
+			if (!oldValue.equals(newValue) && getDataManager() != null) {
+				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private String newValue;
 
 					public TransactedChange setNewValue(String newValue) {
@@ -97,7 +97,7 @@ public class TimeSegmentAdapter {
 					}
 				}.setNewValue(newValue));
 				updateFxProperties();
-				getTaskManager().signalTaskUpdate();
+				getDataManager().signalTaskUpdate();
 			}
 		}
 	};
@@ -107,9 +107,9 @@ public class TimeSegmentAdapter {
 	private ChangeListener<Date> startChangeListener = new ChangeListener<Date>() {
 		@Override
 		public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
-			if (!oldValue.equals(newValue) && getTaskManager() != null) {
+			if (!oldValue.equals(newValue) && getDataManager() != null) {
 				//TODO: catch exceptions & revert
-				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private Date newValue;
 
 					public TransactedChange setNewValue(Date newValue) {
@@ -125,7 +125,7 @@ public class TimeSegmentAdapter {
 				}.setNewValue(newValue));
 				ownerTaskProperty().get().updateFromDatabase();
 				updateFxProperties();
-				getTaskManager().signalTaskUpdate();
+				getDataManager().signalTaskUpdate();
 			}
 		}
 	};
@@ -135,9 +135,9 @@ public class TimeSegmentAdapter {
 	private ChangeListener<Date> endChangeListener = new ChangeListener<Date>() {
 		@Override
 		public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
-			if (!oldValue.equals(newValue) && getTaskManager() != null) {
+			if (!oldValue.equals(newValue) && getDataManager() != null) {
 				//TODO: catch exceptions & revert
-				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private Date newValue;
 
 					public TransactedChange setNewValue(Date newValue) {
@@ -153,7 +153,7 @@ public class TimeSegmentAdapter {
 				}.setNewValue(newValue));
 				ownerTaskProperty().get().updateFromDatabase();
 				updateFxProperties();
-				getTaskManager().signalTaskUpdate();
+				getDataManager().signalTaskUpdate();
 			}
 		}
 	};
@@ -163,8 +163,8 @@ public class TimeSegmentAdapter {
 	private ChangeListener<TaskAdapter> ownerTaskChangeListener = new ChangeListener<TaskAdapter>() {
 		@Override
 		public void changed(ObservableValue<? extends TaskAdapter> ov, TaskAdapter oldValue, TaskAdapter newValue) {
-			if (!oldValue.equals(newValue) && getTaskManager() != null) {
-				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+			if (!oldValue.equals(newValue) && getDataManager() != null) {
+				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private TaskAdapter newValue;
 
 					public TransactedChange setNewValue(TaskAdapter newValue) {
@@ -196,11 +196,11 @@ public class TimeSegmentAdapter {
 	 *
 	 * @param segment the associated entity
 	 * @param ownerTask the owner TaskAdapter reference
-	 * @param taskManager the TaskManager reference
+	 * @param dataManager the DataManager reference
 	 */
-	public TimeSegmentAdapter(TimeSegment segment, TaskAdapter ownerTask, TaskManager taskManager) {
+	public TimeSegmentAdapter(TimeSegment segment, TaskAdapter ownerTask, DataManager dataManager) {
 		this.segment = segment;
-		this.taskManager = taskManager;
+		this.dataManager = dataManager;
 		this.ownerTask.setValue(ownerTask);
 
 		updateFxProperties();
@@ -244,7 +244,7 @@ public class TimeSegmentAdapter {
 		timer = null;
 		endProperty().setValue(new Date());
 		timingProperty.set(false);
-		taskManager.timingSegmentProperty().set(null);
+		dataManager.timingSegmentProperty().set(null);
 		ownerTask.get().isTimingProperty().unbind();
 	}
 
@@ -332,12 +332,12 @@ public class TimeSegmentAdapter {
 	 * Internal methods
 	 */
 	/**
-	 * Returns the TaskManager reference
+	 * Returns the DataManager reference
 	 *
-	 * @return the TaskManager reference
+	 * @return the DataManager reference
 	 */
-	private TaskManager getTaskManager() {
-		return taskManager;
+	private DataManager getDataManager() {
+		return dataManager;
 	}
 
 	/**

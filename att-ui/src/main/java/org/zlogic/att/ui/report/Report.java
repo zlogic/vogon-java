@@ -55,7 +55,7 @@ import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.reporting.DateTools;
 import org.zlogic.att.data.reporting.ReportQuery;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
-import org.zlogic.att.ui.adapters.TaskManager;
+import org.zlogic.att.ui.adapters.DataManager;
 
 /*
  * TODO: move internal classes into other files
@@ -72,9 +72,9 @@ public class Report {
 	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/report/messages");
 	/**
-	 * TaskManager reference
+	 * DataManager reference
 	 */
-	private TaskManager taskManager;
+	private DataManager dataManager;
 	/**
 	 * Report start date
 	 */
@@ -316,10 +316,10 @@ public class Report {
 	/**
 	 * Creates a report
 	 *
-	 * @param taskManager the TaskManager reference
+	 * @param dataManager the DataManager reference
 	 */
-	public Report(TaskManager taskManager) {
-		this.taskManager = taskManager;
+	public Report(DataManager dataManager) {
+		this.dataManager = dataManager;
 	}
 
 	/**
@@ -490,7 +490,7 @@ public class Report {
 		StyleBuilder customFieldNameStyle = DynamicReports.stl.style()
 				.setItalic(true);
 		//Add custom columns
-		for (CustomFieldAdapter customField : taskManager.getCustomFields()) {
+		for (CustomFieldAdapter customField : dataManager.getCustomFields()) {
 			//Extract custom field
 			DRIExpression<CustomField> customFieldExpression = new AbstractSimpleExpression<CustomField>() {
 				private CustomField customField;
@@ -657,7 +657,7 @@ public class Report {
 	 */
 	protected JasperReportBuilder buildCustomFieldsReport(List<Task> tasks) {
 		List<ComponentBuilder> customFieldReports = new LinkedList<>();
-		for (CustomFieldAdapter customField : taskManager.getCustomFields()) {
+		for (CustomFieldAdapter customField : dataManager.getCustomFields()) {
 			customFieldReports.add(DynamicReports.cmp.pageBreak());
 			customFieldReports.add(
 					DynamicReports.cmp.subreport(
@@ -751,7 +751,7 @@ public class Report {
 			//Get data
 			//progressProperty().set(0);
 			progressProperty().set(-1);
-			ReportQuery reportQuery = new ReportQuery(taskManager.getPersistenceHelper());
+			ReportQuery reportQuery = new ReportQuery(dataManager.getPersistenceHelper());
 			reportQuery.setStartDate(startDate);
 			reportQuery.setEndDate(endDate);
 			List<TimeSegment> timeSegments = reportQuery.queryTimeSegments();

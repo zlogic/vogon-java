@@ -30,7 +30,7 @@ import javafx.stage.FileChooser;
 import javafx.util.converter.DateStringConverter;
 import net.sf.dynamicreports.report.exception.DRException;
 import org.zlogic.att.data.reporting.DateTools;
-import org.zlogic.att.ui.adapters.TaskManager;
+import org.zlogic.att.ui.adapters.DataManager;
 import org.zlogic.att.ui.report.Report;
 
 /**
@@ -49,9 +49,9 @@ public class ReportController implements Initializable {
 	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/messages");
 	/**
-	 * TaskManager reference
+	 * DataManager reference
 	 */
-	private TaskManager taskManager;
+	private DataManager dataManager;
 	/**
 	 * Last opened directory
 	 */
@@ -154,19 +154,19 @@ public class ReportController implements Initializable {
 	}
 
 	/**
-	 * Sets the TaskManager reference
+	 * Sets the DataManager reference
 	 *
-	 * @param taskManager the TaskManager reference
+	 * @param dataManager the DataManager reference
 	 */
-	public void setTaskManager(TaskManager taskManager) {
-		this.taskManager = taskManager;
+	public void setDataManager(DataManager dataManager) {
+		this.dataManager = dataManager;
 		//Destroy report on stage close
 		viewer.getScene().getWindow().showingProperty().addListener(new ChangeListener<Boolean>() {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
 				if (oldValue && !newValue) {
 					generatedReport.set(null);
-					viewer.getEngine().load("about:blank");
+					viewer.getEngine().load("about:blank"); //NOI18N
 				}
 			}
 		});
@@ -193,7 +193,7 @@ public class ReportController implements Initializable {
 			@Override
 			protected Void call() throws Exception {
 				updateMessage(messages.getString("GENERATING_REPORT..."));
-				Report report = new Report(taskManager);
+				Report report = new Report(dataManager);
 				report.setStartDate(startDateValue.get());
 				report.setEndDate(endDateValue.get());
 				report.progressProperty().addListener(new ChangeListener<Number>() {

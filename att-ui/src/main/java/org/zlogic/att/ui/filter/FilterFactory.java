@@ -20,7 +20,7 @@ import org.zlogic.att.data.Filter;
 import org.zlogic.att.data.FilterDate;
 import org.zlogic.att.data.TransactedChange;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
-import org.zlogic.att.ui.adapters.TaskManager;
+import org.zlogic.att.ui.adapters.DataManager;
 import org.zlogic.att.ui.filter.adapters.FilterAdapter;
 import org.zlogic.att.ui.filter.adapters.FilterCustomFieldAdapter;
 import org.zlogic.att.ui.filter.adapters.FilterDateAdapter;
@@ -39,9 +39,9 @@ public class FilterFactory {
 	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/filter/messages");
 	/**
-	 * TaskManager reference
+	 * DataManager reference
 	 */
-	private TaskManager taskManager;
+	private DataManager dataManager;
 	/**
 	 * The list of available filter types
 	 */
@@ -103,7 +103,7 @@ public class FilterFactory {
 
 		@Override
 		public FilterAdapter createFilter() {
-			return new FilterDateAdapter(taskManager, taskManager.getPersistenceHelper().createFilterDate(type));
+			return new FilterDateAdapter(dataManager, dataManager.getPersistenceHelper().createFilterDate(type));
 		}
 
 		@Override
@@ -146,7 +146,7 @@ public class FilterFactory {
 
 		@Override
 		public FilterAdapter createFilter() {
-			return new FilterCustomFieldAdapter(taskManager, taskManager.getPersistenceHelper().createFilterCustomField(customField.getCustomField()));
+			return new FilterCustomFieldAdapter(dataManager, dataManager.getPersistenceHelper().createFilterCustomField(customField.getCustomField()));
 		}
 
 		@Override
@@ -177,7 +177,7 @@ public class FilterFactory {
 
 		@Override
 		public FilterAdapter createFilter() {
-			return new FilterTaskCompletedAdapter(taskManager, taskManager.getPersistenceHelper().createFilterTaskCompleted());
+			return new FilterTaskCompletedAdapter(dataManager, dataManager.getPersistenceHelper().createFilterTaskCompleted());
 		}
 
 		@Override
@@ -196,10 +196,10 @@ public class FilterFactory {
 	/**
 	 * Creates a filter factory
 	 *
-	 * @param taskManager the TaskManager reference
+	 * @param dataManager the DataManager reference
 	 */
-	public FilterFactory(TaskManager taskManager) {
-		this.taskManager = taskManager;
+	public FilterFactory(DataManager dataManager) {
+		this.dataManager = dataManager;
 
 		//Populate available filters list
 		availableFilters.add(new DateFilterFactory(FilterDate.DateType.DATE_START));
@@ -207,7 +207,7 @@ public class FilterFactory {
 		availableFilters.add(new CompletedFilterFactory());
 		updateCustomFieldFilters();
 		defaultFilterConstructor = new EmptyFilterFactory();
-		taskManager.getCustomFields().addListener(new ListChangeListener<CustomFieldAdapter>() {
+		this.dataManager.getCustomFields().addListener(new ListChangeListener<CustomFieldAdapter>() {
 			@Override
 			public void onChanged(Change<? extends CustomFieldAdapter> change) {
 				updateCustomFieldFilters();
@@ -267,7 +267,7 @@ public class FilterFactory {
 	 * @param filter the filter to be deleted
 	 */
 	public void deleteFilter(FilterAdapter filter) {
-		taskManager.getPersistenceHelper().performTransactedChange(new TransactedChange() {
+		dataManager.getPersistenceHelper().performTransactedChange(new TransactedChange() {
 			private Filter filter;
 
 			public TransactedChange setDeleteFilter(Filter filter) {
@@ -282,10 +282,10 @@ public class FilterFactory {
 			}
 		}.setDeleteFilter(filter.getFilter()));
 		List<FilterHolder> deleteFiltersHolder = new LinkedList<>();
-		for (FilterHolder filterHolder : taskManager.getFilters())
+		for (FilterHolder filterHolder : dataManager.getFilters())
 			if (filterHolder.filterProperty().get().equals(filter))
 				deleteFiltersHolder.add(filterHolder);
-		taskManager.getFilters().removeAll(deleteFiltersHolder);
+		dataManager.getFilters().removeAll(deleteFiltersHolder);
 	}
 
 	/**
@@ -298,7 +298,7 @@ public class FilterFactory {
 			if (filter instanceof CustomFieldFilterFactory)
 				deleteFilterList.add(filter);
 		availableFilters.removeAll(deleteFilterList);
-		for (CustomFieldAdapter customField : taskManager.getCustomFields())
+		for (CustomFieldAdapter customField : dataManager.getCustomFields())
 			availableFilters.add(new CustomFieldFilterFactory(customField));
 	}
 }

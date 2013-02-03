@@ -42,12 +42,15 @@ import org.zlogic.att.ui.filter.adapters.FilterTaskCompletedAdapter;
  *
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
-public class TaskManager {
+public class DataManager {
 
 	/**
 	 * The logger
 	 */
-	private final static Logger log = Logger.getLogger(TaskManager.class.getName());
+	private final static Logger log = Logger.getLogger(DataManager.class.getName());
+	/**
+	 * Localization messages
+	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/messages");
 	/**
 	 * The persistence helper instance
@@ -88,10 +91,10 @@ public class TaskManager {
 	private FilterFactory filterBuilder = new FilterFactory(this);
 
 	/**
-	 * Creates a TaskManager instance
+	 * Creates a DataManager instance
 	 */
-	public TaskManager() {
-		/*((TaskManager) this).reloadTasks();*/
+	public DataManager() {
+		/*((DataManager) this).reloadTasks();*/
 	}
 
 	/**

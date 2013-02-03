@@ -47,8 +47,8 @@ public class CustomFieldValueAdapter {
 		@Override
 		public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
 			oldValue = oldValue == null ? "" : oldValue; //NOI18N
-			if (newValue != null && !oldValue.equals(newValue) && getTaskManager() != null) {
-				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+			if (newValue != null && !oldValue.equals(newValue) && getDataManager() != null) {
+				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private String newValue;
 					private CustomFieldAdapter customFieldAdapter;
 
@@ -67,25 +67,25 @@ public class CustomFieldValueAdapter {
 				}.setNewValue(getCustomField(), newValue));
 				getTask().updateFromDatabase();
 				updateFxProperties();
-				getTaskManager().removeCustomFieldValue(getCustomField(), oldValue);
-				getTaskManager().addCustomFieldValue(getCustomField(), newValue);
+				getDataManager().removeCustomFieldValue(getCustomField(), oldValue);
+				getDataManager().addCustomFieldValue(getCustomField(), newValue);
 			}
 		}
 	};
 	/**
-	 * TaskManager reference
+	 * DataManager reference
 	 */
-	private TaskManager taskManager;
+	private DataManager dataManager;
 
 	/**
 	 * Creates a CustomFieldValueAdapter instance
 	 *
 	 * @param customFieldAdapter the associated CustomFieldAdapter reference
-	 * @param taskManager the TaskManager reference
+	 * @param dataManager the DataManager reference
 	 */
-	public CustomFieldValueAdapter(CustomFieldAdapter customFieldAdapter, TaskManager taskManager) {
+	public CustomFieldValueAdapter(CustomFieldAdapter customFieldAdapter, DataManager dataManager) {
 		this.customFieldAdapter = customFieldAdapter;
-		this.taskManager = taskManager;
+		this.dataManager = dataManager;
 
 		updateFxProperties();
 
@@ -167,11 +167,11 @@ public class CustomFieldValueAdapter {
 	}
 
 	/**
-	 * Returns the TaskManager reference
+	 * Returns the DataManager reference
 	 *
-	 * @return the TaskManager reference
+	 * @return the DataManager reference
 	 */
-	private TaskManager getTaskManager() {
-		return taskManager;
+	private DataManager getDataManager() {
+		return dataManager;
 	}
 }

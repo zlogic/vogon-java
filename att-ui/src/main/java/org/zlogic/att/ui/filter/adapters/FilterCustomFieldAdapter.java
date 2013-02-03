@@ -14,7 +14,7 @@ import javax.persistence.EntityManager;
 import org.zlogic.att.data.FilterCustomField;
 import org.zlogic.att.data.TransactedChange;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
-import org.zlogic.att.ui.adapters.TaskManager;
+import org.zlogic.att.ui.adapters.DataManager;
 
 /**
  * Filter for custom fields
@@ -28,9 +28,9 @@ public class FilterCustomFieldAdapter implements FilterAdapter<String> {
 	 */
 	private FilterCustomField filter;
 	/**
-	 * TaskManager reference
+	 * DataManager reference
 	 */
-	private TaskManager taskManager;
+	private DataManager dataManager;
 	/**
 	 * The associated custom field
 	 */
@@ -47,8 +47,8 @@ public class FilterCustomFieldAdapter implements FilterAdapter<String> {
 		public void changed(ObservableValue<? extends String> ov, String oldValue, String newValue) {
 			oldValue = oldValue == null ? "" : oldValue; //NOI18N
 			newValue = newValue == null ? "" : newValue; //NOI18N
-			if (!oldValue.equals(newValue) && getTaskManager() != null) {
-				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+			if (!oldValue.equals(newValue) && getDataManager() != null) {
+				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private String newValue;
 
 					public TransactedChange setNewValue(String newValue) {
@@ -70,11 +70,11 @@ public class FilterCustomFieldAdapter implements FilterAdapter<String> {
 	/**
 	 * Constructs a CompletedFilter
 	 *
-	 * @param taskManager the TaskManager reference
+	 * @param dataManager the DataManager reference
 	 * @param filter the associated filter
 	 */
-	public FilterCustomFieldAdapter(TaskManager taskManager, FilterCustomField filter) {
-		this.taskManager = taskManager;
+	public FilterCustomFieldAdapter(DataManager dataManager, FilterCustomField filter) {
+		this.dataManager = dataManager;
 		this.filter = filter;
 		((FilterCustomFieldAdapter) this).updateCustomFieldAdapter();
 		updateFxProperties();
@@ -82,11 +82,11 @@ public class FilterCustomFieldAdapter implements FilterAdapter<String> {
 	}
 
 	/**
-	 * Updates the CustomFieldAdapter form TaskManager (in case the list of
+	 * Updates the CustomFieldAdapter form DataManager (in case the list of
 	 * CustomFieldAdapters is reloaded).
 	 */
 	public void updateCustomFieldAdapter() {
-		for (CustomFieldAdapter customFieldAdapter : taskManager.getCustomFields())
+		for (CustomFieldAdapter customFieldAdapter : dataManager.getCustomFields())
 			if (customFieldAdapter.getCustomField().equals(filter.getCustomField())) {
 				this.customField = customFieldAdapter;
 				break;
@@ -110,7 +110,7 @@ public class FilterCustomFieldAdapter implements FilterAdapter<String> {
 	 * @return the list of allowed values
 	 */
 	public ObservableList<String> getAllowedValues() {
-		return taskManager.getCustomFieldValues(customField);
+		return dataManager.getCustomFieldValues(customField);
 	}
 
 	@Override
@@ -131,12 +131,12 @@ public class FilterCustomFieldAdapter implements FilterAdapter<String> {
 	}
 
 	/**
-	 * Returns the TaskManager reference
+	 * Returns the DataManager reference
 	 *
-	 * @return the TaskManager reference
+	 * @return the DataManager reference
 	 */
-	private TaskManager getTaskManager() {
-		return taskManager;
+	private DataManager getDataManager() {
+		return dataManager;
 	}
 
 	/**

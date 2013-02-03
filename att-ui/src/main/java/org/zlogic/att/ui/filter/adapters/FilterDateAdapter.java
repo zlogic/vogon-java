@@ -15,7 +15,7 @@ import javafx.util.converter.DateStringConverter;
 import javax.persistence.EntityManager;
 import org.zlogic.att.data.FilterDate;
 import org.zlogic.att.data.TransactedChange;
-import org.zlogic.att.ui.adapters.TaskManager;
+import org.zlogic.att.ui.adapters.DataManager;
 
 /**
  * Filter for start/end dates
@@ -29,9 +29,9 @@ public class FilterDateAdapter implements FilterAdapter<Object> {
 	 */
 	private FilterDate filter;
 	/**
-	 * TaskManager reference
+	 * DataManager reference
 	 */
-	private TaskManager taskManager;
+	private DataManager dataManager;
 	/**
 	 * The Date <-> String converter
 	 */
@@ -63,9 +63,9 @@ public class FilterDateAdapter implements FilterAdapter<Object> {
 	private ChangeListener<Object> valueChangeListener = new ChangeListener<Object>() {
 		@Override
 		public void changed(ObservableValue<? extends Object> ov, Object oldValue, Object newValue) {
-			if (newValue instanceof Date && !newValue.equals(oldValue) && getTaskManager() != null) {
+			if (newValue instanceof Date && !newValue.equals(oldValue) && getDataManager() != null) {
 				Date newValueDate = (Date) newValue;
-				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private Date newValue;
 
 					public TransactedChange setNewValue(Date newValue) {
@@ -87,11 +87,11 @@ public class FilterDateAdapter implements FilterAdapter<Object> {
 	/**
 	 * Constructs a CompletedFilter
 	 *
-	 * @param taskManager the TaskManager reference
+	 * @param dataManager the DataManager reference
 	 * @param filter the underlying filter
 	 */
-	public FilterDateAdapter(TaskManager taskManager, FilterDate filter) {
-		this.taskManager = taskManager;
+	public FilterDateAdapter(DataManager dataManager, FilterDate filter) {
+		this.dataManager = dataManager;
 		this.filter = filter;
 		updateFxProperties();
 		value.addListener(valueChangeListener);
@@ -135,12 +135,12 @@ public class FilterDateAdapter implements FilterAdapter<Object> {
 	}
 
 	/**
-	 * Returns the TaskManager reference
+	 * Returns the DataManager reference
 	 *
-	 * @return the TaskManager reference
+	 * @return the DataManager reference
 	 */
-	private TaskManager getTaskManager() {
-		return taskManager;
+	private DataManager getDataManager() {
+		return dataManager;
 	}
 
 	/**

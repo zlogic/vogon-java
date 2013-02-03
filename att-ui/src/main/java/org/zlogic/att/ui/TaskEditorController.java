@@ -38,8 +38,8 @@ import javafx.util.converter.DateTimeStringConverter;
 import javafx.util.converter.DefaultStringConverter;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
 import org.zlogic.att.ui.adapters.CustomFieldValueAdapter;
+import org.zlogic.att.ui.adapters.DataManager;
 import org.zlogic.att.ui.adapters.TaskAdapter;
-import org.zlogic.att.ui.adapters.TaskManager;
 import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 
 /**
@@ -66,9 +66,9 @@ public class TaskEditorController implements Initializable {
 	 */
 	private List<TaskAdapter> boundTasks = new LinkedList<>();
 	/**
-	 * TaskManager reference
+	 * DataManager reference
 	 */
-	private TaskManager taskManager;
+	private DataManager dataManager;
 	/**
 	 * True to ignore updates to edited task (e.g. while editing a time segment)
 	 */
@@ -199,7 +199,7 @@ public class TaskEditorController implements Initializable {
 					@Override
 					public void changed(ObservableValue<? extends TableRow> ov, TableRow oldValue, TableRow newValue) {
 						if (newValue != null && newValue.getItem() instanceof CustomFieldValueAdapter) {
-							ObservableList<String> customFieldValues = taskManager.getCustomFieldValues(((CustomFieldValueAdapter) newValue.getItem()).getCustomField());
+							ObservableList<String> customFieldValues = dataManager.getCustomFieldValues(((CustomFieldValueAdapter) newValue.getItem()).getCustomField());
 							cell.getItems().setAll(customFieldValues != null ? customFieldValues : new LinkedList<String>());
 						}
 					}
@@ -215,7 +215,7 @@ public class TaskEditorController implements Initializable {
 					@Override
 					public void changed(ObservableValue<? extends String> ov, String oldValue, String newValue) {
 						if (newValue != null && cell.getTableRow().getItem() instanceof CustomFieldValueAdapter) {
-							ObservableList<String> customFieldValues = taskManager.getCustomFieldValues(((CustomFieldValueAdapter) cell.getTableRow().getItem()).getCustomField());
+							ObservableList<String> customFieldValues = dataManager.getCustomFieldValues(((CustomFieldValueAdapter) cell.getTableRow().getItem()).getCustomField());
 							cell.getItems().setAll(customFieldValues != null ? customFieldValues : new LinkedList<String>());
 						}
 					}
@@ -300,23 +300,23 @@ public class TaskEditorController implements Initializable {
 	}
 
 	/**
-	 * Sets the TaskManager reference
+	 * Sets the DataManager reference
 	 *
-	 * @param taskManager the TaskManager reference
+	 * @param dataManager the DataManager reference
 	 */
-	public void setTaskManager(TaskManager taskManager) {
-		this.taskManager = taskManager;
+	public void setDataManager(DataManager dataManager) {
+		this.dataManager = dataManager;
 
 		updateCustomFields();
 		//TODO: remove listeners if setCustomFields is called once more
-		taskManager.getCustomFields().addListener(new ListChangeListener<CustomFieldAdapter>() {
+		this.dataManager.getCustomFields().addListener(new ListChangeListener<CustomFieldAdapter>() {
 			@Override
 			public void onChanged(ListChangeListener.Change<? extends CustomFieldAdapter> change) {
 				updateCustomFields();
 			}
 		});
 		//Update start/stop button text
-		taskManager.timingSegmentProperty().addListener(new ChangeListener<TimeSegmentAdapter>() {
+		this.dataManager.timingSegmentProperty().addListener(new ChangeListener<TimeSegmentAdapter>() {
 			private ChangeListener<Boolean> startStopListener = new ChangeListener<Boolean>() {
 				@Override
 				public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
@@ -374,8 +374,8 @@ public class TaskEditorController implements Initializable {
 	 */
 	private void updateCustomFields() {
 		customProperties.getItems().clear();
-		for (CustomFieldAdapter customFieldAdapter : taskManager.getCustomFields())
-			customProperties.getItems().add(new CustomFieldValueAdapter(customFieldAdapter, taskManager));
+		for (CustomFieldAdapter customFieldAdapter : dataManager.getCustomFields())
+			customProperties.getItems().add(new CustomFieldValueAdapter(customFieldAdapter, dataManager));
 		TaskAdapter task = getEditedTask();
 		if (task != null)
 			for (CustomFieldValueAdapter customFieldValueAdapter : customProperties.getItems())
@@ -442,9 +442,9 @@ public class TaskEditorController implements Initializable {
 	 */
 	private boolean isTimingCurrentTask() {
 		TaskAdapter editedTask = getEditedTask();
-		if (editedTask == null || taskManager.timingSegmentProperty().get() == null)
+		if (editedTask == null || dataManager.timingSegmentProperty().get() == null)
 			return false;
-		return editedTask.timeSegmentsProperty().contains(taskManager.timingSegmentProperty().get());
+		return editedTask.timeSegmentsProperty().contains(dataManager.timingSegmentProperty().get());
 	}
 
 	/**
@@ -463,13 +463,13 @@ public class TaskEditorController implements Initializable {
 	 */
 	@FXML
 	private void handleStartStop() {
-		boolean startNewTaskInstead = !getEditedTask().timeSegmentsProperty().contains(taskManager.timingSegmentProperty().get());
-		taskManager.stopTiming();
+		boolean startNewTaskInstead = !getEditedTask().timeSegmentsProperty().contains(dataManager.timingSegmentProperty().get());
+		dataManager.stopTiming();
 		if (startNewTaskInstead) {
 			TaskAdapter task = getEditedTask();
 			if (task != null) {
 				TimeSegmentAdapter newSegmentAdapter = createTimeSegment();
-				taskManager.startTiming(newSegmentAdapter);
+				dataManager.startTiming(newSegmentAdapter);
 			}
 		}
 		updateStartStopText();
@@ -497,7 +497,7 @@ public class TaskEditorController implements Initializable {
 	@FXML
 	private void deleteTimeSegment() {
 		for (TimeSegmentAdapter segment : timeSegments.getSelectionModel().getSelectedItems()) {
-			taskManager.deleteSegment(segment);
+			dataManager.deleteSegment(segment);
 			segment.ownerTaskProperty().get().updateFromDatabase();
 		}
 	}

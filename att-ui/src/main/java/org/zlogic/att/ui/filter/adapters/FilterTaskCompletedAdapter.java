@@ -12,7 +12,7 @@ import javafx.beans.value.ObservableValue;
 import javax.persistence.EntityManager;
 import org.zlogic.att.data.FilterTaskCompleted;
 import org.zlogic.att.data.TransactedChange;
-import org.zlogic.att.ui.adapters.TaskManager;
+import org.zlogic.att.ui.adapters.DataManager;
 
 /**
  * Filter for a task's completed state
@@ -26,9 +26,9 @@ public class FilterTaskCompletedAdapter implements FilterAdapter<Boolean> {
 	 */
 	private FilterTaskCompleted filter;
 	/**
-	 * TaskManager reference
+	 * DataManager reference
 	 */
-	private TaskManager taskManager;
+	private DataManager dataManager;
 	/**
 	 * The filter value
 	 */
@@ -39,8 +39,8 @@ public class FilterTaskCompletedAdapter implements FilterAdapter<Boolean> {
 	private ChangeListener<Boolean> valueChangeListener = new ChangeListener<Boolean>() {
 		@Override
 		public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
-			if (!newValue.equals(oldValue) && getTaskManager() != null) {
-				getTaskManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+			if (!newValue.equals(oldValue) && getDataManager() != null) {
+				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private boolean newValue;
 
 					public TransactedChange setNewValue(boolean newValue) {
@@ -62,11 +62,11 @@ public class FilterTaskCompletedAdapter implements FilterAdapter<Boolean> {
 	/**
 	 * Constructs a FilterTaskCompletedAdapter
 	 *
-	 * @param taskManager the TaskManager reference
+	 * @param dataManager the DataManager reference
 	 * @param filter the associated filter
 	 */
-	public FilterTaskCompletedAdapter(TaskManager taskManager, FilterTaskCompleted filter) {
-		this.taskManager = taskManager;
+	public FilterTaskCompletedAdapter(DataManager dataManager, FilterTaskCompleted filter) {
+		this.dataManager = dataManager;
 		this.filter = filter;
 		value.addListener(valueChangeListener);
 		updateFxProperties();
@@ -101,12 +101,12 @@ public class FilterTaskCompletedAdapter implements FilterAdapter<Boolean> {
 	}
 
 	/**
-	 * Returns the TaskManager reference
+	 * Returns the DataManager reference
 	 *
-	 * @return the TaskManager reference
+	 * @return the DataManager reference
 	 */
-	private TaskManager getTaskManager() {
-		return taskManager;
+	private DataManager getDataManager() {
+		return dataManager;
 	}
 
 	/**
