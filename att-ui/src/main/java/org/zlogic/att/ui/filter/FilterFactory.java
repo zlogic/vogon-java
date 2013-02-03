@@ -15,12 +15,20 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
+import javax.persistence.EntityManager;
+import org.zlogic.att.data.Filter;
+import org.zlogic.att.data.FilterDate;
+import org.zlogic.att.data.TransactedChange;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
 import org.zlogic.att.ui.adapters.TaskManager;
-import org.zlogic.att.ui.filter.ui.Filter;
+import org.zlogic.att.ui.filter.adapters.FilterAdapter;
+import org.zlogic.att.ui.filter.adapters.FilterCustomFieldAdapter;
+import org.zlogic.att.ui.filter.adapters.FilterDateAdapter;
+import org.zlogic.att.ui.filter.adapters.FilterEmptyAdapter;
+import org.zlogic.att.ui.filter.adapters.FilterTaskCompletedAdapter;
 
 /**
- * Filter factory class
+ * FilterAdapter factory class
  *
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
@@ -59,13 +67,13 @@ public class FilterFactory {
 		}
 
 		@Override
-		public Filter createFilter() {
-			return new EmptyFilter(this);
+		public FilterAdapter createFilter() {
+			return new FilterEmptyAdapter();
 		}
 
 		@Override
 		public boolean equals(Object obj) {
-			return obj instanceof EmptyFilterFactory;
+			return (obj instanceof EmptyFilterFactory) || (obj instanceof FilterEmptyAdapter);
 		}
 
 		@Override
@@ -83,23 +91,25 @@ public class FilterFactory {
 		/**
 		 * The date type
 		 */
-		private DateFilter.DateType type;
+		private FilterDate.DateType type;
 
 		/**
 		 * Constructs an DateFilterFactory
 		 */
-		public DateFilterFactory(DateFilter.DateType type) {
-			super(type == DateFilter.DateType.DATE_START ? messages.getString("START_DATE") : messages.getString("END_DATE"));
+		public DateFilterFactory(FilterDate.DateType type) {
+			super(type == FilterDate.DateType.DATE_START ? messages.getString("START_DATE") : messages.getString("END_DATE"));
+			this.type = type;
 		}
 
 		@Override
-		public Filter createFilter() {
-			return new DateFilter(this, type);
+		public FilterAdapter createFilter() {
+			return new FilterDateAdapter(taskManager, taskManager.getPersistenceHelper().createFilterDate(type));
 		}
 
 		@Override
 		public boolean equals(Object obj) {
-			return obj instanceof DateFilterFactory && ((DateFilterFactory) obj).type == type;
+			return (obj instanceof DateFilterFactory && ((DateFilterFactory) obj).type == type)
+					|| (obj instanceof FilterDateAdapter && ((FilterDateAdapter) obj).getFilter().getType() == type);
 		}
 
 		@Override
@@ -135,13 +145,14 @@ public class FilterFactory {
 		}
 
 		@Override
-		public Filter createFilter() {
-			return new CustomFieldFilter(taskManager, this, customField);
+		public FilterAdapter createFilter() {
+			return new FilterCustomFieldAdapter(taskManager, taskManager.getPersistenceHelper().createFilterCustomField(customField.getCustomField()));
 		}
 
 		@Override
 		public boolean equals(Object obj) {
-			return obj instanceof CustomFieldFilterFactory && customField.equals(((CustomFieldFilterFactory) obj).customField);
+			return (obj instanceof CustomFieldFilterFactory && customField.equals(((CustomFieldFilterFactory) obj).customField))
+					|| (obj instanceof FilterCustomFieldAdapter && customField.getCustomField().equals(((FilterCustomFieldAdapter) obj).getFilter().getCustomField()));
 		}
 
 		@Override
@@ -165,13 +176,14 @@ public class FilterFactory {
 		}
 
 		@Override
-		public Filter createFilter() {
-			return new CompletedFilter(this);
+		public FilterAdapter createFilter() {
+			return new FilterTaskCompletedAdapter(taskManager, taskManager.getPersistenceHelper().createFilterTaskCompleted());
 		}
 
 		@Override
 		public boolean equals(Object obj) {
-			return obj instanceof CompletedFilterFactory;
+			return obj instanceof CompletedFilterFactory
+					|| obj instanceof FilterTaskCompletedAdapter;
 		}
 
 		@Override
@@ -190,8 +202,8 @@ public class FilterFactory {
 		this.taskManager = taskManager;
 
 		//Populate available filters list
-		availableFilters.add(new DateFilterFactory(DateFilter.DateType.DATE_START));
-		availableFilters.add(new DateFilterFactory(DateFilter.DateType.DATE_END));
+		availableFilters.add(new DateFilterFactory(FilterDate.DateType.DATE_START));
+		availableFilters.add(new DateFilterFactory(FilterDate.DateType.DATE_END));
 		availableFilters.add(new CompletedFilterFactory());
 		updateCustomFieldFilters();
 		defaultFilterConstructor = new EmptyFilterFactory();
@@ -201,20 +213,6 @@ public class FilterFactory {
 				updateCustomFieldFilters();
 			}
 		});
-	}
-
-	/**
-	 * Updates the custom field filters by deleting them and re-inserting to the
-	 * end of the list
-	 */
-	private void updateCustomFieldFilters() {
-		List<FilterTypeFactory> deleteFilterList = new LinkedList<>();
-		for (FilterTypeFactory filter : availableFilters)
-			if (filter instanceof CustomFieldFilterFactory)
-				deleteFilterList.add(filter);
-		availableFilters.removeAll(deleteFilterList);
-		for (CustomFieldAdapter customField : taskManager.getCustomFields())
-			availableFilters.add(new CustomFieldFilterFactory(customField));
 	}
 
 	/**
@@ -241,7 +239,66 @@ public class FilterFactory {
 	 *
 	 * @return the created filter
 	 */
-	public Filter createFilter() {
+	public FilterAdapter createFilter() {
 		return defaultFilterConstructor.createFilter();
+	}
+
+	/**
+	 * Returns the FilterTypeFactory which can be used to construct the
+	 * specified filter. If no matching FilterTypeFactory can be found, returns
+	 * null.
+	 *
+	 * @param filter the filter to be matched with a FilterTypeFactory
+	 * @return the FilterTypeFactory which can be used to construct the
+	 * specified filter
+	 */
+	public FilterTypeFactory getFilterTypeFor(FilterAdapter filter) {
+		if (filter == null)
+			return null;
+		for (FilterTypeFactory filterType : availableFilters)
+			if (filterType.equals(filter))
+				return filterType;
+		return null;
+	}
+
+	/**
+	 * Deletes a filter
+	 *
+	 * @param filter the filter to be deleted
+	 */
+	public void deleteFilter(FilterAdapter filter) {
+		taskManager.getPersistenceHelper().performTransactedChange(new TransactedChange() {
+			private Filter filter;
+
+			public TransactedChange setDeleteFilter(Filter filter) {
+				this.filter = filter;
+				return this;
+			}
+
+			@Override
+			public void performChange(EntityManager entityManager) {
+				Filter filterEntity = entityManager.find(Filter.class, filter.getId());
+				entityManager.remove(filterEntity);
+			}
+		}.setDeleteFilter(filter.getFilter()));
+		List<FilterHolder> deleteFiltersHolder = new LinkedList<>();
+		for (FilterHolder filterHolder : taskManager.getFilters())
+			if (filterHolder.filterProperty().get().equals(filter))
+				deleteFiltersHolder.add(filterHolder);
+		taskManager.getFilters().removeAll(deleteFiltersHolder);
+	}
+
+	/**
+	 * Updates the custom field filters by deleting them and re-inserting to the
+	 * end of the list
+	 */
+	private void updateCustomFieldFilters() {
+		List<FilterTypeFactory> deleteFilterList = new LinkedList<>();
+		for (FilterTypeFactory filter : availableFilters)
+			if (filter instanceof CustomFieldFilterFactory)
+				deleteFilterList.add(filter);
+		availableFilters.removeAll(deleteFilterList);
+		for (CustomFieldAdapter customField : taskManager.getCustomFields())
+			availableFilters.add(new CustomFieldFilterFactory(customField));
 	}
 }

@@ -5,11 +5,11 @@
  */
 package org.zlogic.att.ui.filter;
 
-import org.zlogic.att.ui.filter.ui.Filter;
+import org.zlogic.att.ui.filter.adapters.FilterAdapter;
 
 /**
- * Filter factory class for a specific filter type. Can also be used to classify
- * filter types.
+ * FilterAdapter factory class for a specific filter type. Can also be used to
+ * classify filter types.
  *
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
@@ -39,7 +39,7 @@ public abstract class FilterTypeFactory {
 	 *
 	 * @return the new created filter
 	 */
-	public abstract Filter createFilter();
+	public abstract FilterAdapter createFilter();
 
 	@Override
 	public abstract boolean equals(Object obj);

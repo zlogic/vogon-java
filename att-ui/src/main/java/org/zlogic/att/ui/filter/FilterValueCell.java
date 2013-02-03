@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.zlogic.att.ui.filter.ui;
+package org.zlogic.att.ui.filter;
 
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
@@ -17,7 +17,10 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import org.zlogic.att.ui.filter.FilterHolder;
+import org.zlogic.att.ui.filter.adapters.FilterAdapter;
+import org.zlogic.att.ui.filter.adapters.FilterCustomFieldAdapter;
+import org.zlogic.att.ui.filter.adapters.FilterDateAdapter;
+import org.zlogic.att.ui.filter.adapters.FilterTaskCompletedAdapter;
 
 /**
  * Cell editor for filter values, allowing to use a custom editor for every
@@ -53,20 +56,20 @@ public class FilterValueCell extends TableCell<FilterHolder, Object> {
 			log.warning(messages.getString("STARTEDIT_ROWITEM_IS_NULL_ERROR"));
 			return;
 		}
-		Filter filterItem = null;
+		FilterAdapter filterItem = null;
 		if (rowItem instanceof FilterHolder)
 			filterItem = ((FilterHolder) rowItem).filterProperty().get();
 		else
 			throw new RuntimeException(MessageFormat.format(messages.getString("UNSUPPORTED_ROW_ITEM_TYPE"), new Object[]{rowItem.getClass().getName()}));
-		if (filterItem instanceof FilterTextValue) {
-			FilterTextValue filter = (FilterTextValue) filterItem;
+		if (filterItem instanceof FilterDateAdapter) {
+			FilterDateAdapter filter = (FilterDateAdapter) filterItem;
 			TextField textEditor = new TextField();
 			textEditor.setText(filter.getConverter().toString(filter.valueProperty().get()));
 			textEditor.setOnKeyPressed(new EventHandler<KeyEvent>() {
-				private FilterTextValue filter;
+				private FilterDateAdapter filter;
 				private TextField textEditor;
 
-				public EventHandler<KeyEvent> setProperties(FilterTextValue filter, TextField textEditor) {
+				public EventHandler<KeyEvent> setProperties(FilterDateAdapter filter, TextField textEditor) {
 					this.filter = filter;
 					this.textEditor = textEditor;
 					return this;
@@ -83,19 +86,19 @@ public class FilterValueCell extends TableCell<FilterHolder, Object> {
 			}.setProperties(filter, textEditor));
 			setGraphic(textEditor);
 			setText(null);
-		} else if (filterItem instanceof FilterSelectableValue) {
-			FilterSelectableValue filter = (FilterSelectableValue) filterItem;
-			ComboBox<Object> comboEditor = new ComboBox<>(filter.getAllowedValues());
+		} else if (filterItem instanceof FilterCustomFieldAdapter) {
+			FilterCustomFieldAdapter filter = (FilterCustomFieldAdapter) filterItem;
+			ComboBox<String> comboEditor = new ComboBox<>(filter.getAllowedValues());
 			comboEditor.setValue(filter.valueProperty().get());
-			comboEditor.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Object>() {
+			comboEditor.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
 				@Override
-				public void changed(ObservableValue<? extends Object> ov, Object oldValue, Object newValue) {
+				public void changed(ObservableValue<? extends String> ov, String oldValue, String newValue) {
 					commitEdit(newValue);
 				}
 			});
 			setText(null);
 			setGraphic(comboEditor);
-		} else if (filterItem instanceof FilterBooleanValue) {
+		} else if (filterItem instanceof FilterTaskCompletedAdapter) {
 		} else
 			throw new RuntimeException(MessageFormat.format(messages.getString("UNSUPPORTED_FILTER_TYPE"), new Object[]{filterItem.getClass().getName()}));
 		super.startEdit();
@@ -131,7 +134,7 @@ public class FilterValueCell extends TableCell<FilterHolder, Object> {
 	public void updateItem(Object item, boolean empty) {
 		super.updateItem(item, empty);
 		Object rowItem = getTableRow().getItem();
-		Filter filterItem = null;
+		FilterAdapter filterItem = null;
 
 		setAlignment(Pos.CENTER_LEFT);
 		if (rowItem instanceof FilterHolder)
@@ -139,11 +142,11 @@ public class FilterValueCell extends TableCell<FilterHolder, Object> {
 		if (empty || filterItem == null) {
 			setText(null);
 			setGraphic(null);
-		} else if (filterItem instanceof FilterTextValue || filterItem instanceof FilterSelectableValue) {
+		} else if (filterItem instanceof FilterDateAdapter || filterItem instanceof FilterCustomFieldAdapter) {
 			setText(getStringValue(item));
 			setGraphic(null);
-		} else if (filterItem instanceof FilterBooleanValue) {
-			FilterBooleanValue filterBooleanValue = (FilterBooleanValue) filterItem;
+		} else if (filterItem instanceof FilterTaskCompletedAdapter) {
+			FilterTaskCompletedAdapter filterBooleanValue = (FilterTaskCompletedAdapter) filterItem;
 			CheckBox editor = new CheckBox();
 			setAlignment(Pos.CENTER);
 			editor.selectedProperty().bindBidirectional(filterBooleanValue.valueProperty());
@@ -164,13 +167,13 @@ public class FilterValueCell extends TableCell<FilterHolder, Object> {
 		if (item == null)
 			return null;
 		Object rowItem = getTableRow().getItem();
-		Filter filterItem = null;
+		FilterAdapter filterItem = null;
 		if (rowItem instanceof FilterHolder)
 			filterItem = ((FilterHolder) rowItem).filterProperty().get();
-		if (filterItem instanceof FilterTextValue)
-			return ((FilterTextValue) filterItem).getConverter().toString(item);
-		if (filterItem instanceof FilterSelectableValue)
-			return ((FilterSelectableValue) filterItem).valueProperty().get().toString();
+		if (filterItem instanceof FilterDateAdapter)
+			return ((FilterDateAdapter) filterItem).getConverter().toString(item);
+		if (filterItem instanceof FilterCustomFieldAdapter)
+			return ((FilterCustomFieldAdapter) filterItem).valueProperty().get().toString();
 		return null;
 	}
 }

@@ -120,6 +120,93 @@ public class PersistenceHelper {
 	}
 
 	/**
+	 * Creates a FilterDate entity
+	 *
+	 * @param type the FilterDate type
+	 * @return the new FilterDate entity, persisted in JPA
+	 */
+	public FilterDate createFilterDate(FilterDate.DateType type) {
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
+		entityManager.getTransaction().begin();
+		FilterDate filter = createFilterDate(entityManager, type);
+		entityManager.getTransaction().commit();
+		entityManager.close();
+		return filter;
+	}
+
+	/**
+	 * Creates a FilterDate entity inside an existing EntityManager/transaction
+	 *
+	 * @param entityManager the EntityManager where the new CustomField will be
+	 * persisted
+	 * @param type the FilterDate type
+	 * @return the new FilterDate entity, persisted in JPA
+	 */
+	public FilterDate createFilterDate(EntityManager entityManager, FilterDate.DateType type) {
+		FilterDate filter = new FilterDate(type);
+		entityManager.persist(filter);
+		return filter;
+	}
+
+	/**
+	 * Creates a FilterCustomField entity
+	 *
+	 * @param customField the associated CustomField
+	 * @return the new FilterCustomField entity, persisted in JPA
+	 */
+	public FilterCustomField createFilterCustomField(CustomField customField) {
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
+		entityManager.getTransaction().begin();
+		FilterCustomField filter = createFilterCustomField(entityManager, customField);
+		entityManager.getTransaction().commit();
+		entityManager.close();
+		return filter;
+	}
+
+	/**
+	 * Creates a FilterCustomField entity inside an existing
+	 * EntityManager/transaction
+	 *
+	 * @param entityManager the EntityManager where the new CustomField will be
+	 * persisted
+	 * @param customField the associated CustomField
+	 * @return the new FilterCustomField entity, persisted in JPA
+	 */
+	public FilterCustomField createFilterCustomField(EntityManager entityManager, CustomField customField) {
+		FilterCustomField filter = new FilterCustomField(customField);
+		entityManager.persist(filter);
+		return filter;
+	}
+
+	/**
+	 * Creates a createFilterTaskCompleted entity
+	 *
+	 * @return the new createFilterTaskCompleted entity, persisted in JPA
+	 */
+	public FilterTaskCompleted createFilterTaskCompleted() {
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
+		entityManager.getTransaction().begin();
+		FilterTaskCompleted filter = createFilterTaskCompleted(entityManager);
+		entityManager.getTransaction().commit();
+		entityManager.close();
+		return filter;
+	}
+
+	/**
+	 * Creates a createFilterTaskCompleted entity inside an existing
+	 * EntityManager/transaction
+	 *
+	 * @param entityManager the EntityManager where the new CustomField will be
+	 * persisted
+	 * @return the new createFilterTaskCompleted entity, persisted in JPA
+	 */
+	public FilterTaskCompleted createFilterTaskCompleted(EntityManager entityManager) {
+		FilterTaskCompleted filter = new FilterTaskCompleted();
+		entityManager.persist(filter);
+		return filter;
+	}
+
+	/**
 	 * Performs a requested change with a supplied TransactedChange
 	 *
 	 * @param requestedChange a TransactedChange implementation
@@ -155,6 +242,24 @@ public class PersistenceHelper {
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 
 		List<Task> result = getAllTasks(entityManager);
+
+		entityManager.close();
+		return result;
+	}
+
+	/**
+	 * Returns all filters from database
+	 *
+	 * @return all filters from database
+	 */
+	public List<Filter> getAllFilters() {
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
+
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Filter> fitlersCriteriaQuery = criteriaBuilder.createQuery(Filter.class);
+		fitlersCriteriaQuery.from(Filter.class);
+
+		List<Filter> result = entityManager.createQuery(fitlersCriteriaQuery).getResultList();
 
 		entityManager.close();
 		return result;

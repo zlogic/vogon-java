@@ -9,7 +9,10 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -17,11 +20,21 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javax.persistence.EntityManager;
 import org.zlogic.att.data.CustomField;
+import org.zlogic.att.data.Filter;
+import org.zlogic.att.data.FilterCustomField;
+import org.zlogic.att.data.FilterDate;
+import org.zlogic.att.data.FilterTaskCompleted;
 import org.zlogic.att.data.PersistenceHelper;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.TransactedChange;
+import org.zlogic.att.ui.filter.FilterFactory;
 import org.zlogic.att.ui.filter.FilterHolder;
+import org.zlogic.att.ui.filter.FilterTypeFactory;
+import org.zlogic.att.ui.filter.adapters.FilterAdapter;
+import org.zlogic.att.ui.filter.adapters.FilterCustomFieldAdapter;
+import org.zlogic.att.ui.filter.adapters.FilterDateAdapter;
+import org.zlogic.att.ui.filter.adapters.FilterTaskCompletedAdapter;
 
 /**
  * Placeholder class to contain an ObservableList of all TaskAdapters. This
@@ -31,6 +44,11 @@ import org.zlogic.att.ui.filter.FilterHolder;
  */
 public class TaskManager {
 
+	/**
+	 * The logger
+	 */
+	private final static Logger log = Logger.getLogger(TaskManager.class.getName());
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/messages");
 	/**
 	 * The persistence helper instance
 	 */
@@ -63,6 +81,11 @@ public class TaskManager {
 	 * The currently active filters
 	 */
 	private ObservableList<FilterHolder> filters = FXCollections.observableList(new LinkedList<FilterHolder>());
+	/**
+	 * The filter factory used to create filters and display the list of
+	 * available filters
+	 */
+	private FilterFactory filterBuilder = new FilterFactory(this);
 
 	/**
 	 * Creates a TaskManager instance
@@ -197,11 +220,13 @@ public class TaskManager {
 			tasks.add(new TaskAdapter(task, this));
 		}
 		reloadCustomFields();
+		reloadFilters();
 	}
 
 	/**
 	 * Reloads the custom fields from database. Forgets old CustomFieldAdapters,
-	 * replaces CustomFieldValueAdapters in tasks with the updated version.
+	 * replaces CustomFieldValueAdapters in tasks and filters with the updated
+	 * version.
 	 */
 	public void reloadCustomFields() {
 		customFieldValues.clear();
@@ -211,6 +236,32 @@ public class TaskManager {
 		for (TaskAdapter task : tasks)
 			for (CustomFieldAdapter adapter : customFields)
 				addCustomFieldValue(adapter, task.getTask().getCustomField(adapter.getCustomField()));
+		for (FilterHolder filter : filters)
+			if (filter.filterProperty().get() instanceof FilterCustomFieldAdapter)
+				((FilterCustomFieldAdapter) filter.filterProperty().get()).updateCustomFieldAdapter();
+	}
+
+	/**
+	 * Reloads the filters from database. Forgets old FilterAdapters.
+	 */
+	public void reloadFilters() {
+		filters.clear();
+		for (Filter filter : persistenceHelper.getAllFilters()) {
+			FilterAdapter filterAdapter = null;
+			if (filter instanceof FilterDate) {
+				filterAdapter = new FilterDateAdapter(this, (FilterDate) filter);
+			} else if (filter instanceof FilterCustomField) {
+				filterAdapter = new FilterCustomFieldAdapter(this, (FilterCustomField) filter);
+			} else if (filter instanceof FilterTaskCompleted) {
+				filterAdapter = new FilterTaskCompletedAdapter(this, (FilterTaskCompleted) filter);
+			}
+
+			FilterTypeFactory filterType = filterBuilder.getFilterTypeFor(filterAdapter);
+			if (filterType != null)
+				filters.add(new FilterHolder(filterAdapter, filterType));
+			else
+				log.log(Level.WARNING, messages.getString("CANNOT_FIND_A_SUITABLE_FILTERADAPTER_CONSTRUCTOR"), filter.getId());
+		}
 	}
 
 	/**
@@ -416,5 +467,14 @@ public class TaskManager {
 	 */
 	public PersistenceHelper getPersistenceHelper() {
 		return persistenceHelper;
+	}
+
+	/**
+	 * Returns the FilterFactory instance
+	 *
+	 * @return the FilterFactory instance
+	 */
+	public FilterFactory getFilterBuilder() {
+		return filterBuilder;
 	}
 }

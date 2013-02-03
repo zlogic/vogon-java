@@ -9,10 +9,10 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import org.zlogic.att.ui.filter.ui.Filter;
+import org.zlogic.att.ui.filter.adapters.FilterAdapter;
 
 /**
- * Class for storing a filter and allowing to change the underlying filter and
+ * Class for storing a filter and allowing to change the associated filter and
  * access its properties
  *
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
@@ -22,7 +22,7 @@ public class FilterHolder {
 	/**
 	 * The associated filter
 	 */
-	private ObjectProperty<Filter> filterProperty = new SimpleObjectProperty<>();
+	private ObjectProperty<FilterAdapter> filterProperty = new SimpleObjectProperty<>();
 	/**
 	 * The associated filter type
 	 */
@@ -36,12 +36,14 @@ public class FilterHolder {
 	 * Created a FilterHolder
 	 *
 	 * @param filter the initially associated filter
+	 * @param type the initially associated filter type (TODO: remove the need
+	 * for this parameter)
 	 */
-	public FilterHolder(Filter filter) {
+	public FilterHolder(FilterAdapter filter, FilterTypeFactory type) {
 		filterProperty.set(filter);
 		valueProperty.bindBidirectional(filter.valueProperty());
-		type.set(filter.getType());
-		type.addListener(new ChangeListener<FilterTypeFactory>() {
+		this.type.set(type);
+		this.type.addListener(new ChangeListener<FilterTypeFactory>() {
 			@Override
 			public void changed(ObservableValue<? extends FilterTypeFactory> ov, FilterTypeFactory oldValue, FilterTypeFactory newValue) {
 				valueProperty.unbindBidirectional(filterProperty.get().valueProperty());
@@ -56,7 +58,7 @@ public class FilterHolder {
 	 *
 	 * @return the associated filter property
 	 */
-	public ObjectProperty<Filter> filterProperty() {
+	public ObjectProperty<FilterAdapter> filterProperty() {
 		return filterProperty;
 	}
 
