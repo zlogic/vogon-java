@@ -99,6 +99,7 @@ public class FilterEditorController implements Initializable {
 	 */
 	@FXML
 	private void hideWindow() {
+		dataManager.applyFilters();
 		filters.getScene().getWindow().hide();
 	}
 

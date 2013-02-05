@@ -110,7 +110,7 @@ public class FilterCustomFieldAdapter implements FilterAdapter<String> {
 	 * @return the list of allowed values
 	 */
 	public ObservableList<String> getAllowedValues() {
-		return dataManager.getCustomFieldValues(customField);
+		return dataManager.getAllCustomFieldValues(customField);
 	}
 
 	@Override

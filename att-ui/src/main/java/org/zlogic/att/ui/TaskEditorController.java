@@ -199,7 +199,7 @@ public class TaskEditorController implements Initializable {
 					@Override
 					public void changed(ObservableValue<? extends TableRow> ov, TableRow oldValue, TableRow newValue) {
 						if (newValue != null && newValue.getItem() instanceof CustomFieldValueAdapter) {
-							ObservableList<String> customFieldValues = dataManager.getCustomFieldValues(((CustomFieldValueAdapter) newValue.getItem()).getCustomField());
+							ObservableList<String> customFieldValues = dataManager.getFilteredCustomFieldValues(((CustomFieldValueAdapter) newValue.getItem()).getCustomField());
 							cell.getItems().setAll(customFieldValues != null ? customFieldValues : new LinkedList<String>());
 						}
 					}
@@ -215,7 +215,7 @@ public class TaskEditorController implements Initializable {
 					@Override
 					public void changed(ObservableValue<? extends String> ov, String oldValue, String newValue) {
 						if (newValue != null && cell.getTableRow().getItem() instanceof CustomFieldValueAdapter) {
-							ObservableList<String> customFieldValues = dataManager.getCustomFieldValues(((CustomFieldValueAdapter) cell.getTableRow().getItem()).getCustomField());
+							ObservableList<String> customFieldValues = dataManager.getFilteredCustomFieldValues(((CustomFieldValueAdapter) cell.getTableRow().getItem()).getCustomField());
 							cell.getItems().setAll(customFieldValues != null ? customFieldValues : new LinkedList<String>());
 						}
 					}

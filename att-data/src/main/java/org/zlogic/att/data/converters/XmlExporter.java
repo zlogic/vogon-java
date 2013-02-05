@@ -87,7 +87,7 @@ public class XmlExporter implements Exporter {
 
 			//Tasks list
 			DatatypeFactory datatypeFactory = DatatypeFactory.newInstance();
-			for (Task task : persistenceHelper.getAllTasks()) {
+			for (Task task : persistenceHelper.getAllTasks(false)) {
 				Element taskElement = doc.createElement("Task"); //NOI18N
 				taskElement.setAttribute("Id", Long.toString(task.getId())); //NOI18N
 				if (task.getName() != null)

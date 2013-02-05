@@ -10,6 +10,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 /**
  * Abstract entity class for a tasks filter.
@@ -34,4 +37,14 @@ public abstract class Filter implements Serializable {
 	public Long getId() {
 		return id;
 	}
+
+	/**
+	 * Returns the predicate which can be used for applying this filter to a
+	 * task query
+	 *
+	 * @param criteriaBuilder the query CriteriaBuilder
+	 * @param taskRoot the task root (CriteriaQuery<Task>.from())
+	 * @return the predicate
+	 */
+	public abstract Predicate getFilterPredicate(CriteriaBuilder criteriaBuilder, Root<Task> taskRoot);
 }

@@ -8,6 +8,10 @@ package org.zlogic.att.data;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.MapJoin;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 /**
  * Tasks filter which filters the custom field value.
@@ -67,5 +71,13 @@ public class FilterCustomField extends Filter {
 	 */
 	public void setCustomFieldValue(String customFieldValue) {
 		this.customFieldValue = customFieldValue;
+	}
+
+	@Override
+	public Predicate getFilterPredicate(CriteriaBuilder criteriaBuilder, Root<Task> taskRoot) {
+		MapJoin<Task, CustomField, String> customFieldJoin = taskRoot.join(Task_.customFields);
+		return criteriaBuilder.and(
+				criteriaBuilder.equal(customFieldJoin.key(), customField),
+				criteriaBuilder.equal(customFieldJoin.value(), customFieldValue));
 	}
 }

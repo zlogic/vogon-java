@@ -67,8 +67,8 @@ public class CustomFieldValueAdapter {
 				}.setNewValue(getCustomField(), newValue));
 				getTask().updateFromDatabase();
 				updateFxProperties();
-				getDataManager().removeCustomFieldValue(getCustomField(), oldValue);
-				getDataManager().addCustomFieldValue(getCustomField(), newValue);
+				getDataManager().removeFilteredCustomFieldValue(getCustomField(), oldValue);
+				getDataManager().addFilteredCustomFieldValue(getCustomField(), newValue);
 			}
 		}
 	};

@@ -97,7 +97,7 @@ public class FilterFactory {
 		 * Constructs an DateFilterFactory
 		 */
 		public DateFilterFactory(FilterDate.DateType type) {
-			super(type == FilterDate.DateType.DATE_START ? messages.getString("START_DATE") : messages.getString("END_DATE"));
+			super(type == FilterDate.DateType.DATE_AFTER ? messages.getString("AFTER_DATE") : messages.getString("BEFORE_DATE"));
 			this.type = type;
 		}
 
@@ -202,8 +202,8 @@ public class FilterFactory {
 		this.dataManager = dataManager;
 
 		//Populate available filters list
-		availableFilters.add(new DateFilterFactory(FilterDate.DateType.DATE_START));
-		availableFilters.add(new DateFilterFactory(FilterDate.DateType.DATE_END));
+		availableFilters.add(new DateFilterFactory(FilterDate.DateType.DATE_AFTER));
+		availableFilters.add(new DateFilterFactory(FilterDate.DateType.DATE_BEFORE));
 		availableFilters.add(new CompletedFilterFactory());
 		updateCustomFieldFilters();
 		defaultFilterConstructor = new EmptyFilterFactory();
@@ -267,20 +267,21 @@ public class FilterFactory {
 	 * @param filter the filter to be deleted
 	 */
 	public void deleteFilter(FilterAdapter filter) {
-		dataManager.getPersistenceHelper().performTransactedChange(new TransactedChange() {
-			private Filter filter;
+		if (!(filter instanceof FilterEmptyAdapter))
+			dataManager.getPersistenceHelper().performTransactedChange(new TransactedChange() {
+				private Filter filter;
 
-			public TransactedChange setDeleteFilter(Filter filter) {
-				this.filter = filter;
-				return this;
-			}
+				public TransactedChange setDeleteFilter(Filter filter) {
+					this.filter = filter;
+					return this;
+				}
 
-			@Override
-			public void performChange(EntityManager entityManager) {
-				Filter filterEntity = entityManager.find(Filter.class, filter.getId());
-				entityManager.remove(filterEntity);
-			}
-		}.setDeleteFilter(filter.getFilter()));
+				@Override
+				public void performChange(EntityManager entityManager) {
+					Filter filterEntity = entityManager.find(Filter.class, filter.getId());
+					entityManager.remove(filterEntity);
+				}
+			}.setDeleteFilter(filter.getFilter()));
 		List<FilterHolder> deleteFiltersHolder = new LinkedList<>();
 		for (FilterHolder filterHolder : dataManager.getFilters())
 			if (filterHolder.filterProperty().get().equals(filter))

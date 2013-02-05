@@ -18,7 +18,7 @@ import org.zlogic.att.data.TransactedChange;
 import org.zlogic.att.ui.adapters.DataManager;
 
 /**
- * Filter for start/end dates
+ * Filter for before/after dates
  *
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */

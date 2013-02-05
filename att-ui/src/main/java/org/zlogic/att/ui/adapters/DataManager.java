@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,9 +70,15 @@ public class DataManager {
 	 */
 	private ObjectProperty<Date> lastTaskUpdate = new SimpleObjectProperty<>();//FIXME: Remove once Java FX 3.0 fixes sorting
 	/**
-	 * Possible values of custom fields, used for autocomplete
+	 * Possible values of custom fields, used for autocomplete, with filter
+	 * applied
 	 */
-	private Map<CustomFieldAdapter, ObservableList<String>> customFieldValues = new TreeMap<>();
+	private Map<CustomFieldAdapter, ObservableList<String>> filteredCustomFieldValues = new TreeMap<>();
+	/**
+	 * Possible values of custom fields, used for autocomplete, without filter
+	 * applied
+	 */
+	private Map<CustomFieldAdapter, ObservableList<String>> allCustomFieldValues = new TreeMap<>();
 	/**
 	 * List of all custom fields
 	 */
@@ -103,12 +110,19 @@ public class DataManager {
 	 * @param adapter the custom field
 	 * @param value the value to be added
 	 */
-	protected void addCustomFieldValue(CustomFieldAdapter adapter, String value) {
+	protected void addFilteredCustomFieldValue(CustomFieldAdapter adapter, String value) {
 		if (value == null)
 			return;
-		if (!customFieldValues.containsKey(adapter))
-			customFieldValues.put(adapter, FXCollections.observableList(new LinkedList<String>()));
-		ObservableList<String> values = customFieldValues.get(adapter);
+		if (!filteredCustomFieldValues.containsKey(adapter))
+			filteredCustomFieldValues.put(adapter, FXCollections.observableList(new LinkedList<String>()));
+		if (!allCustomFieldValues.containsKey(adapter))
+			allCustomFieldValues.put(adapter, FXCollections.observableList(new LinkedList<String>()));
+		ObservableList<String> values = filteredCustomFieldValues.get(adapter);
+		if (!values.contains(value)) {
+			values.add(value);
+			FXCollections.sort(values);
+		}
+		values = allCustomFieldValues.get(adapter);
 		if (!values.contains(value)) {
 			values.add(value);
 			FXCollections.sort(values);
@@ -123,9 +137,9 @@ public class DataManager {
 	 * @param value the value of the Custom Field
 	 * @return true if the value was removed
 	 */
-	protected boolean removeCustomFieldValue(CustomFieldAdapter adapter, String value) {
-		if (!customFieldValues.containsKey(adapter))
-			customFieldValues.put(adapter, FXCollections.observableList(new LinkedList<String>()));
+	protected boolean removeFilteredCustomFieldValue(CustomFieldAdapter adapter, String value) {
+		if (!filteredCustomFieldValues.containsKey(adapter))
+			filteredCustomFieldValues.put(adapter, FXCollections.observableList(new LinkedList<String>()));
 		//Check if value is no longer used
 		for (CustomFieldAdapter customField : customFields)
 			for (TaskAdapter task : tasks) {
@@ -134,7 +148,7 @@ public class DataManager {
 					return false;
 			}
 		//Remove the value
-		List<String> values = customFieldValues.get(adapter);
+		List<String> values = filteredCustomFieldValues.get(adapter);
 		return values.remove(value);
 	}
 
@@ -188,13 +202,25 @@ public class DataManager {
 
 	/**
 	 * Returns a list of all possible CustomField values for a specific
-	 * CustomField. Used for autocomplete.
+	 * CustomField. Used for autocomplete. Filter is applied.
 	 *
 	 * @param adapter the CustomFieldAdapter for which values will be retrieved
 	 * @return the list of all possible CustomField values
 	 */
-	public ObservableList<String> getCustomFieldValues(CustomFieldAdapter adapter) {
-		return customFieldValues.get(adapter);
+	public ObservableList<String> getFilteredCustomFieldValues(CustomFieldAdapter adapter) {
+		return filteredCustomFieldValues.get(adapter);
+	}
+
+	/**
+	 * Returns a list of all possible CustomField values for a specific
+	 * CustomField. Used for autocomplete. Filter is not applied (returns all
+	 * possible values).
+	 *
+	 * @param adapter the CustomFieldAdapter for which values will be retrieved
+	 * @return the list of all possible CustomField values
+	 */
+	public ObservableList<String> getAllCustomFieldValues(CustomFieldAdapter adapter) {
+		return allCustomFieldValues.get(adapter);
 	}
 
 	/**
@@ -219,11 +245,48 @@ public class DataManager {
 	public void reloadTasks() {
 		tasks.clear();
 		timeSegments.clear();
-		for (Task task : persistenceHelper.getAllTasks()) {
+		for (Task task : persistenceHelper.getAllTasks(true)) {
 			tasks.add(new TaskAdapter(task, this));
+		}
+		if (timingSegment.get() != null) {
+			TaskAdapter ownerTask = timingSegment.get().ownerTaskProperty().get();
+			TaskAdapter oldOwnerTask = null;
+			//Keep the currently timing segment
+			for (TaskAdapter taskAdapter : tasks)
+				if (taskAdapter.getTask().equals(ownerTask.getTask())) {
+					oldOwnerTask = taskAdapter;
+					break;
+				}
+			if (oldOwnerTask != null)
+				tasks.set(tasks.indexOf(oldOwnerTask), ownerTask);
+			else
+				tasks.add(ownerTask);
 		}
 		reloadCustomFields();
 		reloadFilters();
+	}
+
+	/**
+	 * Applies task filters.
+	 */
+	public void applyFilters() {
+		reloadTasks();
+		signalTaskUpdate();
+	}
+
+	/**
+	 * Reloads all custom field values
+	 */
+	public void reloadAllCustomFieldValues() {
+		allCustomFieldValues.clear();
+		for (Map.Entry<CustomField, Set<String>> entry : persistenceHelper.getAllCustomFieldValues().entrySet())
+			for (CustomFieldAdapter customFieldAdapter : customFields)
+				if (customFieldAdapter.getCustomField().equals(entry.getKey())) {
+					ObservableList<String> customFieldValues = FXCollections.observableArrayList(entry.getValue());
+					FXCollections.sort(customFieldValues);
+					allCustomFieldValues.put(customFieldAdapter, customFieldValues);
+					break;
+				}
 	}
 
 	/**
@@ -232,16 +295,18 @@ public class DataManager {
 	 * version.
 	 */
 	public void reloadCustomFields() {
-		customFieldValues.clear();
+		filteredCustomFieldValues.clear();
 		customFields.clear();
 		for (CustomField customField : persistenceHelper.getCustomFields())
 			customFields.add(new CustomFieldAdapter(customField, this));
 		for (TaskAdapter task : tasks)
 			for (CustomFieldAdapter adapter : customFields)
-				addCustomFieldValue(adapter, task.getTask().getCustomField(adapter.getCustomField()));
+				addFilteredCustomFieldValue(adapter, task.getTask().getCustomField(adapter.getCustomField()));
 		for (FilterHolder filter : filters)
 			if (filter.filterProperty().get() instanceof FilterCustomFieldAdapter)
 				((FilterCustomFieldAdapter) filter.filterProperty().get()).updateCustomFieldAdapter();
+
+		reloadAllCustomFieldValues();
 	}
 
 	/**
@@ -385,7 +450,7 @@ public class DataManager {
 			@Override
 			public void performChange(EntityManager entityManager) {
 				CustomField customField = entityManager.find(CustomField.class, deleteCustomField.getId());
-				for (Task task : persistenceHelper.getAllTasks(entityManager)) {
+				for (Task task : persistenceHelper.getAllTasks(entityManager, false)) {
 					if (task.getCustomField(customField) != null && !affectedTasks.contains(task))
 						affectedTasks.add(task);
 					task.setCustomField(customField, null);
@@ -394,12 +459,21 @@ public class DataManager {
 			}
 		}.setDeleteCustomField(customField.getCustomField()));
 		customFields.remove(customField);
-		customFieldValues.remove(customField);
+		filteredCustomFieldValues.remove(customField);
+		allCustomFieldValues.remove(customField);
 		for (Task affectedTask : affectedTasks) {
 			TaskAdapter taskAdapter = findTaskAdapter(affectedTask);
 			if (taskAdapter != null)
 				taskAdapter.updateFromDatabase();
 		}
+		for (FilterHolder filter : filters)
+			if (filter.filterProperty().get() instanceof FilterCustomFieldAdapter) {
+				FilterCustomFieldAdapter customFieldFilter = (FilterCustomFieldAdapter) filter.filterProperty().get();
+				if (customFieldFilter.getFilter().getCustomField().equals(customField.getCustomField())) {
+					filters.remove(filter);
+					filterBuilder.deleteFilter(customFieldFilter);
+				}
+			}
 	}
 
 	/*

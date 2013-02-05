@@ -6,12 +6,17 @@
 package org.zlogic.att.data;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.Tuple;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.MapJoin;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.zlogic.att.data.converters.Importer;
 
@@ -236,12 +241,14 @@ public class PersistenceHelper {
 	/**
 	 * Returns all tasks from database
 	 *
+	 * @param applyFilters apply filters currently in the database to the
+	 * resulting list
 	 * @return all tasks from database
 	 */
-	public List<Task> getAllTasks() {
+	public List<Task> getAllTasks(boolean applyFilters) {
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 
-		List<Task> result = getAllTasks(entityManager);
+		List<Task> result = getAllTasks(entityManager, applyFilters);
 
 		entityManager.close();
 		return result;
@@ -255,13 +262,26 @@ public class PersistenceHelper {
 	public List<Filter> getAllFilters() {
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 
+		List<Filter> result = getAllFilters(entityManager);
+
+		entityManager.close();
+		return result;
+	}
+
+	/**
+	 * Returns all filters from database inside an existing
+	 * EntityManager/transaction
+	 *
+	 * @param entityManager the EntityManager which will be used for lookup
+	 * @return all filters from database
+	 */
+	public List<Filter> getAllFilters(EntityManager entityManager) {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Filter> fitlersCriteriaQuery = criteriaBuilder.createQuery(Filter.class);
 		fitlersCriteriaQuery.from(Filter.class);
 
 		List<Filter> result = entityManager.createQuery(fitlersCriteriaQuery).getResultList();
 
-		entityManager.close();
 		return result;
 	}
 
@@ -307,14 +327,23 @@ public class PersistenceHelper {
 	 * Returns all tasks from database inside an existing
 	 * EntityManager/transaction
 	 *
-	 * @param entityManager the EntityManager where the new CustomField will be
-	 * persisted
+	 * @param entityManager the EntityManager which will be used for lookup
+	 * @param applyFilters apply filters currently in the database to the
+	 * resulting list
 	 * @return all tasks from database
 	 */
-	public List<Task> getAllTasks(EntityManager entityManager) {
+	public List<Task> getAllTasks(EntityManager entityManager, boolean applyFilters) {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Task> tasksCriteriaQuery = criteriaBuilder.createQuery(Task.class);
-		tasksCriteriaQuery.from(Task.class);
+		Root<Task> taskRoot = tasksCriteriaQuery.from(Task.class);
+
+		if (applyFilters) {
+			Predicate filtersPredicate = criteriaBuilder.conjunction();
+			for (Filter filter : getAllFilters())
+				filtersPredicate = criteriaBuilder.and(filtersPredicate, filter.getFilterPredicate(criteriaBuilder, taskRoot));
+			tasksCriteriaQuery.where(filtersPredicate);
+			tasksCriteriaQuery.distinct(true);
+		}
 
 		List<Task> result = entityManager.createQuery(tasksCriteriaQuery).getResultList();
 
@@ -335,6 +364,36 @@ public class PersistenceHelper {
 
 		List<CustomField> result = entityManager.createQuery(fieldsCriteriaQuery).getResultList();
 		entityManager.close();
+		return result;
+	}
+
+	/**
+	 * Returns all custom field values from database
+	 *
+	 * @return all custom field values from database
+	 */
+	public Map<CustomField, Set<String>> getAllCustomFieldValues() {
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
+
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Tuple> fieldsCriteriaQuery = criteriaBuilder.createTupleQuery();
+		Root<Task> taskRoot = fieldsCriteriaQuery.from(Task.class);
+		Root<CustomField> customFieldRoot = fieldsCriteriaQuery.from(CustomField.class);
+		MapJoin<Task, CustomField, String> customFieldJoin = taskRoot.join(Task_.customFields);
+		fieldsCriteriaQuery.where(criteriaBuilder.equal(customFieldJoin.key(), customFieldRoot));
+		fieldsCriteriaQuery.multiselect(customFieldRoot, customFieldJoin.value()).distinct(true);
+
+		List<Tuple> resultList = entityManager.createQuery(fieldsCriteriaQuery).getResultList();
+		entityManager.close();
+
+		TreeMap<CustomField, Set<String>> result = new TreeMap<>();
+		for (Tuple entry : resultList) {
+			CustomField customField = entry.get(0, CustomField.class);
+			String customFieldValue = entry.get(1, String.class);
+			if (!result.containsKey(customField))
+				result.put(customField, new TreeSet<String>());
+			result.get(customField).add(customFieldValue);
+		}
 		return result;
 	}
 
@@ -360,7 +419,7 @@ public class PersistenceHelper {
 	public void cleanupDB() {
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		entityManager.getTransaction().begin();
-		List<Task> tasks = getAllTasks(entityManager);
+		List<Task> tasks = getAllTasks(entityManager, false);
 
 		//Cleanup time segments
 		Set<TimeSegment> ownedTimeSegments = new TreeSet<>();

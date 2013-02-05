@@ -29,7 +29,11 @@
           </HBox.margin>
         </Button>
         <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteCustomField" text="%DELETE" HBox.margin="$x1" />
-        <Button defaultButton="true" mnemonicParsing="false" onAction="#hideWindow" text="%OK" HBox.margin="$x1" />
+        <HBox id="HBox" alignment="CENTER_RIGHT" spacing="5.0" HBox.hgrow="ALWAYS">
+          <children>
+            <Button defaultButton="true" mnemonicParsing="false" onAction="#hideWindow" text="%CLOSE" HBox.margin="$x1" />
+          </children>
+        </HBox>
       </children>
       <VBox.margin>
         <Insets />

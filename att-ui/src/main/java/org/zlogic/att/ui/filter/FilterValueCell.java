@@ -88,6 +88,10 @@ public class FilterValueCell extends TableCell<FilterHolder, Object> {
 			setText(null);
 		} else if (filterItem instanceof FilterCustomFieldAdapter) {
 			FilterCustomFieldAdapter filter = (FilterCustomFieldAdapter) filterItem;
+			if (filter.getAllowedValues() == null) {
+				cancelEdit();
+				return;
+			}
 			ComboBox<String> comboEditor = new ComboBox<>(filter.getAllowedValues());
 			comboEditor.setValue(filter.valueProperty().get());
 			comboEditor.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {

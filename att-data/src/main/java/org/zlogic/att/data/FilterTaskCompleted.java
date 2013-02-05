@@ -6,6 +6,9 @@
 package org.zlogic.att.data;
 
 import javax.persistence.Entity;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 /**
  * Tasks filter which filters the task completed state.
@@ -43,5 +46,10 @@ public class FilterTaskCompleted extends Filter {
 	 */
 	public void setTaskCompleted(Boolean taskCompleted) {
 		this.taskCompleted = taskCompleted;
+	}
+
+	@Override
+	public Predicate getFilterPredicate(CriteriaBuilder criteriaBuilder, Root<Task> taskRoot) {
+		return criteriaBuilder.equal(taskRoot.get(Task_.completed), taskCompleted);
 	}
 }
