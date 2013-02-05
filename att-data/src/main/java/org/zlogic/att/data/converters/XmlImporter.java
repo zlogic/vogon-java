@@ -136,14 +136,14 @@ public class XmlImporter implements Importer {
 				//Extract attributes from XML
 				NamedNodeMap attributes = currentNode.getAttributes();
 				long taskId = Long.parseLong(attributes.getNamedItem("Id").getNodeValue()); //NOI18N
-				String taskName = (attributes.getNamedItem("Name") != null)
-						? attributes.getNamedItem("Name").getNodeValue()
+				String taskName = (attributes.getNamedItem("Name") != null) //NOI18N
+						? attributes.getNamedItem("Name").getNodeValue() //NOI18N
 						: null; //NOI18N
-				String taskDescription = (attributes.getNamedItem("Description") != null)
-						? attributes.getNamedItem("Description").getNodeValue()
+				String taskDescription = (attributes.getNamedItem("Description") != null) //NOI18N
+						? attributes.getNamedItem("Description").getNodeValue() //NOI18N
 						: null; //NOI18N
-				Boolean taskCompleted = (attributes.getNamedItem("Completed") != null)
-						? Boolean.parseBoolean(attributes.getNamedItem("Completed").getNodeValue())
+				Boolean taskCompleted = (attributes.getNamedItem("Completed") != null) //NOI18N
+						? Boolean.parseBoolean(attributes.getNamedItem("Completed").getNodeValue()) //NOI18N
 						: null; //NOI18N
 
 				Task task = persistenceHelper.createTask(entityManager);
@@ -160,8 +160,8 @@ public class XmlImporter implements Importer {
 						case "CustomField":	//NOI18N
 							long customFieldId = Long.parseLong(childNode.getAttributes().getNamedItem("Id").getNodeValue()); //NOI18N
 							CustomField customField = customFieldsMap.get(customFieldId);
-							String customFieldValue = (childNode.getAttributes().getNamedItem("Value") != null)
-									? childNode.getAttributes().getNamedItem("Value").getNodeValue()
+							String customFieldValue = (childNode.getAttributes().getNamedItem("Value") != null) //NOI18N
+									? childNode.getAttributes().getNamedItem("Value").getNodeValue() //NOI18N
 									: null; //NOI18N
 							task.setCustomField(customField, customFieldValue);
 							break;

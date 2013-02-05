@@ -122,6 +122,6 @@ public class FilterDate extends Filter {
 					criteriaBuilder.lessThanOrEqualTo(timeSegmentsJoin.get(TimeSegment_.startTime), appliedDate));
 		}
 		log.log(Level.SEVERE, messages.getString("UNKNOWN_DATE_TYPE"), type.toString());
-		return criteriaBuilder.disjunction();
+		return criteriaBuilder.conjunction();
 	}
 }
