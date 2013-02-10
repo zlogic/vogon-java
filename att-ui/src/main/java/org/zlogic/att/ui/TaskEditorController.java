@@ -330,6 +330,8 @@ public class TaskEditorController implements Initializable {
 					oldValue.isTimingProperty().removeListener(startStopListener);
 				if (newValue != null)
 					newValue.isTimingProperty().addListener(startStopListener);
+				else
+					updateStartStopText();
 			}
 		});
 	}

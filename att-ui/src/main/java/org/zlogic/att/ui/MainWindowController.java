@@ -321,6 +321,17 @@ public class MainWindowController implements Initializable {
 							}
 						}
 					};
+					private ChangeListener completedChangeListener = new ChangeListener<Boolean>() {
+						@Override
+						public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
+							if (newValue != null) {
+								if (newValue)
+									row.getStyleClass().add("completed-item"); //NOI18N
+								else
+									row.getStyleClass().remove("completed-item"); //NOI18N
+							}
+						}
+					};
 
 					public ChangeListener<TaskAdapter> setRow(TableRow<TaskAdapter> row) {
 						this.row = row;
@@ -329,11 +340,15 @@ public class MainWindowController implements Initializable {
 
 					@Override
 					public void changed(ObservableValue<? extends TaskAdapter> ov, TaskAdapter oldValue, TaskAdapter newValue) {
-						if (oldValue != null)
+						if (oldValue != null) {
 							oldValue.isTimingProperty().removeListener(timingChangeListener);
+							oldValue.completedProperty().removeListener(completedChangeListener);
+						}
 						if (newValue != null) {
 							newValue.isTimingProperty().addListener(timingChangeListener);
+							newValue.completedProperty().addListener(completedChangeListener);
 							timingChangeListener.changed(newValue.isTimingProperty(), oldValue != null ? oldValue.isTimingProperty().get() : false, newValue.isTimingProperty().get());
+							completedChangeListener.changed(newValue.completedProperty(), oldValue != null ? oldValue.completedProperty().get() : false, newValue.completedProperty().get());
 						}
 					}
 				}.setRow(row));
@@ -852,7 +867,7 @@ public class MainWindowController implements Initializable {
 			lastDirectory.set(selectedFile.isDirectory() ? selectedFile : selectedFile.getParentFile());
 
 			//Append extension if needed
-			String extension = selectedFile.isFile() ? selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".")) : null; //NOI18N
+			String extension = selectedFile.getName().lastIndexOf(".") >= 0 ? selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".")) : null; //NOI18N
 			if (extension == null || extension.isEmpty())
 				selectedFile = new File(selectedFile.getParentFile(), selectedFile.getName() + ".xml"); //NOI18N
 

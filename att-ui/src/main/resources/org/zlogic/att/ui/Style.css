@@ -2,7 +2,7 @@
 
 /*
  * Timing item
-*/
+ */
 .timing-segment {
 	-fx-accent: palegreen;
 	-fx-control-inner-background: palegreen;
@@ -26,7 +26,7 @@
 
 /*
  * Dragged item
-*/
+ */
 .table-row-cell .drag-accept-task {
 	-fx-accent: cornsilk;
 	-fx-background: cornsilk;
@@ -44,3 +44,11 @@
 .table-view:focused .table-row-cell:filled:selected .drag-accept-task {
 	-fx-background-color: -fx-selection-bar;
 }
+
+/*
+ * Completed item
+ */
+ .completed-item .text {
+	 -fx-strikethrough: true;
+ }
+ 
