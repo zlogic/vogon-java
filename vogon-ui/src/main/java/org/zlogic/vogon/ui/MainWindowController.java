@@ -238,7 +238,7 @@ public class MainWindowController implements Initializable {
 			preferenceStorage.put("lastDirectory", lastDirectory.toString()); //NOI18N
 
 			//Set extension if necessary
-			String extension = selectedFile.getName().contains(".") ? selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".")) : null; //NOI18N
+			String extension = selectedFile.getName().lastIndexOf(".") >= 0 ? selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".")) : null; //NOI18N
 			if (extension == null || extension.isEmpty())
 				selectedFile = new File(selectedFile.getParentFile(), selectedFile.getName() + ".xml"); //NOI18N
 
