@@ -313,23 +313,20 @@ public class MainWindowController implements Initializable {
 					private ChangeListener timingChangeListener = new ChangeListener<Boolean>() {
 						@Override
 						public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
-							if (newValue != null) {
-								if (newValue)
-									row.getStyleClass().add("timing-segment"); //NOI18N
-								else
-									row.getStyleClass().remove("timing-segment"); //NOI18N
-							}
+							if (newValue != null && newValue)
+								row.getStyleClass().add("timing-segment"); //NOI18N
+							else
+								row.getStyleClass().remove("timing-segment"); //NOI18N
 						}
 					};
 					private ChangeListener completedChangeListener = new ChangeListener<Boolean>() {
 						@Override
 						public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
-							if (newValue != null) {
-								if (newValue)
-									row.getStyleClass().add("completed-item"); //NOI18N
-								else
-									row.getStyleClass().remove("completed-item"); //NOI18N
-							}
+							row.getStyleClass().removeAll("item-completed", "item-not-completed");//FIXME: remove this once fixed in Java FX
+							if (newValue != null && newValue)
+								row.getStyleClass().add("item-completed"); //NOI18N
+							else
+								row.getStyleClass().add("item-not-completed"); //NOI18N
 						}
 					};
 
@@ -347,9 +344,15 @@ public class MainWindowController implements Initializable {
 						if (newValue != null) {
 							newValue.isTimingProperty().addListener(timingChangeListener);
 							newValue.completedProperty().addListener(completedChangeListener);
-							timingChangeListener.changed(newValue.isTimingProperty(), oldValue != null ? oldValue.isTimingProperty().get() : false, newValue.isTimingProperty().get());
-							completedChangeListener.changed(newValue.completedProperty(), oldValue != null ? oldValue.completedProperty().get() : false, newValue.completedProperty().get());
 						}
+						timingChangeListener.changed(
+								newValue != null ? newValue.isTimingProperty() : null,
+								oldValue != null ? oldValue.isTimingProperty().get() : false,
+								newValue != null ? newValue.isTimingProperty().get() : false);
+						completedChangeListener.changed(
+								newValue != null ? newValue.completedProperty() : null,
+								oldValue != null ? oldValue.completedProperty().get() : false,
+								newValue != null ? newValue.completedProperty().get() : false);
 					}
 				}.setRow(row));
 				//Drag'n'drop support

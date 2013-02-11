@@ -48,7 +48,14 @@
 /*
  * Completed item
  */
- .completed-item .text {
+ .item-completed .text {
 	 -fx-strikethrough: true;
+ }
+ 
+/*
+ * Not completed item
+ */
+ .item-not-completed .text {
+	 -fx-strikethrough: false;
  }
  
