@@ -73,35 +73,20 @@
               <children>
                 <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" HBox.hgrow="SOMETIMES">
                   <children>
-                    <Button fx:id="createTransactionButton" mnemonicParsing="false" onAction="#createNewTask" text="%NEW_TASK">
-                      <HBox.margin>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x2" />
-                      </HBox.margin>
-                    </Button>
-                    <Button id="deleteTaskButton" fx:id="duplicateTaskButton" mnemonicParsing="false" onAction="#duplicateSelectedTasks" text="%DUPLICATE_TASK">
-                      <HBox.margin>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x3" />
-                      </HBox.margin>
-                    </Button>
-                    <Button fx:id="deleteTaskButton" mnemonicParsing="false" onAction="#deleteSelectedTasks" text="%DELETE_TASK">
-                      <HBox.margin>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x4" />
-                      </HBox.margin>
-                    </Button>
+                    <Button fx:id="createTransactionButton" mnemonicParsing="false" onAction="#createNewTask" text="%NEW_TASK" HBox.margin="$x1" />
+                    <Button id="deleteTaskButton" fx:id="duplicateTaskButton" mnemonicParsing="false" onAction="#duplicateSelectedTasks" text="%DUPLICATE_TASK" HBox.margin="$x1" />
+                    <Button fx:id="deleteTaskButton" mnemonicParsing="false" onAction="#deleteSelectedTasks" text="%DELETE_TASK" HBox.margin="$x1" />
+                    <ToggleButton id="editProperties" mnemonicParsing="false" selected="true" text="%EDIT_PROPERTIES" />
                   </children>
                 </HBox>
                 <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
                   <children>
-                    <Button mnemonicParsing="false" onAction="#showFiltersEditor" text="%FILTERS...">
-                      <HBox.margin>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
-                      </HBox.margin>
-                    </Button>
+                    <Button mnemonicParsing="false" onAction="#showFiltersEditor" text="%FILTERS..." HBox.margin="$x1" />
                   </children>
                 </HBox>
               </children>
             </HBox>
-            <TableView fx:id="taskList" editable="true" style="&#10;" VBox.vgrow="ALWAYS">
+            <TableView fx:id="taskList" editable="${editProperties.selected}" VBox.vgrow="ALWAYS">
               <columns>
                 <TableColumn prefWidth="75.0" text="%TASK_NAME" fx:id="columnTaskName">
                   <cellValueFactory>
@@ -130,22 +115,24 @@
                 </TableColumn>
               </columns>
             </TableView>
+            <HBox alignment="CENTER_RIGHT" minHeight="30.0" prefHeight="-1.0" prefWidth="-1.0">
+              <children>
+                <Label alignment="CENTER_RIGHT" contentDisplay="LEFT" text="%TOTAL_TIME_FILTERED" HBox.hgrow="ALWAYS" HBox.margin="$x1">
+                  <labelFor>
+                    <TextField fx:id="totalTimeField" alignment="CENTER_RIGHT" editable="false" minHeight="-1.0" prefWidth="-1.0" text="" HBox.hgrow="NEVER" HBox.margin="$x1" />
+                  </labelFor>
+                </Label>
+                <fx:reference source="totalTimeField" />
+              </children>
+            </HBox>
           </children>
         </VBox>
       </items>
     </SplitPane>
     <HBox fx:id="statusPane" alignment="CENTER_LEFT" prefHeight="-1.0" prefWidth="-1.0" visible="false">
       <children>
-        <ProgressIndicator fx:id="progressIndicator" progress="0.0">
-          <HBox.margin>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x5" />
-          </HBox.margin>
-        </ProgressIndicator>
-        <Label fx:id="progressLabel" labelFor="$progressIndicator" text="">
-          <HBox.margin>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="$x5" />
-          </HBox.margin>
-        </Label>
+        <ProgressIndicator fx:id="progressIndicator" progress="0.0" HBox.margin="$x1" />
+        <Label fx:id="progressLabel" labelFor="$progressIndicator" text="" HBox.margin="$x1" />
       </children>
     </HBox>
   </children>

@@ -18,6 +18,9 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javax.persistence.EntityManager;
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
+import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatterBuilder;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
@@ -36,7 +39,7 @@ public class TimeSegmentAdapter {
 	 */
 	private TimeSegment segment;
 	/*
-	 * Java FX 
+	 * Java FX
 	 */
 	/**
 	 * Description property
@@ -109,6 +112,7 @@ public class TimeSegmentAdapter {
 		public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
 			if (!oldValue.equals(newValue) && getDataManager() != null) {
 				//TODO: catch exceptions & revert
+				oldValue = getTimeSegment().getStartTime();
 				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private Date newValue;
 
@@ -124,8 +128,15 @@ public class TimeSegmentAdapter {
 					}
 				}.setNewValue(newValue));
 				ownerTaskProperty().get().updateFromDatabase();
-				updateFxProperties();
+				//updateFxProperties();
 				getDataManager().signalTaskUpdate();
+				//Update total time
+				if (!oldValue.equals(newValue)) {
+					Period deltaTime = oldValue.before(newValue)
+							? new Period().minus(new Interval(new DateTime(oldValue), new DateTime(newValue)).toPeriod())
+							: new Period().plus(new Interval(new DateTime(newValue), new DateTime(oldValue)).toPeriod());
+					getDataManager().addFilteredTotalTime(deltaTime);
+				}
 			}
 		}
 	};
@@ -136,6 +147,7 @@ public class TimeSegmentAdapter {
 		@Override
 		public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
 			if (!oldValue.equals(newValue) && getDataManager() != null) {
+				oldValue = getTimeSegment().getEndTime();
 				//TODO: catch exceptions & revert
 				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private Date newValue;
@@ -154,6 +166,13 @@ public class TimeSegmentAdapter {
 				ownerTaskProperty().get().updateFromDatabase();
 				updateFxProperties();
 				getDataManager().signalTaskUpdate();
+				//Update total time
+				if (!oldValue.equals(newValue)) {
+					Period deltaTime = oldValue.before(newValue)
+							? new Period().plus(new Interval(new DateTime(oldValue), new DateTime(newValue)).toPeriod())
+							: new Period().minus(new Interval(new DateTime(newValue), new DateTime(oldValue)).toPeriod());
+					getDataManager().addFilteredTotalTime(deltaTime);
+				}
 			}
 		}
 	};

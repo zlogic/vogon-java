@@ -214,8 +214,8 @@ public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 	 * @return the calculated time segment duration
 	 */
 	public Period getClippedDuration(Date clipStartTime, Date clipEndTime) {
-		Date clippedStartTime = clipStartTime.before(startTime) ? startTime : clipStartTime;
-		Date clippedEndTime = clipEndTime.after(endTime) ? endTime : clipEndTime;
+		Date clippedStartTime = (clipStartTime == null || clipStartTime.before(startTime)) ? startTime : clipStartTime;
+		Date clippedEndTime = (clipEndTime == null || clipEndTime.after(endTime)) ? endTime : clipEndTime;
 		if (clippedStartTime.after(clippedEndTime))
 			return new Period();
 		return new Interval(new DateTime(clippedStartTime), new DateTime(clippedEndTime)).toPeriod().normalizedStandard(PeriodType.time());

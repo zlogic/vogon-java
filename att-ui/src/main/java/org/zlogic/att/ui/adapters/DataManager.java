@@ -20,6 +20,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javax.persistence.EntityManager;
+import org.joda.time.Period;
+import org.joda.time.PeriodType;
 import org.zlogic.att.data.CustomField;
 import org.zlogic.att.data.Filter;
 import org.zlogic.att.data.FilterCustomField;
@@ -69,6 +71,10 @@ public class DataManager {
 	 * The last update date
 	 */
 	private ObjectProperty<Date> lastTaskUpdate = new SimpleObjectProperty<>();//FIXME: Remove once Java FX 3.0 fixes sorting
+	/**
+	 * The last update date
+	 */
+	private ObjectProperty<Period> filteredTotalTime = new SimpleObjectProperty<>();
 	/**
 	 * Possible values of custom fields, used for autocomplete, with filter
 	 * applied
@@ -179,6 +185,38 @@ public class DataManager {
 	}
 
 	/**
+	 * Returns the start date filter (if it exists)
+	 *
+	 * @return the start date, or null if no start filters exist
+	 */
+	public Date getFilterStartDate() {
+		Date startDate = null;
+		for (FilterHolder filter : filters)
+			if (filter.filterProperty().get() != null && filter.filterProperty().get().getFilter() instanceof FilterDate) {
+				FilterDate filterDate = (FilterDate) filter.filterProperty().get().getFilter();
+				if (filterDate.getType() == FilterDate.DateType.DATE_AFTER)
+					startDate = (startDate == null || filterDate.getAppliedDate().after(startDate)) ? filterDate.getAppliedDate() : startDate;
+			}
+		return startDate;
+	}
+
+	/**
+	 * Returns the end date filter (if it exists)
+	 *
+	 * @return the end date, or null if no end filters exist
+	 */
+	public Date getFilterEndDate() {
+		Date endDate = null;
+		for (FilterHolder filter : filters)
+			if (filter.filterProperty().get() != null && filter.filterProperty().get().getFilter() instanceof FilterDate) {
+				FilterDate filterDate = (FilterDate) filter.filterProperty().get().getFilter();
+				if (filterDate.getType() == FilterDate.DateType.DATE_BEFORE)
+					endDate = (endDate == null || filterDate.getAppliedDate().before(endDate)) ? filterDate.getAppliedDate() : endDate;
+			}
+		return endDate;
+	}
+
+	/**
 	 * Starts timing a TimeSegment, stopping any already timed tasks
 	 *
 	 * @param segment the segment to be timed
@@ -235,6 +273,31 @@ public class DataManager {
 			}
 		});
 	}
+
+	/**
+	 * Adds the specified period to the filtered total time.
+	 *
+	 * @param addTime time to be added (can be negative)
+	 */
+	protected void addFilteredTotalTime(Period addTime) {
+		if (filteredTotalTime.get() != null)
+			filteredTotalTime.setValue(filteredTotalTime.get().plus(addTime).normalizedStandard(PeriodType.time()));
+		else
+			filteredTotalTime.setValue(addTime.normalizedStandard(PeriodType.time()));
+	}
+
+	/**
+	 * Updates the filtered total time from existing task list.
+	 */
+	protected void updateFilteredTotalTime() {
+		Period totalTime = new Period();
+		//Get the start/end dates
+		Date startDate = getFilterStartDate();
+		Date endDate = getFilterEndDate();
+		for (TaskAdapter task : tasks)
+			totalTime = totalTime.plus(task.getTask().getTotalTime(startDate, endDate));
+		filteredTotalTime.setValue(totalTime.normalizedStandard(PeriodType.time()));
+	}
 	/*
 	 * Database functions
 	 */
@@ -264,6 +327,7 @@ public class DataManager {
 		}
 		reloadCustomFields();
 		reloadFilters();
+		updateFilteredTotalTime();
 	}
 
 	/**
@@ -312,7 +376,7 @@ public class DataManager {
 	/**
 	 * Reloads the filters from database. Forgets old FilterAdapters.
 	 */
-	public void reloadFilters() {
+	private void reloadFilters() {
 		filters.clear();
 		for (Filter filter : persistenceHelper.getAllFilters()) {
 			FilterAdapter filterAdapter = null;
@@ -395,6 +459,7 @@ public class DataManager {
 		}.setDeleteSegment(segment.getTimeSegment()));
 		timeSegments.remove(segment);
 		ownerTask.updateFromDatabase();
+		addFilteredTotalTime(new Period().minus(segment.getTimeSegment().getClippedDuration(getFilterStartDate(), getFilterEndDate())));
 	}
 
 	/**
@@ -424,6 +489,7 @@ public class DataManager {
 		for (TimeSegmentAdapter timeSegment : task.timeSegmentsProperty())
 			timeSegments.remove(timeSegment);
 		tasks.remove(task);
+		addFilteredTotalTime(new Period().minus(task.getTask().getTotalTime(getFilterStartDate(), getFilterEndDate())));
 	}
 
 	/**
@@ -532,6 +598,15 @@ public class DataManager {
 	 */
 	public ObjectProperty<Date> taskUpdatedProperty() {
 		return lastTaskUpdate;
+	}
+
+	/**
+	 * Total time for filtered tasks property
+	 *
+	 * @return the total time for filtered tasks property
+	 */
+	public ObjectProperty<Period> filteredTotalTimeProperty() {
+		return filteredTotalTime;
 	}
 	/*
 	 * Getters/setters

@@ -38,6 +38,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.DragEvent;
@@ -50,6 +51,8 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.converter.DateTimeStringConverter;
 import javafx.util.converter.DefaultStringConverter;
+import org.joda.time.Period;
+import org.joda.time.format.PeriodFormatterBuilder;
 import org.zlogic.att.data.converters.Exporter;
 import org.zlogic.att.data.converters.GrindstoneImporter;
 import org.zlogic.att.data.converters.Importer;
@@ -190,6 +193,11 @@ public class MainWindowController implements Initializable {
 	@FXML
 	private HBox statusPane;
 	/**
+	 * Total filtered time field
+	 */
+	@FXML
+	private TextField totalTimeField;
+	/**
 	 * Progress indicator
 	 */
 	@FXML
@@ -247,6 +255,17 @@ public class MainWindowController implements Initializable {
 		columnLastTime.setComparator(TaskComparator);
 		//Create the data manager
 		dataManager = new DataManager();
+		//Total time field
+		dataManager.filteredTotalTimeProperty().addListener(new ChangeListener<Period>() {
+			@Override
+			public void changed(ObservableValue<? extends Period> ov, Period oldValue, Period newValue) {
+				if (newValue != null)
+					totalTimeField.setText(newValue.toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter()));
+				else
+					totalTimeField.setText(""); //NOI18N
+			}
+		});
+		//Task list
 		taskList.setItems(dataManager.getTasks());
 		reloadTasks();
 
@@ -262,6 +281,7 @@ public class MainWindowController implements Initializable {
 		taskList.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<TaskAdapter>() {
 			@Override
 			public void onChanged(Change<? extends TaskAdapter> change) {
+				taskEditorController.setEditedTaskList(taskList.getSelectionModel().getSelectedItems());
 				taskSelectionSize.set(change.getList().size());
 			}
 		});
@@ -322,7 +342,7 @@ public class MainWindowController implements Initializable {
 					private ChangeListener completedChangeListener = new ChangeListener<Boolean>() {
 						@Override
 						public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
-							row.getStyleClass().removeAll("item-completed", "item-not-completed");//FIXME: remove this once fixed in Java FX
+							row.getStyleClass().removeAll("item-completed", "item-not-completed");//FIXME: remove this once fixed in Java FX //NOI18N
 							if (newValue != null && newValue)
 								row.getStyleClass().add("item-completed"); //NOI18N
 							else
@@ -637,20 +657,20 @@ public class MainWindowController implements Initializable {
 			//Automatically run beginTask/endTask before the actual task is processed
 			backgroundThread = new Thread(
 					new Runnable() {
-						protected Task<Void> task;
+				protected Task<Void> task;
 
-						public Runnable setTask(Task<Void> task) {
-							this.task = task;
-							return this;
-						}
+				public Runnable setTask(Task<Void> task) {
+					this.task = task;
+					return this;
+				}
 
-						@Override
-						public void run() {
-							beginBackgroundTask();
-							task.run();
-							endBackgroundTask();
-						}
-					}.setTask(task));
+				@Override
+				public void run() {
+					beginBackgroundTask();
+					task.run();
+					endBackgroundTask();
+				}
+			}.setTask(task));
 			backgroundThread.setDaemon(true);
 			backgroundThread.start();
 		}

@@ -27,6 +27,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.ClipboardContent;
@@ -92,7 +93,7 @@ public class TaskEditorController implements Initializable {
 	 * Start/Stop button
 	 */
 	@FXML
-	private Button startStop;
+	private ToggleButton startStop;
 	/**
 	 * Delete segment button
 	 */
@@ -454,6 +455,7 @@ public class TaskEditorController implements Initializable {
 	 */
 	private void updateStartStopText() {
 		startStop.setDisable(boundTasks.isEmpty());
+		startStop.setSelected(isTimingCurrentTask());
 		startStop.setText(isTimingCurrentTask() ? messages.getString("STOP") : messages.getString("START"));
 	}
 
