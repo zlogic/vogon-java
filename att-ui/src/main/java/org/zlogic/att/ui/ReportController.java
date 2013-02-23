@@ -53,6 +53,10 @@ public class ReportController implements Initializable {
 	 */
 	private DataManager dataManager;
 	/**
+	 * Exception handler
+	 */
+	private ExceptionHandler exceptionHandler;
+	/**
 	 * Last opened directory
 	 */
 	private ObjectProperty<File> lastDirectory;
@@ -173,6 +177,24 @@ public class ReportController implements Initializable {
 	}
 
 	/**
+	 * Returns the exception handler
+	 *
+	 * @return the exception handler
+	 */
+	public ExceptionHandler getExceptionHandler() {
+		return exceptionHandler;
+	}
+
+	/**
+	 * Sets the exception handler
+	 *
+	 * @param exceptionHandler the exception handler to set
+	 */
+	public void setExceptionHandler(ExceptionHandler exceptionHandler) {
+		this.exceptionHandler = exceptionHandler;
+	}
+
+	/**
 	 * Sets the last directory property
 	 *
 	 * @param lastDirectory the last directory property
@@ -226,6 +248,8 @@ public class ReportController implements Initializable {
 						reportTaskThread.set(null);
 					} catch (InterruptedException ex) {
 						log.log(Level.SEVERE, null, ex);
+						if (exceptionHandler != null)
+							exceptionHandler.showException(null, ex, true);
 					}
 				}
 			}
@@ -263,6 +287,8 @@ public class ReportController implements Initializable {
 				generatedReport.get().savePdfReport(selectedFile);
 			} catch (FileNotFoundException | DRException ex) {
 				log.log(Level.SEVERE, null, ex);
+				if (exceptionHandler != null)
+					exceptionHandler.showException(null, ex, false);
 			}
 		}
 	}

@@ -54,6 +54,7 @@ import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.reporting.DateTools;
 import org.zlogic.att.data.reporting.ReportQuery;
+import org.zlogic.att.ui.ExceptionHandler;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
 import org.zlogic.att.ui.adapters.DataManager;
 
@@ -75,6 +76,10 @@ public class Report {
 	 * DataManager reference
 	 */
 	private DataManager dataManager;
+	/**
+	 * Exception handler
+	 */
+	private ExceptionHandler exceptionHandler;
 	/**
 	 * Report start date
 	 */
@@ -320,6 +325,24 @@ public class Report {
 	 */
 	public Report(DataManager dataManager) {
 		this.dataManager = dataManager;
+	}
+
+	/**
+	 * Returns the exception handler
+	 *
+	 * @return the exception handler
+	 */
+	public ExceptionHandler getExceptionHandler() {
+		return exceptionHandler;
+	}
+
+	/**
+	 * Sets the exception handler
+	 *
+	 * @param exceptionHandler the exception handler to set
+	 */
+	public void setExceptionHandler(ExceptionHandler exceptionHandler) {
+		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
@@ -797,8 +820,12 @@ public class Report {
 			reportHTML = stream.toString("utf-8"); //NOI18N
 		} catch (UnsupportedEncodingException | DRException ex) {
 			Logger.getLogger(Report.class.getName()).log(Level.SEVERE, null, ex);
+			if (exceptionHandler != null)
+				exceptionHandler.showException(null, ex, true);
 		} catch (Throwable ex) {
 			Logger.getLogger(Report.class.getName()).log(Level.SEVERE, null, ex);
+			if (exceptionHandler != null)
+				exceptionHandler.showException(null, ex, true);
 		}
 	}
 }

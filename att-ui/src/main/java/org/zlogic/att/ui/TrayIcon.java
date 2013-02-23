@@ -34,6 +34,10 @@ public class TrayIcon {
 	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/messages");
 	/**
+	 * Exception handler
+	 */
+	private ExceptionHandler exceptionHandler;
+	/**
 	 * The Tray Icon
 	 */
 	private java.awt.TrayIcon trayIcon;
@@ -43,8 +47,10 @@ public class TrayIcon {
 	 *
 	 * @param primaryStage the stage to be shown/hidden by double-clicking the
 	 * icon
+	 * @param exceptionHandler the exception handler
 	 */
-	public TrayIcon(Stage primaryStage) {
+	public TrayIcon(Stage primaryStage, ExceptionHandler exceptionHandler) {
+		this.exceptionHandler = exceptionHandler;
 		if (SystemTray.isSupported()) {
 			SystemTray tray = SystemTray.getSystemTray();
 			Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("icon/att-tilt-16.png")); //NOI18N
@@ -93,6 +99,8 @@ public class TrayIcon {
 				tray.add(trayIcon);
 			} catch (Exception e) {
 				log.log(Level.SEVERE, messages.getString("CANNOT_ADD_ICON_TO_TRAY"), e);
+				if (this.exceptionHandler != null)
+					this.exceptionHandler.showException(messages.getString("CANNOT_ADD_ICON_TO_TRAY"), e, true);
 			}
 		} else {
 			log.severe(messages.getString("SYSTEM_TRAY_IS_UNAVAILABLE"));

@@ -84,6 +84,10 @@ public class MainWindowController implements Initializable {
 	 */
 	private DataManager dataManager;
 	/**
+	 * Exception handler
+	 */
+	private ExceptionHandler exceptionHandler;
+	/**
 	 * Last opened directory
 	 */
 	private ObjectProperty<File> lastDirectory = new SimpleObjectProperty<>();
@@ -236,6 +240,9 @@ public class MainWindowController implements Initializable {
 	 */
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
+		//Prepare exception dialog
+		loadExceptionDialog();
+
 		//Default sort order
 		taskList.getSortOrder().add(columnLastTime);
 		columnLastTime.setSortType(TableColumn.SortType.DESCENDING);
@@ -519,6 +526,24 @@ public class MainWindowController implements Initializable {
 	}
 
 	/**
+	 * Returns the exception handler
+	 *
+	 * @return the exception handler
+	 */
+	public ExceptionHandler getExceptionHandler() {
+		return exceptionHandler;
+	}
+
+	/**
+	 * Sets the exception handler
+	 *
+	 * @param exceptionHandler the exception handler to set
+	 */
+	public void setExceptionHandler(ExceptionHandler exceptionHandler) {
+		this.exceptionHandler = exceptionHandler;
+	}
+
+	/**
 	 * Loads the custom field editor FXML
 	 */
 	private void loadWindowCustomFieldEditor() {
@@ -532,6 +557,8 @@ public class MainWindowController implements Initializable {
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
 			Logger.getLogger(getClass().getName()).log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
+			if (exceptionHandler != null)
+				exceptionHandler.showException(messages.getString("ERROR_LOADING_FXML"), ex, false);
 		}
 		//Initialize the scene properties
 		if (root != null) {
@@ -558,6 +585,8 @@ public class MainWindowController implements Initializable {
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
 			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
+			if (exceptionHandler != null)
+				exceptionHandler.showException(messages.getString("ERROR_LOADING_FXML"), ex, false);
 		}
 		//Initialize the scene properties
 		if (root != null) {
@@ -585,6 +614,8 @@ public class MainWindowController implements Initializable {
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
 			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
+			if (exceptionHandler != null)
+				exceptionHandler.showException(messages.getString("ERROR_LOADING_FXML"), ex, false);
 		}
 		//Initialize the scene properties
 		if (root != null) {
@@ -595,6 +626,26 @@ public class MainWindowController implements Initializable {
 		//Set the data manager
 		filterEditorController = loader.getController();
 		filterEditorController.setDataManager(dataManager);
+	}
+
+	/**
+	 * Loads the report FXML
+	 */
+	private void loadExceptionDialog() {
+		//Load FXML
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("ExceptionDialog.fxml"), messages); //NOI18N
+		loader.setLocation(getClass().getResource("ExceptionDialog.fxml")); //NOI18N
+		try {
+			loader.load();
+		} catch (IOException ex) {
+			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
+			if (exceptionHandler != null)
+				exceptionHandler.showException(messages.getString("ERROR_LOADING_FXML"), ex, false);
+		}
+		//Set the data manager
+		ExceptionDialogController exceptionDialogController = loader.getController();
+		exceptionDialogController.setParentNode(rootPane);
+		exceptionHandler = exceptionDialogController;
 	}
 
 	/**
@@ -687,6 +738,8 @@ public class MainWindowController implements Initializable {
 					backgroundThread = null;
 				} catch (InterruptedException ex) {
 					Logger.getLogger(MainWindowController.class.getName()).log(Level.SEVERE, null, ex);
+					if (exceptionHandler != null)
+						exceptionHandler.showException(null, ex, true);
 				}
 			}
 			if (backgroundTask != null) {
@@ -834,9 +887,6 @@ public class MainWindowController implements Initializable {
 				log.fine(messages.getString("EXTENSION_MATCHED"));
 				importer = new XmlImporter(selectedFile);
 			}
-			//Import data
-
-
 			//Prepare the task
 			Task<Void> task = new Task<Void>() {
 				private Importer importer;
