@@ -7,14 +7,15 @@ package org.zlogic.att.ui;
 
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -25,10 +26,6 @@ import javafx.stage.Stage;
  */
 public class ExceptionDialogController implements Initializable, ExceptionHandler {
 
-	/**
-	 * The logger
-	 */
-	private final static Logger log = Logger.getLogger(ExceptionDialogController.class.getName());
 	/**
 	 * Localization messages
 	 */
@@ -43,10 +40,6 @@ public class ExceptionDialogController implements Initializable, ExceptionHandle
 	 */
 	@FXML
 	private Node rootNode;
-	/**
-	 * The parent window for this exception dialog
-	 */
-	private Node parentNode;
 	/**
 	 * The stage for this window
 	 */
@@ -73,28 +66,18 @@ public class ExceptionDialogController implements Initializable, ExceptionHandle
 	}
 
 	/**
-	 * Returns the parent window for this dialog
+	 * Sets the window icons
 	 *
-	 * @return the parent window for this dialog
+	 * @param icons the icons to be set
 	 */
-	public Node getParentNode() {
-		return parentNode;
-	}
-
-	/**
-	 * Sets the parent window for this dialog
-	 *
-	 * @param parentNode the parent window for this dialog
-	 */
-	public void setParentNode(Node parentNode) {
-		this.parentNode = parentNode;
+	public void setWindowIcons(ObservableList<Image> icons) {
+		stage.getIcons().setAll(icons);
 	}
 
 	@Override
 	public void showException(String explanation, Throwable ex, boolean callerIsBackgroundThread) {
 		if (!callerIsBackgroundThread) {
 			//Show the dialog
-			stage.getIcons().setAll(((Stage) parentNode.getScene().getWindow()).getIcons());
 			if (explanation != null)
 				exceptionLabel.setText(explanation);
 			else if (ex != null && ex.getMessage() != null)
@@ -130,6 +113,6 @@ public class ExceptionDialogController implements Initializable, ExceptionHandle
 	 */
 	@FXML
 	private void hideWindow() {
-		exceptionLabel.getScene().getWindow().hide();
+		rootNode.getScene().getWindow().hide();
 	}
 }

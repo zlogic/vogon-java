@@ -21,6 +21,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ListChangeListener.Change;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -41,6 +42,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.image.Image;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
@@ -123,6 +125,10 @@ public class MainWindowController implements Initializable {
 	 * Report controller
 	 */
 	private ReportController reportController;
+	/**
+	 * Current task notification controller
+	 */
+	private CurrentTaskNotificationController currentTaskNotificationController;
 	/**
 	 * Filters stage
 	 */
@@ -250,13 +256,14 @@ public class MainWindowController implements Initializable {
 		Comparator<Date> TaskComparator = new Comparator<Date>() {
 			@Override
 			public int compare(Date o1, Date o2) {
+				if (o1 != null && o2 != null)
+					return o1.compareTo(o2);
 				if (o1 == null && o2 != null)
 					return 1;
 				if (o1 != null && o2 == null)
 					return -1;
-				if (o1 == null && o2 == null)
+				else
 					return 0;
-				return o1.compareTo(o2);
 			}
 		};
 		columnLastTime.setComparator(TaskComparator);
@@ -267,7 +274,7 @@ public class MainWindowController implements Initializable {
 			@Override
 			public void changed(ObservableValue<? extends Period> ov, Period oldValue, Period newValue) {
 				if (newValue != null)
-					totalTimeField.setText(newValue.toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter()));
+					totalTimeField.setText(newValue.toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(messages.getString(":")).minimumPrintedDigits(2).appendMinutes().appendSeparator(messages.getString(":")).appendSeconds().toFormatter()));
 				else
 					totalTimeField.setText(""); //NOI18N
 			}
@@ -512,6 +519,7 @@ public class MainWindowController implements Initializable {
 		loadWindowCustomFieldEditor();
 		loadWindowReport();
 		loadWindowFilterEditor();
+		loadCurrentTaskNotification();
 		taskEditorController.setDataManager(dataManager);
 	}
 
@@ -541,6 +549,17 @@ public class MainWindowController implements Initializable {
 	 */
 	public void setExceptionHandler(ExceptionHandler exceptionHandler) {
 		this.exceptionHandler = exceptionHandler;
+	}
+
+	/**
+	 * Sets the window icons
+	 *
+	 * @param icons the icons to be set
+	 */
+	public void setWindowIcons(ObservableList<Image> icons) {
+		if (exceptionHandler instanceof ExceptionDialogController)
+			((ExceptionDialogController) exceptionHandler).setWindowIcons(icons);
+		currentTaskNotificationController.setWindowIcons(icons);
 	}
 
 	/**
@@ -629,7 +648,7 @@ public class MainWindowController implements Initializable {
 	}
 
 	/**
-	 * Loads the report FXML
+	 * Loads the exception dialog FXML
 	 */
 	private void loadExceptionDialog() {
 		//Load FXML
@@ -639,13 +658,29 @@ public class MainWindowController implements Initializable {
 			loader.load();
 		} catch (IOException ex) {
 			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
+		}
+		//Set the data manager
+		ExceptionDialogController exceptionDialogController = loader.getController();
+		exceptionHandler = exceptionDialogController;
+	}
+
+	/**
+	 * Loads the current task notification FXML
+	 */
+	private void loadCurrentTaskNotification() {
+		//Load FXML
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("CurrentTaskNotification.fxml"), messages); //NOI18N
+		loader.setLocation(getClass().getResource("CurrentTaskNotification.fxml")); //NOI18N
+		try {
+			loader.load();
+		} catch (IOException ex) {
+			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
 			if (exceptionHandler != null)
 				exceptionHandler.showException(messages.getString("ERROR_LOADING_FXML"), ex, false);
 		}
 		//Set the data manager
-		ExceptionDialogController exceptionDialogController = loader.getController();
-		exceptionDialogController.setParentNode(rootPane);
-		exceptionHandler = exceptionDialogController;
+		currentTaskNotificationController = loader.getController();
+		currentTaskNotificationController.setDataManager(dataManager);
 	}
 
 	/**
@@ -849,7 +884,7 @@ public class MainWindowController implements Initializable {
 			//Choose the importer based on the file extension
 			Importer importer = null;
 			String extension = selectedFile.isFile() ? selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".")) : null; //NOI18N
-			if (extension.equals(".xml")) { //NOI18N
+			if (extension != null && extension.equals(".xml")) { //NOI18N
 				log.fine(messages.getString("EXTENSION_MATCHED"));
 				importer = new GrindstoneImporter(selectedFile);
 			}
@@ -883,7 +918,7 @@ public class MainWindowController implements Initializable {
 			//Choose the importer based on the file extension
 			Importer importer = null;
 			String extension = selectedFile.isFile() ? selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".")) : null; //NOI18N
-			if (extension.equals(".xml")) { //NOI18N
+			if (extension != null && extension.equals(".xml")) { //NOI18N
 				log.fine(messages.getString("EXTENSION_MATCHED"));
 				importer = new XmlImporter(selectedFile);
 			}

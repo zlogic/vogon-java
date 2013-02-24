@@ -49,7 +49,7 @@
               <children>
                 <Label id="" text="%CURRENTLY_TIMING_TASK:" HBox.margin="$x1">
                   <labelFor>
-                    <Label id="" fx:id="activeTaskLabel" style="-fx-font-style: italic;&#10;-fx-font-weight: bold;">
+                    <Label id="" fx:id="activeTaskLabel" styleClass="active-task-label">
                       <HBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
                       </HBox.margin>
@@ -74,9 +74,9 @@
                 <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" HBox.hgrow="SOMETIMES">
                   <children>
                     <Button fx:id="createTransactionButton" mnemonicParsing="false" onAction="#createNewTask" text="%NEW_TASK" HBox.margin="$x1" />
-                    <Button id="deleteTaskButton" fx:id="duplicateTaskButton" mnemonicParsing="false" onAction="#duplicateSelectedTasks" text="%DUPLICATE_TASK" HBox.margin="$x1" />
+                    <Button fx:id="duplicateTaskButton" mnemonicParsing="false" onAction="#duplicateSelectedTasks" text="%DUPLICATE_TASK" HBox.margin="$x1" />
                     <Button fx:id="deleteTaskButton" mnemonicParsing="false" onAction="#deleteSelectedTasks" text="%DELETE_TASK" HBox.margin="$x1" />
-                    <ToggleButton id="editProperties" mnemonicParsing="false" selected="true" text="%EDIT_PROPERTIES" />
+                    <ToggleButton fx:id="editProperties" mnemonicParsing="false" selected="true" text="%EDIT_PROPERTIES" HBox.margin="$x1" />
                   </children>
                 </HBox>
                 <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" HBox.hgrow="ALWAYS">

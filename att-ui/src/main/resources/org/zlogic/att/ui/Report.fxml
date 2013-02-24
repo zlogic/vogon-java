@@ -2,12 +2,14 @@
 
 <?import java.lang.*?>
 <?import java.util.*?>
+<?import java.net.URL?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.web.*?>
 <?scenebuilder-preview-i18n-resource messages.properties?>
+<?scenebuilder-stylesheet Style.css?>
 
 <VBox id="VBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.ReportController">
   <children>
@@ -67,7 +69,7 @@
     </HBox>
     <HBox id="HBox" fx:id="previewReportPane" alignment="CENTER" spacing="5.0">
       <children>
-        <Label style="-fx-font-weight: bold;" text="%PREVIEW_REPORT:" />
+        <Label style="" styleClass="emphasis-label" text="%PREVIEW_REPORT:" />
       </children>
     </HBox>
     <WebView fx:id="viewer" prefHeight="271.0" prefWidth="479.0" VBox.margin="$x2" VBox.vgrow="ALWAYS" />
@@ -81,4 +83,7 @@
       </children>
     </HBox>
   </children>
+  <stylesheets>
+    <URL value="@Style.css" />
+  </stylesheets>
 </VBox>

@@ -2,11 +2,13 @@
 
 <?import java.lang.*?>
 <?import java.util.*?>
+<?import java.net.URL?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 <?scenebuilder-preview-i18n-resource messages.properties?>
+<?scenebuilder-stylesheet Style.css?>
 
 <VBox id="AnchorPane" fx:id="rootNode" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="-1.0" prefWidth="-1.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.ExceptionDialogController">
   <children>
@@ -17,7 +19,7 @@
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
           </HBox.margin>
         </Label>
-        <Label id="ExceptionLabel" fx:id="exceptionLabel" style="-fx-font-weight: bold;" text="" HBox.hgrow="ALWAYS" HBox.margin="$x1" />
+        <Label id="" fx:id="exceptionLabel" styleClass="exception-explanation" text="" HBox.hgrow="ALWAYS" HBox.margin="$x1" />
       </children>
     </HBox>
     <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0">
@@ -31,4 +33,7 @@
       </children>
     </HBox>
   </children>
+  <stylesheets>
+    <URL value="@Style.css" />
+  </stylesheets>
 </VBox>

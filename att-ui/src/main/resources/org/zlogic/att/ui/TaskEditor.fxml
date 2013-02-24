@@ -2,6 +2,7 @@
 
 <?import java.lang.*?>
 <?import java.util.*?>
+<?import java.net.URL?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.control.cell.*?>
@@ -26,7 +27,7 @@
           </rowConstraints>
           <Label text="%NAME" GridPane.columnIndex="0" GridPane.columnSpan="1" GridPane.margin="$x1" GridPane.rowIndex="0" GridPane.rowSpan="1">
             <labelFor>
-              <TextField id="taskName" fx:id="name" GridPane.columnIndex="1" GridPane.columnSpan="1" GridPane.rowIndex="0" GridPane.rowSpan="1">
+              <TextField fx:id="name" GridPane.columnIndex="1" GridPane.columnSpan="1" GridPane.rowIndex="0" GridPane.rowSpan="1">
                 <GridPane.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
                 </GridPane.margin>
@@ -56,7 +57,7 @@
                       <children>
                         <Button mnemonicParsing="false" onAction="#createTimeSegment" text="%ADD_MANUALLY" HBox.margin="$x1" />
                         <Button fx:id="delete" mnemonicParsing="false" onAction="#deleteTimeSegment" text="%DELETE" HBox.margin="$x1" />
-                        <ToggleButton fx:id="editProperties" mnemonicParsing="false" selected="true" text="Edit properties">
+                        <ToggleButton fx:id="editProperties" mnemonicParsing="false" selected="true" text="%EDIT_PROPERTIES">
                           <HBox.margin>
                             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x4" />
                           </HBox.margin>
@@ -134,4 +135,7 @@
       </children>
     </VBox>
   </children>
+  <stylesheets>
+    <URL value="@Style.css" />
+  </stylesheets>
 </AnchorPane>

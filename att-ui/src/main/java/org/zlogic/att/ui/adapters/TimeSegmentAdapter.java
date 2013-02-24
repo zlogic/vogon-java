@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -241,6 +242,12 @@ public class TimeSegmentAdapter {
 		//Start the timer
 		timer = new Timer(true);
 		timer.scheduleAtFixedRate(new TimerTask() {
+			private Runnable task = new Runnable() {
+				@Override
+				public void run() {
+					endProperty.setValue(new Date());
+				}
+			};
 			private ObjectProperty<Date> endProperty;
 
 			public TimerTask setEndProperty(ObjectProperty<Date> endProperty) {
@@ -250,7 +257,7 @@ public class TimeSegmentAdapter {
 
 			@Override
 			public void run() {
-				endProperty.setValue(new Date());
+				Platform.runLater(task);
 			}
 		}.setEndProperty(endProperty()), 0, 1000);
 	}

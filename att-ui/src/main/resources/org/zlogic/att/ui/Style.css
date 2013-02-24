@@ -1,6 +1,40 @@
 @import url("/com/sun/javafx/scene/control/skin/caspian/caspian.bss");
 
 /*
+ * Active task label
+ */
+.active-task-label {
+	-fx-font-style: italic;
+	-fx-font-weight: bold;
+}
+
+/*
+ * Emphasis label
+ */
+.emphasis-label {
+	-fx-font-weight: bold;
+}
+
+/*
+ * Exception explanation label
+ */
+.exception-explanation {
+	-fx-font-weight: bold;
+}
+
+/*
+ * Active task popup scene (borrowed from .titled-pane > *.content)
+ */
+.current-task-notification-root {
+	-fx-background-color:
+		-fx-box-border,
+		linear-gradient(to bottom, derive(-fx-color,-02%), derive(-fx-color,65%) 12%, derive(-fx-color,23%) 88%, derive(-fx-color,50%) 99%, -fx-box-border);
+    -fx-background-insets: 0, 0 1 1 1;
+	-fx-border-width: 2;
+	-fx-border-color: -fx-focus-color;
+}
+
+/*
  * Timing item
  */
 .timing-segment {
