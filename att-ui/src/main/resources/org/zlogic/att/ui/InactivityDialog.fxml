@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import java.net.URL?>
+<?import java.util.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?scenebuilder-preview-i18n-resource messages.properties?>
+<?scenebuilder-stylesheet Style.css?>
+
+<VBox id="VBox" fx:id="rootNode" maxHeight="-1.0" maxWidth="-1.0" minHeight="-1.0" minWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.InactivityDialogController">
+  <children>
+    <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
+      <children>
+        <Label text="%YOU_HAVE_BEEN_AWAY_FOR" HBox.margin="$x1">
+          <labelFor>
+            <Label fx:id="inactivityTimeLabel" styleClass="emphasis-label" text="">
+              <HBox.margin>
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+              </HBox.margin>
+            </Label>
+          </labelFor>
+        </Label>
+        <fx:reference source="inactivityTimeLabel" />
+      </children>
+    </HBox>
+    <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0">
+      <children>
+        <Label text="%YOUR_CURRENT_TASK_IS" HBox.margin="$x1">
+          <labelFor>
+            <Label fx:id="currentTaskLabel" styleClass="active-task-label" text="" HBox.margin="$x1" />
+          </labelFor>
+        </Label>
+        <fx:reference source="currentTaskLabel" />
+      </children>
+    </HBox>
+    <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
+      <children>
+        <Label text="%WHAT_WOULD_YOU_LIKE_TO_DO_WITH_THIS_TIME" HBox.margin="$x1" />
+      </children>
+    </HBox>
+    <VBox id="VBox" alignment="TOP_LEFT" spacing="5.0" VBox.vgrow="SOMETIMES">
+      <children>
+        <RadioButton fx:id="keepTrackingToggle" mnemonicParsing="false" text="%KEEP_TRACKING_THE_CURRENT_TASK" VBox.margin="$x1">
+          <toggleGroup>
+            <ToggleGroup fx:id="selectedAction" />
+          </toggleGroup>
+        </RadioButton>
+        <RadioButton fx:id="splitTimeToggle" mnemonicParsing="false" text="%SPLIT_AWAY_TIME" toggleGroup="$selectedAction" VBox.margin="$x1" />
+        <RadioButton fx:id="discardTimeToggle" mnemonicParsing="false" text="%DISCARD_THE_TIME_COMPLETELY" toggleGroup="$selectedAction" VBox.margin="$x1" />
+      </children>
+    </VBox>
+    <HBox alignment="CENTER_RIGHT" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="NEVER">
+      <children>
+        <Button fx:id="acceptButton" defaultButton="true" disable="${selectedAction.selectedToggle.isNotNull}" mnemonicParsing="false" onAction="#acceptChanges" text="%ACCEPT" HBox.margin="$x1" />
+      </children>
+    </HBox>
+  </children>
+  <stylesheets>
+    <URL value="@Style.css" />
+  </stylesheets>
+</VBox>

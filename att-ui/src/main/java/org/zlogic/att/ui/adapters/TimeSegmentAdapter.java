@@ -114,6 +114,8 @@ public class TimeSegmentAdapter {
 			if (!oldValue.equals(newValue) && getDataManager() != null) {
 				//TODO: catch exceptions & revert
 				oldValue = getTimeSegment().getStartTime();
+				if (oldValue.equals(newValue))
+					return;
 				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private Date newValue;
 
@@ -149,6 +151,8 @@ public class TimeSegmentAdapter {
 		public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
 			if (!oldValue.equals(newValue) && getDataManager() != null) {
 				oldValue = getTimeSegment().getEndTime();
+				if (oldValue.equals(newValue))
+					return;
 				//TODO: catch exceptions & revert
 				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private Date newValue;
@@ -229,6 +233,33 @@ public class TimeSegmentAdapter {
 		this.start.addListener(startChangeListener);
 		this.end.addListener(endChangeListener);
 		this.ownerTask.addListener(ownerTaskChangeListener);
+	}
+
+	/**
+	 * Sets the start/end time in a single call to prevent race conditions
+	 *
+	 * @param startTime the new start time
+	 * @param endTime the new end time
+	 */
+	public void setStartEndTime(Date startTime, Date endTime) {
+		Period previousTime = segment.getDuration();
+		dataManager.getPersistenceHelper().performTransactedChange(new TransactedChange() {
+			private Date startTime, endTime;
+
+			public TransactedChange setParameters(Date startTime, Date endTime) {
+				this.startTime = startTime;
+				this.endTime = endTime;
+				return this;
+			}
+
+			@Override
+			public void performChange(EntityManager entityManager) {
+				setTimeSegment(entityManager.find(TimeSegment.class, getTimeSegment().getId()));
+				getTimeSegment().setStartEndTime(startTime, endTime);
+			}
+		}.setParameters(startTime, endTime));
+		getDataManager().addFilteredTotalTime(segment.getDuration().minus(previousTime));
+		updateFxProperties();
 	}
 
 	/**

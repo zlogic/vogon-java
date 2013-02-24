@@ -130,6 +130,10 @@ public class MainWindowController implements Initializable {
 	 */
 	private CurrentTaskNotificationController currentTaskNotificationController;
 	/**
+	 * Inactivity prompt dialog controller
+	 */
+	private InactivityDialogController inactivityDialogController;
+	/**
 	 * Filters stage
 	 */
 	private Stage filterEditorStage;
@@ -274,7 +278,7 @@ public class MainWindowController implements Initializable {
 			@Override
 			public void changed(ObservableValue<? extends Period> ov, Period oldValue, Period newValue) {
 				if (newValue != null)
-					totalTimeField.setText(newValue.toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(messages.getString(":")).minimumPrintedDigits(2).appendMinutes().appendSeparator(messages.getString(":")).appendSeconds().toFormatter()));
+					totalTimeField.setText(newValue.toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter()));
 				else
 					totalTimeField.setText(""); //NOI18N
 			}
@@ -520,6 +524,7 @@ public class MainWindowController implements Initializable {
 		loadWindowReport();
 		loadWindowFilterEditor();
 		loadCurrentTaskNotification();
+		loadInactivityDialog();
 		taskEditorController.setDataManager(dataManager);
 	}
 
@@ -560,6 +565,7 @@ public class MainWindowController implements Initializable {
 		if (exceptionHandler instanceof ExceptionDialogController)
 			((ExceptionDialogController) exceptionHandler).setWindowIcons(icons);
 		currentTaskNotificationController.setWindowIcons(icons);
+		inactivityDialogController.setWindowIcons(icons);
 	}
 
 	/**
@@ -684,6 +690,25 @@ public class MainWindowController implements Initializable {
 	}
 
 	/**
+	 * Loads the inactivity prompt dialog FXML
+	 */
+	private void loadInactivityDialog() {
+		//Load FXML
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("InactivityDialog.fxml"), messages); //NOI18N
+		loader.setLocation(getClass().getResource("InactivityDialog.fxml")); //NOI18N
+		try {
+			loader.load();
+		} catch (IOException ex) {
+			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
+			if (exceptionHandler != null)
+				exceptionHandler.showException(messages.getString("ERROR_LOADING_FXML"), ex, false);
+		}
+		//Set the data manager
+		inactivityDialogController = loader.getController();
+		inactivityDialogController.setDataManager(dataManager);
+	}
+
+	/**
 	 * Reloads tasks
 	 */
 	protected void reloadTasks() {
@@ -741,8 +766,7 @@ public class MainWindowController implements Initializable {
 			progressLabel.textProperty().bind(task.messageProperty());
 
 			//Automatically run beginTask/endTask before the actual task is processed
-			backgroundThread = new Thread(
-					new Runnable() {
+			backgroundThread = new Thread(new Runnable() {
 				protected Task<Void> task;
 
 				public Runnable setTask(Task<Void> task) {
@@ -1015,9 +1039,7 @@ public class MainWindowController implements Initializable {
 	 */
 	@FXML
 	private void stopTimingTask() {
-		TimeSegmentAdapter segment = dataManager.timingSegmentProperty().get();
-		if (segment != null)
-			segment.stopTiming();
+		dataManager.stopTiming();
 	}
 
 	/**

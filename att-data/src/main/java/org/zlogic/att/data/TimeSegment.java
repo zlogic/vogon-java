@@ -112,6 +112,19 @@ public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 	}
 
 	/**
+	 * Sets the start and end time in a single call to prevent race conditions
+	 *
+	 * @param startTime the new start time
+	 * @param endTime the new end time
+	 */
+	public void setStartEndTime(Date startTime, Date endTime) {
+		if (endTime.before(startTime))
+			throw new java.lang.IllegalArgumentException(messages.getString("START_TIME_CANNOT_BE_LATER_THAN_END_TIME"));
+		this.startTime = startTime;
+		this.endTime = endTime;
+	}
+
+	/**
 	 * Returns the description
 	 *
 	 * @return the description

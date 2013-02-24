@@ -114,7 +114,7 @@ public class CurrentTaskNotificationController implements Initializable {
 					if (newValue != null) {
 						currentTaskLabel.textProperty().bind(newValue.nameProperty());
 					} else {
-						currentTaskLabel.setText("");
+						currentTaskLabel.setText(messages.getString("NO_TASK_CURRENTLY_ACTIVE"));
 					}
 				}
 			};
@@ -134,7 +134,7 @@ public class CurrentTaskNotificationController implements Initializable {
 					//showWindowAnimation();
 				} else {
 					currentTaskLabel.setText(messages.getString("NO_TASK_CURRENTLY_ACTIVE"));
-					timeLabel.setText("");
+					timeLabel.setText(""); //NOI18N
 				}
 			}
 		});
@@ -143,13 +143,14 @@ public class CurrentTaskNotificationController implements Initializable {
 		if (notificationTimer != null)
 			notificationTimer.cancel();
 		notificationTimer = new Timer(true);
-		notificationTimer.scheduleAtFixedRate(
-				new TimerTask() {
+		TimerTask showNotificationTask = new TimerTask() {
 			@Override
 			public void run() {
 				showWindowAnimation();
 			}
-		},
+		};
+		notificationTimer.scheduleAtFixedRate(
+				showNotificationTask,
 				15 * 60 * 1000,
 				15 * 60 * 1000);//TODO: make this configurable
 	}

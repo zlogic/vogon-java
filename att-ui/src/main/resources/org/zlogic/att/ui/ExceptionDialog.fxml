@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.lang.*?>
-<?import java.util.*?>
+<?import java.net.*?>
 <?import java.net.URL?>
+<?import java.util.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -14,12 +15,16 @@
   <children>
     <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0">
       <children>
-        <Label text="%AN_ERROR_HAS_OCCURRED">
-          <HBox.margin>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
-          </HBox.margin>
+        <Label text="%AN_ERROR_HAS_OCCURRED" HBox.margin="$x1">
+          <labelFor>
+            <Label id="" fx:id="exceptionLabel" styleClass="exception-explanation" text="" HBox.hgrow="ALWAYS">
+              <HBox.margin>
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+              </HBox.margin>
+            </Label>
+          </labelFor>
         </Label>
-        <Label id="" fx:id="exceptionLabel" styleClass="exception-explanation" text="" HBox.hgrow="ALWAYS" HBox.margin="$x1" />
+        <fx:reference source="exceptionLabel" />
       </children>
     </HBox>
     <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0">
