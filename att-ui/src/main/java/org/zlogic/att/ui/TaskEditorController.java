@@ -12,8 +12,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -37,6 +40,8 @@ import javafx.scene.input.TransferMode;
 import javafx.util.Callback;
 import javafx.util.converter.DateTimeStringConverter;
 import javafx.util.converter.DefaultStringConverter;
+import org.joda.time.Period;
+import org.joda.time.format.PeriodFormatterBuilder;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
 import org.zlogic.att.ui.adapters.CustomFieldValueAdapter;
 import org.zlogic.att.ui.adapters.DataManager;
@@ -95,6 +100,11 @@ public class TaskEditorController implements Initializable {
 	@FXML
 	private ToggleButton startStop;
 	/**
+	 * Add segment button
+	 */
+	@FXML
+	private Button addSegment;
+	/**
 	 * Delete segment button
 	 */
 	@FXML
@@ -134,6 +144,68 @@ public class TaskEditorController implements Initializable {
 	 */
 	@FXML
 	private TableView<CustomFieldValueAdapter> customProperties;
+
+	/**
+	 * Listener for monitoring the task time property and updating the total.
+	 * Used when multiple tasks are selected to update the total time.
+	 */
+	private class TimeChangeListener implements ChangeListener<String> {
+
+		/**
+		 * List of tasks monitored for changes
+		 */
+		private List<TaskAdapter> monitorTasks = new LinkedList();
+
+		/**
+		 * Updates the totalTime text when a task's totalTime property change is
+		 * detected
+		 *
+		 * @param ov the totalTime ObservableValue (not used)
+		 * @param oldValue the totalTime old String value (not used)
+		 * @param newValue the totalTime new String value (not used)
+		 */
+		@Override
+		public void changed(ObservableValue<? extends String> ov, String oldValue, String newValue) {
+			Period tasksTime = new Period();
+			for (TaskAdapter taskAdapter : monitorTasks)
+				tasksTime = tasksTime.plus(taskAdapter.getTask().getTotalTime());
+			totalTime.setText(tasksTime.toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter()));
+		}
+
+		/**
+		 * Unbinds this class from all monitored TaskAdapters
+		 */
+		public void unbind() {
+			for (TaskAdapter taskAdapter : monitorTasks)
+				taskAdapter.totalTimeProperty().removeListener(this);
+		}
+
+		/**
+		 * Binds this class to a list of TaskAdapters. If a new list is
+		 * supplied, re-binds to the new list.
+		 */
+		public void bind(List<TaskAdapter> tasks) {
+			for (TaskAdapter existingTask : monitorTasks)
+				if (!tasks.contains(existingTask))
+					existingTask.totalTimeProperty().removeListener(this);
+
+			for (TaskAdapter newTask : tasks)
+				if (!monitorTasks.contains(newTask))
+					newTask.totalTimeProperty().addListener(this);
+
+			monitorTasks.clear();
+			monitorTasks.addAll(tasks);
+		}
+	};
+	/**
+	 * Default TimeChangeListener instance
+	 */
+	private TimeChangeListener timeChangeListener = new TimeChangeListener();
+	/**
+	 * Property to store the number of selected segments
+	 */
+	@FXML
+	private IntegerProperty segmentSelectionSize = new SimpleIntegerProperty(0);
 
 	/**
 	 * Initializes the controller
@@ -275,7 +347,15 @@ public class TaskEditorController implements Initializable {
 			}
 		});
 		//Enable/disable Delete button
-		delete.disableProperty().bind(timeSegments.getSelectionModel().selectedItemProperty().isNull());
+		delete.disableProperty().bind(segmentSelectionSize.lessThanOrEqualTo(0));
+
+		//Update the selection size property
+		timeSegments.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<TimeSegmentAdapter>() {
+			@Override
+			public void onChanged(ListChangeListener.Change<? extends TimeSegmentAdapter> change) {
+				segmentSelectionSize.set(change.getList().size());
+			}
+		});
 
 		//Set column sizes
 		//TODO: make sure this keeps working correctly
@@ -335,6 +415,14 @@ public class TaskEditorController implements Initializable {
 					updateStartStopText();
 			}
 		});
+
+		//Auto update sort order
+		dataManager.taskUpdatedProperty().addListener(new ChangeListener<Date>() {
+			@Override
+			public void changed(ObservableValue<? extends Date> ov, Date oldValue, Date newValue) {
+				updateSortOrder();
+			}
+		});
 	}
 
 	/**
@@ -392,14 +480,23 @@ public class TaskEditorController implements Initializable {
 	private void updateEditingTasks() {
 		if (boundTasks.containsAll(editedTaskList) && editedTaskList.containsAll(boundTasks))
 			return;
-		for (TaskAdapter adapter : boundTasks) {
-			name.textProperty().unbindBidirectional(adapter.nameProperty());
-			description.textProperty().unbindBidirectional(adapter.descriptionProperty());
+		for (TaskAdapter taskAdapter : boundTasks) {
+			name.textProperty().unbindBidirectional(taskAdapter.nameProperty());
+			description.textProperty().unbindBidirectional(taskAdapter.descriptionProperty());
 			totalTime.textProperty().unbind();
+			name.setText(messages.getString("MULTIPLE_TASKS_SELECTED"));
+			description.setText(messages.getString("MULTIPLE_TASKS_SELECTED"));
+			totalTime.setText(messages.getString("MULTIPLE_TASKS_SELECTED"));
 		}
 		boundTasks.clear();
 		TaskAdapter editedTask = getEditedTask();
-		if (editedTask != null) {
+		boolean editingSingleTask = editedTask != null;
+		name.setEditable(editingSingleTask);
+		description.setEditable(editingSingleTask);
+		addSegment.setDisable(!editingSingleTask);
+		customProperties.setDisable(!editingSingleTask);
+		if (editingSingleTask) {
+			timeChangeListener.unbind();
 			name.textProperty().bindBidirectional(editedTask.nameProperty());
 			description.textProperty().bindBidirectional(editedTask.descriptionProperty());
 			totalTime.textProperty().bind(editedTask.totalTimeProperty());
@@ -407,13 +504,22 @@ public class TaskEditorController implements Initializable {
 			for (CustomFieldValueAdapter customFieldValueAdapter : customProperties.getItems())
 				customFieldValueAdapter.setTask(editedTask);
 			timeSegments.setItems(editedTask.timeSegmentsProperty());
-			updateSortOrder();
 			updateStartStopText();
 		} else {
 			updateStartStopText();
-			if (editedTaskList.size() > 1)
-				log.severe(messages.getString("CAN_ONLY_EDIT_A_SINGLE_TASK_AT_A_TIME"));//TODO
+			//Set items manually instead of binding with task
+			ObservableList<TimeSegmentAdapter> extractedSegments = FXCollections.observableList(new LinkedList<TimeSegmentAdapter>());
+			timeSegments.setItems(extractedSegments);
+			if (editedTaskList.size() > 1) {
+				for (TaskAdapter task : editedTaskList) {
+					extractedSegments.addAll(task.timeSegmentsProperty());
+				}
+				timeChangeListener.bind(editedTaskList);
+				timeChangeListener.changed(null, null, null);
+			} else
+				timeChangeListener.unbind();
 		}
+		updateSortOrder();
 	}
 
 	//TODO: add support for editing multiple tasks
@@ -433,6 +539,9 @@ public class TaskEditorController implements Initializable {
 	 */
 	private void updateSortOrder() {
 		//FIXME: Remove this after it's fixed in Java FX
+		//TODO: call this on task updates?
+		if (timeSegments.getEditingCell() != null && timeSegments.getEditingCell().getRow() >= 0)
+			return;
 		TableColumn<TimeSegmentAdapter, ?>[] sortOrder = timeSegments.getSortOrder().toArray(new TableColumn[0]);
 		timeSegments.getSortOrder().clear();
 		timeSegments.getSortOrder().addAll(sortOrder);
@@ -504,5 +613,7 @@ public class TaskEditorController implements Initializable {
 			dataManager.deleteSegment(segment);
 			segment.ownerTaskProperty().get().updateFromDatabase();
 		}
+		if (editedTaskList.size() > 1)
+			updateEditingTasks();
 	}
 }

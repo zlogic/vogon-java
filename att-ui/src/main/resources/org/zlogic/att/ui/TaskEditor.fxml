@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.lang.*?>
-<?import java.util.*?>
+<?import java.net.*?>
 <?import java.net.URL?>
+<?import java.util.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.control.cell.*?>
@@ -55,7 +56,7 @@
                   <children>
                     <HBox prefHeight="-1.0" prefWidth="-1.0">
                       <children>
-                        <Button mnemonicParsing="false" onAction="#createTimeSegment" text="%ADD_MANUALLY" HBox.margin="$x1" />
+                        <Button fx:id="addSegment" mnemonicParsing="false" onAction="#createTimeSegment" text="%ADD_MANUALLY" HBox.margin="$x1" />
                         <Button fx:id="delete" mnemonicParsing="false" onAction="#deleteTimeSegment" text="%DELETE" HBox.margin="$x1" />
                         <ToggleButton fx:id="editProperties" mnemonicParsing="false" selected="true" text="%EDIT_PROPERTIES">
                           <HBox.margin>
