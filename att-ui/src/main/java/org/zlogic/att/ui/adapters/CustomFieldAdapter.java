@@ -78,9 +78,6 @@ public class CustomFieldAdapter implements Comparable<CustomFieldAdapter> {
 		this.dataManager = dataManager;
 
 		updateFxProperties();
-
-		//Change listeners
-		this.name.addListener(nameChangeListener);
 	}
 
 	/*

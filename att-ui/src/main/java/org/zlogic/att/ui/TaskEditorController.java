@@ -457,6 +457,7 @@ public class TaskEditorController implements Initializable {
 	 * updates to edited
 	 */
 	public void setIgnoreEditedTaskUpdates(boolean ignoreEditedTaskUpdates) {
+		//TODO: best to remove listener
 		this.ignoreEditedTaskUpdates = ignoreEditedTaskUpdates;
 	}
 
@@ -470,7 +471,7 @@ public class TaskEditorController implements Initializable {
 		TaskAdapter task = getEditedTask();
 		if (task != null)
 			for (CustomFieldValueAdapter customFieldValueAdapter : customProperties.getItems())
-				customFieldValueAdapter.setTask(task);
+				customFieldValueAdapter.setTasks(editedTaskList);
 	}
 
 	/**
@@ -484,9 +485,6 @@ public class TaskEditorController implements Initializable {
 			name.textProperty().unbindBidirectional(taskAdapter.nameProperty());
 			description.textProperty().unbindBidirectional(taskAdapter.descriptionProperty());
 			totalTime.textProperty().unbind();
-			name.setText(messages.getString("MULTIPLE_TASKS_SELECTED"));
-			description.setText(messages.getString("MULTIPLE_TASKS_SELECTED"));
-			totalTime.setText(messages.getString("MULTIPLE_TASKS_SELECTED"));
 		}
 		boundTasks.clear();
 		TaskAdapter editedTask = getEditedTask();
@@ -510,19 +508,34 @@ public class TaskEditorController implements Initializable {
 			//Set items manually instead of binding with task
 			ObservableList<TimeSegmentAdapter> extractedSegments = FXCollections.observableList(new LinkedList<TimeSegmentAdapter>());
 			timeSegments.setItems(extractedSegments);
+
+
+			String defaultFieldString = null;
 			if (editedTaskList.size() > 1) {
 				for (TaskAdapter task : editedTaskList) {
 					extractedSegments.addAll(task.timeSegmentsProperty());
 				}
 				timeChangeListener.bind(editedTaskList);
 				timeChangeListener.changed(null, null, null);
-			} else
+				for (CustomFieldValueAdapter customFieldValueAdapter : customProperties.getItems())
+					customFieldValueAdapter.setTasks(editedTaskList);
+				customProperties.setDisable(false);
+
+				defaultFieldString = messages.getString("MULTIPLE_TASKS_SELECTED");
+			} else {
+				for (CustomFieldValueAdapter customFieldValueAdapter : customProperties.getItems())
+					customFieldValueAdapter.setTasks(null);
 				timeChangeListener.unbind();
+
+				defaultFieldString = ""; //NOI18N
+			}
+			name.setText(defaultFieldString);
+			description.setText(defaultFieldString);
+			totalTime.setText(defaultFieldString);
 		}
 		updateSortOrder();
 	}
 
-	//TODO: add support for editing multiple tasks
 	/**
 	 * Returns the edited task, or null if several or no tasks are being edited
 	 *

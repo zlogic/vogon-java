@@ -5,6 +5,10 @@
  */
 package org.zlogic.att.ui.adapters;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ResourceBundle;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -23,13 +27,17 @@ import org.zlogic.att.data.TransactedChange;
 public class CustomFieldValueAdapter {
 
 	/**
+	 * Localization messages
+	 */
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/adapters/messages");
+	/**
 	 * Associated Custom Field adapter
 	 */
 	private CustomFieldAdapter customFieldAdapter;
 	/**
-	 * Associated Task
+	 * Associated Tasks
 	 */
-	private TaskAdapter taskAdapter;
+	private List<TaskAdapter> taskAdapters = new LinkedList<>();
 	/*
 	 * Java FX
 	 */
@@ -61,11 +69,14 @@ public class CustomFieldValueAdapter {
 					@Override
 					public void performChange(EntityManager entityManager) {
 						CustomField foundCustomField = entityManager.find(CustomField.class, customFieldAdapter.getCustomField().getId());
-						(entityManager.find(Task.class, getTask().getTask().getId())).setCustomField(foundCustomField, newValue);
-						getTask().getTask().setCustomField(foundCustomField, newValue);
+						for (TaskAdapter taskAdapter : getTasks()) {
+							(entityManager.find(Task.class, taskAdapter.getTask().getId())).setCustomField(foundCustomField, newValue);
+							taskAdapter.getTask().setCustomField(foundCustomField, newValue);
+						}
 					}
 				}.setNewValue(getCustomField(), newValue));
-				getTask().updateFromDatabase();
+				for (TaskAdapter taskAdapter : getTasks())
+					taskAdapter.updateFromDatabase();
 				updateFxProperties();
 				getDataManager().removeFilteredCustomFieldValue(getCustomField(), oldValue);
 				getDataManager().addFilteredCustomFieldValue(getCustomField(), newValue);
@@ -88,9 +99,6 @@ public class CustomFieldValueAdapter {
 		this.dataManager = dataManager;
 
 		updateFxProperties();
-
-		//Set change listeners
-		this.value.addListener(valueChangeListener);
 	}
 	/*
 	 * JavaFX properties
@@ -127,12 +135,27 @@ public class CustomFieldValueAdapter {
 	}
 
 	/**
-	 * Returns the associated task
+	 * Returns the associated tasks
 	 *
-	 * @return the associated task
+	 * @return the associated tasks
 	 */
-	public TaskAdapter getTask() {
-		return taskAdapter;
+	protected List<TaskAdapter> getTasks() {
+		return taskAdapters;
+	}
+
+	/**
+	 * Changes the associated tasks and updates this field's value from these
+	 * tasks
+	 *
+	 * @param taskAdapters the new TaskAdapters
+	 */
+	public void setTasks(List<TaskAdapter> taskAdapters) {
+		if (taskAdapters == null || taskAdapters.isEmpty())
+			this.value.setValue(null);
+		this.taskAdapters.clear();
+		if (taskAdapters != null)
+			this.taskAdapters.addAll(taskAdapters);
+		updateFxProperties();
 	}
 
 	/**
@@ -141,10 +164,7 @@ public class CustomFieldValueAdapter {
 	 * @param taskAdapter the new TaskAdapter
 	 */
 	public void setTask(TaskAdapter taskAdapter) {
-		if (this.taskAdapter == null)
-			this.value.setValue(null);
-		this.taskAdapter = taskAdapter;
-		updateFxProperties();
+		setTasks(Arrays.asList(taskAdapter));
 	}
 	//TODO: other Getters/setters
 
@@ -158,8 +178,20 @@ public class CustomFieldValueAdapter {
 		//Remove listener since the update is initiated by us
 		value.removeListener(valueChangeListener);
 		//Perform update
-		if (taskAdapter != null && taskAdapter.getTask() != null) {
-			String customFieldValue = taskAdapter.getTask().getCustomField(customFieldAdapter.getCustomField());
+		if (!taskAdapters.isEmpty()) {
+			String customFieldValue = null;
+			boolean multipleValuesFound = false;
+			for (TaskAdapter taskAdapter : taskAdapters) {
+				String taskCustomFieldValue = taskAdapter.getTask().getCustomField(customFieldAdapter.getCustomField());
+				if (taskCustomFieldValue == null)
+					continue;
+				if (customFieldValue == null || taskCustomFieldValue.equals(customFieldValue))
+					customFieldValue = taskCustomFieldValue;
+				else if (!taskCustomFieldValue.equals(customFieldValue))
+					multipleValuesFound = true;
+			}
+			if (multipleValuesFound)
+				customFieldValue = messages.getString("MULTIPLE_VALUES");
 			value.setValue(customFieldValue == null ? "" : customFieldValue); //NOI18N
 		}
 		//Restore listener

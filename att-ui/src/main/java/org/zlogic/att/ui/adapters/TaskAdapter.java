@@ -187,10 +187,6 @@ public class TaskAdapter {
 			this.dataManager.getTimeSegments().add(new TimeSegmentAdapter(timeSegment, this, this.dataManager));
 
 		updateFxProperties();
-		//Change listeners
-		this.description.addListener(descriptionChangeListener);
-		this.name.addListener(nameChangeListener);
-		this.completed.addListener(completedChangeListener);
 	}
 
 	/**

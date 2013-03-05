@@ -113,9 +113,6 @@ public class TimeSegmentAdapter {
 		public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
 			if (!oldValue.equals(newValue) && getDataManager() != null) {
 				//TODO: catch exceptions & revert
-				oldValue = getTimeSegment().getStartTime();
-				if (oldValue.equals(newValue))
-					return;
 				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private Date newValue;
 
@@ -134,12 +131,10 @@ public class TimeSegmentAdapter {
 				//updateFxProperties();
 				getDataManager().signalTaskUpdate();
 				//Update total time
-				if (!oldValue.equals(newValue)) {
-					Period deltaTime = oldValue.before(newValue)
-							? new Period().minus(new Interval(new DateTime(oldValue), new DateTime(newValue)).toPeriod())
-							: new Period().plus(new Interval(new DateTime(newValue), new DateTime(oldValue)).toPeriod());
-					getDataManager().addFilteredTotalTime(deltaTime);
-				}
+				Period deltaTime = oldValue.before(newValue)
+						? new Period().minus(new Interval(new DateTime(oldValue), new DateTime(newValue)).toPeriod())
+						: new Period().plus(new Interval(new DateTime(newValue), new DateTime(oldValue)).toPeriod());
+				getDataManager().addFilteredTotalTime(deltaTime);
 			}
 		}
 	};
@@ -150,9 +145,6 @@ public class TimeSegmentAdapter {
 		@Override
 		public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
 			if (!oldValue.equals(newValue) && getDataManager() != null) {
-				oldValue = getTimeSegment().getEndTime();
-				if (oldValue.equals(newValue))
-					return;
 				//TODO: catch exceptions & revert
 				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
 					private Date newValue;
@@ -172,12 +164,10 @@ public class TimeSegmentAdapter {
 				updateFxProperties();
 				getDataManager().signalTaskUpdate();
 				//Update total time
-				if (!oldValue.equals(newValue)) {
-					Period deltaTime = oldValue.before(newValue)
-							? new Period().plus(new Interval(new DateTime(oldValue), new DateTime(newValue)).toPeriod())
-							: new Period().minus(new Interval(new DateTime(newValue), new DateTime(oldValue)).toPeriod());
-					getDataManager().addFilteredTotalTime(deltaTime);
-				}
+				Period deltaTime = oldValue.before(newValue)
+						? new Period().plus(new Interval(new DateTime(oldValue), new DateTime(newValue)).toPeriod())
+						: new Period().minus(new Interval(new DateTime(newValue), new DateTime(oldValue)).toPeriod());
+				getDataManager().addFilteredTotalTime(deltaTime);
 			}
 		}
 	};
@@ -228,10 +218,8 @@ public class TimeSegmentAdapter {
 		this.ownerTask.setValue(ownerTask);
 
 		updateFxProperties();
+
 		//Set change listeners
-		this.description.addListener(descriptionChangeListener);
-		this.start.addListener(startChangeListener);
-		this.end.addListener(endChangeListener);
 		this.ownerTask.addListener(ownerTaskChangeListener);
 	}
 
