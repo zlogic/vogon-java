@@ -129,7 +129,7 @@ public class TimeSegmentAdapter {
 					}
 				}.setNewValue(newValue));
 				ownerTaskProperty().get().updateFromDatabase();
-				//updateFxProperties();
+				updateFxProperties();
 				getDataManager().signalTaskUpdate();
 				//Update total time
 				Period deltaTime = oldValue.before(newValue)
