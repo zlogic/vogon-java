@@ -116,6 +116,7 @@ public class Launcher extends Application {
 
 					@Override
 					public void run() {
+						controller.getDataManager().shutdown();
 						trayIcon.exitApplication();
 					}
 				}.setTrayIcon(trayIcon));

@@ -23,6 +23,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatterBuilder;
+import org.zlogic.att.data.ApplicationShuttingDownException;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.TransactedChange;
@@ -146,28 +147,34 @@ public class TimeSegmentAdapter {
 		public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
 			if (!oldValue.equals(newValue) && getDataManager() != null) {
 				//TODO: catch exceptions & revert
-				getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
-					private Date newValue;
+				try {
+					getDataManager().getPersistenceHelper().performTransactedChange(new TransactedChange() {
+						private Date newValue;
 
-					public TransactedChange setNewValue(Date newValue) {
-						this.newValue = newValue;
-						return this;
-					}
+						public TransactedChange setNewValue(Date newValue) {
+							this.newValue = newValue;
+							return this;
+						}
 
-					@Override
-					public void performChange(EntityManager entityManager) {
-						setTimeSegment(entityManager.find(TimeSegment.class, getTimeSegment().getId()));
-						getTimeSegment().setEndTime(newValue);
-					}
-				}.setNewValue(newValue));
-				ownerTaskProperty().get().updateFromDatabase();
-				updateFxProperties();
-				getDataManager().signalTaskUpdate();
-				//Update total time
-				Period deltaTime = oldValue.before(newValue)
-						? new Period().plus(new Interval(new DateTime(oldValue), new DateTime(newValue)).toPeriod())
-						: new Period().minus(new Interval(new DateTime(newValue), new DateTime(oldValue)).toPeriod());
-				getDataManager().addFilteredTotalTime(deltaTime);
+						@Override
+						public void performChange(EntityManager entityManager) {
+							setTimeSegment(entityManager.find(TimeSegment.class, getTimeSegment().getId()));
+							getTimeSegment().setEndTime(newValue);
+						}
+					}.setNewValue(newValue));
+					ownerTaskProperty().get().updateFromDatabase();
+					updateFxProperties();
+					getDataManager().signalTaskUpdate();
+					//Update total time
+					Period deltaTime = oldValue.before(newValue)
+							? new Period().plus(new Interval(new DateTime(oldValue), new DateTime(newValue)).toPeriod())
+							: new Period().minus(new Interval(new DateTime(newValue), new DateTime(oldValue)).toPeriod());
+					getDataManager().addFilteredTotalTime(deltaTime);
+				} catch (ApplicationShuttingDownException ex) {
+					//Rethrow exception if we are not shutting down
+					if (!dataManager.getPersistenceHelper().isShuttingDown())
+						throw ex;
+				}
 			}
 		}
 	};

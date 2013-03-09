@@ -111,6 +111,16 @@ public class DataManager {
 	}
 
 	/**
+	 * Begins the shutdown process. Stops any timing tasks and blocks access to
+	 * the database.
+	 */
+	public void shutdown() {
+		persistenceHelper.shutdown();
+		if (timingSegment.get() != null)
+			timingSegment.get().stopTiming();
+	}
+
+	/**
 	 * Adds a new value to the list of possible CustomField values.
 	 *
 	 * @param adapter the custom field

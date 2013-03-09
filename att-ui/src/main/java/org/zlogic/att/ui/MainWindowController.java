@@ -548,6 +548,15 @@ public class MainWindowController implements Initializable {
 	}
 
 	/**
+	 * Returns the DataManager reference
+	 *
+	 * @return the DataManager reference
+	 */
+	public DataManager getDataManager() {
+		return dataManager;
+	}
+
+	/**
 	 * Sets the exception handler
 	 *
 	 * @param exceptionHandler the exception handler to set
