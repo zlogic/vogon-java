@@ -198,6 +198,23 @@ public class TaskEditorController implements Initializable {
 		}
 	};
 	/**
+	 * Task list change listener
+	 */
+	private ListChangeListener<TaskAdapter> taskChangeListener = new ListChangeListener<TaskAdapter>() {
+		private List<TaskAdapter> previousItems = new LinkedList<>();
+
+		@Override
+		public void onChanged(ListChangeListener.Change<? extends TaskAdapter> change) {
+			//Check to see if items haven't changed
+			if (change.getList().containsAll(previousItems) && previousItems.containsAll(change.getList()))
+				return;
+			//Update tasks
+			previousItems.clear();
+			previousItems.addAll(change.getList());
+			updateEditingTasks();
+		}
+	};
+	/**
 	 * Default TimeChangeListener instance
 	 */
 	private TimeChangeListener timeChangeListener = new TimeChangeListener();
@@ -431,23 +448,11 @@ public class TaskEditorController implements Initializable {
 	 * @param editedTaskList the list of tasks to be edited
 	 */
 	public void setEditedTaskList(ObservableList<TaskAdapter> editedTaskList) {
+		if (this.editedTaskList != null)
+			this.editedTaskList.removeListener(taskChangeListener);
 		this.editedTaskList = editedTaskList;
-		editedTaskList.addListener(new ListChangeListener<TaskAdapter>() {
-			@Override
-			public void onChanged(Change<? extends TaskAdapter> change) {
-				if (!isIgnoreEditedTaskUpdates())
-					updateEditingTasks();
-			}
-		});
-	}
-
-	/**
-	 * Returns true if this controller is ignoring updates to edited tasks
-	 *
-	 * @return true if this controller is ignoring updates to edited tasks
-	 */
-	public boolean isIgnoreEditedTaskUpdates() {
-		return ignoreEditedTaskUpdates;
+		if (!ignoreEditedTaskUpdates)
+			editedTaskList.addListener(taskChangeListener);
 	}
 
 	/**
@@ -457,8 +462,11 @@ public class TaskEditorController implements Initializable {
 	 * updates to edited
 	 */
 	public void setIgnoreEditedTaskUpdates(boolean ignoreEditedTaskUpdates) {
-		//TODO: best to remove listener
 		this.ignoreEditedTaskUpdates = ignoreEditedTaskUpdates;
+		if (ignoreEditedTaskUpdates)
+			editedTaskList.removeListener(taskChangeListener);
+		else
+			editedTaskList.addListener(taskChangeListener);
 	}
 
 	/**
@@ -509,8 +517,7 @@ public class TaskEditorController implements Initializable {
 			ObservableList<TimeSegmentAdapter> extractedSegments = FXCollections.observableList(new LinkedList<TimeSegmentAdapter>());
 			timeSegments.setItems(extractedSegments);
 
-
-			String defaultFieldString = null;
+			String defaultFieldString;
 			if (editedTaskList.size() > 1) {
 				for (TaskAdapter task : editedTaskList) {
 					extractedSegments.addAll(task.timeSegmentsProperty());
