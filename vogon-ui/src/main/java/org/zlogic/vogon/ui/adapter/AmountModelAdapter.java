@@ -8,6 +8,8 @@ package org.zlogic.vogon.ui.adapter;
 import java.text.MessageFormat;
 import java.util.Currency;
 import java.util.ResourceBundle;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.ui.cell.CellStatus;
 
@@ -35,7 +37,7 @@ public class AmountModelAdapter implements Comparable<AmountModelAdapter>, CellS
 	/**
 	 * The amount is OK (e.g. zero sum for a transfer transaction)
 	 */
-	protected boolean isOk;
+	protected BooleanProperty isOkProperty = new SimpleBooleanProperty();
 	/**
 	 * The transaction type (for special rendering)
 	 */
@@ -55,7 +57,7 @@ public class AmountModelAdapter implements Comparable<AmountModelAdapter>, CellS
 	public AmountModelAdapter(double amount, boolean isOk, Currency currency, boolean isCurrencyConverted, FinanceTransaction.Type transactionType) {
 		this.amount = amount;
 		this.currency = currency;
-		this.isOk = isOk;
+		this.isOkProperty.set(isOk);
 		this.isCurrencyConverted = isCurrencyConverted;
 		this.transactionType = transactionType;
 	}
@@ -69,7 +71,7 @@ public class AmountModelAdapter implements Comparable<AmountModelAdapter>, CellS
 	 */
 	public AmountModelAdapter(double amount, boolean isOk) {
 		this.amount = amount;
-		this.isOk = isOk;
+		this.isOkProperty.set(isOk);
 	}
 
 	/**
@@ -80,14 +82,17 @@ public class AmountModelAdapter implements Comparable<AmountModelAdapter>, CellS
 	 */
 	public AmountModelAdapter(double amount) {
 		this.amount = amount;
-		this.isOk = true;
+		this.isOkProperty.set(true);
 	}
 
 	@Override
 	public String toString() {
+		Double amountDouble = getAmount();
+		if (amountDouble.isNaN())
+			amountDouble = 0.0D;
 		String formattedSum = MessageFormat.format(messages.getString("FORMAT_SUM"),
 				transactionType == FinanceTransaction.Type.TRANSFER ? messages.getString("TRANSFER_TRANSACTION_FLAG") : messages.getString("EXPENSE_TRANSACTION_FLAG"),
-				getAmount(),
+				amountDouble,
 				currency != null ? currency.getCurrencyCode() : messages.getString("INVALID_CURRENCY"),
 				isCurrencyConverted ? messages.getString("CURRENCY_CONVERTED") : messages.getString("CURRENCY_NOT_CONVERTED"));
 		return formattedSum;
@@ -138,8 +143,8 @@ public class AmountModelAdapter implements Comparable<AmountModelAdapter>, CellS
 	}
 
 	@Override
-	public boolean isOK() {
-		return isOk;
+	public BooleanProperty okProperty() {
+		return isOkProperty;
 	}
 
 	/**

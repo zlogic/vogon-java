@@ -29,7 +29,7 @@ public class AmountCellEditor<BaseType> extends StringCellEditor<BaseType, Amoun
 	@Override
 	protected AmountModelAdapter propertyFromString(String value) {
 		try {
-			return new AmountModelAdapter(Double.parseDouble(value), getItem().isOK(), getItem().getCurrency(), getItem().isCurrencyConverted(), getItem().getTransactionType());
+			return new AmountModelAdapter(Double.parseDouble(value), getItem().okProperty().get(), getItem().getCurrency(), getItem().isCurrencyConverted(), getItem().getTransactionType());
 		} catch (NumberFormatException ex) {
 			Logger.getLogger(AmountCellEditor.class.getName()).log(Level.SEVERE, null, ex);
 		}
