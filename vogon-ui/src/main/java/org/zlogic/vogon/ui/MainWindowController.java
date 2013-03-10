@@ -365,20 +365,20 @@ public class MainWindowController implements Initializable {
 			//Automatically run beginTask/endTask before the actual task is processed
 			backgroundThread = new Thread(
 					new Runnable() {
-						protected Task<Void> task;
+				protected Task<Void> task;
 
-						public Runnable setTask(Task<Void> task) {
-							this.task = task;
-							return this;
-						}
+				public Runnable setTask(Task<Void> task) {
+					this.task = task;
+					return this;
+				}
 
-						@Override
-						public void run() {
-							beginBackgroundTask();
-							task.run();
-							endBackgroundTask();
-						}
-					}.setTask(task));
+				@Override
+				public void run() {
+					beginBackgroundTask();
+					task.run();
+					endBackgroundTask();
+				}
+			}.setTask(task));
 			backgroundThread.setDaemon(true);
 			backgroundThread.start();
 		}
