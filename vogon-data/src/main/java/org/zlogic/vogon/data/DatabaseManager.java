@@ -24,10 +24,6 @@ public class DatabaseManager {
 	 */
 	protected javax.persistence.EntityManagerFactory entityManagerFactory;
 	/**
-	 * EntityManager instance
-	 */
-	protected javax.persistence.EntityManager entityManager;
-	/**
 	 * Singleton instance of this class
 	 */
 	static DatabaseManager instance = new DatabaseManager();
@@ -37,7 +33,6 @@ public class DatabaseManager {
 	 */
 	protected DatabaseManager() {
 		entityManagerFactory = javax.persistence.Persistence.createEntityManagerFactory("VogonPU"); //NOI18N
-		entityManager = entityManagerFactory.createEntityManager();
 	}
 
 	/**
@@ -81,7 +76,7 @@ public class DatabaseManager {
 				return;
 			//Check if DB is Derby
 			boolean shutdownDerbyManually = false;
-			java.util.Map<String, Object> persistenceProperties = entityManager.getProperties();
+			java.util.Map<String, Object> persistenceProperties = entityManagerFactory.getProperties();
 			if (persistenceProperties.containsKey("javax.persistence.jdbc.driver")) { //NOI18N
 				Object jdbcDriverValue = persistenceProperties.get("javax.persistence.jdbc.driver"); //NOI18N
 				String jdbcDriverString = jdbcDriverValue.getClass() != String.class ? "" : (String) jdbcDriverValue; //NOI18N
