@@ -12,46 +12,46 @@
 <?scenebuilder-preview-i18n-resource messages.properties?>
 
 <VBox fx:id="transactionsVBox" prefHeight="608.0" prefWidth="810.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.TransactionsController">
-	<children>
-		<FlowPane prefHeight="35.0" prefWidth="436.0" VBox.vgrow="NEVER">
-			<children>
-				<Button mnemonicParsing="false" onAction="#handleCreateTransaction" text="%NEW_TRANSACTION">
-					<FlowPane.margin>
-						<Insets bottom="4.0" left="4.0" right="4.0" top="4.0" fx:id="x1" />
-					</FlowPane.margin>
-				</Button>
-				<Button mnemonicParsing="false" onAction="#handleDeleteTransaction" text="%DELETE_TRANSACTION" FlowPane.margin="$x1" />
-			</children>
-		</FlowPane>
-		<TableView fx:id="transactionsTable" editable="true">
-			<columns>
-				<TableColumn prefWidth="75.0" sortable="false" style="" text="%TRANSACTION_DESCRIPTION" fx:id="columnDescription">
-					<cellValueFactory>
-						<PropertyValueFactory property="description" />
-					</cellValueFactory>
-				</TableColumn>
-				<TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_DATE" fx:id="columnDate">
-					<cellValueFactory>
-						<PropertyValueFactory property="date" />
-					</cellValueFactory>
-				</TableColumn>
-				<TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_TAGS" fx:id="columnTags">
-					<cellValueFactory>
-						<PropertyValueFactory property="tags" />
-					</cellValueFactory>
-				</TableColumn>
-				<TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_AMOUNT" fx:id="columnAmount">
-					<cellValueFactory>
-						<PropertyValueFactory property="modelTransaction" />
-					</cellValueFactory>
-				</TableColumn>
-				<TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_ACCOUNT" fx:id="columnAccount">
-					<cellValueFactory>
-						<PropertyValueFactory property="account" />
-					</cellValueFactory>
-				</TableColumn>
-			</columns>
-		</TableView>
-		<Pagination fx:id="transactionsTablePagination" pageCount="10" prefWidth="563.0" VBox.vgrow="ALWAYS" />
-	</children>
+  <children>
+    <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0">
+      <children>
+        <Button mnemonicParsing="false" onAction="#handleCreateTransaction" text="%NEW_TRANSACTION">
+          <HBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+          </HBox.margin>
+        </Button>
+        <Button mnemonicParsing="false" onAction="#handleDeleteTransaction" text="%DELETE_TRANSACTION" HBox.margin="$x1" />
+      </children>
+    </HBox>
+    <TableView fx:id="transactionsTable" editable="true">
+      <columns>
+        <TableColumn prefWidth="75.0" sortable="false" style="" text="%TRANSACTION_DESCRIPTION" fx:id="columnDescription">
+          <cellValueFactory>
+            <PropertyValueFactory property="description" />
+          </cellValueFactory>
+        </TableColumn>
+        <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_DATE" fx:id="columnDate">
+          <cellValueFactory>
+            <PropertyValueFactory property="date" />
+          </cellValueFactory>
+        </TableColumn>
+        <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_TAGS" fx:id="columnTags">
+          <cellValueFactory>
+            <PropertyValueFactory property="tags" />
+          </cellValueFactory>
+        </TableColumn>
+        <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_AMOUNT" fx:id="columnAmount">
+          <cellValueFactory>
+            <PropertyValueFactory property="modelTransaction" />
+          </cellValueFactory>
+        </TableColumn>
+        <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_ACCOUNT" fx:id="columnAccount">
+          <cellValueFactory>
+            <PropertyValueFactory property="account" />
+          </cellValueFactory>
+        </TableColumn>
+      </columns>
+    </TableView>
+    <Pagination fx:id="transactionsTablePagination" pageCount="10" prefWidth="563.0" VBox.vgrow="ALWAYS" />
+  </children>
 </VBox>

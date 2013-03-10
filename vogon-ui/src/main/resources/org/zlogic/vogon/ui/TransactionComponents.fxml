@@ -12,38 +12,35 @@
 <?scenebuilder-preview-i18n-resource messages.properties?>
 
 <TitledPane animated="false" collapsible="false" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.TransactionComponentsController">
-	<content>
-		<VBox id="VBox" minWidth="256.0" prefHeight="304.0" prefWidth="469.0">
-			<children>
-				<FlowPane id="FlowPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
-					<children>
-						<Button mnemonicParsing="false" onAction="#handleAddComponent" text="%ADD_COMPONENT">
-							<FlowPane.margin>
-								<Insets bottom="4.0" left="4.0" right="4.0" top="4.0" fx:id="x2" />
-							</FlowPane.margin>
-						</Button>
-						<Button mnemonicParsing="false" onAction="#handleDeleteComponent" text="%DELETE_COMPONENT" FlowPane.margin="$x2" />
-						<ComboBox fx:id="transactionType" onAction="#handleSetTransactionType" FlowPane.margin="$x2" />
-					</children>
-					<VBox.margin>
-						<Insets fx:id="x1" />
-					</VBox.margin>
-				</FlowPane>
-				<TableView fx:id="transactionComponents" editable="true">
-					<columns>
-						<TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_ACCOUNT" fx:id="columnAccount">
-							<cellValueFactory>
-								<PropertyValueFactory property="account" />
-							</cellValueFactory>
-						</TableColumn>
-						<TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_AMOUNT" fx:id="columnAmount">
-							<cellValueFactory>
-								<PropertyValueFactory property="amount" />
-							</cellValueFactory>
-						</TableColumn>
-					</columns>
-				</TableView>
-			</children>
-		</VBox>
-	</content>
+  <content>
+    <VBox id="VBox" minWidth="256.0" prefHeight="304.0" prefWidth="469.0">
+      <children>
+        <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0">
+          <children>
+            <Button mnemonicParsing="false" onAction="#handleAddComponent" text="%ADD_COMPONENT">
+              <HBox.margin>
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+              </HBox.margin>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#handleDeleteComponent" text="%DELETE_COMPONENT" HBox.margin="$x1" />
+            <ComboBox fx:id="transactionType" onAction="#handleSetTransactionType" HBox.margin="$x1" />
+          </children>
+        </HBox>
+        <TableView fx:id="transactionComponents" editable="true">
+          <columns>
+            <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_ACCOUNT" fx:id="columnAccount">
+              <cellValueFactory>
+                <PropertyValueFactory property="account" />
+              </cellValueFactory>
+            </TableColumn>
+            <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_AMOUNT" fx:id="columnAmount">
+              <cellValueFactory>
+                <PropertyValueFactory property="amount" />
+              </cellValueFactory>
+            </TableColumn>
+          </columns>
+        </TableView>
+      </children>
+    </VBox>
+  </content>
 </TitledPane>
