@@ -5,6 +5,8 @@
  */
 package org.zlogic.vogon.ui.cell;
 
+import javafx.beans.property.BooleanProperty;
+
 /**
  * Interface supporting output of status
  *
@@ -13,9 +15,9 @@ package org.zlogic.vogon.ui.cell;
 public interface CellStatus {
 
 	/**
-	 * Returns true if this cell/value is OK
+	 * Property which equals to true true if this cell/value is OK
 	 *
 	 * @return true if this cell/value is OK
 	 */
-	boolean isOK();
+	BooleanProperty okProperty();
 }

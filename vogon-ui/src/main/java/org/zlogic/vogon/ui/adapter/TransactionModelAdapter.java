@@ -11,8 +11,10 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -59,6 +61,10 @@ public class TransactionModelAdapter implements CellStatus {
 	 * The transaction amount property
 	 */
 	private final ObjectProperty<AmountModelAdapter> amount = new SimpleObjectProperty<>();
+	/**
+	 * The transaction is OK (e.g. zero sum for a transfer transaction)
+	 */
+	protected BooleanProperty isOkProperty = new SimpleBooleanProperty();
 	/**
 	 * The transaction account(s) property (rendered string)
 	 */
@@ -267,8 +273,8 @@ public class TransactionModelAdapter implements CellStatus {
 	}
 
 	@Override
-	public boolean isOK() {
-		return transaction.isAmountOk();
+	public BooleanProperty okProperty() {
+		return isOkProperty;
 	}
 
 	@Override
@@ -307,6 +313,7 @@ public class TransactionModelAdapter implements CellStatus {
 			tags.addAll(transaction.getTags());
 			amount.set(getAmount());
 			account.set(getAccount());
+			isOkProperty.set(transaction.isAmountOk());
 		}
 	}
 }

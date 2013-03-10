@@ -6,9 +6,13 @@
 package org.zlogic.vogon.ui.cell;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
@@ -48,6 +52,16 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 	 * Cell alignment in view (not edit) state
 	 */
 	protected Pos alignment;
+	/**
+	 * Listener for changes in the "OK" property
+	 */
+	protected ChangeListener<Boolean> okPropertyListener = new ChangeListener<Boolean>() {
+		@Override
+		public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
+			getStyleClass().removeAll("transaction-invalid", "transaction-valid");//NOI18N
+			getStyleClass().add(newValue ? "transaction-valid" : "transaction-invalid");//NOI18N
+		}
+	};
 
 	/**
 	 * Constructs a Transaction properties editor/viewer
@@ -95,7 +109,6 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 	public void cancelEdit() {
 		super.cancelEdit();
 		setText(getString());
-		setStatusColor();
 		popup.hide();
 	}
 
@@ -108,7 +121,6 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 	public void commitEdit(TransactionModelAdapter item) {
 		super.commitEdit(item);
 		setText(getString());
-		setStatusColor();
 		popup.hide();
 	}
 
@@ -120,13 +132,19 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 	 */
 	@Override
 	public void updateItem(TransactionModelAdapter item, boolean empty) {
+		if (item != null)
+			item.okProperty().removeListener(okPropertyListener);
 		super.updateItem(item, empty);
 		if (empty) {
 			setText(null);
 			setGraphic(null);
 		} else {
 			setText(getString());
-			setStatusColor();
+			if (getItem() instanceof CellStatus) {
+				CellStatus itemCellStatus = getItem();
+				itemCellStatus.okProperty().addListener(okPropertyListener);
+				okPropertyListener.changed(null, null, itemCellStatus.okProperty().get());
+			}
 		}
 	}
 
@@ -146,15 +164,6 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 		} catch (IOException ex) {
 			Logger.getLogger(TransactionEditor.class.getName()).log(Level.SEVERE, null, ex);
 		}
-	}
-
-	/**
-	 * Sets the status color, if the property can return its status
-	 */
-	protected void setStatusColor() {
-		if (getItem() instanceof CellStatus)
-			if (!((CellStatus) getItem()).isOK())
-				setTextFill(Color.RED);
 	}
 
 	/**

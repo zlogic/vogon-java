@@ -947,9 +947,10 @@ public class FinanceData {
 			entityManager.merge(account);
 
 		entityManager.getTransaction().commit();
-
-		fireTransactionUpdated(transaction.id);
-		fireAccountUpdated(account.id);
+		if (transaction != null)
+			fireTransactionUpdated(transaction.id);
+		if (account != null)
+			fireAccountUpdated(account.id);
 
 		entityManager.close();
 	}

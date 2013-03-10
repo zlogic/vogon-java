@@ -1,0 +1,12 @@
+@import url("/com/sun/javafx/scene/control/skin/caspian/caspian.bss");
+
+.table-cell .transaction-invalid {
+	-fx-background-color: crimson;
+	-fx-font-weight: bold;
+	-fx-strikethrough: true;
+}
+
+.table-cell .transaction-valid {
+	-fx-strikethrough: false;
+	-fx-font-weight: normal;
+}
