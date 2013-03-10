@@ -688,7 +688,7 @@ public class Report {
 			transactionsCriteriaQuery.multiselect(criteriaBuilder.sum(predicate.getComponentsJoin().get(TransactionComponent_.amount)),
 					predicate.getTagsJoin()).distinct(true);
 			transactionsCriteriaQuery.where(criteriaBuilder.and(predicate.getPredicate(), currencyPredicate));
-			transactionsCriteriaQuery.groupBy(predicate.getComponentsJoin(), predicate.getTagsJoin(), predicate.getComponentsJoin().get(TransactionComponent_.account).get(FinanceAccount_.currency));
+			transactionsCriteriaQuery.groupBy(predicate.getTagsJoin(), predicate.getComponentsJoin().get(TransactionComponent_.account).get(FinanceAccount_.currency));
 
 			double exchangeRate = financeData.getExchangeRate(currency, financeData.getDefaultCurrency());
 
