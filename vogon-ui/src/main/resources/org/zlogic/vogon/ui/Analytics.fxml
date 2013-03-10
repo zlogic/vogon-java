@@ -13,128 +13,133 @@
 <?scenebuilder-preview-i18n-resource messages.properties?>
 
 <AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.AnalyticsController">
-	<children>
-		<SplitPane dividerPositions="0.1, 0.5" focusTraversable="true" orientation="VERTICAL" prefHeight="492.0" prefWidth="600.0000999999975" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="-1.0" AnchorPane.topAnchor="0.0">
-			<items>
-				<HBox SplitPane.resizableWithParent="false">
-					<children>
-						<AnchorPane id="AnchorPane">
-							<children>
-								<GridPane AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-									<children>
-										<Label text="%START_DATE" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-										<TextField fx:id="startDateField" onAction="#handleGenerateReport" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-										<Label text="%END_DATE" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-										<TextField fx:id="endDateField" onAction="#handleGenerateReport" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-										<CheckBox fx:id="transferTransactionsCheckbox" mnemonicParsing="false" text="%TRANSFER_TRANSACTIONS" GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.rowIndex="2" />
-										<CheckBox fx:id="incomeTransactionsCheckbox" mnemonicParsing="false" selected="true" text="%INCOME_TRANSACTIONS" GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" />
-										<CheckBox fx:id="expenseTransactionsCheckbox" mnemonicParsing="false" selected="true" text="%EXPENSE_TRANSACTIONS" GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
-									</children>
-									<columnConstraints>
-										<ColumnConstraints hgrow="SOMETIMES" maxWidth="99.0" minWidth="10.0" prefWidth="72.0" />
-										<ColumnConstraints hgrow="SOMETIMES" maxWidth="145.0" minWidth="10.0" prefWidth="113.0" />
-									</columnConstraints>
-									<rowConstraints>
-										<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-										<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-										<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-										<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-										<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-									</rowConstraints>
-								</GridPane>
-								<Button layoutY="152.0" mnemonicParsing="false" onAction="#handleGenerateReport" text="%GENERATE_REPORT" />
-							</children>
-						</AnchorPane>
-						<AnchorPane HBox.hgrow="ALWAYS">
-							<children>
-								<TableView fx:id="tagsSelectionTable" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-									<columns>
-										<TableColumn editable="false" prefWidth="75.0" text="%TAG_NAME" fx:id="tagsSelectionTagColumn">
-											<cellValueFactory>
-												<PropertyValueFactory property="tag" />
-											</cellValueFactory>
-										</TableColumn>
-										<TableColumn prefWidth="75.0" text="%SHOW" fx:id="tagsSelectionShowColumn">
-											<cellValueFactory>
-												<PropertyValueFactory property="enabled" />
-											</cellValueFactory>
-										</TableColumn>
-									</columns>
-								</TableView>
-							</children>
-						</AnchorPane>
-						<AnchorPane HBox.hgrow="ALWAYS">
-							<children>
-								<TableView fx:id="accountsSelectionTable" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-									<columns>
-										<TableColumn editable="false" prefWidth="75.0" text="%ACCOUNT_NAME" fx:id="accountsSelectionAccountColumn">
-											<cellValueFactory>
-												<PropertyValueFactory property="account" />
-											</cellValueFactory>
-										</TableColumn>
-										<TableColumn prefWidth="75.0" text="%SHOW" fx:id="accountsSelectionShowColumn">
-											<cellValueFactory>
-												<PropertyValueFactory property="enabled" />
-											</cellValueFactory>
-										</TableColumn>
-									</columns>
-								</TableView>
-							</children>
-						</AnchorPane>
-					</children>
-				</HBox>
-				<AnchorPane>
-					<children>
-						<TableView fx:id="tagsResultTable" prefHeight="150.0" prefWidth="350.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
-							<columns>
-								<TableColumn prefWidth="75.0" text="%TAG_NAME" fx:id="tagsResultTagColumn">
-									<cellValueFactory>
-										<PropertyValueFactory property="tag" />
-									</cellValueFactory>
-								</TableColumn>
-								<!-- TODO: make this column sorted by default -->
-								<TableColumn prefWidth="75.0" text="%TRANSACTION_AMOUNT" fx:id="tagsResultAmountColumn">
-									<cellValueFactory>
-										<PropertyValueFactory property="amount" />
-									</cellValueFactory>
-								</TableColumn>
-							</columns>
-						</TableView>
-						<PieChart id="PieChart" fx:id="tagsChart" legendSide="RIGHT" prefHeight="150.0" prefWidth="249.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="350.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-					</children>
-				</AnchorPane>
-				<AnchorPane>
-					<children>
-						<TableView fx:id="transactionsResultTable" prefHeight="155.0" prefWidth="350.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
-							<columns>
-								<TableColumn prefWidth="75.0" text="%TRANSACTION_NAME" fx:id="transactionsResultTransactionColumn">
-									<cellValueFactory>
-										<PropertyValueFactory property="description" />
-									</cellValueFactory>
-								</TableColumn>
-								<TableColumn prefWidth="75.0" text="%TRANSACTION_DATE" fx:id="transactionsResultDateColumn">
-									<cellValueFactory>
-										<PropertyValueFactory property="date" />
-									</cellValueFactory>
-								</TableColumn>
-								<TableColumn prefWidth="75.0" text="%TRANSACTION_AMOUNT" fx:id="transactionsResultAmountColumn">
-									<cellValueFactory>
-										<PropertyValueFactory property="amount" />
-									</cellValueFactory>
-								</TableColumn>
-							</columns>
-						</TableView>
-						<LineChart fx:id="balanceChart" legendVisible="false" prefHeight="155.0" prefWidth="250.5" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="350.0" AnchorPane.rightAnchor="-1.5" AnchorPane.topAnchor="0.0">
-							<xAxis>
-								<CategoryAxis side="BOTTOM" />
-							</xAxis>
-							<yAxis>
-								<NumberAxis forceZeroInRange="false" side="LEFT" />
-							</yAxis>
-						</LineChart>
-					</children>
-				</AnchorPane>
-			</items>
-		</SplitPane>
-	</children>
+  <children>
+    <SplitPane dividerPositions="0.35918367346938773, 0.6775510204081633" focusTraversable="true" orientation="VERTICAL" prefHeight="492.0" prefWidth="600.0000999999975" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="-1.0" AnchorPane.topAnchor="0.0">
+      <items>
+        <HBox SplitPane.resizableWithParent="false">
+          <children>
+            <AnchorPane id="AnchorPane">
+              <children>
+                <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <children>
+                    <Label text="%START_DATE" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                      <GridPane.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+                      </GridPane.margin>
+                    </Label>
+                    <TextField fx:id="startDateField" onAction="#handleGenerateReport" GridPane.columnIndex="1" GridPane.margin="$x1" GridPane.rowIndex="0" />
+                    <Label text="%END_DATE" GridPane.columnIndex="0" GridPane.margin="$x1" GridPane.rowIndex="1" />
+                    <TextField fx:id="endDateField" onAction="#handleGenerateReport" GridPane.columnIndex="1" GridPane.margin="$x1" GridPane.rowIndex="1" />
+                    <CheckBox fx:id="transferTransactionsCheckbox" mnemonicParsing="false" text="%TRANSFER_TRANSACTIONS" GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.margin="$x1" GridPane.rowIndex="2" />
+                    <CheckBox fx:id="incomeTransactionsCheckbox" mnemonicParsing="false" selected="true" text="%INCOME_TRANSACTIONS" GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.margin="$x1" GridPane.rowIndex="3" />
+                    <CheckBox fx:id="expenseTransactionsCheckbox" mnemonicParsing="false" selected="true" text="%EXPENSE_TRANSACTIONS" GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.margin="$x1" GridPane.rowIndex="4" />
+                    <Button defaultButton="true" mnemonicParsing="false" onAction="#handleGenerateReport" text="%GENERATE_REPORT" GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.margin="$x1" GridPane.rowIndex="5" />
+                  </children>
+                  <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="99.0" minWidth="10.0" prefWidth="72.0" />
+                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="145.0" minWidth="10.0" prefWidth="113.0" />
+                  </columnConstraints>
+                  <rowConstraints>
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="ALWAYS" />
+                  </rowConstraints>
+                </GridPane>
+              </children>
+            </AnchorPane>
+            <AnchorPane HBox.hgrow="ALWAYS">
+              <children>
+                <TableView fx:id="tagsSelectionTable" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <columns>
+                    <TableColumn editable="false" prefWidth="75.0" text="%TAG_NAME" fx:id="tagsSelectionTagColumn">
+                      <cellValueFactory>
+                        <PropertyValueFactory property="tag" />
+                      </cellValueFactory>
+                    </TableColumn>
+                    <TableColumn prefWidth="75.0" text="%SHOW" fx:id="tagsSelectionShowColumn">
+                      <cellValueFactory>
+                        <PropertyValueFactory property="enabled" />
+                      </cellValueFactory>
+                    </TableColumn>
+                  </columns>
+                </TableView>
+              </children>
+            </AnchorPane>
+            <AnchorPane HBox.hgrow="ALWAYS">
+              <children>
+                <TableView fx:id="accountsSelectionTable" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <columns>
+                    <TableColumn editable="false" prefWidth="75.0" text="%ACCOUNT_NAME" fx:id="accountsSelectionAccountColumn">
+                      <cellValueFactory>
+                        <PropertyValueFactory property="account" />
+                      </cellValueFactory>
+                    </TableColumn>
+                    <TableColumn prefWidth="75.0" text="%SHOW" fx:id="accountsSelectionShowColumn">
+                      <cellValueFactory>
+                        <PropertyValueFactory property="enabled" />
+                      </cellValueFactory>
+                    </TableColumn>
+                  </columns>
+                </TableView>
+              </children>
+            </AnchorPane>
+          </children>
+        </HBox>
+        <AnchorPane>
+          <children>
+            <TableView fx:id="tagsResultTable" prefHeight="150.0" prefWidth="350.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+              <columns>
+                <TableColumn prefWidth="75.0" text="%TAG_NAME" fx:id="tagsResultTagColumn">
+                  <cellValueFactory>
+                    <PropertyValueFactory property="tag" />
+                  </cellValueFactory>
+                </TableColumn>
+                <!-- TODO: make this column sorted by default -->
+                <TableColumn prefWidth="75.0" text="%TRANSACTION_AMOUNT" fx:id="tagsResultAmountColumn">
+                  <cellValueFactory>
+                    <PropertyValueFactory property="amount" />
+                  </cellValueFactory>
+                </TableColumn>
+              </columns>
+            </TableView>
+            <PieChart id="PieChart" fx:id="tagsChart" legendSide="RIGHT" prefHeight="150.0" prefWidth="249.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="350.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+          </children>
+        </AnchorPane>
+        <AnchorPane>
+          <children>
+            <TableView fx:id="transactionsResultTable" prefHeight="155.0" prefWidth="350.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+              <columns>
+                <TableColumn prefWidth="75.0" text="%TRANSACTION_NAME" fx:id="transactionsResultTransactionColumn">
+                  <cellValueFactory>
+                    <PropertyValueFactory property="description" />
+                  </cellValueFactory>
+                </TableColumn>
+                <TableColumn prefWidth="75.0" text="%TRANSACTION_DATE" fx:id="transactionsResultDateColumn">
+                  <cellValueFactory>
+                    <PropertyValueFactory property="date" />
+                  </cellValueFactory>
+                </TableColumn>
+                <TableColumn prefWidth="75.0" text="%TRANSACTION_AMOUNT" fx:id="transactionsResultAmountColumn">
+                  <cellValueFactory>
+                    <PropertyValueFactory property="amount" />
+                  </cellValueFactory>
+                </TableColumn>
+              </columns>
+            </TableView>
+            <LineChart fx:id="balanceChart" legendVisible="false" prefHeight="155.0" prefWidth="250.5" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="350.0" AnchorPane.rightAnchor="-1.5" AnchorPane.topAnchor="0.0">
+              <xAxis>
+                <CategoryAxis side="BOTTOM" />
+              </xAxis>
+              <yAxis>
+                <NumberAxis forceZeroInRange="false" side="LEFT" />
+              </yAxis>
+            </LineChart>
+          </children>
+        </AnchorPane>
+      </items>
+    </SplitPane>
+  </children>
 </AnchorPane>
