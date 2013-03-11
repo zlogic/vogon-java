@@ -19,7 +19,7 @@
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
           </FlowPane.margin>
         </Button>
-        <Button mnemonicParsing="false" onAction="#handleDeleteAccount" text="%DELETE_ACCOUNT" FlowPane.margin="$x1" />
+        <Button fx:id="deleteAccount" mnemonicParsing="false" onAction="#handleDeleteAccount" text="%DELETE_ACCOUNT" FlowPane.margin="$x1" />
       </children>
     </FlowPane>
     <TableView fx:id="accountsTable" editable="true" VBox.vgrow="ALWAYS">

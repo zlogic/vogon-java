@@ -61,6 +61,9 @@ import org.zlogic.vogon.ui.cell.DateConverter;
  */
 public class AnalyticsController implements Initializable {
 
+	/**
+	 * Localization messages
+	 */
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * The report generator

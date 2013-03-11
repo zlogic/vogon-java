@@ -39,6 +39,9 @@ import org.zlogic.vogon.data.Utils;
  */
 public class CsvImporter implements FileImporter {
 
+	/**
+	 * Localization messages
+	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/data/messages");
 	/**
 	 * The input CSV file

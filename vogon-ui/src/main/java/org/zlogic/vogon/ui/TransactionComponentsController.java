@@ -14,6 +14,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -39,6 +40,9 @@ import org.zlogic.vogon.ui.cell.StringValidatorDouble;
  */
 public class TransactionComponentsController implements Initializable {
 
+	/**
+	 * Localization messages
+	 */
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * The FinanceData instance
@@ -68,7 +72,15 @@ public class TransactionComponentsController implements Initializable {
 	 */
 	@FXML
 	private TableColumn<TransactionComponentModelAdapter, AmountModelAdapter> columnAmount;
+	/**
+	 * List of accounts for the accounts combo box
+	 */
 	protected ObservableList<AccountModelAdapter> accountsComboList = FXCollections.observableList(new LinkedList<AccountModelAdapter>());
+	/**
+	 * Delete account button
+	 */
+	@FXML
+	private Button deleteComponent;
 
 	/**
 	 * Initializes the Transaction Components editor
@@ -99,6 +111,9 @@ public class TransactionComponentsController implements Initializable {
 				return cell;
 			}
 		});
+
+		//Enable/disable buttons
+		deleteComponent.disableProperty().bind(transactionComponents.getSelectionModel().selectedIndexProperty().lessThan(0));
 	}
 
 	/**
