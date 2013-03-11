@@ -22,7 +22,7 @@
                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
               </HBox.margin>
             </Button>
-            <Button mnemonicParsing="false" onAction="#handleDeleteComponent" text="%DELETE_COMPONENT" HBox.margin="$x1" />
+            <Button fx:id="deleteComponent" mnemonicParsing="false" onAction="#handleDeleteComponent" text="%DELETE_COMPONENT" HBox.margin="$x1" />
             <ComboBox fx:id="transactionType" onAction="#handleSetTransactionType" HBox.margin="$x1" />
           </children>
         </HBox>

@@ -26,6 +26,9 @@ import org.zlogic.vogon.data.FinanceTransaction;
  */
 public class AccountModelAdapter implements AccountInterface {
 
+	/**
+	 * Localization messages
+	 */
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * The account

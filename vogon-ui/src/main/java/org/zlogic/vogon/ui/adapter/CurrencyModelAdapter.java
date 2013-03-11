@@ -21,6 +21,9 @@ import javafx.beans.property.StringProperty;
  */
 public class CurrencyModelAdapter implements Comparable<CurrencyModelAdapter> {
 
+	/**
+	 * Localization messages
+	 */
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * The currency

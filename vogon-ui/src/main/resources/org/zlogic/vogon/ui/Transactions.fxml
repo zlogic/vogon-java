@@ -22,7 +22,8 @@
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
           </HBox.margin>
         </Button>
-        <Button mnemonicParsing="false" onAction="#handleDeleteTransaction" text="%DELETE_TRANSACTION" HBox.margin="$x1" />
+        <Button fx:id="duplicateTransaction" mnemonicParsing="false" onAction="#handleDuplicateTransaction" text="%DUPLICATE_TRANSACTION" />
+        <Button fx:id="deleteTransaction" mnemonicParsing="false" onAction="#handleDeleteTransaction" text="%DELETE_TRANSACTION" HBox.margin="$x1" />
       </children>
     </HBox>
     <TableView fx:id="transactionsTable" editable="true">

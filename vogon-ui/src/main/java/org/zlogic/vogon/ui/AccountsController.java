@@ -16,6 +16,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -42,6 +43,9 @@ import org.zlogic.vogon.ui.adapter.ReportingAccount;
  */
 public class AccountsController implements Initializable {
 
+	/**
+	 * Localization messages
+	 */
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * The associated FinanceData instance
@@ -72,6 +76,11 @@ public class AccountsController implements Initializable {
 	 */
 	@FXML
 	private TableColumn<AccountInterface, ObjectWithStatus<BooleanProperty, Boolean>> columnIncludeInTotal;
+	/**
+	 * Delete account button
+	 */
+	@FXML
+	private Button deleteAccount;
 
 	/**
 	 * Initializes the Accounts Controller
@@ -150,6 +159,9 @@ public class AccountsController implements Initializable {
 				return cell;
 			}
 		});
+
+		//Enable/disable buttons
+		deleteAccount.disableProperty().bind(accountsTable.getSelectionModel().selectedIndexProperty().lessThan(0));
 	}
 
 	/**

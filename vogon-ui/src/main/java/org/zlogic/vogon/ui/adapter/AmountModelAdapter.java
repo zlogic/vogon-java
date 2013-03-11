@@ -21,6 +21,9 @@ import org.zlogic.vogon.ui.cell.CellStatus;
  */
 public class AmountModelAdapter implements Comparable<AmountModelAdapter>, CellStatus {
 
+	/**
+	 * Localization messages
+	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * The balance/amount

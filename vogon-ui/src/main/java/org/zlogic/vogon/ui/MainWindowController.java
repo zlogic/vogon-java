@@ -46,6 +46,9 @@ import org.zlogic.vogon.data.interop.XmlImporter;
  */
 public class MainWindowController implements Initializable {
 
+	/**
+	 * Localization messages
+	 */
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * Last opened directory

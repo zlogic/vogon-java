@@ -36,6 +36,9 @@ import org.zlogic.vogon.ui.cell.CellStatus;
  */
 public class TransactionModelAdapter implements CellStatus {
 
+	/**
+	 * Localization messages
+	 */
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * The associated transaction

@@ -18,6 +18,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Pagination;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -80,6 +81,16 @@ public class TransactionsController implements Initializable {
 	 */
 	@FXML
 	private VBox transactionsVBox;
+	/**
+	 * Delete transaction button
+	 */
+	@FXML
+	private Button deleteTransaction;
+	/**
+	 * Duplicate transaction button
+	 */
+	@FXML
+	private Button duplicateTransaction;
 	/**
 	 * The list of currently editing TransactionEditors
 	 */
@@ -192,6 +203,10 @@ public class TransactionsController implements Initializable {
 				}
 			}
 		}.createListeners());
+
+		//Enable/disable buttons
+		duplicateTransaction.disableProperty().bind(transactionsTable.getSelectionModel().selectedIndexProperty().lessThan(0));
+		deleteTransaction.disableProperty().bind(transactionsTable.getSelectionModel().selectedIndexProperty().lessThan(0));
 	}
 
 	/**
@@ -201,6 +216,16 @@ public class TransactionsController implements Initializable {
 	private void handleCreateTransaction() {
 		cancelEdit();
 		financeData.createTransaction(new FinanceTransaction("", new String[0], new Date(), FinanceTransaction.Type.EXPENSEINCOME));//NOI18N
+	}
+
+	/**
+	 * Duplicate transaction button
+	 */
+	@FXML
+	private void handleDuplicateTransaction() {
+		cancelEdit();
+		if (transactionsTable.getSelectionModel().getSelectedItem() != null)
+			financeData.createTransaction(transactionsTable.getSelectionModel().getSelectedItem().getTransaction().clone());//NOI18N
 	}
 
 	/**

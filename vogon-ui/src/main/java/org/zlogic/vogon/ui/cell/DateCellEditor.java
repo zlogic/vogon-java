@@ -21,6 +21,9 @@ import java.util.logging.Logger;
  */
 public class DateCellEditor<BaseType> extends StringCellEditor<BaseType, Date> {
 
+	/**
+	 * Localization messages
+	 */
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * The date format to be used for validation
