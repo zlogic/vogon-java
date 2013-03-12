@@ -122,9 +122,9 @@ public class FinanceTransaction implements Serializable {
 			cloneTransaction.tags.add(tag);
 		cloneTransaction.components = new LinkedList<>();
 		for (TransactionComponent component : components)
-			cloneTransaction.components.add(new TransactionComponent(component.getAccount(), cloneTransaction, component.getRawAmount()));
-		cloneTransaction.transactionDate = (Date) transactionDate.clone();
-		cloneTransaction.updateAmounts();
+			cloneTransaction.addComponent(new TransactionComponent(component.getAccount(), cloneTransaction, component.getRawAmount()));
+		//cloneTransaction.transactionDate = (Date) transactionDate.clone();
+		cloneTransaction.transactionDate = new Date();
 		//cloneTransaction.amount = amount;
 
 		return cloneTransaction;
