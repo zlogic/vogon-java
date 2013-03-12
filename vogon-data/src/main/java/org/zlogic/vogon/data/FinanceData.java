@@ -579,6 +579,13 @@ public class FinanceData {
 
 		boolean transactionAdded = persistenceAdd(transaction, entityManager);
 
+		if (!transaction.getComponents().isEmpty()) {
+			for (TransactionComponent component : transaction.getComponents())
+				persistenceAdd(component, entityManager);
+			for (FinanceAccount account : transaction.getAccounts())
+				entityManager.merge(account);
+		}
+
 		entityManager.getTransaction().commit();
 
 		if (transactionAdded) {
