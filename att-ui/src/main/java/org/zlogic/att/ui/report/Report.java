@@ -640,7 +640,7 @@ public class Report {
 		//Prepare value-time map
 		Map<String, CustomFieldTime> customFieldData = new TreeMap<>();
 		for (Task task : tasks) {
-			Period duration = task.getTotalTime();
+			Period duration = task.getTotalTime(startDate, endDate);
 			String customFieldValue = task.getCustomField(customField);
 			customFieldValue = customFieldValue != null ? customFieldValue : ""; //NOI18N
 			if (customFieldData.containsKey(customFieldValue))

@@ -34,6 +34,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
@@ -58,7 +59,7 @@ public class TaskEditorController implements Initializable {
 	/**
 	 * The logger
 	 */
-	private final static Logger log = Logger.getLogger(MainWindowController.class.getName());
+	private final static Logger log = Logger.getLogger(TaskEditorController.class.getName());
 	/**
 	 * Localization messages
 	 */
@@ -79,6 +80,10 @@ public class TaskEditorController implements Initializable {
 	 * True to ignore updates to edited task (e.g. while editing a time segment)
 	 */
 	private boolean ignoreEditedTaskUpdates = false;
+	/**
+	 * The item which was started to be dragged
+	 */
+	private TimeSegmentAdapter dragSegment;
 	/**
 	 * Task description
 	 */
@@ -144,6 +149,17 @@ public class TaskEditorController implements Initializable {
 	 */
 	@FXML
 	private TableView<CustomFieldValueAdapter> customProperties;
+
+	/**
+	 * Returns the drag-n-drop source TimeSegmentAdapter only if source matches
+	 * the time segments table.
+	 *
+	 * @param source the drag-n-drop gesture source
+	 * @return the drag-n-drop source TimeSegmentAdapter
+	 */
+	public TimeSegmentAdapter getDragSource(Object source) {
+		return source == timeSegments ? dragSegment : null;
+	}
 
 	/**
 	 * Listener for monitoring the task time property and updating the total.
@@ -360,6 +376,8 @@ public class TaskEditorController implements Initializable {
 					content.putString(selectedItem.descriptionProperty().get());
 				dragBoard.setContent(content);
 
+				dragSegment = selectedItem;
+
 				event.consume();
 			}
 		});
@@ -495,6 +513,7 @@ public class TaskEditorController implements Initializable {
 			totalTime.textProperty().unbind();
 		}
 		boundTasks.clear();
+		dragSegment = null;
 		TaskAdapter editedTask = getEditedTask();
 		boolean editingSingleTask = editedTask != null;
 		name.setEditable(editingSingleTask);

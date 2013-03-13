@@ -405,7 +405,7 @@ public class MainWindowController implements Initializable {
 
 					@Override
 					public void handle(DragEvent event) {
-						if (event.getGestureSource() instanceof TableView && ((TableView) event.getGestureSource()).getSelectionModel().getSelectedItem() instanceof TimeSegmentAdapter)
+						if (event.getGestureSource() instanceof TableView && taskEditorController.getDragSource(event.getGestureSource()) != null)
 							row.getStyleClass().add("drag-accept-task"); //NOI18N
 						event.consume();
 					}
@@ -427,7 +427,7 @@ public class MainWindowController implements Initializable {
 				row.setOnDragOver(new EventHandler<DragEvent>() {
 					@Override
 					public void handle(DragEvent event) {
-						if (event.getGestureSource() instanceof TableView && ((TableView) event.getGestureSource()).getSelectionModel().getSelectedItem() instanceof TimeSegmentAdapter)
+						if (event.getGestureSource() instanceof TableView && taskEditorController.getDragSource(event.getGestureSource()) != null)
 							event.acceptTransferModes(TransferMode.MOVE);
 						event.consume();
 					}
@@ -444,8 +444,8 @@ public class MainWindowController implements Initializable {
 					public void handle(DragEvent event) {
 						boolean success = false;
 						if (event.getGestureSource() instanceof TableView) {
-							Object selectedItem = ((TableView) event.getGestureSource()).getSelectionModel().getSelectedItem();
-							if (selectedItem instanceof TimeSegmentAdapter) {
+							TimeSegmentAdapter selectedItem = taskEditorController.getDragSource(event.getGestureSource());
+							if (selectedItem != null) {
 								event.setDropCompleted(success);
 								((TimeSegmentAdapter) selectedItem).ownerTaskProperty().set(row.getItem());
 							}
