@@ -28,9 +28,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
-import org.zlogic.vogon.data.DatabaseManager;
-import org.zlogic.vogon.data.FinanceAccount;
-import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.interop.CsvImporter;
 import org.zlogic.vogon.data.interop.FileExporter;
 import org.zlogic.vogon.data.interop.FileImporter;
@@ -38,6 +35,9 @@ import org.zlogic.vogon.data.interop.VogonExportException;
 import org.zlogic.vogon.data.interop.VogonImportLogicalException;
 import org.zlogic.vogon.data.interop.XmlExporter;
 import org.zlogic.vogon.data.interop.XmlImporter;
+import org.zlogic.vogon.ui.adapter.AccountInterface;
+import org.zlogic.vogon.ui.adapter.AccountModelAdapter;
+import org.zlogic.vogon.ui.adapter.DataManager;
 
 /**
  * Main entry window controller.
@@ -55,9 +55,9 @@ public class MainWindowController implements Initializable {
 	 */
 	private File lastDirectory;
 	/**
-	 * The FinanceData instance
+	 * The DataManager instance
 	 */
-	private FinanceData financeData;
+	private DataManager dataManager;
 	/**
 	 * Easy access to preference storage
 	 */
@@ -147,7 +147,7 @@ public class MainWindowController implements Initializable {
 	@FXML
 	private void handleMenuExitAction() {
 		completeTaskThread();
-		DatabaseManager.getInstance().shutdown();
+		dataManager.shutdown();
 		Platform.exit();
 	}
 
@@ -201,8 +201,7 @@ public class MainWindowController implements Initializable {
 						updateProgress(-1, 1);
 						if (importer == null)
 							throw new VogonImportLogicalException(messages.getString("UNKNOWN_FILE_TYPE"));
-						financeData.importData(importer);
-						transactionsPaneController.setFinanceData(financeData);
+						dataManager.importData(importer);
 					} catch (VogonImportLogicalException ex) {
 						Logger.getLogger(MainWindowController.class.getName()).log(Level.SEVERE, null, ex);
 						MessageDialog.showDialog(messages.getString("IMPORT_EXCEPTION_DIALOG_TITLE"), new MessageFormat(messages.getString("IMPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), true);
@@ -261,7 +260,7 @@ public class MainWindowController implements Initializable {
 						updateMessage(messages.getString("TASK_EXPORTING_DATA"));
 						updateProgress(-1, 1);
 
-						financeData.exportData(exporter);
+						dataManager.getFinanceData().exportData(exporter);
 					} catch (VogonExportException ex) {
 						Logger.getLogger(MainWindowController.class.getName()).log(Level.SEVERE, null, ex);
 						MessageDialog.showDialog(messages.getString("EXPORT_EXCEPTION_DIALOG_TITLE"), new MessageFormat(messages.getString("EXPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), true);
@@ -292,7 +291,7 @@ public class MainWindowController implements Initializable {
 				updateMessage(messages.getString("TASK_CLEANING_UP_DB"));
 				updateProgress(-1, 1);
 
-				financeData.cleanup();
+				dataManager.getFinanceData().cleanup();
 
 				updateProgress(1, 1);
 				updateMessage("");//NOI18N
@@ -315,8 +314,9 @@ public class MainWindowController implements Initializable {
 				updateMessage(messages.getString("TASK_RECALCULATING_BALANCE"));
 				updateProgress(-1, 1);
 
-				for (FinanceAccount account : financeData.getAccounts())
-					financeData.refreshAccountBalance(account);
+				for (AccountInterface account : dataManager.getAccounts())
+					if (account instanceof AccountModelAdapter)
+						((AccountModelAdapter) account).refreshBalance();
 
 				updateProgress(1, 1);
 				updateMessage("");//NOI18N
@@ -439,15 +439,15 @@ public class MainWindowController implements Initializable {
 	}
 
 	/**
-	 * Assigns the FinanceData instance
+	 * Assigns the DataManager instance
 	 *
-	 * @param financeData the FinanceData instance
+	 * @param dataManager the DataManager instance
 	 */
-	public void setFinanceData(FinanceData financeData) {
-		this.financeData = financeData;
-		transactionsPaneController.setFinanceData(financeData);
-		accountsPaneController.setFinanceData(financeData);
-		analyticsPaneController.setFinanceData(financeData);
-		currenciesPaneController.setFinanceData(financeData);
+	public void setDataManager(DataManager dataManager) {
+		this.dataManager = dataManager;
+		transactionsPaneController.setDataManager(dataManager);
+		accountsPaneController.setDataManager(dataManager);
+		analyticsPaneController.setDataManager(dataManager);
+		currenciesPaneController.setDataManager(dataManager);
 	}
 }

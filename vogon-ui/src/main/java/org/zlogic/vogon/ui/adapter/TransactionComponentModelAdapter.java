@@ -9,7 +9,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
 
@@ -21,9 +20,9 @@ import org.zlogic.vogon.data.TransactionComponent;
 public class TransactionComponentModelAdapter {
 
 	/**
-	 * The FinanceData instance
+	 * The DataManager instance
 	 */
-	protected FinanceData financeData;
+	protected DataManager dataManager;
 	/**
 	 * The associated transaction component
 	 */
@@ -43,42 +42,48 @@ public class TransactionComponentModelAdapter {
 	 * @param transactionComponent the transaction component
 	 * @param financeData the financeData instance
 	 */
-	public TransactionComponentModelAdapter(TransactionComponent transactionComponent, FinanceData financeData) {
+	public TransactionComponentModelAdapter(TransactionComponent transactionComponent, DataManager dataManager) {
 		this.transactionComponent = transactionComponent;
-		this.financeData = financeData;
+		this.dataManager = dataManager;
 		updateProperties();
 
 		//Set property change listeners
 		account.addListener(new ChangeListener<AccountModelAdapter>() {
-			protected FinanceData financeData;
+			protected DataManager dataManager;
 			protected TransactionComponent transactionComponent;
 
-			public ChangeListener<AccountModelAdapter> setData(TransactionComponent transactionComponent, FinanceData financeData) {
+			public ChangeListener<AccountModelAdapter> setData(TransactionComponent transactionComponent, DataManager dataManager) {
 				this.transactionComponent = transactionComponent;
-				this.financeData = financeData;
+				this.dataManager = dataManager;
 				return this;
 			}
 
 			@Override
 			public void changed(ObservableValue<? extends AccountModelAdapter> ov, AccountModelAdapter t, AccountModelAdapter t1) {
-				financeData.setTransactionComponentAccount(transactionComponent, t1.getAccount());
+				//FIXME URGENT
+				/*
+				 financeData.setTransactionComponentAccount(transactionComponent, t1.getAccount());
+				 */
 			}
-		}.setData(transactionComponent, financeData));
+		}.setData(transactionComponent, dataManager));
 		amount.addListener(new ChangeListener<AmountModelAdapter>() {
-			protected FinanceData financeData;
+			protected DataManager dataManager;
 			protected TransactionComponent transactionComponent;
 
-			public ChangeListener<AmountModelAdapter> setData(TransactionComponent transactionComponent, FinanceData financeData) {
+			public ChangeListener<AmountModelAdapter> setData(TransactionComponent transactionComponent, DataManager dataManager) {
 				this.transactionComponent = transactionComponent;
-				this.financeData = financeData;
+				this.dataManager = dataManager;
 				return this;
 			}
 
 			@Override
 			public void changed(ObservableValue<? extends AmountModelAdapter> ov, AmountModelAdapter t, AmountModelAdapter t1) {
-				financeData.setTransactionComponentAmount(transactionComponent, t1.getAmount());
+				//FIXME URGENT
+				/*
+				 financeData.setTransactionComponentAmount(transactionComponent, t1.getAmount());
+				 */
 			}
-		}.setData(transactionComponent, financeData));
+		}.setData(transactionComponent, dataManager));
 	}
 
 	/**
@@ -114,7 +119,6 @@ public class TransactionComponentModelAdapter {
 	 */
 	private void updateProperties() {
 		if (transactionComponent != null) {
-			account.set(new AccountModelAdapter(transactionComponent.getAccount(), financeData));
 			amount.set(new AmountModelAdapter(transactionComponent.getAmount(), true, transactionComponent.getAccount() != null ? transactionComponent.getAccount().getCurrency() : null, false, FinanceTransaction.Type.UNDEFINED));
 		}
 	}

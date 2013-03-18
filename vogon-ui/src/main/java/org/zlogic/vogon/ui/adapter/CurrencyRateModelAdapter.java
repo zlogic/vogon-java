@@ -12,7 +12,6 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import org.zlogic.vogon.data.CurrencyRate;
-import org.zlogic.vogon.data.FinanceData;
 
 /**
  * Class for storing a currency rate with property change detection.
@@ -26,9 +25,9 @@ public class CurrencyRateModelAdapter {
 	 */
 	protected CurrencyRate rate;
 	/**
-	 * The FinanceData instance
+	 * The DataManager instance
 	 */
-	protected FinanceData financeData;
+	protected DataManager dataManager;
 	/**
 	 * The currency rate value property
 	 */
@@ -38,29 +37,32 @@ public class CurrencyRateModelAdapter {
 	 * Default constructor
 	 *
 	 * @param rate the currency rate for this item
-	 * @param financeData the FinanceData instance
+	 * @param dataManager the DataManager instance
 	 */
-	public CurrencyRateModelAdapter(CurrencyRate rate, FinanceData financeData) {
+	public CurrencyRateModelAdapter(CurrencyRate rate, DataManager dataManager) {
 		this.rate = rate;
 		updateProperties();
 
 		//Add change listener
 		value.addListener(new ChangeListener<Number>() {
-			protected FinanceData financeData;
+			protected DataManager dataManager;
 			protected CurrencyRate rate;
 
-			public ChangeListener<Number> setData(CurrencyRate rate, FinanceData financeData) {
+			public ChangeListener<Number> setData(CurrencyRate rate, DataManager dataManager) {
 				this.rate = rate;
-				this.financeData = financeData;
+				this.dataManager = dataManager;
 				return this;
 			}
 
 			@Override
 			public void changed(ObservableValue<? extends Number> ov, Number t, Number t1) {
-				if (rate.getExchangeRate() != t1.doubleValue())
-					financeData.setExchangeRate(rate, t1.doubleValue());
+				//FIXME URGENT
+				/*
+				 if (rate.getExchangeRate() != t1.doubleValue())
+				 financeData.setExchangeRate(rate, t1.doubleValue());
+				 */
 			}
-		}.setData(rate, financeData));
+		}.setData(rate, dataManager));
 	}
 
 	@Override

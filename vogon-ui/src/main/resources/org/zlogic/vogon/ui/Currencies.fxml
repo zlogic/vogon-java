@@ -23,7 +23,7 @@
         <ComboBox fx:id="defaultCurrency" FlowPane.margin="$x1" />
       </children>
     </FlowPane>
-    <TableView fx:id="currenciesTable" editable="true">
+    <TableView fx:id="currenciesTable" editable="true" VBox.vgrow="ALWAYS">
       <columns>
         <TableColumn editable="false" prefWidth="75.0" text="%CURRENCY_SOURCE" fx:id="columnSourceCurrency">
           <cellValueFactory>

@@ -4,7 +4,7 @@
 
 	<groupId>org.zlogic.vogon</groupId>
 	<artifactId>top</artifactId>
-	<version>0.0.5-SNAPSHOT</version>
+	<version>0.0.6-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Vogon :: Top</name>
@@ -16,7 +16,7 @@
 	<properties>
 		<version.java>1.7</version.java>
 		<version.java.launch4j>1.7.0</version.java.launch4j>
-		<version.windows>0.0.5.0</version.windows>
+		<version.windows>0.0.6.0</version.windows>
 		<version.javafx>2.2</version.javafx>
 	</properties>
 

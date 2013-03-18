@@ -45,13 +45,11 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 import org.zlogic.vogon.data.FinanceAccount;
-import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.Report;
-import org.zlogic.vogon.data.events.AccountEventHandler;
-import org.zlogic.vogon.data.events.TransactionEventHandler;
 import org.zlogic.vogon.ui.adapter.AccountModelAdapter;
 import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
+import org.zlogic.vogon.ui.adapter.DataManager;
 import org.zlogic.vogon.ui.cell.DateConverter;
 
 /**
@@ -72,7 +70,7 @@ public class AnalyticsController implements Initializable {
 	/**
 	 * The finance data reference
 	 */
-	protected FinanceData financeData;
+	protected DataManager dataManager;
 	/**
 	 * The date format for resulting tables
 	 */
@@ -324,7 +322,7 @@ public class AnalyticsController implements Initializable {
 	private void updateAccountsSelectionTable() {
 		accountsSelectionTable.getItems().clear();
 		for (FinanceAccount account : report.getAllAccounts())
-			accountsSelectionTable.getItems().add(new AccountSelectionAdapter(new AccountModelAdapter(account, financeData), account.getIncludeInTotal()));
+			accountsSelectionTable.getItems().add(new AccountSelectionAdapter(new AccountModelAdapter(account, dataManager), account.getIncludeInTotal()));
 	}
 
 	/**
@@ -346,7 +344,7 @@ public class AnalyticsController implements Initializable {
 	private void updateTransactionsResultTable(List<FinanceTransaction> values) {
 		transactionsResultTable.getItems().clear();
 		for (FinanceTransaction transaction : values)
-			transactionsResultTable.getItems().add(new TransactionResultAdapter(transaction, financeData));
+			transactionsResultTable.getItems().add(new TransactionResultAdapter(transaction, dataManager));
 	}
 
 	/**
@@ -359,7 +357,7 @@ public class AnalyticsController implements Initializable {
 		for (Report.TagExpense tagExpense : values) {
 			TagResultAdapter tagResult = new TagResultAdapter(tagExpense.getTag(), tagExpense.getAmount(), tagExpense.getCurrency(), tagExpense.isCurrencyConverted());
 			String tagLabel = MessageFormat.format(messages.getString("PIECHART_TAG_FORMAT"), new Object[]{tagExpense.getTag(), tagResult.amountProperty().get().toString()});
-			data.add(new PieChart.Data(tagLabel, financeData.getExchangeRate(tagExpense.getCurrency(), financeData.getDefaultCurrency())
+			data.add(new PieChart.Data(tagLabel, dataManager.getFinanceData().getExchangeRate(tagExpense.getCurrency(), dataManager.getDefaultCurrency().get().getCurrency())
 					* Math.abs(tagExpense.getAmount())));
 		}
 
@@ -384,70 +382,21 @@ public class AnalyticsController implements Initializable {
 	}
 
 	/**
-	 * Assigns the FinanceData instance
+	 * Assigns the DataManager instance
 	 *
-	 * @param financeData the FinanceData instance
+	 * @param dataManager the DataManager instance
 	 */
-	public void setFinanceData(FinanceData financeData) {
-		this.financeData = financeData;
+	public void setDataManager(DataManager dataManager) {
+		this.dataManager = dataManager;
 
 		//Update the form
-		report = new Report(financeData);
+		report = new Report(dataManager.getFinanceData());
 
 		startDateField.setText(dateFormat.format(report.getEarliestDate()));
 		endDateField.setText(dateFormat.format(report.getLatestDate()));
 
 		updateTagsSelectionTable();
 		updateAccountsSelectionTable();
-
-		//Listen for Account events
-		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
-			((FinanceDataEventDispatcher) financeData.getAccountListener()).addAccountEventHandler(new AccountEventHandler() {
-				@Override
-				public void accountCreated(long accountId) {
-					updateAccountsSelectionTable();
-				}
-
-				@Override
-				public void accountUpdated(long accountId) {
-					updateAccountsSelectionTable();
-				}
-
-				@Override
-				public void accountsUpdated() {
-					updateAccountsSelectionTable();
-				}
-
-				@Override
-				public void accountDeleted(long accountId) {
-					updateAccountsSelectionTable();
-				}
-			});
-		}
-
-		//Listen for Transaction events
-		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
-			((FinanceDataEventDispatcher) financeData.getAccountListener()).addTransactionEventHandler(new TransactionEventHandler() {
-				@Override
-				public void transactionCreated(long transactionId) {
-					updateTagsSelectionTable();
-				}
-
-				@Override
-				public void transactionUpdated(long transactionId) {
-					updateTagsSelectionTable();
-				}
-
-				@Override
-				public void transactionsUpdated() {
-				}
-
-				@Override
-				public void transactionDeleted(long transactionId) {
-					updateTagsSelectionTable();
-				}
-			});
-		}
 	}
 
 	/**
@@ -618,10 +567,10 @@ public class AnalyticsController implements Initializable {
 		 * Constructs a TransactionResultAdapter
 		 *
 		 * @param transaction the transaction
-		 * @param financeData the associated FinanceData instance (used only for
+		 * @param dataManager the associated DataManager instance (used only for
 		 * currency conversion)
 		 */
-		public TransactionResultAdapter(FinanceTransaction transaction, FinanceData financeData) {
+		public TransactionResultAdapter(FinanceTransaction transaction, DataManager dataManager) {
 			this.description.set(transaction.getDescription());
 			double transactionAmount;
 			Currency transactionCurrency;
@@ -629,8 +578,8 @@ public class AnalyticsController implements Initializable {
 				transactionAmount = transaction.getAmount();
 				transactionCurrency = transaction.getCurrencies().get(0);
 			} else {
-				transactionAmount = financeData.getAmountInCurrency(transaction, financeData.getDefaultCurrency());
-				transactionCurrency = financeData.getDefaultCurrency();
+				transactionAmount = dataManager.getFinanceData().getAmountInCurrency(transaction, dataManager.getFinanceData().getDefaultCurrency());
+				transactionCurrency = dataManager.getFinanceData().getDefaultCurrency();
 			}
 			this.amount.set(new AmountModelAdapter(transactionAmount, transaction.isAmountOk(), transactionCurrency, transaction.getCurrencies().size() != 1, transaction.getType()));
 			date.set(transaction.getDate());

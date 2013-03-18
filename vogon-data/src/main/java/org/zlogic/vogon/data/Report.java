@@ -414,58 +414,78 @@ public class Report {
 	 * @return list of all transactions matching the set filters
 	 */
 	public <OrderByClass> List<FinanceTransaction> getTransactions(SingularAttribute<FinanceTransaction, OrderByClass> orderBy, boolean orderAsc, boolean orderAbsolute, EnumSet<FilterType> appliedFilters, int firstTransaction, int lastTransaction) {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<Tuple> transactionsCriteriaQuery = criteriaBuilder.createTupleQuery();
-		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
-
-		//Build general filter
-		ConstructedPredicate predicate = getFilteredTransactionsPredicate(criteriaBuilder, tr, appliedFilters);
-		transactionsCriteriaQuery.where(predicate.getPredicate());
-
-		//Configure the query
-		Expression<?> userOrderBy = tr.get(orderBy);
-
-		if (orderAbsolute) {
-			if (orderBy.getType().getJavaType().isInstance(Number.class))
-				userOrderBy = criteriaBuilder.abs(userOrderBy.as(Number.class));
-			else if (orderBy.getType().getJavaType() == Short.TYPE)
-				userOrderBy = criteriaBuilder.abs(userOrderBy.as(Short.TYPE));
-			else if (orderBy.getType().getJavaType() == Integer.TYPE)
-				userOrderBy = criteriaBuilder.abs(userOrderBy.as(Integer.TYPE));
-			else if (orderBy.getType().getJavaType() == Long.TYPE)
-				userOrderBy = criteriaBuilder.abs(userOrderBy.as(Long.TYPE));
-			else if (orderBy.getType().getJavaType() == Float.TYPE)
-				userOrderBy = criteriaBuilder.abs(userOrderBy.as(Float.TYPE));
-			else if (orderBy.getType().getJavaType() == Double.TYPE)
-				userOrderBy = criteriaBuilder.abs(userOrderBy.as(Double.TYPE));
-		}
-		Order userOrder = orderAsc ? criteriaBuilder.asc(userOrderBy) : criteriaBuilder.desc(userOrderBy);
-		Order idOrder = orderAsc ? criteriaBuilder.asc(tr.get(FinanceTransaction_.id)) : criteriaBuilder.desc(tr.get(FinanceTransaction_.id));
-
-		transactionsCriteriaQuery.multiselect(tr, userOrderBy).distinct(true);
-		transactionsCriteriaQuery.orderBy(userOrder, idOrder);
-		transactionsCriteriaQuery.groupBy(tr, userOrderBy, predicate.getComponentsJoin(), predicate.getTagsJoin());
-
-		//Fetch data
-		TypedQuery<Tuple> query = entityManager.createQuery(transactionsCriteriaQuery);
-		if (firstTransaction >= 0)
-			query = query.setFirstResult(firstTransaction);
-		if (lastTransaction >= 0 && firstTransaction >= 0)
-			query = query.setMaxResults(lastTransaction - firstTransaction + 1);
-
 		List<FinanceTransaction> transactions = new LinkedList<>();
-		for (Tuple tuple : query.getResultList())
-			transactions.add(tuple.get(tr));
+		TransactedChange query = new TransactedChange() {
+			private List<FinanceTransaction> transactions;
+			private SingularAttribute<FinanceTransaction, OrderByClass> orderBy;
+			private boolean orderAsc, orderAbsolute;
+			private EnumSet<FilterType> appliedFilters;
+			private int firstTransaction, lastTransaction;
 
-		//Post-fetch components
-		CriteriaQuery<FinanceTransaction> transactionsComponentsFetchCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
-		Root<FinanceTransaction> trComponentsFetch = transactionsComponentsFetchCriteriaQuery.from(FinanceTransaction.class);
-		transactionsComponentsFetchCriteriaQuery.where(tr.in(transactions));
-		trComponentsFetch.fetch(FinanceTransaction_.components, JoinType.LEFT).fetch(TransactionComponent_.account, JoinType.LEFT);
-		entityManager.createQuery(transactionsComponentsFetchCriteriaQuery).getResultList();
+			public TransactedChange setParameters(List<FinanceTransaction> transactions, SingularAttribute<FinanceTransaction, OrderByClass> orderBy, boolean orderAsc, boolean orderAbsolute, EnumSet<FilterType> appliedFilters, int firstTransaction, int lastTransaction) {
+				this.transactions = transactions;
+				this.orderBy = orderBy;
+				this.orderAsc = orderAsc;
+				this.orderAbsolute = orderAbsolute;
+				this.appliedFilters = appliedFilters;
+				this.firstTransaction = firstTransaction;
+				this.lastTransaction = lastTransaction;
+				return this;
+			}
 
-		entityManager.close();
+			@Override
+			public void performChange(EntityManager entityManager) {
+				CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+				CriteriaQuery<Tuple> transactionsCriteriaQuery = criteriaBuilder.createTupleQuery();
+				Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
+
+				//Build general filter
+				ConstructedPredicate predicate = getFilteredTransactionsPredicate(criteriaBuilder, tr, appliedFilters);
+				transactionsCriteriaQuery.where(predicate.getPredicate());
+
+				//Configure the query
+				Expression<?> userOrderBy = tr.get(orderBy);
+
+				if (orderAbsolute) {
+					if (orderBy.getType().getJavaType().isInstance(Number.class))
+						userOrderBy = criteriaBuilder.abs(userOrderBy.as(Number.class));
+					else if (orderBy.getType().getJavaType() == Short.TYPE)
+						userOrderBy = criteriaBuilder.abs(userOrderBy.as(Short.TYPE));
+					else if (orderBy.getType().getJavaType() == Integer.TYPE)
+						userOrderBy = criteriaBuilder.abs(userOrderBy.as(Integer.TYPE));
+					else if (orderBy.getType().getJavaType() == Long.TYPE)
+						userOrderBy = criteriaBuilder.abs(userOrderBy.as(Long.TYPE));
+					else if (orderBy.getType().getJavaType() == Float.TYPE)
+						userOrderBy = criteriaBuilder.abs(userOrderBy.as(Float.TYPE));
+					else if (orderBy.getType().getJavaType() == Double.TYPE)
+						userOrderBy = criteriaBuilder.abs(userOrderBy.as(Double.TYPE));
+				}
+				Order userOrder = orderAsc ? criteriaBuilder.asc(userOrderBy) : criteriaBuilder.desc(userOrderBy);
+				Order idOrder = orderAsc ? criteriaBuilder.asc(tr.get(FinanceTransaction_.id)) : criteriaBuilder.desc(tr.get(FinanceTransaction_.id));
+
+				transactionsCriteriaQuery.multiselect(tr, userOrderBy).distinct(true);
+				transactionsCriteriaQuery.orderBy(userOrder, idOrder);
+				transactionsCriteriaQuery.groupBy(tr, userOrderBy, predicate.getComponentsJoin(), predicate.getTagsJoin());
+
+				//Fetch data
+				TypedQuery<Tuple> query = entityManager.createQuery(transactionsCriteriaQuery);
+				if (firstTransaction >= 0)
+					query = query.setFirstResult(firstTransaction);
+				if (lastTransaction >= 0 && firstTransaction >= 0)
+					query = query.setMaxResults(lastTransaction - firstTransaction + 1);
+
+				for (Tuple tuple : query.getResultList())
+					transactions.add(tuple.get(tr));
+
+				//Post-fetch components
+				CriteriaQuery<FinanceTransaction> transactionsComponentsFetchCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
+				Root<FinanceTransaction> trComponentsFetch = transactionsComponentsFetchCriteriaQuery.from(FinanceTransaction.class);
+				transactionsComponentsFetchCriteriaQuery.where(tr.in(transactions));
+				trComponentsFetch.fetch(FinanceTransaction_.components, JoinType.LEFT).fetch(TransactionComponent_.account, JoinType.LEFT);
+				entityManager.createQuery(transactionsComponentsFetchCriteriaQuery).getResultList();
+			}
+		}.setParameters(transactions, orderBy, orderAsc, orderAbsolute, appliedFilters, firstTransaction, lastTransaction);
+		financeData.performTransactedChange(query);
 		return transactions;
 	}
 
@@ -475,16 +495,22 @@ public class Report {
 	 * @return a list of all tags
 	 */
 	public List<String> getAllTags() {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<String> tagsCriteriaQuery = criteriaBuilder.createQuery(String.class);
-		Root<FinanceTransaction> tr = tagsCriteriaQuery.from(FinanceTransaction.class);
+		TransactedQuery<String, List<String>> query = new TransactedQuery<String, List<String>>() {
+			@Override
+			public CriteriaQuery<String> getQuery(CriteriaBuilder criteriaBuilder) {
+				CriteriaQuery<String> tagsCriteriaQuery = criteriaBuilder.createQuery(String.class);
+				Root<FinanceTransaction> tr = tagsCriteriaQuery.from(FinanceTransaction.class);
 
-		tagsCriteriaQuery.select(tr.join(FinanceTransaction_.tags)).distinct(true);
+				tagsCriteriaQuery.select(tr.join(FinanceTransaction_.tags)).distinct(true);
+				return tagsCriteriaQuery;
+			}
 
-		List<String> tags = entityManager.createQuery(tagsCriteriaQuery).getResultList();
-		entityManager.close();
-		return tags;
+			@Override
+			public List<String> getQueryResult(TypedQuery<String> preparedQuery) {
+				return preparedQuery.getResultList();
+			}
+		};
+		return financeData.performTransactedQuery(query);
 	}
 
 	/**
@@ -493,12 +519,21 @@ public class Report {
 	 * @return the list of all accounts stored in the database
 	 */
 	public List<FinanceAccount> getAllAccounts() {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<FinanceAccount> accountsCriteriaQuery = criteriaBuilder.createQuery(FinanceAccount.class);
-		accountsCriteriaQuery.from(FinanceAccount.class);
-		List<FinanceAccount> accounts = entityManager.createQuery(accountsCriteriaQuery).getResultList();
-		entityManager.close();
+		TransactedQuery<FinanceAccount, List<FinanceAccount>> query = new TransactedQuery<FinanceAccount, List<FinanceAccount>>() {
+			@Override
+			public CriteriaQuery<FinanceAccount> getQuery(CriteriaBuilder criteriaBuilder) {
+				CriteriaQuery<FinanceAccount> accountsCriteriaQuery = criteriaBuilder.createQuery(FinanceAccount.class);
+				accountsCriteriaQuery.from(FinanceAccount.class);
+				return accountsCriteriaQuery;
+			}
+
+			@Override
+			public List<FinanceAccount> getQueryResult(TypedQuery<FinanceAccount> preparedQuery) {
+				return preparedQuery.getResultList();
+			}
+		};
+
+		List<FinanceAccount> accounts = financeData.performTransactedQuery(query);
 		return accounts;
 	}
 
@@ -510,26 +545,44 @@ public class Report {
 	 * @return the raw balance
 	 */
 	public long getRawAccountBalanceByDate(FinanceAccount account, Date byDate) {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> transactionsCriteriaQuery = criteriaBuilder.createQuery(Long.class);
-		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 
-		Join<FinanceTransaction, TransactionComponent> componentsJoin = tr.join(FinanceTransaction_.components);
-		Path<FinanceAccount> joinedAccount = componentsJoin.get(TransactionComponent_.account);
+		TransactedQuery<Long, Long> query = new TransactedQuery<Long, Long>() {
+			private FinanceAccount account;
+			private Date byDate;
 
-		Predicate accountsPredicate = criteriaBuilder.equal(componentsJoin.get(TransactionComponent_.account), account);
-		Predicate datePredicate = criteriaBuilder.lessThan(tr.get(FinanceTransaction_.transactionDate), byDate);
-		transactionsCriteriaQuery.select(criteriaBuilder.sum(componentsJoin.get(TransactionComponent_.amount)));
-		transactionsCriteriaQuery.where(criteriaBuilder.and(accountsPredicate, datePredicate));
-		transactionsCriteriaQuery.groupBy(joinedAccount);
+			public TransactedQuery<Long, Long> setParameters(FinanceAccount account, Date byDate) {
+				this.account = account;
+				this.byDate = byDate;
+				return this;
+			}
+
+			@Override
+			public CriteriaQuery<Long> getQuery(CriteriaBuilder criteriaBuilder) {
+				CriteriaQuery<Long> transactionsCriteriaQuery = criteriaBuilder.createQuery(Long.class);
+				Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
+
+				Join<FinanceTransaction, TransactionComponent> componentsJoin = tr.join(FinanceTransaction_.components);
+				Path<FinanceAccount> joinedAccount = componentsJoin.get(TransactionComponent_.account);
+
+				Predicate accountsPredicate = criteriaBuilder.equal(componentsJoin.get(TransactionComponent_.account), account);
+				Predicate datePredicate = criteriaBuilder.lessThan(tr.get(FinanceTransaction_.transactionDate), byDate);
+				transactionsCriteriaQuery.select(criteriaBuilder.sum(componentsJoin.get(TransactionComponent_.amount)));
+				transactionsCriteriaQuery.where(criteriaBuilder.and(accountsPredicate, datePredicate));
+				transactionsCriteriaQuery.groupBy(joinedAccount);
+				return transactionsCriteriaQuery;
+			}
+
+			@Override
+			public Long getQueryResult(TypedQuery<Long> preparedQuery) {
+				return preparedQuery.getSingleResult();
+			}
+		}.setParameters(account, byDate);
 
 		long result = 0;
 		try {
-			result = entityManager.createQuery(transactionsCriteriaQuery).getSingleResult();
+			result = financeData.performTransactedQuery(query);
 		} catch (NoResultException ex) {
 		}
-		entityManager.close();
 		return result;
 	}
 
@@ -672,28 +725,45 @@ public class Report {
 	 * @return expenses grouped by tags
 	 */
 	public List<TagExpense> getTagExpenses() {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 		Map<String, TagExpense> result = new TreeMap<>();
 		//Process currencies separately
 		for (Currency currency : financeData.getCurrencies()) {
 			//Obtain the tag-total sum table via a query
-			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-			CriteriaQuery<Tuple> transactionsCriteriaQuery = criteriaBuilder.createTupleQuery();
-			Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
+			TransactedQuery<Tuple, List<Tuple>> query = new TransactedQuery<Tuple, List<Tuple>>() {
+				private Currency currency;
 
-			ConstructedPredicate predicate = getFilteredTransactionsPredicate(criteriaBuilder, tr, EnumSet.allOf(FilterType.class));
+				public TransactedQuery<Tuple, List<Tuple>> setCurrency(Currency currency) {
+					this.currency = currency;
+					return this;
+				}
 
-			Predicate currencyPredicate = criteriaBuilder.equal(predicate.getComponentsJoin().get(TransactionComponent_.account).get(FinanceAccount_.currency), currency.getCurrencyCode());
+				@Override
+				public CriteriaQuery<Tuple> getQuery(CriteriaBuilder criteriaBuilder) {
+					CriteriaQuery<Tuple> transactionsCriteriaQuery = criteriaBuilder.createTupleQuery();
+					Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 
-			transactionsCriteriaQuery.multiselect(criteriaBuilder.sum(predicate.getComponentsJoin().get(TransactionComponent_.amount)),
-					predicate.getTagsJoin()).distinct(true);
-			transactionsCriteriaQuery.where(criteriaBuilder.and(predicate.getPredicate(), currencyPredicate));
-			transactionsCriteriaQuery.groupBy(predicate.getTagsJoin(), predicate.getComponentsJoin().get(TransactionComponent_.account).get(FinanceAccount_.currency));
+					ConstructedPredicate predicate = getFilteredTransactionsPredicate(criteriaBuilder, tr, EnumSet.allOf(FilterType.class));
+
+					Predicate currencyPredicate = criteriaBuilder.equal(predicate.getComponentsJoin().get(TransactionComponent_.account).get(FinanceAccount_.currency), currency.getCurrencyCode());
+
+					transactionsCriteriaQuery.multiselect(criteriaBuilder.sum(predicate.getComponentsJoin().get(TransactionComponent_.amount)),
+							predicate.getTagsJoin()).distinct(true);
+					transactionsCriteriaQuery.where(criteriaBuilder.and(predicate.getPredicate(), currencyPredicate));
+					transactionsCriteriaQuery.groupBy(predicate.getTagsJoin(), predicate.getComponentsJoin().get(TransactionComponent_.account).get(FinanceAccount_.currency));
+
+					return transactionsCriteriaQuery;
+				}
+
+				@Override
+				public List<Tuple> getQueryResult(TypedQuery<Tuple> preparedQuery) {
+					return preparedQuery.getResultList();
+				}
+			}.setCurrency(currency);
 
 			double exchangeRate = financeData.getExchangeRate(currency, financeData.getDefaultCurrency());
 
 			//Convert results to a common currency if tag contains transactions in different currencies
-			for (Tuple tuple : entityManager.createQuery(transactionsCriteriaQuery).getResultList()) {
+			for (Tuple tuple : financeData.performTransactedQuery(query)) {
 				String tag = tuple.get(1, String.class);
 				double amount = (tuple.get(0, Long.class) / Constants.rawAmountMultiplier);
 				if (!result.containsKey(tag))
@@ -711,7 +781,6 @@ public class Report {
 				}
 			}
 		}
-		entityManager.close();
 		return new LinkedList<>(result.values());
 	}
 }

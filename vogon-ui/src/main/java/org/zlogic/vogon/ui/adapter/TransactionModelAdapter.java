@@ -25,8 +25,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.util.StringConverter;
 import org.zlogic.vogon.data.FinanceAccount;
-import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
+import org.zlogic.vogon.data.TransactionComponent;
 import org.zlogic.vogon.ui.cell.CellStatus;
 
 /**
@@ -45,9 +45,9 @@ public class TransactionModelAdapter implements CellStatus {
 	 */
 	protected FinanceTransaction transaction;
 	/**
-	 * The FinanceData instance
+	 * The DataManager instance
 	 */
-	protected FinanceData financeData;
+	protected DataManager dataManager;
 	/**
 	 * The transaction description property
 	 */
@@ -60,6 +60,10 @@ public class TransactionModelAdapter implements CellStatus {
 	 * The transaction date property
 	 */
 	private final ObjectProperty<Date> date = new SimpleObjectProperty<>();
+	/**
+	 * The transaction type property
+	 */
+	private final ObjectProperty<FinanceTransaction.Type> type = new SimpleObjectProperty<>();
 	/**
 	 * The transaction amount property
 	 */
@@ -79,61 +83,103 @@ public class TransactionModelAdapter implements CellStatus {
 	 * @param transaction the associated transaction
 	 * @param financeData the associated FinanceData instance
 	 */
-	public TransactionModelAdapter(FinanceTransaction transaction, FinanceData financeData) {
+	public TransactionModelAdapter(FinanceTransaction transaction, DataManager dataManager) {
 		this.transaction = transaction;
-		this.financeData = financeData;
-		updateProperties();
+		this.dataManager = dataManager;
+		updateFxProperties();
 
 		//Add change listeners
 		description.addListener(new ChangeListener<String>() {
-			protected FinanceData financeData;
+			protected DataManager dataManager;
 			protected FinanceTransaction transaction;
 
-			public ChangeListener<String> setData(FinanceTransaction transaction, FinanceData financeData) {
+			public ChangeListener<String> setData(FinanceTransaction transaction, DataManager dataManager) {
 				this.transaction = transaction;
-				this.financeData = financeData;
+				this.dataManager = dataManager;
 				return this;
 			}
 
 			@Override
 			public void changed(ObservableValue<? extends String> ov, String t, String t1) {
-				if (!t1.equals(transaction.getDescription()))
-					financeData.setTransactionDescription(transaction, t1);
+				//FIXME URGENT
+				/*
+				 if (!t1.equals(transaction.getDescription()))
+				 financeData.setTransactionDescription(transaction, t1);
+				 */
 			}
-		}.setData(transaction, financeData));
+		}.setData(transaction, dataManager));
 
 		tags.addListener(new ListChangeListener<String>() {
-			protected FinanceData financeData;
+			protected DataManager dataManager;
 			protected FinanceTransaction transaction;
 
-			public ListChangeListener<String> setData(FinanceTransaction transaction, FinanceData financeData) {
+			public ListChangeListener<String> setData(FinanceTransaction transaction, DataManager dataManager) {
 				this.transaction = transaction;
-				this.financeData = financeData;
+				this.dataManager = dataManager;
 				return this;
 			}
 
 			@Override
 			public void onChanged(Change<? extends String> change) {
-				financeData.setTransactionTags(transaction, change.getList().toArray(new String[0]));
+				//FIXME URGENT
+				/*
+				 financeData.setTransactionTags(transaction, change.getList().toArray(new String[0]));
+				 */
 			}
-		}.setData(transaction, financeData));
+		}.setData(transaction, dataManager));
 
 		date.addListener(new ChangeListener<Date>() {
-			protected FinanceData financeData;
+			protected DataManager dataManager;
 			protected FinanceTransaction transaction;
 
-			public ChangeListener<Date> setData(FinanceTransaction transaction, FinanceData financeData) {
+			public ChangeListener<Date> setData(FinanceTransaction transaction, DataManager dataManager) {
 				this.transaction = transaction;
-				this.financeData = financeData;
+				this.dataManager = dataManager;
 				return this;
 			}
 
 			@Override
 			public void changed(ObservableValue<? extends Date> ov, Date t, Date t1) {
-				if (!transaction.getDate().equals(t1))
-					financeData.setTransactionDate(transaction, t1);
+				//FIXME URGENT
+				/*
+				 if (!transaction.getDate().equals(t1))
+				 financeData.setTransactionDate(transaction, t1);
+				 */
 			}
-		}.setData(transaction, financeData));
+		}.setData(transaction, dataManager));
+
+		type.addListener(new ChangeListener<FinanceTransaction.Type>() {
+			protected DataManager dataManager;
+			protected FinanceTransaction transaction;
+
+			public ChangeListener<FinanceTransaction.Type> setData(FinanceTransaction transaction, DataManager dataManager) {
+				this.transaction = transaction;
+				this.dataManager = dataManager;
+				return this;
+			}
+
+			@Override
+			public void changed(ObservableValue<? extends FinanceTransaction.Type> ov, FinanceTransaction.Type t, FinanceTransaction.Type t1) {
+				//FIXME URGENT
+				/*
+				 if (!transaction.getDate().equals(t1))
+				 financeData.setTransactionDate(transaction, t1);
+				 */
+			}
+		}.setData(transaction, dataManager));
+	}
+
+	public TransactionComponentModelAdapter createComponent() {
+		TransactionComponent component = dataManager.getFinanceData().createTransactionComponent(null, transaction, 0);
+		TransactionComponentModelAdapter componentAdapter = new TransactionComponentModelAdapter(component, dataManager);
+		//FIXME URGENT: add to component list
+		return componentAdapter;
+	}
+
+	public void deleteComponent(TransactionComponentModelAdapter component) {
+		dataManager.getFinanceData().deleteTransactionComponent(component.getTransactionComponent());
+		//FIXME URGENT: remove from component list
+		//FIXME URGENT: update transaction from database
 	}
 
 	/**
@@ -187,8 +233,8 @@ public class TransactionModelAdapter implements CellStatus {
 			amountValue = transaction.getAmount();
 			currency = transactionCurrencies.get(0);
 		} else {
-			amountValue = financeData.getAmountInCurrency(transaction, financeData.getDefaultCurrency());
-			currency = financeData.getDefaultCurrency();
+			amountValue = dataManager.getFinanceData().getAmountInCurrency(transaction, dataManager.getDefaultCurrency().get().getCurrency());
+			currency = dataManager.getDefaultCurrency().get().getCurrency();
 		}
 		return new AmountModelAdapter(amountValue, transaction.isAmountOk(), currency, transactionCurrencies.size() != 1, transaction.getType());
 	}
@@ -267,6 +313,15 @@ public class TransactionModelAdapter implements CellStatus {
 	}
 
 	/**
+	 * Returns the transaction type property
+	 *
+	 * @return the transaction type property
+	 */
+	public ObjectProperty<FinanceTransaction.Type> typeProperty() {
+		return type;
+	}
+
+	/**
 	 * Returns the transaction accounts property (rendered to string)
 	 *
 	 * @return the transaction accounts property
@@ -308,7 +363,7 @@ public class TransactionModelAdapter implements CellStatus {
 	 * Updates the properties from the current transaction, causing
 	 * ChangeListeners to trigger.
 	 */
-	private void updateProperties() {
+	private void updateFxProperties() {
 		if (transaction != null) {
 			description.set(transaction.getDescription());
 			date.set(transaction.getDate());
@@ -316,6 +371,7 @@ public class TransactionModelAdapter implements CellStatus {
 			tags.addAll(transaction.getTags());
 			amount.set(getAmount());
 			account.set(getAccount());
+			type.set(transaction.getType());
 			isOkProperty.set(transaction.isAmountOk());
 		}
 	}

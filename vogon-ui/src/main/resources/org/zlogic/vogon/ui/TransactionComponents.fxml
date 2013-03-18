@@ -23,7 +23,7 @@
               </HBox.margin>
             </Button>
             <Button fx:id="deleteComponent" mnemonicParsing="false" onAction="#handleDeleteComponent" text="%DELETE_COMPONENT" HBox.margin="$x1" />
-            <ComboBox fx:id="transactionType" onAction="#handleSetTransactionType" HBox.margin="$x1" />
+            <ComboBox fx:id="transactionType" HBox.margin="$x1" />
           </children>
         </HBox>
         <TableView fx:id="transactionComponents" editable="true">

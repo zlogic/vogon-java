@@ -10,16 +10,15 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
-import org.zlogic.vogon.data.events.AccountEventHandler;
-import org.zlogic.vogon.data.events.CurrencyEventHandler;
-import org.zlogic.vogon.data.events.TransactionEventHandler;
 import org.zlogic.vogon.data.interop.FileExporter;
 import org.zlogic.vogon.data.interop.FileImporter;
 import org.zlogic.vogon.data.interop.VogonExportException;
@@ -39,6 +38,18 @@ public class FinanceData {
 	 */
 	protected java.util.List<CurrencyRate> exchangeRates;
 	/**
+	 * Entity manager factory
+	 */
+	private EntityManagerFactory entityManagerFactory = javax.persistence.Persistence.createEntityManagerFactory("VogonPU"); //NOI18N
+	/**
+	 * True if shutdown is started. Disables any transactions.
+	 */
+	private boolean shuttingDown = false;
+	/**
+	 * Lock for shuttingDown
+	 */
+	private ReentrantReadWriteLock shuttingDownLock = new ReentrantReadWriteLock();
+	/**
 	 * Preferred currency
 	 */
 	protected Currency defaultCurrency;
@@ -51,7 +62,79 @@ public class FinanceData {
 	 * Default constructor
 	 */
 	public FinanceData() {
-		restoreFromDatabase();
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
+		restoreFromDatabase(entityManager);
+		entityManager.close();
+	}
+
+	/**
+	 * Starts the shutdown and blocks any future requests to the database.
+	 */
+	public void shutdown() {
+		try {
+			shuttingDownLock.writeLock().lock();
+			shuttingDown = true;
+		} finally {
+			shuttingDownLock.writeLock().unlock();
+		}
+	}
+
+	/**
+	 * Returns true if the application is shutting down and database requests
+	 * will be ignored.
+	 *
+	 * @return true if the applications is shutting down
+	 */
+	public boolean isShuttingDown() {
+		return shuttingDown;
+	}
+
+	/**
+	 * Performs a requested change with a supplied TransactedChange. If process
+	 * is shutting down, the change is ignored.
+	 *
+	 * @param requestedChange a TransactedChange implementation
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
+	 */
+	public void performTransactedChange(TransactedChange requestedChange) throws ApplicationShuttingDownException {
+		try {
+			shuttingDownLock.readLock().lock();
+			if (shuttingDown)
+				throw new ApplicationShuttingDownException();
+			EntityManager entityManager = entityManagerFactory.createEntityManager();
+			entityManager.getTransaction().begin();
+			requestedChange.performChange(entityManager);
+			entityManager.getTransaction().commit();
+			entityManager.close();
+		} finally {
+			shuttingDownLock.readLock().unlock();
+		}
+	}
+
+	/**
+	 * Performs a requested query with a supplied TransactedQuery. If process is
+	 * shutting down, the change is ignored.
+	 *
+	 * @param requestedQuery a TransactedQuery implementation
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
+	 */
+	public <ElementType, ResultType> ResultType performTransactedQuery(TransactedQuery<ElementType, ResultType> requestedQuery) throws ApplicationShuttingDownException {
+		ResultType result = null;
+		try {
+			shuttingDownLock.readLock().lock();
+			if (shuttingDown)
+				throw new ApplicationShuttingDownException();
+			EntityManager entityManager = entityManagerFactory.createEntityManager();
+			entityManager.getTransaction().begin();
+			result = requestedQuery.getQueryResult(entityManager.createQuery(requestedQuery.getQuery(entityManager.getCriteriaBuilder())));
+			entityManager.getTransaction().commit();
+			entityManager.close();
+		} finally {
+			shuttingDownLock.readLock().unlock();
+		}
+		return result;
 	}
 
 	/**
@@ -64,21 +147,31 @@ public class FinanceData {
 	 * @throws VogonImportLogicalException in case of logical errors (without
 	 * meaningful stack trace, just to show an error message)
 	 */
-	public void importData(FileImporter importer) throws VogonImportException, VogonImportLogicalException {
-		importer.importFile();
+	public void importData(FileImporter importer) throws VogonImportException, VogonImportLogicalException, ApplicationShuttingDownException {
+		try {
+			shuttingDownLock.readLock().lock();
+			if (shuttingDown)
+				throw new ApplicationShuttingDownException();
+			EntityManager entityManager = entityManagerFactory.createEntityManager();
+			importer.importFile(this, entityManager);
 
-		restoreFromDatabase();
+			restoreFromDatabase(entityManager);
 
-		populateCurrencies();
-		if (!getCurrencies().contains(defaultCurrency))
-			if (getCurrencies().size() > 0)
-				setDefaultCurrency(getCurrencies().contains(Currency.getInstance(Locale.getDefault())) ? Currency.getInstance(Locale.getDefault()) : getCurrencies().get(0));
-			else
-				setDefaultCurrency(Currency.getInstance(Locale.getDefault()));
-
-		fireTransactionsUpdated();
-		fireAccountsUpdated();
-		fireCurrenciesUpdated();
+			populateCurrencies(entityManager);
+			if (!getCurrencies().contains(defaultCurrency)) {
+				Preferences preferences = getPreferencesFromDatabase(entityManager);
+				entityManager.getTransaction().begin();
+				preferences = entityManager.find(Preferences.class, preferences.id);
+				if (getCurrencies().size() > 0)
+					preferences.setDefaultCurrency(getCurrencies().contains(Currency.getInstance(Locale.getDefault())) ? Currency.getInstance(Locale.getDefault()) : getCurrencies().get(0));
+				else
+					preferences.setDefaultCurrency(Currency.getInstance(Locale.getDefault()));
+				entityManager.getTransaction().commit();
+			}
+			entityManager.close();
+		} finally {
+			shuttingDownLock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -88,24 +181,24 @@ public class FinanceData {
 	 * @throws VogonExportException in case of export errors (I/O, format,
 	 * indexing etc.)
 	 */
-	public void exportData(FileExporter exporter) throws VogonExportException {
-		exporter.exportFile(this);
+	public void exportData(FileExporter exporter) throws VogonExportException, ApplicationShuttingDownException {
+		try {
+			shuttingDownLock.readLock().lock();
+			if (shuttingDown)
+				throw new ApplicationShuttingDownException();
+			exporter.exportFile(this);
+		} finally {
+			shuttingDownLock.readLock().unlock();
+		}
 	}
 
 	/**
 	 * Restores all data from the persistence database
 	 */
-	private void restoreFromDatabase() {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
+	private void restoreFromDatabase(EntityManager entityManager) {
 		exchangeRates = getCurrencyRatesFromDatabase(entityManager);
 		defaultCurrency = getDefaultCurrencyFromDatabase(entityManager);
-		entityManager.close();
-
-		transactionsCount = getTransactionsCountFromDatabase();
-
-		fireTransactionsUpdated();
-		fireAccountsUpdated();
-		fireCurrenciesUpdated();
+		transactionsCount = getTransactionsCountFromDatabase(entityManager);
 	}
 
 	/**
@@ -114,36 +207,42 @@ public class FinanceData {
 	 * @param transaction the transaction to be searcher (only the id is used)
 	 * @return the transaction
 	 */
-	public FinanceTransaction getUpdatedTransactionFromDatabase(FinanceTransaction transaction) {
+	public FinanceTransaction getUpdatedTransactionFromDatabase(FinanceTransaction transaction) throws ApplicationShuttingDownException {
 		if (transaction == null)
 			return null;
-
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-
-		//Retreive the transactions
-		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
-		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
-		tr.fetch(FinanceTransaction_.tags, JoinType.LEFT);
-		transactionsCriteriaQuery.where(criteriaBuilder.equal(tr.get(FinanceTransaction_.id), transaction.id));
-
-		FinanceTransaction result;
 		try {
-			result = entityManager.createQuery(transactionsCriteriaQuery).getSingleResult();
-		} catch (NoResultException ex) {
+			shuttingDownLock.readLock().lock();
+			if (shuttingDown)
+				throw new ApplicationShuttingDownException();
+			EntityManager entityManager = entityManagerFactory.createEntityManager();
+			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+			//Retreive the transactions
+			CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
+			Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
+			tr.fetch(FinanceTransaction_.tags, JoinType.LEFT);
+			transactionsCriteriaQuery.where(criteriaBuilder.equal(tr.get(FinanceTransaction_.id), transaction.id));
+
+			FinanceTransaction result;
+			try {
+				result = entityManager.createQuery(transactionsCriteriaQuery).getSingleResult();
+			} catch (NoResultException ex) {
+				entityManager.close();
+				return null;
+			}
+
+			//Post-fetch components
+			CriteriaQuery<FinanceTransaction> transactionsComponentsFetchCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
+			Root<FinanceTransaction> trComponentsFetch = transactionsComponentsFetchCriteriaQuery.from(FinanceTransaction.class);
+			transactionsComponentsFetchCriteriaQuery.where(criteriaBuilder.equal(tr.get(FinanceTransaction_.id), transaction.id));
+			trComponentsFetch.fetch(FinanceTransaction_.components, JoinType.LEFT).fetch(TransactionComponent_.account, JoinType.LEFT);
+			entityManager.createQuery(transactionsComponentsFetchCriteriaQuery).getSingleResult();
+
 			entityManager.close();
-			return null;
+			return result;
+		} finally {
+			shuttingDownLock.readLock().unlock();
 		}
-
-		//Post-fetch components
-		CriteriaQuery<FinanceTransaction> transactionsComponentsFetchCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
-		Root<FinanceTransaction> trComponentsFetch = transactionsComponentsFetchCriteriaQuery.from(FinanceTransaction.class);
-		transactionsComponentsFetchCriteriaQuery.where(criteriaBuilder.equal(tr.get(FinanceTransaction_.id), transaction.id));
-		trComponentsFetch.fetch(FinanceTransaction_.components, JoinType.LEFT).fetch(TransactionComponent_.account, JoinType.LEFT);
-		entityManager.createQuery(transactionsComponentsFetchCriteriaQuery).getSingleResult();
-
-		entityManager.close();
-		return result;
 	}
 
 	/**
@@ -154,39 +253,46 @@ public class FinanceData {
 	 * @param lastTransaction the last transaction number to be selected
 	 * @return the list of all transactions stored in the database
 	 */
-	protected List<FinanceTransaction> getTransactionsFromDatabase(int firstTransaction, int lastTransaction) {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+	protected List<FinanceTransaction> getTransactionsFromDatabase(int firstTransaction, int lastTransaction) throws ApplicationShuttingDownException {
+		try {
+			shuttingDownLock.readLock().lock();
+			if (shuttingDown)
+				throw new ApplicationShuttingDownException();
+			EntityManager entityManager = entityManagerFactory.createEntityManager();
+			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
-		//Retreive the transactions
-		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
-		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
-		tr.fetch(FinanceTransaction_.tags, JoinType.LEFT);
+			//Retreive the transactions
+			CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
+			Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
+			tr.fetch(FinanceTransaction_.tags, JoinType.LEFT);
 
-		transactionsCriteriaQuery.orderBy(
-				criteriaBuilder.asc(tr.get(FinanceTransaction_.transactionDate)),
-				criteriaBuilder.asc(tr.get(FinanceTransaction_.id)));
-		transactionsCriteriaQuery.select(tr).distinct(true);
+			transactionsCriteriaQuery.orderBy(
+					criteriaBuilder.asc(tr.get(FinanceTransaction_.transactionDate)),
+					criteriaBuilder.asc(tr.get(FinanceTransaction_.id)));
+			transactionsCriteriaQuery.select(tr).distinct(true);
 
-		//Limit the number of transactions retreived
-		TypedQuery<FinanceTransaction> query = entityManager.createQuery(transactionsCriteriaQuery);
-		if (firstTransaction >= 0)
-			query = query.setFirstResult(firstTransaction);
-		if (lastTransaction >= 0 && firstTransaction >= 0)
-			query = query.setMaxResults(lastTransaction - firstTransaction + 1);
+			//Limit the number of transactions retreived
+			TypedQuery<FinanceTransaction> query = entityManager.createQuery(transactionsCriteriaQuery);
+			if (firstTransaction >= 0)
+				query = query.setFirstResult(firstTransaction);
+			if (lastTransaction >= 0 && firstTransaction >= 0)
+				query = query.setMaxResults(lastTransaction - firstTransaction + 1);
 
-		List<FinanceTransaction> result = query.getResultList();
+			List<FinanceTransaction> result = query.getResultList();
 
-		//Post-fetch components
-		if (!result.isEmpty()) {
-			CriteriaQuery<FinanceTransaction> transactionsComponentsFetchCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
-			Root<FinanceTransaction> trComponentsFetch = transactionsComponentsFetchCriteriaQuery.from(FinanceTransaction.class);
-			transactionsComponentsFetchCriteriaQuery.where(tr.in(result));
-			trComponentsFetch.fetch(FinanceTransaction_.components, JoinType.LEFT).fetch(TransactionComponent_.account, JoinType.LEFT);
-			entityManager.createQuery(transactionsComponentsFetchCriteriaQuery).getResultList();
+			//Post-fetch components
+			if (!result.isEmpty()) {
+				CriteriaQuery<FinanceTransaction> transactionsComponentsFetchCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
+				Root<FinanceTransaction> trComponentsFetch = transactionsComponentsFetchCriteriaQuery.from(FinanceTransaction.class);
+				transactionsComponentsFetchCriteriaQuery.where(tr.in(result));
+				trComponentsFetch.fetch(FinanceTransaction_.components, JoinType.LEFT).fetch(TransactionComponent_.account, JoinType.LEFT);
+				entityManager.createQuery(transactionsComponentsFetchCriteriaQuery).getResultList();
+			}
+			entityManager.close();
+			return result;
+		} finally {
+			shuttingDownLock.readLock().unlock();
 		}
-		entityManager.close();
-		return result;
 	}
 
 	/**
@@ -194,8 +300,7 @@ public class FinanceData {
 	 *
 	 * @return the number of transactions stored in the database
 	 */
-	protected long getTransactionsCountFromDatabase() {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
+	protected long getTransactionsCountFromDatabase(EntityManager entityManager) {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
 		CriteriaQuery<Long> transactionsCriteriaQuery = criteriaBuilder.createQuery(Long.class);
@@ -204,7 +309,6 @@ public class FinanceData {
 		transactionsCriteriaQuery.select(criteriaBuilder.countDistinct(tr));
 
 		Long result = entityManager.createQuery(transactionsCriteriaQuery).getSingleResult();
-		entityManager.close();
 		transactionsCount = result;
 		return result;
 	}
@@ -214,15 +318,12 @@ public class FinanceData {
 	 *
 	 * @return the list of all accounts stored in the database
 	 */
-	protected List<FinanceAccount> getAccountsFromDatabase() {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-
+	protected List<FinanceAccount> getAccountsFromDatabase(EntityManager entityManager) {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<FinanceAccount> accountsCriteriaQuery = criteriaBuilder.createQuery(FinanceAccount.class);
 		accountsCriteriaQuery.from(FinanceAccount.class);
 
 		List<FinanceAccount> result = entityManager.createQuery(accountsCriteriaQuery).getResultList();
-		entityManager.close();
 		return result;
 	}
 
@@ -251,7 +352,7 @@ public class FinanceData {
 	 * @return the Preferences class instance, or a new persisted instance if
 	 * the database doesn't contain any
 	 */
-	protected Preferences getPreferencesFromDatabase(EntityManager entityManager) {
+	public Preferences getPreferencesFromDatabase(EntityManager entityManager) {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Preferences> preferencesCriteriaQuery = criteriaBuilder.createQuery(Preferences.class);
 		preferencesCriteriaQuery.from(Preferences.class);
@@ -289,136 +390,38 @@ public class FinanceData {
 	}
 
 	/**
-	 * Internal helper function Adds an account to the list & persists it (if
-	 * necessary) Safe to call even if the account already exists Should only be
-	 * called from an started transaction
-	 *
-	 * @param account the account to be added
-	 * @param entityManager the entity manager with an initiated transaction
-	 * @return true if account was added, false if it's already present in the
-	 * accounts list
-	 */
-	protected boolean persistenceAdd(FinanceAccount account, EntityManager entityManager) {
-		if (account == null)
-			return false;
-
-		boolean result = false;
-
-		if (entityManager.find(FinanceAccount.class, account.id) == null) {
-			entityManager.persist(account);
-			result = true;
-		}
-
-		populateCurrencies();
-
-		return result;
-	}
-
-	/**
-	 * Internal helper function Adds a transaction to the list & persists it and
-	 * its components (if necessary) Safe to call even if the transaction
-	 * already exists Should only be called from an started transaction
-	 *
-	 * @param transaction the transaction to be added
-	 * @param entityManager the entity manager
-	 * @return true if transaction was added, false if it's already present in
-	 * the transactions list
-	 */
-	protected boolean persistenceAdd(FinanceTransaction transaction, EntityManager entityManager) {
-		if (transaction == null)
-			return false;
-
-		boolean result = false;
-
-		for (TransactionComponent component : transaction.getComponents())
-			if (entityManager.find(TransactionComponent.class, component.id) == null)
-				entityManager.persist(component);
-
-		if (entityManager.find(FinanceTransaction.class, transaction.id) == null) {
-			entityManager.persist(transaction);
-			result = true;
-		}
-
-		return result;
-	}
-
-	/**
-	 * Internal helper function Adds a transaction component to the list &
-	 * persists it and its transaction (if necessary) Safe to call even if the
-	 * transaction component already exists Should only be called from an
-	 * started transaction
-	 *
-	 * @param component the component to be added
-	 * @param entityManager the entity manager
-	 * @return true if component was added, false if it's already present in the
-	 * components list
-	 */
-	protected boolean persistenceAdd(TransactionComponent component, EntityManager entityManager) {
-		if (component == null)
-			return false;
-
-		boolean result = false;
-
-		if (component.getTransaction() != null)
-			if (entityManager.find(FinanceTransaction.class, component.getTransaction().id) == null)
-				entityManager.persist(component.getTransaction());
-
-		if (entityManager.find(TransactionComponent.class, component.id) == null) {
-			entityManager.persist(component);
-			result = true;
-		}
-
-		return result;
-	}
-
-	/**
-	 * Returns the total balance for all accounts with a specific currency
-	 *
-	 * @param currency the currency (or null if the balance should be calculated
-	 * for all currencies)
-	 * @return the total balance
-	 */
-	public double getTotalBalance(Currency currency) {
-		long totalBalance = 0;
-		for (FinanceAccount account : getAccountsFromDatabase()) {
-			if (!account.getIncludeInTotal())
-				continue;
-			if (account.getCurrency() == currency)
-				totalBalance += account.getRawBalance();
-			else if (currency == null)
-				totalBalance += Math.round(account.getBalance() * getExchangeRate(account.getCurrency(), getDefaultCurrency()) * Constants.rawAmountMultiplier);
-		}
-		return totalBalance / Constants.rawAmountMultiplier;
-	}
-
-	/**
 	 * Returns the list of all currencies used in this instance
 	 *
 	 * @return the list of used currencies
 	 */
-	public List<Currency> getCurrencies() {
-		List<Currency> currencies = new LinkedList<>();
-		for (CurrencyRate rate : exchangeRates) {
-			if (!currencies.contains(rate.getSource()))
-				currencies.add(rate.getSource());
-			if (!currencies.contains(rate.getDestination()))
-				currencies.add(rate.getDestination());
+	public List<Currency> getCurrencies() throws ApplicationShuttingDownException {
+		try {
+			shuttingDownLock.readLock().lock();
+			if (shuttingDown)
+				throw new ApplicationShuttingDownException();
+			List<Currency> currencies = new LinkedList<>();
+			for (CurrencyRate rate : exchangeRates) {
+				if (!currencies.contains(rate.getSource()))
+					currencies.add(rate.getSource());
+				if (!currencies.contains(rate.getDestination()))
+					currencies.add(rate.getDestination());
+			}
+			return currencies;
+		} finally {
+			shuttingDownLock.readLock().unlock();
 		}
-		return currencies;
 	}
 
 	/**
 	 * Automatically creates missing currency exchange rates Should only be
 	 * called from an started transaction
 	 */
-	protected void populateCurrencies() {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-
+	protected void populateCurrencies(EntityManager entityManager) {
 		entityManager.getTransaction().begin();
 
 		//Search for missing currencies
 		List<CurrencyRate> usedRates = new LinkedList<>();
-		List<FinanceAccount> accounts = getAccountsFromDatabase();
+		List<FinanceAccount> accounts = getAccountsFromDatabase(entityManager);
 		for (FinanceAccount account1 : accounts) {
 			for (FinanceAccount account2 : accounts) {
 				if (account1.getCurrency() != account2.getCurrency()) {
@@ -460,8 +463,6 @@ public class FinanceData {
 
 		entityManager.getTransaction().commit();
 
-		entityManager.close();
-
 		exchangeRates.clear();
 		exchangeRates.addAll(usedRates);
 	}
@@ -471,101 +472,24 @@ public class FinanceData {
 	 *
 	 * @param account the account to be added
 	 */
-	public void createAccount(FinanceAccount account) {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		entityManager.getTransaction().begin();
+	public FinanceAccount createAccount(String name, Currency currency) throws ApplicationShuttingDownException {
+		try {
+			shuttingDownLock.readLock().lock();
+			if (shuttingDown)
+				throw new ApplicationShuttingDownException();
+			EntityManager entityManager = entityManagerFactory.createEntityManager();
+			entityManager.getTransaction().begin();
 
-		boolean accountAdded = persistenceAdd(account, entityManager);
+			FinanceAccount account = new FinanceAccount(name, currency);
+			entityManager.persist(account);
 
-		entityManager.getTransaction().commit();
+			entityManager.getTransaction().commit();
 
-		if (accountAdded) {
-			fireAccountsUpdated();
-			fireAccountCreated(account.id);
-			fireCurrenciesUpdated();
+			entityManager.close();
+			return account;
+		} finally {
+			shuttingDownLock.readLock().unlock();
 		}
-
-		entityManager.close();
-	}
-
-	/**
-	 * Sets a new account name. Adds the account to the persistence if needed.
-	 *
-	 * @param account the account to be updated
-	 * @param name the new account name
-	 */
-	public void setAccountName(FinanceAccount account, String name) {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		entityManager.getTransaction().begin();
-
-		boolean accountAdded = persistenceAdd(account, entityManager);
-
-		account = entityManager.find(FinanceAccount.class, account.id);
-
-		account.setName(name);
-		entityManager.merge(account);
-
-		entityManager.getTransaction().commit();
-
-		if (accountAdded) {
-			fireAccountCreated(account.id);
-			fireCurrenciesUpdated();
-		}
-		fireAccountUpdated(account.id);
-
-		entityManager.close();
-	}
-
-	/**
-	 * Sets a new account currency. Adds the account to the persistence if
-	 * needed.
-	 *
-	 * @param account the account to be updated
-	 * @param currency the new account currency
-	 */
-	public void setAccountCurrency(FinanceAccount account, Currency currency) {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		entityManager.getTransaction().begin();
-
-		persistenceAdd(account, entityManager);
-
-		account = entityManager.find(FinanceAccount.class, account.id);
-
-		account.setCurrency(currency);
-		entityManager.merge(account);
-
-		entityManager.getTransaction().commit();
-		entityManager.close();
-
-		populateCurrencies();
-
-		fireAccountsUpdated();
-		fireCurrenciesUpdated();
-	}
-
-	/**
-	 * Sets if this account should be included in the total for all accounts.
-	 *
-	 * @param account the account to be updated
-	 * @param includeInTotal true if the account should be included in the total
-	 */
-	public void setAccountIncludeInTotal(FinanceAccount account, boolean includeInTotal) {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		entityManager.getTransaction().begin();
-
-		persistenceAdd(account, entityManager);
-
-		account = entityManager.find(FinanceAccount.class, account.id);
-
-		account.setIncludeInTotal(includeInTotal);
-		entityManager.merge(account);
-
-		populateCurrencies();
-
-		entityManager.getTransaction().commit();
-		entityManager.close();
-
-		fireAccountsUpdated();
 	}
 
 	/**
@@ -573,30 +497,52 @@ public class FinanceData {
 	 *
 	 * @param transaction the transaction to be added
 	 */
-	public void createTransaction(FinanceTransaction transaction) {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		entityManager.getTransaction().begin();
+	public FinanceTransaction createTransaction(String description, String[] tags, Date date, FinanceTransaction.Type type) throws ApplicationShuttingDownException {
+		try {
+			shuttingDownLock.readLock().lock();
+			if (shuttingDown)
+				throw new ApplicationShuttingDownException();
+			EntityManager entityManager = entityManagerFactory.createEntityManager();
+			entityManager.getTransaction().begin();
 
-		boolean transactionAdded = persistenceAdd(transaction, entityManager);
+			FinanceTransaction transaction = new FinanceTransaction(description, tags, date, type);
+			entityManager.persist(transaction);
 
-		if (!transaction.getComponents().isEmpty()) {
-			for (TransactionComponent component : transaction.getComponents())
-				persistenceAdd(component, entityManager);
-			for (FinanceAccount account : transaction.getAccounts())
-				entityManager.merge(account);
-		}
-
-		entityManager.getTransaction().commit();
-
-		if (transactionAdded) {
+			entityManager.getTransaction().commit();
 			transactionsCount++;
-			fireTransactionsUpdated();
-			fireTransactionCreated(transaction.id);
-		}
-		for (FinanceAccount account : transaction.getAccounts())
-			fireAccountUpdated(account.id);
 
-		entityManager.close();
+			entityManager.close();
+			return transaction;
+		} finally {
+			shuttingDownLock.readLock().unlock();
+		}
+	}
+
+	/**
+	 * Clones a transaction
+	 *
+	 * @param transaction the transaction to be cloned
+	 */
+	public FinanceTransaction cloneTransaction(FinanceTransaction transaction) throws ApplicationShuttingDownException {
+		try {
+			shuttingDownLock.readLock().lock();
+			if (shuttingDown)
+				throw new ApplicationShuttingDownException();
+			EntityManager entityManager = entityManagerFactory.createEntityManager();
+			entityManager.getTransaction().begin();
+
+			transaction = entityManager.find(FinanceTransaction.class, transaction.id);
+			FinanceTransaction newTransaction = transaction.clone();
+			entityManager.persist(newTransaction);
+
+			entityManager.getTransaction().commit();
+			transactionsCount++;
+
+			entityManager.close();
+			return transaction;
+		} finally {
+			shuttingDownLock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -604,293 +550,31 @@ public class FinanceData {
 	 *
 	 * @param component the component to be added
 	 */
-	public void createTransactionComponent(TransactionComponent component) {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		entityManager.getTransaction().begin();
+	public TransactionComponent createTransactionComponent(FinanceAccount account, FinanceTransaction transaction, long amount) throws ApplicationShuttingDownException {
+		try {
+			shuttingDownLock.readLock().lock();
+			if (shuttingDown)
+				throw new ApplicationShuttingDownException();
+			EntityManager entityManager = entityManagerFactory.createEntityManager();
+			entityManager.getTransaction().begin();
 
-		if (component.getTransaction() != null) {
-			persistenceAdd(component.getTransaction(), entityManager);
-			persistenceAdd(component, entityManager);
-			if (!component.getTransaction().getComponents().contains(component))
-				component.getTransaction().addComponent(component);
-			entityManager.merge(component.getTransaction());
+			account = entityManager.find(FinanceAccount.class, account.id);
+			transaction = entityManager.find(FinanceTransaction.class, transaction.id);
+			TransactionComponent component = new TransactionComponent(account, transaction, amount);
+
+			if (transaction != null) {
+				if (!component.getTransaction().getComponents().contains(component))
+					component.getTransaction().addComponent(component);
+				entityManager.merge(component.getTransaction());
+			}
+
+			entityManager.getTransaction().commit();
+
+			entityManager.close();
+			return component;
+		} finally {
+			shuttingDownLock.readLock().unlock();
 		}
-
-		entityManager.getTransaction().commit();
-
-		if (component.getTransaction() != null)
-			fireTransactionUpdated(component.getTransaction().id);
-		if (component.getAccount() != null)
-			fireAccountUpdated(component.getAccount().id);
-
-		entityManager.close();
-	}
-
-	/**
-	 * Sets new tags for a transaction
-	 *
-	 * @param transaction the transaction to be updated
-	 * @param tags the new tags
-	 */
-	public void setTransactionTags(FinanceTransaction transaction, String[] tags) {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		entityManager.getTransaction().begin();
-
-		transaction = entityManager.find(FinanceTransaction.class, transaction.id);
-
-		boolean transactionAdded = persistenceAdd(transaction, entityManager);
-
-		transaction.setTags(tags);
-		entityManager.merge(transaction);
-
-		entityManager.getTransaction().commit();
-
-		if (transactionAdded) {
-			fireTransactionsUpdated();
-			fireTransactionCreated(transaction.id);
-		}
-		fireTransactionUpdated(transaction.id);
-		for (FinanceAccount account : transaction.getAccounts())
-			fireAccountUpdated(account.id);
-
-		entityManager.close();
-	}
-
-	/**
-	 * Sets a new date for a transaction
-	 *
-	 * @param transaction the transaction to be updated
-	 * @param date the new date
-	 */
-	public void setTransactionDate(FinanceTransaction transaction, Date date) {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		entityManager.getTransaction().begin();
-
-		boolean transactionAdded = persistenceAdd(transaction, entityManager);
-
-		transaction = entityManager.find(FinanceTransaction.class, transaction.id);
-
-		transaction.setDate(date);
-		entityManager.merge(transaction);
-
-		entityManager.getTransaction().commit();
-
-		if (transactionAdded) {
-			fireTransactionsUpdated();
-			fireTransactionCreated(transaction.id);
-		}
-		fireTransactionUpdated(transaction.id);
-		for (FinanceAccount account : transaction.getAccounts())
-			fireAccountUpdated(account.id);
-
-		entityManager.close();
-	}
-
-	/**
-	 * Sets a new description for a transaction
-	 *
-	 * @param transaction the transaction to be updated
-	 * @param description the new description
-	 */
-	public void setTransactionDescription(FinanceTransaction transaction, String description) {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		entityManager.getTransaction().begin();
-
-		boolean transactionAdded = persistenceAdd(transaction, entityManager);
-
-		transaction = entityManager.find(FinanceTransaction.class, transaction.id);
-
-		transaction.setDescription(description);
-		entityManager.merge(transaction);
-
-		entityManager.getTransaction().commit();
-
-		if (transactionAdded) {
-			fireTransactionsUpdated();
-			fireTransactionCreated(transaction.id);
-		}
-		fireTransactionUpdated(transaction.id);
-		for (FinanceAccount account : transaction.getAccounts())
-			fireAccountUpdated(account.id);
-
-		entityManager.close();
-	}
-
-	/**
-	 * Sets a new type for a transaction
-	 *
-	 * @param transaction the transaction to be updated
-	 * @param type the new transaction type
-	 */
-	public void setTransactionType(FinanceTransaction transaction, FinanceTransaction.Type type) {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		entityManager.getTransaction().begin();
-
-		boolean transactionAdded = persistenceAdd(transaction, entityManager);
-
-		transaction = entityManager.find(FinanceTransaction.class, transaction.id);
-
-		transaction.setType(type);
-		entityManager.merge(transaction);
-
-		entityManager.getTransaction().commit();
-
-		if (transactionAdded) {
-			fireTransactionsUpdated();
-			fireTransactionCreated(transaction.id);
-		}
-		fireTransactionUpdated(transaction.id);
-		for (FinanceAccount account : transaction.getAccounts())
-			fireAccountUpdated(account.id);
-
-		entityManager.close();
-	}
-
-	/**
-	 * Sets an transaction component amount
-	 *
-	 * @param component the component to be updated
-	 * @param newAmount the new amount
-	 */
-	public void setTransactionComponentAmount(TransactionComponent component, double newAmount) {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		entityManager.getTransaction().begin();
-
-		boolean transactionAdded = persistenceAdd(component.getTransaction(), entityManager);
-
-		if (entityManager.find(TransactionComponent.class, component.id) == null)
-			entityManager.persist(component);
-
-		component = entityManager.find(TransactionComponent.class, component.id);
-
-		//Update accounts
-		if (component.getTransaction().getComponents().contains(component))
-			component.getTransaction().updateComponentRawAmount(component, Math.round(newAmount * Constants.rawAmountMultiplier));
-		else {
-			component.setRawAmount(Math.round(newAmount * Constants.rawAmountMultiplier));
-			component.getTransaction().addComponent(component);
-		}
-
-		//Update component
-		entityManager.merge(component);
-		if (component.getAccount() != null)
-			entityManager.merge(component.getAccount());
-		if (component.getTransaction() != null)
-			entityManager.merge(component.getTransaction());
-
-		entityManager.getTransaction().commit();
-
-		if (transactionAdded) {
-			fireTransactionsUpdated();
-			fireTransactionCreated(component.getTransaction().id);
-		}
-		fireTransactionUpdated(component.getTransaction().id);
-
-		fireAccountUpdated(component.getAccount().id);
-
-		entityManager.close();
-	}
-
-	/**
-	 * Sets an transaction component account
-	 *
-	 * @param component the component to be updated
-	 * @param newAccount the new account
-	 */
-	public void setTransactionComponentAccount(TransactionComponent component, FinanceAccount newAccount) {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		entityManager.getTransaction().begin();
-
-		boolean transactionAdded = persistenceAdd(component.getTransaction(), entityManager);
-
-		if (entityManager.find(TransactionComponent.class, component.id) == null)
-			entityManager.persist(component);
-
-		persistenceAdd(newAccount, entityManager);
-
-		component = entityManager.find(TransactionComponent.class, component.id);
-		newAccount = entityManager.find(FinanceAccount.class, newAccount.id);
-
-		FinanceAccount oldAccount = component.getAccount();
-
-		//Update accounts
-		if (component.getTransaction().getComponents().contains(component))
-			component.getTransaction().updateComponentAccount(component, newAccount);
-		else {
-			component.setAccount(newAccount);
-			component.getTransaction().addComponent(component);
-		}
-
-		//Update transaction and accounts in DB
-		entityManager.merge(component);
-		if (component.getTransaction() != null)
-			entityManager.merge(component.getTransaction());
-		if (component.getAccount() != null)
-			entityManager.merge(component.getAccount());
-		if (oldAccount != null && component.getAccount() != oldAccount)
-			entityManager.merge(oldAccount);
-
-		entityManager.getTransaction().commit();
-
-		if (transactionAdded) {
-			fireTransactionsUpdated();
-			fireTransactionCreated(component.getTransaction().id);
-		}
-		fireTransactionUpdated(component.getTransaction().id);
-
-		fireAccountUpdated(component.getAccount().id);
-		if (component.getAccount() != oldAccount && oldAccount != null)
-			fireAccountUpdated(oldAccount.id);
-
-		entityManager.close();
-	}
-
-	/**
-	 * Sets the new exchange rate
-	 *
-	 * @param rate the currency rate to be modified
-	 * @param newRate the new exchange rate
-	 */
-	public void setExchangeRate(CurrencyRate rate, double newRate) {
-		if (!exchangeRates.contains(rate))
-			return;
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		entityManager.getTransaction().begin();
-
-		rate.setExchangeRate(newRate);
-		entityManager.merge(rate);
-
-		entityManager.getTransaction().commit();
-		entityManager.close();
-
-		fireTransactionsUpdated();
-		fireCurrenciesUpdated();
-		fireAccountsUpdated();
-	}
-
-	/**
-	 * Sets the default currency
-	 *
-	 * @param defaultCurrency the new default currency
-	 */
-	public void setDefaultCurrency(Currency defaultCurrency) {
-		if (defaultCurrency == null)
-			return;
-
-		this.defaultCurrency = defaultCurrency;
-
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		Preferences preferences = getPreferencesFromDatabase(entityManager);
-		entityManager.getTransaction().begin();
-
-		preferences.setDefaultCurrency(defaultCurrency);
-		entityManager.merge(preferences);
-
-		entityManager.getTransaction().commit();
-		entityManager.close();
-
-		fireTransactionsUpdated();
-		fireAccountsUpdated();
 	}
 
 	/**
@@ -931,33 +615,34 @@ public class FinanceData {
 	 *
 	 * @param component the transaction component to delete
 	 */
-	public void deleteTransactionComponent(TransactionComponent component) {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		entityManager.getTransaction().begin();
+	public void deleteTransactionComponent(TransactionComponent component) throws ApplicationShuttingDownException {
+		try {
+			shuttingDownLock.readLock().lock();
+			if (shuttingDown)
+				throw new ApplicationShuttingDownException();
+			EntityManager entityManager = entityManagerFactory.createEntityManager();
+			entityManager.getTransaction().begin();
 
-		persistenceAdd(component.getTransaction(), entityManager);
+			component = entityManager.find(TransactionComponent.class, component.id);
 
-		component = entityManager.find(TransactionComponent.class, component.id);
+			FinanceTransaction transaction = component.getTransaction();
+			FinanceAccount account = component.getAccount();
+			if (transaction != null) {
+				component.getTransaction().removeComponent(component);
+				entityManager.merge(transaction);
+			}
 
-		FinanceTransaction transaction = component.getTransaction();
-		FinanceAccount account = component.getAccount();
-		if (transaction != null) {
-			component.getTransaction().removeComponent(component);
-			entityManager.merge(transaction);
+			entityManager.remove(entityManager.find(TransactionComponent.class, component.id));
+
+			if (account != null)
+				entityManager.merge(account);
+
+			entityManager.getTransaction().commit();
+
+			entityManager.close();
+		} finally {
+			shuttingDownLock.readLock().unlock();
 		}
-
-		entityManager.remove(entityManager.find(TransactionComponent.class, component.id));
-
-		if (account != null)
-			entityManager.merge(account);
-
-		entityManager.getTransaction().commit();
-		if (transaction != null)
-			fireTransactionUpdated(transaction.id);
-		if (account != null)
-			fireAccountUpdated(account.id);
-
-		entityManager.close();
 	}
 
 	/**
@@ -965,38 +650,40 @@ public class FinanceData {
 	 *
 	 * @param transaction the transaction to delete
 	 */
-	public void deleteTransaction(FinanceTransaction transaction) {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		entityManager.getTransaction().begin();
+	public void deleteTransaction(FinanceTransaction transaction) throws ApplicationShuttingDownException {
+		try {
+			shuttingDownLock.readLock().lock();
+			if (shuttingDown)
+				throw new ApplicationShuttingDownException();
+			EntityManager entityManager = entityManagerFactory.createEntityManager();
+			entityManager.getTransaction().begin();
 
-		transaction = entityManager.find(FinanceTransaction.class, transaction.id);
+			transaction = entityManager.find(FinanceTransaction.class, transaction.id);
 
-		if (transaction == null)
-			return;
+			if (transaction == null)
+				return;
 
-		List<FinanceAccount> affectedAccounts = transaction.getAccounts();
+			List<FinanceAccount> affectedAccounts = transaction.getAccounts();
 
-		//Remove all components
-		for (TransactionComponent component : transaction.getComponents())
-			entityManager.remove(entityManager.find(TransactionComponent.class, component.id));
-		transaction.removeAllComponents();
+			//Remove all components
+			for (TransactionComponent component : transaction.getComponents())
+				entityManager.remove(entityManager.find(TransactionComponent.class, component.id));
+			transaction.removeAllComponents();
 
-		//Remove transaction
-		FinanceTransaction foundTransaction = entityManager.find(FinanceTransaction.class, transaction.id);
-		entityManager.remove(foundTransaction);
-		for (FinanceAccount account : affectedAccounts)
-			entityManager.merge(account);
-		entityManager.getTransaction().commit();
+			//Remove transaction
+			FinanceTransaction foundTransaction = entityManager.find(FinanceTransaction.class, transaction.id);
+			entityManager.remove(foundTransaction);
+			for (FinanceAccount account : affectedAccounts)
+				entityManager.merge(account);
+			entityManager.getTransaction().commit();
 
-		if (foundTransaction != null)
-			transactionsCount--;
-		fireTransactionsUpdated();
-		fireTransactionDeleted(transaction.id);
+			if (foundTransaction != null)
+				transactionsCount--;
 
-		for (FinanceAccount account : affectedAccounts)
-			fireAccountUpdated(account.id);
-
-		entityManager.close();
+			entityManager.close();
+		} finally {
+			shuttingDownLock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -1004,33 +691,35 @@ public class FinanceData {
 	 *
 	 * @param account the account to delete
 	 */
-	public void deleteAccount(FinanceAccount account) {
-		EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
-		entityManager.getTransaction().begin();
+	public void deleteAccount(FinanceAccount account) throws ApplicationShuttingDownException {
+		try {
+			shuttingDownLock.readLock().lock();
+			if (shuttingDown)
+				throw new ApplicationShuttingDownException();
+			EntityManager entityManager = entityManagerFactory.createEntityManager();
+			entityManager.getTransaction().begin();
 
-		//Delete all related transaction components
-		for (FinanceTransaction transaction : getTransactions()) {
-			List<TransactionComponent> components = transaction.getComponentsForAccount(account);
-			transaction.removeComponents(components);
-			if (!components.isEmpty())
-				entityManager.merge(transaction);
-			for (TransactionComponent component : components)
-				entityManager.remove(entityManager.find(TransactionComponent.class, component.id));
+			//Delete all related transaction components
+			for (FinanceTransaction transaction : getTransactions()) {
+				List<TransactionComponent> components = transaction.getComponentsForAccount(account);
+				transaction.removeComponents(components);
+				if (!components.isEmpty())
+					entityManager.merge(transaction);
+				for (TransactionComponent component : components)
+					entityManager.remove(entityManager.find(TransactionComponent.class, component.id));
+			}
+
+			//Remove account
+			entityManager.remove(entityManager.find(FinanceAccount.class, account.id));
+
+			entityManager.getTransaction().commit();
+
+			populateCurrencies(entityManager);
+
+			entityManager.close();
+		} finally {
+			shuttingDownLock.readLock().unlock();
 		}
-
-		//Remove account
-		entityManager.remove(entityManager.find(FinanceAccount.class, account.id));
-
-		entityManager.getTransaction().commit();
-
-		populateCurrencies();
-
-		fireTransactionsUpdated();
-		fireAccountsUpdated();
-		fireAccountDeleted(account.id);
-		fireCurrenciesUpdated();
-
-		entityManager.close();
 	}
 
 	/**
@@ -1038,81 +727,89 @@ public class FinanceData {
 	 *
 	 * @param account the account to be updated
 	 */
-	public void refreshAccountBalance(FinanceAccount account) {
-		//Request all transactions from database
-		EntityManager tempEntityManager = DatabaseManager.getInstance().createEntityManager();
-		CriteriaBuilder criteriaBuilder = tempEntityManager.getCriteriaBuilder();
-		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
-		transactionsCriteriaQuery.from(FinanceTransaction.class);
-		FinanceAccount tempAccount = tempEntityManager.find(FinanceAccount.class, account.id);
+	public void refreshAccountBalance(FinanceAccount account) throws ApplicationShuttingDownException {
+		try {
+			shuttingDownLock.readLock().lock();
+			if (shuttingDown)
+				throw new ApplicationShuttingDownException();
+			//Request all transactions from database
+			EntityManager tempEntityManager = entityManagerFactory.createEntityManager();
+			CriteriaBuilder criteriaBuilder = tempEntityManager.getCriteriaBuilder();
+			CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
+			transactionsCriteriaQuery.from(FinanceTransaction.class);
+			FinanceAccount tempAccount = tempEntityManager.find(FinanceAccount.class, account.id);
 
-		//Recalculate balance from related transactions
-		tempEntityManager.getTransaction().begin();
-		tempAccount.updateRawBalance(-tempAccount.getRawBalance());
+			//Recalculate balance from related transactions
+			tempEntityManager.getTransaction().begin();
+			tempAccount.updateRawBalance(-tempAccount.getRawBalance());
 
-		TypedQuery<FinanceTransaction> transactionsBatchQuery = tempEntityManager.createQuery(transactionsCriteriaQuery);
+			TypedQuery<FinanceTransaction> transactionsBatchQuery = tempEntityManager.createQuery(transactionsCriteriaQuery);
 
-		int currentTransaction = 0;
-		boolean done = false;
-		while (!done) {
-			List<FinanceTransaction> transactions = transactionsBatchQuery.setFirstResult(currentTransaction).setMaxResults(Constants.batchFetchSize).getResultList();
-			currentTransaction += transactions.size();
-			done = transactions.isEmpty();
-			for (FinanceTransaction transaction : transactions)
-				for (TransactionComponent component : transaction.getComponentsForAccount(tempAccount))
-					tempAccount.updateRawBalance(component.getRawAmount());
+			int currentTransaction = 0;
+			boolean done = false;
+			while (!done) {
+				List<FinanceTransaction> transactions = transactionsBatchQuery.setFirstResult(currentTransaction).setMaxResults(Constants.batchFetchSize).getResultList();
+				currentTransaction += transactions.size();
+				done = transactions.isEmpty();
+				for (FinanceTransaction transaction : transactions)
+					for (TransactionComponent component : transaction.getComponentsForAccount(tempAccount))
+						tempAccount.updateRawBalance(component.getRawAmount());
+			}
+			tempEntityManager.getTransaction().commit();
+
+			//Update real account balance from temporary account
+			account.updateRawBalance(-account.getRawBalance() + tempAccount.getRawBalance());
+
+			tempEntityManager.close();
+		} finally {
+			shuttingDownLock.readLock().unlock();
 		}
-		tempEntityManager.getTransaction().commit();
-
-		//Update real account balance from temporary account
-		account.updateRawBalance(-account.getRawBalance() + tempAccount.getRawBalance());
-
-		fireAccountUpdated(account.id);
-
-		tempEntityManager.close();
 	}
 
 	/**
 	 * Deletes all orphaned transactions, accounts and transaction components
 	 */
-	public void cleanup() {
-		EntityManager tempEntityManager = DatabaseManager.getInstance().createEntityManager();
-		CriteriaBuilder componentCriteriaBuilder = tempEntityManager.getCriteriaBuilder();
-		CriteriaQuery<TransactionComponent> componentsCriteriaQuery = componentCriteriaBuilder.createQuery(TransactionComponent.class);
-		componentsCriteriaQuery.from(TransactionComponent.class);
+	public void cleanup() throws ApplicationShuttingDownException {
+		try {
+			shuttingDownLock.readLock().lock();
+			if (shuttingDown)
+				throw new ApplicationShuttingDownException();
+			EntityManager tempEntityManager = entityManagerFactory.createEntityManager();
+			CriteriaBuilder componentCriteriaBuilder = tempEntityManager.getCriteriaBuilder();
+			CriteriaQuery<TransactionComponent> componentsCriteriaQuery = componentCriteriaBuilder.createQuery(TransactionComponent.class);
+			componentsCriteriaQuery.from(TransactionComponent.class);
 
-		CriteriaBuilder transactionCriteriaBuilder = tempEntityManager.getCriteriaBuilder();
-		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = transactionCriteriaBuilder.createQuery(FinanceTransaction.class);
-		transactionsCriteriaQuery.from(FinanceTransaction.class);
+			CriteriaBuilder transactionCriteriaBuilder = tempEntityManager.getCriteriaBuilder();
+			CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = transactionCriteriaBuilder.createQuery(FinanceTransaction.class);
+			transactionsCriteriaQuery.from(FinanceTransaction.class);
 
-		tempEntityManager.getTransaction().begin();
+			tempEntityManager.getTransaction().begin();
 
-		//Get all data from DB
-		List<TransactionComponent> componentsDB = tempEntityManager.createQuery(componentsCriteriaQuery).getResultList();
-		List<FinanceTransaction> transactionsDB = tempEntityManager.createQuery(transactionsCriteriaQuery).getResultList();
+			//Get all data from DB
+			List<TransactionComponent> componentsDB = tempEntityManager.createQuery(componentsCriteriaQuery).getResultList();
+			List<FinanceTransaction> transactionsDB = tempEntityManager.createQuery(transactionsCriteriaQuery).getResultList();
 
-		//Remove OK items from list
-		for (FinanceTransaction transaction : transactionsDB)
-			componentsDB.removeAll(transaction.getComponents());
+			//Remove OK items from list
+			for (FinanceTransaction transaction : transactionsDB)
+				componentsDB.removeAll(transaction.getComponents());
 
-		//Remove anything that still exists
-		for (TransactionComponent component : componentsDB) {
-			if (component.getTransaction() != null)
-				component.getTransaction().removeComponent(component);
-			component.setTransaction(null);
-			tempEntityManager.remove(component);
+			//Remove anything that still exists
+			for (TransactionComponent component : componentsDB) {
+				if (component.getTransaction() != null)
+					component.getTransaction().removeComponent(component);
+				component.setTransaction(null);
+				tempEntityManager.remove(component);
+			}
+
+			tempEntityManager.getTransaction().commit();
+
+			populateCurrencies(tempEntityManager);
+			restoreFromDatabase(tempEntityManager);
+
+			tempEntityManager.close();
+		} finally {
+			shuttingDownLock.readLock().unlock();
 		}
-
-		tempEntityManager.getTransaction().commit();
-		tempEntityManager.close();
-
-		populateCurrencies();
-
-		restoreFromDatabase();
-
-		fireTransactionsUpdated();
-		fireAccountsUpdated();
-		fireCurrenciesUpdated();
 	}
 
 	/*
@@ -1123,8 +820,18 @@ public class FinanceData {
 	 *
 	 * @return the list of accounts
 	 */
-	public List<FinanceAccount> getAccounts() {
-		return getAccountsFromDatabase();
+	public List<FinanceAccount> getAccounts() throws ApplicationShuttingDownException {
+		try {
+			shuttingDownLock.readLock().lock();
+			if (shuttingDown)
+				throw new ApplicationShuttingDownException();
+			EntityManager entityManager = entityManagerFactory.createEntityManager();
+			List<FinanceAccount> accounts = getAccountsFromDatabase(entityManager);
+			entityManager.close();
+			return accounts;
+		} finally {
+			shuttingDownLock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -1135,7 +842,7 @@ public class FinanceData {
 	 * @param lastTransaction the last transaction number to be selected
 	 * @return the list of transactions
 	 */
-	public List<FinanceTransaction> getTransactions(int firstTransaction, int lastTransaction) {
+	public List<FinanceTransaction> getTransactions(int firstTransaction, int lastTransaction) throws ApplicationShuttingDownException {
 		return getTransactionsFromDatabase(firstTransaction, lastTransaction);
 	}
 
@@ -1145,7 +852,7 @@ public class FinanceData {
 	 * @param index the transaction's index
 	 * @return all transactions in the database
 	 */
-	public FinanceTransaction getTransaction(int index) {
+	public FinanceTransaction getTransaction(int index) throws ApplicationShuttingDownException {
 		List<FinanceTransaction> transactions = getTransactionsFromDatabase(index, index);
 		return transactions.isEmpty() ? null : transactions.get(0);
 	}
@@ -1155,7 +862,7 @@ public class FinanceData {
 	 *
 	 * @return all transactions in the database
 	 */
-	public List<FinanceTransaction> getTransactions() {
+	public List<FinanceTransaction> getTransactions() throws ApplicationShuttingDownException {
 		return getTransactionsFromDatabase(-1, -1);
 	}
 
@@ -1187,159 +894,5 @@ public class FinanceData {
 			return defaultCurrency;
 		else
 			return null;
-	}
-
-	/*
-	 * Assigned event handlers
-	 */
-	/**
-	 * Transaction event handler
-	 */
-	protected TransactionEventHandler transactionEventHandler;
-	/**
-	 * Account event handler
-	 */
-	protected AccountEventHandler accountEventHandler;
-	/**
-	 * Currency event handler
-	 */
-	protected CurrencyEventHandler currencyEventHandler;
-
-	/**
-	 * Dispatches a transaction created event
-	 *
-	 * @param transactionId the transaction that was created
-	 */
-	protected void fireTransactionCreated(long transactionId) {
-		if (transactionEventHandler != null)
-			transactionEventHandler.transactionCreated(transactionId);
-	}
-
-	/**
-	 * Dispatches a transaction updated event
-	 *
-	 * @param transactionId the transaction that was updated
-	 */
-	protected void fireTransactionUpdated(long transactionId) {
-		if (transactionEventHandler != null)
-			transactionEventHandler.transactionUpdated(transactionId);
-	}
-
-	/**
-	 * Dispatches a transactions updated event (all transactions were updated)
-	 */
-	protected void fireTransactionsUpdated() {
-		if (transactionEventHandler != null)
-			transactionEventHandler.transactionsUpdated();
-	}
-
-	/**
-	 * Dispatches a transaction deleted event
-	 *
-	 * @param transactionId the transaction that was deleted
-	 */
-	protected void fireTransactionDeleted(long transactionId) {
-		if (transactionEventHandler != null)
-			transactionEventHandler.transactionDeleted(transactionId);
-	}
-
-	/**
-	 * Dispatches an account created event
-	 *
-	 * @param accountId the account that was created
-	 */
-	protected void fireAccountCreated(long accountId) {
-		if (accountEventHandler != null)
-			accountEventHandler.accountCreated(accountId);
-	}
-
-	/**
-	 * Dispatches an account updated event
-	 *
-	 * @param accountId the account that was updated
-	 */
-	protected void fireAccountUpdated(long accountId) {
-		if (accountEventHandler != null)
-			accountEventHandler.accountUpdated(accountId);
-	}
-
-	/**
-	 * Dispatches an accounts updated event (all accounts were updated)
-	 */
-	protected void fireAccountsUpdated() {
-		if (accountEventHandler != null)
-			accountEventHandler.accountsUpdated();
-	}
-
-	/**
-	 * Dispatches an account deleted event
-	 *
-	 * @param accountId the account that was deleted
-	 */
-	protected void fireAccountDeleted(long accountId) {
-		if (accountEventHandler != null)
-			accountEventHandler.accountDeleted(accountId);
-	}
-
-	/**
-	 * Dispatches a currencies updated event (all accounts were updated)
-	 */
-	protected void fireCurrenciesUpdated() {
-		if (currencyEventHandler != null)
-			currencyEventHandler.currenciesUpdated();
-	}
-
-	/**
-	 * Adds a new listener for transaction events
-	 *
-	 * @param transactionEventHandler the event handler
-	 */
-	public void setTransactionListener(TransactionEventHandler transactionEventHandler) {
-		this.transactionEventHandler = transactionEventHandler;
-	}
-
-	/**
-	 * Returns the listener for transaction events
-	 *
-	 * @return the event handler
-	 */
-	public TransactionEventHandler getTransactionListener() {
-		return transactionEventHandler;
-	}
-
-	/**
-	 * Adds a new listener for account events
-	 *
-	 * @param accountEventHandler the event handler
-	 */
-	public void setAccountListener(AccountEventHandler accountEventHandler) {
-		this.accountEventHandler = accountEventHandler;
-	}
-
-	/**
-	 * Returns the listener for account events
-	 *
-	 * @return the event handler
-	 */
-	public AccountEventHandler getAccountListener() {
-		return accountEventHandler;
-	}
-
-	/**
-	 * Adds a new listener for currency events
-	 *
-	 * @param currencyEventHandler the event handler
-	 */
-	public void setCurrencyListener(CurrencyEventHandler currencyEventHandler) {
-		this.currencyEventHandler = currencyEventHandler;
-	}
-
-	/**
-	 * Returns the listener for currency events
-	 *
-	 * @return the event handler
-	 */
-	public CurrencyEventHandler getCurrencyListener() {
-		return currencyEventHandler;
 	}
 }
