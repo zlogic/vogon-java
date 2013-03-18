@@ -1,5 +1,5 @@
 /*
- * Vogon personal finance/expense analyzer.
+ * Awesome Time Tracker project.
  * License TBD.
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
