@@ -35,9 +35,9 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 import org.zlogic.vogon.data.CurrencyRate;
 import org.zlogic.vogon.data.CurrencyRate_;
-import org.zlogic.vogon.data.DatabaseManager;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceAccount_;
+import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.Preferences;
 import org.zlogic.vogon.data.TransactionComponent;
@@ -67,18 +67,9 @@ public class XmlImporter implements FileImporter {
 		this.inputFile = inputFile;
 	}
 
-	/**
-	 * Parses and imports a CSV file
-	 *
-	 * @throws VogonImportException in case of import errors (I/O, format,
-	 * indexing etc.)
-	 * @throws VogonImportLogicalException in case of logical errors (without
-	 * meaningful stack trace, just to show an error message)
-	 */
 	@Override
-	public void importFile() throws VogonImportException, VogonImportLogicalException {
+	public void importFile(FinanceData financeData, EntityManager entityManager) throws VogonImportException, VogonImportLogicalException {
 		try {
-			EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 			entityManager.getTransaction().begin();
 
 			Map<Long, FinanceTransaction> transactionsMap = new HashMap<>();
@@ -255,7 +246,6 @@ public class XmlImporter implements FileImporter {
 				transaction.setTags(tagsList.toArray(new String[0]));
 			}
 			entityManager.getTransaction().commit();
-			entityManager.close();
 		} catch (VogonImportLogicalException e) {
 			throw new VogonImportLogicalException(e);
 		} catch (FileNotFoundException e) {

@@ -20,11 +20,13 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 import javafx.util.converter.DoubleStringConverter;
-import org.zlogic.vogon.data.CurrencyRate;
+import javax.persistence.EntityManager;
 import org.zlogic.vogon.data.FinanceData;
-import org.zlogic.vogon.data.events.CurrencyEventHandler;
+import org.zlogic.vogon.data.Preferences;
+import org.zlogic.vogon.data.TransactedChange;
 import org.zlogic.vogon.ui.adapter.CurrencyModelAdapter;
 import org.zlogic.vogon.ui.adapter.CurrencyRateModelAdapter;
+import org.zlogic.vogon.ui.adapter.DataManager;
 
 /**
  * Currencies pane controller.
@@ -34,9 +36,9 @@ import org.zlogic.vogon.ui.adapter.CurrencyRateModelAdapter;
 public class CurrenciesController implements Initializable {
 
 	/**
-	 * The associated FinanceData instance
+	 * The associated DataManager instance
 	 */
-	protected FinanceData financeData;
+	protected DataManager dataManager;
 	/**
 	 * The currencies table
 	 */
@@ -75,52 +77,43 @@ public class CurrenciesController implements Initializable {
 	}
 
 	/**
-	 * Assigns the FinanceData instance
+	 * Assigns the DataManager instance
 	 *
-	 * @param financeData the FinanceData instance
+	 * @param dataManager the DataManager instance
 	 */
-	public void setFinanceData(FinanceData financeData) {
-		this.financeData = financeData;
-		updateCurrencies();
+	public void setDataManager(DataManager dataManager) {
+		this.dataManager = dataManager;
 
-		//Listen for Currency events
-		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
-			((FinanceDataEventDispatcher) financeData.getCurrencyListener()).addCurrencyEventHandler(new CurrencyEventHandler() {
-				@Override
-				public void currenciesUpdated() {
-					updateCurrencies();
-				}
-			});
-			defaultCurrency.valueProperty().addListener(new ChangeListener<CurrencyModelAdapter>() {
-				protected FinanceData financeData;
+		defaultCurrency.setItems(dataManager.getCurrencies());
+		defaultCurrency.valueProperty().bindBidirectional(dataManager.getDefaultCurrency());
 
-				public ChangeListener<CurrencyModelAdapter> setFinanceData(FinanceData financeData) {
-					this.financeData = financeData;
-					return this;
-				}
+		currenciesTable.setItems(dataManager.getExchangeRates());
 
-				@Override
-				public void changed(ObservableValue<? extends CurrencyModelAdapter> ov, CurrencyModelAdapter t, CurrencyModelAdapter t1) {
-					financeData.setDefaultCurrency(t1.getCurrency());
-				}
-			}.setFinanceData(financeData));
-		}
-	}
+		defaultCurrency.valueProperty().addListener(new ChangeListener<CurrencyModelAdapter>() {
+			protected FinanceData financeData;
 
-	/**
-	 * Updates all currency-related widgets from database
-	 */
-	protected void updateCurrencies() {
-		//Update currencies table
-		currenciesTable.getItems().clear();
-		for (CurrencyRate rate : financeData.getCurrencyRates())
-			currenciesTable.getItems().add(new CurrencyRateModelAdapter(rate, financeData));
+			public ChangeListener<CurrencyModelAdapter> setFinanceData(FinanceData financeData) {
+				this.financeData = financeData;
+				return this;
+			}
 
-		//Update the default currency combo box
-		defaultCurrency.getItems().clear();
-		defaultCurrency.getItems().addAll(CurrencyModelAdapter.getCurrenciesList());
-		Currency currentDefaultCurrency = financeData.getDefaultCurrency();
-		if (currentDefaultCurrency != null)
-			defaultCurrency.getSelectionModel().select(new CurrencyModelAdapter(currentDefaultCurrency));
+			@Override
+			public void changed(ObservableValue<? extends CurrencyModelAdapter> ov, CurrencyModelAdapter oldValue, CurrencyModelAdapter newValue) {
+				financeData.performTransactedChange(new TransactedChange() {
+					private Currency currency;
+
+					public TransactedChange setCurrency(Currency currency) {
+						this.currency = currency;
+						return this;
+					}
+
+					@Override
+					public void performChange(EntityManager entityManager) {
+						Preferences preferences = financeData.getPreferencesFromDatabase(entityManager);
+						preferences.setDefaultCurrency(currency);
+					}
+				}.setCurrency(newValue.getCurrency()));
+			}
+		}.setFinanceData(dataManager.getFinanceData()));//FIXME URGENT: move to DataManager
 	}
 }

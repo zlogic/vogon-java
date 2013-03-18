@@ -17,8 +17,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.TableCell;
 import javafx.stage.Popup;
-import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.ui.TransactionComponentsController;
+import org.zlogic.vogon.ui.adapter.DataManager;
 import org.zlogic.vogon.ui.adapter.TransactionModelAdapter;
 
 /**
@@ -42,9 +42,9 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 	 */
 	protected TransactionComponentsController componentsController;
 	/**
-	 * The FinanceData instance
+	 * The DataManager instance
 	 */
-	protected FinanceData financeData;
+	protected DataManager dataManager;
 	/**
 	 * Cell alignment in view (not edit) state
 	 */
@@ -63,23 +63,23 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 	/**
 	 * Constructs a Transaction properties editor/viewer
 	 *
-	 * @param financeData the FinanceData to be used
+	 * @param dataManager the DataManager to be used
 	 */
-	public TransactionEditor(FinanceData financeData) {
-		this(financeData, null);
-		this.financeData = financeData;
+	public TransactionEditor(DataManager dataManager) {
+		this(dataManager, null);
+		this.dataManager = dataManager;
 	}
 
 	/**
 	 * Constructs a Transaction properties editor/viewer
 	 *
-	 * @param financeData the FinanceData to be used
+	 * @param dataManager the DataManager to be used
 	 * @param alignment the cell alignment in view state
 	 */
-	public TransactionEditor(FinanceData financeData, Pos alignment) {
+	public TransactionEditor(DataManager dataManager, Pos alignment) {
 		if (alignment != null)
 			setAlignment(alignment);
-		this.financeData = financeData;
+		this.dataManager = dataManager;
 	}
 
 	/**
@@ -92,8 +92,8 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 		if (editor == null)
 			createEditor();
 
-		componentsController.setFinanceData(financeData);
-		componentsController.setTransaction(getItem().getTransaction());
+		componentsController.setDataManager(dataManager);
+		componentsController.setTransaction(getItem());
 
 		Point2D bounds = localToScene(0, getHeight());
 		popup.show(this, getScene().getWindow().getX() + getScene().getX() + bounds.getX(), getScene().getWindow().getY() + getScene().getY() + bounds.getY());

@@ -25,9 +25,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.zlogic.vogon.data.Constants;
-import org.zlogic.vogon.data.DatabaseManager;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceAccount_;
+import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
 import org.zlogic.vogon.data.Utils;
@@ -57,18 +57,9 @@ public class CsvImporter implements FileImporter {
 		this.inputFile = inputFile;
 	}
 
-	/**
-	 * Parses and imports a CSV file
-	 *
-	 * @throws VogonImportException in case of import errors (I/O, format,
-	 * indexing etc.)
-	 * @throws VogonImportLogicalException in case of logical errors (without
-	 * meaningful stack trace, just to show an error message)
-	 */
 	@Override
-	public void importFile() throws VogonImportException, VogonImportLogicalException {
+	public void importFile(FinanceData financeData, EntityManager entityManager) throws VogonImportException, VogonImportLogicalException {
 		try {
-			EntityManager entityManager = DatabaseManager.getInstance().createEntityManager();
 			entityManager.getTransaction().begin();
 
 			List<FinanceAccount> accounts = new ArrayList<>();
@@ -151,7 +142,6 @@ public class CsvImporter implements FileImporter {
 			reader.close();
 
 			entityManager.getTransaction().commit();
-			entityManager.close();
 		} catch (java.io.FileNotFoundException e) {
 			Logger.getLogger(CsvImporter.class.getName()).log(Level.SEVERE, null, e);
 			throw new VogonImportException(e);

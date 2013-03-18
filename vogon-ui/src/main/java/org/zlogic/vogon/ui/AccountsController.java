@@ -6,8 +6,6 @@
 package org.zlogic.vogon.ui;
 
 import java.net.URL;
-import java.text.MessageFormat;
-import java.util.Currency;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -26,15 +24,11 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.util.Callback;
-import org.zlogic.vogon.data.FinanceAccount;
-import org.zlogic.vogon.data.FinanceData;
-import org.zlogic.vogon.data.events.AccountEventHandler;
-import org.zlogic.vogon.data.events.CurrencyEventHandler;
 import org.zlogic.vogon.ui.adapter.AccountInterface;
 import org.zlogic.vogon.ui.adapter.AccountModelAdapter;
 import org.zlogic.vogon.ui.adapter.CurrencyModelAdapter;
+import org.zlogic.vogon.ui.adapter.DataManager;
 import org.zlogic.vogon.ui.adapter.ObjectWithStatus;
-import org.zlogic.vogon.ui.adapter.ReportingAccount;
 
 /**
  * The Accounts pane
@@ -44,13 +38,9 @@ import org.zlogic.vogon.ui.adapter.ReportingAccount;
 public class AccountsController implements Initializable {
 
 	/**
-	 * Localization messages
+	 * The associated DataManager instance
 	 */
-	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
-	/**
-	 * The associated FinanceData instance
-	 */
-	protected FinanceData financeData;
+	protected DataManager dataManager;
 	/**
 	 * The Accounts table
 	 */
@@ -165,48 +155,13 @@ public class AccountsController implements Initializable {
 	}
 
 	/**
-	 * Assigns the FinanceData instance
+	 * Assigns the DataManager instance
 	 *
-	 * @param financeData the FinanceData instance
+	 * @param dataManager the DataManager instance
 	 */
-	public void setFinanceData(FinanceData financeData) {
-		this.financeData = financeData;
-		updateAccounts();
-
-		//Listen for Account events
-		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
-			((FinanceDataEventDispatcher) financeData.getAccountListener()).addAccountEventHandler(new AccountEventHandler() {
-				@Override
-				public void accountCreated(long accountId) {
-					updateAccounts();
-				}
-
-				@Override
-				public void accountUpdated(long accountId) {
-					updateAccounts();
-				}
-
-				@Override
-				public void accountDeleted(long accountId) {
-					updateAccounts();
-				}
-
-				@Override
-				public void accountsUpdated() {
-					updateAccounts();
-				}
-			});
-		}
-
-		//Listen for Currency events
-		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
-			((FinanceDataEventDispatcher) financeData.getAccountListener()).addCurrencyEventHandler(new CurrencyEventHandler() {
-				@Override
-				public void currenciesUpdated() {
-					updateAccounts();
-				}
-			});
-		}
+	public void setDataManager(DataManager dataManager) {
+		this.dataManager = dataManager;
+		accountsTable.setItems(dataManager.getAllAccounts());
 	}
 
 	/**
@@ -214,8 +169,7 @@ public class AccountsController implements Initializable {
 	 */
 	@FXML
 	private void handleCreateAccount() {
-		FinanceAccount account = new FinanceAccount("", financeData.getDefaultCurrency()); //NOI18N
-		financeData.createAccount(account);
+		dataManager.createAccount();
 	}
 
 	/**
@@ -225,7 +179,7 @@ public class AccountsController implements Initializable {
 	private void handleDeleteAccount() {
 		AccountInterface selectedItem = accountsTable.getSelectionModel().getSelectedItem();
 		if (selectedItem instanceof AccountModelAdapter)
-			financeData.deleteAccount(((AccountModelAdapter) selectedItem).getAccount());
+			dataManager.deleteAccount(((AccountModelAdapter) selectedItem));
 	}
 
 	/**
@@ -238,19 +192,5 @@ public class AccountsController implements Initializable {
 		for (CurrencyModelAdapter adapter : CurrencyModelAdapter.getCurrenciesList())
 			result.add(new ObjectWithStatus<>(adapter, true));
 		return result;
-	}
-
-	/**
-	 * Updates the accounts table from database
-	 */
-	private void updateAccounts() {
-		accountsTable.getItems().clear();
-		for (FinanceAccount account : financeData.getAccounts())
-			accountsTable.getItems().add(new AccountModelAdapter(account, financeData));
-
-		for (Currency currency : financeData.getCurrencies())
-			accountsTable.getItems().add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ACCOUNT"), new Object[]{currency.getCurrencyCode()}), financeData.getTotalBalance(currency), currency));
-		if (financeData.getDefaultCurrency() != null)
-			accountsTable.getItems().add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ALL_ACCOUNTS"), new Object[]{financeData.getDefaultCurrency().getCurrencyCode()}), financeData.getTotalBalance(null), financeData.getDefaultCurrency()));
 	}
 }

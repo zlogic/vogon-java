@@ -19,8 +19,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.zlogic.vogon.data.DatabaseManager;
-import org.zlogic.vogon.data.FinanceData;
+import org.zlogic.vogon.ui.adapter.DataManager;
 
 /**
  * Main entry point for application. Performs initial initialization and loading
@@ -35,9 +34,9 @@ public class Launcher extends Application {
 	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
-	 * FinanceData instance
+	 * DataManager instance
 	 */
-	private FinanceData financeData = new FinanceData();
+	private DataManager dataManager = new DataManager();
 
 	/**
 	 * Java FX entry point
@@ -68,11 +67,7 @@ public class Launcher extends Application {
 		stage.getIcons().addAll(getIconImages());
 
 		//Set data
-		FinanceDataEventDispatcher dispatcher = new FinanceDataEventDispatcher();
-		financeData.setTransactionListener(dispatcher);
-		financeData.setAccountListener(dispatcher);
-		financeData.setCurrencyListener(dispatcher);
-		((MainWindowController) loader.getController()).setFinanceData(financeData);
+		((MainWindowController) loader.getController()).setDataManager(dataManager);
 
 		//Show scene
 		stage.setScene(scene);
@@ -88,7 +83,7 @@ public class Launcher extends Application {
 			@Override
 			public void handle(WindowEvent t) {
 				controller.completeTaskThread();
-				DatabaseManager.getInstance().shutdown();
+				dataManager.shutdown();
 			}
 		}.setController((MainWindowController) loader.getController()));
 		//Show the scene

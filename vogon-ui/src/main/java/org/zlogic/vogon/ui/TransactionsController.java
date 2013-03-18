@@ -6,7 +6,6 @@
 package org.zlogic.vogon.ui;
 
 import java.net.URL;
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,10 +26,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import javafx.util.converter.DefaultStringConverter;
-import org.zlogic.vogon.data.FinanceData;
-import org.zlogic.vogon.data.FinanceTransaction;
-import org.zlogic.vogon.data.events.AccountEventHandler;
-import org.zlogic.vogon.data.events.TransactionEventHandler;
+import org.zlogic.vogon.ui.adapter.DataManager;
 import org.zlogic.vogon.ui.adapter.TransactionModelAdapter;
 import org.zlogic.vogon.ui.cell.DateCellEditor;
 import org.zlogic.vogon.ui.cell.TransactionEditor;
@@ -43,9 +39,9 @@ import org.zlogic.vogon.ui.cell.TransactionEditor;
 public class TransactionsController implements Initializable {
 
 	/**
-	 * The FinanceData instance
+	 * The DataManager instance
 	 */
-	protected FinanceData financeData;
+	protected DataManager dataManager;
 	/**
 	 * The transactions list table
 	 */
@@ -152,7 +148,7 @@ public class TransactionsController implements Initializable {
 		columnAmount.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, TransactionModelAdapter>, TableCell<TransactionModelAdapter, TransactionModelAdapter>>() {
 			@Override
 			public TableCell<TransactionModelAdapter, TransactionModelAdapter> call(TableColumn<TransactionModelAdapter, TransactionModelAdapter> p) {
-				TransactionEditor cell = new TransactionEditor(financeData);
+				TransactionEditor cell = new TransactionEditor(dataManager);
 				cell.setAlignment(Pos.CENTER_RIGHT);
 				cell.editingProperty().addListener(new javafx.beans.value.ChangeListener<Boolean>() {
 					protected List<TransactionEditor> transactionEditors;
@@ -215,7 +211,7 @@ public class TransactionsController implements Initializable {
 	@FXML
 	private void handleCreateTransaction() {
 		cancelEdit();
-		financeData.createTransaction(new FinanceTransaction("", new String[0], new Date(), FinanceTransaction.Type.EXPENSEINCOME));//NOI18N
+		dataManager.createTransaction();
 	}
 
 	/**
@@ -225,7 +221,7 @@ public class TransactionsController implements Initializable {
 	private void handleDuplicateTransaction() {
 		cancelEdit();
 		if (transactionsTable.getSelectionModel().getSelectedItem() != null)
-			financeData.createTransaction(transactionsTable.getSelectionModel().getSelectedItem().getTransaction().clone());//NOI18N
+			dataManager.cloneTransaction(transactionsTable.getSelectionModel().getSelectedItem());
 	}
 
 	/**
@@ -234,10 +230,9 @@ public class TransactionsController implements Initializable {
 	@FXML
 	private void handleDeleteTransaction() {
 		TransactionModelAdapter selectedItem = transactionsTable.getSelectionModel().getSelectedItem();
-		FinanceTransaction deleteTransaction = selectedItem != null ? selectedItem.getTransaction() : null;
 		cancelEdit();
-		if (deleteTransaction != null)
-			financeData.deleteTransaction(deleteTransaction);
+		if (selectedItem != null)
+			dataManager.deleteTransaction(selectedItem);
 	}
 
 	/**
@@ -246,21 +241,7 @@ public class TransactionsController implements Initializable {
 	 * @param currentPage the currently selected page
 	 */
 	protected void updatePageTransactions(int currentPage) {
-		//Configure the transactions indexes
-		int firstTransactionIndex = currentPage * pageSize;
-		int lastTransactionIndex = firstTransactionIndex + pageSize - 1;
-		lastTransactionIndex = Math.min(lastTransactionIndex, financeData.getTransactionCount() - 1);
-		firstTransactionIndex = financeData.getTransactionCount() - 1 - firstTransactionIndex;
-		lastTransactionIndex = financeData.getTransactionCount() - 1 - lastTransactionIndex;
-		List<FinanceTransaction> transactions = financeData.getTransactions(Math.min(firstTransactionIndex, lastTransactionIndex), Math.max(firstTransactionIndex, lastTransactionIndex));
-		Collections.reverse(transactions);
-
-		//Update the tables
-		List<TransactionModelAdapter> transactionsList = new LinkedList<>();
-		for (FinanceTransaction transaction : transactions)
-			transactionsList.add(new TransactionModelAdapter(transaction, financeData));
-		transactionsTable.getItems().clear();
-		transactionsTable.getItems().addAll(transactionsList);
+		dataManager.setVisibleTransactions(currentPage, pageSize);
 	}
 
 	/**
@@ -285,77 +266,35 @@ public class TransactionsController implements Initializable {
 	}
 
 	/**
-	 * Assigns the FinanceData instance
+	 * Assigns the DataManager instance
 	 *
-	 * @param financeData the FinanceData instance
+	 * @param dataManager the DataManager instance
 	 */
-	public void setFinanceData(FinanceData financeData) {
-		this.financeData = financeData;
+	public void setDataManager(DataManager dataManager) {
+		this.dataManager = dataManager;
+		transactionsTable.setItems(dataManager.getTransactions());
 		updateTransactions();
 
 		//Listen for Transaction events
-		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
-			((FinanceDataEventDispatcher) financeData.getAccountListener()).addTransactionEventHandler(new TransactionEventHandler() {
-				@Override
-				public void transactionCreated(long transactionId) {
-					//Update only if editors are not active
-					if (!editingTransactionEditors.isEmpty())
-						return;
-					transactionsTablePagination.setCurrentPageIndex(0);
-					for (TransactionModelAdapter adapter : transactionsTable.getItems())
-						if (adapter.getTransaction().getId() == transactionId) {
-							transactionsTable.getSelectionModel().select(adapter);
-							break;
-						}
-				}
-
-				@Override
-				public void transactionUpdated(long transactionId) {
-					//Update only if editors are not active
-					if (!editingTransactionEditors.isEmpty())
-						return;
-					updateTransactions();
-				}
-
-				@Override
-				public void transactionDeleted(long transactionId) {
-				}
-
-				@Override
-				public void transactionsUpdated() {
-					//Update only if editors are not active
-					if (!editingTransactionEditors.isEmpty())
-						return;
-					updateTransactions();
-				}
-			});
-		}
-
-		//Listen for Account events
-		if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
-			((FinanceDataEventDispatcher) financeData.getAccountListener()).addAccountEventHandler(new AccountEventHandler() {
-				@Override
-				public void accountCreated(long accountId) {
-					updateTransactions();
-				}
-
-				@Override
-				public void accountUpdated(long accountId) {
-					updateTransactions();
-				}
-
-				@Override
-				public void accountDeleted(long accountId) {
-					cancelEdit();
-					updateTransactions();
-				}
-
-				@Override
-				public void accountsUpdated() {
-					updateTransactions();
-				}
-			});
-		}
+		//FIXME URGENT
+		/*
+		 if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
+		 ((FinanceDataEventDispatcher) financeData.getAccountListener()).addTransactionEventHandler(new TransactionEventHandler() {
+		 @Override
+		 public void transactionCreated(long transactionId) {
+		 //Update only if editors are not active
+		 if (!editingTransactionEditors.isEmpty())
+		 return;
+		 transactionsTablePagination.setCurrentPageIndex(0);
+		 for (TransactionModelAdapter adapter : transactionsTable.getItems())
+		 if (adapter.getTransaction().getId() == transactionId) {
+		 transactionsTable.getSelectionModel().select(adapter);
+		 break;
+		 }
+		 }
+		 });
+		 }
+		 */
 	}
 
 	/**
@@ -364,6 +303,6 @@ public class TransactionsController implements Initializable {
 	 * @return the number of pages
 	 */
 	public int getPageCount() {
-		return financeData.getTransactionCount() / pageSize + 1;
+		return dataManager.getPageCount(pageSize);
 	}
 }
