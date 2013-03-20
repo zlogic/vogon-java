@@ -17,9 +17,9 @@ public interface TransactedChange {
 
 	/**
 	 * Perform the entity modification. EntityManager is already initialized and
-	 * the transaction is started by
-	 * FInanceData.performTransactedChange(). Make sure to update existing
-	 * entities from database with merge() before performing changes.
+	 * the transaction is started by FInanceData.performTransactedChange(). Make
+	 * sure to update existing entities from database with merge() before
+	 * performing changes.
 	 *
 	 * @param entityManager the entity manager used for this change
 	 */

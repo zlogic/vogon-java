@@ -99,6 +99,7 @@ public class DataManager {
 				reportingAccounts.add(account);
 		allAccounts.removeAll(reportingAccounts);
 
+		//Update accounts
 		List<AccountModelAdapter> orphanedAccounts = new LinkedList<>(accounts);
 		for (FinanceAccount account : financeData.getAccounts()) {
 			AccountModelAdapter existingAccount = findAccountAdapter(account);
@@ -107,6 +108,7 @@ public class DataManager {
 				allAccounts.add(new AccountModelAdapter(account, this));
 			} else {
 				existingAccount.setAccount(account);
+				existingAccount.updateFxProperties();
 				orphanedAccounts.remove(existingAccount);
 			}
 		}
@@ -141,7 +143,7 @@ public class DataManager {
 		exchangeRates.setAll(newExchangeRates);
 
 		List<CurrencyModelAdapter> newCurrencies = new LinkedList<>();
-		for(Currency currency : financeData.getCurrencies())
+		for (Currency currency : financeData.getCurrencies())
 			newCurrencies.add(new CurrencyModelAdapter(currency));
 		currencies.setAll(newCurrencies);
 	}
