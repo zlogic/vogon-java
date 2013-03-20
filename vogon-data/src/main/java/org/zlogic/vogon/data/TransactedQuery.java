@@ -15,7 +15,7 @@ import javax.persistence.criteria.CriteriaQuery;
  *
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
-public interface TransactedQuery<ElementType,ResultType> {
+public interface TransactedQuery<ElementType, ResultType> {
 
 	/**
 	 * Return or build a query. CriteriaBuilder is already initialized and the
@@ -24,5 +24,6 @@ public interface TransactedQuery<ElementType,ResultType> {
 	 * @param criteriaBuilder the criteria builder used for this query
 	 */
 	public CriteriaQuery<ElementType> getQuery(CriteriaBuilder criteriaBuilder);
+
 	public ResultType getQueryResult(TypedQuery<ElementType> preparedQuery);
 }

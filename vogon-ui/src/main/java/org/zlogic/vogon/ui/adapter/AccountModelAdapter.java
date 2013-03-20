@@ -5,6 +5,7 @@
  */
 package org.zlogic.vogon.ui.adapter;
 
+import java.util.Currency;
 import java.util.Objects;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -14,8 +15,10 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javax.persistence.EntityManager;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceTransaction;
+import org.zlogic.vogon.data.TransactedChange;
 
 /**
  * Class for storing an account with an overloaded toString method for better
@@ -44,7 +47,7 @@ public class AccountModelAdapter implements AccountInterface {
 	/**
 	 * The account balance property (formatted string)
 	 */
-	private final StringProperty balance = new SimpleStringProperty();
+	private final StringProperty balance = new SimpleStringProperty("");
 	/**
 	 * The currency property
 	 */
@@ -54,6 +57,75 @@ public class AccountModelAdapter implements AccountInterface {
 	 * account's total balance
 	 */
 	private final ObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>> includeInTotal = new SimpleObjectProperty<>(new ObjectWithStatus<BooleanProperty, Boolean>(new SimpleBooleanProperty(true), true));
+	private ChangeListener<Boolean> includeInTotalListener = new ChangeListener<Boolean>() {
+		@Override
+		public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
+			if (oldValue.equals(newValue))
+				return;
+			dataManager.getFinanceData().performTransactedChange(new TransactedChange() {
+				private boolean includeInTotal;
+
+				public TransactedChange setIncludeInTotal(boolean includeInTotal) {
+					this.includeInTotal = includeInTotal;
+					return this;
+				}
+
+				@Override
+				public void performChange(EntityManager entityManager) {
+					setAccount(entityManager.find(FinanceAccount.class, account.getId()));
+					getAccount().setIncludeInTotal(includeInTotal);
+				}
+			}.setIncludeInTotal(newValue));
+			updateFxProperties();
+			dataManager.refreshAccounts();
+		}
+	};
+	private ChangeListener<ObjectWithStatus<String, Boolean>> nameListener = new ChangeListener<ObjectWithStatus<String, Boolean>>() {
+		@Override
+		public void changed(ObservableValue<? extends ObjectWithStatus<String, Boolean>> ov, ObjectWithStatus<String, Boolean> oldValue, ObjectWithStatus<String, Boolean> newValue) {
+			if (oldValue.equals(newValue))
+				return;
+			dataManager.getFinanceData().performTransactedChange(new TransactedChange() {
+				private String name;
+
+				public TransactedChange setName(String name) {
+					this.name = name;
+					return this;
+				}
+
+				@Override
+				public void performChange(EntityManager entityManager) {
+					setAccount(entityManager.find(FinanceAccount.class, account.getId()));
+					getAccount().setName(name);
+				}
+			}.setName(newValue.getValue()));
+			updateFxProperties();
+		}
+	};
+	private ChangeListener<ObjectWithStatus<CurrencyModelAdapter, Boolean>> currencyListener = new ChangeListener<ObjectWithStatus<CurrencyModelAdapter, Boolean>>() {
+		@Override
+		public void changed(ObservableValue<? extends ObjectWithStatus<CurrencyModelAdapter, Boolean>> ov, ObjectWithStatus<CurrencyModelAdapter, Boolean> oldValue, ObjectWithStatus<CurrencyModelAdapter, Boolean> newValue) {
+			if (oldValue.equals(newValue))
+				return;
+			dataManager.getFinanceData().performTransactedChange(new TransactedChange() {
+				private Currency currency;
+
+				public TransactedChange setCurrency(Currency currency) {
+					this.currency = currency;
+					return this;
+				}
+
+				@Override
+				public void performChange(EntityManager entityManager) {
+					setAccount(entityManager.find(FinanceAccount.class, account.getId()));
+					getAccount().setCurrency(currency);
+				}
+			}.setCurrency(newValue.getValue().getCurrency()));
+			dataManager.getFinanceData().populateCurrencies();
+			updateFxProperties();
+			dataManager.reloadCurrencies();
+		}
+	};
 
 	/**
 	 * Default constructor
@@ -65,71 +137,18 @@ public class AccountModelAdapter implements AccountInterface {
 		this.account = account;
 		this.dataManager = dataManager;
 
-		updateFxProperties();
-
-		//Set property change listeners
-		includeInTotal.getValue().getValue().addListener(new ChangeListener<Boolean>() {
-			protected DataManager dataManager;
-			protected FinanceAccount account;
-
-			public ChangeListener<Boolean> setData(FinanceAccount account, DataManager dataManager) {
-				this.account = account;
-				this.dataManager = dataManager;
-				return this;
-			}
-
-			@Override
-			public void changed(ObservableValue<? extends Boolean> ov, Boolean t, Boolean t1) {
-				//FIXME URGENT
-				/*
-				 if (t1.booleanValue() != account.getIncludeInTotal())
-				 financeData.setAccountIncludeInTotal(account, t1);
-				 */
-			}
-		}.setData(account, dataManager));
-
-		name.addListener(new ChangeListener<ObjectWithStatus<String, Boolean>>() {
-			protected DataManager dataManager;
-			protected FinanceAccount account;
-
-			public ChangeListener<ObjectWithStatus<String, Boolean>> setData(FinanceAccount account, DataManager dataManager) {
-				this.account = account;
-				this.dataManager = dataManager;
-				return this;
-			}
-
-			@Override
-			public void changed(ObservableValue<? extends ObjectWithStatus<String, Boolean>> ov, ObjectWithStatus<String, Boolean> t, ObjectWithStatus<String, Boolean> t1) {
-				//FIXME URGENT
-				/*
-				 if (!account.getName().equals(t1.getValue()))
-				 financeData.setAccountName(account, t1.getValue());
-				 */
-			}
-		}.setData(account, dataManager));
-
-		currency.addListener(new ChangeListener<ObjectWithStatus<CurrencyModelAdapter, Boolean>>() {
-			protected DataManager dataManager;
-			protected FinanceAccount account;
-
-			public ChangeListener<ObjectWithStatus<CurrencyModelAdapter, Boolean>> setData(FinanceAccount account, DataManager dataManager) {
-				this.account = account;
-				this.dataManager = dataManager;
-				return this;
-			}
-
-			@Override
-			public void changed(ObservableValue<? extends ObjectWithStatus<CurrencyModelAdapter, Boolean>> ov, ObjectWithStatus<CurrencyModelAdapter, Boolean> t, ObjectWithStatus<CurrencyModelAdapter, Boolean> t1) {
-				//FIXME URGENT
-				/*
-				 financeData.setAccountCurrency(account, t1.getValue().getCurrency());
-				 */
-			}
-		}.setData(account, dataManager));
+		((AccountModelAdapter) this).updateFxProperties();
 	}
 
 	public void refreshBalance() {
-		//FIXME URGENT
+		dataManager.getFinanceData().refreshAccountBalance(account);
+		dataManager.getFinanceData().performTransactedChange(new TransactedChange() {
+			@Override
+			public void performChange(EntityManager entityManager) {
+				setAccount(entityManager.find(FinanceAccount.class, account.getId()));
+			}
+		});
+		updateFxProperties();
 	}
 
 	@Override
@@ -149,17 +168,13 @@ public class AccountModelAdapter implements AccountInterface {
 		if (!(obj instanceof AccountModelAdapter))
 			return false;
 		AccountModelAdapter adapter = (AccountModelAdapter) obj;
-		return account.equals(adapter.account) && balance.get().equals(adapter.balance.get()) && currency.get().equals(adapter.currency.get()) && includeInTotal.get().equals(adapter.includeInTotal.get()) && name.get().equals(adapter.name.get());
+		return account.getId() == adapter.account.getId();
 	}
 
 	@Override
 	public int hashCode() {
 		int hash = 7;
 		hash = 79 * hash + Objects.hashCode(this.account);
-		hash = 79 * hash + Objects.hashCode(this.name);
-		hash = 79 * hash + Objects.hashCode(this.balance);
-		hash = 79 * hash + Objects.hashCode(this.currency);
-		hash = 79 * hash + Objects.hashCode(this.includeInTotal);
 		return hash;
 	}
 
@@ -170,6 +185,10 @@ public class AccountModelAdapter implements AccountInterface {
 	 */
 	public FinanceAccount getAccount() {
 		return account;
+	}
+
+	protected void setAccount(FinanceAccount account) {
+		this.account = account;
 	}
 
 	@Override
@@ -197,6 +216,10 @@ public class AccountModelAdapter implements AccountInterface {
 	 * to trigger.
 	 */
 	protected void updateFxProperties() {
+		//Remove property change listeners
+		includeInTotal.getValue().getValue().removeListener(includeInTotalListener);
+		name.removeListener(nameListener);
+		currency.removeListener(currencyListener);
 		if (account != null) {
 			balance.set(new AmountModelAdapter(account.getBalance(), true, account.getCurrency(), false, FinanceTransaction.Type.UNDEFINED).toString());
 			name.set(new ObjectWithStatus<>(account.getName(), true));
@@ -204,9 +227,9 @@ public class AccountModelAdapter implements AccountInterface {
 			includeInTotal.get().getValue().setValue(account.getIncludeInTotal());
 			includeInTotal.set(new ObjectWithStatus<>(includeInTotal.get().getValue(), true));
 		}
-	}
-
-	protected void setAccount(FinanceAccount account) {
-		this.account = account;
+		//Restore property change listeners
+		includeInTotal.getValue().getValue().addListener(includeInTotalListener);
+		name.addListener(nameListener);
+		currency.addListener(currencyListener);
 	}
 }

@@ -314,9 +314,11 @@ public class MainWindowController implements Initializable {
 				updateMessage(messages.getString("TASK_RECALCULATING_BALANCE"));
 				updateProgress(-1, 1);
 
-				for (AccountInterface account : dataManager.getAccounts())
-					if (account instanceof AccountModelAdapter)
+				for (AccountInterface account : dataManager.getAllAccounts())
+					if (account instanceof AccountModelAdapter) {
 						((AccountModelAdapter) account).refreshBalance();
+					}
+				dataManager.refreshAccounts();
 
 				updateProgress(1, 1);
 				updateMessage("");//NOI18N

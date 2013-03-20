@@ -92,7 +92,6 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 		if (editor == null)
 			createEditor();
 
-		componentsController.setDataManager(dataManager);
 		componentsController.setTransaction(getItem());
 
 		Point2D bounds = localToScene(0, getHeight());
@@ -156,6 +155,7 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 			editor = (Parent) loader.load();
 			editor.autosize();
 			componentsController = loader.getController();
+			componentsController.setDataManager(dataManager);
 			popup = new Popup();
 			popup.getContent().add(editor);
 		} catch (IOException ex) {

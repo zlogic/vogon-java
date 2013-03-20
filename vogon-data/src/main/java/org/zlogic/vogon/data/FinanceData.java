@@ -394,26 +394,35 @@ public class FinanceData {
 	 *
 	 * @return the list of used currencies
 	 */
-	public List<Currency> getCurrencies() throws ApplicationShuttingDownException {
+	public List<Currency> getCurrencies() {
+		List<Currency> currencies = new LinkedList<>();
+		for (CurrencyRate rate : exchangeRates) {
+			if (!currencies.contains(rate.getSource()))
+				currencies.add(rate.getSource());
+			if (!currencies.contains(rate.getDestination()))
+				currencies.add(rate.getDestination());
+		}
+		return currencies;
+	}
+
+	/**
+	 * Automatically creates missing currency exchange rates.
+	 */
+	public void populateCurrencies() throws ApplicationShuttingDownException {
 		try {
 			shuttingDownLock.readLock().lock();
 			if (shuttingDown)
 				throw new ApplicationShuttingDownException();
-			List<Currency> currencies = new LinkedList<>();
-			for (CurrencyRate rate : exchangeRates) {
-				if (!currencies.contains(rate.getSource()))
-					currencies.add(rate.getSource());
-				if (!currencies.contains(rate.getDestination()))
-					currencies.add(rate.getDestination());
-			}
-			return currencies;
+			EntityManager entityManager = entityManagerFactory.createEntityManager();
+			populateCurrencies(entityManager);
+			entityManager.close();
 		} finally {
 			shuttingDownLock.readLock().unlock();
 		}
 	}
 
 	/**
-	 * Automatically creates missing currency exchange rates Should only be
+	 * Automatically creates missing currency exchange rates. Should only be
 	 * called from an started transaction
 	 */
 	protected void populateCurrencies(EntityManager entityManager) {
