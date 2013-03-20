@@ -6,8 +6,6 @@
 package org.zlogic.vogon.ui;
 
 import java.net.URL;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -21,10 +19,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.util.Callback;
-import javax.persistence.EntityManager;
-import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceTransaction;
-import org.zlogic.vogon.data.TransactedChange;
 import org.zlogic.vogon.ui.adapter.AccountModelAdapter;
 import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
 import org.zlogic.vogon.ui.adapter.DataManager;
@@ -123,10 +118,14 @@ public class TransactionComponentsController implements Initializable {
 	 */
 	public void setTransaction(TransactionModelAdapter transaction) {
 		this.transaction = null;
-		if (transaction != null)
-			transactionType.getSelectionModel().select(new TransactionTypeComboItem(transaction.typeProperty().get()));
-		this.transaction = transaction;
-		//TODO: Get components from transaction (bind)
+		if (transaction != null) {
+			//transactionType.valueProperty().bindBidirectional(transaction.typeProperty());
+			transactionType.getSelectionModel().select(new TransactionTypeComboItem(transaction.typeProperty().get()));//FIXME URGENT: use bind instead
+			this.transaction = transaction;
+			transactionComponents.setItems(transaction.transactionComponentsProperty());
+		} else {
+			transactionComponents.setItems(FXCollections.<TransactionComponentModelAdapter>emptyObservableList());
+		}
 	}
 
 	/**
@@ -156,7 +155,6 @@ public class TransactionComponentsController implements Initializable {
 		TransactionComponentModelAdapter selectedItem = transactionComponents.getSelectionModel().getSelectedItem();
 		if (selectedItem != null)
 			transaction.deleteComponent(selectedItem);
-		transactionComponents.getItems().remove(selectedItem);
 	}
 
 	/**

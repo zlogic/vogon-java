@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -115,8 +116,10 @@ public class TransactionsController implements Initializable {
 		transactionsTablePagination.setPageFactory(new Callback<Integer, Node>() {
 			@Override
 			public Node call(Integer p) {
+				TransactionModelAdapter selectedItem = transactionsTable.getSelectionModel().getSelectedItem();
 				updatePageTransactions(p);
-				return transactionsTable;//transactionsTable;
+				transactionsTable.getSelectionModel().select(selectedItem);
+				return transactionsTable;
 			}
 		});
 
@@ -150,6 +153,7 @@ public class TransactionsController implements Initializable {
 			public TableCell<TransactionModelAdapter, TransactionModelAdapter> call(TableColumn<TransactionModelAdapter, TransactionModelAdapter> p) {
 				TransactionEditor cell = new TransactionEditor(dataManager);
 				cell.setAlignment(Pos.CENTER_RIGHT);
+				//Keep track of all editors
 				cell.editingProperty().addListener(new javafx.beans.value.ChangeListener<Boolean>() {
 					protected List<TransactionEditor> transactionEditors;
 					protected TransactionEditor cell;
@@ -166,7 +170,7 @@ public class TransactionsController implements Initializable {
 							transactionEditors.add(cell);
 						if (!t1 && t1 != t) {
 							transactionEditors.remove(cell);
-							updateTransactions();
+							updateTransactions();//FIXME URGENT: is this necessary?
 						}
 					}
 				}.setData(editingTransactionEditors, cell));
@@ -275,26 +279,21 @@ public class TransactionsController implements Initializable {
 		transactionsTable.setItems(dataManager.getTransactions());
 		updateTransactions();
 
-		//Listen for Transaction events
-		//FIXME URGENT
-		/*
-		 if (financeData.getAccountListener() instanceof FinanceDataEventDispatcher) {
-		 ((FinanceDataEventDispatcher) financeData.getAccountListener()).addTransactionEventHandler(new TransactionEventHandler() {
-		 @Override
-		 public void transactionCreated(long transactionId) {
-		 //Update only if editors are not active
-		 if (!editingTransactionEditors.isEmpty())
-		 return;
-		 transactionsTablePagination.setCurrentPageIndex(0);
-		 for (TransactionModelAdapter adapter : transactionsTable.getItems())
-		 if (adapter.getTransaction().getId() == transactionId) {
-		 transactionsTable.getSelectionModel().select(adapter);
-		 break;
-		 }
-		 }
-		 });
-		 }
-		 */
+		//Listen for new transaction events
+		dataManager.getTransactions().addListener(new ListChangeListener<TransactionModelAdapter>() {
+			@Override
+			public void onChanged(ListChangeListener.Change<? extends TransactionModelAdapter> change) {
+				if (editingTransactionEditors.isEmpty())
+					while (change.next()) {
+						if (change.wasAdded() && change.getAddedSize() == 1) {
+							//If just one item was added, this is probably a new transaction vs. a refresh
+							final TransactionModelAdapter addedItem = change.getAddedSubList().get(0);
+							transactionsTable.getSelectionModel().select(addedItem);
+							transactionsTablePagination.setCurrentPageIndex(0);
+						}
+					}
+			}
+		});
 	}
 
 	/**

@@ -174,7 +174,7 @@ public class AccountModelAdapter implements AccountInterface {
 	@Override
 	public int hashCode() {
 		int hash = 7;
-		hash = 79 * hash + Objects.hashCode(this.account);
+		hash = 79 * hash + Objects.hashCode(this.account.getId());
 		return hash;
 	}
 
