@@ -45,7 +45,7 @@ public class TransactionComponentModelAdapter {
 	public TransactionComponentModelAdapter(TransactionComponent transactionComponent, DataManager dataManager) {
 		this.transactionComponent = transactionComponent;
 		this.dataManager = dataManager;
-		updateProperties();
+		((TransactionComponentModelAdapter) this).updateFxProperties();
 
 		//Set property change listeners
 		account.addListener(new ChangeListener<AccountModelAdapter>() {
@@ -95,6 +95,10 @@ public class TransactionComponentModelAdapter {
 		return transactionComponent;
 	}
 
+	protected void setTransactionComponent(TransactionComponent transactionComponent) {
+		this.transactionComponent = transactionComponent;
+	}
+
 	/**
 	 * Returns the account property
 	 *
@@ -117,8 +121,9 @@ public class TransactionComponentModelAdapter {
 	 * Updates the properties from the current transaction component, causing
 	 * ChangeListeners to trigger.
 	 */
-	private void updateProperties() {
+	protected void updateFxProperties() {
 		if (transactionComponent != null) {
+			account.set(dataManager.findAccountAdapter(transactionComponent.getAccount()));//FIXME URGENT: check this is not null & display incorrect account if required
 			amount.set(new AmountModelAdapter(transactionComponent.getAmount(), true, transactionComponent.getAccount() != null ? transactionComponent.getAccount().getCurrency() : null, false, FinanceTransaction.Type.UNDEFINED));
 		}
 	}

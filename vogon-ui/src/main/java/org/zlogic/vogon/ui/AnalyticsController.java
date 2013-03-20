@@ -395,8 +395,8 @@ public class AnalyticsController implements Initializable {
 		startDateField.setText(dateFormat.format(report.getEarliestDate()));
 		endDateField.setText(dateFormat.format(report.getLatestDate()));
 
-		updateTagsSelectionTable();
-		updateAccountsSelectionTable();
+		updateTagsSelectionTable();//TODO: move this to FinanceData
+		updateAccountsSelectionTable();//TODO: move this to FinanceData (add "select for report" property to regular adapter)
 	}
 
 	/**

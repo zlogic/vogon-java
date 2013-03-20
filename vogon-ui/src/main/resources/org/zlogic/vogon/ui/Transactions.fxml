@@ -50,7 +50,7 @@
         </TableColumn>
         <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_ACCOUNT" fx:id="columnAccount">
           <cellValueFactory>
-            <PropertyValueFactory property="account" />
+            <PropertyValueFactory property="accountName" />
           </cellValueFactory>
         </TableColumn>
       </columns>

@@ -207,42 +207,33 @@ public class FinanceData {
 	 * @param transaction the transaction to be searcher (only the id is used)
 	 * @return the transaction
 	 */
-	public FinanceTransaction getUpdatedTransactionFromDatabase(FinanceTransaction transaction) throws ApplicationShuttingDownException {
+	public FinanceTransaction getUpdatedTransactionFromDatabase(EntityManager entityManager, FinanceTransaction transaction) throws ApplicationShuttingDownException {
 		if (transaction == null)
 			return null;
+
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+		//Retreive the transactions
+		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
+		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
+		tr.fetch(FinanceTransaction_.tags, JoinType.LEFT);
+		transactionsCriteriaQuery.where(criteriaBuilder.equal(tr.get(FinanceTransaction_.id), transaction.id));
+
+		FinanceTransaction result;
 		try {
-			shuttingDownLock.readLock().lock();
-			if (shuttingDown)
-				throw new ApplicationShuttingDownException();
-			EntityManager entityManager = entityManagerFactory.createEntityManager();
-			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-
-			//Retreive the transactions
-			CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
-			Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
-			tr.fetch(FinanceTransaction_.tags, JoinType.LEFT);
-			transactionsCriteriaQuery.where(criteriaBuilder.equal(tr.get(FinanceTransaction_.id), transaction.id));
-
-			FinanceTransaction result;
-			try {
-				result = entityManager.createQuery(transactionsCriteriaQuery).getSingleResult();
-			} catch (NoResultException ex) {
-				entityManager.close();
-				return null;
-			}
-
-			//Post-fetch components
-			CriteriaQuery<FinanceTransaction> transactionsComponentsFetchCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
-			Root<FinanceTransaction> trComponentsFetch = transactionsComponentsFetchCriteriaQuery.from(FinanceTransaction.class);
-			transactionsComponentsFetchCriteriaQuery.where(criteriaBuilder.equal(tr.get(FinanceTransaction_.id), transaction.id));
-			trComponentsFetch.fetch(FinanceTransaction_.components, JoinType.LEFT).fetch(TransactionComponent_.account, JoinType.LEFT);
-			entityManager.createQuery(transactionsComponentsFetchCriteriaQuery).getSingleResult();
-
+			result = entityManager.createQuery(transactionsCriteriaQuery).getSingleResult();
+		} catch (NoResultException ex) {
 			entityManager.close();
-			return result;
-		} finally {
-			shuttingDownLock.readLock().unlock();
+			return null;
 		}
+
+		//Post-fetch components
+		CriteriaQuery<FinanceTransaction> transactionsComponentsFetchCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
+		Root<FinanceTransaction> trComponentsFetch = transactionsComponentsFetchCriteriaQuery.from(FinanceTransaction.class);
+		transactionsComponentsFetchCriteriaQuery.where(criteriaBuilder.equal(tr.get(FinanceTransaction_.id), transaction.id));
+		trComponentsFetch.fetch(FinanceTransaction_.components, JoinType.LEFT).fetch(TransactionComponent_.account, JoinType.LEFT);
+		entityManager.createQuery(transactionsComponentsFetchCriteriaQuery).getSingleResult();
+		return result;
 	}
 
 	/**
