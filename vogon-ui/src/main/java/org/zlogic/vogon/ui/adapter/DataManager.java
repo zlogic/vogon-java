@@ -45,7 +45,7 @@ public class DataManager {
 	private FinanceData financeData = new FinanceData();
 	private ObservableList<TransactionModelAdapter> transactions = FXCollections.observableList(new LinkedList<TransactionModelAdapter>());
 	private ObservableList<AccountInterface> allAccounts = FXCollections.observableList(new LinkedList<AccountInterface>());
-	private ObservableList<AccountModelAdapter> accounts = FXCollections.observableList(new LinkedList<AccountModelAdapter>());
+	private ObservableList<AccountInterface> accounts = FXCollections.observableList(new LinkedList<AccountInterface>());
 	private ObservableList<CurrencyModelAdapter> currencies = FXCollections.observableList(new LinkedList<CurrencyModelAdapter>());
 	private ObservableList<CurrencyRateModelAdapter> exchangeRates = FXCollections.observableList(new LinkedList<CurrencyRateModelAdapter>());
 	/**
@@ -100,7 +100,7 @@ public class DataManager {
 		allAccounts.removeAll(reportingAccounts);
 
 		//Update accounts
-		List<AccountModelAdapter> orphanedAccounts = new LinkedList<>(accounts);
+		List<AccountInterface> orphanedAccounts = new LinkedList<>(accounts);
 		for (FinanceAccount account : financeData.getAccounts()) {
 			AccountModelAdapter existingAccount = findAccountAdapter(account);
 			if (existingAccount == null) {
@@ -192,9 +192,9 @@ public class DataManager {
 		return financeData;
 	}
 
-	public TransactionModelAdapter findTransactionAdapter(TransactionModelAdapter transaction) {
+	public TransactionModelAdapter findTransactionAdapter(FinanceTransaction transaction) {
 		for (TransactionModelAdapter adapter : transactions) {
-			if (adapter.getTransaction().equals(transaction.getTransaction()))
+			if (adapter.getTransaction().equals(transaction))
 				return adapter;
 		}
 		return null;
@@ -252,7 +252,7 @@ public class DataManager {
 		return allAccounts;
 	}
 
-	public ObservableList<AccountModelAdapter> getAccounts() {
+	public ObservableList<AccountInterface> getAccounts() {
 		return accounts;
 	}
 

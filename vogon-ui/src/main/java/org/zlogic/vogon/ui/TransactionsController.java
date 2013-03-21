@@ -168,10 +168,8 @@ public class TransactionsController implements Initializable {
 					public void changed(ObservableValue<? extends Boolean> ov, Boolean t, Boolean t1) {
 						if (t1 && t1 != t)
 							transactionEditors.add(cell);
-						if (!t1 && t1 != t) {
+						if (!t1 && t1 != t)
 							transactionEditors.remove(cell);
-							updateTransactions();//FIXME URGENT: is this necessary?
-						}
 					}
 				}.setData(editingTransactionEditors, cell));
 				return cell;

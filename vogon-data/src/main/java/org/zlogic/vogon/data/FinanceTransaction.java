@@ -251,6 +251,17 @@ public class FinanceTransaction implements Serializable {
 	 * @param component the component to be updated
 	 * @param amount the new amount
 	 */
+	public void updateComponentRawAmount(TransactionComponent component, double amount) {
+		updateComponentRawAmount(component, (long) (amount * Constants.rawAmountMultiplier));
+	}
+
+	/**
+	 * Sets a new amount for a component and updates the transaction and account
+	 * balance
+	 *
+	 * @param component the component to be updated
+	 * @param amount the new amount
+	 */
 	public void updateComponentRawAmount(TransactionComponent component, long amount) {
 		if (!components.contains(component))
 			return;
