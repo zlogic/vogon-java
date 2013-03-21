@@ -237,6 +237,38 @@ public class FinanceData {
 	}
 
 	/**
+	 * Returns the latest copy of a transaction from the database
+	 *
+	 * @param transaction the transaction to be searcher (only the id is used)
+	 * @return the transaction
+	 */
+	public TransactionComponent getUpdatedTransactionComponentFromDatabase(EntityManager entityManager, TransactionComponent component) throws ApplicationShuttingDownException {
+		if (component == null)
+			return null;
+
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+		//Retreive the transactions
+		CriteriaQuery<TransactionComponent> transactionComponentCriteriaQuery = criteriaBuilder.createQuery(TransactionComponent.class);
+		Root<TransactionComponent> trc = transactionComponentCriteriaQuery.from(TransactionComponent.class);
+		transactionComponentCriteriaQuery.where(criteriaBuilder.equal(trc.get(TransactionComponent_.id), component.id));
+
+		//Post-fetch transaction and account		
+		trc.fetch(TransactionComponent_.transaction, JoinType.LEFT);
+		trc.fetch(TransactionComponent_.account, JoinType.LEFT);
+
+		TransactionComponent result;
+		try {
+			result = entityManager.createQuery(transactionComponentCriteriaQuery).getSingleResult();
+		} catch (NoResultException ex) {
+			entityManager.close();
+			return null;
+		}
+
+		return result;
+	}
+
+	/**
 	 * Retrieves all transactions from the database (from firstTransaction to
 	 * lastTransaction)
 	 *
@@ -558,15 +590,13 @@ public class FinanceData {
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
 
-			account = entityManager.find(FinanceAccount.class, account.id);
+			account = account != null ? entityManager.find(FinanceAccount.class, account.id) : null;
 			transaction = entityManager.find(FinanceTransaction.class, transaction.id);
 			TransactionComponent component = new TransactionComponent(account, transaction, amount);
+			entityManager.persist(component);
 
-			if (transaction != null) {
-				if (!component.getTransaction().getComponents().contains(component))
-					component.getTransaction().addComponent(component);
-				entityManager.merge(component.getTransaction());
-			}
+			if (transaction != null)
+				transaction.addComponent(component);
 
 			entityManager.getTransaction().commit();
 

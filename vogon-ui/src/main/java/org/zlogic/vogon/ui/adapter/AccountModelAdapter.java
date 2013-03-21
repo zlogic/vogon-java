@@ -78,6 +78,7 @@ public class AccountModelAdapter implements AccountInterface {
 			}.setIncludeInTotal(newValue));
 			updateFxProperties();
 			dataManager.refreshAccounts();
+			//FIXME URGENT: updateFxProperties for transactions
 		}
 	};
 	private ChangeListener<ObjectWithStatus<String, Boolean>> nameListener = new ChangeListener<ObjectWithStatus<String, Boolean>>() {
@@ -124,6 +125,7 @@ public class AccountModelAdapter implements AccountInterface {
 			dataManager.getFinanceData().populateCurrencies();
 			updateFxProperties();
 			dataManager.reloadCurrencies();
+			//FIXME URGENT: updateFxProperties for transactions
 		}
 	};
 

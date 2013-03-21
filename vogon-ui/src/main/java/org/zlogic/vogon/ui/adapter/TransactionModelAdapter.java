@@ -171,7 +171,7 @@ public class TransactionModelAdapter implements CellStatus {
 	public TransactionModelAdapter(FinanceTransaction transaction, DataManager dataManager) {
 		this.transaction = transaction;
 		this.dataManager = dataManager;
-		updateFxProperties();
+		((TransactionModelAdapter) this).updateFxProperties();
 		updateComponents();
 	}
 
@@ -186,13 +186,7 @@ public class TransactionModelAdapter implements CellStatus {
 		dataManager.getFinanceData().deleteTransactionComponent(component.getTransactionComponent());
 		components.remove(component);
 
-		//Update transaction from database
-		dataManager.getFinanceData().performTransactedChange(new TransactedChange() {
-			@Override
-			public void performChange(EntityManager entityManager) {
-				setTransaction(dataManager.getFinanceData().getUpdatedTransactionFromDatabase(entityManager, transaction));
-			}
-		});
+		updateFromDatabase();
 		updateFxProperties();
 	}
 
@@ -217,6 +211,15 @@ public class TransactionModelAdapter implements CellStatus {
 
 	protected void setTransaction(FinanceTransaction transaction) {
 		this.transaction = transaction;
+	}
+
+	protected void updateFromDatabase() {
+		dataManager.getFinanceData().performTransactedChange(new TransactedChange() {
+			@Override
+			public void performChange(EntityManager entityManager) {
+				setTransaction(dataManager.getFinanceData().getUpdatedTransactionFromDatabase(entityManager, transaction));
+			}
+		});
 	}
 
 	/**
@@ -405,7 +408,7 @@ public class TransactionModelAdapter implements CellStatus {
 	 * Updates the properties from the current transaction, causing
 	 * ChangeListeners to trigger.
 	 */
-	private void updateFxProperties() {
+	protected void updateFxProperties() {
 		//Remove property change listeners
 		description.removeListener(descriptionListener);
 		tags.removeListener(tagsListener);

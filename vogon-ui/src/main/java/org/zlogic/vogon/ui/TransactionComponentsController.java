@@ -20,6 +20,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.util.Callback;
 import org.zlogic.vogon.data.FinanceTransaction;
+import org.zlogic.vogon.ui.adapter.AccountInterface;
 import org.zlogic.vogon.ui.adapter.AccountModelAdapter;
 import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
 import org.zlogic.vogon.ui.adapter.DataManager;
@@ -61,7 +62,7 @@ public class TransactionComponentsController implements Initializable {
 	 * The account column
 	 */
 	@FXML
-	private TableColumn<TransactionComponentModelAdapter, AccountModelAdapter> columnAccount;
+	private TableColumn<TransactionComponentModelAdapter, AccountInterface> columnAccount;
 	/**
 	 * The amount column
 	 */
@@ -70,7 +71,7 @@ public class TransactionComponentsController implements Initializable {
 	/**
 	 * List of accounts for the accounts combo box
 	 */
-	protected ObservableList<AccountModelAdapter> accountsComboList;
+	protected ObservableList<AccountInterface> accountsComboList;
 	/**
 	 * Delete account button
 	 */
@@ -90,10 +91,10 @@ public class TransactionComponentsController implements Initializable {
 		updateTransactionTypeCombo();
 
 		//Cell editors
-		columnAccount.setCellFactory(new Callback<TableColumn<TransactionComponentModelAdapter, AccountModelAdapter>, TableCell<TransactionComponentModelAdapter, AccountModelAdapter>>() {
+		columnAccount.setCellFactory(new Callback<TableColumn<TransactionComponentModelAdapter, AccountInterface>, TableCell<TransactionComponentModelAdapter, AccountInterface>>() {
 			@Override
-			public TableCell<TransactionComponentModelAdapter, AccountModelAdapter> call(TableColumn<TransactionComponentModelAdapter, AccountModelAdapter> p) {
-				ComboBoxTableCell<TransactionComponentModelAdapter, AccountModelAdapter> cell = new ComboBoxTableCell<>(accountsComboList);
+			public TableCell<TransactionComponentModelAdapter, AccountInterface> call(TableColumn<TransactionComponentModelAdapter, AccountInterface> p) {
+				ComboBoxTableCell<TransactionComponentModelAdapter, AccountInterface> cell = new ComboBoxTableCell<>(accountsComboList);
 				return cell;
 			}
 		});

@@ -38,7 +38,7 @@ public class ReportingAccount implements AccountInterface {
 	 * The property indicating if account should be included in the reporting
 	 * account's total balance
 	 */
-	private final ObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>> includeInTotal = new SimpleObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>>(new ObjectWithStatus<BooleanProperty, Boolean>(new SimpleBooleanProperty(true), false));
+	private final ObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>> includeInTotal = new SimpleObjectProperty<>(new ObjectWithStatus<BooleanProperty, Boolean>(new SimpleBooleanProperty(true), false));
 
 	/**
 	 * Constructor for ReportingAccount
@@ -71,5 +71,10 @@ public class ReportingAccount implements AccountInterface {
 	@Override
 	public ObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>> includeInTotalProperty() {
 		return includeInTotal;
+	}
+
+	@Override
+	public String toString() {
+		return name.get().getValue();
 	}
 }
