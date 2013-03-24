@@ -5,7 +5,6 @@
  */
 package org.zlogic.vogon.ui.adapter;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Currency;
 import java.util.Date;
@@ -270,8 +269,11 @@ public class TransactionModelAdapter implements CellStatus {
 		if (transaction.getType() == FinanceTransaction.Type.EXPENSEINCOME) {
 			List<FinanceAccount> accountsList = transaction.getAccounts();
 			StringBuilder builder = new StringBuilder();
-			for (FinanceAccount currentAccount : accountsList)
-				builder.append(currentAccount != accountsList.get(0) ? "," : "").append(currentAccount != null ? currentAccount.getName() : messages.getString("INVALID_ACCOUNT")); //NOI18N
+			for (FinanceAccount account : accountsList) {
+				AccountModelAdapter accountAdapter = dataManager.findAccountAdapter(account);
+				FinanceAccount currentAccount = (accountAdapter != null && accountAdapter.getAccount() != null) ? accountAdapter.getAccount() : null;
+				builder.append(account != accountsList.get(0) ? "," : "").append(currentAccount != null ? currentAccount.getName() : messages.getString("INVALID_ACCOUNT")); //NOI18N
+			}
 			return builder.toString();
 		} else if (transaction.getType() == FinanceTransaction.Type.TRANSFER) {
 			FinanceAccount[] toAccounts = transaction.getToAccounts();
@@ -279,19 +281,31 @@ public class TransactionModelAdapter implements CellStatus {
 			StringBuilder builder = new StringBuilder();
 			if (fromAccounts.length > 1) {
 				builder.append("("); //NOI18N
-				for (FinanceAccount currentAccount : fromAccounts)
-					builder.append(currentAccount != fromAccounts[0] ? "," : "").append(currentAccount != null ? currentAccount.getName() : messages.getString("INVALID_ACCOUNT")); //NOI18N
+				for (FinanceAccount account : fromAccounts) {
+					AccountModelAdapter accountAdapter = dataManager.findAccountAdapter(account);
+					FinanceAccount currentAccount = (account != null && accountAdapter.getAccount() != null) ? accountAdapter.getAccount() : null;
+					builder.append(account != fromAccounts[0] ? "," : "").append(currentAccount != null ? currentAccount.getName() : messages.getString("INVALID_ACCOUNT")); //NOI18N
+				}
 				builder.append(")"); //NOI18N
-			} else if (fromAccounts.length == 1)
-				builder.append(fromAccounts[0].getName());
+			} else if (fromAccounts.length == 1) {
+				AccountModelAdapter accountAdapter = dataManager.findAccountAdapter(fromAccounts[0]);
+				FinanceAccount currentAccount = (accountAdapter != null && accountAdapter.getAccount() != null) ? accountAdapter.getAccount() : null;
+				builder.append(currentAccount != null ? currentAccount.getName() : messages.getString("INVALID_ACCOUNT"));
+			}
 			builder.append("->"); //NOI18N
 			if (toAccounts.length > 1) {
 				builder.append("("); //NOI18N
-				for (FinanceAccount currentAccount : toAccounts)
-					builder.append(currentAccount != toAccounts[0] ? "," : "").append(currentAccount != null ? currentAccount.getName() : messages.getString("INVALID_ACCOUNT")); //NOI18N
+				for (FinanceAccount account : toAccounts) {
+					AccountModelAdapter accountAdapter = dataManager.findAccountAdapter(account);
+					FinanceAccount currentAccount = (account != null && accountAdapter.getAccount() != null) ? accountAdapter.getAccount() : null;
+					builder.append(account != toAccounts[0] ? "," : "").append(currentAccount != null ? currentAccount.getName() : messages.getString("INVALID_ACCOUNT")); //NOI18N
+				}
 				builder.append(")"); //NOI18N
-			} else if (toAccounts.length == 1)
-				builder.append(toAccounts[0].getName());
+			} else if (toAccounts.length == 1) {
+				AccountModelAdapter accountAdapter = dataManager.findAccountAdapter(toAccounts[0]);
+				FinanceAccount currentAccount = (accountAdapter != null && accountAdapter.getAccount() != null) ? accountAdapter.getAccount() : null;
+				builder.append(currentAccount != null ? currentAccount.getName() : messages.getString("INVALID_ACCOUNT"));
+			}
 			return builder.toString();
 		} else
 			return ""; //NOI18N

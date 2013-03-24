@@ -11,7 +11,9 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javax.persistence.EntityManager;
 import org.zlogic.vogon.data.CurrencyRate;
+import org.zlogic.vogon.data.TransactedChange;
 
 /**
  * Class for storing a currency rate with property change detection.
@@ -32,6 +34,30 @@ public class CurrencyRateModelAdapter {
 	 * The currency rate value property
 	 */
 	private final DoubleProperty value = new SimpleDoubleProperty();
+	private ChangeListener<Number> valueListener = new ChangeListener<Number>() {
+		@Override
+		public void changed(ObservableValue<? extends Number> ov, Number oldValue, Number newValue) {
+			if (oldValue.equals(newValue))
+				return;
+			dataManager.getFinanceData().performTransactedChange(new TransactedChange() {
+				private double value;
+
+				public TransactedChange setValue(double value) {
+					this.value = value;
+					return this;
+				}
+
+				@Override
+				public void performChange(EntityManager entityManager) {
+					rate.setExchangeRate(value);
+					entityManager.merge(rate);
+				}
+			}.setValue(newValue.doubleValue()));
+			updateFxProperties();
+			dataManager.refreshAccounts();
+			dataManager.updateTransactionsFxProperties();
+		}
+	};
 
 	/**
 	 * Default constructor
@@ -41,28 +67,8 @@ public class CurrencyRateModelAdapter {
 	 */
 	public CurrencyRateModelAdapter(CurrencyRate rate, DataManager dataManager) {
 		this.rate = rate;
-		updateProperties();
-
-		//Add change listener
-		value.addListener(new ChangeListener<Number>() {
-			protected DataManager dataManager;
-			protected CurrencyRate rate;
-
-			public ChangeListener<Number> setData(CurrencyRate rate, DataManager dataManager) {
-				this.rate = rate;
-				this.dataManager = dataManager;
-				return this;
-			}
-
-			@Override
-			public void changed(ObservableValue<? extends Number> ov, Number t, Number t1) {
-				//FIXME URGENT
-				/*
-				 if (rate.getExchangeRate() != t1.doubleValue())
-				 financeData.setExchangeRate(rate, t1.doubleValue());
-				 */
-			}
-		}.setData(rate, dataManager));
+		this.dataManager = dataManager;
+		updateFxProperties();
 	}
 
 	@Override
@@ -113,7 +119,11 @@ public class CurrencyRateModelAdapter {
 	 * Updates the properties from the current currency rate, causing
 	 * ChangeListeners to trigger.
 	 */
-	private void updateProperties() {
+	private void updateFxProperties() {
+		//Remove property change listeners
+		value.removeListener(valueListener);
 		value.set(rate.getExchangeRate());
+		//Restore property change listeners
+		value.addListener(valueListener);
 	}
 }
