@@ -18,6 +18,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.TableCell;
 import javafx.stage.Popup;
 import org.zlogic.vogon.ui.TransactionComponentsController;
+import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
 import org.zlogic.vogon.ui.adapter.DataManager;
 import org.zlogic.vogon.ui.adapter.TransactionModelAdapter;
 
@@ -57,6 +58,15 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 		public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
 			getStyleClass().removeAll("transaction-invalid", "transaction-valid");//NOI18N
 			getStyleClass().add(newValue ? "transaction-valid" : "transaction-invalid");//NOI18N
+		}
+	};
+	/**
+	 * Listener for changes in the "Value" property
+	 */
+	protected ChangeListener<AmountModelAdapter> amountPropertyListener = new ChangeListener<AmountModelAdapter>() {
+		@Override
+		public void changed(ObservableValue<? extends AmountModelAdapter> ov, AmountModelAdapter oldValue, AmountModelAdapter newValue) {
+			setText(getString());
 		}
 	};
 
@@ -128,8 +138,10 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 	 */
 	@Override
 	public void updateItem(TransactionModelAdapter item, boolean empty) {
-		if (item != null)
+		if (item != null) {
 			item.okProperty().removeListener(okPropertyListener);
+			item.amountProperty().removeListener(amountPropertyListener);
+		}
 		super.updateItem(item, empty);
 		if (empty) {
 			setText(null);
@@ -140,6 +152,7 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 				CellStatus itemCellStatus = getItem();
 				itemCellStatus.okProperty().addListener(okPropertyListener);
 				okPropertyListener.changed(null, null, itemCellStatus.okProperty().get());
+				item.amountProperty().addListener(amountPropertyListener);
 			}
 		}
 	}

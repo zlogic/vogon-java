@@ -21,7 +21,6 @@ import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.util.Callback;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.ui.adapter.AccountInterface;
-import org.zlogic.vogon.ui.adapter.AccountModelAdapter;
 import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
 import org.zlogic.vogon.ui.adapter.DataManager;
 import org.zlogic.vogon.ui.adapter.TransactionComponentModelAdapter;

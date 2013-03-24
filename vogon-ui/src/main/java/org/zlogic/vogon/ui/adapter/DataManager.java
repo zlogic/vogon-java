@@ -91,21 +91,30 @@ public class DataManager {
 		reloadTransactions();
 	}
 
-	public void refreshAccounts() {
-		//Remove reporting accounts
+	private void refreshReportingAccounts() {
+		//Remove existing reporting accounts
 		List<AccountInterface> reportingAccounts = new LinkedList<>();
 		for (AccountInterface account : allAccounts)
 			if (account instanceof ReportingAccount)
 				reportingAccounts.add(account);
 		allAccounts.removeAll(reportingAccounts);
 
+		//Recreate reporting accounts
+		for (Currency currency : financeData.getCurrencies())
+			allAccounts.add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ACCOUNT"), new Object[]{currency.getCurrencyCode()}), getTotalBalance(currency), currency));
+		if (financeData.getDefaultCurrency() != null)
+			allAccounts.add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ALL_ACCOUNTS"), new Object[]{financeData.getDefaultCurrency().getCurrencyCode()}), getTotalBalance(null), financeData.getDefaultCurrency()));
+	}
+
+	public void refreshAccounts() {
 		//Update accounts
 		List<AccountInterface> orphanedAccounts = new LinkedList<>(accounts);
 		for (FinanceAccount account : financeData.getAccounts()) {
 			AccountModelAdapter existingAccount = findAccountAdapter(account);
 			if (existingAccount == null) {
-				accounts.add(new AccountModelAdapter(account, this));
-				allAccounts.add(new AccountModelAdapter(account, this));
+				AccountModelAdapter newAccount = new AccountModelAdapter(account, this);
+				accounts.add(newAccount);
+				allAccounts.add(newAccount);
 			} else {
 				existingAccount.setAccount(account);
 				existingAccount.updateFxProperties();
@@ -116,11 +125,7 @@ public class DataManager {
 		accounts.removeAll(orphanedAccounts);
 		allAccounts.removeAll(orphanedAccounts);
 
-		//Recreate reporting accounts
-		for (Currency currency : financeData.getCurrencies())
-			allAccounts.add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ACCOUNT"), new Object[]{currency.getCurrencyCode()}), getTotalBalance(currency), currency));
-		if (financeData.getDefaultCurrency() != null)
-			allAccounts.add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ALL_ACCOUNTS"), new Object[]{financeData.getDefaultCurrency().getCurrencyCode()}), getTotalBalance(null), financeData.getDefaultCurrency()));
+		refreshReportingAccounts();
 	}
 
 	public void reloadTransactions() {
@@ -134,6 +139,11 @@ public class DataManager {
 			newTransactionAdapters.add(new TransactionModelAdapter(transaction, this));
 
 		transactions.setAll(newTransactionAdapters);
+	}
+
+	public void updateTransactionsFxProperties() {
+		for (TransactionModelAdapter transaction : transactions)
+			transaction.updateFxProperties();
 	}
 
 	public void reloadCurrencies() {
@@ -231,8 +241,16 @@ public class DataManager {
 		financeData.deleteAccount(account.getAccount());
 		accounts.remove(account);
 		allAccounts.remove(account);
-		//FIXME URGENT: refresh affected transactions from database
-		//FIXME URGENT: update reporting accounts
+
+		refreshReportingAccounts();
+
+		//Refresh affected transactions from database
+		for (TransactionModelAdapter transaction : transactions) {
+			if (transaction.getTransaction().getAccounts().contains(account.getAccount())) {
+				transaction.updateFromDatabase();
+				transaction.updateFxProperties();
+			}
+		}
 	}
 
 	public void deleteTransaction(TransactionModelAdapter transaction) {

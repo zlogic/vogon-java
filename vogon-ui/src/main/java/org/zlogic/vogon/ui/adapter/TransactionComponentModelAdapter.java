@@ -69,6 +69,10 @@ public class TransactionComponentModelAdapter {
 				}
 			}.setAccount(newAccount));
 			updateFxProperties();
+			if (account.get() instanceof AccountModelAdapter) {
+				((AccountModelAdapter) account.get()).setAccount(transactionComponent.getAccount());
+				((AccountModelAdapter) account.get()).updateFxProperties();
+			}
 		}
 	};
 	private ChangeListener<AmountModelAdapter> amountListener = new ChangeListener<AmountModelAdapter>() {
@@ -168,10 +172,6 @@ public class TransactionComponentModelAdapter {
 			if (transaction.get() != null) {
 				transaction.get().updateFromDatabase();
 				transaction.get().updateFxProperties();
-			}
-			if (account.get() instanceof AccountModelAdapter) {
-				((AccountModelAdapter) account.get()).setAccount(transactionComponent.getAccount());
-				((AccountModelAdapter) account.get()).updateFxProperties();
 			}
 		}
 		//Restore property change listeners
