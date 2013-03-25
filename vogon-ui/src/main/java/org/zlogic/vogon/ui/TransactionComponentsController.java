@@ -19,12 +19,12 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.util.Callback;
-import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.ui.adapter.AccountInterface;
 import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
 import org.zlogic.vogon.ui.adapter.DataManager;
 import org.zlogic.vogon.ui.adapter.TransactionComponentModelAdapter;
 import org.zlogic.vogon.ui.adapter.TransactionModelAdapter;
+import org.zlogic.vogon.ui.adapter.TransactionTypeModelAdapter;
 import org.zlogic.vogon.ui.cell.AmountCellEditor;
 import org.zlogic.vogon.ui.cell.StringValidatorDouble;
 
@@ -35,10 +35,6 @@ import org.zlogic.vogon.ui.cell.StringValidatorDouble;
  */
 public class TransactionComponentsController implements Initializable {
 
-	/**
-	 * Localization messages
-	 */
-	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
 	 * The DataManager instance
 	 */
@@ -56,7 +52,7 @@ public class TransactionComponentsController implements Initializable {
 	 * The transaction type combo box
 	 */
 	@FXML
-	private ComboBox<TransactionTypeComboItem> transactionType;
+	private ComboBox<TransactionTypeModelAdapter> transactionType;
 	/**
 	 * The account column
 	 */
@@ -87,8 +83,6 @@ public class TransactionComponentsController implements Initializable {
 	public void initialize(URL url, ResourceBundle rb) {
 		transactionComponents.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-		updateTransactionTypeCombo();
-
 		//Cell editors
 		columnAccount.setCellFactory(new Callback<TableColumn<TransactionComponentModelAdapter, AccountInterface>, TableCell<TransactionComponentModelAdapter, AccountInterface>>() {
 			@Override
@@ -117,10 +111,11 @@ public class TransactionComponentsController implements Initializable {
 	 * @param transaction the edited transaction
 	 */
 	public void setTransaction(TransactionModelAdapter transaction) {
+		if (this.transaction != null)
+			transactionType.valueProperty().unbindBidirectional(this.transaction.typeProperty());
 		this.transaction = null;
 		if (transaction != null) {
-			//transactionType.valueProperty().bindBidirectional(transaction.typeProperty());
-			transactionType.getSelectionModel().select(new TransactionTypeComboItem(transaction.typeProperty().get()));//FIXME URGENT: use bind instead
+			transactionType.valueProperty().bindBidirectional(transaction.typeProperty());
 			this.transaction = transaction;
 			transactionComponents.setItems(transaction.transactionComponentsProperty());
 		} else {
@@ -137,6 +132,7 @@ public class TransactionComponentsController implements Initializable {
 		this.dataManager = dataManager;
 
 		accountsComboList = dataManager.getAccounts();
+		transactionType.setItems(dataManager.getTransactionTypes());
 	}
 
 	/**
@@ -155,70 +151,5 @@ public class TransactionComponentsController implements Initializable {
 		TransactionComponentModelAdapter selectedItem = transactionComponents.getSelectionModel().getSelectedItem();
 		if (selectedItem != null)
 			transaction.deleteComponent(selectedItem);
-	}
-
-	/**
-	 * Populates the transaction type combo box
-	 */
-	private void updateTransactionTypeCombo() {
-		for (FinanceTransaction.Type currentType : FinanceTransaction.Type.values())
-			if (currentType != FinanceTransaction.Type.UNDEFINED) {
-				TransactionTypeComboItem currentItem = new TransactionTypeComboItem(currentType);
-				transactionType.getItems().add(currentItem);
-			}
-	}
-
-	/**
-	 * Transaction type combo box item
-	 */
-	protected class TransactionTypeComboItem {
-
-		/**
-		 * The transaction type
-		 */
-		protected FinanceTransaction.Type type;
-
-		/**
-		 * Default constructor
-		 *
-		 * @param type the transaction type
-		 */
-		public TransactionTypeComboItem(FinanceTransaction.Type type) {
-			this.type = type;
-		}
-
-		@Override
-		public String toString() {
-			switch (type) {
-				case EXPENSEINCOME:
-					return messages.getString("TRANSACTION_EXPENSE_INCOME");
-				case TRANSFER:
-					return messages.getString("TRANSACTION_TRANSFER");
-				case UNDEFINED:
-					return messages.getString("INVALID_TRANSACTION_TYPE");
-			}
-			return messages.getString("INVALID_TRANSACTION_TYPE");
-		}
-
-		/**
-		 * Returns the transaction type
-		 *
-		 * @return the transaction type
-		 */
-		public FinanceTransaction.Type getType() {
-			return type;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			return obj instanceof TransactionTypeComboItem && ((TransactionTypeComboItem) obj).type.equals(type);
-		}
-
-		@Override
-		public int hashCode() {
-			int hash = 5;
-			hash = 53 * hash + (this.type != null ? this.type.hashCode() : 0);
-			return hash;
-		}
 	}
 }

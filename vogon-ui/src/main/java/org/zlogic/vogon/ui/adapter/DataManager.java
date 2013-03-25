@@ -15,14 +15,19 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javax.persistence.EntityManager;
 import org.zlogic.vogon.data.ApplicationShuttingDownException;
 import org.zlogic.vogon.data.Constants;
 import org.zlogic.vogon.data.CurrencyRate;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
+import org.zlogic.vogon.data.Preferences;
+import org.zlogic.vogon.data.TransactedChange;
 import org.zlogic.vogon.data.interop.FileImporter;
 import org.zlogic.vogon.data.interop.VogonImportException;
 import org.zlogic.vogon.data.interop.VogonImportLogicalException;
@@ -48,10 +53,31 @@ public class DataManager {
 	private ObservableList<AccountInterface> accounts = FXCollections.observableList(new LinkedList<AccountInterface>());
 	private ObservableList<CurrencyModelAdapter> currencies = FXCollections.observableList(new LinkedList<CurrencyModelAdapter>());
 	private ObservableList<CurrencyRateModelAdapter> exchangeRates = FXCollections.observableList(new LinkedList<CurrencyRateModelAdapter>());
+	private ObservableList<TransactionTypeModelAdapter> transactionTypes = FXCollections.observableList(new LinkedList<TransactionTypeModelAdapter>());
 	/**
 	 * Preferred currency
 	 */
 	private ObjectProperty<CurrencyModelAdapter> defaultCurrency = new SimpleObjectProperty<>();
+	private ChangeListener<CurrencyModelAdapter> defaultCurrencyListener = new ChangeListener<CurrencyModelAdapter>() {
+		@Override
+		public void changed(ObservableValue<? extends CurrencyModelAdapter> ov, CurrencyModelAdapter oldValue, CurrencyModelAdapter newValue) {
+			financeData.performTransactedChange(new TransactedChange() {
+				private Currency currency;
+
+				public TransactedChange setCurrency(Currency currency) {
+					this.currency = currency;
+					return this;
+				}
+
+				@Override
+				public void performChange(EntityManager entityManager) {
+					Preferences preferences = financeData.getPreferencesFromDatabase(entityManager);
+					preferences.setDefaultCurrency(currency);
+				}
+			}.setCurrency(newValue.getCurrency()));
+			refreshReportingAccounts();
+		}
+	};
 	/**
 	 * Contains exchange rates
 	 */
@@ -59,6 +85,10 @@ public class DataManager {
 	private IntegerProperty lastTransactionIndex = new SimpleIntegerProperty(0);
 
 	public DataManager() {
+		for (FinanceTransaction.Type currentType : FinanceTransaction.Type.values())
+			if (currentType != FinanceTransaction.Type.UNDEFINED)
+				transactionTypes.add(new TransactionTypeModelAdapter(currentType));
+
 		reloadData();
 	}
 
@@ -66,6 +96,11 @@ public class DataManager {
 	 * Updates the data table from database
 	 */
 	private void reloadData() {
+		//Update currencies first
+		defaultCurrency.removeListener(defaultCurrencyListener);
+		defaultCurrency.setValue(new CurrencyModelAdapter(financeData.getDefaultCurrency()));
+		defaultCurrency.addListener(defaultCurrencyListener);
+
 		refreshAccounts();
 		reloadCurrencies();
 
@@ -74,9 +109,6 @@ public class DataManager {
 		//Update transactions
 		for (FinanceTransaction transaction : financeData.getTransactions(firstTransactionIndex.get(), lastTransactionIndex.get()))
 			transactions.add(new TransactionModelAdapter(transaction, this));
-
-		//Update other attributes
-		defaultCurrency.setValue(new CurrencyModelAdapter(financeData.getDefaultCurrency()));
 	}
 
 	public void setVisibleTransactions(int currentPage, int pageSize) {
@@ -102,8 +134,8 @@ public class DataManager {
 		//Recreate reporting accounts
 		for (Currency currency : financeData.getCurrencies())
 			allAccounts.add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ACCOUNT"), new Object[]{currency.getCurrencyCode()}), getTotalBalance(currency), currency));
-		if (financeData.getDefaultCurrency() != null)
-			allAccounts.add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ALL_ACCOUNTS"), new Object[]{financeData.getDefaultCurrency().getCurrencyCode()}), getTotalBalance(null), financeData.getDefaultCurrency()));
+		if (defaultCurrency.get() != null)
+			allAccounts.add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ALL_ACCOUNTS"), new Object[]{defaultCurrency.get().getCurrency().getCurrencyCode()}), getTotalBalance(null), financeData.getDefaultCurrency()));
 	}
 
 	public void refreshAccounts() {
@@ -181,7 +213,7 @@ public class DataManager {
 			if (account.getAccount().getCurrency() == currency)
 				totalBalance += account.getAccount().getRawBalance();
 			else if (currency == null)
-				totalBalance += Math.round(account.getAccount().getBalance() * financeData.getExchangeRate(account.getAccount().getCurrency(), financeData.getDefaultCurrency()) * Constants.rawAmountMultiplier);
+				totalBalance += Math.round(account.getAccount().getBalance() * financeData.getExchangeRate(account.getAccount().getCurrency(), defaultCurrency.get().getCurrency()) * Constants.rawAmountMultiplier);
 		}
 		return totalBalance / Constants.rawAmountMultiplier;
 	}
@@ -215,6 +247,13 @@ public class DataManager {
 			if (adapter instanceof AccountModelAdapter && ((AccountModelAdapter) adapter).getAccount().equals(account))
 				return (AccountModelAdapter) adapter;
 		}
+		return null;
+	}
+
+	public TransactionTypeModelAdapter findTransactionType(FinanceTransaction.Type type) {
+		for (TransactionTypeModelAdapter adapter : transactionTypes)
+			if (adapter.getType().equals(type))
+				return adapter;
 		return null;
 	}
 
@@ -284,6 +323,10 @@ public class DataManager {
 
 	public ObjectProperty<CurrencyModelAdapter> getDefaultCurrency() {
 		return defaultCurrency;
+	}
+
+	public ObservableList<TransactionTypeModelAdapter> getTransactionTypes() {
+		return transactionTypes;
 	}
 
 	public int getPageCount(int pageSize) {

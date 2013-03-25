@@ -66,7 +66,7 @@ public class TransactionModelAdapter implements CellStatus {
 	/**
 	 * The transaction type property
 	 */
-	private final ObjectProperty<FinanceTransaction.Type> type = new SimpleObjectProperty<>();
+	private final ObjectProperty<TransactionTypeModelAdapter> type = new SimpleObjectProperty<>();
 	/**
 	 * The transaction amount property
 	 */
@@ -138,9 +138,9 @@ public class TransactionModelAdapter implements CellStatus {
 			updateFxProperties();
 		}
 	};
-	private ChangeListener<FinanceTransaction.Type> typeListener = new ChangeListener<FinanceTransaction.Type>() {
+	private ChangeListener<TransactionTypeModelAdapter> typeListener = new ChangeListener<TransactionTypeModelAdapter>() {
 		@Override
-		public void changed(ObservableValue<? extends FinanceTransaction.Type> ov, FinanceTransaction.Type oldValue, FinanceTransaction.Type newValue) {
+		public void changed(ObservableValue<? extends TransactionTypeModelAdapter> ov, TransactionTypeModelAdapter oldValue, TransactionTypeModelAdapter newValue) {
 			if (oldValue.equals(newValue))
 				return;
 			dataManager.getFinanceData().performTransactedChange(new TransactedChange() {
@@ -156,7 +156,7 @@ public class TransactionModelAdapter implements CellStatus {
 					setTransaction(dataManager.getFinanceData().getUpdatedTransactionFromDatabase(entityManager, transaction));
 					getTransaction().setType(type);
 				}
-			}.setType(newValue));
+			}.setType(newValue.getType()));
 			updateFxProperties();
 		}
 	};
@@ -352,7 +352,7 @@ public class TransactionModelAdapter implements CellStatus {
 	 *
 	 * @return the transaction type property
 	 */
-	public ObjectProperty<FinanceTransaction.Type> typeProperty() {
+	public ObjectProperty<TransactionTypeModelAdapter> typeProperty() {
 		return type;
 	}
 
@@ -434,7 +434,7 @@ public class TransactionModelAdapter implements CellStatus {
 			tags.setAll(transaction.getTags());
 			amount.set(getAmount());
 			accountName.set(getAccountName());
-			type.set(transaction.getType());
+			type.set(dataManager.findTransactionType(transaction.getType()));
 			isOkProperty.set(transaction.isAmountOk());
 		}
 		//Restore property change listeners

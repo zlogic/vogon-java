@@ -6,10 +6,7 @@
 package org.zlogic.vogon.ui;
 
 import java.net.URL;
-import java.util.Currency;
 import java.util.ResourceBundle;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -20,10 +17,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 import javafx.util.converter.DoubleStringConverter;
-import javax.persistence.EntityManager;
-import org.zlogic.vogon.data.FinanceData;
-import org.zlogic.vogon.data.Preferences;
-import org.zlogic.vogon.data.TransactedChange;
 import org.zlogic.vogon.ui.adapter.CurrencyModelAdapter;
 import org.zlogic.vogon.ui.adapter.CurrencyRateModelAdapter;
 import org.zlogic.vogon.ui.adapter.DataManager;
@@ -88,32 +81,5 @@ public class CurrenciesController implements Initializable {
 		defaultCurrency.valueProperty().bindBidirectional(dataManager.getDefaultCurrency());
 
 		currenciesTable.setItems(dataManager.getExchangeRates());
-
-		defaultCurrency.valueProperty().addListener(new ChangeListener<CurrencyModelAdapter>() {
-			protected FinanceData financeData;
-
-			public ChangeListener<CurrencyModelAdapter> setFinanceData(FinanceData financeData) {
-				this.financeData = financeData;
-				return this;
-			}
-
-			@Override
-			public void changed(ObservableValue<? extends CurrencyModelAdapter> ov, CurrencyModelAdapter oldValue, CurrencyModelAdapter newValue) {
-				financeData.performTransactedChange(new TransactedChange() {
-					private Currency currency;
-
-					public TransactedChange setCurrency(Currency currency) {
-						this.currency = currency;
-						return this;
-					}
-
-					@Override
-					public void performChange(EntityManager entityManager) {
-						Preferences preferences = financeData.getPreferencesFromDatabase(entityManager);
-						preferences.setDefaultCurrency(currency);
-					}
-				}.setCurrency(newValue.getCurrency()));
-			}
-		}.setFinanceData(dataManager.getFinanceData()));//FIXME URGENT: move to DataManager
 	}
 }

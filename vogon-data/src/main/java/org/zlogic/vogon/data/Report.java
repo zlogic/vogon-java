@@ -592,12 +592,12 @@ public class Report {
 	 * @param amounts the amounts in different currencies
 	 * @return sum of all amounts converted to the default currency
 	 */
-	protected long convertRawAmountToCommonCurrency(Map<String, Long> amounts) {
+	protected long convertRawAmountToCommonCurrency(Map<String, Long> amounts, Currency commonCurrency) {
 		long result = 0;
 		for (Map.Entry<String, Long> amountInCurrency : amounts.entrySet())
-			result += Currency.getInstance(amountInCurrency.getKey()) == financeData.getDefaultCurrency()
+			result += Currency.getInstance(amountInCurrency.getKey()) == commonCurrency
 					? amountInCurrency.getValue()
-					: (long) (Math.round(financeData.getExchangeRate(Currency.getInstance(amountInCurrency.getKey()), financeData.getDefaultCurrency()) * (double) amountInCurrency.getValue()));
+					: (long) (Math.round(financeData.getExchangeRate(Currency.getInstance(amountInCurrency.getKey()), commonCurrency) * (double) amountInCurrency.getValue()));
 		return result;
 	}
 
@@ -608,6 +608,8 @@ public class Report {
 	 */
 	public Map<Date, Double> getAccountsBalanceGraph() {
 		Map<String, Long> sumBalance = new TreeMap<>();
+
+		Currency defaultCurrency = financeData.getDefaultCurrency();
 
 		for (Currency currency : financeData.getCurrencies())
 			sumBalance.put(currency.getCurrencyCode(), 0L);
@@ -634,7 +636,7 @@ public class Report {
 				for (FinanceAccount account : selectedAccounts)
 					for (TransactionComponent component : transaction.getComponentsForAccount(account))
 						sumBalance.put(account.getCurrency().getCurrencyCode(), sumBalance.get(account.getCurrency().getCurrencyCode()) + component.getRawAmount());
-				currentBalance.put(transaction.getDate(), convertRawAmountToCommonCurrency(sumBalance));
+				currentBalance.put(transaction.getDate(), convertRawAmountToCommonCurrency(sumBalance, defaultCurrency));
 			}
 		}
 
@@ -727,6 +729,7 @@ public class Report {
 	public List<TagExpense> getTagExpenses() {
 		Map<String, TagExpense> result = new TreeMap<>();
 		//Process currencies separately
+		Currency defaultCurrency = financeData.getDefaultCurrency();
 		for (Currency currency : financeData.getCurrencies()) {
 			//Obtain the tag-total sum table via a query
 			TransactedQuery<Tuple, List<Tuple>> query = new TransactedQuery<Tuple, List<Tuple>>() {
@@ -760,7 +763,7 @@ public class Report {
 				}
 			}.setCurrency(currency);
 
-			double exchangeRate = financeData.getExchangeRate(currency, financeData.getDefaultCurrency());
+			double exchangeRate = financeData.getExchangeRate(currency, defaultCurrency);
 
 			//Convert results to a common currency if tag contains transactions in different currencies
 			for (Tuple tuple : financeData.performTransactedQuery(query)) {
@@ -776,8 +779,8 @@ public class Report {
 					tagExpense.amount += exchangeRate * amount;
 				else {
 					tagExpense.currencyConverted = true;
-					tagExpense.amount *= financeData.getExchangeRate(tagExpense.currency, financeData.getDefaultCurrency());
-					tagExpense.currency = financeData.getDefaultCurrency();
+					tagExpense.amount *= financeData.getExchangeRate(tagExpense.currency, defaultCurrency);
+					tagExpense.currency = defaultCurrency;
 				}
 			}
 		}
