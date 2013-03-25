@@ -50,10 +50,6 @@ public class FinanceData {
 	 */
 	private ReentrantReadWriteLock shuttingDownLock = new ReentrantReadWriteLock();
 	/**
-	 * Preferred currency
-	 */
-	protected Currency defaultCurrency;
-	/**
 	 * Number of transactions in the database
 	 */
 	protected long transactionsCount = 0;
@@ -158,8 +154,11 @@ public class FinanceData {
 			restoreFromDatabase(entityManager);
 
 			populateCurrencies(entityManager);
+
+			Preferences preferences = getPreferencesFromDatabase(entityManager);
+			Currency defaultCurrency = preferences.getDefaultCurrency();
+
 			if (!getCurrencies().contains(defaultCurrency)) {
-				Preferences preferences = getPreferencesFromDatabase(entityManager);
 				entityManager.getTransaction().begin();
 				preferences = entityManager.find(Preferences.class, preferences.id);
 				if (getCurrencies().size() > 0)
@@ -197,7 +196,6 @@ public class FinanceData {
 	 */
 	private void restoreFromDatabase(EntityManager entityManager) {
 		exchangeRates = getCurrencyRatesFromDatabase(entityManager);
-		defaultCurrency = getDefaultCurrencyFromDatabase(entityManager);
 		transactionsCount = getTransactionsCountFromDatabase(entityManager);
 	}
 
@@ -915,14 +913,15 @@ public class FinanceData {
 	}
 
 	/**
-	 * Returns the default currency
+	 * Returns the default currency from database
 	 *
 	 * @return the default currency
 	 */
 	public Currency getDefaultCurrency() {
-		if (defaultCurrency != null)
-			return defaultCurrency;
-		else
-			return null;
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
+		Preferences preferences = getPreferencesFromDatabase(entityManager);
+		Currency defaultCurrency = preferences.getDefaultCurrency();
+		entityManager.close();
+		return defaultCurrency;
 	}
 }

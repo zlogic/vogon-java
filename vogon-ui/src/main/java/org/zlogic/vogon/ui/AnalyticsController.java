@@ -578,8 +578,8 @@ public class AnalyticsController implements Initializable {
 				transactionAmount = transaction.getAmount();
 				transactionCurrency = transaction.getCurrencies().get(0);
 			} else {
-				transactionAmount = dataManager.getFinanceData().getAmountInCurrency(transaction, dataManager.getFinanceData().getDefaultCurrency());
-				transactionCurrency = dataManager.getFinanceData().getDefaultCurrency();
+				transactionAmount = dataManager.getFinanceData().getAmountInCurrency(transaction, dataManager.getDefaultCurrency().get().getCurrency());
+				transactionCurrency = dataManager.getDefaultCurrency().get().getCurrency();
 			}
 			this.amount.set(new AmountModelAdapter(transactionAmount, transaction.isAmountOk(), transactionCurrency, transaction.getCurrencies().size() != 1, transaction.getType()));
 			date.set(transaction.getDate());
