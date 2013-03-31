@@ -10,3 +10,11 @@
 	-fx-strikethrough: false;
 	-fx-font-weight: normal;
 }
+
+.reporting-account .text {
+	-fx-font-weight: bold;
+}
+
+.regular-account .text {
+	-fx-font-weight: normal;
+}

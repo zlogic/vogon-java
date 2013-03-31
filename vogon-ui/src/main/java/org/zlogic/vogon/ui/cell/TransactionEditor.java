@@ -28,28 +28,26 @@ import org.zlogic.vogon.ui.adapter.TransactionModelAdapter;
  *
  * @author Dmitry Zolotukhin
  */
-public class TransactionEditor extends TableCell<TransactionModelAdapter, TransactionModelAdapter> {
+public class TransactionEditor extends TableCell<TransactionModelAdapter, AmountModelAdapter> {
 
 	/**
 	 * The editor parent container
 	 */
-	protected Parent editor;
+	private Parent editor;
 	/**
 	 * The popup editor
 	 */
-	protected Popup popup;
+	private Popup popup;
 	/**
 	 * The editor controller
 	 */
-	protected TransactionComponentsController componentsController;
+	private TransactionComponentsController componentsController;
 	/**
 	 * The DataManager instance
 	 */
-	protected DataManager dataManager;
-	/**
-	 * Cell alignment in view (not edit) state
-	 */
-	protected Pos alignment;
+	private DataManager dataManager;
+	private TransactionModelAdapter editedTransaction;
+	private boolean doNotCancelEdit = false;
 	/**
 	 * Listener for changes in the "OK" property
 	 */
@@ -102,7 +100,8 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 		if (editor == null)
 			createEditor();
 
-		componentsController.setTransaction(getItem());
+		editedTransaction = (TransactionModelAdapter) getTableRow().getItem();
+		componentsController.setTransaction(editedTransaction);
 
 		Point2D bounds = localToScene(0, getHeight());
 		popup.show(this, getScene().getWindow().getX() + getScene().getX() + bounds.getX(), getScene().getWindow().getY() + getScene().getY() + bounds.getY());
@@ -113,9 +112,12 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 	 */
 	@Override
 	public void cancelEdit() {
+		if (doNotCancelEdit)
+			return;
 		super.cancelEdit();
 		setText(getString());
 		popup.hide();
+		editedTransaction = null;
 	}
 
 	/**
@@ -124,10 +126,11 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 	 * @param item the updated item
 	 */
 	@Override
-	public void commitEdit(TransactionModelAdapter item) {
+	public void commitEdit(AmountModelAdapter item) {
 		super.commitEdit(item);
 		setText(getString());
 		popup.hide();
+		editedTransaction = null;
 	}
 
 	/**
@@ -137,23 +140,26 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 	 * @param empty true if the item is empty
 	 */
 	@Override
-	public void updateItem(TransactionModelAdapter item, boolean empty) {
+	public void updateItem(AmountModelAdapter item, boolean empty) {
 		if (item != null) {
 			item.okProperty().removeListener(okPropertyListener);
-			item.amountProperty().removeListener(amountPropertyListener);
 		}
-		super.updateItem(item, empty);
+		boolean setDoNotCancelEdit = editedTransaction != null && editedTransaction.equals(getTableRow().getItem());
+		try {
+			if (setDoNotCancelEdit)
+				doNotCancelEdit = true;
+			super.updateItem(item, empty);
+		} finally {
+			if (setDoNotCancelEdit)
+				doNotCancelEdit = false;
+		}
 		if (empty) {
 			setText(null);
 			setGraphic(null);
 		} else {
 			setText(getString());
-			if (getItem() instanceof CellStatus) {
-				CellStatus itemCellStatus = getItem();
-				itemCellStatus.okProperty().addListener(okPropertyListener);
-				okPropertyListener.changed(null, null, itemCellStatus.okProperty().get());
-				item.amountProperty().addListener(amountPropertyListener);
-			}
+			item.okProperty().addListener(okPropertyListener);
+			okPropertyListener.changed(null, null, item.okProperty().get());
 		}
 	}
 
@@ -182,6 +188,6 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Transa
 	 * @return the string value of the edited property
 	 */
 	protected String getString() {
-		return getItem() == null ? "" : getItem().getAmount().toString();//NOI18N
+		return getItem() == null ? "" : getItem().toString();//NOI18N
 	}
 }

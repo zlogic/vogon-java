@@ -25,7 +25,7 @@ public class ReportingAccount implements AccountInterface {
 	/**
 	 * The account name property
 	 */
-	private final ObjectProperty<ObjectWithStatus<String, Boolean>> name = new SimpleObjectProperty<>();
+	private final StringProperty name = new SimpleStringProperty();
 	/**
 	 * The account balance property (formatted string)
 	 */
@@ -33,12 +33,12 @@ public class ReportingAccount implements AccountInterface {
 	/**
 	 * The currency property
 	 */
-	private final ObjectProperty<ObjectWithStatus<CurrencyModelAdapter, Boolean>> currency = new SimpleObjectProperty<>();
+	private final ObjectProperty<CurrencyModelAdapter> currency = new SimpleObjectProperty<>();
 	/**
 	 * The property indicating if account should be included in the reporting
 	 * account's total balance
 	 */
-	private final ObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>> includeInTotal = new SimpleObjectProperty<>(new ObjectWithStatus<BooleanProperty, Boolean>(new SimpleBooleanProperty(true), false));
+	private final BooleanProperty includeInTotal = new SimpleBooleanProperty(true);
 
 	/**
 	 * Constructor for ReportingAccount
@@ -48,9 +48,9 @@ public class ReportingAccount implements AccountInterface {
 	 * @param currency the account's currency
 	 */
 	public ReportingAccount(String description, double balance, Currency currency) {
-		this.name.set(new ObjectWithStatus<>(description, false));
+		this.name.set(description);
 		this.balance.set(new AmountModelAdapter(balance, true, currency, false, FinanceTransaction.Type.UNDEFINED).toString());
-		this.currency.set(new ObjectWithStatus<>(new CurrencyModelAdapter(currency), false));
+		this.currency.set(new CurrencyModelAdapter(currency));
 	}
 
 	@Override
@@ -59,22 +59,22 @@ public class ReportingAccount implements AccountInterface {
 	}
 
 	@Override
-	public ObjectProperty<ObjectWithStatus<String, Boolean>> nameProperty() {
+	public StringProperty nameProperty() {
 		return name;
 	}
 
 	@Override
-	public ObjectProperty<ObjectWithStatus<CurrencyModelAdapter, Boolean>> currencyProperty() {
+	public ObjectProperty<CurrencyModelAdapter> currencyProperty() {
 		return currency;
 	}
 
 	@Override
-	public ObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>> includeInTotalProperty() {
+	public BooleanProperty includeInTotalProperty() {
 		return includeInTotal;
 	}
 
 	@Override
 	public String toString() {
-		return name.get().getValue();
+		return name.get();
 	}
 }

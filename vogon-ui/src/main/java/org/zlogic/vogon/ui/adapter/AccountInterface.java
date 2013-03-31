@@ -29,14 +29,14 @@ public interface AccountInterface {
 	 *
 	 * @return the account balance property
 	 */
-	public ObjectProperty<ObjectWithStatus<String, Boolean>> nameProperty();
+	public StringProperty nameProperty();
 
 	/**
 	 * The account currency property
 	 *
 	 * @return the account currency property
 	 */
-	public ObjectProperty<ObjectWithStatus<CurrencyModelAdapter, Boolean>> currencyProperty();
+	public ObjectProperty<CurrencyModelAdapter> currencyProperty();
 
 	/**
 	 * The property indicating if account should be included in total (reporting
@@ -44,5 +44,5 @@ public interface AccountInterface {
 	 *
 	 * @return the property indicating if account should be included in total
 	 */
-	public ObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>> includeInTotalProperty();
+	public BooleanProperty includeInTotalProperty();
 }

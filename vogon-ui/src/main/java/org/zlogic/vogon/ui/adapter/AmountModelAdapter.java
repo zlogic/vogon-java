@@ -11,7 +11,6 @@ import java.util.ResourceBundle;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import org.zlogic.vogon.data.FinanceTransaction;
-import org.zlogic.vogon.ui.cell.CellStatus;
 
 /**
  * Class for storing an amount with an overloaded toString method for better
@@ -19,7 +18,7 @@ import org.zlogic.vogon.ui.cell.CellStatus;
  *
  * @author Dmitry Zolotukhin
  */
-public class AmountModelAdapter implements Comparable<AmountModelAdapter>, CellStatus {
+public class AmountModelAdapter implements Comparable<AmountModelAdapter> {
 
 	/**
 	 * Localization messages
@@ -145,7 +144,6 @@ public class AmountModelAdapter implements Comparable<AmountModelAdapter>, CellS
 		this.amount = amount;
 	}
 
-	@Override
 	public BooleanProperty okProperty() {
 		return isOkProperty;
 	}
