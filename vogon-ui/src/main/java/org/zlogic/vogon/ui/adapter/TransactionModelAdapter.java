@@ -30,14 +30,13 @@ import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactedChange;
 import org.zlogic.vogon.data.TransactionComponent;
-import org.zlogic.vogon.ui.cell.CellStatus;
 
 /**
  * Transactions helper class for rendering with property change detection.
  *
  * @author Dmitry Zolotukhin
  */
-public class TransactionModelAdapter implements CellStatus {
+public class TransactionModelAdapter {
 
 	/**
 	 * Localization messages
@@ -187,16 +186,6 @@ public class TransactionModelAdapter implements CellStatus {
 
 		updateFromDatabase();
 		updateFxProperties();
-	}
-
-	/**
-	 * Returns this class instance (used in JavaFX to use a
-	 * TransactionModelAdapter as its own property)
-	 *
-	 * @return this class instance
-	 */
-	public TransactionModelAdapter getModelTransaction() {
-		return this;
 	}
 
 	/**
@@ -365,7 +354,6 @@ public class TransactionModelAdapter implements CellStatus {
 		return accountName;
 	}
 
-	@Override
 	public BooleanProperty okProperty() {
 		return isOkProperty;
 	}

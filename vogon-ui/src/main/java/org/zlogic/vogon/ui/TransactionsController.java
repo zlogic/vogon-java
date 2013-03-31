@@ -27,6 +27,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import javafx.util.converter.DefaultStringConverter;
+import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
 import org.zlogic.vogon.ui.adapter.DataManager;
 import org.zlogic.vogon.ui.adapter.TransactionModelAdapter;
 import org.zlogic.vogon.ui.cell.DateCellEditor;
@@ -67,7 +68,7 @@ public class TransactionsController implements Initializable {
 	 * The transaction amount column
 	 */
 	@FXML
-	private TableColumn<TransactionModelAdapter, TransactionModelAdapter> columnAmount;
+	private TableColumn<TransactionModelAdapter, AmountModelAdapter> columnAmount;
 	/**
 	 * Pagination control
 	 */
@@ -148,9 +149,9 @@ public class TransactionsController implements Initializable {
 				return cell;
 			}
 		});
-		columnAmount.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, TransactionModelAdapter>, TableCell<TransactionModelAdapter, TransactionModelAdapter>>() {
+		columnAmount.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, AmountModelAdapter>, TableCell<TransactionModelAdapter, AmountModelAdapter>>() {
 			@Override
-			public TableCell<TransactionModelAdapter, TransactionModelAdapter> call(TableColumn<TransactionModelAdapter, TransactionModelAdapter> p) {
+			public TableCell<TransactionModelAdapter, AmountModelAdapter> call(TableColumn<TransactionModelAdapter, AmountModelAdapter> p) {
 				TransactionEditor cell = new TransactionEditor(dataManager);
 				cell.setAlignment(Pos.CENTER_RIGHT);
 				//Keep track of all editors

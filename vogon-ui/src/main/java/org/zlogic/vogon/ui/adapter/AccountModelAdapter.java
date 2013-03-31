@@ -43,7 +43,7 @@ public class AccountModelAdapter implements AccountInterface {
 	/**
 	 * The account name property
 	 */
-	private final ObjectProperty<ObjectWithStatus<String, Boolean>> name = new SimpleObjectProperty<>();
+	private final StringProperty name = new SimpleStringProperty();
 	/**
 	 * The account balance property (formatted string)
 	 */
@@ -51,12 +51,12 @@ public class AccountModelAdapter implements AccountInterface {
 	/**
 	 * The currency property
 	 */
-	private final ObjectProperty<ObjectWithStatus<CurrencyModelAdapter, Boolean>> currency = new SimpleObjectProperty<>();
+	private final ObjectProperty<CurrencyModelAdapter> currency = new SimpleObjectProperty<>();
 	/**
 	 * The property indicating if account should be included in the reporting
 	 * account's total balance
 	 */
-	private final ObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>> includeInTotal = new SimpleObjectProperty<>(new ObjectWithStatus<BooleanProperty, Boolean>(new SimpleBooleanProperty(true), true));
+	private final BooleanProperty includeInTotal = new SimpleBooleanProperty(true);
 	private ChangeListener<Boolean> includeInTotalListener = new ChangeListener<Boolean>() {
 		@Override
 		public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
@@ -80,9 +80,9 @@ public class AccountModelAdapter implements AccountInterface {
 			dataManager.refreshAccounts();
 		}
 	};
-	private ChangeListener<ObjectWithStatus<String, Boolean>> nameListener = new ChangeListener<ObjectWithStatus<String, Boolean>>() {
+	private ChangeListener<String> nameListener = new ChangeListener<String>() {
 		@Override
-		public void changed(ObservableValue<? extends ObjectWithStatus<String, Boolean>> ov, ObjectWithStatus<String, Boolean> oldValue, ObjectWithStatus<String, Boolean> newValue) {
+		public void changed(ObservableValue<? extends String> ov, String oldValue, String newValue) {
 			if (oldValue.equals(newValue))
 				return;
 			dataManager.getFinanceData().performTransactedChange(new TransactedChange() {
@@ -98,14 +98,14 @@ public class AccountModelAdapter implements AccountInterface {
 					setAccount(entityManager.find(FinanceAccount.class, account.getId()));
 					getAccount().setName(name);
 				}
-			}.setName(newValue.getValue()));
+			}.setName(newValue));
 			updateFxProperties();
 			dataManager.updateTransactionsFxProperties();
 		}
 	};
-	private ChangeListener<ObjectWithStatus<CurrencyModelAdapter, Boolean>> currencyListener = new ChangeListener<ObjectWithStatus<CurrencyModelAdapter, Boolean>>() {
+	private ChangeListener<CurrencyModelAdapter> currencyListener = new ChangeListener<CurrencyModelAdapter>() {
 		@Override
-		public void changed(ObservableValue<? extends ObjectWithStatus<CurrencyModelAdapter, Boolean>> ov, ObjectWithStatus<CurrencyModelAdapter, Boolean> oldValue, ObjectWithStatus<CurrencyModelAdapter, Boolean> newValue) {
+		public void changed(ObservableValue<? extends CurrencyModelAdapter> ov, CurrencyModelAdapter oldValue, CurrencyModelAdapter newValue) {
 			if (oldValue.equals(newValue))
 				return;
 			dataManager.getFinanceData().performTransactedChange(new TransactedChange() {
@@ -121,7 +121,7 @@ public class AccountModelAdapter implements AccountInterface {
 					setAccount(entityManager.find(FinanceAccount.class, account.getId()));
 					getAccount().setCurrency(currency);
 				}
-			}.setCurrency(newValue.getValue().getCurrency()));
+			}.setCurrency(newValue.getCurrency()));
 			dataManager.getFinanceData().populateCurrencies();
 			updateFxProperties();
 			dataManager.reloadCurrencies();
@@ -199,17 +199,17 @@ public class AccountModelAdapter implements AccountInterface {
 	}
 
 	@Override
-	public ObjectProperty<ObjectWithStatus<String, Boolean>> nameProperty() {
+	public StringProperty nameProperty() {
 		return name;
 	}
 
 	@Override
-	public ObjectProperty<ObjectWithStatus<CurrencyModelAdapter, Boolean>> currencyProperty() {
+	public ObjectProperty<CurrencyModelAdapter> currencyProperty() {
 		return currency;
 	}
 
 	@Override
-	public ObjectProperty<ObjectWithStatus<BooleanProperty, Boolean>> includeInTotalProperty() {
+	public BooleanProperty includeInTotalProperty() {
 		return includeInTotal;
 	}
 
@@ -219,18 +219,17 @@ public class AccountModelAdapter implements AccountInterface {
 	 */
 	protected void updateFxProperties() {
 		//Remove property change listeners
-		includeInTotal.getValue().getValue().removeListener(includeInTotalListener);
+		includeInTotal.removeListener(includeInTotalListener);
 		name.removeListener(nameListener);
 		currency.removeListener(currencyListener);
 		if (account != null) {
 			balance.set(new AmountModelAdapter(account.getBalance(), true, account.getCurrency(), false, FinanceTransaction.Type.UNDEFINED).toString());
-			name.set(new ObjectWithStatus<>(account.getName(), true));
-			currency.set(new ObjectWithStatus<>(new CurrencyModelAdapter(account.getCurrency()), true));
-			includeInTotal.get().getValue().setValue(account.getIncludeInTotal());
-			includeInTotal.set(new ObjectWithStatus<>(includeInTotal.get().getValue(), true));
+			name.set(account.getName());
+			currency.set(new CurrencyModelAdapter(account.getCurrency()));
+			includeInTotal.setValue(account.getIncludeInTotal());
 		}
 		//Restore property change listeners
-		includeInTotal.getValue().getValue().addListener(includeInTotalListener);
+		includeInTotal.addListener(includeInTotalListener);
 		name.addListener(nameListener);
 		currency.addListener(currencyListener);
 	}
