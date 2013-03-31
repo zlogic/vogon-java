@@ -34,11 +34,9 @@ public class MessageDialog implements Initializable {
 	 *
 	 * @param title the dialog window's title
 	 * @param message the message to be displayed
-	 * @param callerIsBackgroundThread true if the caller's thread is background
-	 * (and not the main JavaFX event thread)
 	 */
-	public static void showDialog(String title, String message, boolean callerIsBackgroundThread) {
-		if (!callerIsBackgroundThread) {
+	public static void showDialog(String title, String message) {
+		if (Platform.isFxApplicationThread()) {
 			//Load FXML
 			Stage dialogStage = new Stage();
 			dialogStage.initModality(Modality.APPLICATION_MODAL);
@@ -66,7 +64,7 @@ public class MessageDialog implements Initializable {
 
 				@Override
 				public void run() {
-					showDialog(title, message, false);
+					showDialog(title, message);
 				}
 
 				public Runnable setParameters(String title, String message) {

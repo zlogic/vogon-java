@@ -247,7 +247,7 @@ public class AnalyticsController implements Initializable {
 					report.setEarliestDate(dateFormat.parse(startDateField.getText()));
 					report.setLatestDate(dateFormat.parse(endDateField.getText()));
 				} catch (ParseException ex) {
-					MessageDialog.showDialog(messages.getString("ANALYTICS_REPORT_EXCEPTION_DIALOG_TITLE"), new MessageFormat(messages.getString("ANALYTICS_REPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}), true);
+					MessageDialog.showDialog(messages.getString("ANALYTICS_REPORT_EXCEPTION_DIALOG_TITLE"), new MessageFormat(messages.getString("ANALYTICS_REPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}));
 					Logger.getLogger(AnalyticsController.class.getName()).log(Level.SEVERE, null, ex);
 				}
 
