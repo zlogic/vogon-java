@@ -112,7 +112,10 @@ public class FinanceData {
 	 * Performs a requested query with a supplied TransactedQuery. If process is
 	 * shutting down, the change is ignored.
 	 *
+	 * @param <ElementType> element type for query
+	 * @param <ResultType> return result type
 	 * @param requestedQuery a TransactedQuery implementation
+	 * @return the query result
 	 * @throws ApplicationShuttingDownException if application is shutting down
 	 * and database requests are ignored
 	 */
@@ -135,13 +138,16 @@ public class FinanceData {
 
 	/**
 	 * Imports and persists data into this instance by using the output of the
-	 * specified FileImporter
+	 * specified FileImporter. If process is shutting down, the change is
+	 * ignored.
 	 *
 	 * @param importer a configured FileImporter instance
 	 * @throws VogonImportException in case of import errors (I/O, format,
 	 * indexing etc.)
 	 * @throws VogonImportLogicalException in case of logical errors (without
 	 * meaningful stack trace, just to show an error message)
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	public void importData(FileImporter importer) throws VogonImportException, VogonImportLogicalException, ApplicationShuttingDownException {
 		try {
@@ -150,14 +156,14 @@ public class FinanceData {
 				throw new ApplicationShuttingDownException();
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			importer.importFile(this, entityManager);
-			
+
 			restoreFromDatabase(entityManager);
-			
+
 			populateCurrencies(entityManager);
-			
+
 			Preferences preferences = getPreferencesFromDatabase(entityManager);
 			Currency defaultCurrency = preferences.getDefaultCurrency();
-			
+
 			if (!getCurrencies().contains(defaultCurrency)) {
 				entityManager.getTransaction().begin();
 				preferences = entityManager.find(Preferences.class, preferences.id);
@@ -174,11 +180,14 @@ public class FinanceData {
 	}
 
 	/**
-	 * Exports data by using the specified FileExporter
+	 * Exports data by using the specified FileExporter. If process is shutting
+	 * down, the request is ignored.
 	 *
 	 * @param exporter a configured FileExporter instance
 	 * @throws VogonExportException in case of export errors (I/O, format,
 	 * indexing etc.)
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	public void exportData(FileExporter exporter) throws VogonExportException, ApplicationShuttingDownException {
 		try {
@@ -200,15 +209,19 @@ public class FinanceData {
 	}
 
 	/**
-	 * Returns the latest copy of a transaction from the database
+	 * Returns the latest copy of a transaction from the database. If process is
+	 * shutting down, the request is ignored.
 	 *
-	 * @param transaction the transaction to be searcher (only the id is used)
+	 * @param entityManager the entity manager
+	 * @param transaction the transaction to be searched (only the id is used)
 	 * @return the transaction
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	public FinanceTransaction getUpdatedTransactionFromDatabase(EntityManager entityManager, FinanceTransaction transaction) throws ApplicationShuttingDownException {
 		if (transaction == null)
 			return null;
-		
+
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
 		//Retreive the transactions
@@ -216,7 +229,7 @@ public class FinanceData {
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 		tr.fetch(FinanceTransaction_.tags, JoinType.LEFT);
 		transactionsCriteriaQuery.where(criteriaBuilder.equal(tr.get(FinanceTransaction_.id), transaction.id));
-		
+
 		FinanceTransaction result;
 		try {
 			result = entityManager.createQuery(transactionsCriteriaQuery).getSingleResult();
@@ -235,15 +248,20 @@ public class FinanceData {
 	}
 
 	/**
-	 * Returns the latest copy of a transaction from the database
+	 * Returns the latest copy of a transaction component from the database. If
+	 * process is shutting down, the request is ignored.
 	 *
-	 * @param transaction the transaction to be searcher (only the id is used)
-	 * @return the transaction
+	 * @param entityManager the entity manager
+	 * @param component the transaction component to be searched (only the id is
+	 * used)
+	 * @return the transaction component
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	public TransactionComponent getUpdatedTransactionComponentFromDatabase(EntityManager entityManager, TransactionComponent component) throws ApplicationShuttingDownException {
 		if (component == null)
 			return null;
-		
+
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
 		//Retreive the transactions
@@ -254,7 +272,7 @@ public class FinanceData {
 		//Post-fetch transaction and account		
 		trc.fetch(TransactionComponent_.transaction, JoinType.LEFT);
 		trc.fetch(TransactionComponent_.account, JoinType.LEFT);
-		
+
 		TransactionComponent result;
 		try {
 			result = entityManager.createQuery(transactionComponentCriteriaQuery).getSingleResult();
@@ -262,17 +280,19 @@ public class FinanceData {
 			entityManager.close();
 			return null;
 		}
-		
+
 		return result;
 	}
 
 	/**
 	 * Retrieves all transactions from the database (from firstTransaction to
-	 * lastTransaction)
+	 * lastTransaction). If process is shutting down, the request is ignored.
 	 *
 	 * @param firstTransaction the first transaction number to be selected
 	 * @param lastTransaction the last transaction number to be selected
 	 * @return the list of all transactions stored in the database
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	protected List<FinanceTransaction> getTransactionsFromDatabase(int firstTransaction, int lastTransaction) throws ApplicationShuttingDownException {
 		try {
@@ -286,7 +306,7 @@ public class FinanceData {
 			CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
 			Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 			tr.fetch(FinanceTransaction_.tags, JoinType.LEFT);
-			
+
 			transactionsCriteriaQuery.orderBy(
 					criteriaBuilder.asc(tr.get(FinanceTransaction_.transactionDate)),
 					criteriaBuilder.asc(tr.get(FinanceTransaction_.id)));
@@ -298,7 +318,7 @@ public class FinanceData {
 				query = query.setFirstResult(firstTransaction);
 			if (lastTransaction >= 0 && firstTransaction >= 0)
 				query = query.setMaxResults(lastTransaction - firstTransaction + 1);
-			
+
 			List<FinanceTransaction> result = query.getResultList();
 
 			//Post-fetch components
@@ -319,16 +339,17 @@ public class FinanceData {
 	/**
 	 * Returns the number of transactions stored in the database
 	 *
+	 * @param entityManager the entity manager
 	 * @return the number of transactions stored in the database
 	 */
 	protected long getTransactionsCountFromDatabase(EntityManager entityManager) {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		
+
 		CriteriaQuery<Long> transactionsCriteriaQuery = criteriaBuilder.createQuery(Long.class);
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
-		
+
 		transactionsCriteriaQuery.select(criteriaBuilder.countDistinct(tr));
-		
+
 		Long result = entityManager.createQuery(transactionsCriteriaQuery).getSingleResult();
 		transactionsCount = result;
 		return result;
@@ -337,13 +358,14 @@ public class FinanceData {
 	/**
 	 * Retrieves all accounts from the database
 	 *
+	 * @param entityManager the entity manager
 	 * @return the list of all accounts stored in the database
 	 */
 	protected List<FinanceAccount> getAccountsFromDatabase(EntityManager entityManager) {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<FinanceAccount> accountsCriteriaQuery = criteriaBuilder.createQuery(FinanceAccount.class);
 		accountsCriteriaQuery.from(FinanceAccount.class);
-		
+
 		List<FinanceAccount> result = entityManager.createQuery(accountsCriteriaQuery).getResultList();
 		return result;
 	}
@@ -351,8 +373,7 @@ public class FinanceData {
 	/**
 	 * Retrieves all currency exchange rates from the database
 	 *
-	 * @param entityManager the entity manager (used for obtaining the same
-	 * classes from DB)
+	 * @param entityManager the entity manager
 	 * @return the list of all currency exchange rates stored in the database
 	 */
 	protected List<CurrencyRate> getCurrencyRatesFromDatabase(EntityManager entityManager) {
@@ -368,8 +389,7 @@ public class FinanceData {
 	/**
 	 * Retrieves the Preferences class instance from the database
 	 *
-	 * @param entityManager the entity manager (used for obtaining the same
-	 * classes from DB)
+	 * @param entityManager the entity manager
 	 * @return the Preferences class instance, or a new persisted instance if
 	 * the database doesn't contain any
 	 */
@@ -394,8 +414,7 @@ public class FinanceData {
 	/**
 	 * Retrieves the default currency from the database
 	 *
-	 * @param entityManager the entity manager (used for obtaining the same
-	 * classes from DB)
+	 * @param entityManager the entity manager
 	 * @return the default currency stored in the database, or the system locale
 	 * currency
 	 */
@@ -404,7 +423,7 @@ public class FinanceData {
 		Currency currency = preferences.getDefaultCurrency();
 		if (currency == null) {
 			currency = Currency.getInstance(Locale.getDefault());
-			
+
 			entityManager.merge(preferences);
 		}
 		return currency;
@@ -427,7 +446,11 @@ public class FinanceData {
 	}
 
 	/**
-	 * Automatically creates missing currency exchange rates.
+	 * Automatically creates missing currency exchange rates. If process is
+	 * shutting down, the change is ignored.
+	 *
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	public void populateCurrencies() throws ApplicationShuttingDownException {
 		try {
@@ -445,6 +468,8 @@ public class FinanceData {
 	/**
 	 * Automatically creates missing currency exchange rates. Should only be
 	 * called from an started transaction
+	 *
+	 * @param entityManager the entity manager
 	 */
 	protected void populateCurrencies(EntityManager entityManager) {
 		entityManager.getTransaction().begin();
@@ -490,17 +515,22 @@ public class FinanceData {
 					entityManager.remove(foundRate);
 			}
 		}
-		
+
 		entityManager.getTransaction().commit();
-		
+
 		exchangeRates.clear();
 		exchangeRates.addAll(usedRates);
 	}
 
 	/**
-	 * Adds a new account
+	 * Creates a new account and persists it in the database. If process is
+	 * shutting down, the change is ignored.
 	 *
-	 * @param account the account to be added
+	 * @param name the account name
+	 * @param currency the account currency
+	 * @return the created account
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	public FinanceAccount createAccount(String name, Currency currency) throws ApplicationShuttingDownException {
 		try {
@@ -509,12 +539,12 @@ public class FinanceData {
 				throw new ApplicationShuttingDownException();
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
-			
+
 			FinanceAccount account = new FinanceAccount(name, currency);
 			entityManager.persist(account);
-			
+
 			entityManager.getTransaction().commit();
-			
+
 			entityManager.close();
 			return account;
 		} finally {
@@ -523,9 +553,16 @@ public class FinanceData {
 	}
 
 	/**
-	 * Adds a new transaction
+	 * Creates a new transaction and persists it in the database. If process is
+	 * shutting down, the change is ignored.
 	 *
-	 * @param transaction the transaction to be added
+	 * @param description the transaction description
+	 * @param tags the transaction tags
+	 * @param date the transaction date
+	 * @param type the transaction type
+	 * @return the created transaction
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	public FinanceTransaction createTransaction(String description, String[] tags, Date date, FinanceTransaction.Type type) throws ApplicationShuttingDownException {
 		try {
@@ -534,13 +571,13 @@ public class FinanceData {
 				throw new ApplicationShuttingDownException();
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
-			
+
 			FinanceTransaction transaction = new FinanceTransaction(description, tags, date, type);
 			entityManager.persist(transaction);
-			
+
 			entityManager.getTransaction().commit();
 			transactionsCount++;
-			
+
 			entityManager.close();
 			return transaction;
 		} finally {
@@ -549,9 +586,12 @@ public class FinanceData {
 	}
 
 	/**
-	 * Clones a transaction
+	 * Clones a transaction. If process is shutting down, the change is ignored.
 	 *
 	 * @param transaction the transaction to be cloned
+	 * @return the transaction clone
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	public FinanceTransaction cloneTransaction(FinanceTransaction transaction) throws ApplicationShuttingDownException {
 		try {
@@ -560,16 +600,16 @@ public class FinanceData {
 				throw new ApplicationShuttingDownException();
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
-			
+
 			transaction = entityManager.find(FinanceTransaction.class, transaction.id);
 			FinanceTransaction newTransaction = transaction.clone();
 			for (TransactionComponent component : newTransaction.getComponents())
 				entityManager.persist(component);
 			entityManager.persist(newTransaction);
-			
+
 			entityManager.getTransaction().commit();
 			transactionsCount++;
-			
+
 			entityManager.close();
 			return transaction;
 		} finally {
@@ -578,9 +618,16 @@ public class FinanceData {
 	}
 
 	/**
-	 * Adds a new transaction
+	 * Creates a new transaction component and persists it in the database. If
+	 * process is shutting down, the change is ignored.
 	 *
-	 * @param component the component to be added
+	 * @param account the account
+	 * @param transaction the transaction
+	 * @param amount the amount which this component modifies the account, can
+	 * be both negative and positive
+	 * @return the created transaction component
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	public TransactionComponent createTransactionComponent(FinanceAccount account, FinanceTransaction transaction, long amount) throws ApplicationShuttingDownException {
 		try {
@@ -589,17 +636,17 @@ public class FinanceData {
 				throw new ApplicationShuttingDownException();
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
-			
+
 			account = account != null ? entityManager.find(FinanceAccount.class, account.id) : null;
 			transaction = entityManager.find(FinanceTransaction.class, transaction.id);
 			TransactionComponent component = new TransactionComponent(account, transaction, amount);
 			entityManager.persist(component);
-			
+
 			if (transaction != null)
 				transaction.addComponent(component);
-			
+
 			entityManager.getTransaction().commit();
-			
+
 			entityManager.close();
 			return component;
 		} finally {
@@ -641,9 +688,12 @@ public class FinanceData {
 	}
 
 	/**
-	 * Deletes a transaction component (with all dependencies)
+	 * Deletes a transaction component (with all dependencies). If process is
+	 * shutting down, the change is ignored.
 	 *
 	 * @param component the transaction component to delete
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	public void deleteTransactionComponent(TransactionComponent component) throws ApplicationShuttingDownException {
 		try {
@@ -652,23 +702,23 @@ public class FinanceData {
 				throw new ApplicationShuttingDownException();
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
-			
+
 			component = entityManager.find(TransactionComponent.class, component.id);
-			
+
 			FinanceTransaction transaction = component.getTransaction();
 			FinanceAccount account = component.getAccount();
 			if (transaction != null) {
 				component.getTransaction().removeComponent(component);
 				entityManager.merge(transaction);
 			}
-			
+
 			entityManager.remove(entityManager.find(TransactionComponent.class, component.id));
-			
+
 			if (account != null)
 				entityManager.merge(account);
-			
+
 			entityManager.getTransaction().commit();
-			
+
 			entityManager.close();
 		} finally {
 			shuttingDownLock.readLock().unlock();
@@ -676,9 +726,12 @@ public class FinanceData {
 	}
 
 	/**
-	 * Deletes a transaction (with all dependencies)
+	 * Deletes a transaction (with all dependencies). If process is shutting
+	 * down, the change is ignored.
 	 *
 	 * @param transaction the transaction to delete
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	public void deleteTransaction(FinanceTransaction transaction) throws ApplicationShuttingDownException {
 		try {
@@ -687,12 +740,12 @@ public class FinanceData {
 				throw new ApplicationShuttingDownException();
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
-			
+
 			transaction = entityManager.find(FinanceTransaction.class, transaction.id);
-			
+
 			if (transaction == null)
 				return;
-			
+
 			List<FinanceAccount> affectedAccounts = transaction.getAccounts();
 
 			//Remove all components
@@ -706,10 +759,10 @@ public class FinanceData {
 			for (FinanceAccount account : affectedAccounts)
 				entityManager.merge(account);
 			entityManager.getTransaction().commit();
-			
+
 			if (foundTransaction != null)
 				transactionsCount--;
-			
+
 			entityManager.close();
 		} finally {
 			shuttingDownLock.readLock().unlock();
@@ -717,9 +770,12 @@ public class FinanceData {
 	}
 
 	/**
-	 * Deletes an account (with all dependencies)
+	 * Deletes an account (with all dependencies). If process is shutting down,
+	 * the change is ignored.
 	 *
 	 * @param account the account to delete
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	public void deleteAccount(FinanceAccount account) throws ApplicationShuttingDownException {
 		try {
@@ -741,11 +797,11 @@ public class FinanceData {
 
 			//Remove account
 			entityManager.remove(entityManager.find(FinanceAccount.class, account.id));
-			
+
 			entityManager.getTransaction().commit();
-			
+
 			populateCurrencies(entityManager);
-			
+
 			entityManager.close();
 		} finally {
 			shuttingDownLock.readLock().unlock();
@@ -753,9 +809,12 @@ public class FinanceData {
 	}
 
 	/**
-	 * Recalculates an account's balance based on its transactions
+	 * Recalculates an account's balance based on its transactions. If process
+	 * is shutting down, the change is ignored.
 	 *
 	 * @param account the account to be updated
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	public void refreshAccountBalance(FinanceAccount account) throws ApplicationShuttingDownException {
 		try {
@@ -772,9 +831,9 @@ public class FinanceData {
 			//Recalculate balance from related transactions
 			tempEntityManager.getTransaction().begin();
 			tempAccount.updateRawBalance(-tempAccount.getRawBalance());
-			
+
 			TypedQuery<FinanceTransaction> transactionsBatchQuery = tempEntityManager.createQuery(transactionsCriteriaQuery);
-			
+
 			int currentTransaction = 0;
 			boolean done = false;
 			while (!done) {
@@ -789,7 +848,7 @@ public class FinanceData {
 
 			//Update real account balance from temporary account
 			account.updateRawBalance(-account.getRawBalance() + tempAccount.getRawBalance());
-			
+
 			tempEntityManager.close();
 		} finally {
 			shuttingDownLock.readLock().unlock();
@@ -797,7 +856,11 @@ public class FinanceData {
 	}
 
 	/**
-	 * Deletes all orphaned transactions, accounts and transaction components
+	 * Deletes all orphaned transactions, accounts and transaction components.
+	 * If process is shutting down, the change is ignored.
+	 *
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	public void cleanup() throws ApplicationShuttingDownException {
 		try {
@@ -808,11 +871,11 @@ public class FinanceData {
 			CriteriaBuilder componentCriteriaBuilder = tempEntityManager.getCriteriaBuilder();
 			CriteriaQuery<TransactionComponent> componentsCriteriaQuery = componentCriteriaBuilder.createQuery(TransactionComponent.class);
 			componentsCriteriaQuery.from(TransactionComponent.class);
-			
+
 			CriteriaBuilder transactionCriteriaBuilder = tempEntityManager.getCriteriaBuilder();
 			CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = transactionCriteriaBuilder.createQuery(FinanceTransaction.class);
 			transactionsCriteriaQuery.from(FinanceTransaction.class);
-			
+
 			tempEntityManager.getTransaction().begin();
 
 			//Get all data from DB
@@ -830,12 +893,12 @@ public class FinanceData {
 				component.setTransaction(null);
 				tempEntityManager.remove(component);
 			}
-			
+
 			tempEntityManager.getTransaction().commit();
-			
+
 			populateCurrencies(tempEntityManager);
 			restoreFromDatabase(tempEntityManager);
-			
+
 			tempEntityManager.close();
 		} finally {
 			shuttingDownLock.readLock().unlock();
@@ -846,9 +909,12 @@ public class FinanceData {
 	 * Getters/setters
 	 */
 	/**
-	 * Returns the list of accounts
+	 * Returns the list of accounts. If process is shutting down, the request is
+	 * ignored.
 	 *
 	 * @return the list of accounts
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	public List<FinanceAccount> getAccounts() throws ApplicationShuttingDownException {
 		try {
@@ -866,21 +932,27 @@ public class FinanceData {
 
 	/**
 	 * Returns the list of transactions (from firstTransaction to
-	 * lastTransaction)
+	 * lastTransaction). If process is shutting down, the request is ignored.
+	 *
 	 *
 	 * @param firstTransaction the first transaction number to be selected
 	 * @param lastTransaction the last transaction number to be selected
 	 * @return the list of transactions
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	public List<FinanceTransaction> getTransactions(int firstTransaction, int lastTransaction) throws ApplicationShuttingDownException {
 		return getTransactionsFromDatabase(firstTransaction, lastTransaction);
 	}
 
 	/**
-	 * Returns a specific transaction from database
+	 * Returns a specific transaction from database. If process is shutting
+	 * down, the request is ignored.
 	 *
 	 * @param index the transaction's index
 	 * @return all transactions in the database
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	public FinanceTransaction getTransaction(int index) throws ApplicationShuttingDownException {
 		List<FinanceTransaction> transactions = getTransactionsFromDatabase(index, index);
@@ -888,9 +960,12 @@ public class FinanceData {
 	}
 
 	/**
-	 * Returns all transactions from database
+	 * Returns all transactions from database. If process is shutting down, the
+	 * request is ignored.
 	 *
 	 * @return all transactions in the database
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
 	 */
 	public List<FinanceTransaction> getTransactions() throws ApplicationShuttingDownException {
 		return getTransactionsFromDatabase(-1, -1);

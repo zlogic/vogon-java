@@ -590,6 +590,8 @@ public class Report {
 	 * Converts a multi-currency amount map into the default currency
 	 *
 	 * @param amounts the amounts in different currencies
+	 * @param commonCurrency the common currency to which everything will be
+	 * converted
 	 * @return sum of all amounts converted to the default currency
 	 */
 	protected long convertRawAmountToCommonCurrency(Map<String, Long> amounts, Currency commonCurrency) {

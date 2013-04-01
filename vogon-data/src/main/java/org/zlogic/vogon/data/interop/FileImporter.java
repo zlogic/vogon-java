@@ -18,7 +18,7 @@ public interface FileImporter {
 	/**
 	 * Imports a file containing financial transactions
 	 *
-	 * @param persistenceHelper the FinanceData to be used for obtaining data
+	 * @param financeData the FinanceData to be used for obtaining data
 	 * @param entityManager the EntityManager to be used for storing new items
 	 * and checking for duplicates
 	 *
