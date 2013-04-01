@@ -13,6 +13,8 @@ import javax.persistence.criteria.CriteriaQuery;
  * Interface for allowing to perform a custom modification in an
  * EntityManager-managed transaction.
  *
+ * @param <ElementType> element type for query
+ * @param <ResultType> return result type
  * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public interface TransactedQuery<ElementType, ResultType> {
@@ -22,8 +24,15 @@ public interface TransactedQuery<ElementType, ResultType> {
 	 * transaction is started by PersistenceHelper.performTransactedQuery().
 	 *
 	 * @param criteriaBuilder the criteria builder used for this query
+	 * @return the created criteria query
 	 */
 	public CriteriaQuery<ElementType> getQuery(CriteriaBuilder criteriaBuilder);
 
+	/**
+	 * Performs the query and returns the result.
+	 *
+	 * @param preparedQuery the previously prepared query (made by getQuery)
+	 * @return thew query result
+	 */
 	public ResultType getQueryResult(TypedQuery<ElementType> preparedQuery);
 }
