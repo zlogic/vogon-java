@@ -142,6 +142,15 @@ public class AccountModelAdapter implements AccountInterface {
 		((AccountModelAdapter) this).updateFxProperties();
 	}
 
+	protected void updateFromDatabase() {
+		dataManager.getFinanceData().performTransactedChange(new TransactedChange() {
+			@Override
+			public void performChange(EntityManager entityManager) {
+				setAccount(entityManager.find(FinanceAccount.class, account.getId()));
+			}
+		});
+	}
+
 	public void refreshBalance() {
 		dataManager.getFinanceData().refreshAccountBalance(account);
 		dataManager.getFinanceData().performTransactedChange(new TransactedChange() {
