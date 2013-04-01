@@ -150,14 +150,14 @@ public class FinanceData {
 				throw new ApplicationShuttingDownException();
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			importer.importFile(this, entityManager);
-
+			
 			restoreFromDatabase(entityManager);
-
+			
 			populateCurrencies(entityManager);
-
+			
 			Preferences preferences = getPreferencesFromDatabase(entityManager);
 			Currency defaultCurrency = preferences.getDefaultCurrency();
-
+			
 			if (!getCurrencies().contains(defaultCurrency)) {
 				entityManager.getTransaction().begin();
 				preferences = entityManager.find(Preferences.class, preferences.id);
@@ -208,7 +208,7 @@ public class FinanceData {
 	public FinanceTransaction getUpdatedTransactionFromDatabase(EntityManager entityManager, FinanceTransaction transaction) throws ApplicationShuttingDownException {
 		if (transaction == null)
 			return null;
-
+		
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
 		//Retreive the transactions
@@ -216,7 +216,7 @@ public class FinanceData {
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 		tr.fetch(FinanceTransaction_.tags, JoinType.LEFT);
 		transactionsCriteriaQuery.where(criteriaBuilder.equal(tr.get(FinanceTransaction_.id), transaction.id));
-
+		
 		FinanceTransaction result;
 		try {
 			result = entityManager.createQuery(transactionsCriteriaQuery).getSingleResult();
@@ -243,7 +243,7 @@ public class FinanceData {
 	public TransactionComponent getUpdatedTransactionComponentFromDatabase(EntityManager entityManager, TransactionComponent component) throws ApplicationShuttingDownException {
 		if (component == null)
 			return null;
-
+		
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
 		//Retreive the transactions
@@ -254,7 +254,7 @@ public class FinanceData {
 		//Post-fetch transaction and account		
 		trc.fetch(TransactionComponent_.transaction, JoinType.LEFT);
 		trc.fetch(TransactionComponent_.account, JoinType.LEFT);
-
+		
 		TransactionComponent result;
 		try {
 			result = entityManager.createQuery(transactionComponentCriteriaQuery).getSingleResult();
@@ -262,7 +262,7 @@ public class FinanceData {
 			entityManager.close();
 			return null;
 		}
-
+		
 		return result;
 	}
 
@@ -286,7 +286,7 @@ public class FinanceData {
 			CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
 			Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 			tr.fetch(FinanceTransaction_.tags, JoinType.LEFT);
-
+			
 			transactionsCriteriaQuery.orderBy(
 					criteriaBuilder.asc(tr.get(FinanceTransaction_.transactionDate)),
 					criteriaBuilder.asc(tr.get(FinanceTransaction_.id)));
@@ -298,7 +298,7 @@ public class FinanceData {
 				query = query.setFirstResult(firstTransaction);
 			if (lastTransaction >= 0 && firstTransaction >= 0)
 				query = query.setMaxResults(lastTransaction - firstTransaction + 1);
-
+			
 			List<FinanceTransaction> result = query.getResultList();
 
 			//Post-fetch components
@@ -323,12 +323,12 @@ public class FinanceData {
 	 */
 	protected long getTransactionsCountFromDatabase(EntityManager entityManager) {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-
+		
 		CriteriaQuery<Long> transactionsCriteriaQuery = criteriaBuilder.createQuery(Long.class);
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
-
+		
 		transactionsCriteriaQuery.select(criteriaBuilder.countDistinct(tr));
-
+		
 		Long result = entityManager.createQuery(transactionsCriteriaQuery).getSingleResult();
 		transactionsCount = result;
 		return result;
@@ -343,7 +343,7 @@ public class FinanceData {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<FinanceAccount> accountsCriteriaQuery = criteriaBuilder.createQuery(FinanceAccount.class);
 		accountsCriteriaQuery.from(FinanceAccount.class);
-
+		
 		List<FinanceAccount> result = entityManager.createQuery(accountsCriteriaQuery).getResultList();
 		return result;
 	}
@@ -404,7 +404,7 @@ public class FinanceData {
 		Currency currency = preferences.getDefaultCurrency();
 		if (currency == null) {
 			currency = Currency.getInstance(Locale.getDefault());
-
+			
 			entityManager.merge(preferences);
 		}
 		return currency;
@@ -490,9 +490,9 @@ public class FinanceData {
 					entityManager.remove(foundRate);
 			}
 		}
-
+		
 		entityManager.getTransaction().commit();
-
+		
 		exchangeRates.clear();
 		exchangeRates.addAll(usedRates);
 	}
@@ -509,12 +509,12 @@ public class FinanceData {
 				throw new ApplicationShuttingDownException();
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
-
+			
 			FinanceAccount account = new FinanceAccount(name, currency);
 			entityManager.persist(account);
-
+			
 			entityManager.getTransaction().commit();
-
+			
 			entityManager.close();
 			return account;
 		} finally {
@@ -534,13 +534,13 @@ public class FinanceData {
 				throw new ApplicationShuttingDownException();
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
-
+			
 			FinanceTransaction transaction = new FinanceTransaction(description, tags, date, type);
 			entityManager.persist(transaction);
-
+			
 			entityManager.getTransaction().commit();
 			transactionsCount++;
-
+			
 			entityManager.close();
 			return transaction;
 		} finally {
@@ -560,14 +560,16 @@ public class FinanceData {
 				throw new ApplicationShuttingDownException();
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
-
+			
 			transaction = entityManager.find(FinanceTransaction.class, transaction.id);
 			FinanceTransaction newTransaction = transaction.clone();
+			for (TransactionComponent component : newTransaction.getComponents())
+				entityManager.persist(component);
 			entityManager.persist(newTransaction);
-
+			
 			entityManager.getTransaction().commit();
 			transactionsCount++;
-
+			
 			entityManager.close();
 			return transaction;
 		} finally {
@@ -587,17 +589,17 @@ public class FinanceData {
 				throw new ApplicationShuttingDownException();
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
-
+			
 			account = account != null ? entityManager.find(FinanceAccount.class, account.id) : null;
 			transaction = entityManager.find(FinanceTransaction.class, transaction.id);
 			TransactionComponent component = new TransactionComponent(account, transaction, amount);
 			entityManager.persist(component);
-
+			
 			if (transaction != null)
 				transaction.addComponent(component);
-
+			
 			entityManager.getTransaction().commit();
-
+			
 			entityManager.close();
 			return component;
 		} finally {
@@ -650,23 +652,23 @@ public class FinanceData {
 				throw new ApplicationShuttingDownException();
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
-
+			
 			component = entityManager.find(TransactionComponent.class, component.id);
-
+			
 			FinanceTransaction transaction = component.getTransaction();
 			FinanceAccount account = component.getAccount();
 			if (transaction != null) {
 				component.getTransaction().removeComponent(component);
 				entityManager.merge(transaction);
 			}
-
+			
 			entityManager.remove(entityManager.find(TransactionComponent.class, component.id));
-
+			
 			if (account != null)
 				entityManager.merge(account);
-
+			
 			entityManager.getTransaction().commit();
-
+			
 			entityManager.close();
 		} finally {
 			shuttingDownLock.readLock().unlock();
@@ -685,12 +687,12 @@ public class FinanceData {
 				throw new ApplicationShuttingDownException();
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
-
+			
 			transaction = entityManager.find(FinanceTransaction.class, transaction.id);
-
+			
 			if (transaction == null)
 				return;
-
+			
 			List<FinanceAccount> affectedAccounts = transaction.getAccounts();
 
 			//Remove all components
@@ -704,10 +706,10 @@ public class FinanceData {
 			for (FinanceAccount account : affectedAccounts)
 				entityManager.merge(account);
 			entityManager.getTransaction().commit();
-
+			
 			if (foundTransaction != null)
 				transactionsCount--;
-
+			
 			entityManager.close();
 		} finally {
 			shuttingDownLock.readLock().unlock();
@@ -739,11 +741,11 @@ public class FinanceData {
 
 			//Remove account
 			entityManager.remove(entityManager.find(FinanceAccount.class, account.id));
-
+			
 			entityManager.getTransaction().commit();
-
+			
 			populateCurrencies(entityManager);
-
+			
 			entityManager.close();
 		} finally {
 			shuttingDownLock.readLock().unlock();
@@ -770,9 +772,9 @@ public class FinanceData {
 			//Recalculate balance from related transactions
 			tempEntityManager.getTransaction().begin();
 			tempAccount.updateRawBalance(-tempAccount.getRawBalance());
-
+			
 			TypedQuery<FinanceTransaction> transactionsBatchQuery = tempEntityManager.createQuery(transactionsCriteriaQuery);
-
+			
 			int currentTransaction = 0;
 			boolean done = false;
 			while (!done) {
@@ -787,7 +789,7 @@ public class FinanceData {
 
 			//Update real account balance from temporary account
 			account.updateRawBalance(-account.getRawBalance() + tempAccount.getRawBalance());
-
+			
 			tempEntityManager.close();
 		} finally {
 			shuttingDownLock.readLock().unlock();
@@ -806,11 +808,11 @@ public class FinanceData {
 			CriteriaBuilder componentCriteriaBuilder = tempEntityManager.getCriteriaBuilder();
 			CriteriaQuery<TransactionComponent> componentsCriteriaQuery = componentCriteriaBuilder.createQuery(TransactionComponent.class);
 			componentsCriteriaQuery.from(TransactionComponent.class);
-
+			
 			CriteriaBuilder transactionCriteriaBuilder = tempEntityManager.getCriteriaBuilder();
 			CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = transactionCriteriaBuilder.createQuery(FinanceTransaction.class);
 			transactionsCriteriaQuery.from(FinanceTransaction.class);
-
+			
 			tempEntityManager.getTransaction().begin();
 
 			//Get all data from DB
@@ -828,12 +830,12 @@ public class FinanceData {
 				component.setTransaction(null);
 				tempEntityManager.remove(component);
 			}
-
+			
 			tempEntityManager.getTransaction().commit();
-
+			
 			populateCurrencies(tempEntityManager);
 			restoreFromDatabase(tempEntityManager);
-
+			
 			tempEntityManager.close();
 		} finally {
 			shuttingDownLock.readLock().unlock();
