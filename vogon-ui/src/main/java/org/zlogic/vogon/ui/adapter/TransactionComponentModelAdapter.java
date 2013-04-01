@@ -64,14 +64,19 @@ public class TransactionComponentModelAdapter {
 
 				@Override
 				public void performChange(EntityManager entityManager) {
+					account = entityManager.find(FinanceAccount.class, account.getId());
 					setTransactionComponent(dataManager.getFinanceData().getUpdatedTransactionComponentFromDatabase(entityManager, transactionComponent));
 					getTransactionComponent().getTransaction().updateComponentAccount(getTransactionComponent(), account);
 				}
 			}.setAccount(newAccount));
 			updateFxProperties();
-			if (account.get() instanceof AccountModelAdapter) {
-				((AccountModelAdapter) account.get()).setAccount(transactionComponent.getAccount());
-				((AccountModelAdapter) account.get()).updateFxProperties();
+			if (oldValue instanceof AccountModelAdapter) {
+				((AccountModelAdapter) oldValue).updateFromDatabase();
+				((AccountModelAdapter) oldValue).updateFxProperties();
+			}
+			if (newValue instanceof AccountModelAdapter) {
+				((AccountModelAdapter) newValue).setAccount(transactionComponent.getAccount());
+				((AccountModelAdapter) newValue).updateFxProperties();
 			}
 		}
 	};
@@ -96,6 +101,10 @@ public class TransactionComponentModelAdapter {
 				}
 			}.setAmount(newValue.getAmount()));
 			updateFxProperties();
+			if (account.get() instanceof AccountModelAdapter) {
+				((AccountModelAdapter) account.get()).setAccount(transactionComponent.getAccount());
+				((AccountModelAdapter) account.get()).updateFxProperties();
+			}
 		}
 	};
 

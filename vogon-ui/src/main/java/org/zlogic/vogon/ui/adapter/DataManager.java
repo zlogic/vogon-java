@@ -273,6 +273,7 @@ public class DataManager {
 	public TransactionModelAdapter cloneTransaction(TransactionModelAdapter transaction) {
 		TransactionModelAdapter clonedTransaction = new TransactionModelAdapter(financeData.cloneTransaction(transaction.getTransaction()), this); //NOI18N
 		transactions.add(0, clonedTransaction);
+		refreshAccounts();
 		return clonedTransaction;
 	}
 
