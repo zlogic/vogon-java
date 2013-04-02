@@ -34,6 +34,9 @@ public class CurrencyRateModelAdapter {
 	 * The currency rate value property
 	 */
 	private final DoubleProperty value = new SimpleDoubleProperty();
+	/**
+	 * Listener for changes of value (saves to database)
+	 */
 	private ChangeListener<Number> valueListener = new ChangeListener<Number>() {
 		@Override
 		public void changed(ObservableValue<? extends Number> ov, Number oldValue, Number newValue) {

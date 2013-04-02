@@ -78,7 +78,7 @@ public class CurrenciesController implements Initializable {
 		this.dataManager = dataManager;
 
 		defaultCurrency.setItems(dataManager.getCurrencies());
-		defaultCurrency.valueProperty().bindBidirectional(dataManager.getDefaultCurrency());
+		defaultCurrency.valueProperty().bindBidirectional(dataManager.defaultCurrencyProperty());
 
 		currenciesTable.setItems(dataManager.getExchangeRates());
 	}

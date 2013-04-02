@@ -144,6 +144,11 @@ public class AmountModelAdapter implements Comparable<AmountModelAdapter> {
 		this.amount = amount;
 	}
 
+	/**
+	 * Property which equals to true if amount is OK
+	 *
+	 * @return true if amount is OK
+	 */
 	public BooleanProperty okProperty() {
 		return isOkProperty;
 	}

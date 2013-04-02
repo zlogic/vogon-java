@@ -78,7 +78,13 @@ public class TransactionModelAdapter {
 	 * The transaction account(s) property (rendered string)
 	 */
 	private final StringProperty accountName = new SimpleStringProperty();
+	/**
+	 * Associated TransactionComponentModelAdapter instances
+	 */
 	private ObservableList<TransactionComponentModelAdapter> components = FXCollections.observableList(new LinkedList<TransactionComponentModelAdapter>());
+	/**
+	 * Listener for changes of description (saves to database)
+	 */
 	private ChangeListener<String> descriptionListener = new ChangeListener<String>() {
 		@Override
 		public void changed(ObservableValue<? extends String> ov, String oldValue, String newValue) {
@@ -101,6 +107,9 @@ public class TransactionModelAdapter {
 			updateFxProperties();
 		}
 	};
+	/**
+	 * Listener for changes of tags (saves to database)
+	 */
 	private ListChangeListener<String> tagsListener = new ListChangeListener<String>() {
 		@Override
 		public void onChanged(ListChangeListener.Change<? extends String> change) {
@@ -115,6 +124,9 @@ public class TransactionModelAdapter {
 			updateFxProperties();
 		}
 	};
+	/**
+	 * Listener for changes of date (saves to database)
+	 */
 	private ChangeListener<Date> dateListener = new ChangeListener<Date>() {
 		@Override
 		public void changed(ObservableValue<? extends Date> ov, Date oldValue, Date newValue) {
@@ -137,6 +149,9 @@ public class TransactionModelAdapter {
 			updateFxProperties();
 		}
 	};
+	/**
+	 * Listener for changes of type (saves to database)
+	 */
 	private ChangeListener<TransactionTypeModelAdapter> typeListener = new ChangeListener<TransactionTypeModelAdapter>() {
 		@Override
 		public void changed(ObservableValue<? extends TransactionTypeModelAdapter> ov, TransactionTypeModelAdapter oldValue, TransactionTypeModelAdapter newValue) {
@@ -164,7 +179,7 @@ public class TransactionModelAdapter {
 	 * Default constructor
 	 *
 	 * @param transaction the associated transaction
-	 * @param financeData the associated FinanceData instance
+	 * @param dataManager the DataManager instance
 	 */
 	public TransactionModelAdapter(FinanceTransaction transaction, DataManager dataManager) {
 		this.transaction = transaction;
@@ -173,6 +188,11 @@ public class TransactionModelAdapter {
 		updateComponents();
 	}
 
+	/**
+	 * Creates a new transaction component within this transaction
+	 *
+	 * @return the new transaction component
+	 */
 	public TransactionComponentModelAdapter createComponent() {
 		TransactionComponent component = dataManager.getFinanceData().createTransactionComponent(null, transaction, 0);
 		TransactionComponentModelAdapter componentAdapter = new TransactionComponentModelAdapter(component, dataManager);
@@ -180,6 +200,11 @@ public class TransactionModelAdapter {
 		return componentAdapter;
 	}
 
+	/**
+	 * Deletes a transaction component from this transaction
+	 *
+	 * @param component the transaction component to delete
+	 */
 	public void deleteComponent(TransactionComponentModelAdapter component) {
 		dataManager.getFinanceData().deleteTransactionComponent(component.getTransactionComponent());
 		components.remove(component);
@@ -197,10 +222,18 @@ public class TransactionModelAdapter {
 		return transaction;
 	}
 
+	/**
+	 * Sets the transaction (doesn't update Java FX properties)
+	 *
+	 * @param transaction the transaction to set
+	 */
 	protected void setTransaction(FinanceTransaction transaction) {
 		this.transaction = transaction;
 	}
 
+	/**
+	 * Updates transaction from database (does not update Java FX properties)
+	 */
 	protected void updateFromDatabase() {
 		dataManager.getFinanceData().performTransactedChange(new TransactedChange() {
 			@Override
@@ -242,8 +275,8 @@ public class TransactionModelAdapter {
 			amountValue = transaction.getAmount();
 			currency = transactionCurrencies.get(0);
 		} else {
-			amountValue = dataManager.getFinanceData().getAmountInCurrency(transaction, dataManager.getDefaultCurrency().get().getCurrency());
-			currency = dataManager.getDefaultCurrency().get().getCurrency();
+			amountValue = dataManager.getFinanceData().getAmountInCurrency(transaction, dataManager.defaultCurrencyProperty().get().getCurrency());
+			currency = dataManager.defaultCurrencyProperty().get().getCurrency();
 		}
 		return new AmountModelAdapter(amountValue, transaction.isAmountOk(), currency, transactionCurrencies.size() != 1, transaction.getType());
 	}
@@ -354,10 +387,20 @@ public class TransactionModelAdapter {
 		return accountName;
 	}
 
+	/**
+	 * Property which equals to true if transaction is OK
+	 *
+	 * @return true if transaction is OK
+	 */
 	public BooleanProperty okProperty() {
 		return isOkProperty;
 	}
 
+	/**
+	 * Returns the transaction components list property
+	 *
+	 * @return the transaction components property
+	 */
 	public ObservableList<TransactionComponentModelAdapter> transactionComponentsProperty() {
 		return components;
 	}
@@ -381,6 +424,14 @@ public class TransactionModelAdapter {
 		return hash;
 	}
 
+	/**
+	 * Finds an existing TransactionComponentModelAdapter wrapper for a
+	 * transaction component. Searches within this transaction only.
+	 *
+	 * @param component the transaction component to find
+	 * @return the wrapping TransactionComponentModelAdapter or null if not
+	 * found
+	 */
 	private TransactionComponentModelAdapter findComponent(TransactionComponent component) {
 		for (TransactionComponentModelAdapter currentComponent : components)
 			if (currentComponent.getTransactionComponent().equals(component))
