@@ -46,7 +46,15 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Amount
 	 * The DataManager instance
 	 */
 	private DataManager dataManager;
+	/**
+	 * The transaction currently being edited (used to filter and ignore updates
+	 * while editing)
+	 */
 	private TransactionModelAdapter editedTransaction;
+	/**
+	 * True if cancelEdit() should be ignored (used to filter and ignore updates
+	 * while editing)
+	 */
 	private boolean doNotCancelEdit = false;
 	/**
 	 * Listener for changes in the "OK" property

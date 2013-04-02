@@ -48,16 +48,37 @@ public class DataManager {
 	 * The persistence helper instance
 	 */
 	private FinanceData financeData = new FinanceData();
+	/**
+	 * Transactions (currently visible)
+	 */
 	private ObservableList<TransactionModelAdapter> transactions = FXCollections.observableList(new LinkedList<TransactionModelAdapter>());
+	/**
+	 * All accounts, including reporting
+	 */
 	private ObservableList<AccountInterface> allAccounts = FXCollections.observableList(new LinkedList<AccountInterface>());
+	/**
+	 * Persisted accounts
+	 */
 	private ObservableList<AccountInterface> accounts = FXCollections.observableList(new LinkedList<AccountInterface>());
+	/**
+	 * Currencies
+	 */
 	private ObservableList<CurrencyModelAdapter> currencies = FXCollections.observableList(new LinkedList<CurrencyModelAdapter>());
+	/**
+	 * Exchange rates
+	 */
 	private ObservableList<CurrencyRateModelAdapter> exchangeRates = FXCollections.observableList(new LinkedList<CurrencyRateModelAdapter>());
+	/**
+	 * Transaction types
+	 */
 	private ObservableList<TransactionTypeModelAdapter> transactionTypes = FXCollections.observableList(new LinkedList<TransactionTypeModelAdapter>());
 	/**
 	 * Preferred currency
 	 */
 	private ObjectProperty<CurrencyModelAdapter> defaultCurrency = new SimpleObjectProperty<>();
+	/**
+	 * Listener for changes of default currency (saves to database)
+	 */
 	private ChangeListener<CurrencyModelAdapter> defaultCurrencyListener = new ChangeListener<CurrencyModelAdapter>() {
 		@Override
 		public void changed(ObservableValue<? extends CurrencyModelAdapter> ov, CurrencyModelAdapter oldValue, CurrencyModelAdapter newValue) {
@@ -79,11 +100,17 @@ public class DataManager {
 		}
 	};
 	/**
-	 * Contains exchange rates
+	 * Index of first transaction on current page
 	 */
 	private IntegerProperty firstTransactionIndex = new SimpleIntegerProperty(0);
+	/**
+	 * Index of last transaction on current page
+	 */
 	private IntegerProperty lastTransactionIndex = new SimpleIntegerProperty(0);
 
+	/**
+	 * Constructor for DataManager. Loads data from database.
+	 */
 	public DataManager() {
 		for (FinanceTransaction.Type currentType : FinanceTransaction.Type.values())
 			if (currentType != FinanceTransaction.Type.UNDEFINED)
@@ -111,6 +138,12 @@ public class DataManager {
 			transactions.add(new TransactionModelAdapter(transaction, this));
 	}
 
+	/**
+	 * Sets the visible transactions range
+	 *
+	 * @param currentPage the current page
+	 * @param pageSize page size
+	 */
 	public void setVisibleTransactions(int currentPage, int pageSize) {
 		int firstTransactionIndexValue = currentPage * pageSize;
 		int lastTransactionIndexValue = firstTransactionIndexValue + pageSize - 1;
@@ -123,6 +156,9 @@ public class DataManager {
 		reloadTransactions();
 	}
 
+	/**
+	 * Refreshes reporting accounts
+	 */
 	private void refreshReportingAccounts() {
 		//Remove existing reporting accounts
 		List<AccountInterface> reportingAccounts = new LinkedList<>();
@@ -138,6 +174,9 @@ public class DataManager {
 			allAccounts.add(new ReportingAccount(MessageFormat.format(messages.getString("TOTAL_ALL_ACCOUNTS"), new Object[]{defaultCurrency.get().getCurrency().getCurrencyCode()}), getTotalBalance(null), financeData.getDefaultCurrency()));
 	}
 
+	/**
+	 * Refreshes all accounts from database.
+	 */
 	public void refreshAccounts() {
 		//Update accounts
 		List<AccountInterface> orphanedAccounts = new LinkedList<>(accounts);
@@ -160,6 +199,10 @@ public class DataManager {
 		refreshReportingAccounts();
 	}
 
+	/**
+	 * Reloads transactions from database. Discards old TransactionModelAdapter
+	 * instances.
+	 */
 	public void reloadTransactions() {
 		List<FinanceTransaction> newTransactions = financeData.getTransactions(
 				Math.min(firstTransactionIndex.get(), lastTransactionIndex.get()),
@@ -173,11 +216,17 @@ public class DataManager {
 		transactions.setAll(newTransactionAdapters);
 	}
 
+	/**
+	 * Performs updateFxProperties for all transactions
+	 */
 	public void updateTransactionsFxProperties() {
 		for (TransactionModelAdapter transaction : transactions)
 			transaction.updateFxProperties();
 	}
 
+	/**
+	 * Reloads currency rates from database
+	 */
 	public void reloadCurrencies() {
 		List<CurrencyRateModelAdapter> newExchangeRates = new LinkedList<>();
 		for (CurrencyRate rate : financeData.getCurrencyRates())
@@ -190,6 +239,18 @@ public class DataManager {
 		currencies.setAll(newCurrencies);
 	}
 
+	/**
+	 * Imports data into database. If process is shutting down, the change is
+	 * ignored.
+	 *
+	 * @param importer a configured FileImporter instance
+	 * @throws VogonImportException in case of import errors (I/O, format,
+	 * indexing etc.)
+	 * @throws VogonImportLogicalException in case of logical errors (without
+	 * meaningful stack trace, just to show an error message)
+	 * @throws ApplicationShuttingDownException if application is shutting down
+	 * and database requests are ignored
+	 */
 	public void importData(FileImporter importer) throws ApplicationShuttingDownException, VogonImportException, VogonImportLogicalException {
 		financeData.importData(importer);
 		reloadData();
@@ -234,6 +295,12 @@ public class DataManager {
 		return financeData;
 	}
 
+	/**
+	 * Finds an existing TransactionModelAdapter wrapper for a transaction
+	 *
+	 * @param transaction the transaction to find
+	 * @return the wrapping TransactionModelAdapter or null if not found
+	 */
 	public TransactionModelAdapter findTransactionAdapter(FinanceTransaction transaction) {
 		for (TransactionModelAdapter adapter : transactions) {
 			if (adapter.getTransaction().equals(transaction))
@@ -242,6 +309,12 @@ public class DataManager {
 		return null;
 	}
 
+	/**
+	 * Finds an existing AccountModelAdapter wrapper for an account
+	 *
+	 * @param account the account to find
+	 * @return the wrapping AccountModelAdapter or null if not found
+	 */
 	public AccountModelAdapter findAccountAdapter(FinanceAccount account) {
 		for (AccountInterface adapter : accounts) {
 			if (adapter instanceof AccountModelAdapter && ((AccountModelAdapter) adapter).getAccount().equals(account))
@@ -250,6 +323,13 @@ public class DataManager {
 		return null;
 	}
 
+	/**
+	 * Finds an existing AccountModelAdapter wrapper for a
+	 * FinanceTransaction.Type
+	 *
+	 * @param type the FinanceTransaction.Type
+	 * @return the wrapping TransactionTypeModelAdapter or null if not found
+	 */
 	public TransactionTypeModelAdapter findTransactionType(FinanceTransaction.Type type) {
 		for (TransactionTypeModelAdapter adapter : transactionTypes)
 			if (adapter.getType().equals(type))
@@ -257,6 +337,11 @@ public class DataManager {
 		return null;
 	}
 
+	/**
+	 * Creates a new account and persists it in the database
+	 *
+	 * @return the new account
+	 */
 	public AccountModelAdapter createAccount() {
 		AccountModelAdapter account = new AccountModelAdapter(financeData.createAccount("", defaultCurrency.get().getCurrency()), this); //NOI18N
 		accounts.add(0, account);
@@ -264,12 +349,23 @@ public class DataManager {
 		return account;
 	}
 
+	/**
+	 * Creates a new transaction and persists it in the database
+	 *
+	 * @return the new transaction
+	 */
 	public TransactionModelAdapter createTransaction() {
 		TransactionModelAdapter transaction = new TransactionModelAdapter(financeData.createTransaction("", new String[0], new Date(), FinanceTransaction.Type.EXPENSEINCOME), this); //NOI18N
 		transactions.add(0, transaction);
 		return transaction;
 	}
 
+	/**
+	 * Clones a transaction and persists the clone in the database
+	 *
+	 * @param transaction the transaction to clone
+	 * @return the transaction clone
+	 */
 	public TransactionModelAdapter cloneTransaction(TransactionModelAdapter transaction) {
 		TransactionModelAdapter clonedTransaction = new TransactionModelAdapter(financeData.cloneTransaction(transaction.getTransaction()), this); //NOI18N
 		transactions.add(0, clonedTransaction);
@@ -277,6 +373,11 @@ public class DataManager {
 		return clonedTransaction;
 	}
 
+	/**
+	 * Deletes an account from the database
+	 *
+	 * @param account the account to delete
+	 */
 	public void deleteAccount(AccountModelAdapter account) {
 		financeData.deleteAccount(account.getAccount());
 		accounts.remove(account);
@@ -293,6 +394,11 @@ public class DataManager {
 		}
 	}
 
+	/**
+	 * Deletes a transaction from the database
+	 *
+	 * @param transaction the transaction to delete
+	 */
 	public void deleteTransaction(TransactionModelAdapter transaction) {
 		financeData.deleteTransaction(transaction.getTransaction());
 		transactions.remove(transaction);
@@ -302,34 +408,75 @@ public class DataManager {
 	/*
 	 * Getters/setters
 	 */
+	/**
+	 * Returns the list of transactions on the current page
+	 *
+	 * @return the list of transactions on the current page
+	 */
 	public ObservableList<TransactionModelAdapter> getTransactions() {
 		return transactions;
 	}
 
+	/**
+	 * Returns the list of all accounts, including persisted and reporting
+	 *
+	 * @return the list of all accounts
+	 */
 	public ObservableList<AccountInterface> getAllAccounts() {
 		return allAccounts;
 	}
 
+	/**
+	 * Returns the list of persisted accounts
+	 *
+	 * @return the list of persisted accounts
+	 */
 	public ObservableList<AccountInterface> getAccounts() {
 		return accounts;
 	}
 
+	/**
+	 * Returns the list of exchange rates
+	 *
+	 * @return the list of exchange rates
+	 */
 	public ObservableList<CurrencyRateModelAdapter> getExchangeRates() {
 		return exchangeRates;
 	}
 
+	/**
+	 * Returns the list of currencies
+	 *
+	 * @return the list of currencies
+	 */
 	public ObservableList<CurrencyModelAdapter> getCurrencies() {
 		return currencies;
 	}
 
-	public ObjectProperty<CurrencyModelAdapter> getDefaultCurrency() {
+	/**
+	 * Returns the default currency property
+	 *
+	 * @return the default currency property
+	 */
+	public ObjectProperty<CurrencyModelAdapter> defaultCurrencyProperty() {
 		return defaultCurrency;
 	}
 
+	/**
+	 * Returns the list of transaction types
+	 *
+	 * @return the list of transaction types
+	 */
 	public ObservableList<TransactionTypeModelAdapter> getTransactionTypes() {
 		return transactionTypes;
 	}
 
+	/**
+	 * Returns the total number of pages
+	 *
+	 * @param pageSize number of transactions on one page
+	 * @return the total number of pages
+	 */
 	public int getPageCount(int pageSize) {
 		return financeData.getTransactionCount() / pageSize + 1;
 	}

@@ -357,7 +357,7 @@ public class AnalyticsController implements Initializable {
 		for (Report.TagExpense tagExpense : values) {
 			TagResultAdapter tagResult = new TagResultAdapter(tagExpense.getTag(), tagExpense.getAmount(), tagExpense.getCurrency(), tagExpense.isCurrencyConverted());
 			String tagLabel = MessageFormat.format(messages.getString("PIECHART_TAG_FORMAT"), new Object[]{tagExpense.getTag(), tagResult.amountProperty().get().toString()});
-			data.add(new PieChart.Data(tagLabel, dataManager.getFinanceData().getExchangeRate(tagExpense.getCurrency(), dataManager.getDefaultCurrency().get().getCurrency())
+			data.add(new PieChart.Data(tagLabel, dataManager.getFinanceData().getExchangeRate(tagExpense.getCurrency(), dataManager.defaultCurrencyProperty().get().getCurrency())
 					* Math.abs(tagExpense.getAmount())));
 		}
 
@@ -578,8 +578,8 @@ public class AnalyticsController implements Initializable {
 				transactionAmount = transaction.getAmount();
 				transactionCurrency = transaction.getCurrencies().get(0);
 			} else {
-				transactionAmount = dataManager.getFinanceData().getAmountInCurrency(transaction, dataManager.getDefaultCurrency().get().getCurrency());
-				transactionCurrency = dataManager.getDefaultCurrency().get().getCurrency();
+				transactionAmount = dataManager.getFinanceData().getAmountInCurrency(transaction, dataManager.defaultCurrencyProperty().get().getCurrency());
+				transactionCurrency = dataManager.defaultCurrencyProperty().get().getCurrency();
 			}
 			this.amount.set(new AmountModelAdapter(transactionAmount, transaction.isAmountOk(), transactionCurrency, transaction.getCurrencies().size() != 1, transaction.getType()));
 			date.set(transaction.getDate());

@@ -57,6 +57,9 @@ public class AccountModelAdapter implements AccountInterface {
 	 * account's total balance
 	 */
 	private final BooleanProperty includeInTotal = new SimpleBooleanProperty(true);
+	/**
+	 * Listener for changes of includeInTotal (saves to database)
+	 */
 	private ChangeListener<Boolean> includeInTotalListener = new ChangeListener<Boolean>() {
 		@Override
 		public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
@@ -80,6 +83,9 @@ public class AccountModelAdapter implements AccountInterface {
 			dataManager.refreshAccounts();
 		}
 	};
+	/**
+	 * Listener for changes of name (saves to database)
+	 */
 	private ChangeListener<String> nameListener = new ChangeListener<String>() {
 		@Override
 		public void changed(ObservableValue<? extends String> ov, String oldValue, String newValue) {
@@ -103,6 +109,9 @@ public class AccountModelAdapter implements AccountInterface {
 			dataManager.updateTransactionsFxProperties();
 		}
 	};
+	/**
+	 * Listener for changes of currency (saves to database)
+	 */
 	private ChangeListener<CurrencyModelAdapter> currencyListener = new ChangeListener<CurrencyModelAdapter>() {
 		@Override
 		public void changed(ObservableValue<? extends CurrencyModelAdapter> ov, CurrencyModelAdapter oldValue, CurrencyModelAdapter newValue) {
@@ -142,6 +151,9 @@ public class AccountModelAdapter implements AccountInterface {
 		((AccountModelAdapter) this).updateFxProperties();
 	}
 
+	/**
+	 * Updates account from database (does not update Java FX properties)
+	 */
 	protected void updateFromDatabase() {
 		dataManager.getFinanceData().performTransactedChange(new TransactedChange() {
 			@Override
@@ -151,14 +163,12 @@ public class AccountModelAdapter implements AccountInterface {
 		});
 	}
 
+	/**
+	 * Refreshes balance based on transactions affecting the account
+	 */
 	public void refreshBalance() {
 		dataManager.getFinanceData().refreshAccountBalance(account);
-		dataManager.getFinanceData().performTransactedChange(new TransactedChange() {
-			@Override
-			public void performChange(EntityManager entityManager) {
-				setAccount(entityManager.find(FinanceAccount.class, account.getId()));
-			}
-		});
+		updateFromDatabase();
 		updateFxProperties();
 	}
 
@@ -198,6 +208,11 @@ public class AccountModelAdapter implements AccountInterface {
 		return account;
 	}
 
+	/**
+	 * Sets the account (doesn't update Java FX properties)
+	 *
+	 * @param account the account to set
+	 */
 	protected void setAccount(FinanceAccount account) {
 		this.account = account;
 	}

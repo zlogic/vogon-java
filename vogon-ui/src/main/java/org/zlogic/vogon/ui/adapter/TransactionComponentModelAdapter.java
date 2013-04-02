@@ -46,6 +46,9 @@ public class TransactionComponentModelAdapter {
 	 * The amount property
 	 */
 	private final ObjectProperty<AmountModelAdapter> amount = new SimpleObjectProperty<>();
+	/**
+	 * Listener for changes of account (saves to database)
+	 */
 	private ChangeListener<AccountInterface> accountListener = new ChangeListener<AccountInterface>() {
 		@Override
 		public void changed(ObservableValue<? extends AccountInterface> ov, AccountInterface oldValue, AccountInterface newValue) {
@@ -80,6 +83,9 @@ public class TransactionComponentModelAdapter {
 			}
 		}
 	};
+	/**
+	 * Listener for changes of amount (saves to database)
+	 */
 	private ChangeListener<AmountModelAdapter> amountListener = new ChangeListener<AmountModelAdapter>() {
 		@Override
 		public void changed(ObservableValue<? extends AmountModelAdapter> ov, AmountModelAdapter oldValue, AmountModelAdapter newValue) {
@@ -112,7 +118,7 @@ public class TransactionComponentModelAdapter {
 	 * Constructor for TransactionComponentModelAdapter
 	 *
 	 * @param transactionComponent the transaction component
-	 * @param financeData the financeData instance
+	 * @param dataManager the DataManager instance
 	 */
 	public TransactionComponentModelAdapter(TransactionComponent transactionComponent, DataManager dataManager) {
 		this.transactionComponent = transactionComponent;
@@ -129,6 +135,11 @@ public class TransactionComponentModelAdapter {
 		return transactionComponent;
 	}
 
+	/**
+	 * Sets the transaction component (doesn't update Java FX properties)
+	 *
+	 * @param transactionComponent the transaction component to set
+	 */
 	protected void setTransactionComponent(TransactionComponent transactionComponent) {
 		this.transactionComponent = transactionComponent;
 	}
