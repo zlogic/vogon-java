@@ -611,7 +611,7 @@ public class FinanceData {
 			transactionsCount++;
 
 			entityManager.close();
-			return transaction;
+			return newTransaction;
 		} finally {
 			shuttingDownLock.readLock().unlock();
 		}
