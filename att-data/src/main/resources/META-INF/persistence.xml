@@ -10,13 +10,13 @@
 		<class>org.zlogic.att.data.FilterDate</class>
 		<class>org.zlogic.att.data.FilterTaskCompleted</class>
 		<properties>
-			<property name="javax.persistence.jdbc.url" value="jdbc:h2:AwesomeTimeTracker"/>
+			<property name="javax.persistence.jdbc.url" value="jdbc:hsqldb:file:AwesomeTimeTracker;shutdown=true"/>
 			<property name="javax.persistence.jdbc.password" value=""/>
 			<property name="javax.persistence.jdbc.user" value=""/>
 			<property name="hibernate.hbm2ddl.auto" value="update"/>
 			<!--<property name="hibernate.hbm2ddl.auto" value="create-drop"/>-->
 			<!--<property name="hibernate.show_sql" value="true" />-->
-			<property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+			<property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect"/>
 		</properties>
 	</persistence-unit>
 </persistence>
