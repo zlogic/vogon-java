@@ -23,6 +23,7 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
+import javafx.util.converter.DefaultStringConverter;
 import org.zlogic.vogon.ui.adapter.AccountInterface;
 import org.zlogic.vogon.ui.adapter.AccountModelAdapter;
 import org.zlogic.vogon.ui.adapter.CurrencyModelAdapter;
@@ -110,6 +111,7 @@ public class AccountsController implements Initializable {
 			@Override
 			public TableCell<AccountInterface, String> call(TableColumn<AccountInterface, String> p) {
 				TextFieldTableCell<AccountInterface, String> cell = new TextFieldTableCell<>();
+				cell.setConverter(new DefaultStringConverter());
 				return cell;
 			}
 		});
