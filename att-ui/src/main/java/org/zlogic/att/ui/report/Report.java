@@ -8,7 +8,13 @@ package org.zlogic.att.ui.report;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -100,6 +106,10 @@ public class Report {
 	 * Generated report
 	 */
 	private JasperReportBuilder report;
+	/**
+	 * Path for storing images from HTML files
+	 */
+	private Path htmlImagesPath;
 	/**
 	 * Formatter to output date and time
 	 */
@@ -325,6 +335,61 @@ public class Report {
 	 */
 	public Report(DataManager dataManager) {
 		this.dataManager = dataManager;
+	}
+
+	/**
+	 * Recursively deletes a path
+	 *
+	 * @param parent the parent path
+	 * @throws IOException if deletion fails
+	 */
+	private void deleteTree(Path parent) throws IOException {
+		Files.walkFileTree(parent, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				Files.delete(file);
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+				Files.delete(file);
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+				if (exc == null) {
+					Files.delete(dir);
+					return FileVisitResult.CONTINUE;
+				} else
+					throw exc;
+			}
+		});
+	}
+
+	/**
+	 * Returns a temporary directory to be used for storing report images
+	 *
+	 * @return the temporary directory to be used for storing report images
+	 * @throws IOException when cannot create the temporary directory
+	 */
+	private Path getHTMLImagesDir() throws IOException {
+		if (htmlImagesPath == null) {
+			htmlImagesPath = Files.createTempDirectory("att");
+			Runnable deleteFile = new Runnable() {
+				@Override
+				public void run() {
+					try {
+						deleteTree(htmlImagesPath);
+					} catch (IOException ex) {
+						Logger.getLogger(Report.class.getName()).log(Level.SEVERE, null, ex);
+					}
+				}
+			};
+			Runtime.getRuntime().addShutdownHook(new Thread(deleteFile));
+		}
+		return htmlImagesPath;
 	}
 
 	/**
@@ -787,9 +852,9 @@ public class Report {
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			JasperHtmlExporterBuilder htmlExporter =
 					Exporters.htmlExporter(stream)
-					.setOutputImagesToDir(false)
-					//.setImagesURI(tempDir.toUri()+File.separator)
-					//.setImagesDirName(tempDir.toString())
+					.setOutputImagesToDir(true)
+					.setImagesURI(getHTMLImagesDir().toUri().toString())
+					.setImagesDirName(getHTMLImagesDir().toString())
 					.setUsingImagesToAlign(false);
 
 			//Table of contents after title
