@@ -1,6 +1,6 @@
 /*
  * Vogon personal finance/expense analyzer.
- * License TBD.
+ * Licensed under Apache license: http://www.apache.org/licenses/LICENSE-2.0
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
 package org.zlogic.vogon.data;
