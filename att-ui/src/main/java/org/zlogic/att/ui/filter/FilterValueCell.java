@@ -1,6 +1,7 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Awesome Time Tracker project.
+ * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
 package org.zlogic.att.ui.filter;
 

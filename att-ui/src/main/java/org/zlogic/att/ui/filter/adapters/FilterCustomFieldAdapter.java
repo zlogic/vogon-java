@@ -1,6 +1,6 @@
 /*
  * Awesome Time Tracker project.
- * License TBD.
+ * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
 package org.zlogic.att.ui.filter.adapters;
