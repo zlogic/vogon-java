@@ -85,12 +85,12 @@ public class DataManager {
 		public void changed(ObservableValue<? extends CurrencyModelAdapter> ov, CurrencyModelAdapter oldValue, CurrencyModelAdapter newValue) {
 			financeData.performTransactedChange(new TransactedChange() {
 				private Currency currency;
-				
+
 				public TransactedChange setCurrency(Currency currency) {
 					this.currency = currency;
 					return this;
 				}
-				
+
 				@Override
 				public void performChange(EntityManager entityManager) {
 					Preferences preferences = financeData.getPreferencesFromDatabase(entityManager);
@@ -116,7 +116,7 @@ public class DataManager {
 		for (FinanceTransaction.Type currentType : FinanceTransaction.Type.values())
 			if (currentType != FinanceTransaction.Type.UNDEFINED)
 				transactionTypes.add(new TransactionTypeModelAdapter(currentType));
-		
+
 		reloadData();
 	}
 
@@ -128,10 +128,10 @@ public class DataManager {
 		defaultCurrency.removeListener(defaultCurrencyListener);
 		defaultCurrency.setValue(new CurrencyModelAdapter(financeData.getDefaultCurrency()));
 		defaultCurrency.addListener(defaultCurrencyListener);
-		
+
 		refreshAccounts();
 		reloadCurrencies();
-		
+
 		transactions.clear();
 
 		//Update transactions
@@ -151,7 +151,7 @@ public class DataManager {
 		lastTransactionIndexValue = Math.min(lastTransactionIndexValue, financeData.getTransactionCount() - 1);
 		firstTransactionIndexValue = financeData.getTransactionCount() - 1 - firstTransactionIndexValue;
 		lastTransactionIndexValue = financeData.getTransactionCount() - 1 - lastTransactionIndexValue;
-		
+
 		this.firstTransactionIndex.set(firstTransactionIndexValue);
 		this.lastTransactionIndex.set(lastTransactionIndexValue);
 		reloadTransactions();
@@ -193,10 +193,10 @@ public class DataManager {
 				orphanedAccounts.remove(existingAccount);
 			}
 		}
-		
+
 		accounts.removeAll(orphanedAccounts);
 		allAccounts.removeAll(orphanedAccounts);
-		
+
 		refreshReportingAccounts();
 	}
 
@@ -209,11 +209,11 @@ public class DataManager {
 				Math.min(firstTransactionIndex.get(), lastTransactionIndex.get()),
 				Math.max(firstTransactionIndex.get(), lastTransactionIndex.get()));
 		Collections.reverse(newTransactions);
-		
+
 		List<TransactionModelAdapter> newTransactionAdapters = new LinkedList<>();
 		for (FinanceTransaction transaction : newTransactions)
 			newTransactionAdapters.add(new TransactionModelAdapter(transaction, this));
-		
+
 		transactions.setAll(newTransactionAdapters);
 	}
 
@@ -233,7 +233,7 @@ public class DataManager {
 		for (CurrencyRate rate : financeData.getCurrencyRates())
 			newExchangeRates.add(new CurrencyRateModelAdapter(rate, this));
 		exchangeRates.setAll(newExchangeRates);
-		
+
 		List<CurrencyModelAdapter> newCurrencies = new LinkedList<>();
 		for (Currency currency : financeData.getCurrencies())
 			newCurrencies.add(new CurrencyModelAdapter(currency));
@@ -392,7 +392,7 @@ public class DataManager {
 		financeData.deleteAccount(account.getAccount());
 		accounts.remove(account);
 		allAccounts.remove(account);
-		
+
 		refreshReportingAccounts();
 
 		//Refresh affected transactions from database
