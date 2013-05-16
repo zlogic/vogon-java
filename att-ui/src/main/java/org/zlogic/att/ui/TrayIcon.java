@@ -100,7 +100,7 @@ public class TrayIcon {
 			} catch (Exception e) {
 				log.log(Level.SEVERE, messages.getString("CANNOT_ADD_ICON_TO_TRAY"), e);
 				if (this.exceptionHandler != null)
-					this.exceptionHandler.showException(messages.getString("CANNOT_ADD_ICON_TO_TRAY"), e, true);
+					this.exceptionHandler.showException(messages.getString("CANNOT_ADD_ICON_TO_TRAY"), e);
 			}
 		} else {
 			log.severe(messages.getString("SYSTEM_TRAY_IS_UNAVAILABLE"));

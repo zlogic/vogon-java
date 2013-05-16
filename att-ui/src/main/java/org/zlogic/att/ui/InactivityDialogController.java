@@ -271,7 +271,7 @@ public class InactivityDialogController implements Initializable {
 			}
 		} else {
 			log.log(Level.SEVERE, messages.getString("INVALID_ACTION_SELECTED_FORMAT"), selectedAction.getSelectedToggle().toString());
-			exceptionHandler.showException(messages.getString("INVALID_ACTION_SELECTED") + selectedAction.getSelectedToggle().toString(), null, false);
+			exceptionHandler.showException(messages.getString("INVALID_ACTION_SELECTED") + selectedAction.getSelectedToggle().toString(), null);
 		}
 		selectedAction.selectToggle(null);
 		rootNode.getScene().getWindow().hide();

@@ -10,7 +10,7 @@
 		<class>org.zlogic.att.data.FilterDate</class>
 		<class>org.zlogic.att.data.FilterTaskCompleted</class>
 		<properties>
-			<property name="javax.persistence.jdbc.url" value="jdbc:hsqldb:file:AwesomeTimeTracker;shutdown=true"/>
+			<property name="javax.persistence.jdbc.url" value="jdbc:hsqldb:file:${user.dir}/AwesomeTimeTracker;shutdown=true"/>
 			<property name="javax.persistence.jdbc.password" value=""/>
 			<property name="javax.persistence.jdbc.user" value=""/>
 			<property name="hibernate.hbm2ddl.auto" value="update"/>

@@ -75,8 +75,8 @@ public class ExceptionDialogController implements Initializable, ExceptionHandle
 	}
 
 	@Override
-	public void showException(String explanation, Throwable ex, boolean callerIsBackgroundThread) {
-		if (!callerIsBackgroundThread) {
+	public void showException(String explanation, Throwable ex) {
+		if (Platform.isFxApplicationThread()) {
 			//Show the dialog
 			if (explanation != null)
 				exceptionLabel.setText(explanation);
@@ -93,7 +93,7 @@ public class ExceptionDialogController implements Initializable, ExceptionHandle
 
 				@Override
 				public void run() {
-					showException(explanation, ex, false);
+					showException(explanation, ex);
 				}
 
 				public Runnable setParameters(String explanation, Throwable ex) {

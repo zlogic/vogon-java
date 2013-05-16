@@ -886,11 +886,11 @@ public class Report {
 		} catch (UnsupportedEncodingException | DRException ex) {
 			Logger.getLogger(Report.class.getName()).log(Level.SEVERE, null, ex);
 			if (exceptionHandler != null)
-				exceptionHandler.showException(null, ex, true);
+				exceptionHandler.showException(null, ex);
 		} catch (Throwable ex) {
 			Logger.getLogger(Report.class.getName()).log(Level.SEVERE, null, ex);
 			if (exceptionHandler != null)
-				exceptionHandler.showException(null, ex, true);
+				exceptionHandler.showException(null, ex);
 		}
 	}
 }

@@ -12,7 +12,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -34,7 +36,6 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
@@ -231,6 +232,20 @@ public class TaskEditorController implements Initializable {
 		}
 	};
 	/**
+	 * Time segment cell editing property listener
+	 */
+	private ChangeListener<Boolean> timeSegmentEditingListener = new ChangeListener<Boolean>() {
+		@Override
+		public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
+			if (newValue)
+				editingSegmentsCount.add(1);
+			else
+				editingSegmentsCount.subtract(1);
+			if (editingSegmentsCount.get() < 0)
+				editingSegmentsCount.set(0);
+		}
+	};
+	/**
 	 * Default TimeChangeListener instance
 	 */
 	private TimeChangeListener timeChangeListener = new TimeChangeListener();
@@ -239,6 +254,14 @@ public class TaskEditorController implements Initializable {
 	 */
 	@FXML
 	private IntegerProperty segmentSelectionSize = new SimpleIntegerProperty(0);
+	/**
+	 * Property to store if a single task is currently selected (vs. a
+	 * null-selection i the task list)
+	 */
+	@FXML
+	private BooleanProperty editingSingleTask = new SimpleBooleanProperty(false);
+	@FXML
+	private IntegerProperty editingSegmentsCount = new SimpleIntegerProperty();
 
 	/**
 	 * Initializes the controller
@@ -334,6 +357,7 @@ public class TaskEditorController implements Initializable {
 			public TableCell<TimeSegmentAdapter, String> call(TableColumn<TimeSegmentAdapter, String> p) {
 				TextFieldTableCell<TimeSegmentAdapter, String> cell = new TextFieldTableCell<>();
 				cell.setConverter(new DefaultStringConverter());
+				cell.editingProperty().addListener(timeSegmentEditingListener);
 				return cell;
 			}
 		});
@@ -352,6 +376,7 @@ public class TaskEditorController implements Initializable {
 				TextFieldTableCell<TimeSegmentAdapter, Date> cell = new TextFieldTableCell<>();
 				cell.setConverter(new DateTimeStringConverter());
 				cell.setAlignment(Pos.CENTER_RIGHT);
+				cell.editingProperty().addListener(timeSegmentEditingListener);
 				return cell;
 			}
 		});
@@ -361,6 +386,7 @@ public class TaskEditorController implements Initializable {
 				TextFieldTableCell<TimeSegmentAdapter, Date> cell = new TextFieldTableCell<>();
 				cell.setConverter(new DateTimeStringConverter());
 				cell.setAlignment(Pos.CENTER_RIGHT);
+				cell.editingProperty().addListener(timeSegmentEditingListener);
 				return cell;
 			}
 		});
@@ -381,8 +407,14 @@ public class TaskEditorController implements Initializable {
 				event.consume();
 			}
 		});
-		//Enable/disable Delete button
-		delete.disableProperty().bind(segmentSelectionSize.lessThanOrEqualTo(0));
+		//Enable/disable Delete button and task fields
+		delete.disableProperty().bind(segmentSelectionSize.lessThanOrEqualTo(0).or(editingSingleTask.not()));
+		name.editableProperty().bind(editingSingleTask);
+		totalTime.disableProperty().bind(editingSingleTask.not());
+		description.editableProperty().bind(editingSingleTask);
+		timeSegments.disableProperty().bind(editingSingleTask.not());
+		timeSegments.disableProperty().bind(editingSingleTask.not());
+		addSegment.disableProperty().bind(editingSingleTask.not());
 
 		//Update the selection size property
 		timeSegments.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<TimeSegmentAdapter>() {
@@ -515,12 +547,10 @@ public class TaskEditorController implements Initializable {
 		boundTasks.clear();
 		dragSegment = null;
 		TaskAdapter editedTask = getEditedTask();
-		boolean editingSingleTask = editedTask != null;
-		name.setEditable(editingSingleTask);
-		description.setEditable(editingSingleTask);
-		addSegment.setDisable(!editingSingleTask);
-		customProperties.setDisable(!editingSingleTask);
-		if (editingSingleTask) {
+		editingSingleTask.set(editedTask != null);
+		customProperties.setDisable(!editingSingleTask.get());
+		editingSegmentsCount.set(0);
+		if (editingSingleTask.get()) {
 			timeChangeListener.unbind();
 			name.textProperty().bindBidirectional(editedTask.nameProperty());
 			description.textProperty().bindBidirectional(editedTask.descriptionProperty());
@@ -579,7 +609,7 @@ public class TaskEditorController implements Initializable {
 	private void updateSortOrder() {
 		//FIXME: Remove this after it's fixed in Java FX
 		//TODO: call this on task updates?
-		if (timeSegments.getEditingCell() != null && timeSegments.getEditingCell().getRow() >= 0)
+		if (editingSegmentsCount.get() > 0 || (timeSegments.getEditingCell() != null && timeSegments.getEditingCell().getRow() >= 0))
 			return;
 		TableColumn<TimeSegmentAdapter, ?>[] sortOrder = timeSegments.getSortOrder().toArray(new TableColumn[0]);
 		timeSegments.getSortOrder().clear();

@@ -249,7 +249,7 @@ public class ReportController implements Initializable {
 					} catch (InterruptedException ex) {
 						log.log(Level.SEVERE, null, ex);
 						if (exceptionHandler != null)
-							exceptionHandler.showException(null, ex, true);
+							exceptionHandler.showException(null, ex);
 					}
 				}
 			}
@@ -288,7 +288,7 @@ public class ReportController implements Initializable {
 			} catch (FileNotFoundException | DRException ex) {
 				log.log(Level.SEVERE, null, ex);
 				if (exceptionHandler != null)
-					exceptionHandler.showException(null, ex, false);
+					exceptionHandler.showException(null, ex);
 			}
 		}
 	}

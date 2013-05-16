@@ -18,8 +18,6 @@ public interface ExceptionHandler {
 	 *
 	 * @param explanation the exception human-readable explanation
 	 * @param ex the actual exception
-	 * @param callerIsBackgroundThread true if the caller is a background thread
-	 * (not a JavaFX event thread)
 	 */
-	public void showException(String explanation, Throwable ex, boolean callerIsBackgroundThread);
+	public void showException(String explanation, Throwable ex);
 }
