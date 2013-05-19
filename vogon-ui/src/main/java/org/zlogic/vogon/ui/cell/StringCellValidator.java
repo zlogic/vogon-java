@@ -8,7 +8,7 @@ package org.zlogic.vogon.ui.cell;
 /**
  * Cell validator interface.
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public interface StringCellValidator {
 

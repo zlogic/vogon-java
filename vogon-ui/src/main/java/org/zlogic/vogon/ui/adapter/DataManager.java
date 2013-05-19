@@ -78,6 +78,10 @@ public class DataManager {
 	 */
 	private ObjectProperty<CurrencyModelAdapter> defaultCurrency = new SimpleObjectProperty<>();
 	/**
+	 * Data reloaded counter for monitoring reloadData() changes
+	 */
+	private IntegerProperty dataVersionProperty = new SimpleIntegerProperty(0);
+	/**
 	 * Listener for changes of default currency (saves to database)
 	 */
 	private ChangeListener<CurrencyModelAdapter> defaultCurrencyListener = new ChangeListener<CurrencyModelAdapter>() {
@@ -134,9 +138,13 @@ public class DataManager {
 
 		transactions.clear();
 
+		firstTransactionIndex.set(0);
+		lastTransactionIndex.set(0);
 		//Update transactions
 		for (FinanceTransaction transaction : financeData.getTransactions(firstTransactionIndex.get(), lastTransactionIndex.get()))
 			transactions.add(new TransactionModelAdapter(transaction, this));
+
+		dataVersionProperty.set(dataVersionProperty.get() + 1);
 	}
 
 	/**
@@ -470,6 +478,16 @@ public class DataManager {
 	 */
 	public ObjectProperty<CurrencyModelAdapter> defaultCurrencyProperty() {
 		return defaultCurrency;
+	}
+
+	/**
+	 * Returns the data version property. Can be monitored for changes made by
+	 * DataManager.
+	 *
+	 * @return the data version property
+	 */
+	public IntegerProperty dataVersionProperty() {
+		return dataVersionProperty;
 	}
 
 	/**

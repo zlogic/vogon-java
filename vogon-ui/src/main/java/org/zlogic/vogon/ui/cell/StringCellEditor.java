@@ -8,21 +8,31 @@ package org.zlogic.vogon.ui.cell;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.property.ObjectProperty;
 import javafx.event.EventHandler;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import org.zlogic.vogon.ui.ExceptionHandler;
 
 /**
  * Simple string cell editor
  *
  * @param <BaseType> the row type
  * @param <PropertyType> the cell type
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType, PropertyType> {
 
+	/**
+	 * The logger
+	 */
+	private final static Logger log = Logger.getLogger(StringCellEditor.class.getName());
+	/**
+	 * Exception handler
+	 */
+	private ObjectProperty<ExceptionHandler> exceptionHandler;
 	/**
 	 * The PropertyType class
 	 */
@@ -41,10 +51,12 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 	 *
 	 * @param validator the value validator
 	 * @param classPropertyType the PropertyType class
+	 * @param exceptionHandler the exception handler
 	 */
-	public StringCellEditor(StringCellValidator validator, Class<PropertyType> classPropertyType) {
+	public StringCellEditor(StringCellValidator validator, Class<PropertyType> classPropertyType, ObjectProperty<ExceptionHandler> exceptionHandler) {
 		this.validator = validator;
 		this.classPropertyType = classPropertyType;
+		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
@@ -142,7 +154,9 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 			try {
 				return classPropertyType.getConstructor(String.class).newInstance(value);
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
-				Logger.getLogger(StringCellEditor.class.getName()).log(Level.SEVERE, null, ex);
+				log.log(Level.SEVERE, null, ex);
+				if (exceptionHandler.get() != null)
+					exceptionHandler.get().showException(null, ex);
 			}
 		return null;
 	}

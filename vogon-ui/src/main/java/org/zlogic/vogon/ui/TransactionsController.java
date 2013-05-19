@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -36,7 +38,7 @@ import org.zlogic.vogon.ui.cell.TransactionEditor;
 /**
  * Transactions pane controller.
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class TransactionsController implements Initializable {
 
@@ -44,6 +46,10 @@ public class TransactionsController implements Initializable {
 	 * The DataManager instance
 	 */
 	protected DataManager dataManager;
+	/**
+	 * Exception handler
+	 */
+	private ObjectProperty<ExceptionHandler> exceptionHandler = new SimpleObjectProperty<>();
 	/**
 	 * The transactions list table
 	 */
@@ -144,7 +150,7 @@ public class TransactionsController implements Initializable {
 		columnDate.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, Date>, TableCell<TransactionModelAdapter, Date>>() {
 			@Override
 			public TableCell<TransactionModelAdapter, Date> call(TableColumn<TransactionModelAdapter, Date> p) {
-				DateCellEditor<TransactionModelAdapter> cell = new DateCellEditor<>();
+				DateCellEditor<TransactionModelAdapter> cell = new DateCellEditor<>(exceptionHandler);
 				cell.setAlignment(Pos.CENTER_RIGHT);
 				return cell;
 			}
@@ -152,7 +158,7 @@ public class TransactionsController implements Initializable {
 		columnAmount.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, AmountModelAdapter>, TableCell<TransactionModelAdapter, AmountModelAdapter>>() {
 			@Override
 			public TableCell<TransactionModelAdapter, AmountModelAdapter> call(TableColumn<TransactionModelAdapter, AmountModelAdapter> p) {
-				TransactionEditor cell = new TransactionEditor(dataManager);
+				TransactionEditor cell = new TransactionEditor(dataManager, exceptionHandler);
 				cell.setAlignment(Pos.CENTER_RIGHT);
 				//Keep track of all editors
 				cell.editingProperty().addListener(new javafx.beans.value.ChangeListener<Boolean>() {
@@ -249,10 +255,13 @@ public class TransactionsController implements Initializable {
 
 	/**
 	 * Updates the transactions table
+	 *
+	 * @param forceUpdate true if update should be done even if an editor is
+	 * currently active
 	 */
-	protected void updateTransactions() {
+	protected void updateTransactions(boolean forceUpdate) {
 		//Update only if editors are not active
-		if (!editingTransactionEditors.isEmpty())
+		if ((!forceUpdate) && (!editingTransactionEditors.isEmpty()))
 			return;
 		transactionsTablePagination.setPageCount(getPageCount());
 		updatePageTransactions(transactionsTablePagination.getCurrentPageIndex());
@@ -276,7 +285,13 @@ public class TransactionsController implements Initializable {
 	public void setDataManager(DataManager dataManager) {
 		this.dataManager = dataManager;
 		transactionsTable.setItems(dataManager.getTransactions());
-		updateTransactions();
+		dataManager.dataVersionProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> ov, Number oldValue, Number newValue) {
+				updateTransactions(true);
+			}
+		});
+		updateTransactions(true);
 
 		//Listen for new transaction events
 		dataManager.getTransactions().addListener(new ListChangeListener<TransactionModelAdapter>() {
@@ -293,6 +308,15 @@ public class TransactionsController implements Initializable {
 					}
 			}
 		});
+	}
+
+	/**
+	 * Returns the exception handler property
+	 *
+	 * @return the exception handler property
+	 */
+	public ObjectProperty<ExceptionHandler> exceptionHandlerProperty() {
+		return exceptionHandler;
 	}
 
 	/**

@@ -12,19 +12,29 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.property.ObjectProperty;
+import org.zlogic.vogon.ui.ExceptionHandler;
 
 /**
  * String cell editor with date validation & parsing
  *
  * @param <BaseType> the row type
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class DateCellEditor<BaseType> extends StringCellEditor<BaseType, Date> {
 
 	/**
+	 * The logger
+	 */
+	private final static Logger log = Logger.getLogger(DateCellEditor.class.getName());
+	/**
 	 * Localization messages
 	 */
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
+	/**
+	 * Exception handler
+	 */
+	private ObjectProperty<ExceptionHandler> exceptionHandler;
 	/**
 	 * The date format to be used for validation
 	 */
@@ -32,9 +42,12 @@ public class DateCellEditor<BaseType> extends StringCellEditor<BaseType, Date> {
 
 	/**
 	 * Creates a date editor
+	 *
+	 * @param exceptionHandler the exception handler
 	 */
-	public DateCellEditor() {
-		super(new StringValidatorDate(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages").getString("PARSER_DATE")), Date.class);
+	public DateCellEditor(ObjectProperty<ExceptionHandler> exceptionHandler) {
+		super(new StringValidatorDate(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages").getString("PARSER_DATE"), exceptionHandler), Date.class, exceptionHandler);
+		this.exceptionHandler = exceptionHandler;
 		dateFormat = new SimpleDateFormat(messages.getString("PARSER_DATE"));
 	}
 
@@ -43,7 +56,9 @@ public class DateCellEditor<BaseType> extends StringCellEditor<BaseType, Date> {
 		try {
 			return dateFormat.parse(value);
 		} catch (ParseException ex) {
-			Logger.getLogger(DateCellEditor.class.getName()).log(Level.SEVERE, null, ex);
+			log.log(Level.SEVERE, null, ex);
+			if (exceptionHandler.get() != null)
+				exceptionHandler.get().showException(MessageFormat.format(messages.getString("CANNOT_PARSE_DATE"), new Object[]{value, ex.getMessage()}), ex);
 		}
 		return null;
 	}

@@ -7,6 +7,8 @@ package org.zlogic.vogon.ui;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -31,7 +33,7 @@ import org.zlogic.vogon.ui.cell.StringValidatorDouble;
 /**
  * Controller for editing a transaction's components.
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class TransactionComponentsController implements Initializable {
 
@@ -39,6 +41,10 @@ public class TransactionComponentsController implements Initializable {
 	 * The DataManager instance
 	 */
 	protected DataManager dataManager;
+	/**
+	 * Exception handler
+	 */
+	private ObjectProperty<ExceptionHandler> exceptionHandler = new SimpleObjectProperty<>();
 	/**
 	 * The edited transaction
 	 */
@@ -95,7 +101,7 @@ public class TransactionComponentsController implements Initializable {
 		columnAmount.setCellFactory(new Callback<TableColumn<TransactionComponentModelAdapter, AmountModelAdapter>, TableCell<TransactionComponentModelAdapter, AmountModelAdapter>>() {
 			@Override
 			public TableCell<TransactionComponentModelAdapter, AmountModelAdapter> call(TableColumn<TransactionComponentModelAdapter, AmountModelAdapter> p) {
-				AmountCellEditor<TransactionComponentModelAdapter> cell = new AmountCellEditor<>(new StringValidatorDouble());
+				AmountCellEditor<TransactionComponentModelAdapter> cell = new AmountCellEditor<>(new StringValidatorDouble(exceptionHandler), exceptionHandler);
 				cell.setAlignment(Pos.CENTER_RIGHT);
 				return cell;
 			}
@@ -133,6 +139,15 @@ public class TransactionComponentsController implements Initializable {
 
 		accountsComboList = dataManager.getAccounts();
 		transactionType.setItems(dataManager.getTransactionTypes());
+	}
+
+	/**
+	 * Returns the exception handler property
+	 *
+	 * @return the exception handler property
+	 */
+	public ObjectProperty<ExceptionHandler> exceptionHandlerProperty() {
+		return exceptionHandler;
 	}
 
 	/**

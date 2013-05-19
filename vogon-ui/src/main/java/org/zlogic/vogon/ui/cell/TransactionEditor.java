@@ -6,17 +6,19 @@
 package org.zlogic.vogon.ui.cell;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.TableCell;
 import javafx.stage.Popup;
+import org.zlogic.vogon.ui.ExceptionHandler;
 import org.zlogic.vogon.ui.TransactionComponentsController;
 import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
 import org.zlogic.vogon.ui.adapter.DataManager;
@@ -26,10 +28,22 @@ import org.zlogic.vogon.ui.adapter.TransactionModelAdapter;
  * Transactions components editor. Expands from a simple string to a
  * full-featured editor.
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class TransactionEditor extends TableCell<TransactionModelAdapter, AmountModelAdapter> {
 
+	/**
+	 * The logger
+	 */
+	private final static Logger log = Logger.getLogger(TransactionEditor.class.getName());
+	/**
+	 * Localization messages
+	 */
+	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
+	/**
+	 * Exception handler
+	 */
+	private ObjectProperty<ExceptionHandler> exceptionHandler;
 	/**
 	 * The editor parent container
 	 */
@@ -80,22 +94,11 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Amount
 	 * Constructs a Transaction properties editor/viewer
 	 *
 	 * @param dataManager the DataManager to be used
+	 * @param exceptionHandler the exception handler
 	 */
-	public TransactionEditor(DataManager dataManager) {
-		this(dataManager, null);
+	public TransactionEditor(DataManager dataManager, ObjectProperty<ExceptionHandler> exceptionHandler) {
 		this.dataManager = dataManager;
-	}
-
-	/**
-	 * Constructs a Transaction properties editor/viewer
-	 *
-	 * @param dataManager the DataManager to be used
-	 * @param alignment the cell alignment in view state
-	 */
-	public TransactionEditor(DataManager dataManager, Pos alignment) {
-		if (alignment != null)
-			setAlignment(alignment);
-		this.dataManager = dataManager;
+		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
@@ -183,10 +186,13 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Amount
 			editor.autosize();
 			componentsController = loader.getController();
 			componentsController.setDataManager(dataManager);
+			componentsController.exceptionHandlerProperty().bind(exceptionHandler);
 			popup = new Popup();
 			popup.getContent().add(editor);
 		} catch (IOException ex) {
-			Logger.getLogger(TransactionEditor.class.getName()).log(Level.SEVERE, null, ex);
+			log.log(Level.SEVERE, null, ex);
+			if (exceptionHandler.get() != null)
+				exceptionHandler.get().showException(MessageFormat.format(messages.getString("CANNOT_LOAD_TRANSACTION_EDITOR"), new Object[]{ex.getMessage()}), ex);
 		}
 	}
 

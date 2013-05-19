@@ -24,7 +24,7 @@ import org.zlogic.vogon.data.TransactedChange;
  * Class for storing an account with an overloaded toString method for better
  * customization of how it's rendered in a combo box and other similar places.
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class AccountModelAdapter implements AccountInterface {
 

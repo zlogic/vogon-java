@@ -59,11 +59,10 @@ public class CsvImporter implements FileImporter {
 
 	@Override
 	public void importFile(FinanceData financeData, EntityManager entityManager) throws VogonImportException, VogonImportLogicalException {
-		try {
+		try(CSVReader reader = new CSVReader(new java.io.InputStreamReader(new java.io.FileInputStream(inputFile), "UTF8"))) {//NOI18N
 			entityManager.getTransaction().begin();
 
 			List<FinanceAccount> accounts = new ArrayList<>();
-			CSVReader reader = new CSVReader(new java.io.InputStreamReader(new java.io.FileInputStream(inputFile), "UTF8")); //NOI18N
 			String[] columns;
 			String[] columnsHeader = null;
 			while ((columns = reader.readNext()) != null) {
