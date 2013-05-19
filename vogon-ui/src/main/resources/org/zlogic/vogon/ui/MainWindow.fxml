@@ -72,8 +72,12 @@
     </Accordion>
     <HBox fx:id="statusPane" alignment="CENTER_RIGHT">
       <children>
-        <Label fx:id="progressLabel" HBox.hgrow="ALWAYS" />
-        <ProgressIndicator fx:id="progressIndicator" progress="0.0" HBox.hgrow="NEVER" />
+        <Label fx:id="progressLabel" HBox.hgrow="ALWAYS">
+          <HBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+          </HBox.margin>
+        </Label>
+        <ProgressIndicator fx:id="progressIndicator" progress="0.0" HBox.hgrow="NEVER" HBox.margin="$x1" />
       </children>
     </HBox>
   </children>

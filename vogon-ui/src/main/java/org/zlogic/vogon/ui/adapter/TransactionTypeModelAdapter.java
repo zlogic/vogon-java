@@ -13,7 +13,7 @@ import static org.zlogic.vogon.data.FinanceTransaction.Type.UNDEFINED;
 /**
  * Transaction type helper class for rendering.
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class TransactionTypeModelAdapter {
 

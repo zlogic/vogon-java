@@ -55,14 +55,22 @@ import org.zlogic.vogon.ui.cell.DateConverter;
 /**
  * The Analytics pane
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class AnalyticsController implements Initializable {
 
 	/**
+	 * The logger
+	 */
+	private final static Logger log = Logger.getLogger(AnalyticsController.class.getName());
+	/**
 	 * Localization messages
 	 */
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
+	/**
+	 * Exception handler
+	 */
+	private ObjectProperty<ExceptionHandler> exceptionHandler = new SimpleObjectProperty<>();
 	/**
 	 * The report generator
 	 */
@@ -225,7 +233,7 @@ public class AnalyticsController implements Initializable {
 			@Override
 			public TableCell<TransactionResultAdapter, Date> call(TableColumn<TransactionResultAdapter, Date> p) {
 				TextFieldTableCell<TransactionResultAdapter, Date> cell = new TextFieldTableCell<>();
-				cell.setConverter(new DateConverter(DateFormat.getDateInstance(DateFormat.LONG)));
+				cell.setConverter(new DateConverter(DateFormat.getDateInstance(DateFormat.LONG), exceptionHandler));
 				cell.setAlignment(Pos.CENTER_RIGHT);
 				return cell;
 			}
@@ -248,7 +256,7 @@ public class AnalyticsController implements Initializable {
 					report.setLatestDate(dateFormat.parse(endDateField.getText()));
 				} catch (ParseException ex) {
 					MessageDialog.showDialog(messages.getString("ANALYTICS_REPORT_EXCEPTION_DIALOG_TITLE"), new MessageFormat(messages.getString("ANALYTICS_REPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}));
-					Logger.getLogger(AnalyticsController.class.getName()).log(Level.SEVERE, null, ex);
+					log.log(Level.SEVERE, null, ex);
 				}
 
 				List<FinanceAccount> selectedAccounts = new LinkedList<>();
@@ -397,6 +405,15 @@ public class AnalyticsController implements Initializable {
 
 		updateTagsSelectionTable();//TODO: move this to FinanceData
 		updateAccountsSelectionTable();//TODO: move this to FinanceData (add "select for report" property to regular adapter)
+	}
+
+	/**
+	 * Returns the exception handler property
+	 *
+	 * @return the exception handler property
+	 */
+	public ObjectProperty<ExceptionHandler> exceptionHandlerProperty() {
+		return exceptionHandler;
 	}
 
 	/**

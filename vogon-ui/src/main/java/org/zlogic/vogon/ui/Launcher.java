@@ -25,10 +25,14 @@ import org.zlogic.vogon.ui.adapter.DataManager;
  * Main entry point for application. Performs initial initialization and loading
  * of Java FX code.
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class Launcher extends Application {
 
+	/**
+	 * The logger
+	 */
+	private final static Logger log = Logger.getLogger(Launcher.class.getName());
 	/**
 	 * Localization messages
 	 */
@@ -55,7 +59,7 @@ public class Launcher extends Application {
 			loader.setLocation(getClass().getResource("MainWindow.fxml")); //NOI18N
 			root = (Parent) loader.load(); //NOI18N
 		} catch (IOException ex) {
-			java.util.logging.Logger.getLogger(Launcher.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+			log.log(java.util.logging.Level.SEVERE, null, ex);
 			return;
 		}
 
@@ -68,6 +72,7 @@ public class Launcher extends Application {
 
 		//Set data
 		((MainWindowController) loader.getController()).setDataManager(dataManager);
+		((MainWindowController) loader.getController()).setWindowIcons(stage.getIcons());
 
 		//Show scene
 		stage.setScene(scene);
@@ -104,7 +109,7 @@ public class Launcher extends Application {
 				if (url != null)
 					java.util.logging.LogManager.getLogManager().readConfiguration(url.openStream());
 			} catch (IOException | SecurityException ex) {
-				Logger.getLogger(Launcher.class.getName()).log(Level.SEVERE, messages.getString("ERROR_LOADING_LOGGING_CONFIGURATION"), ex);
+				log.log(Level.SEVERE, messages.getString("ERROR_LOADING_LOGGING_CONFIGURATION"), ex);
 				System.err.println(messages.getString("ERROR_LOADING_LOGGING_CONFIGURATION"));
 			}
 		}

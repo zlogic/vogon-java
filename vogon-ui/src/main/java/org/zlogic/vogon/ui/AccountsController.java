@@ -32,7 +32,7 @@ import org.zlogic.vogon.ui.adapter.DataManager;
 /**
  * The Accounts pane
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class AccountsController implements Initializable {
 

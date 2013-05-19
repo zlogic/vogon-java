@@ -25,10 +25,16 @@ import javafx.stage.Stage;
  * Very simple dialog class. TODO: replace this with Alert once Java FX 3.0/8.0
  * is released
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class MessageDialog implements Initializable {
 
+	/**
+	 * The logger
+	 */
+	private final static Logger log = Logger.getLogger(MessageDialog.class.getName());
+
+	//TODO: make this non-static to load the dialog FXML just once and use window icons
 	/**
 	 * Shows the dialog (modal)
 	 *
@@ -46,7 +52,7 @@ public class MessageDialog implements Initializable {
 			try {
 				root = (Parent) loader.load();
 			} catch (IOException ex) {
-				Logger.getLogger(MessageDialog.class.getName()).log(Level.SEVERE, null, ex);
+				log.log(Level.SEVERE, null, ex);
 			}
 			//Initialize the scene properties
 			if (root != null) {

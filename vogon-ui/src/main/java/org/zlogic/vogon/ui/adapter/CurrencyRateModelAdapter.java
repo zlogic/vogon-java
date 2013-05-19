@@ -18,7 +18,7 @@ import org.zlogic.vogon.data.TransactedChange;
 /**
  * Class for storing a currency rate with property change detection.
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <zlogic@gmail.com>
  */
 public class CurrencyRateModelAdapter {
 
