@@ -15,6 +15,8 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -60,7 +62,7 @@ public class InactivityDialogController implements Initializable {
 	/**
 	 * Exception handler
 	 */
-	private ExceptionHandler exceptionHandler;
+	private ObjectProperty<ExceptionHandler> exceptionHandler = new SimpleObjectProperty<>();
 	/**
 	 * The root node
 	 */
@@ -208,21 +210,12 @@ public class InactivityDialogController implements Initializable {
 	}
 
 	/**
-	 * Returns the exception handler
+	 * Returns the exception handler property
 	 *
-	 * @return the exception handler
+	 * @return the exception handler property
 	 */
-	public ExceptionHandler getExceptionHandler() {
+	public ObjectProperty<ExceptionHandler> exceptionHandlerProperty() {
 		return exceptionHandler;
-	}
-
-	/**
-	 * Sets the exception handler
-	 *
-	 * @param exceptionHandler the exception handler to set
-	 */
-	public void setExceptionHandler(ExceptionHandler exceptionHandler) {
-		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
@@ -271,7 +264,8 @@ public class InactivityDialogController implements Initializable {
 			}
 		} else {
 			log.log(Level.SEVERE, messages.getString("INVALID_ACTION_SELECTED_FORMAT"), selectedAction.getSelectedToggle().toString());
-			exceptionHandler.showException(messages.getString("INVALID_ACTION_SELECTED") + selectedAction.getSelectedToggle().toString(), null);
+			if (exceptionHandler.get() != null)
+				exceptionHandler.get().showException(messages.getString("INVALID_ACTION_SELECTED") + selectedAction.getSelectedToggle().toString(), null);
 		}
 		selectedAction.selectToggle(null);
 		rootNode.getScene().getWindow().hide();

@@ -55,7 +55,7 @@ public class ReportController implements Initializable {
 	/**
 	 * Exception handler
 	 */
-	private ExceptionHandler exceptionHandler;
+	private ObjectProperty<ExceptionHandler> exceptionHandler = new SimpleObjectProperty<>();
 	/**
 	 * Last opened directory
 	 */
@@ -177,21 +177,12 @@ public class ReportController implements Initializable {
 	}
 
 	/**
-	 * Returns the exception handler
+	 * Returns the exception handler property
 	 *
-	 * @return the exception handler
+	 * @return the exception handler property
 	 */
-	public ExceptionHandler getExceptionHandler() {
+	public ObjectProperty<ExceptionHandler> exceptionHandlerProperty() {
 		return exceptionHandler;
-	}
-
-	/**
-	 * Sets the exception handler
-	 *
-	 * @param exceptionHandler the exception handler to set
-	 */
-	public void setExceptionHandler(ExceptionHandler exceptionHandler) {
-		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
@@ -215,7 +206,7 @@ public class ReportController implements Initializable {
 			@Override
 			protected Void call() throws Exception {
 				updateMessage(messages.getString("GENERATING_REPORT..."));
-				Report report = new Report(dataManager);
+				Report report = new Report(dataManager, exceptionHandler);
 				report.setStartDate(startDateValue.get());
 				report.setEndDate(endDateValue.get());
 				report.progressProperty().addListener(new ChangeListener<Number>() {
@@ -248,8 +239,8 @@ public class ReportController implements Initializable {
 						reportTaskThread.set(null);
 					} catch (InterruptedException ex) {
 						log.log(Level.SEVERE, null, ex);
-						if (exceptionHandler != null)
-							exceptionHandler.showException(null, ex);
+						if (exceptionHandler.get() != null)
+							exceptionHandler.get().showException(null, ex);
 					}
 				}
 			}
@@ -287,8 +278,8 @@ public class ReportController implements Initializable {
 				generatedReport.get().savePdfReport(selectedFile);
 			} catch (FileNotFoundException | DRException ex) {
 				log.log(Level.SEVERE, null, ex);
-				if (exceptionHandler != null)
-					exceptionHandler.showException(null, ex);
+				if (exceptionHandler.get() != null)
+					exceptionHandler.get().showException(null, ex);
 			}
 		}
 	}

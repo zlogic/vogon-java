@@ -260,6 +260,9 @@ public class TaskEditorController implements Initializable {
 	 */
 	@FXML
 	private BooleanProperty editingSingleTask = new SimpleBooleanProperty(false);
+	/**
+	 * The number of currently edited segments
+	 */
 	@FXML
 	private IntegerProperty editingSegmentsCount = new SimpleIntegerProperty();
 

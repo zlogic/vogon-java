@@ -15,6 +15,8 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.stage.Stage;
 
 /**
@@ -36,7 +38,7 @@ public class TrayIcon {
 	/**
 	 * Exception handler
 	 */
-	private ExceptionHandler exceptionHandler;
+	private ObjectProperty<ExceptionHandler> exceptionHandler = new SimpleObjectProperty<>();
 	/**
 	 * The Tray Icon
 	 */
@@ -49,8 +51,8 @@ public class TrayIcon {
 	 * icon
 	 * @param exceptionHandler the exception handler
 	 */
-	public TrayIcon(Stage primaryStage, ExceptionHandler exceptionHandler) {
-		this.exceptionHandler = exceptionHandler;
+	public TrayIcon(Stage primaryStage, ObjectProperty<ExceptionHandler> exceptionHandler) {
+		this.exceptionHandler.bind(exceptionHandler);
 		if (SystemTray.isSupported()) {
 			SystemTray tray = SystemTray.getSystemTray();
 			Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("icon/att-tilt-16.png")); //NOI18N
@@ -99,8 +101,8 @@ public class TrayIcon {
 				tray.add(trayIcon);
 			} catch (Exception e) {
 				log.log(Level.SEVERE, messages.getString("CANNOT_ADD_ICON_TO_TRAY"), e);
-				if (this.exceptionHandler != null)
-					this.exceptionHandler.showException(messages.getString("CANNOT_ADD_ICON_TO_TRAY"), e);
+				if (this.exceptionHandler.get() != null)
+					this.exceptionHandler.get().showException(messages.getString("CANNOT_ADD_ICON_TO_TRAY"), e);
 			}
 		} else {
 			log.severe(messages.getString("SYSTEM_TRAY_IS_UNAVAILABLE"));

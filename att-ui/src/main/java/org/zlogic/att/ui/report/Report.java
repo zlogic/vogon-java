@@ -29,6 +29,7 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.jasper.builder.export.Exporters;
@@ -85,7 +86,7 @@ public class Report {
 	/**
 	 * Exception handler
 	 */
-	private ExceptionHandler exceptionHandler;
+	private ObjectProperty<ExceptionHandler> exceptionHandler;
 	/**
 	 * Report start date
 	 */
@@ -332,9 +333,11 @@ public class Report {
 	 * Creates a report
 	 *
 	 * @param dataManager the DataManager reference
+	 * @param exceptionHandler the exception handler
 	 */
-	public Report(DataManager dataManager) {
+	public Report(DataManager dataManager, ObjectProperty<ExceptionHandler> exceptionHandler) {
 		this.dataManager = dataManager;
+		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
@@ -390,24 +393,6 @@ public class Report {
 			Runtime.getRuntime().addShutdownHook(new Thread(deleteFile));
 		}
 		return htmlImagesPath;
-	}
-
-	/**
-	 * Returns the exception handler
-	 *
-	 * @return the exception handler
-	 */
-	public ExceptionHandler getExceptionHandler() {
-		return exceptionHandler;
-	}
-
-	/**
-	 * Sets the exception handler
-	 *
-	 * @param exceptionHandler the exception handler to set
-	 */
-	public void setExceptionHandler(ExceptionHandler exceptionHandler) {
-		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
@@ -885,12 +870,12 @@ public class Report {
 			reportHTML = stream.toString("utf-8"); //NOI18N
 		} catch (UnsupportedEncodingException | DRException ex) {
 			Logger.getLogger(Report.class.getName()).log(Level.SEVERE, null, ex);
-			if (exceptionHandler != null)
-				exceptionHandler.showException(null, ex);
+			if (exceptionHandler.get() != null)
+				exceptionHandler.get().showException(null, ex);
 		} catch (Throwable ex) {
 			Logger.getLogger(Report.class.getName()).log(Level.SEVERE, null, ex);
-			if (exceptionHandler != null)
-				exceptionHandler.showException(null, ex);
+			if (exceptionHandler.get() != null)
+				exceptionHandler.get().showException(null, ex);
 		}
 	}
 }

@@ -88,7 +88,7 @@ public class MainWindowController implements Initializable {
 	/**
 	 * Exception handler
 	 */
-	private ExceptionHandler exceptionHandler;
+	private ObjectProperty<ExceptionHandler> exceptionHandler = new SimpleObjectProperty<>();
 	/**
 	 * Last opened directory
 	 */
@@ -539,11 +539,11 @@ public class MainWindowController implements Initializable {
 	}
 
 	/**
-	 * Returns the exception handler
+	 * Returns the exception handler property
 	 *
-	 * @return the exception handler
+	 * @return the exception handler property
 	 */
-	public ExceptionHandler getExceptionHandler() {
+	public ObjectProperty<ExceptionHandler> exceptionHandlerProperty() {
 		return exceptionHandler;
 	}
 
@@ -557,22 +557,13 @@ public class MainWindowController implements Initializable {
 	}
 
 	/**
-	 * Sets the exception handler
-	 *
-	 * @param exceptionHandler the exception handler to set
-	 */
-	public void setExceptionHandler(ExceptionHandler exceptionHandler) {
-		this.exceptionHandler = exceptionHandler;
-	}
-
-	/**
 	 * Sets the window icons
 	 *
 	 * @param icons the icons to be set
 	 */
 	public void setWindowIcons(ObservableList<Image> icons) {
-		if (exceptionHandler instanceof ExceptionDialogController)
-			((ExceptionDialogController) exceptionHandler).setWindowIcons(icons);
+		if (exceptionHandler.get() instanceof ExceptionDialogController)
+			((ExceptionDialogController) exceptionHandler.get()).setWindowIcons(icons);
 		currentTaskNotificationController.setWindowIcons(icons);
 		inactivityDialogController.setWindowIcons(icons);
 	}
@@ -591,8 +582,8 @@ public class MainWindowController implements Initializable {
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
 			Logger.getLogger(getClass().getName()).log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
-			if (exceptionHandler != null)
-				exceptionHandler.showException(messages.getString("ERROR_LOADING_FXML"), ex);
+			if (exceptionHandler.get() != null)
+				exceptionHandler.get().showException(messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Initialize the scene properties
 		if (root != null) {
@@ -619,8 +610,8 @@ public class MainWindowController implements Initializable {
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
 			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
-			if (exceptionHandler != null)
-				exceptionHandler.showException(messages.getString("ERROR_LOADING_FXML"), ex);
+			if (exceptionHandler.get() != null)
+				exceptionHandler.get().showException(messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Initialize the scene properties
 		if (root != null) {
@@ -632,6 +623,7 @@ public class MainWindowController implements Initializable {
 		reportController = loader.getController();
 		reportController.setDataManager(dataManager);
 		reportController.setLastDirectory(lastDirectory);
+		reportController.exceptionHandlerProperty().bind(exceptionHandler);
 	}
 
 	/**
@@ -648,8 +640,8 @@ public class MainWindowController implements Initializable {
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
 			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
-			if (exceptionHandler != null)
-				exceptionHandler.showException(messages.getString("ERROR_LOADING_FXML"), ex);
+			if (exceptionHandler.get() != null)
+				exceptionHandler.get().showException(messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Initialize the scene properties
 		if (root != null) {
@@ -676,7 +668,7 @@ public class MainWindowController implements Initializable {
 		}
 		//Set the data manager
 		ExceptionDialogController exceptionDialogController = loader.getController();
-		exceptionHandler = exceptionDialogController;
+		exceptionHandler.set(exceptionDialogController);
 	}
 
 	/**
@@ -690,8 +682,8 @@ public class MainWindowController implements Initializable {
 			loader.load();
 		} catch (IOException ex) {
 			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
-			if (exceptionHandler != null)
-				exceptionHandler.showException(messages.getString("ERROR_LOADING_FXML"), ex);
+			if (exceptionHandler.get() != null)
+				exceptionHandler.get().showException(messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Set the data manager
 		currentTaskNotificationController = loader.getController();
@@ -709,12 +701,13 @@ public class MainWindowController implements Initializable {
 			loader.load();
 		} catch (IOException ex) {
 			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
-			if (exceptionHandler != null)
-				exceptionHandler.showException(messages.getString("ERROR_LOADING_FXML"), ex);
+			if (exceptionHandler.get() != null)
+				exceptionHandler.get().showException(messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Set the data manager
 		inactivityDialogController = loader.getController();
 		inactivityDialogController.setDataManager(dataManager);
+		inactivityDialogController.exceptionHandlerProperty().bind(exceptionHandler);
 	}
 
 	/**
@@ -806,8 +799,8 @@ public class MainWindowController implements Initializable {
 					backgroundThread = null;
 				} catch (InterruptedException ex) {
 					Logger.getLogger(MainWindowController.class.getName()).log(Level.SEVERE, null, ex);
-					if (exceptionHandler != null)
-						exceptionHandler.showException(null, ex);
+					if (exceptionHandler.get() != null)
+						exceptionHandler.get().showException(null, ex);
 				}
 			}
 			if (backgroundTask != null) {
