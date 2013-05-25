@@ -1,7 +1,7 @@
 /*
  * Awesome Time Tracker project.
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
- * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ * Author: Dmitry Zolotukhin <zlogic42@outlook.com>
  */
 package org.zlogic.att.data;
 
@@ -26,7 +26,8 @@ import org.zlogic.att.data.converters.Importer;
  * Helper class to perform routine entity modifications and create a single
  * point where EntityManager is used.
  *
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public class PersistenceHelper {
 

@@ -1,7 +1,7 @@
 /*
  * Awesome Time Tracker project.
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
- * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ * Author: Dmitry Zolotukhin <zlogic42@outlook.com>
  */
 package org.zlogic.att.ui.report;
 
@@ -44,6 +44,7 @@ import net.sf.dynamicreports.report.builder.group.CustomGroupBuilder;
 import net.sf.dynamicreports.report.builder.style.StyleBuilder;
 import net.sf.dynamicreports.report.builder.tableofcontents.TableOfContentsCustomizer;
 import net.sf.dynamicreports.report.constant.HorizontalAlignment;
+import net.sf.dynamicreports.report.constant.Markup;
 import net.sf.dynamicreports.report.constant.Orientation;
 import net.sf.dynamicreports.report.constant.PageOrientation;
 import net.sf.dynamicreports.report.constant.PageType;
@@ -71,7 +72,8 @@ import org.zlogic.att.ui.adapters.DataManager;
 /**
  * Class for generating a report
  *
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public class Report {
 
@@ -165,9 +167,13 @@ public class Report {
 	public class DateTimeSegment {
 
 		/**
-		 * The date
+		 * The day start date
 		 */
-		private Date date;
+		private Date dayStart;
+		/**
+		 * The day end date
+		 */
+		private Date dayEnd;
 		/**
 		 * The times segment
 		 */
@@ -179,8 +185,9 @@ public class Report {
 		 * @param date the date
 		 * @param timeSegment the TimeSegment
 		 */
-		private DateTimeSegment(Date date, TimeSegment timeSegment) {
-			this.date = date;
+		private DateTimeSegment(Date dayStart, Date dayEnd, TimeSegment timeSegment) {
+			this.dayStart = dayStart;
+			this.dayEnd = dayEnd;
 			this.timeSegment = timeSegment;
 		}
 
@@ -190,7 +197,7 @@ public class Report {
 		 * @return the date
 		 */
 		public Date getDate() {
-			return date;
+			return dayStart;
 		}
 
 		/**
@@ -209,7 +216,7 @@ public class Report {
 		 * @return the duration of the time segment
 		 */
 		public double getDurationHours() {
-			Period period = timeSegment.getClippedDuration(startDate, endDate).normalizedStandard(PeriodType.time());
+			Period period = timeSegment.getClippedDuration(dayStart, dayEnd).normalizedStandard(PeriodType.time());
 			return ((double) period.toStandardDuration().getStandardSeconds()) / 3600;
 		}
 
@@ -541,7 +548,10 @@ public class Report {
 				.setFontSize(10)
 				.setVerticalAlignment(VerticalAlignment.MIDDLE)
 				.setHorizontalAlignment(HorizontalAlignment.RIGHT);
-		return DynamicReports.cmp.text(lastPageFooterExpression).setStyle(lastPageFooterStyle).setHeight(20);
+		return DynamicReports.cmp.text(lastPageFooterExpression)
+				.setStyle(lastPageFooterStyle)
+				.setMarkup(Markup.HTML)
+				.setHeight(20);
 	}
 
 	/**
@@ -758,7 +768,7 @@ public class Report {
 				Date dayEnd = DateTools.getInstance().convertDateToEndOfDay(calendar.getTime());
 				for (TimeSegment timeSegment : timeSegments)
 					if (!timeSegment.getClippedDuration(dayStart, dayEnd).equals(Period.ZERO))
-						dataSource.add(new DateTimeSegment(dayStart, timeSegment));
+						dataSource.add(new DateTimeSegment(dayStart, dayEnd, timeSegment));
 			}
 		}
 

@@ -1,7 +1,7 @@
 /*
  * Awesome Time Tracker project.
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
- * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ * Author: Dmitry Zolotukhin <zlogic42@outlook.com>
  */
 package org.zlogic.att.data;
 
@@ -11,7 +11,8 @@ import javax.persistence.EntityManager;
  * Interface for allowing to perform a custom modification in an
  * EntityManager-managed transaction.
  *
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public interface TransactedChange {
 

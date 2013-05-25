@@ -1,7 +1,7 @@
 /*
  * Awesome Time Tracker project.
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
- * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ * Author: Dmitry Zolotukhin <zlogic42@outlook.com>
  */
 package org.zlogic.att.ui;
 
@@ -22,7 +22,8 @@ import javafx.stage.Stage;
 /**
  * Class for creating and showing the tray icon.
  *
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 //FIXME: Replace with native Java FX version from Java FX 3.0
 public class TrayIcon {
