@@ -1,7 +1,7 @@
 /*
  * Vogon personal finance/expense analyzer.
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
- * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ * Author: Dmitry Zolotukhin <zlogic42@outlook.com>
  */
 package org.zlogic.vogon.ui.cell;
 
