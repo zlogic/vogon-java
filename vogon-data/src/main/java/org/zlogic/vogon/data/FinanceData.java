@@ -29,7 +29,8 @@ import org.zlogic.vogon.data.interop.VogonImportLogicalException;
  * Class for storing the finance data, performing database operations and
  * generating events
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public class FinanceData {
 

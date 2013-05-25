@@ -19,7 +19,8 @@ import org.zlogic.vogon.ui.ExceptionHandler;
  * String cell editor with date validation & parsing
  *
  * @param <BaseType> the row type
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public class DateCellEditor<BaseType> extends StringCellEditor<BaseType, Date> {
 

@@ -18,7 +18,8 @@ import javax.persistence.Transient;
 /**
  * Class for storing application preferences
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 @Entity
 public class Preferences implements Serializable {

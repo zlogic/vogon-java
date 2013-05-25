@@ -16,7 +16,8 @@ import javax.persistence.Id;
 /**
  * Class for storing account data
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 @Entity
 public class FinanceAccount implements Serializable {

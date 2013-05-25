@@ -21,7 +21,8 @@ import org.zlogic.vogon.ui.ExceptionHandler;
  *
  * @param <BaseType> the row type
  * @param <PropertyType> the cell type
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType, PropertyType> {
 

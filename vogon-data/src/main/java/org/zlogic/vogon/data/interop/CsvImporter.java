@@ -35,7 +35,8 @@ import org.zlogic.vogon.data.Utils;
 /**
  * Implementation for importing data from CSV files
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public class CsvImporter implements FileImporter {
 
@@ -59,7 +60,7 @@ public class CsvImporter implements FileImporter {
 
 	@Override
 	public void importFile(FinanceData financeData, EntityManager entityManager) throws VogonImportException, VogonImportLogicalException {
-		try(CSVReader reader = new CSVReader(new java.io.InputStreamReader(new java.io.FileInputStream(inputFile), "UTF8"))) {//NOI18N
+		try (CSVReader reader = new CSVReader(new java.io.InputStreamReader(new java.io.FileInputStream(inputFile), "UTF8"))) {//NOI18N
 			entityManager.getTransaction().begin();
 
 			List<FinanceAccount> accounts = new ArrayList<>();

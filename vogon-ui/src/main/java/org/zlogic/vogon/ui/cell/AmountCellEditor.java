@@ -16,7 +16,8 @@ import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
  * Cell editor capable of displaying and editing an amount.
  *
  * @param <BaseType> the cell type
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public class AmountCellEditor<BaseType> extends StringCellEditor<BaseType, AmountModelAdapter> {
 

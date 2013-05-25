@@ -25,7 +25,8 @@ import javafx.stage.Stage;
  * Very simple dialog class. TODO: replace this with Alert once Java FX 3.0/8.0
  * is released
  *
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public class MessageDialog implements Initializable {
 

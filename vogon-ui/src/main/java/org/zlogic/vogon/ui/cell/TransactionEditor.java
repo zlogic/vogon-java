@@ -28,7 +28,8 @@ import org.zlogic.vogon.ui.adapter.TransactionModelAdapter;
  * Transactions components editor. Expands from a simple string to a
  * full-featured editor.
  *
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public class TransactionEditor extends TableCell<TransactionModelAdapter, AmountModelAdapter> {
 

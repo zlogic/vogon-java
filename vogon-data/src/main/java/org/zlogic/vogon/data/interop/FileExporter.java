@@ -10,7 +10,8 @@ import org.zlogic.vogon.data.FinanceData;
 /**
  * Interface for exporting data to files
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public interface FileExporter {
 
