@@ -17,7 +17,8 @@ import javafx.beans.property.StringProperty;
  * Class for storing an currency with an overloaded toString method for better
  * customization of how it's rendered in a control.
  *
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public class CurrencyModelAdapter implements Comparable<CurrencyModelAdapter> {
 

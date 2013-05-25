@@ -15,7 +15,8 @@ import javax.persistence.criteria.CriteriaQuery;
  *
  * @param <ElementType> element type for query
  * @param <ResultType> return result type
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public interface TransactedQuery<ElementType, ResultType> {
 

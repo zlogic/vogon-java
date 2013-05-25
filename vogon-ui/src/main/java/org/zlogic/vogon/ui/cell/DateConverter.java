@@ -18,7 +18,8 @@ import org.zlogic.vogon.ui.ExceptionHandler;
 /**
  * Simple date converter for table cells.
  *
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public class DateConverter extends StringConverter<Date> {
 

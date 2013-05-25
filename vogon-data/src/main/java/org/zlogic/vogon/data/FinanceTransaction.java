@@ -25,7 +25,8 @@ import javax.persistence.Temporal;
 /**
  * Interface for storing a single finance transaction
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 @Entity
 public class FinanceTransaction implements Serializable {
@@ -252,7 +253,7 @@ public class FinanceTransaction implements Serializable {
 	 * @param amount the new amount
 	 */
 	public void updateComponentRawAmount(TransactionComponent component, double amount) {
-		updateComponentRawAmount(component, (long) (amount * Constants.rawAmountMultiplier));
+		updateComponentRawAmount(component, Math.round(amount * Constants.rawAmountMultiplier));
 	}
 
 	/**

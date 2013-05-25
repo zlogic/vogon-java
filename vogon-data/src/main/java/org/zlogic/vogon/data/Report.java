@@ -34,7 +34,8 @@ import javax.persistence.metamodel.SingularAttribute;
  * Central class for setting report parameters and generating various reports.
  * Interacts with DB directly.
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public class Report {
 

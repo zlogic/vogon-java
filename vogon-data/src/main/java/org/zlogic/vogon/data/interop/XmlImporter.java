@@ -45,7 +45,8 @@ import org.zlogic.vogon.data.TransactionComponent;
 /**
  * Implementation for importing data from XML files
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public class XmlImporter implements FileImporter {
 

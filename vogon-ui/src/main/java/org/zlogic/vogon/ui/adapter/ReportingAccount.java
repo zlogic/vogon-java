@@ -18,7 +18,8 @@ import org.zlogic.vogon.data.FinanceTransaction;
  * Class for displaying a virtual summary/report account (e.g. the total amount
  * for a specific currency).
  *
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public class ReportingAccount implements AccountInterface {
 

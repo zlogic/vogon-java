@@ -15,7 +15,8 @@ import javax.persistence.ManyToOne;
 /**
  * Implements a transaction (amount associated with a specific account)
  *
- * @author Dmitry Zolotukhin
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 @Entity
 public class TransactionComponent implements Serializable {
