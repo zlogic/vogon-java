@@ -148,12 +148,7 @@ public class InactivityDialogController implements Initializable {
 			@Override
 			public void run() {
 				Point mouseLocation = MouseInfo.getPointerInfo().getLocation();
-				if ((mouseLocation.x != prevX || mouseLocation.y != prevY) && !stage.isShowing()) {
-					inactivityStarted = null;
-					previousMoveEvent = new Date();
-					prevX = mouseLocation.x;
-					prevY = mouseLocation.y;
-				} else if ((new Date().getTime() - previousMoveEvent.getTime()) > inactivityTimeout) {
+				if ((new Date().getTime() - previousMoveEvent.getTime()) > inactivityTimeout) {
 					inactivityStarted = previousMoveEvent;
 					//Inactivity detected, show the dialog
 					Platform.runLater(new Runnable() {
@@ -166,6 +161,12 @@ public class InactivityDialogController implements Initializable {
 							inactivityTimeLabel.setText(inactivityTimeString);
 						}
 					});
+				}
+				if ((mouseLocation.x != prevX || mouseLocation.y != prevY) && !stage.isShowing()) {
+					inactivityStarted = null;
+					previousMoveEvent = new Date();
+					prevX = mouseLocation.x;
+					prevY = mouseLocation.y;
 				}
 			}
 		};

@@ -16,21 +16,15 @@ import javafx.animation.SequentialTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.stage.Modality;
+import javafx.stage.Popup;
 import javafx.stage.Screen;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.zlogic.att.ui.adapters.DataManager;
 import org.zlogic.att.ui.adapters.TaskAdapter;
@@ -68,10 +62,13 @@ public class CurrentTaskNotificationController implements Initializable {
 	@FXML
 	private Node rootNode;
 	/**
-	 * The stage for this window
+	 * The popup window
 	 */
-	@FXML
-	private Stage stage;
+	private Popup popup = new Popup();
+	/**
+	 * The popup parent window
+	 */
+	private Node parentWindow;
 	/**
 	 * Fade in/out animation
 	 */
@@ -89,14 +86,9 @@ public class CurrentTaskNotificationController implements Initializable {
 	 */
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
-		//Prepare the stage
-		stage = new Stage();
-		stage.initModality(Modality.NONE);
-		//Initialize the scene properties
-		Scene scene = new Scene((Parent) rootNode);
-		stage.initStyle(StageStyle.UNDECORATED);//FIXME: always on top, don't show in taskbar
-		stage.setScene(scene);
-		stage.opacityProperty().bind(rootNode.opacityProperty());
+		//Initialize the popup properties
+		popup.getContent().add(rootNode);
+		popup.setAutoFix(true);
 	}
 
 	/**
@@ -107,7 +99,7 @@ public class CurrentTaskNotificationController implements Initializable {
 	public void setDataManager(DataManager dataManager) {
 		this.dataManager = dataManager;
 		//Listen for active task changes
-		this.dataManager.timingSegmentProperty().addListener(new ChangeListener<TimeSegmentAdapter>() {
+		ChangeListener<TimeSegmentAdapter> timeSegmentChangeListener = new ChangeListener<TimeSegmentAdapter>() {
 			private ChangeListener<TaskAdapter> taskChangedListener = new ChangeListener<TaskAdapter>() {
 				@Override
 				public void changed(ObservableValue<? extends TaskAdapter> ov, TaskAdapter oldValue, TaskAdapter newValue) {
@@ -138,7 +130,10 @@ public class CurrentTaskNotificationController implements Initializable {
 					timeLabel.setText(""); //NOI18N
 				}
 			}
-		});
+		};
+		//Set default text
+		timeSegmentChangeListener.changed(null, null, null);
+		this.dataManager.timingSegmentProperty().addListener(timeSegmentChangeListener);
 
 		//Start the timer
 		if (notificationTimer != null)
@@ -157,12 +152,12 @@ public class CurrentTaskNotificationController implements Initializable {
 	}
 
 	/**
-	 * Sets the window icons
+	 * Set the parent window for the popup
 	 *
-	 * @param icons the icons to be set
+	 * @param parentWindow the parent window for the popup
 	 */
-	public void setWindowIcons(ObservableList<Image> icons) {
-		stage.getIcons().setAll(icons);
+	public void setParentWindow(Node parentWindow) {
+		this.parentWindow = parentWindow;
 	}
 
 	/**
@@ -175,13 +170,14 @@ public class CurrentTaskNotificationController implements Initializable {
 			public void run() {
 				if (activeAnimation != null)//TODO: synchronize this
 					activeAnimation.stop();
-
+				if (parentWindow == null || parentWindow.getScene() == null || parentWindow.getScene().getWindow() == null)
+					return;
 				//Show the window
 				Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
-				stage.sizeToScene();
-				stage.show();
-				stage.getScene().getWindow().setX(primaryScreenBounds.getMaxX() - stage.getWidth() - 100);
-				stage.getScene().getWindow().setY(primaryScreenBounds.getMaxY() - stage.getHeight() - 100);
+				popup.sizeToScene();
+				popup.show(parentWindow,
+						primaryScreenBounds.getMaxX() - popup.getWidth() - 100,
+						primaryScreenBounds.getMaxY() - popup.getHeight() - 100);//FIXME: this is ugly and requires the main window to be constantly opened. But other options are annoying and can even steal focus.
 				//Play the animation
 				FadeTransition fadeInTransition = new FadeTransition(Duration.millis(500), rootNode);
 				fadeInTransition.setFromValue(0.0);
@@ -199,7 +195,7 @@ public class CurrentTaskNotificationController implements Initializable {
 				animation.setOnFinished(new EventHandler<ActionEvent>() {
 					@Override
 					public void handle(ActionEvent t) {
-						stage.hide();
+						popup.hide();
 						activeAnimation = null;
 					}
 				});

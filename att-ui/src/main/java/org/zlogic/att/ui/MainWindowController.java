@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -50,6 +51,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.Window;
+import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import javafx.util.converter.DateTimeStringConverter;
 import javafx.util.converter.DefaultStringConverter;
@@ -520,6 +523,9 @@ public class MainWindowController implements Initializable {
 		statusPane.managedProperty().bind(statusPane.visibleProperty());
 		statusPane.setVisible(false);
 
+		//Set the window close handler
+		setCloseHandler();
+
 		//Load other windows
 		loadWindowCustomFieldEditor();
 		loadWindowReport();
@@ -558,6 +564,56 @@ public class MainWindowController implements Initializable {
 	}
 
 	/**
+	 * Replaces the "close" action with a "hide" action. If rootPane has no
+	 * Scene or Window associated, will monitor these fields and perform
+	 * replacement once they are assigned.
+	 */
+	private void setCloseHandler() {
+		ChangeListener<Window> windowListener = new ChangeListener<Window>() {
+			@Override
+			public void changed(ObservableValue<? extends Window> ov, Window oldWindow, Window newWindow) {
+				if (newWindow == null)
+					return;
+				newWindow.setOnCloseRequest(new EventHandler<WindowEvent>() {
+					private Window window;
+
+					public EventHandler<WindowEvent> setWindow(Window window) {
+						this.window = window;
+						return this;
+					}
+
+					@Override
+					public void handle(WindowEvent event) {
+						event.consume();
+						if (window instanceof Stage)
+							((Stage) window).setIconified(true);
+					}
+				}.setWindow(newWindow));
+				rootPane.getScene().windowProperty().removeListener(this);
+			}
+		};
+		ChangeListener<Scene> sceneListener = new ChangeListener<Scene>() {
+			private ChangeListener<Window> windowListener;
+
+			public ChangeListener<Scene> setWindowListener(ChangeListener<Window> windowListener) {
+				this.windowListener = windowListener;
+				return this;
+			}
+
+			@Override
+			public void changed(ObservableValue<? extends Scene> ov, Scene oldScene, Scene newScene) {
+				if (newScene.getWindow() != null) {
+					windowListener.changed(null, null, newScene.getWindow());
+					rootPane.sceneProperty().removeListener(this);
+				} else {
+					newScene.windowProperty().addListener(windowListener);
+				}
+			}
+		}.setWindowListener(windowListener);
+		rootPane.sceneProperty().addListener(sceneListener);
+	}
+
+	/**
 	 * Sets the window icons
 	 *
 	 * @param icons the icons to be set
@@ -565,7 +621,6 @@ public class MainWindowController implements Initializable {
 	public void setWindowIcons(ObservableList<Image> icons) {
 		if (exceptionHandler.get() instanceof ExceptionDialogController)
 			((ExceptionDialogController) exceptionHandler.get()).setWindowIcons(icons);
-		currentTaskNotificationController.setWindowIcons(icons);
 		inactivityDialogController.setWindowIcons(icons);
 	}
 
@@ -689,6 +744,7 @@ public class MainWindowController implements Initializable {
 		//Set the data manager
 		currentTaskNotificationController = loader.getController();
 		currentTaskNotificationController.setDataManager(dataManager);
+		currentTaskNotificationController.setParentWindow(rootPane);
 	}
 
 	/**
@@ -886,8 +942,13 @@ public class MainWindowController implements Initializable {
 	 */
 	@FXML
 	private void exit() {
-		if (shutdownProcedure != null)
+		if (shutdownProcedure != null) {
 			shutdownProcedure.run();
+		} else {
+			//Default shutdown procedure
+			dataManager.shutdown();
+			Platform.exit();
+		}
 	}
 
 	/**

@@ -72,7 +72,7 @@ public class Launcher extends Application {
 
 		controller = loader.getController();
 		controller.setWindowIcons(stage.getIcons());
-		initTrayIcon(stage, controller);
+		//initTrayIcon(stage, controller);
 		stage.show();
 	}
 

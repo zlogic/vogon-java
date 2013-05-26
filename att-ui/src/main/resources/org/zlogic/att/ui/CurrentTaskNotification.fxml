@@ -12,7 +12,7 @@
 <?scenebuilder-preview-i18n-resource messages.properties?>
 <?scenebuilder-stylesheet Style.css?>
 
-<VBox id="VBox" fx:id="rootNode" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMousePressed="#hideWindow" prefHeight="-1.0" prefWidth="-1.0" styleClass="current-task-notification-root" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.CurrentTaskNotificationController">
+<VBox id="VBox" fx:id="rootNode" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMousePressed="#hideWindow" prefHeight="-1.0" prefWidth="250.0" styleClass="current-task-notification-root" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.CurrentTaskNotificationController">
   <children>
     <HBox id="HBox" alignment="CENTER" spacing="5.0">
       <children>
