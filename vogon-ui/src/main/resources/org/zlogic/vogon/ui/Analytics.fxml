@@ -12,7 +12,7 @@
 <?import javafx.scene.paint.*?>
 <?scenebuilder-preview-i18n-resource messages.properties?>
 
-<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.AnalyticsController">
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="org.zlogic.vogon.ui.AnalyticsController">
   <children>
     <SplitPane dividerPositions="0.35918367346938773, 0.6775510204081633" focusTraversable="true" orientation="VERTICAL" prefHeight="492.0" prefWidth="600.0000999999975" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="-1.0" AnchorPane.topAnchor="0.0">
       <items>
@@ -52,38 +52,75 @@
             </AnchorPane>
             <AnchorPane HBox.hgrow="ALWAYS">
               <children>
-                <TableView fx:id="tagsSelectionTable" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                  <columns>
-                    <TableColumn editable="false" prefWidth="75.0" text="%TAG_NAME" fx:id="tagsSelectionTagColumn">
-                      <cellValueFactory>
-                        <PropertyValueFactory property="tag" />
-                      </cellValueFactory>
-                    </TableColumn>
-                    <TableColumn prefWidth="75.0" text="%SHOW" fx:id="tagsSelectionShowColumn">
-                      <cellValueFactory>
-                        <PropertyValueFactory property="enabled" />
-                      </cellValueFactory>
-                    </TableColumn>
-                  </columns>
-                </TableView>
+                <VBox prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <children>
+                    <TableView fx:id="tagsSelectionTable" editable="true" prefHeight="173.0" prefWidth="263.0">
+                      <columns>
+                        <TableColumn editable="false" prefWidth="75.0" text="%TAG_NAME" fx:id="tagsSelectionTagColumn">
+                          <cellValueFactory>
+                            <PropertyValueFactory property="tag" />
+                          </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn prefWidth="75.0" text="%SHOW" fx:id="tagsSelectionShowColumn">
+                          <cellValueFactory>
+                            <PropertyValueFactory property="enabled" />
+                          </cellValueFactory>
+                        </TableColumn>
+                      </columns>
+                    </TableView>
+                    <GridPane hgap="0.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="SOMETIMES">
+                      <children>
+                        <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleSelectAllTags" text="%SELECT_ALL" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.margin="$x1" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+                        <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleUnselectAllTags" text="%UNSELECT_ALL" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.margin="$x1" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+                      </children>
+                      <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="-1.0" prefWidth="-1.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="-1.0" prefWidth="-1.0" />
+                      </columnConstraints>
+                      <rowConstraints>
+                        <RowConstraints minHeight="-1.0" prefHeight="-1.0" vgrow="SOMETIMES" />
+                      </rowConstraints>
+                      <VBox.margin>
+                        <Insets />
+                      </VBox.margin>
+                    </GridPane>
+                  </children>
+                </VBox>
               </children>
             </AnchorPane>
             <AnchorPane HBox.hgrow="ALWAYS">
               <children>
-                <TableView fx:id="accountsSelectionTable" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                  <columns>
-                    <TableColumn editable="false" prefWidth="75.0" text="%ACCOUNT_NAME" fx:id="accountsSelectionAccountColumn">
-                      <cellValueFactory>
-                        <PropertyValueFactory property="account" />
-                      </cellValueFactory>
-                    </TableColumn>
-                    <TableColumn prefWidth="75.0" text="%SHOW" fx:id="accountsSelectionShowColumn">
-                      <cellValueFactory>
-                        <PropertyValueFactory property="enabled" />
-                      </cellValueFactory>
-                    </TableColumn>
-                  </columns>
-                </TableView>
+                <VBox prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <children>
+                    <TableView fx:id="accountsSelectionTable" editable="true" prefHeight="173.0" prefWidth="216.0">
+                      <columns>
+                        <TableColumn editable="false" prefWidth="75.0" text="%ACCOUNT_NAME" fx:id="accountsSelectionAccountColumn">
+                          <cellValueFactory>
+                            <PropertyValueFactory property="account" />
+                          </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn prefWidth="75.0" text="%SHOW" fx:id="accountsSelectionShowColumn">
+                          <cellValueFactory>
+                            <PropertyValueFactory property="enabled" />
+                          </cellValueFactory>
+                        </TableColumn>
+                      </columns>
+                    </TableView>
+                    <GridPane hgap="0.0" prefHeight="-1.0" prefWidth="241.0">
+                      <children>
+                        <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleSelectAllAccounts" text="%SELECT_ALL" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.margin="$x1" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+                        <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleUnselectAllAccounts" text="%UNSELECT_ALL" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.margin="$x1" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
+                      </children>
+                      <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="-1.0" prefWidth="-1.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="-1.0" prefWidth="-1.0" />
+                      </columnConstraints>
+                      <rowConstraints>
+                        <RowConstraints minHeight="-1.0" prefHeight="-1.0" vgrow="SOMETIMES" />
+                      </rowConstraints>
+                    </GridPane>
+                  </children>
+                </VBox>
               </children>
             </AnchorPane>
           </children>
