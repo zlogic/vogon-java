@@ -209,7 +209,11 @@ public class TransactionModelAdapter {
 	public void deleteComponent(TransactionComponentModelAdapter component) {
 		dataManager.getFinanceData().deleteTransactionComponent(component.getTransactionComponent());
 		components.remove(component);
-
+		if (component.accountProperty().get() instanceof AccountModelAdapter) {
+			AccountModelAdapter account = (AccountModelAdapter) component.accountProperty().get();
+			account.updateFromDatabase();
+			account.updateFxProperties();
+		}
 		updateFromDatabase();
 		updateFxProperties();
 	}

@@ -315,6 +315,42 @@ public class AnalyticsController implements Initializable {
 	}
 
 	/**
+	 * Selects all accounts
+	 */
+	@FXML
+	private void handleSelectAllAccounts() {
+		for (AccountSelectionAdapter account : accountsSelectionTable.getItems())
+			account.enabledProperty().set(true);
+	}
+
+	/**
+	 * Unselects all accounts
+	 */
+	@FXML
+	private void handleUnselectAllAccounts() {
+		for (AccountSelectionAdapter account : accountsSelectionTable.getItems())
+			account.enabledProperty().set(false);
+	}
+
+	/**
+	 * Selects all tags
+	 */
+	@FXML
+	private void handleSelectAllTags() {
+		for (TagSelectionAdapter tag : tagsSelectionTable.getItems())
+			tag.enabledProperty().set(true);
+	}
+
+	/**
+	 * Unselects all tags
+	 */
+	@FXML
+	private void handleUnselectAllTags() {
+		for (TagSelectionAdapter tag : tagsSelectionTable.getItems())
+			tag.enabledProperty().set(false);
+	}
+
+	/**
 	 * Updates the table for selecting tags
 	 */
 	private void updateTagsSelectionTable() {
