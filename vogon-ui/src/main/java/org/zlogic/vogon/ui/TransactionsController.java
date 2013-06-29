@@ -177,7 +177,7 @@ public class TransactionsController implements Initializable {
 						if (t1 && t1 != t)
 							transactionEditors.add(cell);
 						if (!t1 && t1 != t)
-							transactionEditors.remove(cell);
+							transactionEditors.clear();
 					}
 				}.setData(editingTransactionEditors, cell));
 				return cell;

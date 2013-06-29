@@ -153,8 +153,8 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Amount
 	 */
 	@Override
 	public void updateItem(AmountModelAdapter item, boolean empty) {
-		if (item != null) {
-			item.okProperty().removeListener(okPropertyListener);
+		if (getItem() != null) {
+			getItem().okProperty().removeListener(okPropertyListener);
 		}
 		boolean setDoNotCancelEdit = editedTransaction != null && editedTransaction.equals(getTableRow().getItem());
 		try {
