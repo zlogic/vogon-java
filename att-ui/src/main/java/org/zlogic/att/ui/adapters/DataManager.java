@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -103,6 +106,10 @@ public class DataManager {
 	 * available filters
 	 */
 	private FilterFactory filterBuilder = new FilterFactory(this);
+	/**
+	 * Lock to prevent reloading of tasks from interfering with other threads
+	 */
+	private ReadWriteLock reloadLock = new ReentrantReadWriteLock();
 
 	/**
 	 * Creates a DataManager instance
@@ -116,9 +123,14 @@ public class DataManager {
 	 * the database.
 	 */
 	public void shutdown() {
-		persistenceHelper.shutdown();
-		if (timingSegment.get() != null)
-			timingSegment.get().stopTiming();
+		try {
+			reloadLock.writeLock().lock();
+			persistenceHelper.shutdown();
+			if (timingSegment.get() != null)
+				timingSegment.get().stopTiming();
+		} finally {
+			reloadLock.writeLock().unlock();
+		}
 	}
 
 	/**
@@ -176,10 +188,15 @@ public class DataManager {
 	 * @return the associated TaskAdapter instance, or null
 	 */
 	public TaskAdapter findTaskAdapter(Task task) {
-		for (TaskAdapter taskAdapter : tasks)
-			if (taskAdapter.getTask().equals(task))
-				return taskAdapter;
-		return null;
+		try {
+			reloadLock.readLock().lock();
+			for (TaskAdapter taskAdapter : tasks)
+				if (taskAdapter.getTask().equals(task))
+					return taskAdapter;
+			return null;
+		} finally {
+			reloadLock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -189,10 +206,15 @@ public class DataManager {
 	 * @return the associated TimeSegmentAdapter instance, or null
 	 */
 	public TimeSegmentAdapter findTimeSegmentAdapter(TimeSegment timeSegment) {
-		for (TimeSegmentAdapter timeSegmentAdapter : timeSegments)
-			if (timeSegmentAdapter.getTimeSegment().equals(timeSegment))
-				return timeSegmentAdapter;
-		return null;
+		try {
+			reloadLock.readLock().lock();
+			for (TimeSegmentAdapter timeSegmentAdapter : timeSegments)
+				if (timeSegmentAdapter.getTimeSegment().equals(timeSegment))
+					return timeSegmentAdapter;
+			return null;
+		} finally {
+			reloadLock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -317,28 +339,42 @@ public class DataManager {
 	 * Reloads the tasks from database. Forgets old TaskAdapters.
 	 */
 	public void reloadTasks() {
-		tasks.clear();
-		timeSegments.clear();
-		for (Task task : persistenceHelper.getAllTasks(true)) {
-			tasks.add(new TaskAdapter(task, this));
+		try {
+			reloadLock.writeLock().lock();
+			tasks.clear();
+			timeSegments.clear();
+			for (Task task : persistenceHelper.getAllTasks(true)) {
+				tasks.add(new TaskAdapter(task, this));
+			}
+			if (timingSegment.get() != null) {
+				TaskAdapter ownerTask = timingSegment.get().ownerTaskProperty().get();
+				TaskAdapter oldOwnerTask = null;
+				//Keep the currently timing segment's task
+				for (TaskAdapter taskAdapter : tasks)
+					if (taskAdapter.getTask().equals(ownerTask.getTask())) {
+						oldOwnerTask = taskAdapter;
+						break;
+					}
+				if (oldOwnerTask != null)
+					tasks.set(tasks.indexOf(oldOwnerTask), ownerTask);
+				else
+					tasks.add(ownerTask);
+
+				timingSegment.get().ownerTaskProperty().set(ownerTask);
+
+				//Keep the currently timing segment's task's segments
+				if (!timeSegments.contains(timingSegment.get()))
+					timeSegments.add(timingSegment.get());
+				for (TimeSegmentAdapter segment : ownerTask.timeSegmentsProperty())
+					if (!timeSegments.contains(segment))
+						timeSegments.add(segment);
+			}
+			reloadCustomFields();
+			reloadFilters();
+			updateFilteredTotalTime();
+		} finally {
+			reloadLock.writeLock().unlock();
 		}
-		if (timingSegment.get() != null) {
-			TaskAdapter ownerTask = timingSegment.get().ownerTaskProperty().get();
-			TaskAdapter oldOwnerTask = null;
-			//Keep the currently timing segment
-			for (TaskAdapter taskAdapter : tasks)
-				if (taskAdapter.getTask().equals(ownerTask.getTask())) {
-					oldOwnerTask = taskAdapter;
-					break;
-				}
-			if (oldOwnerTask != null)
-				tasks.set(tasks.indexOf(oldOwnerTask), ownerTask);
-			else
-				tasks.add(ownerTask);
-		}
-		reloadCustomFields();
-		reloadFilters();
-		updateFilteredTotalTime();
 	}
 
 	/**
