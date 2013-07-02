@@ -143,27 +143,35 @@ public class InactivityDialogController implements Initializable {
 		TimerTask checkMouseMovement = new TimerTask() {
 			private int prevX = 0, prevY = 0;
 			private Date previousMoveEvent = new Date();
-			private long inactivityTimeout = 10 * 60 * 1000;//TODO: make the timeout configurable
+			private long inactivityTimeout = 5 * 60 * 1000;//TODO: make the timeout configurable
+			private Runnable updateDateLabel = new Runnable() {
+				@Override
+				public void run() {
+					//Update the inactivity time property
+					String inactivityTimeString = new Interval(new DateTime(inactivityStarted), new DateTime()).toPeriod().normalizedStandard(PeriodType.time()).toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter());
+					inactivityTimeLabel.setText(inactivityTimeString);
+				}
+			};
 
 			@Override
 			public void run() {
 				Point mouseLocation = MouseInfo.getPointerInfo().getLocation();
+				if (stage.isShowing())
+					Platform.runLater(updateDateLabel);
+
 				if ((new Date().getTime() - previousMoveEvent.getTime()) > inactivityTimeout) {
 					inactivityStarted = previousMoveEvent;
 					//Inactivity detected, show the dialog
 					Platform.runLater(new Runnable() {
 						@Override
 						public void run() {
+							updateDateLabel.run();
 							if (!stage.isShowing() && dataManager.timingSegmentProperty().get() != null)
 								stage.show();
-							//Update the inactivity time property
-							String inactivityTimeString = new Interval(new DateTime(previousMoveEvent), new DateTime()).toPeriod().normalizedStandard(PeriodType.time()).toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter());
-							inactivityTimeLabel.setText(inactivityTimeString);
 						}
 					});
 				}
-				if ((mouseLocation.x != prevX || mouseLocation.y != prevY) && !stage.isShowing()) {
-					inactivityStarted = null;
+				if ((mouseLocation.x != prevX || mouseLocation.y != prevY)) {
 					previousMoveEvent = new Date();
 					prevX = mouseLocation.x;
 					prevY = mouseLocation.y;
@@ -270,6 +278,7 @@ public class InactivityDialogController implements Initializable {
 				exceptionHandler.get().showException(messages.getString("INVALID_ACTION_SELECTED") + selectedAction.getSelectedToggle().toString(), null);
 		}
 		selectedAction.selectToggle(null);
-		rootNode.getScene().getWindow().hide();
+		inactivityStarted = null;
+		stage.hide();
 	}
 }
