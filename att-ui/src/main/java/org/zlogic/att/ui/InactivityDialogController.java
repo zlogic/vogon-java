@@ -7,6 +7,7 @@ package org.zlogic.att.ui;
 
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.PointerInfo;
 import java.net.URL;
 import java.util.Date;
 import java.util.ResourceBundle;
@@ -155,26 +156,36 @@ public class InactivityDialogController implements Initializable {
 
 			@Override
 			public void run() {
-				Point mouseLocation = MouseInfo.getPointerInfo().getLocation();
-				if (stage.isShowing())
-					Platform.runLater(updateDateLabel);
+				try {
+					PointerInfo pointerInfo = MouseInfo.getPointerInfo();
+					if (pointerInfo == null) {
+						log.finest(messages.getString("MOUSEINFO_GETPOINTERINFO_IS_NULL_ERROR"));
+						return;
+					}
 
-				if ((new Date().getTime() - previousMoveEvent.getTime()) > inactivityTimeout) {
-					inactivityStarted = previousMoveEvent;
-					//Inactivity detected, show the dialog
-					Platform.runLater(new Runnable() {
-						@Override
-						public void run() {
-							updateDateLabel.run();
-							if (!stage.isShowing() && dataManager.timingSegmentProperty().get() != null)
-								stage.show();
-						}
-					});
-				}
-				if ((mouseLocation.x != prevX || mouseLocation.y != prevY)) {
-					previousMoveEvent = new Date();
-					prevX = mouseLocation.x;
-					prevY = mouseLocation.y;
+					Point mouseLocation = MouseInfo.getPointerInfo().getLocation();
+					if (stage.isShowing())
+						Platform.runLater(updateDateLabel);
+
+					if ((new Date().getTime() - previousMoveEvent.getTime()) > inactivityTimeout) {
+						inactivityStarted = previousMoveEvent;
+						//Inactivity detected, show the dialog
+						Platform.runLater(new Runnable() {
+							@Override
+							public void run() {
+								updateDateLabel.run();
+								if (!stage.isShowing() && dataManager.timingSegmentProperty().get() != null)
+									stage.show();
+							}
+						});
+					}
+					if ((mouseLocation.x != prevX || mouseLocation.y != prevY)) {
+						previousMoveEvent = new Date();
+						prevX = mouseLocation.x;
+						prevY = mouseLocation.y;
+					}
+				} catch (Exception ex) {
+					log.log(Level.WARNING, messages.getString("EXCEPTION_IN_CHECKMOUSEMOVEMENT_TIMER_TASK"), ex);
 				}
 			}
 		};
