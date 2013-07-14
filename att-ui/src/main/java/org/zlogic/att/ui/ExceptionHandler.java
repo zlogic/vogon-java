@@ -1,7 +1,7 @@
 /*
  * Awesome Time Tracker project.
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
- * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ * Author: Dmitry Zolotukhin <zlogic42@outlook.com>
  */
 package org.zlogic.att.ui;
 
@@ -9,7 +9,8 @@ package org.zlogic.att.ui;
 /**
  * UI interface for displaying an exception
  *
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public interface ExceptionHandler {
 
@@ -18,8 +19,6 @@ public interface ExceptionHandler {
 	 *
 	 * @param explanation the exception human-readable explanation
 	 * @param ex the actual exception
-	 * @param callerIsBackgroundThread true if the caller is a background thread
-	 * (not a JavaFX event thread)
 	 */
-	public void showException(String explanation, Throwable ex, boolean callerIsBackgroundThread);
+	public void showException(String explanation, Throwable ex);
 }

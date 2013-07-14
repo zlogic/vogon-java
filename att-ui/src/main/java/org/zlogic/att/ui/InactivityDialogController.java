@@ -1,12 +1,13 @@
 /*
  * Awesome Time Tracker project.
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
- * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ * Author: Dmitry Zolotukhin <zlogic42@outlook.com>
  */
 package org.zlogic.att.ui;
 
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.PointerInfo;
 import java.net.URL;
 import java.util.Date;
 import java.util.ResourceBundle;
@@ -15,6 +16,8 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -41,7 +44,8 @@ import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 /**
  * Controller for the inactivity prompt dialog
  *
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public class InactivityDialogController implements Initializable {
 
@@ -60,7 +64,7 @@ public class InactivityDialogController implements Initializable {
 	/**
 	 * Exception handler
 	 */
-	private ExceptionHandler exceptionHandler;
+	private ObjectProperty<ExceptionHandler> exceptionHandler = new SimpleObjectProperty<>();
 	/**
 	 * The root node
 	 */
@@ -140,29 +144,48 @@ public class InactivityDialogController implements Initializable {
 		TimerTask checkMouseMovement = new TimerTask() {
 			private int prevX = 0, prevY = 0;
 			private Date previousMoveEvent = new Date();
-			private long inactivityTimeout = 10 * 60 * 1000;//TODO: make the timeout configurable
+			private long inactivityTimeout = 5 * 60 * 1000;//TODO: make the timeout configurable
+			private Runnable updateDateLabel = new Runnable() {
+				@Override
+				public void run() {
+					//Update the inactivity time property
+					String inactivityTimeString = new Interval(new DateTime(inactivityStarted), new DateTime()).toPeriod().normalizedStandard(PeriodType.time()).toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter());
+					inactivityTimeLabel.setText(inactivityTimeString);
+				}
+			};
 
 			@Override
 			public void run() {
-				Point mouseLocation = MouseInfo.getPointerInfo().getLocation();
-				if ((mouseLocation.x != prevX || mouseLocation.y != prevY) && !stage.isShowing()) {
-					inactivityStarted = null;
-					previousMoveEvent = new Date();
-					prevX = mouseLocation.x;
-					prevY = mouseLocation.y;
-				} else if ((new Date().getTime() - previousMoveEvent.getTime()) > inactivityTimeout) {
-					inactivityStarted = previousMoveEvent;
-					//Inactivity detected, show the dialog
-					Platform.runLater(new Runnable() {
-						@Override
-						public void run() {
-							if (!stage.isShowing() && dataManager.timingSegmentProperty().get() != null)
-								stage.show();
-							//Update the inactivity time property
-							String inactivityTimeString = new Interval(new DateTime(previousMoveEvent), new DateTime()).toPeriod().normalizedStandard(PeriodType.time()).toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter());
-							inactivityTimeLabel.setText(inactivityTimeString);
-						}
-					});
+				try {
+					PointerInfo pointerInfo = MouseInfo.getPointerInfo();
+					if (pointerInfo == null) {
+						log.finest(messages.getString("MOUSEINFO_GETPOINTERINFO_IS_NULL_ERROR"));
+						return;
+					}
+
+					Point mouseLocation = MouseInfo.getPointerInfo().getLocation();
+					if (stage.isShowing())
+						Platform.runLater(updateDateLabel);
+
+					if ((new Date().getTime() - previousMoveEvent.getTime()) > inactivityTimeout) {
+						inactivityStarted = previousMoveEvent;
+						//Inactivity detected, show the dialog
+						Platform.runLater(new Runnable() {
+							@Override
+							public void run() {
+								updateDateLabel.run();
+								if (!stage.isShowing() && dataManager.timingSegmentProperty().get() != null)
+									stage.show();
+							}
+						});
+					}
+					if ((mouseLocation.x != prevX || mouseLocation.y != prevY)) {
+						previousMoveEvent = new Date();
+						prevX = mouseLocation.x;
+						prevY = mouseLocation.y;
+					}
+				} catch (Exception ex) {
+					log.log(Level.WARNING, messages.getString("EXCEPTION_IN_CHECKMOUSEMOVEMENT_TIMER_TASK"), ex);
 				}
 			}
 		};
@@ -208,21 +231,12 @@ public class InactivityDialogController implements Initializable {
 	}
 
 	/**
-	 * Returns the exception handler
+	 * Returns the exception handler property
 	 *
-	 * @return the exception handler
+	 * @return the exception handler property
 	 */
-	public ExceptionHandler getExceptionHandler() {
+	public ObjectProperty<ExceptionHandler> exceptionHandlerProperty() {
 		return exceptionHandler;
-	}
-
-	/**
-	 * Sets the exception handler
-	 *
-	 * @param exceptionHandler the exception handler to set
-	 */
-	public void setExceptionHandler(ExceptionHandler exceptionHandler) {
-		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
@@ -271,9 +285,11 @@ public class InactivityDialogController implements Initializable {
 			}
 		} else {
 			log.log(Level.SEVERE, messages.getString("INVALID_ACTION_SELECTED_FORMAT"), selectedAction.getSelectedToggle().toString());
-			exceptionHandler.showException(messages.getString("INVALID_ACTION_SELECTED") + selectedAction.getSelectedToggle().toString(), null, false);
+			if (exceptionHandler.get() != null)
+				exceptionHandler.get().showException(messages.getString("INVALID_ACTION_SELECTED") + selectedAction.getSelectedToggle().toString(), null);
 		}
 		selectedAction.selectToggle(null);
-		rootNode.getScene().getWindow().hide();
+		inactivityStarted = null;
+		stage.hide();
 	}
 }

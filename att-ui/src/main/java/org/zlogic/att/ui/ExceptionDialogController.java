@@ -1,7 +1,7 @@
 /*
  * Awesome Time Tracker project.
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
- * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ * Author: Dmitry Zolotukhin <zlogic42@outlook.com>
  */
 package org.zlogic.att.ui;
 
@@ -22,7 +22,8 @@ import javafx.stage.Stage;
 /**
  * Controller for the exception dialog
  *
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public class ExceptionDialogController implements Initializable, ExceptionHandler {
 
@@ -75,8 +76,8 @@ public class ExceptionDialogController implements Initializable, ExceptionHandle
 	}
 
 	@Override
-	public void showException(String explanation, Throwable ex, boolean callerIsBackgroundThread) {
-		if (!callerIsBackgroundThread) {
+	public void showException(String explanation, Throwable ex) {
+		if (Platform.isFxApplicationThread()) {
 			//Show the dialog
 			if (explanation != null)
 				exceptionLabel.setText(explanation);
@@ -93,7 +94,7 @@ public class ExceptionDialogController implements Initializable, ExceptionHandle
 
 				@Override
 				public void run() {
-					showException(explanation, ex, false);
+					showException(explanation, ex);
 				}
 
 				public Runnable setParameters(String explanation, Throwable ex) {

@@ -1,7 +1,7 @@
 /*
  * Awesome Time Tracker project.
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
- * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ * Author: Dmitry Zolotukhin <zlogic42@outlook.com>
  */
 package org.zlogic.att.ui;
 
@@ -15,12 +15,15 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.stage.Stage;
 
 /**
  * Class for creating and showing the tray icon.
  *
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 //FIXME: Replace with native Java FX version from Java FX 3.0
 public class TrayIcon {
@@ -36,7 +39,7 @@ public class TrayIcon {
 	/**
 	 * Exception handler
 	 */
-	private ExceptionHandler exceptionHandler;
+	private ObjectProperty<ExceptionHandler> exceptionHandler = new SimpleObjectProperty<>();
 	/**
 	 * The Tray Icon
 	 */
@@ -49,8 +52,8 @@ public class TrayIcon {
 	 * icon
 	 * @param exceptionHandler the exception handler
 	 */
-	public TrayIcon(Stage primaryStage, ExceptionHandler exceptionHandler) {
-		this.exceptionHandler = exceptionHandler;
+	public TrayIcon(Stage primaryStage, ObjectProperty<ExceptionHandler> exceptionHandler) {
+		this.exceptionHandler.bind(exceptionHandler);
 		if (SystemTray.isSupported()) {
 			SystemTray tray = SystemTray.getSystemTray();
 			Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("icon/att-tilt-16.png")); //NOI18N
@@ -99,8 +102,8 @@ public class TrayIcon {
 				tray.add(trayIcon);
 			} catch (Exception e) {
 				log.log(Level.SEVERE, messages.getString("CANNOT_ADD_ICON_TO_TRAY"), e);
-				if (this.exceptionHandler != null)
-					this.exceptionHandler.showException(messages.getString("CANNOT_ADD_ICON_TO_TRAY"), e, true);
+				if (this.exceptionHandler.get() != null)
+					this.exceptionHandler.get().showException(messages.getString("CANNOT_ADD_ICON_TO_TRAY"), e);
 			}
 		} else {
 			log.severe(messages.getString("SYSTEM_TRAY_IS_UNAVAILABLE"));

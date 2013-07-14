@@ -7,7 +7,7 @@
 	<groupId>org.zlogic.att</groupId>
 	<artifactId>top</artifactId>
 	<packaging>pom</packaging>
-	<version>0.2-SNAPSHOT</version>
+	<version>0.3-SNAPSHOT</version>
 	<name>Awesome Time Tracker :: Top</name>
 
 	<organization>
@@ -24,7 +24,7 @@
 	<properties>
 		<version.java>1.7</version.java>
 		<version.java.launch4j>1.7.0</version.java.launch4j>
-		<version.windows>0.2.0.0</version.windows>
+		<version.windows>0.3.0.0</version.windows>
 		<version.javafx>2.2</version.javafx>
 	</properties>
 
@@ -67,7 +67,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>2.0</version>
+					<version>2.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -77,7 +77,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>2.7</version>
+					<version>2.8</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -86,14 +86,14 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>com.h2database</groupId>
-				<artifactId>h2</artifactId>
-				<version>1.3.171</version>
+				<groupId>org.hsqldb</groupId>
+				<artifactId>hsqldb</artifactId>
+				<version>2.2.9</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-entitymanager</artifactId>
-				<version>4.2.0.Final</version>
+				<version>4.2.2.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
@@ -108,17 +108,17 @@
 			<dependency>
 				<groupId>net.sourceforge.dynamicreports</groupId>
 				<artifactId>dynamicreports-core</artifactId>
-				<version>3.1.2</version>
+				<version>3.1.3</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sf.jasperreports</groupId>
 				<artifactId>jasperreports</artifactId>
-				<version>5.0.4</version>
+				<version>5.2.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.lowagie</groupId>
 				<artifactId>itext</artifactId>
-				<version>2.1.7.js1</version>
+				<version>2.1.7.js2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.zlogic.att</groupId>

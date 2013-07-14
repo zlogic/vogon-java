@@ -1,7 +1,7 @@
 /*
  * Awesome Time Tracker project.
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
- * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ * Author: Dmitry Zolotukhin <zlogic42@outlook.com>
  */
 package org.zlogic.att.ui;
 
@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -50,6 +51,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.Window;
+import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import javafx.util.converter.DateTimeStringConverter;
 import javafx.util.converter.DefaultStringConverter;
@@ -69,7 +72,8 @@ import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 /**
  * Controller for the main window
  *
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public class MainWindowController implements Initializable {
 
@@ -88,7 +92,7 @@ public class MainWindowController implements Initializable {
 	/**
 	 * Exception handler
 	 */
-	private ExceptionHandler exceptionHandler;
+	private ObjectProperty<ExceptionHandler> exceptionHandler = new SimpleObjectProperty<>();
 	/**
 	 * Last opened directory
 	 */
@@ -519,6 +523,9 @@ public class MainWindowController implements Initializable {
 		statusPane.managedProperty().bind(statusPane.visibleProperty());
 		statusPane.setVisible(false);
 
+		//Set the window close handler
+		setCloseHandler();
+
 		//Load other windows
 		loadWindowCustomFieldEditor();
 		loadWindowReport();
@@ -539,11 +546,11 @@ public class MainWindowController implements Initializable {
 	}
 
 	/**
-	 * Returns the exception handler
+	 * Returns the exception handler property
 	 *
-	 * @return the exception handler
+	 * @return the exception handler property
 	 */
-	public ExceptionHandler getExceptionHandler() {
+	public ObjectProperty<ExceptionHandler> exceptionHandlerProperty() {
 		return exceptionHandler;
 	}
 
@@ -557,12 +564,53 @@ public class MainWindowController implements Initializable {
 	}
 
 	/**
-	 * Sets the exception handler
-	 *
-	 * @param exceptionHandler the exception handler to set
+	 * Replaces the "close" action with a "hide" action. If rootPane has no
+	 * Scene or Window associated, will monitor these fields and perform
+	 * replacement once they are assigned.
 	 */
-	public void setExceptionHandler(ExceptionHandler exceptionHandler) {
-		this.exceptionHandler = exceptionHandler;
+	private void setCloseHandler() {
+		ChangeListener<Window> windowListener = new ChangeListener<Window>() {
+			@Override
+			public void changed(ObservableValue<? extends Window> ov, Window oldWindow, Window newWindow) {
+				if (newWindow == null)
+					return;
+				newWindow.setOnCloseRequest(new EventHandler<WindowEvent>() {
+					private Window window;
+
+					public EventHandler<WindowEvent> setWindow(Window window) {
+						this.window = window;
+						return this;
+					}
+
+					@Override
+					public void handle(WindowEvent event) {
+						event.consume();
+						if (window instanceof Stage)
+							((Stage) window).setIconified(true);
+					}
+				}.setWindow(newWindow));
+				rootPane.getScene().windowProperty().removeListener(this);
+			}
+		};
+		ChangeListener<Scene> sceneListener = new ChangeListener<Scene>() {
+			private ChangeListener<Window> windowListener;
+
+			public ChangeListener<Scene> setWindowListener(ChangeListener<Window> windowListener) {
+				this.windowListener = windowListener;
+				return this;
+			}
+
+			@Override
+			public void changed(ObservableValue<? extends Scene> ov, Scene oldScene, Scene newScene) {
+				if (newScene.getWindow() != null) {
+					windowListener.changed(null, null, newScene.getWindow());
+					rootPane.sceneProperty().removeListener(this);
+				} else {
+					newScene.windowProperty().addListener(windowListener);
+				}
+			}
+		}.setWindowListener(windowListener);
+		rootPane.sceneProperty().addListener(sceneListener);
 	}
 
 	/**
@@ -571,9 +619,8 @@ public class MainWindowController implements Initializable {
 	 * @param icons the icons to be set
 	 */
 	public void setWindowIcons(ObservableList<Image> icons) {
-		if (exceptionHandler instanceof ExceptionDialogController)
-			((ExceptionDialogController) exceptionHandler).setWindowIcons(icons);
-		currentTaskNotificationController.setWindowIcons(icons);
+		if (exceptionHandler.get() instanceof ExceptionDialogController)
+			((ExceptionDialogController) exceptionHandler.get()).setWindowIcons(icons);
 		inactivityDialogController.setWindowIcons(icons);
 	}
 
@@ -591,8 +638,8 @@ public class MainWindowController implements Initializable {
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
 			Logger.getLogger(getClass().getName()).log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
-			if (exceptionHandler != null)
-				exceptionHandler.showException(messages.getString("ERROR_LOADING_FXML"), ex, false);
+			if (exceptionHandler.get() != null)
+				exceptionHandler.get().showException(messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Initialize the scene properties
 		if (root != null) {
@@ -619,8 +666,8 @@ public class MainWindowController implements Initializable {
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
 			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
-			if (exceptionHandler != null)
-				exceptionHandler.showException(messages.getString("ERROR_LOADING_FXML"), ex, false);
+			if (exceptionHandler.get() != null)
+				exceptionHandler.get().showException(messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Initialize the scene properties
 		if (root != null) {
@@ -632,6 +679,7 @@ public class MainWindowController implements Initializable {
 		reportController = loader.getController();
 		reportController.setDataManager(dataManager);
 		reportController.setLastDirectory(lastDirectory);
+		reportController.exceptionHandlerProperty().bind(exceptionHandler);
 	}
 
 	/**
@@ -648,8 +696,8 @@ public class MainWindowController implements Initializable {
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
 			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
-			if (exceptionHandler != null)
-				exceptionHandler.showException(messages.getString("ERROR_LOADING_FXML"), ex, false);
+			if (exceptionHandler.get() != null)
+				exceptionHandler.get().showException(messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Initialize the scene properties
 		if (root != null) {
@@ -676,7 +724,7 @@ public class MainWindowController implements Initializable {
 		}
 		//Set the data manager
 		ExceptionDialogController exceptionDialogController = loader.getController();
-		exceptionHandler = exceptionDialogController;
+		exceptionHandler.set(exceptionDialogController);
 	}
 
 	/**
@@ -690,12 +738,13 @@ public class MainWindowController implements Initializable {
 			loader.load();
 		} catch (IOException ex) {
 			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
-			if (exceptionHandler != null)
-				exceptionHandler.showException(messages.getString("ERROR_LOADING_FXML"), ex, false);
+			if (exceptionHandler.get() != null)
+				exceptionHandler.get().showException(messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Set the data manager
 		currentTaskNotificationController = loader.getController();
 		currentTaskNotificationController.setDataManager(dataManager);
+		currentTaskNotificationController.setParentWindow(rootPane);
 	}
 
 	/**
@@ -709,12 +758,13 @@ public class MainWindowController implements Initializable {
 			loader.load();
 		} catch (IOException ex) {
 			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
-			if (exceptionHandler != null)
-				exceptionHandler.showException(messages.getString("ERROR_LOADING_FXML"), ex, false);
+			if (exceptionHandler.get() != null)
+				exceptionHandler.get().showException(messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Set the data manager
 		inactivityDialogController = loader.getController();
 		inactivityDialogController.setDataManager(dataManager);
+		inactivityDialogController.exceptionHandlerProperty().bind(exceptionHandler);
 	}
 
 	/**
@@ -806,8 +856,8 @@ public class MainWindowController implements Initializable {
 					backgroundThread = null;
 				} catch (InterruptedException ex) {
 					Logger.getLogger(MainWindowController.class.getName()).log(Level.SEVERE, null, ex);
-					if (exceptionHandler != null)
-						exceptionHandler.showException(null, ex, true);
+					if (exceptionHandler.get() != null)
+						exceptionHandler.get().showException(null, ex);
 				}
 			}
 			if (backgroundTask != null) {
@@ -892,8 +942,13 @@ public class MainWindowController implements Initializable {
 	 */
 	@FXML
 	private void exit() {
-		if (shutdownProcedure != null)
+		if (shutdownProcedure != null) {
 			shutdownProcedure.run();
+		} else {
+			//Default shutdown procedure
+			dataManager.shutdown();
+			Platform.exit();
+		}
 	}
 
 	/**

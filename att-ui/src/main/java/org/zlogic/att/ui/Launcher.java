@@ -1,7 +1,7 @@
 /*
  * Awesome Time Tracker project.
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
- * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ * Author: Dmitry Zolotukhin <zlogic42@outlook.com>
  */
 package org.zlogic.att.ui;
 
@@ -23,7 +23,8 @@ import javafx.stage.Stage;
 /**
  * Java FX launcher/initializer
  *
- * @author Dmitry Zolotukhin <zlogic@gmail.com>
+ * @author Dmitry Zolotukhin <a
+ * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
  */
 public class Launcher extends Application {
 
@@ -71,7 +72,7 @@ public class Launcher extends Application {
 
 		controller = loader.getController();
 		controller.setWindowIcons(stage.getIcons());
-		initTrayIcon(stage, controller);
+		//initTrayIcon(stage, controller);
 		stage.show();
 	}
 
@@ -105,7 +106,7 @@ public class Launcher extends Application {
 
 			@Override
 			public void run() {
-				TrayIcon trayIcon = new TrayIcon(primaryStage, controller.getExceptionHandler());
+				TrayIcon trayIcon = new TrayIcon(primaryStage, controller.exceptionHandlerProperty());
 				controller.setShutdownProcedure(new Runnable() {
 					private TrayIcon trayIcon;
 
