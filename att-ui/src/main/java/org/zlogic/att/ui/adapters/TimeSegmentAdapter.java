@@ -55,11 +55,11 @@ public class TimeSegmentAdapter {
 	/**
 	 * Start time property
 	 */
-	private ObjectProperty<Date> start = new SimpleObjectProperty<>();
+	private ObjectProperty<Date> start = new SimpleObjectProperty<>(this,"");
 	/**
 	 * End time property
 	 */
-	private ObjectProperty<Date> end = new SimpleObjectProperty<>();
+	private ObjectProperty<Date> end = new SimpleObjectProperty<>(this,"");
 	/**
 	 * Owner task property
 	 */

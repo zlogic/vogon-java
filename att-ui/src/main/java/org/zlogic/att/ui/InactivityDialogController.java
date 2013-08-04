@@ -163,7 +163,7 @@ public class InactivityDialogController implements Initializable {
 						return;
 					}
 
-					Point mouseLocation = MouseInfo.getPointerInfo().getLocation();
+					Point mouseLocation = pointerInfo.getLocation();
 					if (stage.isShowing())
 						Platform.runLater(updateDateLabel);
 

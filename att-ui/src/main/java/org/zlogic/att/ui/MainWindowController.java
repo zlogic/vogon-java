@@ -36,6 +36,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -156,6 +158,11 @@ public class MainWindowController implements Initializable {
 	@FXML
 	private TaskEditorController taskEditorController;
 	/**
+	 * Time graph controller
+	 */
+	@FXML
+	private TimeGraphController timeGraphController;
+	/**
 	 * Tasks list table
 	 */
 	@FXML
@@ -245,6 +252,12 @@ public class MainWindowController implements Initializable {
 	 */
 	@FXML
 	private IntegerProperty taskSelectionSize = new SimpleIntegerProperty(0);
+
+	/**
+	 * Graphical representation tab
+	 */
+	@FXML
+	private Tab tabGraphical;
 
 	/**
 	 * Initializes the controller
@@ -533,6 +546,9 @@ public class MainWindowController implements Initializable {
 		loadCurrentTaskNotification();
 		loadInactivityDialog();
 		taskEditorController.setDataManager(dataManager);
+		timeGraphController.setDataManager(dataManager);
+
+		timeGraphController.visibleProperty().bind(tabGraphical.selectedProperty());
 	}
 
 	/**
