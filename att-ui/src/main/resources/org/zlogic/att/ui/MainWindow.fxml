@@ -43,7 +43,7 @@
     </MenuBar>
     <TabPane id="tabPane" prefHeight="-1.0" prefWidth="-1.0" tabClosingPolicy="UNAVAILABLE">
       <tabs>
-        <Tab fx:id="tabLogical" text="Untitled Tab 1">
+        <Tab fx:id="tabLogical" text="%LOGICAL_VIEW">
           <SplitPane id="SplitPane" dividerPositions="0.6450567260940032" orientation="VERTICAL" prefHeight="-1.0" prefWidth="-1.0">
             <items>
               <VBox id="VBox" alignment="CENTER" spacing="5.0">
@@ -133,7 +133,7 @@
             </items>
           </SplitPane>
         </Tab>
-        <Tab fx:id="tabGraphical" text="Untitled Tab">
+        <Tab fx:id="tabGraphical" text="%GRAPHICAL_VIEW">
           <content>
             <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
               <children>

@@ -5,13 +5,17 @@
  */
 package org.zlogic.att.ui.adapters;
 
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.Objects;
+import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -38,6 +42,10 @@ import org.zlogic.att.data.TransactedChange;
 public class TimeSegmentAdapter {
 
 	/**
+	 * Localization messages
+	 */
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/adapters/messages");
+	/**
 	 * Assigned entity
 	 */
 	private TimeSegment segment;
@@ -51,7 +59,11 @@ public class TimeSegmentAdapter {
 	/**
 	 * Last (latest) time assigned property (generated)
 	 */
-	private StringProperty duration = new SimpleStringProperty();
+	private ReadOnlyStringWrapper duration = new ReadOnlyStringWrapper();
+	/**
+	 * Full description, including the task name, description and elapsed time
+	 */
+	private ReadOnlyStringWrapper fullDescription = new ReadOnlyStringWrapper();
 	/**
 	 * Start time property
 	 */
@@ -208,8 +220,21 @@ public class TimeSegmentAdapter {
 				}
 				oldValue.updateFromDatabase();
 				newValue.updateFromDatabase();
+				oldValue.nameProperty().removeListener(ownerTaskNameListener);
+				newValue.nameProperty().addListener(ownerTaskNameListener);
 				updateFxProperties();
 			}
+		}
+	};
+
+	/**
+	 * Owner task name listener
+	 */
+	private ChangeListener<String> ownerTaskNameListener = new ChangeListener<String>() {
+		@Override
+		public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
+			if(newValue!=null)
+				updateFxProperties();
 		}
 	};
 
@@ -229,6 +254,7 @@ public class TimeSegmentAdapter {
 
 		//Set change listeners
 		this.ownerTask.addListener(ownerTaskChangeListener);
+		this.ownerTask.get().nameProperty().addListener(ownerTaskNameListener);
 	}
 
 	/**
@@ -327,8 +353,8 @@ public class TimeSegmentAdapter {
 	 *
 	 * @return the duration property
 	 */
-	public StringProperty durationProperty() {
-		return duration;
+	public ReadOnlyStringProperty durationProperty() {
+		return duration.getReadOnlyProperty();
 	}
 
 	/**
@@ -338,6 +364,15 @@ public class TimeSegmentAdapter {
 	 */
 	public StringProperty descriptionProperty() {
 		return description;
+	}
+
+	/**
+	 * Full description property
+	 *
+	 * @return the full description property
+	 */
+	public ReadOnlyStringProperty fullDescriptionProperty(){
+		return fullDescription.getReadOnlyProperty();
 	}
 
 	/**
@@ -409,6 +444,12 @@ public class TimeSegmentAdapter {
 		if (end.get() == null || !end.get().equals(segment.getEndTime()))
 			end.setValue(segment.getEndTime());
 		duration.setValue(segment.getDuration().toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter()));
+		fullDescription.setValue(new MessageFormat(messages.getString("FULL_DESCRIPTION")).format(
+				new Object[]{
+						((ownerTask!=null && ownerTask.get().nameProperty().get()!=null)?ownerTask.get().nameProperty().get():messages.getString("NULL_OWNER_TASK")),
+						description.get(),
+						duration.get()})
+		);
 		//Restore listener
 		description.addListener(descriptionChangeListener);
 		start.addListener(startChangeListener);

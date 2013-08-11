@@ -21,7 +21,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
@@ -37,7 +36,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -548,7 +546,7 @@ public class MainWindowController implements Initializable {
 		taskEditorController.setDataManager(dataManager);
 		timeGraphController.setDataManager(dataManager);
 
-		timeGraphController.visibleProperty().bind(tabGraphical.selectedProperty());
+		timeGraphController.visibleProperty().bind(tabGraphical.selectedProperty());//TODO: maybe always visible is actually OK?
 	}
 
 	/**

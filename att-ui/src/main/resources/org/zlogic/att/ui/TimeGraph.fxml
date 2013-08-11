@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.lang.*?>
+<?import java.net.*?>
+<?import java.net.URL?>
 <?import java.util.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
@@ -17,4 +19,7 @@
       </children>
     </VBox>
   </children>
+  <stylesheets>
+    <URL value="@Style.css" />
+  </stylesheets>
 </AnchorPane>
