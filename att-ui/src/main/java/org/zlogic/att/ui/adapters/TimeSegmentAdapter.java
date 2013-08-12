@@ -444,7 +444,7 @@ public class TimeSegmentAdapter {
 		if (end.get() == null || !end.get().equals(segment.getEndTime()))
 			end.setValue(segment.getEndTime());
 		duration.setValue(segment.getDuration().toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter()));
-		fullDescription.setValue(new MessageFormat(messages.getString("FULL_DESCRIPTION")).format(
+		fullDescription.setValue(MessageFormat.format(messages.getString("FULL_DESCRIPTION"),
 				new Object[]{
 						((ownerTask!=null && ownerTask.get().nameProperty().get()!=null)?ownerTask.get().nameProperty().get():messages.getString("NULL_OWNER_TASK")),
 						description.get(),

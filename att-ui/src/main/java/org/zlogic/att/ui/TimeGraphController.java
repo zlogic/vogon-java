@@ -7,8 +7,10 @@ package org.zlogic.att.ui;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -23,13 +25,20 @@ import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.TextAlignment;
 import org.zlogic.att.ui.adapters.DataManager;
 import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 
 import java.net.URL;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.NavigableMap;
 import java.util.ResourceBundle;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 public class TimeGraphController implements Initializable {
@@ -56,19 +65,25 @@ public class TimeGraphController implements Initializable {
 		MOVE,RESIZE
 	};
 
-	private DragAction dragAction;
+	private DragAction dragAction=DragAction.MOVE;
 
 	private DoubleProperty scale = new SimpleDoubleProperty(0.00005);
 
+	private LongProperty ticksStep = new SimpleLongProperty(0);
+
 	private DoubleProperty layoutPos = new SimpleDoubleProperty(0);
 
-	int resizeWidth = 10;
+	private int resizeWidth = 10;
+
+	private double minTickSpacing = 100;
 
 	private ObservableMap<TimeSegmentAdapter,TimeSegmentGraphics> timeSegmentGraphics = FXCollections.observableHashMap();
 
 	private Date latestDate;
 
 	private BooleanProperty visibleProperty = new SimpleBooleanProperty(false);
+
+	private SimpleDateFormat dateFormat = new SimpleDateFormat("H:mm:ss\ndd.MM.yyyy");//TODO: move to properties
 
 	private ListChangeListener<TimeSegmentAdapter> dataManagerListener = new ListChangeListener<TimeSegmentAdapter>() {
 		@Override
@@ -152,7 +167,7 @@ public class TimeGraphController implements Initializable {
 			updateGraphics();
 
 			//Init resize rectangles
-			rectLeft = new Rectangle();
+			rectLeft = new Rectangle();//TODO: draw vertical label with start/end time
 			rectLeft.layoutXProperty().bind(rect.layoutXProperty().subtract(resizeWidth));
 			setResizeHandleRectProperties(rectLeft);
 
@@ -227,6 +242,23 @@ public class TimeGraphController implements Initializable {
 		}
 	}
 
+	private class Tick{
+		private Line line;
+		private Label label;
+		public Tick(Line line,Label label){
+			this.line = line;
+			this.label = label;
+			timeGraphPane.getChildren().addAll(line,label);
+			label.toBack();
+			line.toBack();
+		}
+		public void dispose(){
+			timeGraphPane.getChildren().removeAll(line,label);
+		}
+	}
+
+	private NavigableMap<Long,Tick> ticks = new TreeMap<>();
+
 	/**
 	 * Initializes the controller
 	 *
@@ -250,6 +282,25 @@ public class TimeGraphController implements Initializable {
 					dataManager.getTimeSegments().removeListener(dataManagerListener);
 					clearTimeScale();
 				}
+			}
+		});
+
+		updateTicksStep();
+
+		scale.addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
+				if(!newValue.equals(oldValue))
+					return;
+				updateTicksStep();
+			}
+		});
+
+		timeGraphPane.widthProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
+				if(!oldValue.equals(newValue))
+					updateTicks();
 			}
 		});
 	}
@@ -294,6 +345,7 @@ public class TimeGraphController implements Initializable {
 				timeSegmentGraphics.put(timeSegment,graphics);
 			}
 		}
+		updateTicks();
 	}
 
 	/**
@@ -305,6 +357,58 @@ public class TimeGraphController implements Initializable {
 			for(TimeSegmentGraphics graphics : timeSegmentGraphics.values())
 				graphics.dispose();
 			timeSegmentGraphics.clear();
+		}
+	}
+
+	private void updateTicksStep(){
+		long step = 1000;//1 second is the minimum
+		long stepMultipliers[] = new long[]{1,2,5};
+		int stepMultiplier = 0;
+		while((step*stepMultipliers[stepMultiplier]*scale.get())<minTickSpacing && step<Long.MAX_VALUE && step>0){
+			stepMultiplier++;
+			if(stepMultiplier>=(stepMultipliers.length-1)){
+				stepMultiplier=0;
+				step*=10;
+			}
+		}
+		if(step<Long.MAX_VALUE && step>0){
+			ticksStep.set(step*stepMultipliers[stepMultiplier]);
+		}else{
+			ticksStep.set(0);
+			log.severe(MessageFormat.format("Step {0} is out of range", new Object[]{step}));
+		}
+	}
+
+	private void updateTicks(){
+		if(ticksStep.get()<=0)
+			return;
+		long startTick = ticksStep.get()*((latestDate.getTime()-(long)((layoutPos.get()-timeGraphPane.getLayoutX())/scale.get()))/ticksStep.get());
+		long endTick = ticksStep.get()*((latestDate.getTime()-(long)((layoutPos.get()-timeGraphPane.getLayoutX()-timeGraphPane.getWidth())/scale.get()))/ticksStep.get()+1);
+		for(long currentTick=startTick;currentTick<=endTick;currentTick+=ticksStep.get()){
+			if(ticks.containsKey(currentTick))
+				continue;
+			Line line = new Line();
+			line.startYProperty().set(0);
+			line.endYProperty().bind(timeGraphPane.heightProperty());
+			line.setStroke(Color.ORANGE);//TODO: use styles
+			line.layoutXProperty().bind(timeGraphPane.layoutXProperty().add(scale.multiply(currentTick-latestDate.getTime())).add(layoutPos));
+
+			Label label = new Label(dateFormat.format(new Date(currentTick)));
+			label.setLabelFor(line);
+			label.setTextAlignment(TextAlignment.CENTER);//TODO: use styles
+			label.setTextFill(Color.ORANGE);//TODO: use styles
+			label.layoutXProperty().bind(line.layoutXProperty().subtract(label.widthProperty().divide(2)));
+			label.layoutYProperty().bind(timeGraphPane.layoutYProperty());
+
+			ticks.put(currentTick,new Tick(line, label));
+		}
+		while(ticks.firstKey()<startTick){
+			ticks.firstEntry().getValue().dispose();
+			ticks.remove(ticks.firstKey());
+		}
+		while(ticks.lastKey()>endTick){
+			ticks.lastEntry().getValue().dispose();
+			ticks.remove(ticks.lastKey());
 		}
 	}
 
@@ -328,6 +432,7 @@ public class TimeGraphController implements Initializable {
 				layoutPos.unbind();
 			layoutPos.set(layoutPos.get()+deltaX);
 			mouseDown(event);
+			updateTicks();
 		}
 	}
 }
