@@ -5,6 +5,7 @@
  */
 package org.zlogic.att.ui;
 
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.LongProperty;
@@ -13,9 +14,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableMap;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -36,8 +35,12 @@ import java.net.URL;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.NavigableMap;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
@@ -77,36 +80,30 @@ public class TimeGraphController implements Initializable {
 
 	private double minTickSpacing = 100;
 
-	private ObservableMap<TimeSegmentAdapter,TimeSegmentGraphics> timeSegmentGraphics = FXCollections.observableHashMap();
+	private long timeSegmentGraphicsBinsize = 200000;//TODO: compute this as a product of scale and width, update timeSegmentGraphicsLocations on change
 
-	private Date latestDate;
+	private Map<TimeSegmentAdapter,TimeSegmentGraphics> timeSegmentGraphics = new HashMap<>();
+
+	private NavigableMap<Long,Set<TimeSegmentGraphics>> timeSegmentGraphicsLocations = new TreeMap<>();
+
+	private Date latestDate;//TODO: add centralized pixel<->time conversion functions
 
 	private BooleanProperty visibleProperty = new SimpleBooleanProperty(false);
 
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("H:mm:ss\ndd.MM.yyyy");//TODO: move to properties
 
+
 	private ListChangeListener<TimeSegmentAdapter> dataManagerListener = new ListChangeListener<TimeSegmentAdapter>() {
 		@Override
 		public void onChanged(Change<? extends TimeSegmentAdapter> change) {
-			synchronized(timeSegmentGraphics){
-				while(change.next()){
-					if(change.wasRemoved())
-						for(TimeSegmentAdapter timeSegment : change.getRemoved()){
-							TimeSegmentGraphics removeGraphics  = timeSegmentGraphics.get(timeSegment);
-							if(removeGraphics!=null){
-								removeGraphics.dispose();
-								timeSegmentGraphics.remove(timeSegment);
-							}
-						}
-					if(change.wasAdded()){
-						for(TimeSegmentAdapter timeSegment :change.getAddedSubList()){
-							TimeSegmentGraphics existingGraphics  = timeSegmentGraphics.get(timeSegment);
-							if(existingGraphics!=null){
-								existingGraphics.dispose();
-								timeSegmentGraphics.remove(timeSegment);
-							}
-							timeSegmentGraphics.put(timeSegment,new TimeSegmentGraphics(timeSegment));
-						}
+			while(change.next()){
+				if(change.wasRemoved())
+					for(TimeSegmentAdapter timeSegment : change.getRemoved())
+						removeTimeSegmentGraphics(timeSegment);
+				if(change.wasAdded()){
+					for(TimeSegmentAdapter timeSegment : change.getAddedSubList()){
+						removeTimeSegmentGraphics(timeSegment);
+						addTimeSegmentGraphics(timeSegment);
 					}
 				}
 			}
@@ -124,17 +121,30 @@ public class TimeGraphController implements Initializable {
 			}
 		};
 		private BooleanProperty selectedProperty = new SimpleBooleanProperty(true);//TODO: bind to the currently selected item
+		private boolean initialized = false;
+		private BooleanProperty outOfRange = new SimpleBooleanProperty(true);
 
 		private ChangeListener<Date> updateListener = new ChangeListener<Date>(){
 			@Override
 			public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
+				if(newValue.equals(oldValue))
+					return;
 				updateGraphics();
 			}
 		};
 
+		private ChangeListener<Boolean> outOfRangeListener =  new ChangeListener<Boolean>() {
+			@Override
+			public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
+				if(newValue)
+					dispose();
+			}
+		};
+
+
 		public TimeSegmentGraphics(TimeSegmentAdapter timeSegment){
 			this.timeSegment = timeSegment;
-			init();
+			outOfRange.addListener(outOfRangeListener);
 		}
 
 		private void setResizeHandleRectProperties(Rectangle rectHandle){
@@ -147,6 +157,9 @@ public class TimeGraphController implements Initializable {
 		}
 
 		private void init(){
+			if(initialized)
+				return;
+			initialized = true;
 			//Bring selected item to front
 			selectedProperty.addListener(new ChangeListener<Boolean>() {
 				@Override
@@ -199,7 +212,7 @@ public class TimeGraphController implements Initializable {
 					double deltaY = mouseEvent.getSceneY()-dragAnchor.getY();
 					mouseDown(mouseEvent);
 					timeSegment.startProperty().setValue(new Date(timeSegment.startProperty().get().getTime()+(long)(deltaX/scale.get())));//TODO: use "add time" instead
-					mouseEvent.consume();
+					mouseEvent.consume();//TODO: editing for very short durations
 				}
 			});
 			rectRight.setOnMouseDragged(new EventHandler<MouseEvent>() {
@@ -218,27 +231,46 @@ public class TimeGraphController implements Initializable {
 			timeGraphPane.getChildren().addAll(rectLeft);
 			timeGraphPane.getChildren().addAll(rectRight);
 			timeGraphPane.getChildren().addAll(label);
+			BooleanBinding outOfRangeExpression = rectLeft.layoutXProperty().greaterThan(timeGraphPane.layoutXProperty().add(timeGraphPane.widthProperty()))
+					.or(rectRight.layoutXProperty().add(rectRight.widthProperty()).lessThan(timeGraphPane.layoutXProperty()));
+			outOfRange.bind(outOfRangeExpression);
+			outOfRangeListener.changed(outOfRangeExpression, true,outOfRangeExpression.get());
 		}
 
 		private void toFront(){
+			if(!initialized)
+				return;
 			label.toFront();
 			rect.toFront();
 			rectLeft.toFront();
 			rectRight.toFront();
 		}
 
-		public void updateGraphics(){
+		private void updateGraphics(){
+			if(!initialized)
+				return;
 			long start = timeSegment.startProperty().get().getTime();
 			long end = timeSegment.endProperty().get().getTime();
 			long duration = end - start;
 			rect.layoutXProperty().bind(timeGraphPane.layoutXProperty().add(scale.multiply(start-latestDate.getTime())).add(layoutPos).add(resizeWidth));
 			rect.widthProperty().bind(scale.multiply(duration).subtract(resizeWidth * 2));
+			updateTimeSegmentGraphics(this);
+			updateTimeSegmentGraphics();
 		}
 
 		public void dispose(){
-			timeSegment.startProperty().removeListener(updateListener);
-			timeSegment.endProperty().removeListener(updateListener);
-			timeGraphPane.getChildren().removeAll(label,rectLeft,rectRight,rect);
+			if(initialized){
+				timeSegment.startProperty().removeListener(updateListener);
+				timeSegment.endProperty().removeListener(updateListener);
+				timeGraphPane.getChildren().removeAll(label,rectLeft,rectRight,rect);
+				rect = null;
+				rectLeft = null;
+				rectRight = null;
+				rect = null;
+				initialized  = false;
+				outOfRange.unbind();
+				outOfRange.set(true);
+			}
 		}
 	}
 
@@ -299,8 +331,10 @@ public class TimeGraphController implements Initializable {
 		timeGraphPane.widthProperty().addListener(new ChangeListener<Number>() {
 			@Override
 			public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
-				if(!oldValue.equals(newValue))
+				if(!oldValue.equals(newValue)){
 					updateTicks();
+					updateTimeSegmentGraphics();
+				}
 			}
 		});
 	}
@@ -335,28 +369,71 @@ public class TimeGraphController implements Initializable {
 	 * Peforms a full refresh of the time scale
 	 */
 	private void updateTimescale(){
-		synchronized(timeSegmentGraphics){
-			clearTimeScale();
-			for(TimeSegmentAdapter timeSegment : dataManager.getTimeSegments())
-				updateLatestDate(timeSegment);
+		clearTimeScale();
+		for(TimeSegmentAdapter timeSegment : dataManager.getTimeSegments())
+			updateLatestDate(timeSegment);
 
-			for(TimeSegmentAdapter timeSegment : dataManager.getTimeSegments()){
-				TimeSegmentGraphics graphics = new TimeSegmentGraphics(timeSegment);
-				timeSegmentGraphics.put(timeSegment,graphics);
-			}
+		for(TimeSegmentAdapter timeSegment : dataManager.getTimeSegments()){
+			addTimeSegmentGraphics(timeSegment);
 		}
 		updateTicks();
+
+		updateTimeSegmentGraphics();
 	}
 
 	/**
 	 * Deletes all items from the time scale
 	 */
 	private void clearTimeScale(){
-		synchronized (timeSegmentGraphics){
+		synchronized (timeSegmentGraphicsLocations){
 			latestDate = null;
+			timeSegmentGraphicsLocations.clear();
 			for(TimeSegmentGraphics graphics : timeSegmentGraphics.values())
 				graphics.dispose();
 			timeSegmentGraphics.clear();
+		}
+	}
+
+	private void removeTimeSegmentGraphics(TimeSegmentAdapter timeSegment){
+		TimeSegmentGraphics graphics = timeSegmentGraphics.remove(timeSegment);
+		if(graphics!=null){
+			boolean found = false;
+			synchronized (timeSegmentGraphicsLocations){
+				for(Map.Entry<Long,Set<TimeSegmentGraphics>> entry : timeSegmentGraphicsLocations.entrySet())
+					found|=entry.getValue().remove(graphics);
+			}
+			graphics.dispose();
+		}
+	}
+
+	private void addTimeSegmentGraphics(TimeSegmentAdapter timeSegment){
+		long startBin = timeSegmentGraphicsBinsize * (timeSegment.startProperty().get().getTime()/timeSegmentGraphicsBinsize);
+		long endBin = timeSegmentGraphicsBinsize * (timeSegment.endProperty().get().getTime()/timeSegmentGraphicsBinsize+1);
+		TimeSegmentGraphics graphics = new TimeSegmentGraphics(timeSegment);
+		timeSegmentGraphics.put(timeSegment,graphics);
+		synchronized(timeSegmentGraphicsLocations){
+			for(long bin = startBin;bin<=endBin;bin+=timeSegmentGraphicsBinsize){
+				if(!timeSegmentGraphicsLocations.containsKey(bin))
+					timeSegmentGraphicsLocations.put(bin,new HashSet<TimeSegmentGraphics>());
+				timeSegmentGraphicsLocations.get(bin).add(graphics);
+			}
+		}
+	}
+
+	private void updateTimeSegmentGraphics(TimeSegmentGraphics graphics){
+		long startBin = timeSegmentGraphicsBinsize * (graphics.timeSegment.startProperty().get().getTime()/timeSegmentGraphicsBinsize);
+		long endBin = timeSegmentGraphicsBinsize * (graphics.timeSegment.endProperty().get().getTime()/timeSegmentGraphicsBinsize+1);
+		synchronized(timeSegmentGraphicsLocations){
+			//Remove from non-matching bins
+			for(Map.Entry<Long,Set<TimeSegmentGraphics>> entry : timeSegmentGraphicsLocations.entrySet())
+				if(entry.getKey()<startBin || entry.getKey()>endBin)
+					entry.getValue().remove(graphics);
+			//Add to any bins we aren't already in
+			for(long bin = startBin;bin<=endBin;bin+=timeSegmentGraphicsBinsize){
+				if(!timeSegmentGraphicsLocations.containsKey(bin))
+					timeSegmentGraphicsLocations.put(bin,new HashSet<TimeSegmentGraphics>());
+				timeSegmentGraphicsLocations.get(bin).add(graphics);
+			}
 		}
 	}
 
@@ -377,6 +454,16 @@ public class TimeGraphController implements Initializable {
 			ticksStep.set(0);
 			log.severe(MessageFormat.format("Step {0} is out of range", new Object[]{step}));
 		}
+	}
+
+	private void updateTimeSegmentGraphics(){
+		long startTime = latestDate.getTime()-(long)((layoutPos.get()-timeGraphPane.getLayoutX())/scale.get());
+		long endTime = latestDate.getTime()-(long)((layoutPos.get()-timeGraphPane.getLayoutX()-timeGraphPane.getWidth())/scale.get());
+		//Initialize new objects
+		for(NavigableMap.Entry<Long,Set<TimeSegmentGraphics>> entry : timeSegmentGraphicsLocations.subMap(startTime,true,endTime,true).entrySet())
+			for(TimeSegmentGraphics graphics : entry.getValue())
+				if(!graphics.initialized)
+					graphics.init();
 	}
 
 	private void updateTicks(){
@@ -433,6 +520,7 @@ public class TimeGraphController implements Initializable {
 			layoutPos.set(layoutPos.get()+deltaX);
 			mouseDown(event);
 			updateTicks();
+			updateTimeSegmentGraphics();
 		}
 	}
 }
