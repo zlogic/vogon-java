@@ -53,6 +53,9 @@ public class FilterValueCell extends TableCell<FilterHolder, Object> {
 	 */
 	@Override
 	public void startEdit() {
+		super.startEdit();
+		if (!isEditing())
+			return;//Item is empty?
 		Object rowItem = getTableRow().getItem();
 		if (rowItem == null) {
 			log.warning(messages.getString("STARTEDIT_ROWITEM_IS_NULL_ERROR"));
@@ -107,7 +110,6 @@ public class FilterValueCell extends TableCell<FilterHolder, Object> {
 		} else if (filterItem instanceof FilterTaskCompletedAdapter) {
 		} else
 			throw new RuntimeException(MessageFormat.format(messages.getString("UNSUPPORTED_FILTER_TYPE"), new Object[]{filterItem.getClass().getName()}));
-		super.startEdit();
 	}
 
 	/**
