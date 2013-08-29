@@ -250,7 +250,6 @@ public class MainWindowController implements Initializable {
 	 */
 	@FXML
 	private IntegerProperty taskSelectionSize = new SimpleIntegerProperty(0);
-
 	/**
 	 * Graphical representation tab
 	 */

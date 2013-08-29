@@ -549,7 +549,7 @@ public class DataManager {
 			private CustomField deleteCustomField;
 			private List<Task> affectedTasks;
 
-			public TransactedChange setParameters(CustomField deleteCustomField,List<Task> affectedTasks) {
+			public TransactedChange setParameters(CustomField deleteCustomField, List<Task> affectedTasks) {
 				this.deleteCustomField = deleteCustomField;
 				this.affectedTasks = affectedTasks;
 				return this;
@@ -565,7 +565,7 @@ public class DataManager {
 				}
 				entityManager.remove(customField);
 			}
-		}.setParameters(customField.getCustomField(),affectedTasks));
+		}.setParameters(customField.getCustomField(), affectedTasks));
 		customFields.remove(customField);
 		filteredCustomFieldValues.remove(customField);
 		allCustomFieldValues.remove(customField);

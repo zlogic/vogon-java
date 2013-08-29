@@ -67,11 +67,11 @@ public class TimeSegmentAdapter {
 	/**
 	 * Start time property
 	 */
-	private ObjectProperty<Date> start = new SimpleObjectProperty<>(this,"");
+	private ObjectProperty<Date> start = new SimpleObjectProperty<>(this, "");
 	/**
 	 * End time property
 	 */
-	private ObjectProperty<Date> end = new SimpleObjectProperty<>(this,"");
+	private ObjectProperty<Date> end = new SimpleObjectProperty<>(this, "");
 	/**
 	 * Owner task property
 	 */
@@ -226,14 +226,13 @@ public class TimeSegmentAdapter {
 			}
 		}
 	};
-
 	/**
 	 * Owner task name listener
 	 */
 	private ChangeListener<String> ownerTaskNameListener = new ChangeListener<String>() {
 		@Override
 		public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
-			if(newValue!=null)
+			if (newValue != null)
 				updateFxProperties();
 		}
 	};
@@ -371,7 +370,7 @@ public class TimeSegmentAdapter {
 	 *
 	 * @return the full description property
 	 */
-	public ReadOnlyStringProperty fullDescriptionProperty(){
+	public ReadOnlyStringProperty fullDescriptionProperty() {
 		return fullDescription.getReadOnlyProperty();
 	}
 
@@ -446,10 +445,9 @@ public class TimeSegmentAdapter {
 		duration.setValue(segment.getDuration().toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter()));
 		fullDescription.setValue(MessageFormat.format(messages.getString("FULL_DESCRIPTION"),
 				new Object[]{
-						((ownerTask!=null && ownerTask.get().nameProperty().get()!=null)?ownerTask.get().nameProperty().get():messages.getString("NULL_OWNER_TASK")),
-						description.get(),
-						duration.get()})
-		);
+			((ownerTask != null && ownerTask.get().nameProperty().get() != null) ? ownerTask.get().nameProperty().get() : messages.getString("NULL_OWNER_TASK")),
+			description.get(),
+			duration.get()}));
 		//Restore listener
 		description.addListener(descriptionChangeListener);
 		start.addListener(startChangeListener);
