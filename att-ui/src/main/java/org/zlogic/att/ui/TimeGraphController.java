@@ -72,6 +72,7 @@ public class TimeGraphController implements Initializable {
 	private long timeSegmentGraphicsBinsize = 200000;//TODO: compute this as a product of scale and width, update timeSegmentGraphicsLocations on change
 	private Map<TimeSegmentAdapter, TimeSegmentGraphics> timeSegmentGraphics = new HashMap<>();
 	private NavigableMap<Long, Set<TimeSegmentGraphics>> timeSegmentGraphicsLocations = new TreeMap<>();
+	private Set<TimeSegmentGraphics> visibleTimeSegments = new HashSet<>();
 	private Date latestDate;//TODO: add centralized pixel<->time conversion functions
 	private BooleanProperty visibleProperty = new SimpleBooleanProperty(false);
 	private SimpleDateFormat dateFormat = new SimpleDateFormat(messages.getString("TIMEGRAPH_DATE_TIME_FORMAT"));
@@ -97,9 +98,11 @@ public class TimeGraphController implements Initializable {
 		private Rectangle rect, rectLeft, rectRight;
 		private Label label;
 		private TimeSegmentAdapter timeSegment;
+		private Point2D localClick;
 		private EventHandler<MouseEvent> mousePressHandler = new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent mouseEvent) {
+				localClick = new Point2D(mouseEvent.getX(), mouseEvent.getY());
 				dragAction = DragAction.RESIZE;
 			}
 		};
@@ -186,25 +189,75 @@ public class TimeGraphController implements Initializable {
 			rectRight.setOnMousePressed(mousePressHandler);
 
 			rectLeft.setOnMouseDragged(new EventHandler<MouseEvent>() {
+				private TimeSegmentGraphics owner;
+
+				public EventHandler<MouseEvent> setOwner(TimeSegmentGraphics owner) {
+					this.owner = owner;
+					return this;
+				}
+
+				private Date clipDate(Date newStart) {
+					Date oldStart = timeSegment.startProperty().get();
+					Date clippedStart = newStart;
+					for (TimeSegmentGraphics graphics : visibleTimeSegments) {
+						Date end = graphics.timeSegment.endProperty().get();
+						if (end.before(oldStart) && end.after(newStart) && end.after(clippedStart))
+							clippedStart = end;
+					}
+					return clippedStart;
+				}
+
 				@Override
 				public void handle(MouseEvent mouseEvent) {
-					double deltaX = mouseEvent.getSceneX() - dragAnchor.getX();
-					double deltaY = mouseEvent.getSceneY() - dragAnchor.getY();
+					double clickLocation = localClick != null ? localClick.getX() : 0;
+					Date newStart = coordinatesToTime(mouseEvent.getSceneX() - clickLocation);
+					if (newStart.after(timeSegment.endProperty().get())) {
+						log.finer(messages.getString("START_CANNOT_BE_BEFORE_END_SKIPPING_EDIT"));
+					} else if (getIntersectionCount(owner, newStart, timeSegment.endProperty().get()) <= getIntersectionCount(owner, timeSegment.startProperty().get(), timeSegment.endProperty().get())) {
+						timeSegment.startProperty().setValue(newStart);
+					} else {
+						Date clippedStart = clipDate(newStart);
+						if (!clippedStart.equals(newStart))
+							timeSegment.startProperty().setValue(clippedStart);
+					}
 					mouseDown(mouseEvent);
-					timeSegment.startProperty().setValue(new Date(timeSegment.startProperty().get().getTime() + (long) (deltaX / scale.get())));//TODO: use "add time" instead
-					mouseEvent.consume();
 				}
-			});
+			}.setOwner(this));
 			rectRight.setOnMouseDragged(new EventHandler<MouseEvent>() {
+				private TimeSegmentGraphics owner;
+
+				public EventHandler<MouseEvent> setOwner(TimeSegmentGraphics owner) {
+					this.owner = owner;
+					return this;
+				}
+
+				private Date clipDate(Date newEnd) {
+					Date oldEnd = timeSegment.endProperty().get();
+					Date clippedEnd = newEnd;
+					for (TimeSegmentGraphics graphics : visibleTimeSegments) {
+						Date start = graphics.timeSegment.startProperty().get();
+						if (start.after(oldEnd) && start.before(newEnd) && start.before(clippedEnd))
+							clippedEnd = start;
+					}
+					return clippedEnd;
+				}
+
 				@Override
 				public void handle(MouseEvent mouseEvent) {
-					double deltaX = mouseEvent.getSceneX() - dragAnchor.getX();
-					double deltaY = mouseEvent.getSceneY() - dragAnchor.getY();
+					double clickLocation = localClick != null ? localClick.getX() : 0;
+					Date newEnd = coordinatesToTime(mouseEvent.getSceneX() - clickLocation);
+					if (newEnd.before(timeSegment.startProperty().get())) {
+						log.finer(messages.getString("START_CANNOT_BE_BEFORE_END_SKIPPING_EDIT"));
+					} else if (getIntersectionCount(owner, timeSegment.startProperty().get(), newEnd) <= getIntersectionCount(owner, timeSegment.startProperty().get(), timeSegment.endProperty().get())) {
+						timeSegment.endProperty().setValue(newEnd);
+					} else {
+						Date clippedEnd = clipDate(newEnd);
+						if (!clippedEnd.equals(newEnd))
+							timeSegment.endProperty().setValue(clippedEnd);
+					}
 					mouseDown(mouseEvent);
-					timeSegment.endProperty().setValue(new Date(timeSegment.endProperty().get().getTime() + (long) (deltaX / scale.get())));//TODO: use "add time" instead
-					mouseEvent.consume();
 				}
-			});
+			}.setOwner(this));
 
 			//Add everything to the graph
 			timeGraphPane.getChildren().addAll(rect);
@@ -215,6 +268,9 @@ public class TimeGraphController implements Initializable {
 					.or(rectRight.layoutXProperty().add(rectRight.widthProperty()).lessThan(timeGraphPane.layoutXProperty()));
 			outOfRange.bind(outOfRangeExpression);
 			outOfRangeListener.changed(outOfRangeExpression, true, outOfRangeExpression.get());
+
+			//Add to visible graphics list
+			visibleTimeSegments.add(this);
 		}
 
 		private void toFront() {
@@ -240,6 +296,7 @@ public class TimeGraphController implements Initializable {
 
 		public void dispose() {
 			if (initialized) {
+				//TODO: do not dispose if object is being dragged
 				timeSegment.startProperty().removeListener(updateListener);
 				timeSegment.endProperty().removeListener(updateListener);
 				timeGraphPane.getChildren().removeAll(label, rectLeft, rectRight, rect);
@@ -250,6 +307,7 @@ public class TimeGraphController implements Initializable {
 				initialized = false;
 				outOfRange.unbind();
 				outOfRange.set(true);
+				visibleTimeSegments.remove(this);
 			}
 		}
 	}
@@ -352,7 +410,7 @@ public class TimeGraphController implements Initializable {
 	}
 
 	/**
-	 * Peforms a full refresh of the time scale
+	 * Performs a full refresh of the time scale
 	 */
 	private void updateTimescale() {
 		clearTimeScale();
@@ -364,7 +422,7 @@ public class TimeGraphController implements Initializable {
 		}
 		updateTicks();
 
-		updateTimeSegmentGraphics();
+		updateTimeSegmentGraphics();//TODO: also call this when tasks are added or changed; a started offscreen task can slowly crawl into the visible space!
 	}
 
 	/**
@@ -424,7 +482,7 @@ public class TimeGraphController implements Initializable {
 	}
 
 	private void updateTicksStep() {
-		long step = 1000;//1 second is the minimum
+		long step = 1000;//1 second is the minimum //TODO: move this into constants
 		long stepMultipliers[] = new long[]{1, 2, 5};
 		int stepMultiplier = 0;
 		while ((step * stepMultipliers[stepMultiplier] * scale.get()) < minTickSpacing && step < Long.MAX_VALUE && step > 0) {
@@ -443,8 +501,8 @@ public class TimeGraphController implements Initializable {
 	}
 
 	private void updateTimeSegmentGraphics() {
-		long startTime = latestDate.getTime() - (long) ((layoutPos.get() - timeGraphPane.getLayoutX()) / scale.get());
-		long endTime = latestDate.getTime() - (long) ((layoutPos.get() - timeGraphPane.getLayoutX() - timeGraphPane.getWidth()) / scale.get());
+		long startTime = coordinatesToTime(timeGraphPane.getLayoutX()).getTime();
+		long endTime = coordinatesToTime(timeGraphPane.getLayoutX() + timeGraphPane.getWidth()).getTime();
 		//Initialize new objects
 		for (NavigableMap.Entry<Long, Set<TimeSegmentGraphics>> entry : timeSegmentGraphicsLocations.subMap(startTime, true, endTime, true).entrySet())
 			for (TimeSegmentGraphics graphics : entry.getValue())
@@ -455,8 +513,8 @@ public class TimeGraphController implements Initializable {
 	private void updateTicks() {
 		if (ticksStep.get() <= 0)
 			return;
-		long startTick = ticksStep.get() * ((latestDate.getTime() - (long) ((layoutPos.get() - timeGraphPane.getLayoutX()) / scale.get())) / ticksStep.get());
-		long endTick = ticksStep.get() * ((latestDate.getTime() - (long) ((layoutPos.get() - timeGraphPane.getLayoutX() - timeGraphPane.getWidth()) / scale.get())) / ticksStep.get() + 1);
+		long startTick = ticksStep.get() * (coordinatesToTime(timeGraphPane.getLayoutX()).getTime() / ticksStep.get());
+		long endTick = ticksStep.get() * (coordinatesToTime(timeGraphPane.getLayoutX() + timeGraphPane.getWidth()).getTime() / ticksStep.get() + 1);
 		for (long currentTick = startTick; currentTick <= endTick; currentTick += ticksStep.get()) {
 			if (ticks.containsKey(currentTick))
 				continue;
@@ -484,6 +542,29 @@ public class TimeGraphController implements Initializable {
 		}
 	}
 
+	private int getIntersectionCount(TimeSegmentGraphics segmentGraphics, Date segmentStartTime, Date segmentEndTime) {
+		//Check the current intersections count
+		int currentIntersectionsCount = 0;
+		for (TimeSegmentGraphics graphics : visibleTimeSegments)
+			if (graphics != segmentGraphics) {
+				Date start = graphics.timeSegment.startProperty().get();
+				Date end = graphics.timeSegment.endProperty().get();
+				if (segmentStartTime.after(start) && segmentStartTime.before(end))
+					currentIntersectionsCount++;
+				if (segmentEndTime.after(start) && segmentEndTime.before(end))
+					currentIntersectionsCount++;
+			}
+		return currentIntersectionsCount;
+	}
+
+	private double timeToCoordinates(Date time) {
+		return timeGraphPane.layoutXProperty().get() + scale.get() * (time.getTime() - latestDate.getTime()) + layoutPos.get();
+	}
+
+	private Date coordinatesToTime(Double coordinates) {
+		return new Date(latestDate.getTime() - (long) ((layoutPos.get() - coordinates) / scale.get()));
+	}
+
 	@FXML
 	private void mouseDown(MouseEvent event) {
 		dragAnchor = new Point2D(event.getSceneX(), event.getSceneY());
@@ -499,7 +580,6 @@ public class TimeGraphController implements Initializable {
 	private void mouseDragged(MouseEvent event) {
 		if (dragAction == DragAction.MOVE) {
 			double deltaX = event.getX() - dragAnchor.getX();
-			double deltaY = event.getY() - dragAnchor.getY();
 			if (layoutPos.isBound())
 				layoutPos.unbind();
 			layoutPos.set(layoutPos.get() + deltaX);
