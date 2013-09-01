@@ -5,6 +5,18 @@
  */
 package org.zlogic.att.ui;
 
+import java.net.URL;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.logging.Logger;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -24,25 +36,10 @@ import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.TextAlignment;
 import org.zlogic.att.ui.adapters.DataManager;
 import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
-
-import java.net.URL;
-import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.logging.Logger;
 
 public class TimeGraphController implements Initializable {
 
@@ -77,7 +74,7 @@ public class TimeGraphController implements Initializable {
 	private NavigableMap<Long, Set<TimeSegmentGraphics>> timeSegmentGraphicsLocations = new TreeMap<>();
 	private Date latestDate;//TODO: add centralized pixel<->time conversion functions
 	private BooleanProperty visibleProperty = new SimpleBooleanProperty(false);
-	private SimpleDateFormat dateFormat = new SimpleDateFormat("H:mm:ss\ndd.MM.yyyy");//TODO: move to properties
+	private SimpleDateFormat dateFormat = new SimpleDateFormat(messages.getString("TIMEGRAPH_DATE_TIME_FORMAT"));
 	private ListChangeListener<TimeSegmentAdapter> dataManagerListener = new ListChangeListener<TimeSegmentAdapter>() {
 		@Override
 		public void onChanged(Change<? extends TimeSegmentAdapter> change) {
@@ -195,7 +192,7 @@ public class TimeGraphController implements Initializable {
 					double deltaY = mouseEvent.getSceneY() - dragAnchor.getY();
 					mouseDown(mouseEvent);
 					timeSegment.startProperty().setValue(new Date(timeSegment.startProperty().get().getTime() + (long) (deltaX / scale.get())));//TODO: use "add time" instead
-					mouseEvent.consume();//TODO: editing for very short durations
+					mouseEvent.consume();
 				}
 			});
 			rectRight.setOnMouseDragged(new EventHandler<MouseEvent>() {
@@ -441,7 +438,7 @@ public class TimeGraphController implements Initializable {
 			ticksStep.set(step * stepMultipliers[stepMultiplier]);
 		} else {
 			ticksStep.set(0);
-			log.severe(MessageFormat.format("Step {0} is out of range", new Object[]{step}));
+			log.severe(MessageFormat.format(messages.getString("STEP_IS_OUT_OF_RANGE"), new Object[]{step}));
 		}
 	}
 
@@ -464,17 +461,16 @@ public class TimeGraphController implements Initializable {
 			if (ticks.containsKey(currentTick))
 				continue;
 			Line line = new Line();
-			line.startYProperty().set(0);
 			line.endYProperty().bind(timeGraphPane.heightProperty());
-			line.setStroke(Color.ORANGE);//TODO: use styles
 			line.layoutXProperty().bind(timeGraphPane.layoutXProperty().add(scale.multiply(currentTick - latestDate.getTime())).add(layoutPos));
+			line.getStyleClass().add("timegraph-tick"); //NOI18N
 
 			Label label = new Label(dateFormat.format(new Date(currentTick)));
 			label.setLabelFor(line);
-			label.setTextAlignment(TextAlignment.CENTER);//TODO: use styles
-			label.setTextFill(Color.ORANGE);//TODO: use styles
 			label.layoutXProperty().bind(line.layoutXProperty().subtract(label.widthProperty().divide(2)));
-			label.layoutYProperty().bind(timeGraphPane.layoutYProperty());
+			label.getStyleClass().add("timegraph-tick"); //NOI18N
+
+			line.layoutYProperty().bind(label.layoutYProperty().add(label.heightProperty()));
 
 			ticks.put(currentTick, new Tick(line, label));
 		}

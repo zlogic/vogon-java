@@ -1,5 +1,7 @@
 @import url("/com/sun/javafx/scene/control/skin/caspian/caspian.bss");
 
+/* See http://docs.oracle.com/javafx/2/api/javafx/scene/doc-files/cssref.html for reference */
+
 /*
  * Active task label
  */
@@ -82,37 +84,54 @@
 /*
  * Completed item
  */
- .item-completed .text {
-	 -fx-strikethrough: true;
- }
+.item-completed .text {
+	-fx-strikethrough: true;
+}
 
 /*
  * Not completed item
  */
- .item-not-completed .text {
-	 -fx-strikethrough: false;
- }
+.item-not-completed .text {
+	-fx-strikethrough: false;
+}
 
- /*
-  * Time graph handle
-  */
- .timegraph-handle {
+/*
+ * Time graph handle
+ */
+.timegraph-handle {
     -fx-accent: -fx-box-border;
 	-fx-fill: -fx-accent;
- }
- .timegraph-handle:hover {
+}
+.timegraph-handle:hover {
 	-fx-fill: derive(-fx-accent,50%);
- }
- /*
-  * Time graph time segment
-  */
- .timegraph-segment {
+}
+
+/*
+ * Time graph time segment
+ */
+.timegraph-segment {
     -fx-stroke: -fx-box-border;
     -fx-stroke-width: 1;
 	-fx-fill:
 		linear-gradient(to bottom, derive(-fx-color,-02%), derive(-fx-color,65%) 12%, derive(-fx-color,23%) 88%, derive(-fx-color,50%) 99%, -fx-box-border);
- }
+}
 
- .timegraph-segment .text{
+.timegraph-segment .selected-segment {
+    -fx-color: palegreen;
+}
+
+.timegraph-segment .text{
     /*-fx-fill: white;*/
- }
+}
+
+/*
+ * Time graph tick
+ */
+.timegraph-tick{
+	-fx-color: black;
+	-fx-stroke: -fx-color;
+    -fx-stroke-dash-array: 10 10;
+    -fx-stroke-dash-offset: 10;
+	-fx-text-fill: -fx-color;
+	-fx-text-alignment: center;
+}
