@@ -7,7 +7,7 @@
 	<groupId>org.zlogic.att</groupId>
 	<artifactId>top</artifactId>
 	<packaging>pom</packaging>
-	<version>0.3-SNAPSHOT</version>
+	<version>0.4-SNAPSHOT</version>
 	<name>Awesome Time Tracker :: Top</name>
 
 	<organization>
@@ -24,7 +24,7 @@
 	<properties>
 		<version.java>1.7</version.java>
 		<version.java.launch4j>1.7.0</version.java.launch4j>
-		<version.windows>0.3.0.0</version.windows>
+		<version.windows>0.4.0.0</version.windows>
 		<version.javafx>2.2</version.javafx>
 	</properties>
 
