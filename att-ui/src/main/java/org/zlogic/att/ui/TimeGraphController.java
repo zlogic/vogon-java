@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.LongProperty;
@@ -73,7 +74,6 @@ public class TimeGraphController implements Initializable {
 	private Map<TimeSegmentAdapter, TimeSegmentGraphics> timeSegmentGraphics = new HashMap<>();
 	private NavigableMap<Long, Set<TimeSegmentGraphics>> timeSegmentGraphicsLocations = new TreeMap<>();
 	private Set<TimeSegmentGraphics> visibleTimeSegments = new HashSet<>();
-	private Date latestDate;//TODO: add centralized pixel<->time conversion functions
 	private BooleanProperty visibleProperty = new SimpleBooleanProperty(false);
 	private SimpleDateFormat dateFormat = new SimpleDateFormat(messages.getString("TIMEGRAPH_DATE_TIME_FORMAT"));
 	private ListChangeListener<TimeSegmentAdapter> dataManagerListener = new ListChangeListener<TimeSegmentAdapter>() {
@@ -288,7 +288,7 @@ public class TimeGraphController implements Initializable {
 			long start = timeSegment.startProperty().get().getTime();
 			long end = timeSegment.endProperty().get().getTime();
 			long duration = end - start;
-			rect.layoutXProperty().bind(timeGraphPane.layoutXProperty().add(scale.multiply(start - latestDate.getTime())).add(layoutPos).add(resizeWidth));
+			rect.layoutXProperty().bind(timeToCoordinatesProperty(timeSegment.startProperty().get()));
 			rect.widthProperty().bind(scale.multiply(duration).subtract(resizeWidth * 2));
 			updateTimeSegmentGraphics(this);
 			updateTimeSegmentGraphics();
@@ -340,7 +340,6 @@ public class TimeGraphController implements Initializable {
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
 		timeGraphPane.setCursor(Cursor.MOVE);
-		layoutPos.bind(timeGraphPane.widthProperty());
 
 		visibleProperty.addListener(new ChangeListener<Boolean>() {
 			@Override
@@ -398,24 +397,19 @@ public class TimeGraphController implements Initializable {
 	}
 
 	/**
-	 * Updates the latest date (which is displayed by default) by using the
-	 * latest date from the time segment and the previously extracted date
-	 *
-	 * @param timeSegment the time segment from which the latest date should be
-	 * extracted
-	 */
-	private void updateLatestDate(TimeSegmentAdapter timeSegment) {
-		if (latestDate == null || latestDate.before(timeSegment.endProperty().get()))
-			latestDate = timeSegment.endProperty().get();
-	}
-
-	/**
 	 * Performs a full refresh of the time scale
 	 */
 	private void updateTimescale() {
 		clearTimeScale();
-		for (TimeSegmentAdapter timeSegment : dataManager.getTimeSegments())
-			updateLatestDate(timeSegment);
+		if (dragAnchor == null) {
+			//Graph was not moved - so we can jump to the latest time
+			Date latestDate = null;
+			for (TimeSegmentAdapter timeSegment : dataManager.getTimeSegments())
+				if (latestDate == null || timeSegment.endProperty().get().after(latestDate))
+					latestDate = timeSegment.endProperty().get();
+			if (latestDate != null)
+				layoutPos.bind(timeGraphPane.widthProperty()/*.negate().*/.subtract(scale.multiply(latestDate.getTime())));
+		}
 
 		for (TimeSegmentAdapter timeSegment : dataManager.getTimeSegments()) {
 			addTimeSegmentGraphics(timeSegment);
@@ -430,7 +424,6 @@ public class TimeGraphController implements Initializable {
 	 */
 	private void clearTimeScale() {
 		synchronized (timeSegmentGraphicsLocations) {
-			latestDate = null;
 			timeSegmentGraphicsLocations.clear();
 			for (TimeSegmentGraphics graphics : timeSegmentGraphics.values())
 				graphics.dispose();
@@ -515,12 +508,17 @@ public class TimeGraphController implements Initializable {
 			return;
 		long startTick = ticksStep.get() * (coordinatesToTime(timeGraphPane.getLayoutX()).getTime() / ticksStep.get());
 		long endTick = ticksStep.get() * (coordinatesToTime(timeGraphPane.getLayoutX() + timeGraphPane.getWidth()).getTime() / ticksStep.get() + 1);
+		Map<Long, Tick> newTicks = new HashMap<>();
+		//Generate new ticks
 		for (long currentTick = startTick; currentTick <= endTick; currentTick += ticksStep.get()) {
-			if (ticks.containsKey(currentTick))
+			if (ticks.containsKey(currentTick)) {
+				newTicks.put(currentTick, ticks.get(currentTick));
+				ticks.remove(currentTick);
 				continue;
+			}
 			Line line = new Line();
 			line.endYProperty().bind(timeGraphPane.heightProperty());
-			line.layoutXProperty().bind(timeGraphPane.layoutXProperty().add(scale.multiply(currentTick - latestDate.getTime())).add(layoutPos));
+			line.layoutXProperty().bind(timeToCoordinatesProperty(new Date(currentTick)));
 			line.getStyleClass().add("timegraph-tick"); //NOI18N
 
 			Label label = new Label(dateFormat.format(new Date(currentTick)));
@@ -530,16 +528,14 @@ public class TimeGraphController implements Initializable {
 
 			line.layoutYProperty().bind(label.layoutYProperty().add(label.heightProperty()));
 
-			ticks.put(currentTick, new Tick(line, label));
+			newTicks.put(currentTick, new Tick(line, label));
 		}
-		while (ticks.firstKey() < startTick) {
-			ticks.firstEntry().getValue().dispose();
-			ticks.remove(ticks.firstKey());
-		}
-		while (ticks.lastKey() > endTick) {
-			ticks.lastEntry().getValue().dispose();
-			ticks.remove(ticks.lastKey());
-		}
+
+		//Dispose unused ticks
+		for (Tick oldTick : ticks.values())
+			oldTick.dispose();
+		ticks.clear();
+		ticks.putAll(newTicks);
 	}
 
 	private int getIntersectionCount(TimeSegmentGraphics segmentGraphics, Date segmentStartTime, Date segmentEndTime) {
@@ -557,12 +553,16 @@ public class TimeGraphController implements Initializable {
 		return currentIntersectionsCount;
 	}
 
+	private DoubleBinding timeToCoordinatesProperty(Date time) {
+		return timeGraphPane.layoutXProperty().add(layoutPos).add(scale.multiply(time.getTime()));
+	}
+
 	private double timeToCoordinates(Date time) {
-		return timeGraphPane.layoutXProperty().get() + scale.get() * (time.getTime() - latestDate.getTime()) + layoutPos.get();
+		return timeGraphPane.layoutXProperty().get() + layoutPos.get() + scale.get() * (time.getTime());
 	}
 
 	private Date coordinatesToTime(Double coordinates) {
-		return new Date(latestDate.getTime() - (long) ((layoutPos.get() - coordinates) / scale.get()));
+		return new Date((long) ((coordinates - layoutPos.get()) / scale.get()));
 	}
 
 	@FXML
