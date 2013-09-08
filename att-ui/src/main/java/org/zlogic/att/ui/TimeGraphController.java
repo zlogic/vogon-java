@@ -11,6 +11,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.ResourceBundle;
@@ -27,7 +29,9 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -58,6 +62,7 @@ public class TimeGraphController implements Initializable {
 	private DataManager dataManager;
 	@FXML
 	private Pane timeGraphPane;
+	private ObservableList<TimeSegmentAdapter> selectedTimeSegments = FXCollections.observableList(new LinkedList<TimeSegmentAdapter>());
 	private Point2D dragAnchor;
 
 	private enum DragAction {
@@ -79,6 +84,8 @@ public class TimeGraphController implements Initializable {
 	private ListChangeListener<TimeSegmentAdapter> dataManagerListener = new ListChangeListener<TimeSegmentAdapter>() {
 		@Override
 		public void onChanged(Change<? extends TimeSegmentAdapter> change) {
+			if (!visibleProperty.get())
+				return;
 			while (change.next()) {
 				if (change.wasRemoved())
 					for (TimeSegmentAdapter timeSegment : change.getRemoved())
@@ -90,6 +97,28 @@ public class TimeGraphController implements Initializable {
 					}
 				}
 			}
+		}
+	};
+	private ListChangeListener<TimeSegmentAdapter> selectedTimeSegmentsListener = new ListChangeListener<TimeSegmentAdapter>() {
+		@Override
+		public void onChanged(ListChangeListener.Change<? extends TimeSegmentAdapter> change) {
+			if (!visibleProperty.get())
+				return;
+			while (change.next()) {
+				if (change.wasRemoved())
+					for (TimeSegmentAdapter timeSegment : change.getRemoved()) {
+						TimeSegmentGraphics graphics = timeSegmentGraphics.get(timeSegment);
+						if (graphics != null)
+							graphics.selectedProperty.set(false);
+					}
+				if (change.wasAdded())
+					for (TimeSegmentAdapter timeSegment : change.getAddedSubList()) {
+						TimeSegmentGraphics graphics = timeSegmentGraphics.get(timeSegment);
+						if (graphics != null)
+							graphics.selectedProperty.set(true);
+					}
+			}
+
 		}
 	};
 
@@ -106,7 +135,7 @@ public class TimeGraphController implements Initializable {
 				dragAction = DragAction.RESIZE;
 			}
 		};
-		private BooleanProperty selectedProperty = new SimpleBooleanProperty(true);//TODO: bind to the currently selected item
+		private BooleanProperty selectedProperty = new SimpleBooleanProperty(false);
 		private boolean initialized = false;
 		private BooleanProperty outOfRange = new SimpleBooleanProperty(true);
 		private ChangeListener<Date> updateListener = new ChangeListener<Date>() {
@@ -122,6 +151,26 @@ public class TimeGraphController implements Initializable {
 			public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
 				if (newValue)
 					dispose();
+			}
+		};
+		private ChangeListener<Boolean> selectedListener = new ChangeListener<Boolean>() {
+			@Override
+			public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
+				if (newValue.equals(oldValue) || rect == null)
+					return;
+				if (newValue)
+					rect.getStyleClass().add("selected-segment");
+				else
+					rect.getStyleClass().remove("selected-segment");
+				//Bring selected item to front
+				if (newValue)
+					toFront();
+			}
+		};
+		private EventHandler<MouseEvent> selectHandler = new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent t) {
+				selectedTimeSegments.setAll(timeSegment);
 			}
 		};
 
@@ -143,14 +192,9 @@ public class TimeGraphController implements Initializable {
 			if (initialized)
 				return;
 			initialized = true;
-			//Bring selected item to front
-			selectedProperty.addListener(new ChangeListener<Boolean>() {
-				@Override
-				public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
-					if (newValue)
-						toFront();
-				}
-			});
+
+			selectedProperty.set(false);
+			selectedProperty.addListener(selectedListener);
 
 			//Init main rectangle
 			rect = new Rectangle();
@@ -200,8 +244,12 @@ public class TimeGraphController implements Initializable {
 					Date oldStart = timeSegment.startProperty().get();
 					Date clippedStart = newStart;
 					for (TimeSegmentGraphics graphics : visibleTimeSegments) {
+						if (graphics == owner)
+							continue;
 						Date end = graphics.timeSegment.endProperty().get();
-						if (end.before(oldStart) && end.after(newStart) && end.after(clippedStart))
+						if (!end.after(clippedStart))
+							continue;
+						if ((end.before(oldStart) || end.equals(oldStart)) && (end.after(newStart) || end.equals(newStart)))
 							clippedStart = end;
 					}
 					return clippedStart;
@@ -235,8 +283,12 @@ public class TimeGraphController implements Initializable {
 					Date oldEnd = timeSegment.endProperty().get();
 					Date clippedEnd = newEnd;
 					for (TimeSegmentGraphics graphics : visibleTimeSegments) {
+						if (graphics == owner)
+							continue;
 						Date start = graphics.timeSegment.startProperty().get();
-						if (start.after(oldEnd) && start.before(newEnd) && start.before(clippedEnd))
+						if (!start.before(clippedEnd))
+							continue;
+						if ((start.after(oldEnd) || start.equals(oldEnd)) && (start.before(newEnd) || start.equals(newEnd)))
 							clippedEnd = start;
 					}
 					return clippedEnd;
@@ -244,8 +296,8 @@ public class TimeGraphController implements Initializable {
 
 				@Override
 				public void handle(MouseEvent mouseEvent) {
-					double clickLocation = localClick != null ? localClick.getX() : 0;
-					Date newEnd = coordinatesToTime(mouseEvent.getSceneX() - clickLocation);
+					double clickLocation = localClick != null ? (resizeWidth - localClick.getX()) : 0;
+					Date newEnd = coordinatesToTime(mouseEvent.getSceneX() + clickLocation);
 					if (newEnd.before(timeSegment.startProperty().get())) {
 						log.finer(messages.getString("START_CANNOT_BE_BEFORE_END_SKIPPING_EDIT"));
 					} else if (getIntersectionCount(owner, timeSegment.startProperty().get(), newEnd) <= getIntersectionCount(owner, timeSegment.startProperty().get(), timeSegment.endProperty().get())) {
@@ -259,6 +311,10 @@ public class TimeGraphController implements Initializable {
 				}
 			}.setOwner(this));
 
+			//Add handler for main rectangle
+			rect.setOnMouseClicked(selectHandler);
+			label.setOnMouseClicked(selectHandler);
+
 			//Add everything to the graph
 			timeGraphPane.getChildren().addAll(rect);
 			timeGraphPane.getChildren().addAll(rectLeft);
@@ -271,15 +327,19 @@ public class TimeGraphController implements Initializable {
 
 			//Add to visible graphics list
 			visibleTimeSegments.add(this);
+
+			//Set selected style
+			if (selectedTimeSegments != null)
+				selectedProperty.set(selectedTimeSegments.contains(timeSegment));
 		}
 
 		private void toFront() {
 			if (!initialized)
 				return;
-			label.toFront();
 			rect.toFront();
 			rectLeft.toFront();
 			rectRight.toFront();
+			label.toFront();
 		}
 
 		private void updateGraphics() {
@@ -288,7 +348,7 @@ public class TimeGraphController implements Initializable {
 			long start = timeSegment.startProperty().get().getTime();
 			long end = timeSegment.endProperty().get().getTime();
 			long duration = end - start;
-			rect.layoutXProperty().bind(timeToCoordinatesProperty(timeSegment.startProperty().get()));
+			rect.layoutXProperty().bind(timeToCoordinatesProperty(timeSegment.startProperty().get()).add(resizeWidth));
 			rect.widthProperty().bind(scale.multiply(duration).subtract(resizeWidth * 2));
 			updateTimeSegmentGraphics(this);
 			updateTimeSegmentGraphics();
@@ -299,6 +359,7 @@ public class TimeGraphController implements Initializable {
 				//TODO: do not dispose if object is being dragged
 				timeSegment.startProperty().removeListener(updateListener);
 				timeSegment.endProperty().removeListener(updateListener);
+				selectedProperty.removeListener(selectedListener);
 				timeGraphPane.getChildren().removeAll(label, rectLeft, rectRight, rect);
 				rect = null;
 				rectLeft = null;
@@ -340,6 +401,7 @@ public class TimeGraphController implements Initializable {
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
 		timeGraphPane.setCursor(Cursor.MOVE);
+		selectedTimeSegments.addListener(selectedTimeSegmentsListener);
 
 		visibleProperty.addListener(new ChangeListener<Boolean>() {
 			@Override
@@ -394,6 +456,10 @@ public class TimeGraphController implements Initializable {
 	 */
 	public BooleanProperty visibleProperty() {
 		return visibleProperty;
+	}
+
+	public void setSelectedTimeSegments(List<TimeSegmentAdapter> selectedTimeSegments) {
+		this.selectedTimeSegments.setAll(selectedTimeSegments);
 	}
 
 	/**
@@ -545,9 +611,9 @@ public class TimeGraphController implements Initializable {
 			if (graphics != segmentGraphics) {
 				Date start = graphics.timeSegment.startProperty().get();
 				Date end = graphics.timeSegment.endProperty().get();
-				if (segmentStartTime.after(start) && segmentStartTime.before(end))
+				if (segmentStartTime.before(start) && segmentEndTime.after(start))
 					currentIntersectionsCount++;
-				if (segmentEndTime.after(start) && segmentEndTime.before(end))
+				else if (segmentStartTime.before(end) && segmentEndTime.after(end))
 					currentIntersectionsCount++;
 			}
 		return currentIntersectionsCount;

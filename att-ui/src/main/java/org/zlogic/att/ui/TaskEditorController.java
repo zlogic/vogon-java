@@ -608,6 +608,15 @@ public class TaskEditorController implements Initializable {
 	}
 
 	/**
+	 * Returns the list of currently selected time segments
+	 *
+	 * @return the list of currently selected time segments
+	 */
+	protected ObservableList<TimeSegmentAdapter> getSelectedTimeSegments() {
+		return timeSegments.getSelectionModel().getSelectedItems();
+	}
+
+	/**
 	 * Updates the time segments sort order
 	 */
 	private void updateSortOrder() {

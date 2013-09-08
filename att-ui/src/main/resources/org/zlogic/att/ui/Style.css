@@ -116,11 +116,11 @@
 		linear-gradient(to bottom, derive(-fx-color,-02%), derive(-fx-color,65%) 12%, derive(-fx-color,23%) 88%, derive(-fx-color,50%) 99%, -fx-box-border);
 }
 
-.timegraph-segment .selected-segment {
-    -fx-color: palegreen;
+.timegraph-segment.selected-segment {
+	-fx-color: -fx-focus-color;
 }
 
-.timegraph-segment .text{
+.timegraph-segment.text{
     /*-fx-fill: white;*/
 }
 

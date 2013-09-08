@@ -41,10 +41,10 @@
         </Menu>
       </menus>
     </MenuBar>
-    <TabPane id="tabPane" prefHeight="-1.0" prefWidth="-1.0" tabClosingPolicy="UNAVAILABLE">
+    <TabPane id="tabPane" prefHeight="-1.0" prefWidth="-1.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
       <tabs>
         <Tab fx:id="tabLogical" text="%LOGICAL_VIEW">
-          <SplitPane id="SplitPane" dividerPositions="0.6450567260940032" orientation="VERTICAL" prefHeight="-1.0" prefWidth="-1.0">
+          <SplitPane id="SplitPane" dividerPositions="0.5008103727714749" orientation="VERTICAL" prefHeight="-1.0" prefWidth="-1.0">
             <items>
               <VBox id="VBox" alignment="CENTER" spacing="5.0">
                 <children>
@@ -144,7 +144,7 @@
         </Tab>
       </tabs>
     </TabPane>
-    <HBox fx:id="statusPane" alignment="CENTER_LEFT" prefHeight="-1.0" prefWidth="-1.0" visible="false">
+    <HBox fx:id="statusPane" alignment="CENTER_LEFT" prefHeight="-1.0" prefWidth="-1.0" visible="false" VBox.vgrow="SOMETIMES">
       <children>
         <ProgressIndicator fx:id="progressIndicator" progress="0.0" HBox.margin="$x1" />
         <Label fx:id="progressLabel" labelFor="$progressIndicator" text="" HBox.margin="$x1" />

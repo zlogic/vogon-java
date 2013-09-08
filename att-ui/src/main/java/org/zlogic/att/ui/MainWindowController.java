@@ -546,6 +546,13 @@ public class MainWindowController implements Initializable {
 		timeGraphController.setDataManager(dataManager);
 
 		timeGraphController.visibleProperty().bind(tabGraphical.selectedProperty());//TODO: maybe always visible is actually OK?
+		timeGraphController.visibleProperty().addListener(new ChangeListener<Boolean>() {
+			@Override
+			public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
+				if (newValue)
+					timeGraphController.setSelectedTimeSegments(taskEditorController.getSelectedTimeSegments());
+			}
+		});
 	}
 
 	/**
