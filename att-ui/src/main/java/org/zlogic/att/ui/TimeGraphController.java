@@ -64,20 +64,29 @@ public class TimeGraphController implements Initializable {
 	private Pane timeGraphPane;
 	private ObservableList<TimeSegmentAdapter> selectedTimeSegments = FXCollections.observableList(new LinkedList<TimeSegmentAdapter>());
 	private Point2D dragAnchor;
-	
+
 	private enum DragAction {
-		
+
 		MOVE, RESIZE
 	};
 	private DragAction dragAction = DragAction.MOVE;
-	private DoubleProperty scale = new SimpleDoubleProperty(0.00005);
+	/*
+	 * Begin: constants
+	 */
+	private static final double defaultScale = 0.00005;
+	private static final int resizeWidth = 10;
+	private static final double minTickSpacing = 100;
+	private static final long minimumStep = 1000;//1 second
+	private static final SimpleDateFormat timeFormat = new SimpleDateFormat(messages.getString("TIMEGRAPH_TIME_FORMAT"));
+	/*
+	 * End: constants
+	 */
+	private DoubleProperty scale = new SimpleDoubleProperty(defaultScale);
 	private LongProperty ticksStep = new SimpleLongProperty(0);
 	private DoubleProperty layoutPos = new SimpleDoubleProperty(0);
-	private int resizeWidth = 10;
-	private double minTickSpacing = 100;
-	private long timeSegmentGraphicsBinsize = 200000;//TODO: compute this as a product of scale and width, update timeSegmentGraphicsLocations on change
+	private LongProperty timeSegmentGraphicsBinsize = new SimpleLongProperty();
 	private Map<TimeSegmentAdapter, TimeSegmentGraphics> timeSegmentGraphics = new HashMap<>();
-	private NavigableMap<Long, Set<TimeSegmentGraphics>> timeSegmentGraphicsLocations = new TreeMap<>();
+	private final NavigableMap<Long, Set<TimeSegmentGraphics>> timeSegmentGraphicsLocations = new TreeMap<>();
 	private Set<TimeSegmentGraphics> visibleTimeSegments = new HashSet<>();
 	private BooleanProperty visibleProperty = new SimpleBooleanProperty(false);
 	private SimpleDateFormat dateFormat = new SimpleDateFormat(messages.getString("TIMEGRAPH_DATE_TIME_FORMAT"));
@@ -118,14 +127,14 @@ public class TimeGraphController implements Initializable {
 							graphics.selectedProperty.set(true);
 					}
 			}
-			
+
 		}
 	};
-	
+
 	private class TimeSegmentGraphics {
-		
+
 		private Rectangle rect, rectLeft, rectRight;
-		private Label label;
+		private Label rectLabel, rectLeftLabel, rectRightLabel;
 		private TimeSegmentAdapter timeSegment;
 		private Point2D localClick;
 		private EventHandler<MouseEvent> mousePressHandler = new EventHandler<MouseEvent>() {
@@ -133,24 +142,45 @@ public class TimeGraphController implements Initializable {
 			public void handle(MouseEvent mouseEvent) {
 				localClick = new Point2D(mouseEvent.getX(), mouseEvent.getY());
 				dragAction = DragAction.RESIZE;
+				isDragged.set(true);
+			}
+		};
+		private EventHandler<MouseEvent> mouseReleaseHandler = new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent mouseEvent) {
+				isDragged.set(false);
 			}
 		};
 		private BooleanProperty selectedProperty = new SimpleBooleanProperty(false);
 		private boolean initialized = false;
 		private BooleanProperty outOfRange = new SimpleBooleanProperty(true);
+		private BooleanProperty isDragged = new SimpleBooleanProperty(false);
 		private ChangeListener<Date> updateListener = new ChangeListener<Date>() {
+			private TimeSegmentGraphics graphics;
+
+			public ChangeListener<Date> setGraphics(TimeSegmentGraphics graphics) {
+				this.graphics = graphics;
+				return this;
+			}
+
 			@Override
 			public void changed(ObservableValue<? extends Date> observableValue, Date oldValue, Date newValue) {
 				if (newValue.equals(oldValue))
 					return;
-				updateGraphics();
+				if (!initialized) {
+					//Check if time segment has crawled into the visible screen
+					updateTimeSegmentGraphics(graphics);
+					updateTimeSegmentGraphics();
+				}
+				if (initialized)
+					updateGraphics();
 			}
-		};
+		}.setGraphics(this);
 		private ChangeListener<Boolean> outOfRangeListener = new ChangeListener<Boolean>() {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
 				if (newValue)
-					dispose();
+					disposeGraphics();
 			}
 		};
 		private ChangeListener<Number> widthLargerThanZeroListener = new ChangeListener<Number>() {
@@ -159,12 +189,16 @@ public class TimeGraphController implements Initializable {
 				if (newValue == oldValue || newValue == null)
 					return;
 				if ((newValue instanceof Double && (Double) newValue > 0) || newValue.floatValue() > 0) {
-					if (!timeGraphPane.getChildren().contains(rectLeft))
+					if (!timeGraphPane.getChildren().contains(rectLeft)) {
 						timeGraphPane.getChildren().add(rectLeft);
-					if (!timeGraphPane.getChildren().contains(rectRight))
+						timeGraphPane.getChildren().add(rectLeftLabel);
+					}
+					if (!timeGraphPane.getChildren().contains(rectRight)) {
 						timeGraphPane.getChildren().add(rectRight);
+						timeGraphPane.getChildren().add(rectRightLabel);
+					}
 				} else {
-					timeGraphPane.getChildren().removeAll(rectLeft, rectRight);
+					timeGraphPane.getChildren().removeAll(rectLeft, rectRight, rectLeftLabel, rectRightLabel);
 				}
 			}
 		};
@@ -188,12 +222,14 @@ public class TimeGraphController implements Initializable {
 				selectedTimeSegments.setAll(timeSegment);
 			}
 		};
-		
+
 		public TimeSegmentGraphics(TimeSegmentAdapter timeSegment) {
 			this.timeSegment = timeSegment;
 			outOfRange.addListener(outOfRangeListener);
+			timeSegment.startProperty().addListener(updateListener);
+			timeSegment.endProperty().addListener(updateListener);
 		}
-		
+
 		private void setResizeHandleRectProperties(Rectangle rectHandle) {
 			rectHandle.setCursor(Cursor.W_RESIZE);
 			rectHandle.setWidth(resizeWidth);
@@ -202,12 +238,34 @@ public class TimeGraphController implements Initializable {
 			rectHandle.getStyleClass().add("timegraph-handle"); //NOI18N
 			rectHandle.disableProperty().bind(selectedProperty.not());
 		}
-		
+
+		private void setLabelForRect(Rectangle rectangle, Label label) {
+			label.layoutXProperty().bind(rectangle.layoutXProperty());
+			label.layoutYProperty().bind(rectangle.layoutYProperty());
+			label.maxHeightProperty().bind(rectangle.heightProperty());
+			label.prefHeightProperty().bind(rectangle.heightProperty());
+			label.maxWidthProperty().bind(rectangle.widthProperty());
+			label.prefWidthProperty().bind(rectangle.widthProperty());
+			label.setLabelFor(rectangle);
+		}
+
+		private void setLabelForRectVertical(Rectangle rectangle, Label label) {
+			label.layoutXProperty().bind(rectangle.layoutXProperty().add(label.heightProperty().subtract(label.widthProperty()).divide(2)));
+			label.layoutYProperty().bind(rectangle.layoutYProperty().add(label.widthProperty().subtract(label.heightProperty()).divide(2)));
+			label.maxHeightProperty().bind(rectangle.widthProperty());
+			label.minHeightProperty().bind(rectangle.widthProperty());
+			label.prefHeightProperty().bind(rectangle.widthProperty());
+			label.maxWidthProperty().bind(rectangle.heightProperty());
+			label.minWidthProperty().bind(rectangle.heightProperty());
+			label.prefWidthProperty().bind(rectangle.heightProperty());
+			label.setLabelFor(rectangle);
+		}
+
 		private void init() {
 			if (initialized)
 				return;
 			initialized = true;
-			
+
 			selectedProperty.set(false);
 			selectedProperty.addListener(selectedListener);
 
@@ -217,44 +275,52 @@ public class TimeGraphController implements Initializable {
 			rect.layoutYProperty().bind(timeGraphPane.heightProperty().subtract(rect.heightProperty()).divide(2));
 			rect.getStyleClass().add("timegraph-segment"); //NOI18N
 			rect.setCursor(Cursor.DEFAULT);
-			timeSegment.startProperty().addListener(updateListener);
-			timeSegment.endProperty().addListener(updateListener);
 
 			//Init resize rectangles
-			rectLeft = new Rectangle();//TODO: draw vertical label with start/end time
+			rectLeft = new Rectangle();
 			rectLeft.layoutXProperty().bind(rect.layoutXProperty().subtract(resizeWidth));
 			setResizeHandleRectProperties(rectLeft);
-			
+
+			rectLeftLabel = new Label();
+			rectLeftLabel.setRotate(270);
+			setLabelForRectVertical(rectLeft, rectLeftLabel);
+			rectLeftLabel.setAlignment(Pos.CENTER);
+			rectLeftLabel.setDisable(true);
+			rectLeftLabel.getStyleClass().addAll("timegraph-handle", "text"); //NOI18N
+
 			rectRight = new Rectangle();
 			rectRight.layoutXProperty().bind(rect.layoutXProperty().add(rect.widthProperty()));
 			setResizeHandleRectProperties(rectRight);
 
+			rectRightLabel = new Label();
+			rectRightLabel.setRotate(270);
+			setLabelForRectVertical(rectRight, rectRightLabel);
+			rectRightLabel.setAlignment(Pos.CENTER);
+			rectRightLabel.setDisable(true);
+			rectRightLabel.getStyleClass().addAll("timegraph-handle", "text"); //NOI18N
+
 			//Init text label
-			label = new Label();
-			label.setAlignment(Pos.CENTER);
-			label.layoutXProperty().bind(rect.layoutXProperty());
-			label.layoutYProperty().bind(rect.layoutYProperty());
-			label.maxHeightProperty().bind(rect.heightProperty());
-			label.prefHeightProperty().bind(rect.heightProperty());
-			label.maxWidthProperty().bind(rect.widthProperty());
-			label.prefWidthProperty().bind(rect.widthProperty());
-			label.setLabelFor(rect);
-			label.getStyleClass().addAll("timegraph-segment", "text"); //NOI18N
-			label.textProperty().bind(timeSegment.fullDescriptionProperty());
-			label.visibleProperty().bind(rect.widthProperty().greaterThan(0));
+			rectLabel = new Label();
+			setLabelForRect(rect, rectLabel);
+			rectLabel.setAlignment(Pos.CENTER);
+			rectLabel.getStyleClass().addAll("timegraph-segment", "text"); //NOI18N
+			rectLabel.textProperty().bind(timeSegment.fullDescriptionProperty());
+			rectLabel.visibleProperty().bind(rect.widthProperty().greaterThan(0));
 
 			//Add handlers for resize handles
 			rectLeft.setOnMousePressed(mousePressHandler);
+			rectLeft.setOnMouseReleased(mouseReleaseHandler);
 			rectRight.setOnMousePressed(mousePressHandler);
-			
+			rectRight.setOnMouseReleased(mouseReleaseHandler);
+
 			rectLeft.setOnMouseDragged(new EventHandler<MouseEvent>() {
 				private TimeSegmentGraphics owner;
-				
+
 				public EventHandler<MouseEvent> setOwner(TimeSegmentGraphics owner) {
 					this.owner = owner;
 					return this;
 				}
-				
+
 				private Date clipDate(Date newStart) {
 					Date oldStart = timeSegment.startProperty().get();
 					Date clippedStart = newStart;
@@ -269,7 +335,7 @@ public class TimeGraphController implements Initializable {
 					}
 					return clippedStart;
 				}
-				
+
 				@Override
 				public void handle(MouseEvent mouseEvent) {
 					if (!timeGraphPane.getChildren().contains(owner.rectLeft))
@@ -290,12 +356,12 @@ public class TimeGraphController implements Initializable {
 			}.setOwner(this));
 			rectRight.setOnMouseDragged(new EventHandler<MouseEvent>() {
 				private TimeSegmentGraphics owner;
-				
+
 				public EventHandler<MouseEvent> setOwner(TimeSegmentGraphics owner) {
 					this.owner = owner;
 					return this;
 				}
-				
+
 				private Date clipDate(Date newEnd) {
 					Date oldEnd = timeSegment.endProperty().get();
 					Date clippedEnd = newEnd;
@@ -310,7 +376,7 @@ public class TimeGraphController implements Initializable {
 					}
 					return clippedEnd;
 				}
-				
+
 				@Override
 				public void handle(MouseEvent mouseEvent) {
 					if (!timeGraphPane.getChildren().contains(owner.rectRight))
@@ -336,11 +402,11 @@ public class TimeGraphController implements Initializable {
 
 			//Add handler for main rectangle
 			rect.setOnMouseClicked(selectHandler);
-			label.setOnMouseClicked(selectHandler);
+			rectLabel.setOnMouseClicked(selectHandler);
 
 			//Add everything to the graph
 			timeGraphPane.getChildren().addAll(rect);
-			timeGraphPane.getChildren().addAll(label);
+			timeGraphPane.getChildren().addAll(rectLabel);
 			BooleanBinding outOfRangeExpression = rectLeft.layoutXProperty().greaterThan(timeGraphPane.layoutXProperty().add(timeGraphPane.widthProperty()))
 					.or(rectRight.layoutXProperty().add(rectRight.widthProperty()).lessThan(timeGraphPane.layoutXProperty()));
 			outOfRange.bind(outOfRangeExpression);
@@ -353,16 +419,18 @@ public class TimeGraphController implements Initializable {
 			if (selectedTimeSegments != null)
 				selectedProperty.set(selectedTimeSegments.contains(timeSegment));
 		}
-		
+
 		private void toFront() {
 			if (!initialized)
 				return;
 			rect.toFront();
 			rectLeft.toFront();
 			rectRight.toFront();
-			label.toFront();
+			rectLabel.toFront();
+			rectLeftLabel.toFront();
+			rectRightLabel.toFront();
 		}
-		
+
 		private void updateGraphics() {
 			if (!initialized)
 				return;
@@ -371,34 +439,41 @@ public class TimeGraphController implements Initializable {
 			long duration = end - start;
 			rect.layoutXProperty().bind(timeToCoordinatesProperty(timeSegment.startProperty().get()).add(resizeWidth));
 			rect.widthProperty().bind(scale.multiply(duration).subtract(resizeWidth * 2));
+			rectLeftLabel.setText(timeFormat.format(timeSegment.startProperty().get()));
+			rectRightLabel.setText(timeFormat.format(timeSegment.endProperty().get()));
 			updateTimeSegmentGraphics(this);
 			updateTimeSegmentGraphics();
 		}
-		
-		public void dispose() {
-			if (initialized) {
-				//TODO: do not dispose if object is being dragged
-				timeSegment.startProperty().removeListener(updateListener);
-				timeSegment.endProperty().removeListener(updateListener);
+
+		public void disposeGraphics() {
+			if (initialized && !isDragged.get()) {
 				selectedProperty.removeListener(selectedListener);
-				timeGraphPane.getChildren().removeAll(label, rectLeft, rectRight, rect);
+				timeGraphPane.getChildren().removeAll(rectLabel, rectLeftLabel, rectRightLabel, rectLeft, rectRight, rect);
 				rect = null;
 				rectLeft = null;
 				rectRight = null;
-				rect = null;
+				rectLabel = null;
+				rectLeftLabel = null;
+				rectRightLabel = null;
 				initialized = false;
 				outOfRange.unbind();
 				outOfRange.set(true);
 				visibleTimeSegments.remove(this);
 			}
 		}
+
+		public void dispose() {
+			disposeGraphics();
+			timeSegment.startProperty().removeListener(updateListener);
+			timeSegment.endProperty().removeListener(updateListener);
+		}
 	}
-	
+
 	private class Tick {
-		
+
 		private Line line;
 		private Label label;
-		
+
 		public Tick(Line line, Label label) {
 			this.line = line;
 			this.label = label;
@@ -406,7 +481,7 @@ public class TimeGraphController implements Initializable {
 			label.toBack();
 			line.toBack();
 		}
-		
+
 		public void dispose() {
 			timeGraphPane.getChildren().removeAll(line, label);
 		}
@@ -423,14 +498,15 @@ public class TimeGraphController implements Initializable {
 	public void initialize(URL url, ResourceBundle resourceBundle) {
 		timeGraphPane.setCursor(Cursor.MOVE);
 		selectedTimeSegments.addListener(selectedTimeSegmentsListener);
-		
+
 		visibleProperty.addListener(new ChangeListener<Boolean>() {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
 				if (newValue == oldValue)
 					return;
 				if (newValue.equals(Boolean.TRUE)) {
-					updateTimescale();
+					if (timeGraphPane.widthProperty().greaterThan(0).get())
+						updateTimescale();
 					dataManager.getTimeSegments().addListener(dataManagerListener);
 				} else {
 					dataManager.getTimeSegments().removeListener(dataManagerListener);
@@ -438,9 +514,9 @@ public class TimeGraphController implements Initializable {
 				}
 			}
 		});
-		
+
 		updateTicksStep();
-		
+
 		scale.addListener(new ChangeListener<Number>() {
 			@Override
 			public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
@@ -449,7 +525,7 @@ public class TimeGraphController implements Initializable {
 				updateTicksStep();
 			}
 		});
-		
+
 		timeGraphPane.widthProperty().addListener(new ChangeListener<Number>() {
 			@Override
 			public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
@@ -457,6 +533,17 @@ public class TimeGraphController implements Initializable {
 					updateTicks();
 					updateTimeSegmentGraphics();
 				}
+			}
+		});
+
+		timeSegmentGraphicsBinsize.bind(new SimpleDoubleProperty(1).divide(scale).multiply(timeGraphPane.widthProperty()));
+		timeSegmentGraphicsBinsize.addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> ov, Number oldValue, Number newValue) {
+				if (newValue == null || newValue.equals(oldValue))
+					return;
+				if (visibleProperty.get())
+					updateTimescale();//TODO: replace this with a less compute-intensive operation?
 			}
 		});
 	}
@@ -478,7 +565,7 @@ public class TimeGraphController implements Initializable {
 	public BooleanProperty visibleProperty() {
 		return visibleProperty;
 	}
-	
+
 	public void setSelectedTimeSegments(List<TimeSegmentAdapter> selectedTimeSegments) {
 		this.selectedTimeSegments.setAll(selectedTimeSegments);
 	}
@@ -497,13 +584,13 @@ public class TimeGraphController implements Initializable {
 			if (latestDate != null)
 				layoutPos.bind(timeGraphPane.widthProperty()/*.negate().*/.subtract(scale.multiply(latestDate.getTime())));
 		}
-		
+
 		for (TimeSegmentAdapter timeSegment : dataManager.getTimeSegments()) {
 			addTimeSegmentGraphics(timeSegment);
 		}
 		updateTicks();
-		
-		updateTimeSegmentGraphics();//TODO: also call this when tasks are added or changed; a started offscreen task can slowly crawl into the visible space!
+
+		updateTimeSegmentGraphics();
 	}
 
 	/**
@@ -517,52 +604,68 @@ public class TimeGraphController implements Initializable {
 			timeSegmentGraphics.clear();
 		}
 	}
-	
+
+	/**
+	 * Removes a specific TimeSegment from the location bins
+	 *
+	 * @param timeSegment the TimeSegment to remove
+	 */
 	private void removeTimeSegmentGraphics(TimeSegmentAdapter timeSegment) {
 		TimeSegmentGraphics graphics = timeSegmentGraphics.remove(timeSegment);
 		if (graphics != null) {
-			boolean found = false;
 			synchronized (timeSegmentGraphicsLocations) {
 				for (Map.Entry<Long, Set<TimeSegmentGraphics>> entry : timeSegmentGraphicsLocations.entrySet())
-					found |= entry.getValue().remove(graphics);
+					entry.getValue().remove(graphics);
 			}
 			graphics.dispose();
 		}
 	}
-	
+
+	/**
+	 * Adds a TimeSegmentAdapter for display
+	 *
+	 * @param timeSegment the TimeSegment to add
+	 */
 	private void addTimeSegmentGraphics(TimeSegmentAdapter timeSegment) {
-		long startBin = timeSegmentGraphicsBinsize * (timeSegment.startProperty().get().getTime() / timeSegmentGraphicsBinsize);
-		long endBin = timeSegmentGraphicsBinsize * (timeSegment.endProperty().get().getTime() / timeSegmentGraphicsBinsize + 1);
+		long binSize = timeSegmentGraphicsBinsize.get();
+		long startBin = binSize * (timeSegment.startProperty().get().getTime() / binSize);
+		long endBin = binSize * (timeSegment.endProperty().get().getTime() / binSize + 1);
 		TimeSegmentGraphics graphics = new TimeSegmentGraphics(timeSegment);
 		timeSegmentGraphics.put(timeSegment, graphics);
 		synchronized (timeSegmentGraphicsLocations) {
-			for (long bin = startBin; bin <= endBin; bin += timeSegmentGraphicsBinsize) {
+			for (long bin = startBin; bin <= endBin; bin += binSize) {
 				if (!timeSegmentGraphicsLocations.containsKey(bin))
 					timeSegmentGraphicsLocations.put(bin, new HashSet<TimeSegmentGraphics>());
 				timeSegmentGraphicsLocations.get(bin).add(graphics);
 			}
 		}
 	}
-	
+
+	/**
+	 * Updates the graphics for a TimeSegment in location bins
+	 *
+	 * @param graphics
+	 */
 	private void updateTimeSegmentGraphics(TimeSegmentGraphics graphics) {
-		long startBin = timeSegmentGraphicsBinsize * (graphics.timeSegment.startProperty().get().getTime() / timeSegmentGraphicsBinsize);
-		long endBin = timeSegmentGraphicsBinsize * (graphics.timeSegment.endProperty().get().getTime() / timeSegmentGraphicsBinsize + 1);
+		long binSize = timeSegmentGraphicsBinsize.get();
+		long startBin = binSize * (graphics.timeSegment.startProperty().get().getTime() / binSize);
+		long endBin = binSize * (graphics.timeSegment.endProperty().get().getTime() / binSize + 1);
 		synchronized (timeSegmentGraphicsLocations) {
 			//Remove from non-matching bins
 			for (Map.Entry<Long, Set<TimeSegmentGraphics>> entry : timeSegmentGraphicsLocations.entrySet())
 				if (entry.getKey() < startBin || entry.getKey() > endBin)
 					entry.getValue().remove(graphics);
 			//Add to any bins we aren't already in
-			for (long bin = startBin; bin <= endBin; bin += timeSegmentGraphicsBinsize) {
+			for (long bin = startBin; bin <= endBin; bin += binSize) {
 				if (!timeSegmentGraphicsLocations.containsKey(bin))
 					timeSegmentGraphicsLocations.put(bin, new HashSet<TimeSegmentGraphics>());
 				timeSegmentGraphicsLocations.get(bin).add(graphics);
 			}
 		}
 	}
-	
+
 	private void updateTicksStep() {
-		long step = 1000;//1 second is the minimum //TODO: move this into constants
+		long step = minimumStep;
 		long stepMultipliers[] = new long[]{1, 2, 5};
 		int stepMultiplier = 0;
 		while ((step * stepMultipliers[stepMultiplier] * scale.get()) < minTickSpacing && step < Long.MAX_VALUE && step > 0) {
@@ -579,7 +682,7 @@ public class TimeGraphController implements Initializable {
 			log.severe(MessageFormat.format(messages.getString("STEP_IS_OUT_OF_RANGE"), new Object[]{step}));
 		}
 	}
-	
+
 	private void updateTimeSegmentGraphics() {
 		long startTime = coordinatesToTime(timeGraphPane.getLayoutX()).getTime();
 		long endTime = coordinatesToTime(timeGraphPane.getLayoutX() + timeGraphPane.getWidth()).getTime();
@@ -589,7 +692,7 @@ public class TimeGraphController implements Initializable {
 				if (!graphics.initialized)
 					graphics.init();
 	}
-	
+
 	private void updateTicks() {
 		if (ticksStep.get() <= 0)
 			return;
@@ -614,7 +717,7 @@ public class TimeGraphController implements Initializable {
 			label.getStyleClass().add("timegraph-tick"); //NOI18N
 
 			line.layoutYProperty().bind(label.layoutYProperty().add(label.heightProperty()));
-			
+
 			newTicks.put(currentTick, new Tick(line, label));
 		}
 
@@ -624,7 +727,7 @@ public class TimeGraphController implements Initializable {
 		ticks.clear();
 		ticks.putAll(newTicks);
 	}
-	
+
 	private int getIntersectionCount(TimeSegmentGraphics segmentGraphics, Date segmentStartTime, Date segmentEndTime) {
 		//Check the current intersections count
 		int currentIntersectionsCount = 0;
@@ -639,30 +742,30 @@ public class TimeGraphController implements Initializable {
 			}
 		return currentIntersectionsCount;
 	}
-	
+
 	private DoubleBinding timeToCoordinatesProperty(Date time) {
 		return timeGraphPane.layoutXProperty().add(layoutPos).add(scale.multiply(time.getTime()));
 	}
-	
+
 	private double timeToCoordinates(Date time) {
 		return timeGraphPane.layoutXProperty().get() + layoutPos.get() + scale.get() * (time.getTime());
 	}
-	
+
 	private Date coordinatesToTime(Double coordinates) {
 		return new Date((long) ((coordinates - layoutPos.get()) / scale.get()));
 	}
-	
+
 	@FXML
 	private void mouseDown(MouseEvent event) {
 		dragAnchor = new Point2D(event.getSceneX(), event.getSceneY());
 		event.consume();
 	}
-	
+
 	@FXML
 	private void mouseUp(MouseEvent event) {
 		dragAction = DragAction.MOVE;
 	}
-	
+
 	@FXML
 	private void mouseDragged(MouseEvent event) {
 		if (dragAction == DragAction.MOVE) {

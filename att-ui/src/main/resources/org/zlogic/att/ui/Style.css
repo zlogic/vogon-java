@@ -102,6 +102,9 @@
     -fx-accent: -fx-box-border;
 	-fx-fill: -fx-accent;
 }
+.timegraph-handle.text {
+    -fx-font-size: 8;
+}
 .timegraph-handle:hover {
 	-fx-fill: derive(-fx-accent,50%);
 }

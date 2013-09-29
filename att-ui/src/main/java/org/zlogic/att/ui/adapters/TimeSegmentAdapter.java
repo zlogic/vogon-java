@@ -26,6 +26,7 @@ import javax.persistence.EntityManager;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 import org.zlogic.att.data.ApplicationShuttingDownException;
 import org.zlogic.att.data.Task;
@@ -45,6 +46,10 @@ public class TimeSegmentAdapter {
 	 * Localization messages
 	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/adapters/messages");
+	/**
+	 * Joda time formatter
+	 */
+	private static final PeriodFormatter timeFormatter = new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter();
 	/**
 	 * Assigned entity
 	 */
@@ -442,7 +447,7 @@ public class TimeSegmentAdapter {
 			start.setValue(segment.getStartTime());
 		if (end.get() == null || !end.get().equals(segment.getEndTime()))
 			end.setValue(segment.getEndTime());
-		duration.setValue(segment.getDuration().toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter()));
+		duration.setValue(segment.getDuration().toString(timeFormatter));
 		fullDescription.setValue(MessageFormat.format(messages.getString("FULL_DESCRIPTION"),
 				new Object[]{
 			((ownerTask != null && ownerTask.get().nameProperty().get() != null) ? ownerTask.get().nameProperty().get() : messages.getString("NULL_OWNER_TASK")),
