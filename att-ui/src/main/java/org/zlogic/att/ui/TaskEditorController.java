@@ -437,8 +437,8 @@ public class TaskEditorController implements Initializable {
 		columnDescription.prefWidthProperty().bind(timeSegments.widthProperty().multiply(4).divide(10).subtract(15));
 
 		//Default sort order
-		timeSegments.getSortOrder().add(columnStart);
-		columnStart.setSortType(TableColumn.SortType.DESCENDING);
+		timeSegments.getSortOrder().add(columnEnd);
+		columnEnd.setSortType(TableColumn.SortType.DESCENDING);
 
 		//Date comparator
 		Comparator<Date> dateComparator = new Comparator<Date>() {
