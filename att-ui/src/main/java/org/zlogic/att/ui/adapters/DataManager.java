@@ -464,6 +464,7 @@ public class DataManager {
 	public TaskAdapter createTask() {
 		TaskAdapter newTask = new TaskAdapter(persistenceHelper.createTask(), this);
 		tasks.add(newTask);
+		signalTaskUpdate();
 		return newTask;
 	}
 
