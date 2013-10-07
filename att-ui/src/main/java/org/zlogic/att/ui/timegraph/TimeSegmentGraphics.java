@@ -341,10 +341,6 @@ public class TimeSegmentGraphics {
 				return this;
 			}
 
-			private Date clipDate(Date newStart) {
-				return graphicsManager.clipStart(owner, newStart);
-			}
-
 			@Override
 			public void handle(MouseEvent mouseEvent) {
 				if (!graphicsManager.containsGraphicsChild(owner.rectLeft))
@@ -356,7 +352,7 @@ public class TimeSegmentGraphics {
 				} else if (graphicsManager.getIntersectionCount(owner, newStart, timeSegment.endProperty().get()) <= graphicsManager.getIntersectionCount(owner, timeSegment.startProperty().get(), timeSegment.endProperty().get())) {
 					timeSegment.startProperty().setValue(newStart);
 				} else {
-					Date clippedStart = clipDate(newStart);
+					Date clippedStart = graphicsManager.clipStart(owner, newStart);
 					if (!clippedStart.equals(newStart))
 						timeSegment.startProperty().setValue(clippedStart);
 				}
@@ -373,10 +369,6 @@ public class TimeSegmentGraphics {
 				return this;
 			}
 
-			private Date clipDate(Date newEnd) {
-				return graphicsManager.clipEnd(owner, newEnd);
-			}
-
 			@Override
 			public void handle(MouseEvent mouseEvent) {
 				if (!graphicsManager.containsGraphicsChild(owner.rectRight))
@@ -388,7 +380,7 @@ public class TimeSegmentGraphics {
 				} else if (graphicsManager.getIntersectionCount(owner, timeSegment.startProperty().get(), newEnd) <= graphicsManager.getIntersectionCount(owner, timeSegment.startProperty().get(), timeSegment.endProperty().get())) {
 					timeSegment.endProperty().setValue(newEnd);
 				} else {
-					Date clippedEnd = clipDate(newEnd);
+					Date clippedEnd = graphicsManager.clipEnd(owner, newEnd);
 					if (!clippedEnd.equals(newEnd))
 						timeSegment.endProperty().setValue(clippedEnd);
 				}

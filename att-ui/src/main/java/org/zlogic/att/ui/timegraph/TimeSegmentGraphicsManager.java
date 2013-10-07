@@ -285,7 +285,7 @@ public class TimeSegmentGraphicsManager {
 			for (TimeSegmentGraphics graphics : visibleTimeSegments) {
 				if (graphics == owner)
 					continue;
-				Date end = owner.getEndDate();
+				Date end = graphics.getEndDate();
 				if (!end.after(clippedStart))
 					continue;
 				if ((end.before(oldStart) || end.equals(oldStart)) && (end.after(newStart) || end.equals(newStart)))
@@ -310,7 +310,7 @@ public class TimeSegmentGraphicsManager {
 			for (TimeSegmentGraphics graphics : visibleTimeSegments) {
 				if (graphics == owner)
 					continue;
-				Date start = owner.getStartDate();
+				Date start = graphics.getStartDate();
 				if (!start.before(clippedEnd))
 					continue;
 				if ((start.after(oldEnd) || start.equals(oldEnd)) && (start.before(newEnd) || start.equals(newEnd)))

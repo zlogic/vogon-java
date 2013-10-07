@@ -8,6 +8,7 @@ package org.zlogic.att.ui;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -200,7 +201,7 @@ public class TimeGraphController implements Initializable {
 				}
 			}
 		});
-		
+
 		updateTicksStep();
 
 		//Update graph on scale changes
@@ -261,7 +262,7 @@ public class TimeGraphController implements Initializable {
 	 * @param selectedTimeSegments the selected time segments list
 	 */
 	public void setSelectedTimeSegments(List<TimeSegmentAdapter> selectedTimeSegments) {
-		graphicsManager.setSelectedSegments(selectedTimeSegments.toArray(new TimeSegmentAdapter[0]));
+		graphicsManager.setSelectedSegments(new ArrayList<>(selectedTimeSegments).toArray(new TimeSegmentAdapter[0]));
 	}
 
 	/**
@@ -282,7 +283,7 @@ public class TimeGraphController implements Initializable {
 		//Add time segments to bins
 		for (TimeSegmentAdapter timeSegment : dataManager.getTimeSegments())
 			graphicsManager.addTimeSegmentGraphics(timeSegment);
-		
+
 		updateTicks();
 		graphicsManager.updateTimeSegmentGraphics();
 	}
@@ -340,7 +341,7 @@ public class TimeGraphController implements Initializable {
 			label.getStyleClass().add("timegraph-tick"); //NOI18N
 
 			line.layoutYProperty().bind(label.layoutYProperty().add(label.heightProperty()));
-			
+
 			newTicks.put(currentTick, new Tick(line, label));
 		}
 
