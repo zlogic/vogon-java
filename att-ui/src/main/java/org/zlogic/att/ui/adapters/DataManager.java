@@ -342,32 +342,20 @@ public class DataManager {
 			reloadLock.writeLock().lock();
 			tasks.clear();
 			timeSegments.clear();
-			for (Task task : persistenceHelper.getAllTasks(true)) {
-				tasks.add(new TaskAdapter(task, this));
-			}
 			if (timingSegment.get() != null) {
 				TaskAdapter ownerTask = timingSegment.get().ownerTaskProperty().get();
-				TaskAdapter oldOwnerTask = null;
 				//Keep the currently timing segment's task
-				for (TaskAdapter taskAdapter : tasks)
-					if (taskAdapter.getTask().equals(ownerTask.getTask())) {
-						oldOwnerTask = taskAdapter;
-						break;
-					}
-				if (oldOwnerTask != null)
-					tasks.set(tasks.indexOf(oldOwnerTask), ownerTask);
-				else
-					tasks.add(ownerTask);
+				tasks.add(ownerTask);
 
-				timingSegment.get().ownerTaskProperty().set(ownerTask);
-
-				//Keep the currently timing segment's task's segments
-				if (!timeSegments.contains(timingSegment.get()))
-					timeSegments.add(timingSegment.get());
+				//Restore the currently timing segment's task's segments
+				timeSegments.add(timingSegment.get());
 				for (TimeSegmentAdapter segment : ownerTask.timeSegmentsProperty())
-					if (!timeSegments.contains(segment))
-						timeSegments.add(segment);
+					addTimeSegmentAdapter(segment);
 			}
+			//Load all other tasks except for the timing segment task
+			for (Task task : persistenceHelper.getAllTasks(true))
+				if (findTaskAdapter(task) == null)
+					tasks.add(new TaskAdapter(task, this));
 			reloadCustomFields();
 			reloadFilters();
 			updateFilteredTotalTime();
@@ -454,6 +442,17 @@ public class DataManager {
 		if (!timeSegments.contains(newSegment))
 			timeSegments.add(newSegment);
 		return newSegment;
+	}
+
+	/**
+	 * Adds a time segment to the list of all time segments in case it's not
+	 * already added
+	 *
+	 * @param timeSegment the time segment to add
+	 */
+	public void addTimeSegmentAdapter(TimeSegmentAdapter timeSegment) {
+		if (!timeSegments.contains(timeSegment))
+			timeSegments.add(timeSegment);
 	}
 
 	/**

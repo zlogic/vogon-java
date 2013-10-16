@@ -185,7 +185,8 @@ public class TaskAdapter {
 
 		//Populate time segments
 		for (TimeSegment timeSegment : task.getTimeSegments())
-			this.dataManager.getTimeSegments().add(new TimeSegmentAdapter(timeSegment, this, this.dataManager));
+			if (dataManager.findTimeSegmentAdapter(timeSegment) == null)
+				this.dataManager.addTimeSegmentAdapter(new TimeSegmentAdapter(timeSegment, this, this.dataManager));
 
 		updateFxProperties();
 	}
