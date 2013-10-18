@@ -144,7 +144,7 @@ public class TimeSegmentGraphics {
 				graphicsManager.updateTimeSegmentGraphics();
 			}
 			if (initialized)
-				updateGraphics();
+				updateGraphics(true);
 		}
 	}.setGraphics(this);
 	/**
@@ -390,7 +390,7 @@ public class TimeSegmentGraphics {
 		}.setOwner(this));
 		//Update rectangle width
 		rect.widthProperty().addListener(widthLargerThanZeroListener);
-		updateGraphics();
+		updateGraphics(false);
 		//Add handler for main rectangle
 		rect.setOnMouseClicked(selectHandler);
 		rectLabel.setOnMouseClicked(selectHandler);
@@ -422,8 +422,10 @@ public class TimeSegmentGraphics {
 
 	/**
 	 * Updates the start/end properties of graphics
+	 *
+	 * @param initIfNecessary true if TimeSegmentGraphics should be initialized
 	 */
-	private void updateGraphics() {
+	private void updateGraphics(boolean initIfNecessary) {
 		if (!initialized)
 			return;
 		long start = timeSegment.startProperty().get().getTime();
@@ -434,7 +436,8 @@ public class TimeSegmentGraphics {
 		rectLeftLabel.setText(timeFormat.format(timeSegment.startProperty().get()));
 		rectRightLabel.setText(timeFormat.format(timeSegment.endProperty().get()));
 		graphicsManager.updateTimeSegmentGraphics(this);
-		graphicsManager.updateTimeSegmentGraphics();
+		if (initIfNecessary)
+			graphicsManager.updateTimeSegmentGraphics();
 	}
 
 	/**
