@@ -93,7 +93,7 @@
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-entitymanager</artifactId>
-				<version>4.2.5.Final</version>
+				<version>4.2.6.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
@@ -108,7 +108,7 @@
 			<dependency>
 				<groupId>net.sourceforge.dynamicreports</groupId>
 				<artifactId>dynamicreports-core</artifactId>
-				<version>3.1.4</version>
+				<version>3.1.5</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sf.jasperreports</groupId>
