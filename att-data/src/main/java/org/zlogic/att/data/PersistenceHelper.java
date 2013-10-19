@@ -5,6 +5,7 @@
  */
 package org.zlogic.att.data;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -499,15 +500,35 @@ public class PersistenceHelper {
 			CriteriaQuery<Task> tasksCriteriaQuery = criteriaBuilder.createQuery(Task.class);
 			Root<Task> taskRoot = tasksCriteriaQuery.from(Task.class);
 
+			List<Filter> filters = getAllFilters();
+
 			if (applyFilters) {
 				Predicate filtersPredicate = criteriaBuilder.conjunction();
-				for (Filter filter : getAllFilters())
+				for (Filter filter : filters)
 					filtersPredicate = criteriaBuilder.and(filtersPredicate, filter.getFilterPredicate(criteriaBuilder, taskRoot));
 				tasksCriteriaQuery.where(filtersPredicate);
 				tasksCriteriaQuery.distinct(true);
 			}
 
 			List<Task> result = entityManager.createQuery(tasksCriteriaQuery).getResultList();
+
+			//Apply empty filters
+			if (applyFilters) {
+				for (Filter filter : filters) {
+					if (!(filter instanceof FilterCustomField))
+						continue;
+					FilterCustomField filterCustomField = (FilterCustomField) filter;
+					if (!(filterCustomField.getCustomFieldValue() == null || filterCustomField.getCustomFieldValue().isEmpty()))
+						continue;
+					List<Task> tempResult = new LinkedList<>();
+					for (Task task : result) {
+						String customFieldValue = task.getCustomField(filterCustomField.getCustomField());
+						if (customFieldValue == null || customFieldValue.isEmpty())
+							tempResult.add(task);
+					}
+					result = tempResult;
+				}
+			}
 
 			return result;
 		} finally {

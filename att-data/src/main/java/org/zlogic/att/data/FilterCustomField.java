@@ -76,6 +76,8 @@ public class FilterCustomField extends Filter {
 
 	@Override
 	public Predicate getFilterPredicate(CriteriaBuilder criteriaBuilder, Root<Task> taskRoot) {
+		if (customFieldValue == null || customFieldValue.isEmpty())
+			return criteriaBuilder.conjunction();//This will be dealt with later
 		MapJoin<Task, CustomField, String> customFieldJoin = taskRoot.join(Task_.customFields);
 		return criteriaBuilder.and(
 				criteriaBuilder.equal(customFieldJoin.key(), customField),

@@ -140,7 +140,7 @@ public class DataManager {
 	 */
 	protected void addFilteredCustomFieldValue(CustomFieldAdapter adapter, String value) {
 		if (value == null)
-			return;
+			value = ""; //NOI18N
 		if (!filteredCustomFieldValues.containsKey(adapter))
 			filteredCustomFieldValues.put(adapter, FXCollections.observableList(new LinkedList<String>()));
 		if (!allCustomFieldValues.containsKey(adapter))
@@ -381,6 +381,8 @@ public class DataManager {
 			for (CustomFieldAdapter customFieldAdapter : customFields)
 				if (customFieldAdapter.getCustomField().equals(entry.getKey())) {
 					ObservableList<String> customFieldValues = FXCollections.observableArrayList(entry.getValue());
+					if (!customFieldValues.contains("")) //NOI18N
+						customFieldValues.add(""); //NOI18N
 					FXCollections.sort(customFieldValues);
 					allCustomFieldValues.put(customFieldAdapter, customFieldValues);
 					break;
