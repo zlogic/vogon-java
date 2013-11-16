@@ -1,7 +1,7 @@
 /*
  * Vogon personal finance/expense analyzer.
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
- * Author: Dmitry Zolotukhin <zlogic42@outlook.com>
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
 package org.zlogic.vogon.data;
 
@@ -16,7 +16,7 @@ import javax.persistence.criteria.CriteriaQuery;
  * @param <ElementType> element type for query
  * @param <ResultType> return result type
  * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
+ * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
  */
 public interface TransactedQuery<ElementType, ResultType> {
 
