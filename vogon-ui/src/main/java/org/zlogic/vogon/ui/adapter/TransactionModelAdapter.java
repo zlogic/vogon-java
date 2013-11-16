@@ -1,7 +1,7 @@
 /*
  * Vogon personal finance/expense analyzer.
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
- * Author: Dmitry Zolotukhin <zlogic42@outlook.com>
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
 package org.zlogic.vogon.ui.adapter;
 
@@ -35,7 +35,7 @@ import org.zlogic.vogon.data.TransactionComponent;
  * Transactions helper class for rendering with property change detection.
  *
  * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
+ * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
  */
 public class TransactionModelAdapter {
 
