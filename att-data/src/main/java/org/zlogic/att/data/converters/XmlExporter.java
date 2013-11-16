@@ -1,7 +1,7 @@
 /*
  * Awesome Time Tracker project.
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
- * Author: Dmitry Zolotukhin <zlogic42@outlook.com>
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
 package org.zlogic.att.data.converters;
 
@@ -32,7 +32,7 @@ import org.zlogic.att.data.TimeSegment;
  * Exporter of data to XML files
  *
  * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
+ * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
  */
 public class XmlExporter implements Exporter {
 

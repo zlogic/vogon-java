@@ -1,7 +1,7 @@
 /*
  * Awesome Time Tracker project.
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
- * Author: Dmitry Zolotukhin <zlogic42@outlook.com>
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
 package org.zlogic.att.ui.adapters;
 
@@ -31,7 +31,7 @@ import org.zlogic.att.data.TransactedChange;
  * Adapter to interface JPA with Java FX observable properties for Task classes.
  *
  * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic42@outlook.com">zlogic42@outlook.com</a>
+ * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
  */
 public class TaskAdapter {
 
