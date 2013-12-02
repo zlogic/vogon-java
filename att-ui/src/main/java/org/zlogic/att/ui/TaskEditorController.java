@@ -417,7 +417,6 @@ public class TaskEditorController implements Initializable {
 		totalTime.disableProperty().bind(editingSingleTask.not());
 		description.editableProperty().bind(editingSingleTask);
 		timeSegments.disableProperty().bind(editingSingleTask.not());
-		timeSegments.disableProperty().bind(editingSingleTask.not());
 		addSegment.disableProperty().bind(editingSingleTask.not());
 
 		//Update the selection size property
