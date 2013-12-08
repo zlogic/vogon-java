@@ -239,9 +239,9 @@ public class TaskEditorController implements Initializable {
 		@Override
 		public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
 			if (newValue)
-				editingSegmentsCount.add(1);
+				editingSegmentsCount.set(editingSegmentsCount.add(1).get());
 			else
-				editingSegmentsCount.subtract(1);
+				editingSegmentsCount.set(editingSegmentsCount.subtract(1).get());
 			if (editingSegmentsCount.get() < 0)
 				editingSegmentsCount.set(0);
 		}
