@@ -302,7 +302,8 @@ public class TimeSegmentAdapter {
 			private Runnable task = new Runnable() {
 				@Override
 				public void run() {
-					endProperty.setValue(new Date());
+					if(isTimingProperty().get())
+						endProperty.setValue(new Date());
 				}
 			};
 			private ObjectProperty<Date> endProperty;

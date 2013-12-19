@@ -150,7 +150,6 @@ public class PersistenceHelper {
 		parent = entityManager.find(Task.class, parent.getId());
 		TimeSegment segment = parent.createSegment();
 		entityManager.persist(segment);
-		entityManager.merge(parent);
 		return segment;
 	}
 

@@ -17,7 +17,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -109,6 +111,10 @@ public class DataManager {
 	 * Lock to prevent reloading of tasks from interfering with other threads
 	 */
 	private ReadWriteLock reloadLock = new ReentrantReadWriteLock();
+	/**
+	 * Property indicating that task updates affecting sort order should be paused
+	 */
+	private BooleanProperty pauseUpdates = new SimpleBooleanProperty();
 
 	/**
 	 * Creates a DataManager instance
@@ -301,7 +307,8 @@ public class DataManager {
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				lastTaskUpdate.set(new Date());
+				if(!pauseUpdates.get())
+					lastTaskUpdate.set(new Date());
 			}
 		});
 	}
@@ -651,6 +658,15 @@ public class DataManager {
 	 */
 	public ObjectProperty<Period> filteredTotalTimeProperty() {
 		return filteredTotalTime;
+	}
+
+	/**
+	 * Property indicating that task updates affecting sort order should be paused
+	 *
+	 * @return the property indicating that task updates affecting sort order should be paused
+	 */
+	public BooleanProperty pauseUpdatesProperty() {
+		return pauseUpdates;
 	}
 	/*
 	 * Getters/setters

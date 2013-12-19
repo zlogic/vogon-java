@@ -233,19 +233,39 @@ public class TaskEditorController implements Initializable {
 		}
 	};
 	/**
-	 * Time segment cell editing property listener
+	 * Time segment cell monitoring which blocks external updates until edit is completed
 	 */
-	private ChangeListener<Boolean> timeSegmentEditingListener = new ChangeListener<Boolean>() {
+	private class UpdateBlockingTableCell<S, T> extends TextFieldTableCell<S, T> {
 		@Override
-		public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
-			if (newValue)
-				editingSegmentsCount.set(editingSegmentsCount.add(1).get());
-			else
-				editingSegmentsCount.set(editingSegmentsCount.subtract(1).get());
-			if (editingSegmentsCount.get() < 0)
-				editingSegmentsCount.set(0);
+		public void cancelEdit() {
+			dataManager.pauseUpdatesProperty().set(false);
+			super.cancelEdit();
 		}
-	};
+
+		@Override
+		public void startEdit() {
+			dataManager.pauseUpdatesProperty().set(true);
+			super.startEdit();
+		}
+
+		@Override
+		public void commitEdit(T t) {
+			dataManager.pauseUpdatesProperty().set(false);
+			super.commitEdit(t);
+		}
+
+		public void updateItem(T item, boolean empty) {
+			/*
+			if(item!=getItem() || empty!=isEmpty()){
+				TimeSegmentAdapter timeSegment = (TimeSegmentAdapter) getTableRow().getItem();
+				if(timeSegment!=null)
+					timeSegment.pauseUpdates.set(false);
+			}*/
+			super.updateItem(item,empty);
+		}
+	}
+
+	;
 	/**
 	 * Default TimeChangeListener instance
 	 */
@@ -261,11 +281,6 @@ public class TaskEditorController implements Initializable {
 	 */
 	@FXML
 	private BooleanProperty editingSingleTask = new SimpleBooleanProperty(false);
-	/**
-	 * The number of currently edited segments
-	 */
-	@FXML
-	private IntegerProperty editingSegmentsCount = new SimpleIntegerProperty();
 
 	/**
 	 * Initializes the controller
@@ -359,9 +374,8 @@ public class TaskEditorController implements Initializable {
 		columnDescription.setCellFactory(new Callback<TableColumn<TimeSegmentAdapter, String>, TableCell<TimeSegmentAdapter, String>>() {
 			@Override
 			public TableCell<TimeSegmentAdapter, String> call(TableColumn<TimeSegmentAdapter, String> p) {
-				TextFieldTableCell<TimeSegmentAdapter, String> cell = new TextFieldTableCell<>();
+				TextFieldTableCell<TimeSegmentAdapter, String> cell = new UpdateBlockingTableCell<>();
 				cell.setConverter(new DefaultStringConverter());
-				cell.editingProperty().addListener(timeSegmentEditingListener);
 				return cell;
 			}
 		});
@@ -377,20 +391,18 @@ public class TaskEditorController implements Initializable {
 		columnStart.setCellFactory(new Callback<TableColumn<TimeSegmentAdapter, Date>, TableCell<TimeSegmentAdapter, Date>>() {
 			@Override
 			public TableCell<TimeSegmentAdapter, Date> call(TableColumn<TimeSegmentAdapter, Date> p) {
-				TextFieldTableCell<TimeSegmentAdapter, Date> cell = new TextFieldTableCell<>();
+				TextFieldTableCell<TimeSegmentAdapter, Date> cell = new UpdateBlockingTableCell<>();
 				cell.setConverter(new DateTimeStringConverter());
 				cell.setAlignment(Pos.CENTER_RIGHT);
-				cell.editingProperty().addListener(timeSegmentEditingListener);
 				return cell;
 			}
 		});
 		columnEnd.setCellFactory(new Callback<TableColumn<TimeSegmentAdapter, Date>, TableCell<TimeSegmentAdapter, Date>>() {
 			@Override
 			public TableCell<TimeSegmentAdapter, Date> call(TableColumn<TimeSegmentAdapter, Date> p) {
-				TextFieldTableCell<TimeSegmentAdapter, Date> cell = new TextFieldTableCell<>();
+				TextFieldTableCell<TimeSegmentAdapter, Date> cell = new UpdateBlockingTableCell<>();
 				cell.setConverter(new DateTimeStringConverter());
 				cell.setAlignment(Pos.CENTER_RIGHT);
-				cell.editingProperty().addListener(timeSegmentEditingListener);
 				return cell;
 			}
 		});
@@ -552,7 +564,6 @@ public class TaskEditorController implements Initializable {
 		TaskAdapter editedTask = getEditedTask();
 		editingSingleTask.set(editedTask != null);
 		customProperties.setDisable(!editingSingleTask.get());
-		editingSegmentsCount.set(0);
 		if (editingSingleTask.get()) {
 			timeChangeListener.unbind();
 			name.textProperty().bindBidirectional(editedTask.nameProperty());
@@ -621,8 +632,6 @@ public class TaskEditorController implements Initializable {
 	private void updateSortOrder() {
 		//FIXME: Remove this after it's fixed in Java FX
 		//TODO: call this on task updates?
-		if (editingSegmentsCount.get() > 0 || (timeSegments.getEditingCell() != null && timeSegments.getEditingCell().getRow() >= 0))
-			return;
 		TableColumn<TimeSegmentAdapter, ?>[] sortOrder = timeSegments.getSortOrder().toArray(new TableColumn[0]);
 		timeSegments.getSortOrder().clear();
 		timeSegments.getSortOrder().addAll(sortOrder);
