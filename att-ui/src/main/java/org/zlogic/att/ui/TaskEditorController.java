@@ -232,10 +232,13 @@ public class TaskEditorController implements Initializable {
 			updateEditingTasks();
 		}
 	};
+
 	/**
-	 * Time segment cell monitoring which blocks external updates until edit is completed
+	 * Time segment cell monitoring which blocks external updates until edit is
+	 * completed
 	 */
 	private class UpdateBlockingTableCell<S, T> extends TextFieldTableCell<S, T> {
+
 		@Override
 		public void cancelEdit() {
 			dataManager.pauseUpdatesProperty().set(false);
@@ -256,16 +259,14 @@ public class TaskEditorController implements Initializable {
 
 		public void updateItem(T item, boolean empty) {
 			/*
-			if(item!=getItem() || empty!=isEmpty()){
-				TimeSegmentAdapter timeSegment = (TimeSegmentAdapter) getTableRow().getItem();
-				if(timeSegment!=null)
-					timeSegment.pauseUpdates.set(false);
-			}*/
+			 if(item!=getItem() || empty!=isEmpty()){
+			 TimeSegmentAdapter timeSegment = (TimeSegmentAdapter) getTableRow().getItem();
+			 if(timeSegment!=null)
+			 timeSegment.pauseUpdates.set(false);
+			 }*/
 			super.updateItem(item,empty);
 		}
-	}
-
-	;
+	};
 	/**
 	 * Default TimeChangeListener instance
 	 */
@@ -632,6 +633,13 @@ public class TaskEditorController implements Initializable {
 	private void updateSortOrder() {
 		//FIXME: Remove this after it's fixed in Java FX
 		//TODO: call this on task updates?
+		if (dataManager.pauseUpdatesProperty().get()) {
+			log.severe("Cancelling incorrect updateSortOrder, reason: pauseUpdatesProperty");
+			return;
+		} else if (timeSegments.getEditingCell() != null && timeSegments.getEditingCell().getColumn() != -1 && timeSegments.getEditingCell().getRow() != -1) {
+			log.severe("Cancelling incorrect updateSortOrder, reason: editingCellProperty");
+			return;
+		}
 		TableColumn<TimeSegmentAdapter, ?>[] sortOrder = timeSegments.getSortOrder().toArray(new TableColumn[0]);
 		timeSegments.getSortOrder().clear();
 		timeSegments.getSortOrder().addAll(sortOrder);

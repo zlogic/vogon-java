@@ -302,7 +302,7 @@ public class TimeSegmentAdapter {
 			private Runnable task = new Runnable() {
 				@Override
 				public void run() {
-					if(isTimingProperty().get())
+					if (isTimingProperty().get())
 						endProperty.setValue(new Date());
 				}
 			};
@@ -451,9 +451,9 @@ public class TimeSegmentAdapter {
 		duration.setValue(segment.getDuration().toString(timeFormatter));
 		fullDescription.setValue(MessageFormat.format(messages.getString("FULL_DESCRIPTION"),
 				new Object[]{
-			((ownerTask != null && ownerTask.get().nameProperty().get() != null) ? ownerTask.get().nameProperty().get() : messages.getString("NULL_OWNER_TASK")),
-			description.get(),
-			duration.get()}));
+					((ownerTask != null && ownerTask.get().nameProperty().get() != null) ? ownerTask.get().nameProperty().get() : messages.getString("NULL_OWNER_TASK")),
+					description.get(),
+					duration.get()}));
 		//Restore listener
 		description.addListener(descriptionChangeListener);
 		start.addListener(startChangeListener);
