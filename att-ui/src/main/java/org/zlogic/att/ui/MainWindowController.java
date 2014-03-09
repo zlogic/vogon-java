@@ -45,6 +45,8 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.input.DragEvent;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -478,6 +480,31 @@ public class MainWindowController implements Initializable {
 			public TableCell<TaskAdapter, String> call(TableColumn<TaskAdapter, String> p) {
 				TextFieldTableCell<TaskAdapter, String> cell = new TextFieldTableCell<>();
 				cell.setConverter(new DefaultStringConverter());
+				//Shift + space causes all kids of problems ("rarely occurring discarded edits of time segments which are currently being timed")
+				//So it's best to intercept it and not allow TableView to ruin an edit in progress
+				cell.setOnKeyPressed(new EventHandler<KeyEvent>() {
+					private TableCell cell;
+
+					private EventHandler setCell(TableCell cell) {
+						this.cell = cell;
+						return this;
+					}
+
+					@Override
+					public void handle(KeyEvent t) {
+						if (cell.isEditing())
+							if (t.isShiftDown() && (t.getCode() == KeyCode.SPACE || t.getCode() == KeyCode.LEFT || t.getCode() == KeyCode.RIGHT)) {
+								t.consume();
+								log.log(Level.WARNING, "Consumed key event: {0}{1} to prevent loss of focus", new String[]{
+									t.isShiftDown() ? "Shift+" : "",
+									t.isAltDown() ? "Alt+" : "",
+									t.isControlDown() ? "Control+" : "",
+									t.isMetaDown() ? "Meta+" : "",
+									t.isShortcutDown() ? "Shortcut+" : "",
+									t.getCode().getName()});
+							}
+					}
+				}.setCell(cell));
 				return cell;
 			}
 		});

@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -37,6 +38,8 @@ import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.util.Callback;
@@ -234,6 +237,28 @@ public class TaskEditorController implements Initializable {
 	};
 
 	/**
+	 * Shift + space causes all kids of problems ("rarely occurring discarded
+	 * edits of time segments which are currently being timed") So it's best to
+	 * intercept it and not allow TableView to ruin an edit in progress
+	 */
+	private EventHandler<KeyEvent> badShortcutsInterceptor = new EventHandler<KeyEvent>() {
+		@Override
+		public void handle(KeyEvent t) {
+			if (dataManager.pauseUpdatesProperty().get())
+				if (t.isShiftDown() && (t.getCode() == KeyCode.SPACE || t.getCode() == KeyCode.LEFT || t.getCode() == KeyCode.RIGHT)) {
+					t.consume();
+					log.log(Level.WARNING, "Consumed key event: {0}{1} to prevent loss of focus", new String[]{
+						t.isShiftDown() ? "Shift+" : "",
+						t.isAltDown() ? "Alt+" : "",
+						t.isControlDown() ? "Control+" : "",
+						t.isMetaDown() ? "Meta+" : "",
+						t.isShortcutDown() ? "Shortcut+" : "",
+						t.getCode().getName()});
+				}
+		}
+	};
+
+	/**
 	 * Time segment cell monitoring which blocks external updates until edit is
 	 * completed
 	 */
@@ -264,9 +289,10 @@ public class TaskEditorController implements Initializable {
 			 if(timeSegment!=null)
 			 timeSegment.pauseUpdates.set(false);
 			 }*/
-			super.updateItem(item,empty);
+			super.updateItem(item, empty);
 		}
 	};
+
 	/**
 	 * Default TimeChangeListener instance
 	 */
@@ -369,6 +395,7 @@ public class TaskEditorController implements Initializable {
 						}
 					}
 				}.setCell(cell));
+				cell.setOnKeyPressed(badShortcutsInterceptor);
 				return cell;
 			}
 		});
@@ -377,6 +404,7 @@ public class TaskEditorController implements Initializable {
 			public TableCell<TimeSegmentAdapter, String> call(TableColumn<TimeSegmentAdapter, String> p) {
 				TextFieldTableCell<TimeSegmentAdapter, String> cell = new UpdateBlockingTableCell<>();
 				cell.setConverter(new DefaultStringConverter());
+				cell.setOnKeyPressed(badShortcutsInterceptor);
 				return cell;
 			}
 		});
@@ -395,6 +423,7 @@ public class TaskEditorController implements Initializable {
 				TextFieldTableCell<TimeSegmentAdapter, Date> cell = new UpdateBlockingTableCell<>();
 				cell.setConverter(new DateTimeStringConverter());
 				cell.setAlignment(Pos.CENTER_RIGHT);
+				cell.setOnKeyPressed(badShortcutsInterceptor);
 				return cell;
 			}
 		});
@@ -404,6 +433,7 @@ public class TaskEditorController implements Initializable {
 				TextFieldTableCell<TimeSegmentAdapter, Date> cell = new UpdateBlockingTableCell<>();
 				cell.setConverter(new DateTimeStringConverter());
 				cell.setAlignment(Pos.CENTER_RIGHT);
+				cell.setOnKeyPressed(badShortcutsInterceptor);
 				return cell;
 			}
 		});
