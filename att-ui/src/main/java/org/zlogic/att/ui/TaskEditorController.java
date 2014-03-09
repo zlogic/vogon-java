@@ -11,7 +11,10 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -232,40 +235,45 @@ public class TaskEditorController implements Initializable {
 			updateEditingTasks();
 		}
 	};
+
 	/**
-	 * Time segment cell monitoring which blocks external updates until edit is completed
+	 * Time segment cell monitoring which blocks external updates until edit is
+	 * completed
 	 */
 	private class UpdateBlockingTableCell<S, T> extends TextFieldTableCell<S, T> {
+
 		@Override
 		public void cancelEdit() {
+			log.severe(Utils.getStackTrace("About to call cancelEdit"));
 			dataManager.pauseUpdatesProperty().set(false);
 			super.cancelEdit();
 		}
 
 		@Override
 		public void startEdit() {
+			log.severe(Utils.getStackTrace("About to call startEdit"));
 			dataManager.pauseUpdatesProperty().set(true);
 			super.startEdit();
 		}
 
 		@Override
 		public void commitEdit(T t) {
+			log.severe(Utils.getStackTrace("About to call commitEdit"));
 			dataManager.pauseUpdatesProperty().set(false);
 			super.commitEdit(t);
 		}
 
 		public void updateItem(T item, boolean empty) {
 			/*
-			if(item!=getItem() || empty!=isEmpty()){
-				TimeSegmentAdapter timeSegment = (TimeSegmentAdapter) getTableRow().getItem();
-				if(timeSegment!=null)
-					timeSegment.pauseUpdates.set(false);
-			}*/
-			super.updateItem(item,empty);
+			 if(item!=getItem() || empty!=isEmpty()){
+			 TimeSegmentAdapter timeSegment = (TimeSegmentAdapter) getTableRow().getItem();
+			 if(timeSegment!=null)
+			 timeSegment.pauseUpdates.set(false);
+			 }*/
+			log.severe(Utils.getStackTrace("About to call updateItem"));
+			super.updateItem(item, empty);
 		}
-	}
-
-	;
+	};
 	/**
 	 * Default TimeChangeListener instance
 	 */
@@ -302,6 +310,7 @@ public class TaskEditorController implements Initializable {
 						@Override
 						public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
 							if (newValue != null) {
+								log.severe(Utils.getStackTrace("Row timing property changed: " + newValue.toString()));
 								if (newValue)
 									row.getStyleClass().add("timing-segment"); //NOI18N
 								else
@@ -317,6 +326,7 @@ public class TaskEditorController implements Initializable {
 
 					@Override
 					public void changed(ObservableValue<? extends TimeSegmentAdapter> ov, TimeSegmentAdapter oldValue, TimeSegmentAdapter newValue) {
+						log.severe("Row changed");
 						if (oldValue != null)
 							oldValue.isTimingProperty().removeListener(timingChangeListener);
 						if (newValue != null) {
@@ -325,6 +335,18 @@ public class TaskEditorController implements Initializable {
 						}
 					}
 				}.setRow(row));
+
+				row.editingProperty().addListener(new ChangeListener<Boolean>() {
+					@Override
+					public void changed(ObservableValue<? extends Boolean> ov, Boolean oldValue, Boolean newValue) {
+						if (newValue != null) {
+							if (newValue)
+								log.severe(Utils.getStackTrace("Row started editing"));
+							else
+								log.severe(Utils.getStackTrace("Row stopped editing"));
+						}
+					}
+				});
 				return row;
 			}
 		});
@@ -460,6 +482,8 @@ public class TaskEditorController implements Initializable {
 		};
 		columnStart.setComparator(dateComparator);
 		columnEnd.setComparator(dateComparator);
+
+		initErrorGeneratingTimer();
 	}
 
 	/**
@@ -632,6 +656,14 @@ public class TaskEditorController implements Initializable {
 	private void updateSortOrder() {
 		//FIXME: Remove this after it's fixed in Java FX
 		//TODO: call this on task updates?
+		log.severe(Utils.getStackTrace("updateSortOrder"));
+		if (dataManager.pauseUpdatesProperty().get()) {
+			log.severe("Cancelling incorrect updateSortOrder, reason: pauseUpdatesProperty");
+			return;
+		} else if (timeSegments.getEditingCell() != null && timeSegments.getEditingCell().getColumn() != -1 && timeSegments.getEditingCell().getRow() != -1) {
+			log.severe("Cancelling incorrect updateSortOrder, reason: editingCellProperty");
+			return;
+		}
 		TableColumn<TimeSegmentAdapter, ?>[] sortOrder = timeSegments.getSortOrder().toArray(new TableColumn[0]);
 		timeSegments.getSortOrder().clear();
 		timeSegments.getSortOrder().addAll(sortOrder);
@@ -705,5 +737,24 @@ public class TaskEditorController implements Initializable {
 		}
 		if (editedTaskList.size() > 1)
 			updateEditingTasks();
+	}
+
+	private Timer errorGeneratingTimer = new Timer("ErrorGeneratorTimer", true);
+	private TimerTask errorGeneratingTask = new TimerTask() {
+		@Override
+		public void run() {
+			if (!Platform.isFxApplicationThread())
+				Platform.runLater(this);
+			else
+				try {
+					updateSortOrder();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+		}
+	};
+
+	private void initErrorGeneratingTimer() {
+		//errorGeneratingTimer.schedule(errorGeneratingTask,2000,2000);
 	}
 }

@@ -11,7 +11,10 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
@@ -32,6 +35,7 @@ import org.zlogic.att.data.ApplicationShuttingDownException;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.TransactedChange;
+import org.zlogic.att.ui.Utils;
 
 /**
  * Adapter to interface JPA with Java FX observable properties for TimeSegment
@@ -42,6 +46,10 @@ import org.zlogic.att.data.TransactedChange;
  */
 public class TimeSegmentAdapter {
 
+	/**
+	 * The logger
+	 */
+	private final static Logger log = Logger.getLogger(TimeSegmentAdapter.class.getName());
 	/**
 	 * Localization messages
 	 */
@@ -102,6 +110,7 @@ public class TimeSegmentAdapter {
 	private ChangeListener<String> descriptionChangeListener = new ChangeListener<String>() {
 		@Override
 		public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
+			log.severe("About to update descriptionChangeListener");
 			oldValue = oldValue == null ? "" : oldValue; //NOI18N
 			newValue = newValue == null ? "" : newValue; //NOI18N
 			if (!oldValue.equals(newValue) && getDataManager() != null) {
@@ -250,6 +259,8 @@ public class TimeSegmentAdapter {
 	 * @param dataManager the DataManager reference
 	 */
 	public TimeSegmentAdapter(TimeSegment segment, TaskAdapter ownerTask, DataManager dataManager) {
+		description.addListener(descriptionChangeLogger);
+		description.addListener(descriptionInvalidationLogger);
 		this.segment = segment;
 		this.dataManager = dataManager;
 		this.ownerTask.setValue(ownerTask);
@@ -302,7 +313,7 @@ public class TimeSegmentAdapter {
 			private Runnable task = new Runnable() {
 				@Override
 				public void run() {
-					if(isTimingProperty().get())
+					if (isTimingProperty().get())
 						endProperty.setValue(new Date());
 				}
 			};
@@ -441,6 +452,9 @@ public class TimeSegmentAdapter {
 		description.removeListener(descriptionChangeListener);
 		start.removeListener(startChangeListener);
 		end.removeListener(endChangeListener);
+
+		log.severe(Utils.getStackTrace("updateFxProperties"));
+
 		//Perform update
 		if (description.get() == null || !description.get().equals(segment.getDescription()))
 			description.setValue(segment.getDescription());
@@ -451,9 +465,9 @@ public class TimeSegmentAdapter {
 		duration.setValue(segment.getDuration().toString(timeFormatter));
 		fullDescription.setValue(MessageFormat.format(messages.getString("FULL_DESCRIPTION"),
 				new Object[]{
-			((ownerTask != null && ownerTask.get().nameProperty().get() != null) ? ownerTask.get().nameProperty().get() : messages.getString("NULL_OWNER_TASK")),
-			description.get(),
-			duration.get()}));
+					((ownerTask != null && ownerTask.get().nameProperty().get() != null) ? ownerTask.get().nameProperty().get() : messages.getString("NULL_OWNER_TASK")),
+					description.get(),
+					duration.get()}));
 		//Restore listener
 		description.addListener(descriptionChangeListener);
 		start.addListener(startChangeListener);
@@ -474,4 +488,17 @@ public class TimeSegmentAdapter {
 		hash = 47 * hash + Objects.hashCode(this.segment.hashCode());
 		return hash;
 	}
+
+	private ChangeListener<String> descriptionChangeLogger = new ChangeListener<String>() {
+		@Override
+		public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
+			log.severe(Utils.getStackTrace("Description changed"));
+		}
+	};
+	private InvalidationListener descriptionInvalidationLogger = new InvalidationListener() {
+		@Override
+		public void invalidated(Observable o) {
+			log.severe(Utils.getStackTrace("Description invalidated"));
+		}
+	};
 }
