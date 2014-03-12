@@ -13,14 +13,14 @@ import java.util.logging.Logger;
  * Class for redirecting stdout to log
  *
  * @author Dmitry Zolotukhin <a
- *         href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
  */
 public class ConsoleLogger {
 
 	/**
 	 * The console logger name
 	 */
-	public static final String CONSOLE_LOGGER = "Console";
+	public static final String CONSOLE_LOGGER = "Console"; //NOI18N
 	/**
 	 * The console logger
 	 */
@@ -41,6 +41,7 @@ public class ConsoleLogger {
 	 * Stream to redirect output to log
 	 */
 	public class LoggerStream extends OutputStream {
+
 		/**
 		 * Log level for this stream
 		 */
@@ -73,7 +74,7 @@ public class ConsoleLogger {
 				return false;
 			int writeCallCount = 0;
 			for (StackTraceElement ste : Thread.currentThread().getStackTrace())
-				if (ste.getClassName().equals(LoggerStream.class.getName()) && ste.getMethodName().equals("write"))
+				if (ste.getClassName().equals(LoggerStream.class.getName()) && ste.getMethodName().equals("write")) //NOI18N
 					writeCallCount++;
 			return writeCallCount >= 2;
 		}

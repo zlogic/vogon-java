@@ -482,29 +482,7 @@ public class MainWindowController implements Initializable {
 				cell.setConverter(new DefaultStringConverter());
 				//Shift + space causes all kids of problems ("rarely occurring discarded edits of time segments which are currently being timed")
 				//So it's best to intercept it and not allow TableView to ruin an edit in progress
-				cell.setOnKeyPressed(new EventHandler<KeyEvent>() {
-					private TableCell cell;
-
-					private EventHandler setCell(TableCell cell) {
-						this.cell = cell;
-						return this;
-					}
-
-					@Override
-					public void handle(KeyEvent t) {
-						if (cell.isEditing())
-							if (t.isShiftDown() && (t.getCode() == KeyCode.SPACE || t.getCode() == KeyCode.LEFT || t.getCode() == KeyCode.RIGHT)) {
-								t.consume();
-								log.log(Level.WARNING, "Consumed key event: {0}{1} to prevent loss of focus", new String[]{
-									t.isShiftDown() ? "Shift+" : "",
-									t.isAltDown() ? "Alt+" : "",
-									t.isControlDown() ? "Control+" : "",
-									t.isMetaDown() ? "Meta+" : "",
-									t.isShortcutDown() ? "Shortcut+" : "",
-									t.getCode().getName()});
-							}
-					}
-				}.setCell(cell));
+				cell.setOnKeyPressed(new TableCellBadShortcutsInterceptor(cell.editingProperty()));
 				return cell;
 			}
 		});

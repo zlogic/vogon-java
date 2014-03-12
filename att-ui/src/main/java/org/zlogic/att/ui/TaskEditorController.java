@@ -38,8 +38,6 @@ import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.util.Callback;
@@ -237,28 +235,6 @@ public class TaskEditorController implements Initializable {
 	};
 
 	/**
-	 * Shift + space causes all kids of problems ("rarely occurring discarded
-	 * edits of time segments which are currently being timed") So it's best to
-	 * intercept it and not allow TableView to ruin an edit in progress
-	 */
-	private EventHandler<KeyEvent> badShortcutsInterceptor = new EventHandler<KeyEvent>() {
-		@Override
-		public void handle(KeyEvent t) {
-			if (dataManager.pauseUpdatesProperty().get())
-				if (t.isShiftDown() && (t.getCode() == KeyCode.SPACE || t.getCode() == KeyCode.LEFT || t.getCode() == KeyCode.RIGHT)) {
-					t.consume();
-					log.log(Level.WARNING, "Consumed key event: {0}{1} to prevent loss of focus", new String[]{
-						t.isShiftDown() ? "Shift+" : "",
-						t.isAltDown() ? "Alt+" : "",
-						t.isControlDown() ? "Control+" : "",
-						t.isMetaDown() ? "Meta+" : "",
-						t.isShortcutDown() ? "Shortcut+" : "",
-						t.getCode().getName()});
-				}
-		}
-	};
-
-	/**
 	 * Time segment cell monitoring which blocks external updates until edit is
 	 * completed
 	 */
@@ -395,7 +371,7 @@ public class TaskEditorController implements Initializable {
 						}
 					}
 				}.setCell(cell));
-				cell.setOnKeyPressed(badShortcutsInterceptor);
+				cell.setOnKeyPressed(new TableCellBadShortcutsInterceptor(cell.editingProperty()));
 				return cell;
 			}
 		});
@@ -404,7 +380,7 @@ public class TaskEditorController implements Initializable {
 			public TableCell<TimeSegmentAdapter, String> call(TableColumn<TimeSegmentAdapter, String> p) {
 				TextFieldTableCell<TimeSegmentAdapter, String> cell = new UpdateBlockingTableCell<>();
 				cell.setConverter(new DefaultStringConverter());
-				cell.setOnKeyPressed(badShortcutsInterceptor);
+				cell.setOnKeyPressed(new TableCellBadShortcutsInterceptor(cell.editingProperty()));
 				return cell;
 			}
 		});
@@ -423,7 +399,7 @@ public class TaskEditorController implements Initializable {
 				TextFieldTableCell<TimeSegmentAdapter, Date> cell = new UpdateBlockingTableCell<>();
 				cell.setConverter(new DateTimeStringConverter());
 				cell.setAlignment(Pos.CENTER_RIGHT);
-				cell.setOnKeyPressed(badShortcutsInterceptor);
+				cell.setOnKeyPressed(new TableCellBadShortcutsInterceptor(cell.editingProperty()));
 				return cell;
 			}
 		});
@@ -433,7 +409,7 @@ public class TaskEditorController implements Initializable {
 				TextFieldTableCell<TimeSegmentAdapter, Date> cell = new UpdateBlockingTableCell<>();
 				cell.setConverter(new DateTimeStringConverter());
 				cell.setAlignment(Pos.CENTER_RIGHT);
-				cell.setOnKeyPressed(badShortcutsInterceptor);
+				cell.setOnKeyPressed(new TableCellBadShortcutsInterceptor(cell.editingProperty()));
 				return cell;
 			}
 		});
@@ -664,10 +640,10 @@ public class TaskEditorController implements Initializable {
 		//FIXME: Remove this after it's fixed in Java FX
 		//TODO: call this on task updates?
 		if (dataManager.pauseUpdatesProperty().get()) {
-			log.severe("Cancelling incorrect updateSortOrder, reason: pauseUpdatesProperty");
+			log.log(Level.SEVERE, messages.getString("CANCELLING_INCORRECT_UPDATESORTORDER"), "pauseUpdatesProperty");
 			return;
 		} else if (timeSegments.getEditingCell() != null && timeSegments.getEditingCell().getColumn() != -1 && timeSegments.getEditingCell().getRow() != -1) {
-			log.severe("Cancelling incorrect updateSortOrder, reason: editingCellProperty");
+			log.log(Level.SEVERE, messages.getString("CANCELLING_INCORRECT_UPDATESORTORDER"), "editingCellProperty");
 			return;
 		}
 		TableColumn<TimeSegmentAdapter, ?>[] sortOrder = timeSegments.getSortOrder().toArray(new TableColumn[0]);

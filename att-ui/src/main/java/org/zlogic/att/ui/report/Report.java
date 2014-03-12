@@ -386,7 +386,7 @@ public class Report {
 	 */
 	private Path getHTMLImagesDir() throws IOException {
 		if (htmlImagesPath == null) {
-			htmlImagesPath = Files.createTempDirectory("att");
+			htmlImagesPath = Files.createTempDirectory("att"); //NOI18N
 			Runnable deleteFile = new Runnable() {
 				@Override
 				public void run() {
@@ -567,8 +567,8 @@ public class Report {
 				.setBold(true);
 		VerticalListBuilder customFieldsList = DynamicReports.cmp.verticalList()
 				.add(
-				DynamicReports.cmp.text(DynamicReports.field("name", String.class)) //NOI18N
-				.setStyle(titleStyle));
+						DynamicReports.cmp.text(DynamicReports.field("name", String.class)) //NOI18N
+						.setStyle(titleStyle));
 		//Style for custom field names
 		StyleBuilder customFieldNameStyle = DynamicReports.stl.style()
 				.setItalic(true);
@@ -591,9 +591,9 @@ public class Report {
 			//Build the column
 			customFieldsList = customFieldsList
 					.add(
-					DynamicReports.cmp.horizontalFlowList(
-					DynamicReports.cmp.text(customFieldExpression).setValueFormatter(customFieldNameFormatter).setStyle(customFieldNameStyle).setRemoveLineWhenBlank(true),
-					DynamicReports.cmp.text(customFieldExpression).setValueFormatter(customFieldValueFormatter).setRemoveLineWhenBlank(true)));
+							DynamicReports.cmp.horizontalFlowList(
+									DynamicReports.cmp.text(customFieldExpression).setValueFormatter(customFieldNameFormatter).setStyle(customFieldNameStyle).setRemoveLineWhenBlank(true),
+									DynamicReports.cmp.text(customFieldExpression).setValueFormatter(customFieldValueFormatter).setRemoveLineWhenBlank(true)));
 		}
 		return customFieldsList;
 	}
@@ -635,10 +635,10 @@ public class Report {
 				.addField(DynamicReports.field("timeSegment", Date.class)) //NOI18N
 				.sortBy(DynamicReports.asc(startTimeExpression))
 				.columns(
-				DynamicReports.col.column(messages.getString("TASK"), "owner.name", DynamicReports.type.stringType()), //NOI18N
-				DynamicReports.col.column(messages.getString("SPECIFICS"), "description", DynamicReports.type.stringType()), //NOI18N
-				DynamicReports.col.column(messages.getString("START_TIME"), startTimeExpression).setValueFormatter(dateTimeFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT),
-				DynamicReports.col.column(messages.getString("END_TIME"), endTimeExpression).setValueFormatter(dateTimeFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT))
+						DynamicReports.col.column(messages.getString("TASK"), "owner.name", DynamicReports.type.stringType()), //NOI18N
+						DynamicReports.col.column(messages.getString("SPECIFICS"), "description", DynamicReports.type.stringType()), //NOI18N
+						DynamicReports.col.column(messages.getString("START_TIME"), startTimeExpression).setValueFormatter(dateTimeFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT),
+						DynamicReports.col.column(messages.getString("END_TIME"), endTimeExpression).setValueFormatter(dateTimeFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT))
 				.setHighlightDetailEvenRows(true)
 				.setColumnTitleStyle(getColumnTitleStyle())
 				.setDataSource(new JRBeanCollectionDataSource(timeSegments));
@@ -679,10 +679,10 @@ public class Report {
 				.sortBy(DynamicReports.asc(startTimeExpression))
 				.sortBy(DynamicReports.desc(totalTimeExpression))
 				.columns(
-				DynamicReports.col.componentColumn(messages.getString("TASK"), getTaskWithCustomFields()),
-				//DynamicReports.col.column("Task", "name", DynamicReports.type.stringType()),
-				DynamicReports.col.column(messages.getString("DESCRIPTION"), "description", DynamicReports.type.stringType()), //NOI18N
-				DynamicReports.col.column(messages.getString("TOTAL_TIME"), totalTimeExpression).setValueFormatter(periodFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT))
+						DynamicReports.col.componentColumn(messages.getString("TASK"), getTaskWithCustomFields()),
+						//DynamicReports.col.column("Task", "name", DynamicReports.type.stringType()),
+						DynamicReports.col.column(messages.getString("DESCRIPTION"), "description", DynamicReports.type.stringType()), //NOI18N
+						DynamicReports.col.column(messages.getString("TOTAL_TIME"), totalTimeExpression).setValueFormatter(periodFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT))
 				.setHighlightDetailEvenRows(true)
 				.setColumnTitleStyle(getColumnTitleStyle())
 				.setDataSource(new JRBeanCollectionDataSource(tasks));
@@ -715,17 +715,17 @@ public class Report {
 				.title(DynamicReports.cmp.text(header).setTableOfContentsHeading(header).setStyle(getPageHeaderStyle()))
 				.addField(DynamicReports.field("group", Date.class)) //NOI18N
 				.summary(
-				DynamicReports.cht.barChart()
-				.setCategory(DynamicReports.field("customFieldChartValue", String.class)) //NOI18N
-				.series(DynamicReports.cht.serie("durationHours", Double.class)) //NOI18N
-				.setHeight(700)
-				.setShowLegend(false)
-				//.setLabelFormat("{0} ({1} hours)")
-				.setOrientation(Orientation.HORIZONTAL))
+						DynamicReports.cht.barChart()
+						.setCategory(DynamicReports.field("customFieldChartValue", String.class)) //NOI18N
+						.series(DynamicReports.cht.serie("durationHours", Double.class)) //NOI18N
+						.setHeight(700)
+						.setShowLegend(false)
+						//.setLabelFormat("{0} ({1} hours)")
+						.setOrientation(Orientation.HORIZONTAL))
 				.sortBy(DynamicReports.desc(DynamicReports.field("durationHours", Double.class))) //NOI18N
 				.columns(
-				DynamicReports.col.column(messages.getString("FIELD"), "customFieldValue", DynamicReports.type.stringType()), //NOI18N
-				DynamicReports.col.column(messages.getString("TOTAL_TIME"), "duration", Period.class).setValueFormatter(periodFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT)) //NOI18N
+						DynamicReports.col.column(messages.getString("FIELD"), "customFieldValue", DynamicReports.type.stringType()), //NOI18N
+						DynamicReports.col.column(messages.getString("TOTAL_TIME"), "duration", Period.class).setValueFormatter(periodFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT)) //NOI18N
 				.setHighlightDetailEvenRows(true)
 				.setColumnTitleStyle(getColumnTitleStyle())
 				.setDataSource(new JRBeanCollectionDataSource(customFieldData.values()))
@@ -744,7 +744,7 @@ public class Report {
 			customFieldReports.add(DynamicReports.cmp.pageBreak());
 			customFieldReports.add(
 					DynamicReports.cmp.subreport(
-					buildCustomFieldReport(tasks, customField.getCustomField())));
+							buildCustomFieldReport(tasks, customField.getCustomField())));
 		}
 		return DynamicReports.report()
 				//.pageHeader(DynamicReports.cmp.text(messages.getString("STATISTICS")).setStyle(getPageHeaderStyle()))
@@ -793,10 +793,10 @@ public class Report {
 				.pageHeader(DynamicReports.cmp.text(header).setStyle(getPageHeaderStyle()).setPrintWhenExpression(subreportPrintNotInFirstPageExpression))
 				.title(DynamicReports.cmp.text(header).setTableOfContentsHeading(header).setStyle(getPageHeaderStyle()))
 				.columns(
-				DynamicReports.col.column(messages.getString("TASK"), "timeSegment.owner.name", DynamicReports.type.stringType()), //NOI18N
-				DynamicReports.col.column(messages.getString("SPECIFICS"), "timeSegment.description", DynamicReports.type.stringType()), //NOI18N
-				//DynamicReports.col.column("Duration", "duration", DynamicReports.type.stringType()),
-				DynamicReports.col.column(messages.getString("HOURS"), "durationHours", DynamicReports.type.doubleType())) //NOI18N
+						DynamicReports.col.column(messages.getString("TASK"), "timeSegment.owner.name", DynamicReports.type.stringType()), //NOI18N
+						DynamicReports.col.column(messages.getString("SPECIFICS"), "timeSegment.description", DynamicReports.type.stringType()), //NOI18N
+						//DynamicReports.col.column("Duration", "duration", DynamicReports.type.stringType()),
+						DynamicReports.col.column(messages.getString("HOURS"), "durationHours", DynamicReports.type.doubleType())) //NOI18N
 				.groupBy(dateGroup)
 				.sortBy(DynamicReports.asc("date", Date.class)) //NOI18N
 				.setHighlightDetailEvenRows(true)
@@ -842,11 +842,10 @@ public class Report {
 
 			//Build the report
 			//progressProperty().set(0.2);
-
 			//Prepare exporter
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
-			JasperHtmlExporterBuilder htmlExporter =
-					Exporters.htmlExporter(stream)
+			JasperHtmlExporterBuilder htmlExporter
+					= Exporters.htmlExporter(stream)
 					.setOutputImagesToDir(true)
 					.setImagesURI(getHTMLImagesDir().toUri().toString())
 					.setImagesDirName(getHTMLImagesDir().toString())
@@ -867,13 +866,13 @@ public class Report {
 					.setPageFormat(PageType.A4, PageOrientation.PORTRAIT)
 					.tableOfContents(tableOfContentsAfterTitle)
 					.detail(
-					DynamicReports.cmp.verticalGap(20),
-					DynamicReports.cmp.subreport(buildTasksReport(tasks)),
-					DynamicReports.cmp.subreport(buildCustomFieldsReport(tasks)),
-					DynamicReports.cmp.pageBreak(),
-					DynamicReports.cmp.subreport(buildTimeSegmentsReport(timeSegments)),
-					DynamicReports.cmp.pageBreak(),
-					DynamicReports.cmp.subreport(buildTimesheetReport(timeSegments)))
+							DynamicReports.cmp.verticalGap(20),
+							DynamicReports.cmp.subreport(buildTasksReport(tasks)),
+							DynamicReports.cmp.subreport(buildCustomFieldsReport(tasks)),
+							DynamicReports.cmp.pageBreak(),
+							DynamicReports.cmp.subreport(buildTimeSegmentsReport(timeSegments)),
+							DynamicReports.cmp.pageBreak(),
+							DynamicReports.cmp.subreport(buildTimesheetReport(timeSegments)))
 					.lastPageFooter(getLastFooter())
 					.setDataSource(new JREmptyDataSource())
 					.toHtml(htmlExporter);
