@@ -148,6 +148,10 @@ public class MainWindowController implements Initializable {
 	 */
 	private FilterEditorController filterEditorController;
 	/**
+	 * About stage
+	 */
+	private Stage aboutStage;
+	/**
 	 * Root pane
 	 */
 	@FXML
@@ -547,6 +551,7 @@ public class MainWindowController implements Initializable {
 		loadWindowFilterEditor();
 		loadCurrentTaskNotification();
 		loadInactivityDialog();
+		loadWindowAbout();
 		taskEditorController.setDataManager(dataManager);
 		timeGraphController.setDataManager(dataManager);
 
@@ -708,7 +713,7 @@ public class MainWindowController implements Initializable {
 	}
 
 	/**
-	 * Loads the report FXML
+	 * Loads the filter editor FXML
 	 */
 	private void loadWindowFilterEditor() {
 		//Load FXML
@@ -790,6 +795,32 @@ public class MainWindowController implements Initializable {
 		inactivityDialogController = loader.getController();
 		inactivityDialogController.setDataManager(dataManager);
 		inactivityDialogController.exceptionHandlerProperty().bind(exceptionHandler);
+	}
+
+	/**
+	 * Loads the about window FXML
+	 */
+	private void loadWindowAbout() {
+		//Load FXML
+		aboutStage = new Stage();
+		aboutStage.initModality(Modality.NONE);
+		aboutStage.setResizable(false);
+		Parent root = null;
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("About.fxml"), messages); //NOI18N
+		loader.setLocation(getClass().getResource("About.fxml")); //NOI18N
+		try {
+			root = (Parent) loader.load();
+		} catch (IOException ex) {
+			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
+			if (exceptionHandler.get() != null)
+				exceptionHandler.get().showException(messages.getString("ERROR_LOADING_FXML"), ex);
+		}
+		//Initialize the scene properties
+		if (root != null) {
+			Scene scene = new Scene(root);
+			aboutStage.setTitle(messages.getString("ABOUT_TITLE"));
+			aboutStage.setScene(scene);
+		}
 	}
 
 	/**
@@ -960,6 +991,15 @@ public class MainWindowController implements Initializable {
 	private void showFiltersEditor() {
 		filterEditorStage.getIcons().setAll(((Stage) rootPane.getScene().getWindow()).getIcons());
 		filterEditorStage.show();
+	}
+
+	/**
+	 * Show the about window
+	 */
+	@FXML
+	private void showAboutWindow() {
+		aboutStage.getIcons().setAll(((Stage) rootPane.getScene().getWindow()).getIcons());
+		aboutStage.show();
 	}
 
 	/**
