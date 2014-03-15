@@ -52,7 +52,7 @@ public class TimeSegmentGraphics {
 	/**
 	 * Width of resize box in pixels
 	 */
-	private static final int resizeWidth = 10;
+	private static final int resizeWidth = 20;
 	/**
 	 * The central rectangle
 	 */
@@ -200,7 +200,10 @@ public class TimeSegmentGraphics {
 	private EventHandler<MouseEvent> selectHandler = new EventHandler<MouseEvent>() {
 		@Override
 		public void handle(MouseEvent t) {
-			graphicsManager.setSelectedSegments(timeSegment);
+			if (!selectedProperty.get())
+				graphicsManager.setSelectedSegments(timeSegment);
+			else
+				graphicsManager.setSelectedSegments();
 		}
 	};
 
@@ -248,6 +251,7 @@ public class TimeSegmentGraphics {
 		rectHandle.layoutYProperty().bind(rect.layoutYProperty());
 		rectHandle.getStyleClass().add("timegraph-handle"); //NOI18N
 		rectHandle.disableProperty().bind(selectedProperty.not());
+		rectHandle.visibleProperty().bind(selectedProperty);
 	}
 
 	/**
@@ -274,6 +278,7 @@ public class TimeSegmentGraphics {
 	 * @param label the label for a rectangle
 	 */
 	private void setLabelForRectVertical(Rectangle rectangle, Label label) {
+		label.setRotate(270);
 		label.layoutXProperty().bind(rectangle.layoutXProperty().add(label.heightProperty().subtract(label.widthProperty()).divide(2)));
 		label.layoutYProperty().bind(rectangle.layoutYProperty().add(label.widthProperty().subtract(label.heightProperty()).divide(2)));
 		label.maxHeightProperty().bind(rectangle.widthProperty());
@@ -283,6 +288,10 @@ public class TimeSegmentGraphics {
 		label.minWidthProperty().bind(rectangle.heightProperty());
 		label.prefWidthProperty().bind(rectangle.heightProperty());
 		label.setLabelFor(rectangle);
+		label.visibleProperty().bind(selectedProperty);
+		label.setAlignment(Pos.CENTER);
+		label.setDisable(true);
+		label.getStyleClass().addAll("timegraph-handle", "text"); //NOI18N
 	}
 
 	/**
@@ -303,23 +312,17 @@ public class TimeSegmentGraphics {
 		//Init left resize rectangle
 		rectLeft = new Rectangle();
 		rectLeft.layoutXProperty().bind(rect.layoutXProperty().subtract(resizeWidth));
+		rectLeft.getStyleClass().add("left");
 		setResizeHandleRectProperties(rectLeft);
 		rectLeftLabel = new Label();
-		rectLeftLabel.setRotate(270);
 		setLabelForRectVertical(rectLeft, rectLeftLabel);
-		rectLeftLabel.setAlignment(Pos.CENTER);
-		rectLeftLabel.setDisable(true);
-		rectLeftLabel.getStyleClass().addAll("timegraph-handle", "text"); //NOI18N
 		//Init right resize rectangle
 		rectRight = new Rectangle();
 		rectRight.layoutXProperty().bind(rect.layoutXProperty().add(rect.widthProperty()));
+		rectRight.getStyleClass().add("right");
 		setResizeHandleRectProperties(rectRight);
 		rectRightLabel = new Label();
-		rectRightLabel.setRotate(270);
 		setLabelForRectVertical(rectRight, rectRightLabel);
-		rectRightLabel.setAlignment(Pos.CENTER);
-		rectRightLabel.setDisable(true);
-		rectRightLabel.getStyleClass().addAll("timegraph-handle", "text"); //NOI18N
 		//Init text label
 		rectLabel = new Label();
 		setLabelForRect(rect, rectLabel);
@@ -345,8 +348,8 @@ public class TimeSegmentGraphics {
 			public void handle(MouseEvent mouseEvent) {
 				if (!graphicsManager.containsGraphicsChild(owner.rectLeft))
 					return; //Skip drag if handle was hidden
-				double clickLocation = localClick != null ? localClick.getX() : 0;
-				Date newStart = graphicsManager.coordinatesToTime(mouseEvent.getSceneX() - clickLocation);
+				double clickLocation = localClick != null ? (resizeWidth - localClick.getX()) : 0;
+				Date newStart = graphicsManager.coordinatesToTime(mouseEvent.getSceneX() + clickLocation);
 				if (newStart.after(timeSegment.endProperty().get())) {
 					log.finer(messages.getString("START_CANNOT_BE_BEFORE_END_SKIPPING_EDIT"));
 				} else if (graphicsManager.getIntersectionCount(owner, newStart, timeSegment.endProperty().get()) <= graphicsManager.getIntersectionCount(owner, timeSegment.startProperty().get(), timeSegment.endProperty().get())) {
@@ -373,8 +376,8 @@ public class TimeSegmentGraphics {
 			public void handle(MouseEvent mouseEvent) {
 				if (!graphicsManager.containsGraphicsChild(owner.rectRight))
 					return; //Skip drag if handle was hidden
-				double clickLocation = localClick != null ? (resizeWidth - localClick.getX()) : 0;
-				Date newEnd = graphicsManager.coordinatesToTime(mouseEvent.getSceneX() + clickLocation);
+				double clickLocation = localClick != null ? localClick.getX() : 0;
+				Date newEnd = graphicsManager.coordinatesToTime(mouseEvent.getSceneX() - clickLocation);
 				if (newEnd.before(timeSegment.startProperty().get())) {
 					log.finer(messages.getString("START_CANNOT_BE_BEFORE_END_SKIPPING_EDIT"));
 				} else if (graphicsManager.getIntersectionCount(owner, timeSegment.startProperty().get(), newEnd) <= graphicsManager.getIntersectionCount(owner, timeSegment.startProperty().get(), timeSegment.endProperty().get())) {
@@ -395,8 +398,8 @@ public class TimeSegmentGraphics {
 		rect.setOnMouseClicked(selectHandler);
 		rectLabel.setOnMouseClicked(selectHandler);
 		//Add everything to the graph
-		graphicsManager.addGraphicsChildren(rect);
-		graphicsManager.addGraphicsChildren(rectLabel);
+		graphicsManager.addGraphicsChildren(rect, rectLabel);
+		//Listen for out-of-range events
 		BooleanBinding outOfRangeExpression = rectLeft.layoutXProperty().greaterThan(graphicsManager.graphicsLayoutXProperty().add(graphicsManager.graphicsWidthProperty())).or(rectRight.layoutXProperty().add(rectRight.widthProperty()).lessThan(graphicsManager.graphicsLayoutXProperty()));
 		outOfRange.bind(outOfRangeExpression);
 		outOfRangeListener.changed(outOfRangeExpression, true, outOfRangeExpression.get());
@@ -409,7 +412,7 @@ public class TimeSegmentGraphics {
 	/**
 	 * Brings graphics objects to front in correct order
 	 */
-	private void toFront() {
+	protected void toFront() {
 		if (!initialized)
 			return;
 		rect.toFront();
@@ -431,8 +434,8 @@ public class TimeSegmentGraphics {
 		long start = timeSegment.startProperty().get().getTime();
 		long end = timeSegment.endProperty().get().getTime();
 		long duration = end - start;
-		rect.layoutXProperty().bind(graphicsManager.timeToCoordinatesProperty(timeSegment.startProperty().get()).add(resizeWidth));
-		rect.widthProperty().bind(graphicsManager.scaleProperty().multiply(duration).subtract(resizeWidth * 2));
+		rect.layoutXProperty().bind(graphicsManager.timeToCoordinatesProperty(timeSegment.startProperty().get()));
+		rect.widthProperty().bind(graphicsManager.scaleProperty().multiply(duration));
 		rectLeftLabel.setText(timeFormat.format(timeSegment.startProperty().get()));
 		rectRightLabel.setText(timeFormat.format(timeSegment.endProperty().get()));
 		graphicsManager.updateTimeSegmentGraphics(this);

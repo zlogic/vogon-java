@@ -150,10 +150,14 @@ public class TimeSegmentAdapter {
 				updateFxProperties();
 				getDataManager().signalTaskUpdate();
 				//Update total time
-				Period deltaTime = oldValue.before(newValue)
-						? new Period().minus(new Interval(new DateTime(oldValue), new DateTime(newValue)).toPeriod())
-						: new Period().plus(new Interval(new DateTime(newValue), new DateTime(oldValue)).toPeriod());
-				getDataManager().addFilteredTotalTime(deltaTime);
+				DateTime oldValueDateTime = new DateTime(oldValue);
+				DateTime newValueDateTime = new DateTime(newValue);
+				if (!newValueDateTime.equals(oldValueDateTime)) {
+					Period deltaTime = oldValueDateTime.isBefore(newValueDateTime)
+							? new Period().minus(new Interval(oldValueDateTime, newValueDateTime).toPeriod())
+							: new Period().plus(new Interval(newValueDateTime, oldValueDateTime).toPeriod());
+					getDataManager().addFilteredTotalTime(deltaTime);
+				}
 			}
 		}
 	};
@@ -184,10 +188,14 @@ public class TimeSegmentAdapter {
 					updateFxProperties();
 					getDataManager().signalTaskUpdate();
 					//Update total time
-					Period deltaTime = oldValue.before(newValue)
-							? new Period().plus(new Interval(new DateTime(oldValue), new DateTime(newValue)).toPeriod())
-							: new Period().minus(new Interval(new DateTime(newValue), new DateTime(oldValue)).toPeriod());
-					getDataManager().addFilteredTotalTime(deltaTime);
+					DateTime oldValueDateTime = new DateTime(oldValue);
+					DateTime newValueDateTime = new DateTime(newValue);
+					if (!newValueDateTime.equals(oldValueDateTime)) {
+						Period deltaTime = oldValueDateTime.isBefore(newValueDateTime)
+								? new Period().plus(new Interval(oldValueDateTime, newValueDateTime).toPeriod())
+								: new Period().minus(new Interval(newValueDateTime, oldValueDateTime).toPeriod());
+						getDataManager().addFilteredTotalTime(deltaTime);
+					}
 				} catch (ApplicationShuttingDownException ex) {
 					//Rethrow exception if we are not shutting down
 					if (!dataManager.getPersistenceHelper().isShuttingDown())

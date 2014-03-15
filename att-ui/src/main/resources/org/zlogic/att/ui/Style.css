@@ -100,13 +100,24 @@
  */
 .timegraph-handle {
     -fx-accent: -fx-box-border;
-	-fx-fill: -fx-accent;
+}
+.timegraph-handle.left {
+	-fx-fill: linear-gradient(from 0% 0% to 100% 0%, transparent, -fx-accent);
+}
+.timegraph-handle.right {
+	-fx-fill: linear-gradient(from 100% 0% to 0% 0%, transparent, -fx-accent);
 }
 .timegraph-handle.text {
-    -fx-font-size: 8;
+    /*-fx-font-size: 18;*/
+	-fx-font-weight: bold;
+	-fx-text-fill: black;
+	-fx-opacity: 1;
 }
-.timegraph-handle:hover {
-	-fx-fill: derive(-fx-accent,50%);
+.timegraph-handle.left:hover {
+	-fx-fill: linear-gradient(from 0% 0% to 100% 0%, transparent, derive(-fx-accent,30%));
+}
+.timegraph-handle.right:hover {
+	-fx-fill: linear-gradient(from 100% 0% to 0% 0%, transparent, derive(-fx-accent,30%));
 }
 
 /*

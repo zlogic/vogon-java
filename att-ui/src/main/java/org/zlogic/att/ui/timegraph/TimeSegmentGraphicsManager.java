@@ -213,6 +213,15 @@ public class TimeSegmentGraphicsManager {
 	}
 
 	/**
+	 * Bring selected time segments to front
+	 */
+	private void toFrontSelectedSegments() {
+		for (TimeSegmentGraphics graphics : visibleTimeSegments)
+			if (graphics.selectedProperty.get())
+				graphics.toFront();
+	}
+
+	/**
 	 * Returns the number of times a segment intersects other visible segments
 	 *
 	 * @param segmentGraphics the TimeSegmentGraphics (used to exclude itself
@@ -388,6 +397,7 @@ public class TimeSegmentGraphicsManager {
 			List<Node> filteredList = new ArrayList(Arrays.asList(nodes));
 			filteredList.removeAll(graphicsNode.getChildren());
 			graphicsNode.getChildren().addAll(filteredList);
+			toFrontSelectedSegments();
 		}
 	}
 
