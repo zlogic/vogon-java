@@ -217,13 +217,20 @@ public class ReportController implements Initializable {
 					}
 				});
 				report.buildReport();
-				generatedReport.set(report);
 				Platform.runLater(new Runnable() {
+					private Report report;
+
+					public Runnable setReport(Report report) {
+						this.report = report;
+						return this;
+					}
+
 					@Override
 					public void run() {
+						generatedReport.set(report);
 						viewer.getEngine().loadContent(generatedReport.get().getReportHTML());
 					}
-				});
+				}.setReport(report));
 				//updateProgress(-1, 1);
 				return null;
 			}
