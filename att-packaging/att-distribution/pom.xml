@@ -100,7 +100,7 @@
 							<icon>src/main/resources/att.ico</icon>
 							<jre>
 								<minVersion>${version.java.launch4j}</minVersion>
-								<path>jre7</path>
+								<path>jre8</path>
 							</jre>
 							<versionInfo>
 								<fileVersion>${version.windows}</fileVersion>
