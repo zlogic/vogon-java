@@ -322,10 +322,9 @@ public class TaskEditorController implements Initializable {
 					public void changed(ObservableValue<? extends TimeSegmentAdapter> ov, TimeSegmentAdapter oldValue, TimeSegmentAdapter newValue) {
 						if (oldValue != null)
 							oldValue.isTimingProperty().removeListener(timingChangeListener);
-						if (newValue != null) {
+						if (newValue != null)
 							newValue.isTimingProperty().addListener(timingChangeListener);
-							timingChangeListener.changed(newValue.isTimingProperty(), oldValue != null ? oldValue.isTimingProperty().get() : false, newValue.isTimingProperty().get());
-						}
+						timingChangeListener.changed(null, oldValue != null ? oldValue.isTimingProperty().get() : false, newValue != null ? newValue.isTimingProperty().get() : false);
 					}
 				}.setRow(row));
 				return row;
