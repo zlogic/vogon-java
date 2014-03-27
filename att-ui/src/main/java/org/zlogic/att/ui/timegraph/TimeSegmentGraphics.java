@@ -48,6 +48,9 @@ public class TimeSegmentGraphics {
 	 * Mouse events handler
 	 */
 	private MouseHandler mouseHandler;
+	/**
+	 * The graphics manager
+	 */
 	private TimeSegmentGraphicsManager graphicsManager;
 	/**
 	 * Width of resize box in pixels
@@ -167,6 +170,8 @@ public class TimeSegmentGraphics {
 		public void changed(ObservableValue<? extends Number> ov, Number oldValue, Number newValue) {
 			if (newValue == oldValue || newValue == null)
 				return;
+			if (!initialized)
+				return;
 			if ((newValue instanceof Double && (Double) newValue > 0) || newValue.floatValue() > 0) {
 				graphicsManager.addGraphicsChildren(rectLeft);
 				graphicsManager.addGraphicsChildren(rectLeftLabel);
@@ -211,6 +216,8 @@ public class TimeSegmentGraphics {
 	 * Creates the graphics for a TimeSegmentAdapter
 	 *
 	 * @param timeSegment the TimeSegmentAdapter
+	 * @param graphicsManager the TimeSegmentGraphicsManager
+	 * @param mouseHandler the mouse event handler
 	 */
 	public TimeSegmentGraphics(TimeSegmentAdapter timeSegment, TimeSegmentGraphicsManager graphicsManager, MouseHandler mouseHandler) {
 		this.timeSegment = timeSegment;
