@@ -14,26 +14,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.LongProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
+import javafx.util.converter.DateTimeStringConverter;
 import org.zlogic.att.ui.adapters.DataManager;
 import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 import org.zlogic.att.ui.timegraph.MouseHandler;
@@ -72,9 +78,18 @@ public class TimeGraphController implements Initializable {
 	 */
 	@FXML
 	private Pane timeGraphPane;
+	/**
+	 * Jump to date field
+	 */
+	@FXML
+	private TextField jumpDate;
 	/*
 	 * Begin: constants
 	 */
+	/**
+	 * Scale change step
+	 */
+	private static final double scaleStep = 1.2;
 	/**
 	 * Default scale
 	 */
@@ -107,6 +122,10 @@ public class TimeGraphController implements Initializable {
 	 * any changes
 	 */
 	private BooleanProperty visibleProperty = new SimpleBooleanProperty(false);
+	/**
+	 * Jump to date value
+	 */
+	private ObjectProperty<Date> jumpDateValue = new SimpleObjectProperty<>(new Date());
 	/**
 	 * Format for date/time in tick labels
 	 */
@@ -189,7 +208,7 @@ public class TimeGraphController implements Initializable {
 		visibleProperty.addListener(new ChangeListener<Boolean>() {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observableValue, Boolean oldValue, Boolean newValue) {
-				if (newValue == oldValue)
+				if (Objects.equals(newValue, oldValue))
 					return;
 				if (newValue.equals(Boolean.TRUE)) {
 					if (timeGraphPane.widthProperty().greaterThan(0).get())
@@ -208,8 +227,12 @@ public class TimeGraphController implements Initializable {
 		scale.addListener(new ChangeListener<Number>() {
 			@Override
 			public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
-				if (!newValue.equals(oldValue))
+				if (newValue == null || newValue.equals(oldValue))
 					return;
+				if (!layoutPos.isBound())
+					layoutPos.set(layoutPos.get() * (newValue.doubleValue() / oldValue.doubleValue()));
+				graphicsManager.updateTimeSegmentGraphics();
+				updateTicks();
 				updateTicksStep();
 			}
 		});
@@ -235,6 +258,16 @@ public class TimeGraphController implements Initializable {
 					updateTimescale();//TODO: replace this with a less compute-intensive operation?
 			}
 		});
+
+		//Update "jump to date" value
+		layoutPos.addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				if (newValue != null && !newValue.equals(oldValue))
+					jumpDateValue.set(graphicsManager.coordinatesToTime(timeGraphPane.widthProperty().divide(2).get()));
+			}
+		});
+		jumpDate.textProperty().bindBidirectional(jumpDateValue, new DateTimeStringConverter());
 	}
 
 	/**
@@ -394,5 +427,57 @@ public class TimeGraphController implements Initializable {
 			updateTicks();
 			graphicsManager.updateTimeSegmentGraphics();
 		}
+	}
+
+	/*
+	 Zoom buttons
+	 */
+	/**
+	 * ZoomPlus button
+	 *
+	 * @param event the event
+	 */
+	@FXML
+	private void zoomPlus(ActionEvent event) {
+		double currentScaleStep = Math.round(Math.log(scale.get() / defaultScale) / Math.log(scaleStep));
+		currentScaleStep++;
+		scale.set(defaultScale * Math.pow(scaleStep, currentScaleStep));
+	}
+
+	/**
+	 * ZoomMinus button
+	 *
+	 * @param event the event
+	 */
+	@FXML
+	private void zoomMinus(ActionEvent event) {
+		double currentScaleStep = Math.round(Math.log(scale.get() / defaultScale) / Math.log(scaleStep));
+		currentScaleStep--;
+		scale.set(defaultScale * Math.pow(scaleStep, currentScaleStep));
+	}
+
+	/**
+	 * Zoom Reset button
+	 *
+	 * @param event the event
+	 */
+	@FXML
+	private void zoomReset(ActionEvent event) {
+		scale.set(defaultScale);
+	}
+
+	/**
+	 * Jump to date button
+	 *
+	 * @param event the event
+	 */
+	@FXML
+	private void jumpToDate(ActionEvent event) {
+		if (layoutPos.isBound())
+			layoutPos.unbind();
+		layoutPos.set(timeGraphPane.widthProperty().divide(2).subtract(scale.multiply(jumpDateValue.get().getTime())).get());
+
+		updateTicks();
+		graphicsManager.updateTimeSegmentGraphics();
 	}
 }
