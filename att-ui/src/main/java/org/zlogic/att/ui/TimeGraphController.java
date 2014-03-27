@@ -232,8 +232,8 @@ public class TimeGraphController implements Initializable {
 				if (!layoutPos.isBound())
 					layoutPos.set(layoutPos.get() * (newValue.doubleValue() / oldValue.doubleValue()));
 				graphicsManager.updateTimeSegmentGraphics();
-				updateTicks();
 				updateTicksStep();
+				updateTicks();
 			}
 		});
 
