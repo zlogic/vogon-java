@@ -6,7 +6,6 @@
 package org.zlogic.att.ui;
 
 import java.net.URL;
-import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,6 +43,7 @@ import org.zlogic.att.ui.adapters.DataManager;
 import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 import org.zlogic.att.ui.timegraph.MouseHandler;
 import org.zlogic.att.ui.timegraph.TimeSegmentGraphicsManager;
+import org.zlogic.att.ui.timegraph.TimeStepRangeCalculator;
 
 /**
  * Controller for graphical time segment editor
@@ -98,10 +98,6 @@ public class TimeGraphController implements Initializable {
 	 * Minimum space between ticks in pixels
 	 */
 	private static final double minTickSpacing = 100;
-	/**
-	 * Minimum tick step
-	 */
-	private static final long minimumStep = 1000;//1 second
 	/*
 	 * End: constants
 	 */
@@ -152,6 +148,8 @@ public class TimeGraphController implements Initializable {
 			}
 		}
 	};
+
+	private TimeStepRangeCalculator stepCalculator = new TimeStepRangeCalculator();
 
 	/**
 	 * Graphics object containing a graph tick
@@ -230,7 +228,7 @@ public class TimeGraphController implements Initializable {
 				if (newValue == null || newValue.equals(oldValue))
 					return;
 				if (!layoutPos.isBound())
-					layoutPos.set(layoutPos.get() * (newValue.doubleValue() / oldValue.doubleValue()));
+					layoutPos.set((layoutPos.get() - timeGraphPane.getWidth() / 2) * (newValue.doubleValue() / oldValue.doubleValue()) + timeGraphPane.getWidth() / 2);
 				graphicsManager.updateTimeSegmentGraphics();
 				updateTicksStep();
 				updateTicks();
@@ -245,17 +243,6 @@ public class TimeGraphController implements Initializable {
 					updateTicks();
 					graphicsManager.updateTimeSegmentGraphics();
 				}
-			}
-		});
-
-		//Update scale on bin size changes
-		graphicsManager.timeSegmentGraphicsBinsizeProperty().addListener(new ChangeListener<Number>() {
-			@Override
-			public void changed(ObservableValue<? extends Number> ov, Number oldValue, Number newValue) {
-				if (newValue == null || newValue.equals(oldValue))
-					return;
-				if (visibleProperty.get())
-					updateTimescale();//TODO: replace this with a less compute-intensive operation?
 			}
 		});
 
@@ -325,23 +312,7 @@ public class TimeGraphController implements Initializable {
 	 * Updates the ticks step to match the current scale
 	 */
 	private void updateTicksStep() {
-		long step = minimumStep;
-		long stepMultipliers[] = new long[]{1, 2, 5};
-		int stepMultiplier = 0;
-		//Iterate through possible scales
-		while ((step * stepMultipliers[stepMultiplier] * scale.get()) < minTickSpacing && step < Long.MAX_VALUE && step > 0) {
-			stepMultiplier++;
-			if (stepMultiplier >= (stepMultipliers.length - 1)) {
-				stepMultiplier = 0;
-				step *= 10;
-			}
-		}
-		if (step < Long.MAX_VALUE && step > 0) {
-			ticksStep.set(step * stepMultipliers[stepMultiplier]);
-		} else {
-			ticksStep.set(0);
-			log.severe(MessageFormat.format(messages.getString("STEP_IS_OUT_OF_RANGE"), new Object[]{step}));
-		}
+		ticksStep.set(stepCalculator.getTicksStep((long) (minTickSpacing / scale.get())));
 	}
 
 	/**
