@@ -206,10 +206,15 @@ public class TimeSegmentGraphicsManager {
 		long startTime = coordinatesToTime(graphicsNode.getLayoutX()).getTime();
 		long endTime = coordinatesToTime(graphicsNode.getLayoutX() + graphicsNode.getWidth()).getTime();
 		//Initialize new objects
-		for (NavigableMap.Entry<Long, Set<TimeSegmentGraphics>> entry : timeSegmentGraphicsLocations.subMap(startTime, true, endTime, true).entrySet())
-			for (TimeSegmentGraphics graphics : entry.getValue())
-				if (!graphics.initialized)
-					graphics.init();
+		synchronized (this) {
+			List<TimeSegmentGraphics> initGraphics = new LinkedList<>();
+			for (NavigableMap.Entry<Long, Set<TimeSegmentGraphics>> entry : timeSegmentGraphicsLocations.subMap(startTime, true, endTime, true).entrySet())
+				for (TimeSegmentGraphics graphics : entry.getValue())
+					if (!graphics.initialized)
+						initGraphics.add(graphics);
+			for (TimeSegmentGraphics graphics : initGraphics)
+				graphics.init();
+		}
 	}
 
 	/**
@@ -234,16 +239,16 @@ public class TimeSegmentGraphicsManager {
 		//Check the current intersections count
 		int currentIntersectionsCount = 0;
 		synchronized (this) {
-			//TODO: use bins instead of visible segments
-			for (TimeSegmentGraphics graphics : visibleTimeSegments)
-				if (graphics != segmentGraphics) {
-					Date start = graphics.getStartDate();
-					Date end = graphics.getEndDate();
-					if (segmentStartTime.before(start) && segmentEndTime.after(start))
-						currentIntersectionsCount++;
-					else if (segmentStartTime.before(end) && segmentEndTime.after(end))
-						currentIntersectionsCount++;
-				}
+			for (NavigableMap.Entry<Long, Set<TimeSegmentGraphics>> entry : timeSegmentGraphicsLocations.subMap(segmentStartTime.getTime(), true, segmentEndTime.getTime(), true).entrySet())
+				for (TimeSegmentGraphics graphics : entry.getValue())
+					if (graphics != segmentGraphics) {
+						Date start = graphics.getStartDate();
+						Date end = graphics.getEndDate();
+						if (segmentStartTime.before(start) && segmentEndTime.after(start))
+							currentIntersectionsCount++;
+						else if (segmentStartTime.before(end) && segmentEndTime.after(end))
+							currentIntersectionsCount++;
+					}
 		}
 		return currentIntersectionsCount;
 	}
