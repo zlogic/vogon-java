@@ -200,11 +200,41 @@ public class TimeSegmentGraphicsManager {
 	}
 
 	/**
+	 * Returns the floor of key of a map, or the key itself if there is no floor
+	 *
+	 * @param <K> the map key type
+	 * @param <V> the map value type
+	 * @param map the map
+	 * @param key the key
+	 * @return the floor of key of a map, or the key itself if there is no floor
+	 */
+	private <K, V> K floorKey(NavigableMap<K, V> map, K key) {
+		K floorKey = map.floorKey(key);
+		return floorKey != null ? floorKey : key;
+	}
+
+	/**
+	 * Returns the ceiling of key of a map, or the key itself if there is no
+	 * ceiling
+	 *
+	 * @param <K> the map key type
+	 * @param <V> the map value type
+	 * @param map the map
+	 * @param key the key
+	 * @return the ceiling of key of a map, or the key itself if there is no
+	 * ceiling
+	 */
+	private <K, V> K ceilingKey(NavigableMap<K, V> map, K key) {
+		K ceilingKey = map.ceilingKey(key);
+		return ceilingKey != null ? ceilingKey : key;
+	}
+
+	/**
 	 * Initializes visible TimeSegmentGraphics objects
 	 */
 	public void updateTimeSegmentGraphics() {
-		long startTime = coordinatesToTime(graphicsNode.getLayoutX()).getTime();
-		long endTime = coordinatesToTime(graphicsNode.getLayoutX() + graphicsNode.getWidth()).getTime();
+		long startTime = floorKey(timeSegmentGraphicsLocations, coordinatesToTime(graphicsNode.getLayoutX()).getTime());
+		long endTime = ceilingKey(timeSegmentGraphicsLocations, coordinatesToTime(graphicsNode.getLayoutX() + graphicsNode.getWidth()).getTime());
 		//Initialize new objects
 		synchronized (this) {
 			List<TimeSegmentGraphics> initGraphics = new LinkedList<>();
@@ -239,7 +269,9 @@ public class TimeSegmentGraphicsManager {
 		//Check the current intersections count
 		int currentIntersectionsCount = 0;
 		synchronized (this) {
-			for (NavigableMap.Entry<Long, Set<TimeSegmentGraphics>> entry : timeSegmentGraphicsLocations.subMap(segmentStartTime.getTime(), true, segmentEndTime.getTime(), true).entrySet())
+			long startTime = floorKey(timeSegmentGraphicsLocations, segmentStartTime.getTime());
+			long endTime = ceilingKey(timeSegmentGraphicsLocations, segmentEndTime.getTime());
+			for (NavigableMap.Entry<Long, Set<TimeSegmentGraphics>> entry : timeSegmentGraphicsLocations.subMap(startTime, true, endTime, true).entrySet())
 				for (TimeSegmentGraphics graphics : entry.getValue())
 					if (graphics != segmentGraphics) {
 						Date start = graphics.getStartDate();
