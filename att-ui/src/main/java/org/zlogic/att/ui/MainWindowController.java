@@ -8,6 +8,7 @@ package org.zlogic.att.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.ResourceBundle;
@@ -56,8 +57,6 @@ import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import javafx.util.converter.DateTimeStringConverter;
 import javafx.util.converter.DefaultStringConverter;
-import org.joda.time.Period;
-import org.joda.time.format.PeriodFormatterBuilder;
 import org.zlogic.att.data.converters.Exporter;
 import org.zlogic.att.data.converters.GrindstoneImporter;
 import org.zlogic.att.data.converters.Importer;
@@ -66,6 +65,7 @@ import org.zlogic.att.data.converters.XmlImporter;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
 import org.zlogic.att.ui.adapters.CustomFieldValueAdapter;
 import org.zlogic.att.ui.adapters.DataManager;
+import org.zlogic.att.ui.adapters.DurationFormatter;
 import org.zlogic.att.ui.adapters.TaskAdapter;
 import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 
@@ -292,11 +292,11 @@ public class MainWindowController implements Initializable {
 		//Create the data manager
 		dataManager = new DataManager();
 		//Total time field
-		dataManager.filteredTotalTimeProperty().addListener(new ChangeListener<Period>() {
+		dataManager.filteredTotalTimeProperty().addListener(new ChangeListener<Duration>() {
 			@Override
-			public void changed(ObservableValue<? extends Period> ov, Period oldValue, Period newValue) {
+			public void changed(ObservableValue<? extends Duration> ov, Duration oldValue, Duration newValue) {
 				if (newValue != null)
-					totalTimeField.setText(newValue.toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter()));
+					totalTimeField.setText(DurationFormatter.formatDuration(newValue));
 				else
 					totalTimeField.setText(""); //NOI18N
 			}

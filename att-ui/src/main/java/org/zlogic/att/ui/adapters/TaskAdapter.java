@@ -22,7 +22,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javax.persistence.EntityManager;
-import org.joda.time.format.PeriodFormatterBuilder;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.TransactedChange;
@@ -362,7 +361,7 @@ public class TaskAdapter {
 	protected void updateTimeProperty() {
 		firstTime.setValue(getEarliestTime());
 		lastTime.setValue(getLatestTime());
-		totalTime.setValue(task.getTotalTime().toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter()));//TODO: reuse this formatter
+		totalTime.setValue(DurationFormatter.formatDuration(task.getTotalTime()));
 	}
 
 	/**

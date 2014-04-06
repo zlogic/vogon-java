@@ -6,6 +6,7 @@
 package org.zlogic.att.ui;
 
 import java.net.URL;
+import java.time.Duration;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
@@ -43,11 +44,10 @@ import javafx.scene.input.TransferMode;
 import javafx.util.Callback;
 import javafx.util.converter.DateTimeStringConverter;
 import javafx.util.converter.DefaultStringConverter;
-import org.joda.time.Period;
-import org.joda.time.format.PeriodFormatterBuilder;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
 import org.zlogic.att.ui.adapters.CustomFieldValueAdapter;
 import org.zlogic.att.ui.adapters.DataManager;
+import org.zlogic.att.ui.adapters.DurationFormatter;
 import org.zlogic.att.ui.adapters.TaskAdapter;
 import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 
@@ -185,10 +185,10 @@ public class TaskEditorController implements Initializable {
 		 */
 		@Override
 		public void changed(ObservableValue<? extends String> ov, String oldValue, String newValue) {
-			Period tasksTime = new Period();
+			Duration tasksTime = Duration.ZERO;
 			for (TaskAdapter taskAdapter : monitorTasks)
 				tasksTime = tasksTime.plus(taskAdapter.getTask().getTotalTime());
-			totalTime.setText(tasksTime.toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter()));
+			totalTime.setText(DurationFormatter.formatDuration(tasksTime));
 		}
 
 		/**

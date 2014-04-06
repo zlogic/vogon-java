@@ -5,6 +5,7 @@
  */
 package org.zlogic.att.ui.adapters;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,8 +25,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javax.persistence.EntityManager;
-import org.joda.time.Period;
-import org.joda.time.PeriodType;
 import org.zlogic.att.data.CustomField;
 import org.zlogic.att.data.Filter;
 import org.zlogic.att.data.FilterCustomField;
@@ -79,7 +78,7 @@ public class DataManager {
 	/**
 	 * The last update date
 	 */
-	private ObjectProperty<Period> filteredTotalTime = new SimpleObjectProperty<>();
+	private ObjectProperty<Duration> filteredTotalTime = new SimpleObjectProperty<>();
 	/**
 	 * Possible values of custom fields, used for autocomplete, with filter
 	 * applied
@@ -112,7 +111,8 @@ public class DataManager {
 	 */
 	private ReadWriteLock reloadLock = new ReentrantReadWriteLock();
 	/**
-	 * Property indicating that task updates affecting sort order should be paused
+	 * Property indicating that task updates affecting sort order should be
+	 * paused
 	 */
 	private BooleanProperty pauseUpdates = new SimpleBooleanProperty();
 
@@ -307,7 +307,7 @@ public class DataManager {
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				if(!pauseUpdates.get())
+				if (!pauseUpdates.get())
 					lastTaskUpdate.set(new Date());
 			}
 		});
@@ -318,24 +318,24 @@ public class DataManager {
 	 *
 	 * @param addTime time to be added (can be negative)
 	 */
-	protected void addFilteredTotalTime(Period addTime) {
+	protected void addFilteredTotalTime(Duration addTime) {
 		if (filteredTotalTime.get() != null)
-			filteredTotalTime.setValue(filteredTotalTime.get().plus(addTime).normalizedStandard(PeriodType.time()));
+			filteredTotalTime.setValue(filteredTotalTime.get().plus(addTime));
 		else
-			filteredTotalTime.setValue(addTime.normalizedStandard(PeriodType.time()));
+			filteredTotalTime.setValue(addTime);
 	}
 
 	/**
 	 * Updates the filtered total time from existing task list.
 	 */
 	protected void updateFilteredTotalTime() {
-		Period totalTime = new Period();
+		Duration totalTime = Duration.ZERO;
 		//Get the start/end dates
 		Date startDate = getFilterStartDate();
 		Date endDate = getFilterEndDate();
 		for (TaskAdapter task : tasks)
 			totalTime = totalTime.plus(task.getTask().getTotalTime(startDate, endDate));
-		filteredTotalTime.setValue(totalTime.normalizedStandard(PeriodType.time()));
+		filteredTotalTime.setValue(totalTime);
 	}
 	/*
 	 * Database functions
@@ -514,7 +514,7 @@ public class DataManager {
 		}.setDeleteSegment(segment.getTimeSegment()));
 		timeSegments.remove(segment);
 		ownerTask.updateFromDatabase();
-		addFilteredTotalTime(new Period().minus(segment.getTimeSegment().getClippedDuration(getFilterStartDate(), getFilterEndDate())));
+		addFilteredTotalTime(Duration.ZERO.minus(segment.getTimeSegment().getClippedDuration(getFilterStartDate(), getFilterEndDate())));
 	}
 
 	/**
@@ -544,7 +544,7 @@ public class DataManager {
 		for (TimeSegmentAdapter timeSegment : task.timeSegmentsProperty())
 			timeSegments.remove(timeSegment);
 		tasks.remove(task);
-		addFilteredTotalTime(new Period().minus(task.getTask().getTotalTime(getFilterStartDate(), getFilterEndDate())));
+		addFilteredTotalTime(Duration.ZERO.minus(task.getTask().getTotalTime(getFilterStartDate(), getFilterEndDate())));
 	}
 
 	/**
@@ -656,14 +656,16 @@ public class DataManager {
 	 *
 	 * @return the total time for filtered tasks property
 	 */
-	public ObjectProperty<Period> filteredTotalTimeProperty() {
+	public ObjectProperty<Duration> filteredTotalTimeProperty() {
 		return filteredTotalTime;
 	}
 
 	/**
-	 * Property indicating that task updates affecting sort order should be paused
+	 * Property indicating that task updates affecting sort order should be
+	 * paused
 	 *
-	 * @return the property indicating that task updates affecting sort order should be paused
+	 * @return the property indicating that task updates affecting sort order
+	 * should be paused
 	 */
 	public BooleanProperty pauseUpdatesProperty() {
 		return pauseUpdates;

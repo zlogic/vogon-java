@@ -9,6 +9,8 @@ import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.PointerInfo;
 import java.net.URL;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.ResourceBundle;
 import java.util.Timer;
@@ -33,11 +35,8 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
-import org.joda.time.PeriodType;
-import org.joda.time.format.PeriodFormatterBuilder;
 import org.zlogic.att.ui.adapters.DataManager;
+import org.zlogic.att.ui.adapters.DurationFormatter;
 import org.zlogic.att.ui.adapters.TaskAdapter;
 import org.zlogic.att.ui.adapters.TimeSegmentAdapter;
 
@@ -149,7 +148,7 @@ public class InactivityDialogController implements Initializable {
 				@Override
 				public void run() {
 					//Update the inactivity time property
-					String inactivityTimeString = new Interval(new DateTime(inactivityStarted), new DateTime()).toPeriod().normalizedStandard(PeriodType.time()).toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter());
+					String inactivityTimeString = DurationFormatter.formatDuration(Duration.between(inactivityStarted.toInstant(), Instant.now()));
 					inactivityTimeLabel.setText(inactivityTimeString);
 				}
 			};

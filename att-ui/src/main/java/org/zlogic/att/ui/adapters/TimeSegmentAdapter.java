@@ -6,6 +6,8 @@
 package org.zlogic.att.ui.adapters;
 
 import java.text.MessageFormat;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -23,11 +25,6 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javax.persistence.EntityManager;
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
-import org.joda.time.Period;
-import org.joda.time.format.PeriodFormatter;
-import org.joda.time.format.PeriodFormatterBuilder;
 import org.zlogic.att.data.ApplicationShuttingDownException;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
@@ -46,10 +43,6 @@ public class TimeSegmentAdapter {
 	 * Localization messages
 	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/att/ui/adapters/messages");
-	/**
-	 * Joda time formatter
-	 */
-	private static final PeriodFormatter timeFormatter = new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter();
 	/**
 	 * Assigned entity
 	 */
@@ -150,12 +143,10 @@ public class TimeSegmentAdapter {
 				updateFxProperties();
 				getDataManager().signalTaskUpdate();
 				//Update total time
-				DateTime oldValueDateTime = new DateTime(oldValue);
-				DateTime newValueDateTime = new DateTime(newValue);
+				Instant oldValueDateTime = oldValue.toInstant();
+				Instant newValueDateTime = newValue.toInstant();
 				if (!newValueDateTime.equals(oldValueDateTime)) {
-					Period deltaTime = oldValueDateTime.isBefore(newValueDateTime)
-							? new Period().minus(new Interval(oldValueDateTime, newValueDateTime).toPeriod())
-							: new Period().plus(new Interval(newValueDateTime, oldValueDateTime).toPeriod());
+					Duration deltaTime = Duration.between(oldValueDateTime, newValueDateTime);
 					getDataManager().addFilteredTotalTime(deltaTime);
 				}
 			}
@@ -188,12 +179,10 @@ public class TimeSegmentAdapter {
 					updateFxProperties();
 					getDataManager().signalTaskUpdate();
 					//Update total time
-					DateTime oldValueDateTime = new DateTime(oldValue);
-					DateTime newValueDateTime = new DateTime(newValue);
+					Instant oldValueDateTime = oldValue.toInstant();
+					Instant newValueDateTime = newValue.toInstant();
 					if (!newValueDateTime.equals(oldValueDateTime)) {
-						Period deltaTime = oldValueDateTime.isBefore(newValueDateTime)
-								? new Period().plus(new Interval(oldValueDateTime, newValueDateTime).toPeriod())
-								: new Period().minus(new Interval(newValueDateTime, oldValueDateTime).toPeriod());
+						Duration deltaTime = Duration.between(oldValueDateTime, newValueDateTime);
 						getDataManager().addFilteredTotalTime(deltaTime);
 					}
 				} catch (ApplicationShuttingDownException ex) {
@@ -276,7 +265,7 @@ public class TimeSegmentAdapter {
 	 * @param endTime the new end time
 	 */
 	public void setStartEndTime(Date startTime, Date endTime) {
-		Period previousTime = segment.getDuration();
+		Duration previousTime = segment.getDuration();
 		dataManager.getPersistenceHelper().performTransactedChange(new TransactedChange() {
 			private Date startTime, endTime;
 
@@ -456,7 +445,7 @@ public class TimeSegmentAdapter {
 			start.setValue(segment.getStartTime());
 		if (end.get() == null || !end.get().equals(segment.getEndTime()))
 			end.setValue(segment.getEndTime());
-		duration.setValue(segment.getDuration().toString(timeFormatter));
+		duration.setValue(DurationFormatter.formatDuration(segment.getDuration()));
 		fullDescription.setValue(MessageFormat.format(messages.getString("FULL_DESCRIPTION"),
 				new Object[]{
 					((ownerTask != null && ownerTask.get().nameProperty().get() != null) ? ownerTask.get().nameProperty().get() : messages.getString("NULL_OWNER_TASK")),

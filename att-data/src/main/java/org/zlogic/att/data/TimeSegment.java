@@ -6,6 +6,7 @@
 package org.zlogic.att.data;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.Date;
 import java.util.ResourceBundle;
 import javax.persistence.CascadeType;
@@ -17,10 +18,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import org.joda.time.DateTime;
-import org.joda.time.Interval;
-import org.joda.time.Period;
-import org.joda.time.PeriodType;
 
 /**
  * Entity class for a time segment Each task's time is tracked with
@@ -181,8 +178,8 @@ public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 	 *
 	 * @return the calculated time segment duration
 	 */
-	public Period getDuration() {
-		return new Interval(new DateTime(startTime), new DateTime(endTime)).toPeriod().normalizedStandard(PeriodType.time());
+	public Duration getDuration() {
+		return Duration.between(startTime.toInstant(), endTime.toInstant());
 	}
 
 	/**
@@ -227,12 +224,12 @@ public class TimeSegment implements Serializable, Comparable<TimeSegment> {
 	 * @param clipEndTime end time of clip period
 	 * @return the calculated time segment duration
 	 */
-	public Period getClippedDuration(Date clipStartTime, Date clipEndTime) {
+	public Duration getClippedDuration(Date clipStartTime, Date clipEndTime) {
 		Date clippedStartTime = (clipStartTime == null || clipStartTime.before(startTime)) ? startTime : clipStartTime;
 		Date clippedEndTime = (clipEndTime == null || clipEndTime.after(endTime)) ? endTime : clipEndTime;
 		if (clippedStartTime.after(clippedEndTime))
-			return new Period();
-		return new Interval(new DateTime(clippedStartTime), new DateTime(clippedEndTime)).toPeriod().normalizedStandard(PeriodType.time());
+			return Duration.ZERO;
+		return Duration.between(clippedStartTime.toInstant(), clippedEndTime.toInstant());
 	}
 
 	/**

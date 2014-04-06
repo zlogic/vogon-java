@@ -6,6 +6,7 @@
 package org.zlogic.att.data;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -19,8 +20,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import org.joda.time.Period;
-import org.joda.time.PeriodType;
 
 /**
  * Entity class for a tracked task. Each task's time is tracked with
@@ -107,11 +106,11 @@ public class Task implements Serializable {
 	 *
 	 * @return the total time for this task
 	 */
-	public Period getTotalTime() {
-		Period totalTime = new Period();
+	public Duration getTotalTime() {
+		Duration totalTime = Duration.ZERO;
 		for (TimeSegment segment : timeSegments)
 			totalTime = totalTime.plus(segment.getDuration());
-		return totalTime.normalizedStandard(PeriodType.time());
+		return totalTime;
 	}
 
 	/**
@@ -122,11 +121,11 @@ public class Task implements Serializable {
 	 * @param clipEndTime end time of clip period
 	 * @return the total time for this task
 	 */
-	public Period getTotalTime(Date clipStartTime, Date clipEndTime) {
-		Period totalTime = new Period();
+	public Duration getTotalTime(Date clipStartTime, Date clipEndTime) {
+		Duration totalTime = Duration.ZERO;
 		for (TimeSegment segment : timeSegments)
 			totalTime = totalTime.plus(segment.getClippedDuration(clipStartTime, clipEndTime));
-		return totalTime.normalizedStandard(PeriodType.time());
+		return totalTime;
 	}
 
 	/**

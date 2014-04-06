@@ -18,6 +18,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -54,9 +55,6 @@ import net.sf.dynamicreports.report.definition.expression.DRIExpression;
 import net.sf.dynamicreports.report.exception.DRException;
 import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import org.joda.time.Period;
-import org.joda.time.PeriodType;
-import org.joda.time.format.PeriodFormatterBuilder;
 import org.zlogic.att.data.CustomField;
 import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
@@ -65,6 +63,7 @@ import org.zlogic.att.data.reporting.ReportQuery;
 import org.zlogic.att.ui.ExceptionHandler;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
 import org.zlogic.att.ui.adapters.DataManager;
+import org.zlogic.att.ui.adapters.DurationFormatter;
 
 /*
  * TODO: move internal classes into other files
@@ -125,10 +124,10 @@ public class Report {
 	/**
 	 * Formatter to output a Joda period
 	 */
-	private AbstractValueFormatter<String, Period> periodFormatter = new AbstractValueFormatter<String, Period>() {
+	private AbstractValueFormatter<String, Duration> periodFormatter = new AbstractValueFormatter<String, Duration>() {
 		@Override
-		public String format(Period value, ReportParameters reportParameters) {
-			return value.normalizedStandard(PeriodType.time()).toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter());
+		public String format(Duration value, ReportParameters reportParameters) {
+			return DurationFormatter.formatDuration(value);
 		}
 	};
 	/**
@@ -216,8 +215,8 @@ public class Report {
 		 * @return the duration of the time segment
 		 */
 		public double getDurationHours() {
-			Period period = timeSegment.getClippedDuration(dayStart, dayEnd).normalizedStandard(PeriodType.time());
-			return ((double) period.toStandardDuration().getStandardSeconds()) / 3600;
+			Duration period = timeSegment.getClippedDuration(dayStart, dayEnd);
+			return ((double) period.getSeconds()) / 3600;
 		}
 
 		/**
@@ -227,8 +226,8 @@ public class Report {
 		 * @return the duration of the time segment
 		 */
 		public String getDuration() {
-			Period period = timeSegment.getClippedDuration(startDate, endDate).normalizedStandard(PeriodType.time());
-			return period.toString(new PeriodFormatterBuilder().printZeroIfSupported().appendHours().appendSeparator(":").minimumPrintedDigits(2).appendMinutes().appendSeparator(":").appendSeconds().toFormatter());
+			Duration period = timeSegment.getClippedDuration(startDate, endDate);
+			return DurationFormatter.formatDuration(period);
 		}
 	}
 
@@ -248,7 +247,7 @@ public class Report {
 		/**
 		 * The duration of the CustomField's Value
 		 */
-		private Period duration;
+		private Duration duration;
 		/**
 		 * This CustomFieldTime is grouped
 		 */
@@ -261,7 +260,7 @@ public class Report {
 		 * @param customFieldValue the value of the associated CustomField
 		 * @param duration the duration for this CustomFieldTime
 		 */
-		private CustomFieldTime(CustomField customField, String customFieldValue, Period duration, Boolean group) {
+		private CustomFieldTime(CustomField customField, String customFieldValue, Duration duration, Boolean group) {
 			this.customField = customField;
 			this.customFieldValue = customFieldValue;
 			this.duration = duration;
@@ -291,7 +290,7 @@ public class Report {
 		 *
 		 * @param add the duration to ass
 		 */
-		public void addDuration(Period add) {
+		public void addDuration(Duration add) {
 			duration = duration.plus(add);
 		}
 
@@ -300,7 +299,7 @@ public class Report {
 		 *
 		 * @return the duration
 		 */
-		public Period getDuration() {
+		public Duration getDuration() {
 			return duration;
 		}
 
@@ -310,7 +309,7 @@ public class Report {
 		 * @return the duration in hours
 		 */
 		public Double getDurationHours() {
-			return ((double) duration.normalizedStandard(PeriodType.time()).toStandardDuration().getStandardSeconds()) / 3600;
+			return ((double) duration.getSeconds()) / 3600;
 		}
 
 		/**
@@ -664,9 +663,9 @@ public class Report {
 				return earliestStartDate;
 			}
 		};
-		AbstractSimpleExpression<Period> totalTimeExpression = new AbstractSimpleExpression<Period>() {
+		AbstractSimpleExpression<Duration> totalTimeExpression = new AbstractSimpleExpression<Duration>() {
 			@Override
-			public Period evaluate(ReportParameters rp) {
+			public Duration evaluate(ReportParameters rp) {
 				Task task = rp.getFieldValue("task"); //NOI18N
 				return task.getTotalTime(startDate, endDate);
 			}
@@ -700,7 +699,7 @@ public class Report {
 		//Prepare value-time map
 		Map<String, CustomFieldTime> customFieldData = new TreeMap<>();
 		for (Task task : tasks) {
-			Period duration = task.getTotalTime(startDate, endDate);
+			Duration duration = task.getTotalTime(startDate, endDate);
 			String customFieldValue = task.getCustomField(customField);
 			customFieldValue = customFieldValue != null ? customFieldValue : ""; //NOI18N
 			if (customFieldData.containsKey(customFieldValue))
@@ -725,7 +724,7 @@ public class Report {
 				.sortBy(DynamicReports.desc(DynamicReports.field("durationHours", Double.class))) //NOI18N
 				.columns(
 						DynamicReports.col.column(messages.getString("FIELD"), "customFieldValue", DynamicReports.type.stringType()), //NOI18N
-						DynamicReports.col.column(messages.getString("TOTAL_TIME"), "duration", Period.class).setValueFormatter(periodFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT)) //NOI18N
+						DynamicReports.col.column(messages.getString("TOTAL_TIME"), "duration", Duration.class).setValueFormatter(periodFormatter).setHorizontalAlignment(HorizontalAlignment.RIGHT)) //NOI18N
 				.setHighlightDetailEvenRows(true)
 				.setColumnTitleStyle(getColumnTitleStyle())
 				.setDataSource(new JRBeanCollectionDataSource(customFieldData.values()))
@@ -767,7 +766,7 @@ public class Report {
 				Date dayStart = DateTools.getInstance().convertDateToStartOfDay(calendar.getTime());
 				Date dayEnd = DateTools.getInstance().convertDateToEndOfDay(calendar.getTime());
 				for (TimeSegment timeSegment : timeSegments)
-					if (!timeSegment.getClippedDuration(dayStart, dayEnd).equals(Period.ZERO))
+					if (!timeSegment.getClippedDuration(dayStart, dayEnd).equals(Duration.ZERO))
 						dataSource.add(new DateTimeSegment(dayStart, dayEnd, timeSegment));
 			}
 		}
