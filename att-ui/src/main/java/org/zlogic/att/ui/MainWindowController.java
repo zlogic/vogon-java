@@ -541,8 +541,7 @@ public class MainWindowController implements Initializable {
 		statusPane.setVisible(false);
 
 		//Set the window close handler
-		setCloseHandler();
-
+		//setCloseHandler();
 		//Load other windows
 		loadWindowCustomFieldEditor();
 		loadWindowReport();
@@ -649,6 +648,7 @@ public class MainWindowController implements Initializable {
 	public void setWindowIcons(ObservableList<Image> icons) {
 		if (exceptionHandler.get() instanceof ExceptionDialogController)
 			((ExceptionDialogController) exceptionHandler.get()).setWindowIcons(icons);
+		currentTaskNotificationController.setWindowIcons(icons);
 		inactivityDialogController.setWindowIcons(icons);
 	}
 
@@ -772,7 +772,6 @@ public class MainWindowController implements Initializable {
 		//Set the data manager
 		currentTaskNotificationController = loader.getController();
 		currentTaskNotificationController.setDataManager(dataManager);
-		currentTaskNotificationController.setParentWindow(rootPane);
 	}
 
 	/**

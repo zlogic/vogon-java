@@ -16,15 +16,21 @@ import javafx.animation.SequentialTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.stage.Popup;
+import javafx.scene.image.Image;
+import javafx.stage.Modality;
 import javafx.stage.Screen;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.zlogic.att.ui.adapters.DataManager;
 import org.zlogic.att.ui.adapters.TaskAdapter;
@@ -64,11 +70,7 @@ public class CurrentTaskNotificationController implements Initializable {
 	/**
 	 * The popup window
 	 */
-	private Popup popup = new Popup();
-	/**
-	 * The popup parent window
-	 */
-	private Node parentWindow;
+	private Stage stage;
 	/**
 	 * Fade in/out animation
 	 */
@@ -86,9 +88,15 @@ public class CurrentTaskNotificationController implements Initializable {
 	 */
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
-		//Initialize the popup properties
-		popup.getContent().add(rootNode);
-		popup.setAutoFix(true);
+		//Prepare the stage
+		stage = new Stage();
+		stage.initModality(Modality.NONE);
+		//Initialize the scene properties
+		Scene scene = new Scene((Parent) rootNode);
+		stage.initStyle(StageStyle.UTILITY);//FIXME: always on top, don't show in taskbar
+		stage.setScene(scene);
+		stage.setResizable(false);
+		stage.opacityProperty().bind(rootNode.opacityProperty());
 	}
 
 	/**
@@ -152,12 +160,12 @@ public class CurrentTaskNotificationController implements Initializable {
 	}
 
 	/**
-	 * Set the parent window for the popup
+	 * Sets the window icons
 	 *
-	 * @param parentWindow the parent window for the popup
+	 * @param icons the icons to be set
 	 */
-	public void setParentWindow(Node parentWindow) {
-		this.parentWindow = parentWindow;
+	public void setWindowIcons(ObservableList<Image> icons) {
+		stage.getIcons().setAll(icons);
 	}
 
 	/**
@@ -170,14 +178,12 @@ public class CurrentTaskNotificationController implements Initializable {
 			public void run() {
 				if (activeAnimation != null)//TODO: synchronize this
 					activeAnimation.stop();
-				if (parentWindow == null || parentWindow.getScene() == null || parentWindow.getScene().getWindow() == null)
-					return;
 				//Show the window
 				Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
-				popup.sizeToScene();
-				popup.show(parentWindow,
-						primaryScreenBounds.getMaxX() - popup.getWidth() - 100,
-						primaryScreenBounds.getMaxY() - popup.getHeight() - 100);//FIXME: this is ugly and requires the main window to be constantly opened. But other options are annoying and can even steal focus.
+				stage.sizeToScene();
+				stage.show();
+				stage.getScene().getWindow().setX(primaryScreenBounds.getMaxX() - stage.getWidth() - 100);
+				stage.getScene().getWindow().setY(primaryScreenBounds.getMaxY() - stage.getHeight() - 100);
 				//Play the animation
 				FadeTransition fadeInTransition = new FadeTransition(Duration.millis(500), rootNode);
 				fadeInTransition.setFromValue(0.0);
@@ -195,7 +201,7 @@ public class CurrentTaskNotificationController implements Initializable {
 				animation.setOnFinished(new EventHandler<ActionEvent>() {
 					@Override
 					public void handle(ActionEvent t) {
-						popup.hide();
+						hideWindow();
 						activeAnimation = null;
 					}
 				});
@@ -213,6 +219,6 @@ public class CurrentTaskNotificationController implements Initializable {
 	 */
 	@FXML
 	private void hideWindow() {
-		rootNode.getScene().getWindow().hide();
+		stage.hide();
 	}
 }
