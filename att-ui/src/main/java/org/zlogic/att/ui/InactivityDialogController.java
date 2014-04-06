@@ -164,8 +164,10 @@ public class InactivityDialogController implements Initializable {
 					}
 
 					Point mouseLocation = pointerInfo.getLocation();
-					if (stage.isShowing())
+					if (stage.isShowing()) {
+						previousMoveEvent = new Date();//Reset date so keyboard navigation doesn't cause it to be considered an "inactivity"
 						Platform.runLater(updateDateLabel);
+					}
 
 					if ((new Date().getTime() - previousMoveEvent.getTime()) > inactivityTimeout) {
 						inactivityStarted = previousMoveEvent;
