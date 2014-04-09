@@ -81,6 +81,11 @@ public class CurrentTaskNotificationController implements Initializable {
 	private Timer notificationTimer;
 
 	/**
+	 * Interval for displaying this window
+	 */
+	private long displayInterval = -15 * 60 * 1000;//TODO: make this configurable
+
+	/**
 	 * Initializes the controller
 	 *
 	 * @param url initialization URL
@@ -146,17 +151,19 @@ public class CurrentTaskNotificationController implements Initializable {
 		//Start the timer
 		if (notificationTimer != null)
 			notificationTimer.cancel();
-		notificationTimer = new Timer(true);
-		TimerTask showNotificationTask = new TimerTask() {
-			@Override
-			public void run() {
-				showWindowAnimation();
-			}
-		};
-		notificationTimer.scheduleAtFixedRate(
-				showNotificationTask,
-				15 * 60 * 1000,
-				15 * 60 * 1000);//TODO: make this configurable
+		if (displayInterval > 0) {
+			notificationTimer = new Timer(true);
+			TimerTask showNotificationTask = new TimerTask() {
+				@Override
+				public void run() {
+					showWindowAnimation();
+				}
+			};
+			notificationTimer.scheduleAtFixedRate(
+					showNotificationTask,
+					displayInterval,
+					displayInterval);
+		}
 	}
 
 	/**
