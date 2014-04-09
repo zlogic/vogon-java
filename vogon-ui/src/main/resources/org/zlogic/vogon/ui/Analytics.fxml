@@ -12,11 +12,11 @@
 <?import javafx.scene.paint.*?>
 <?scenebuilder-preview-i18n-resource messages.properties?>
 
-<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="org.zlogic.vogon.ui.AnalyticsController">
+<AnchorPane id="AnchorPane" maxHeight="-1.0" maxWidth="-1.0" minHeight="-1.0" minWidth="-1.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="org.zlogic.vogon.ui.AnalyticsController">
   <children>
-    <SplitPane dividerPositions="0.35918367346938773, 0.6775510204081633" focusTraversable="true" orientation="VERTICAL" prefHeight="492.0" prefWidth="600.0000999999975" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="-1.0" AnchorPane.topAnchor="0.0">
+    <SplitPane dividerPositions="0.35, 0.70" focusTraversable="true" orientation="VERTICAL" prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <items>
-        <HBox SplitPane.resizableWithParent="false">
+        <HBox minHeight="180.0">
           <children>
             <AnchorPane id="AnchorPane">
               <children>
@@ -68,7 +68,7 @@
                         </TableColumn>
                       </columns>
                     </TableView>
-                    <GridPane hgap="0.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="SOMETIMES">
+                    <GridPane hgap="0.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="NEVER">
                       <children>
                         <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleSelectAllTags" text="%SELECT_ALL" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.margin="$x1" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                         <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleUnselectAllTags" text="%UNSELECT_ALL" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.margin="$x1" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
@@ -106,7 +106,7 @@
                         </TableColumn>
                       </columns>
                     </TableView>
-                    <GridPane hgap="0.0" prefHeight="-1.0" prefWidth="241.0">
+                    <GridPane hgap="0.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="NEVER">
                       <children>
                         <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleSelectAllAccounts" text="%SELECT_ALL" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.margin="$x1" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
                         <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleUnselectAllAccounts" text="%UNSELECT_ALL" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.margin="$x1" GridPane.rowIndex="0" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" />
