@@ -11,9 +11,8 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.property.ObjectProperty;
 import javafx.util.StringConverter;
-import org.zlogic.vogon.ui.ExceptionHandler;
+import org.zlogic.vogon.ui.ExceptionLogger;
 
 /**
  * Simple date converter for table cells.
@@ -32,10 +31,6 @@ public class DateConverter extends StringConverter<Date> {
 	 */
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
-	 * Exception handler
-	 */
-	private ObjectProperty<ExceptionHandler> exceptionHandler;
-	/**
 	 * The date format
 	 */
 	protected DateFormat format;
@@ -46,9 +41,8 @@ public class DateConverter extends StringConverter<Date> {
 	 * @param format the date format for parsing
 	 * @param exceptionHandler the exception handler
 	 */
-	public DateConverter(DateFormat format, ObjectProperty<ExceptionHandler> exceptionHandler) {
+	public DateConverter(DateFormat format) {
 		this.format = format;
-		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
@@ -74,8 +68,7 @@ public class DateConverter extends StringConverter<Date> {
 			return format.parse(string);
 		} catch (ParseException ex) {
 			log.log(Level.SEVERE, null, ex);
-			if (exceptionHandler.get() != null)
-				exceptionHandler.get().showException(MessageFormat.format(messages.getString("CANNOT_PARSE_DATE"), new Object[]{string, ex.getMessage()}), ex);
+			ExceptionLogger.getInstance().showException(MessageFormat.format(messages.getString("CANNOT_PARSE_DATE"), new Object[]{string, ex.getMessage()}), ex);
 			return null;
 		}
 	}

@@ -5,7 +5,6 @@
  */
 package org.zlogic.vogon.ui;
 
-//FIXME: catch all Java FX exceptions here once this is supported by Java 8
 /**
  * UI interface for displaying an exception
  *

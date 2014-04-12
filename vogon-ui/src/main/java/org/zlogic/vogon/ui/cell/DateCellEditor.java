@@ -12,8 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.property.ObjectProperty;
-import org.zlogic.vogon.ui.ExceptionHandler;
+import org.zlogic.vogon.ui.ExceptionLogger;
 
 /**
  * String cell editor with date validation & parsing
@@ -33,10 +32,6 @@ public class DateCellEditor<BaseType> extends StringCellEditor<BaseType, Date> {
 	 */
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
-	 * Exception handler
-	 */
-	private ObjectProperty<ExceptionHandler> exceptionHandler;
-	/**
 	 * The date format to be used for validation
 	 */
 	protected SimpleDateFormat dateFormat;
@@ -46,9 +41,8 @@ public class DateCellEditor<BaseType> extends StringCellEditor<BaseType, Date> {
 	 *
 	 * @param exceptionHandler the exception handler
 	 */
-	public DateCellEditor(ObjectProperty<ExceptionHandler> exceptionHandler) {
-		super(new StringValidatorDate(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages").getString("PARSER_DATE"), exceptionHandler), Date.class, exceptionHandler);
-		this.exceptionHandler = exceptionHandler;
+	public DateCellEditor() {
+		super(new StringValidatorDate(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages").getString("PARSER_DATE")), Date.class);
 		dateFormat = new SimpleDateFormat(messages.getString("PARSER_DATE"));
 	}
 
@@ -58,8 +52,7 @@ public class DateCellEditor<BaseType> extends StringCellEditor<BaseType, Date> {
 			return dateFormat.parse(value);
 		} catch (ParseException ex) {
 			log.log(Level.SEVERE, null, ex);
-			if (exceptionHandler.get() != null)
-				exceptionHandler.get().showException(MessageFormat.format(messages.getString("CANNOT_PARSE_DATE"), new Object[]{value, ex.getMessage()}), ex);
+			ExceptionLogger.getInstance().showException(MessageFormat.format(messages.getString("CANNOT_PARSE_DATE"), new Object[]{value, ex.getMessage()}), ex);
 		}
 		return null;
 	}

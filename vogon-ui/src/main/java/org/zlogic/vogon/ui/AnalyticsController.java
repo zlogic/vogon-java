@@ -69,10 +69,6 @@ public class AnalyticsController implements Initializable {
 	 */
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
-	 * Exception handler
-	 */
-	private ObjectProperty<ExceptionHandler> exceptionHandler = new SimpleObjectProperty<>();
-	/**
 	 * The report generator
 	 */
 	protected Report report;
@@ -234,7 +230,7 @@ public class AnalyticsController implements Initializable {
 			@Override
 			public TableCell<TransactionResultAdapter, Date> call(TableColumn<TransactionResultAdapter, Date> p) {
 				TextFieldTableCell<TransactionResultAdapter, Date> cell = new TextFieldTableCell<>();
-				cell.setConverter(new DateConverter(DateFormat.getDateInstance(DateFormat.LONG), exceptionHandler));
+				cell.setConverter(new DateConverter(DateFormat.getDateInstance(DateFormat.LONG)));
 				cell.setAlignment(Pos.CENTER_RIGHT);
 				return cell;
 			}
@@ -442,15 +438,6 @@ public class AnalyticsController implements Initializable {
 
 		updateTagsSelectionTable();//TODO: move this to FinanceData
 		updateAccountsSelectionTable();//TODO: move this to FinanceData (add "select for report" property to regular adapter)
-	}
-
-	/**
-	 * Returns the exception handler property
-	 *
-	 * @return the exception handler property
-	 */
-	public ObjectProperty<ExceptionHandler> exceptionHandlerProperty() {
-		return exceptionHandler;
 	}
 
 	/**

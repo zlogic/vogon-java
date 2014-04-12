@@ -8,8 +8,7 @@ package org.zlogic.vogon.ui.cell;
 import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.property.ObjectProperty;
-import org.zlogic.vogon.ui.ExceptionHandler;
+import org.zlogic.vogon.ui.ExceptionLogger;
 
 /**
  * Validator which validates integer/double values.
@@ -27,18 +26,13 @@ public class StringValidatorDouble implements StringCellValidator {
 	 * Localization messages
 	 */
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
-	/**
-	 * Exception handler
-	 */
-	private ObjectProperty<ExceptionHandler> exceptionHandler;
 
 	/**
 	 * Constructs a StringValidatorDouble
 	 *
 	 * @param exceptionHandler the exception handler
 	 */
-	public StringValidatorDouble(ObjectProperty<ExceptionHandler> exceptionHandler) {
-		this.exceptionHandler = exceptionHandler;
+	public StringValidatorDouble() {
 	}
 
 	@Override
@@ -48,8 +42,7 @@ public class StringValidatorDouble implements StringCellValidator {
 			return true;
 		} catch (NumberFormatException ex) {
 			log.log(Level.SEVERE, null, ex);
-			if (exceptionHandler.get() != null)
-				exceptionHandler.get().showException(MessageFormat.format(messages.getString("CANNOT_PARSE_NUMBER"), new Object[]{value, ex.getMessage()}), ex);
+			ExceptionLogger.getInstance().showException(MessageFormat.format(messages.getString("CANNOT_PARSE_NUMBER"), new Object[]{value, ex.getMessage()}), ex);
 			return false;
 		}
 	}

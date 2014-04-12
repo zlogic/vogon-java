@@ -10,8 +10,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -47,10 +45,6 @@ public class TransactionsController implements Initializable {
 	 * The DataManager instance
 	 */
 	protected DataManager dataManager;
-	/**
-	 * Exception handler
-	 */
-	private ObjectProperty<ExceptionHandler> exceptionHandler = new SimpleObjectProperty<>();
 	/**
 	 * The transactions list table
 	 */
@@ -151,7 +145,7 @@ public class TransactionsController implements Initializable {
 		columnDate.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, Date>, TableCell<TransactionModelAdapter, Date>>() {
 			@Override
 			public TableCell<TransactionModelAdapter, Date> call(TableColumn<TransactionModelAdapter, Date> p) {
-				DateCellEditor<TransactionModelAdapter> cell = new DateCellEditor<>(exceptionHandler);
+				DateCellEditor<TransactionModelAdapter> cell = new DateCellEditor<>();
 				cell.setAlignment(Pos.CENTER_RIGHT);
 				return cell;
 			}
@@ -159,7 +153,7 @@ public class TransactionsController implements Initializable {
 		columnAmount.setCellFactory(new Callback<TableColumn<TransactionModelAdapter, AmountModelAdapter>, TableCell<TransactionModelAdapter, AmountModelAdapter>>() {
 			@Override
 			public TableCell<TransactionModelAdapter, AmountModelAdapter> call(TableColumn<TransactionModelAdapter, AmountModelAdapter> p) {
-				TransactionEditor cell = new TransactionEditor(dataManager, exceptionHandler);
+				TransactionEditor cell = new TransactionEditor(dataManager);
 				cell.setAlignment(Pos.CENTER_RIGHT);
 				//Keep track of all editors
 				cell.editingProperty().addListener(new javafx.beans.value.ChangeListener<Boolean>() {
@@ -309,15 +303,6 @@ public class TransactionsController implements Initializable {
 					}
 			}
 		});
-	}
-
-	/**
-	 * Returns the exception handler property
-	 *
-	 * @return the exception handler property
-	 */
-	public ObjectProperty<ExceptionHandler> exceptionHandlerProperty() {
-		return exceptionHandler;
 	}
 
 	/**

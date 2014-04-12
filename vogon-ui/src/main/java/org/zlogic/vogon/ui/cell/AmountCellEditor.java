@@ -8,8 +8,7 @@ package org.zlogic.vogon.ui.cell;
 import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.property.ObjectProperty;
-import org.zlogic.vogon.ui.ExceptionHandler;
+import org.zlogic.vogon.ui.ExceptionLogger;
 import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
 
 /**
@@ -29,20 +28,14 @@ public class AmountCellEditor<BaseType> extends StringCellEditor<BaseType, Amoun
 	 * Localization messages
 	 */
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
-	/**
-	 * Exception handler
-	 */
-	private ObjectProperty<ExceptionHandler> exceptionHandler;
 
 	/**
 	 * Creates an AmountCellEditor with a value validator
 	 *
 	 * @param validator the value validator
-	 * @param exceptionHandler the exception handler
 	 */
-	public AmountCellEditor(StringCellValidator validator, ObjectProperty<ExceptionHandler> exceptionHandler) {
-		super(validator, AmountModelAdapter.class, exceptionHandler);
-		this.exceptionHandler = exceptionHandler;
+	public AmountCellEditor(StringCellValidator validator) {
+		super(validator, AmountModelAdapter.class);
 	}
 
 	@Override
@@ -51,8 +44,7 @@ public class AmountCellEditor<BaseType> extends StringCellEditor<BaseType, Amoun
 			return new AmountModelAdapter(Double.parseDouble(value), getItem().okProperty().get(), getItem().getCurrency(), getItem().isCurrencyConverted(), getItem().getTransactionType());
 		} catch (NumberFormatException ex) {
 			log.log(Level.SEVERE, null, ex);
-			if (exceptionHandler.get() != null)
-				exceptionHandler.get().showException(MessageFormat.format(messages.getString("CANNOT_PARSE_NUMBER"), new Object[]{value, ex.getMessage()}), ex);
+			ExceptionLogger.getInstance().showException(MessageFormat.format(messages.getString("CANNOT_PARSE_NUMBER"), new Object[]{value, ex.getMessage()}), ex);
 		}
 		return null;
 	}

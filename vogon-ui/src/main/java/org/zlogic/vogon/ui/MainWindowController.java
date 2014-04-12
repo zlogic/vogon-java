@@ -6,7 +6,6 @@
 package org.zlogic.vogon.ui;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.Map;
@@ -15,14 +14,11 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Label;
@@ -69,10 +65,6 @@ public class MainWindowController implements Initializable {
 	 * The DataManager instance
 	 */
 	private DataManager dataManager;
-	/**
-	 * Exception handler
-	 */
-	private ObjectProperty<ExceptionHandler> exceptionHandler = new SimpleObjectProperty<>();
 	/**
 	 * Easy access to preference storage
 	 */
@@ -349,11 +341,16 @@ public class MainWindowController implements Initializable {
 	 * progress pane)
 	 */
 	private void beginBackgroundTask() {
-		statusPane.setVisible(true);
-		menuItemImport.setDisable(true);
-		menuItemExport.setDisable(true);
-		menuItemRecalculateBalance.setDisable(true);
-		menuItemCleanupDB.setDisable(true);
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				statusPane.setVisible(true);
+				menuItemImport.setDisable(true);
+				menuItemExport.setDisable(true);
+				menuItemRecalculateBalance.setDisable(true);
+				menuItemCleanupDB.setDisable(true);
+			}
+		});
 	}
 
 	/**
@@ -361,11 +358,16 @@ public class MainWindowController implements Initializable {
 	 * progress pane)
 	 */
 	private void endBackgroundTask() {
-		statusPane.setVisible(false);
-		menuItemImport.setDisable(false);
-		menuItemExport.setDisable(false);
-		menuItemRecalculateBalance.setDisable(false);
-		menuItemCleanupDB.setDisable(false);
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				statusPane.setVisible(false);
+				menuItemImport.setDisable(false);
+				menuItemExport.setDisable(false);
+				menuItemRecalculateBalance.setDisable(false);
+				menuItemCleanupDB.setDisable(false);
+			}
+		});
 	}
 
 	/**
@@ -385,20 +387,20 @@ public class MainWindowController implements Initializable {
 			//Automatically run beginTask/endTask before the actual task is processed
 			backgroundThread = new Thread(
 					new Runnable() {
-				protected Task<Void> task;
+						protected Task<Void> task;
 
-				public Runnable setTask(Task<Void> task) {
-					this.task = task;
-					return this;
-				}
+						public Runnable setTask(Task<Void> task) {
+							this.task = task;
+							return this;
+						}
 
-				@Override
-				public void run() {
-					beginBackgroundTask();
-					task.run();
-					endBackgroundTask();
-				}
-			}.setTask(task));
+						@Override
+						public void run() {
+							beginBackgroundTask();
+							task.run();
+							endBackgroundTask();
+						}
+					}.setTask(task));
 			backgroundThread.setDaemon(true);
 			backgroundThread.start();
 		}
@@ -415,8 +417,7 @@ public class MainWindowController implements Initializable {
 					backgroundThread = null;
 				} catch (InterruptedException ex) {
 					log.log(Level.SEVERE, null, ex);
-					if (exceptionHandler.get() != null)
-						exceptionHandler.get().showException(null, ex);
+					ExceptionLogger.getInstance().showException(null, ex);
 				}
 			}
 			if (backgroundTask != null) {
@@ -455,29 +456,6 @@ public class MainWindowController implements Initializable {
 				return null;
 			}
 		});
-		loadExceptionDialog();
-	}
-
-	/**
-	 * Loads the exception dialog FXML
-	 */
-	private void loadExceptionDialog() {
-		//Load FXML
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("ExceptionDialog.fxml"), messages); //NOI18N
-		loader.setLocation(getClass().getResource("ExceptionDialog.fxml")); //NOI18N
-		try {
-			loader.load();
-		} catch (IOException ex) {
-			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
-			if (exceptionHandler != null)
-				exceptionHandler.get().showException(null, ex);
-		}
-		//Set the data manager
-		ExceptionDialogController exceptionDialogController = loader.getController();
-		exceptionHandler.set(exceptionDialogController);
-		transactionsPaneController.exceptionHandlerProperty().bind(exceptionHandler);
-		analyticsPaneController.exceptionHandlerProperty().bind(exceptionHandler);
-
 	}
 
 	/**
@@ -499,16 +477,6 @@ public class MainWindowController implements Initializable {
 	 * @param icons the icons to be set
 	 */
 	public void setWindowIcons(ObservableList<Image> icons) {
-		if (exceptionHandler.get() instanceof ExceptionDialogController)
-			((ExceptionDialogController) exceptionHandler.get()).setWindowIcons(icons);
-	}
-
-	/**
-	 * Returns the exception handler property
-	 *
-	 * @return the exception handler property
-	 */
-	public ObjectProperty<ExceptionHandler> exceptionHandlerProperty() {
-		return exceptionHandler;
+		ExceptionLogger.getInstance().setWindowIcons(icons);
 	}
 }
