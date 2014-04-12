@@ -23,8 +23,9 @@
             <Button mnemonicParsing="false" onAction="#zoomMinus" text="%ZOOM_-" />
             <Button mnemonicParsing="false" onAction="#zoomReset" text="%ZOOM_RESET" />
             <Separator orientation="VERTICAL" prefHeight="-1.0" />
-            <TextField fx:id="jumpDate" prefWidth="-1.0" />
+            <Button mnemonicParsing="false" onAction="#jumpToCurrentTime" text="%JUMP_TO_CURRENT_TIME" />
             <Button mnemonicParsing="false" onAction="#jumpToDate" text="%JUMP_TO_DATE" />
+            <TextField fx:id="jumpDate" prefWidth="-1.0" />
           </children>
           <padding>
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

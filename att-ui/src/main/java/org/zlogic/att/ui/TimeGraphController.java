@@ -454,4 +454,15 @@ public class TimeGraphController implements Initializable {
 		updateTicks();
 		graphicsManager.updateTimeSegmentGraphics();
 	}
+
+	/**
+	 * Jump to current time button
+	 *
+	 * @param event the event
+	 */
+	@FXML
+	private void jumpToCurrentTime(ActionEvent event) {
+		jumpDateValue.set(new Date());
+		jumpToDate(event);
+	}
 }
