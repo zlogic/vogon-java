@@ -24,6 +24,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -89,10 +90,6 @@ public class MainWindowController implements Initializable {
 	 * DataManager reference
 	 */
 	private DataManager dataManager;
-	/**
-	 * Exception handler
-	 */
-	private ObjectProperty<ExceptionHandler> exceptionHandler = new SimpleObjectProperty<>();
 	/**
 	 * Last opened directory
 	 */
@@ -268,9 +265,6 @@ public class MainWindowController implements Initializable {
 	 */
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
-		//Prepare exception dialog
-		loadExceptionDialog();
-
 		//Default sort order
 		taskList.getSortOrder().add(columnLastTime);
 		columnLastTime.setSortType(TableColumn.SortType.DESCENDING);
@@ -306,9 +300,9 @@ public class MainWindowController implements Initializable {
 		reloadTasks();
 
 		//Auto update sort order
-		dataManager.taskUpdatedProperty().addListener(new ChangeListener<Date>() {
+		dataManager.addTasksUpdatedListener(new EventHandler() {
 			@Override
-			public void changed(ObservableValue<? extends Date> ov, Date oldValue, Date newValue) {
+			public void handle(Event event) {
 				updateSortOrder();
 			}
 		});
@@ -526,7 +520,7 @@ public class MainWindowController implements Initializable {
 
 		//Set column sizes
 		//TODO: make sure this keeps working correctly
-		//taskList.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		taskList.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
 		columnTaskName.prefWidthProperty().bind(taskList.widthProperty().multiply(10).divide(20));
 		columnTotalTime.prefWidthProperty().bind(taskList.widthProperty().multiply(2).divide(20));
 		columnFirstTime.prefWidthProperty().bind(taskList.widthProperty().multiply(3).divide(20));
@@ -570,15 +564,6 @@ public class MainWindowController implements Initializable {
 	 */
 	public void setShutdownProcedure(Runnable shutdownProcedure) {
 		this.shutdownProcedure = shutdownProcedure;
-	}
-
-	/**
-	 * Returns the exception handler property
-	 *
-	 * @return the exception handler property
-	 */
-	public ObjectProperty<ExceptionHandler> exceptionHandlerProperty() {
-		return exceptionHandler;
 	}
 
 	/**
@@ -646,8 +631,7 @@ public class MainWindowController implements Initializable {
 	 * @param icons the icons to be set
 	 */
 	public void setWindowIcons(ObservableList<Image> icons) {
-		if (exceptionHandler.get() instanceof ExceptionDialogController)
-			((ExceptionDialogController) exceptionHandler.get()).setWindowIcons(icons);
+		ExceptionLogger.getInstance().setWindowIcons(icons);
 		currentTaskNotificationController.setWindowIcons(icons);
 		inactivityDialogController.setWindowIcons(icons);
 	}
@@ -666,8 +650,7 @@ public class MainWindowController implements Initializable {
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
 			Logger.getLogger(getClass().getName()).log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
-			if (exceptionHandler.get() != null)
-				exceptionHandler.get().showException(messages.getString("ERROR_LOADING_FXML"), ex);
+			ExceptionLogger.getInstance().showException(messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Initialize the scene properties
 		if (root != null) {
@@ -694,8 +677,7 @@ public class MainWindowController implements Initializable {
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
 			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
-			if (exceptionHandler.get() != null)
-				exceptionHandler.get().showException(messages.getString("ERROR_LOADING_FXML"), ex);
+			ExceptionLogger.getInstance().showException(messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Initialize the scene properties
 		if (root != null) {
@@ -707,7 +689,6 @@ public class MainWindowController implements Initializable {
 		reportController = loader.getController();
 		reportController.setDataManager(dataManager);
 		reportController.setLastDirectory(lastDirectory);
-		reportController.exceptionHandlerProperty().bind(exceptionHandler);
 	}
 
 	/**
@@ -724,8 +705,7 @@ public class MainWindowController implements Initializable {
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
 			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
-			if (exceptionHandler.get() != null)
-				exceptionHandler.get().showException(messages.getString("ERROR_LOADING_FXML"), ex);
+			ExceptionLogger.getInstance().showException(messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Initialize the scene properties
 		if (root != null) {
@@ -739,23 +719,6 @@ public class MainWindowController implements Initializable {
 	}
 
 	/**
-	 * Loads the exception dialog FXML
-	 */
-	private void loadExceptionDialog() {
-		//Load FXML
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("ExceptionDialog.fxml"), messages); //NOI18N
-		loader.setLocation(getClass().getResource("ExceptionDialog.fxml")); //NOI18N
-		try {
-			loader.load();
-		} catch (IOException ex) {
-			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
-		}
-		//Set the data manager
-		ExceptionDialogController exceptionDialogController = loader.getController();
-		exceptionHandler.set(exceptionDialogController);
-	}
-
-	/**
 	 * Loads the current task notification FXML
 	 */
 	private void loadCurrentTaskNotification() {
@@ -766,8 +729,7 @@ public class MainWindowController implements Initializable {
 			loader.load();
 		} catch (IOException ex) {
 			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
-			if (exceptionHandler.get() != null)
-				exceptionHandler.get().showException(messages.getString("ERROR_LOADING_FXML"), ex);
+			ExceptionLogger.getInstance().showException(messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Set the data manager
 		currentTaskNotificationController = loader.getController();
@@ -785,13 +747,11 @@ public class MainWindowController implements Initializable {
 			loader.load();
 		} catch (IOException ex) {
 			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
-			if (exceptionHandler.get() != null)
-				exceptionHandler.get().showException(messages.getString("ERROR_LOADING_FXML"), ex);
+			ExceptionLogger.getInstance().showException(messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Set the data manager
 		inactivityDialogController = loader.getController();
 		inactivityDialogController.setDataManager(dataManager);
-		inactivityDialogController.exceptionHandlerProperty().bind(exceptionHandler);
 	}
 
 	/**
@@ -809,8 +769,7 @@ public class MainWindowController implements Initializable {
 			root = (Parent) loader.load();
 		} catch (IOException ex) {
 			log.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
-			if (exceptionHandler.get() != null)
-				exceptionHandler.get().showException(messages.getString("ERROR_LOADING_FXML"), ex);
+			ExceptionLogger.getInstance().showException(messages.getString("ERROR_LOADING_FXML"), ex);
 		}
 		//Initialize the scene properties
 		if (root != null) {
@@ -826,22 +785,15 @@ public class MainWindowController implements Initializable {
 	protected void reloadTasks() {
 		dataManager.reloadTasks();
 		taskEditorController.setEditedTaskList(taskList.getSelectionModel().getSelectedItems());
-		updateSortOrder();
 	}
 
 	/**
 	 * Updates the tasks sort order
 	 */
 	private void updateSortOrder() {
-		//FIXME: Remove this after it's fixed in Java FX
-		//TODO: call this on task updates?
 		if (taskList.getEditingCell() != null && taskList.getEditingCell().getRow() >= 0)
 			return;
-		TableColumn<TaskAdapter, ?>[] sortOrder = taskList.getSortOrder().toArray(new TableColumn[0]);
-		taskEditorController.setIgnoreEditedTaskUpdates(true);
-		taskList.getSortOrder().clear();
-		taskList.getSortOrder().addAll(sortOrder);
-		taskEditorController.setIgnoreEditedTaskUpdates(false);
+		taskList.getSortPolicy().call(taskList);
 	}
 
 	/*
@@ -909,8 +861,7 @@ public class MainWindowController implements Initializable {
 					backgroundThread = null;
 				} catch (InterruptedException ex) {
 					Logger.getLogger(MainWindowController.class.getName()).log(Level.SEVERE, null, ex);
-					if (exceptionHandler.get() != null)
-						exceptionHandler.get().showException(null, ex);
+					ExceptionLogger.getInstance().showException(null, ex);
 				}
 			}
 			if (backgroundTask != null) {
@@ -931,7 +882,6 @@ public class MainWindowController implements Initializable {
 	private void createNewTask() {
 		TaskAdapter newTask = dataManager.createTask();
 		taskList.getSelectionModel().clearSelection();
-		updateSortOrder();
 		taskList.getSelectionModel().select(newTask);
 	}
 
@@ -942,7 +892,6 @@ public class MainWindowController implements Initializable {
 	private void deleteSelectedTasks() {
 		for (TaskAdapter selectedTask : taskList.getSelectionModel().getSelectedItems())
 			dataManager.deleteTask(selectedTask);
-		updateSortOrder();
 	}
 
 	/**
@@ -960,7 +909,6 @@ public class MainWindowController implements Initializable {
 				customFieldValue.valueProperty().set(selectedTask.getTask().getCustomField(customField.getCustomField()));
 			}
 		}
-		updateSortOrder();
 	}
 
 	/**

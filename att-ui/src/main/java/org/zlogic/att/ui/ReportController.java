@@ -54,10 +54,6 @@ public class ReportController implements Initializable {
 	 */
 	private DataManager dataManager;
 	/**
-	 * Exception handler
-	 */
-	private ObjectProperty<ExceptionHandler> exceptionHandler = new SimpleObjectProperty<>();
-	/**
 	 * Last opened directory
 	 */
 	private ObjectProperty<File> lastDirectory;
@@ -178,15 +174,6 @@ public class ReportController implements Initializable {
 	}
 
 	/**
-	 * Returns the exception handler property
-	 *
-	 * @return the exception handler property
-	 */
-	public ObjectProperty<ExceptionHandler> exceptionHandlerProperty() {
-		return exceptionHandler;
-	}
-
-	/**
 	 * Sets the last directory property
 	 *
 	 * @param lastDirectory the last directory property
@@ -207,7 +194,7 @@ public class ReportController implements Initializable {
 			@Override
 			protected Void call() throws Exception {
 				updateMessage(messages.getString("GENERATING_REPORT..."));
-				Report report = new Report(dataManager, exceptionHandler);
+				Report report = new Report(dataManager);
 				report.setStartDate(startDateValue.get());
 				report.setEndDate(endDateValue.get());
 				report.progressProperty().addListener(new ChangeListener<Number>() {
@@ -247,8 +234,7 @@ public class ReportController implements Initializable {
 						reportTaskThread.set(null);
 					} catch (InterruptedException ex) {
 						log.log(Level.SEVERE, null, ex);
-						if (exceptionHandler.get() != null)
-							exceptionHandler.get().showException(null, ex);
+						ExceptionLogger.getInstance().showException(null, ex);
 					}
 				}
 			}
@@ -286,8 +272,7 @@ public class ReportController implements Initializable {
 				generatedReport.get().savePdfReport(selectedFile);
 			} catch (FileNotFoundException | DRException ex) {
 				log.log(Level.SEVERE, null, ex);
-				if (exceptionHandler.get() != null)
-					exceptionHandler.get().showException(null, ex);
+				ExceptionLogger.getInstance().showException(null, ex);
 			}
 		}
 	}

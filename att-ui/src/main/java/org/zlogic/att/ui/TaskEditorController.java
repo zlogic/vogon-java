@@ -23,6 +23,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -142,6 +143,11 @@ public class TaskEditorController implements Initializable {
 	 */
 	@FXML
 	private TableView<TimeSegmentAdapter> timeSegments;
+	/**
+	 * Custom field name column
+	 */
+	@FXML
+	private TableColumn<CustomFieldValueAdapter, String> columnField;
 	/**
 	 * Custom field value column
 	 */
@@ -452,7 +458,10 @@ public class TaskEditorController implements Initializable {
 
 		//Set column sizes
 		//TODO: make sure this keeps working correctly
-		customProperties.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		customProperties.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+		columnField.prefWidthProperty().bind(customProperties.widthProperty().divide(2));
+		columnFieldValue.prefWidthProperty().bind(customProperties.widthProperty().divide(2).subtract(15));
+		timeSegments.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
 		columnStart.prefWidthProperty().bind(timeSegments.widthProperty().multiply(2).divide(10));
 		columnEnd.prefWidthProperty().bind(timeSegments.widthProperty().multiply(2).divide(10));
 		columnDuration.prefWidthProperty().bind(timeSegments.widthProperty().multiply(2).divide(10));
@@ -510,9 +519,9 @@ public class TaskEditorController implements Initializable {
 		});
 
 		//Auto update sort order
-		dataManager.taskUpdatedProperty().addListener(new ChangeListener<Date>() {
+		dataManager.addTasksUpdatedListener(new EventHandler() {
 			@Override
-			public void changed(ObservableValue<? extends Date> ov, Date oldValue, Date newValue) {
+			public void handle(Event event) {
 				updateSortOrder();
 			}
 		});
@@ -641,8 +650,6 @@ public class TaskEditorController implements Initializable {
 	 * Updates the time segments sort order
 	 */
 	private void updateSortOrder() {
-		//FIXME: Remove this after it's fixed in Java FX
-		//TODO: call this on task updates?
 		if (dataManager.pauseUpdatesProperty().get()) {
 			log.log(Level.SEVERE, messages.getString("CANCELLING_INCORRECT_UPDATESORTORDER"), "pauseUpdatesProperty");
 			return;
@@ -650,9 +657,7 @@ public class TaskEditorController implements Initializable {
 			log.log(Level.SEVERE, messages.getString("CANCELLING_INCORRECT_UPDATESORTORDER"), "editingCellProperty");
 			return;
 		}
-		TableColumn<TimeSegmentAdapter, ?>[] sortOrder = timeSegments.getSortOrder().toArray(new TableColumn[0]);
-		timeSegments.getSortOrder().clear();
-		timeSegments.getSortOrder().addAll(sortOrder);
+		timeSegments.getSortPolicy().call(timeSegments);
 	}
 
 	/**
@@ -706,7 +711,6 @@ public class TaskEditorController implements Initializable {
 		TaskAdapter task = getEditedTask();
 		if (task != null) {
 			TimeSegmentAdapter newSegmentAdapter = task.createTimeSegment();
-			updateSortOrder();
 			return newSegmentAdapter;
 		}
 		return null;

@@ -24,6 +24,9 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javax.persistence.EntityManager;
 import org.zlogic.att.data.CustomField;
 import org.zlogic.att.data.Filter;
@@ -74,10 +77,6 @@ public class DataManager {
 	/**
 	 * The last update date
 	 */
-	private ObjectProperty<Date> lastTaskUpdate = new SimpleObjectProperty<>();//FIXME: Remove once Java FX 3.0 fixes sorting
-	/**
-	 * The last update date
-	 */
 	private ObjectProperty<Duration> filteredTotalTime = new SimpleObjectProperty<>();
 	/**
 	 * Possible values of custom fields, used for autocomplete, with filter
@@ -115,6 +114,14 @@ public class DataManager {
 	 * paused
 	 */
 	private BooleanProperty pauseUpdates = new SimpleBooleanProperty();
+	/**
+	 * Tasks updated event
+	 */
+	private EventType tasksUpdatedEvent = new EventType<>("Tasks updated");
+	/**
+	 * List of listeners for task updates (e.g. to update sort order)
+	 */
+	private List<EventHandler<Event>> tasksUpdatedListeners = new LinkedList<>();
 
 	/**
 	 * Creates a DataManager instance
@@ -307,8 +314,10 @@ public class DataManager {
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				if (!pauseUpdates.get())
-					lastTaskUpdate.set(new Date());
+				if (!pauseUpdates.get()) {
+					for (EventHandler listener : tasksUpdatedListeners)
+						listener.handle(new Event(tasksUpdatedEvent));
+				}
 			}
 		});
 	}
@@ -366,6 +375,7 @@ public class DataManager {
 			reloadCustomFields();
 			reloadFilters();
 			updateFilteredTotalTime();
+			signalTaskUpdate();
 		} finally {
 			reloadLock.writeLock().unlock();
 		}
@@ -450,6 +460,7 @@ public class DataManager {
 		TimeSegmentAdapter newSegment = new TimeSegmentAdapter(persistenceHelper.createTimeSegment(owner.getTask()), owner, this);
 		if (!timeSegments.contains(newSegment))
 			timeSegments.add(newSegment);
+		signalTaskUpdate();
 		return newSegment;
 	}
 
@@ -545,6 +556,7 @@ public class DataManager {
 			timeSegments.remove(timeSegment);
 		tasks.remove(task);
 		addFilteredTotalTime(Duration.ZERO.minus(task.getTask().getTotalTime(getFilterStartDate(), getFilterEndDate())));
+		signalTaskUpdate();
 	}
 
 	/**
@@ -593,9 +605,19 @@ public class DataManager {
 			}
 	}
 
+	/**
+	 * Adds a listener to tasks updated event
+	 *
+	 * @param listener
+	 */
+	public void addTasksUpdatedListener(EventHandler listener) {
+		if (!tasksUpdatedListeners.contains(listener))
+			tasksUpdatedListeners.add(listener);
+	}
 	/*
 	 * Java FX properties
 	 */
+
 	/**
 	 * The currently timing TimeSegment property (value may be null if nothing's
 	 * being timed)
@@ -640,15 +662,6 @@ public class DataManager {
 	 */
 	public ObservableList<FilterHolder> getFilters() {
 		return filters;
-	}
-
-	/**
-	 * Last task update date property
-	 *
-	 * @return the last task update date property
-	 */
-	public ObjectProperty<Date> taskUpdatedProperty() {
-		return lastTaskUpdate;
 	}
 
 	/**

@@ -106,7 +106,7 @@ public class Launcher extends Application {
 
 			@Override
 			public void run() {
-				TrayIcon trayIcon = new TrayIcon(primaryStage, controller.exceptionHandlerProperty());
+				TrayIcon trayIcon = new TrayIcon(primaryStage);
 				controller.setShutdownProcedure(new Runnable() {
 					private TrayIcon trayIcon;
 

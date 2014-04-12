@@ -5,10 +5,15 @@
  */
 package org.zlogic.att.ui;
 
+import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.image.Image;
 
 /**
  * Class for logging uncaught exceptions
@@ -16,7 +21,7 @@ import java.util.logging.Logger;
  * @author Dmitry Zolotukhin <a
  * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
  */
-public class ExceptionLogger implements UncaughtExceptionHandler {
+public class ExceptionLogger implements UncaughtExceptionHandler, ExceptionHandler {
 
 	/**
 	 * The console logger name
@@ -34,7 +39,16 @@ public class ExceptionLogger implements UncaughtExceptionHandler {
 	/**
 	 * Format for throwable cause message
 	 */
-	private MessageFormat format = new MessageFormat(messages.getString("CAUSED_BY"));
+	private MessageFormat stackTraceFormat = new MessageFormat(messages.getString("CAUSED_BY"));
+	/**
+	 * Format for uncaught exception message
+	 */
+	private MessageFormat uncaughtExceptionFormat = new MessageFormat(messages.getString("RECEIVED_UNCAUGHT_EXCEPTION"));
+
+	/**
+	 * Java FX controller to display GUI error message
+	 */
+	private ExceptionDialogController exceptionDialogController;
 
 	/**
 	 * The singleton instance
@@ -66,17 +80,64 @@ public class ExceptionLogger implements UncaughtExceptionHandler {
 		Thread.setDefaultUncaughtExceptionHandler(getInstance());
 	}
 
+	/**
+	 * Loads the exception dialog FXML
+	 */
+	private void loadExceptionDialog() {
+		//Load FXML
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("ExceptionDialog.fxml"), messages); //NOI18N
+		loader.setLocation(getClass().getResource("ExceptionDialog.fxml")); //NOI18N
+		try {
+			loader.load();
+		} catch (IOException ex) {
+			logger.log(Level.SEVERE, messages.getString("ERROR_LOADING_FXML"), ex);
+		}
+		exceptionDialogController = loader.getController();
+	}
+
+	/**
+	 * Sets the window icons
+	 *
+	 * @param icons the icons to be set
+	 */
+	public void setWindowIcons(ObservableList<Image> icons) {
+		if (exceptionDialogController == null)
+			loadExceptionDialog();
+		exceptionDialogController.setWindowIcons(icons);
+	}
+
+	private String getExceptionStacktrace(Throwable thr) {
+		StringBuilder exceptionStackTrace = new StringBuilder();
+		while (thr != null) {
+			exceptionStackTrace.append(stackTraceFormat.format(new Object[]{thr.getMessage()}));
+			for (StackTraceElement ste : thr.getStackTrace())
+				exceptionStackTrace.append("\n\t").append(ste.toString()); //NOI18N
+			thr = thr.getCause();
+		}
+		return exceptionStackTrace.toString();
+	}
+
 	@Override
 	public void uncaughtException(Thread t, Throwable e) {
-		StringBuilder exceptionStackTrace = new StringBuilder();
-		exceptionStackTrace.append(messages.getString("RECEIVED_UNCAUGHT_EXCEPTION"));
-		while (e != null) {
-			exceptionStackTrace.append(format.format(new Object[]{e.getMessage()}));
-			for (StackTraceElement ste : e.getStackTrace())
-				exceptionStackTrace.append("\n\t").append(ste.toString()); //NOI18N
-			e = e.getCause();
-		}
-		//TODO: also show the ExceptionDialogController here?
-		logger.severe(exceptionStackTrace.toString());
+		logger.severe(uncaughtExceptionFormat.format(new Object[]{getExceptionStacktrace(e)}));
+		if (exceptionDialogController == null)
+			loadExceptionDialog();
+		exceptionDialogController.showExceptionMessage(uncaughtExceptionFormat.format(new Object[]{e.getMessage()}));
+	}
+
+	@Override
+	public void showException(String explanation, Throwable ex) {
+		String exceptionString = null;
+		if (explanation != null)
+			exceptionString = explanation;
+		else if (ex != null && ex.getMessage() != null)
+			exceptionString = uncaughtExceptionFormat.format(new Object[]{ex.getMessage()});
+		else
+			exceptionString = messages.getString("UNKNOWN_ERROR");
+
+		logger.severe(exceptionString);
+		if (exceptionDialogController == null)
+			loadExceptionDialog();
+		exceptionDialogController.showExceptionMessage(exceptionString);
 	}
 }

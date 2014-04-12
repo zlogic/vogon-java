@@ -25,7 +25,7 @@ import javafx.stage.Stage;
  * @author Dmitry Zolotukhin <a
  * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
  */
-public class ExceptionDialogController implements Initializable, ExceptionHandler {
+public class ExceptionDialogController implements Initializable {
 
 	/**
 	 * Localization messages
@@ -74,36 +74,32 @@ public class ExceptionDialogController implements Initializable, ExceptionHandle
 	public void setWindowIcons(ObservableList<Image> icons) {
 		stage.getIcons().setAll(icons);
 	}
-	
-	@Override
-	public void showException(String explanation, Throwable ex) {
-		ExceptionLogger.getInstance().uncaughtException(Thread.currentThread(), ex);
+
+	/**
+	 * Shows an exception message
+	 *
+	 * @param explanation the exception message to display
+	 */
+	public void showExceptionMessage(String explanation) {
 		if (Platform.isFxApplicationThread()) {
 			//Show the dialog
-			if (explanation != null)
-				exceptionLabel.setText(explanation);
-			else if (ex != null && ex.getMessage() != null)
-				exceptionLabel.setText(ex.getMessage());
-			else
-				exceptionLabel.setText(messages.getString("UNKNOWN_ERROR"));
+			exceptionLabel.setText(explanation);
 			stage.showAndWait();
 		} else {
 			//Required for JavaFX, otherwise dialog won't be displayed
 			Platform.runLater(new Runnable() {
 				private String explanation;
-				private Throwable ex;
-				
+
 				@Override
 				public void run() {
-					showException(explanation, ex);
+					showExceptionMessage(explanation);
 				}
-				
-				public Runnable setParameters(String explanation, Throwable ex) {
+
+				public Runnable setParameters(String explanation) {
 					this.explanation = explanation;
-					this.ex = ex;
 					return this;
 				}
-			}.setParameters(explanation, ex));
+			}.setParameters(explanation));
 		}
 	}
 

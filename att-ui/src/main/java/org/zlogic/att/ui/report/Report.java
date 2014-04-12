@@ -61,6 +61,7 @@ import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.reporting.DateTools;
 import org.zlogic.att.data.reporting.ReportQuery;
 import org.zlogic.att.ui.ExceptionHandler;
+import org.zlogic.att.ui.ExceptionLogger;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
 import org.zlogic.att.ui.adapters.DataManager;
 import org.zlogic.att.ui.adapters.DurationFormatter;
@@ -84,10 +85,6 @@ public class Report {
 	 * DataManager reference
 	 */
 	private DataManager dataManager;
-	/**
-	 * Exception handler
-	 */
-	private ObjectProperty<ExceptionHandler> exceptionHandler;
 	/**
 	 * Report start date
 	 */
@@ -259,6 +256,7 @@ public class Report {
 		 *
 		 * @param customField the associated CustomField
 		 * @param customFieldValue the value of the associated CustomField
+		 * @param duration the duration of the CustomField's Value
 		 * @param group true if the field should be grouped
 		 */
 		private CustomFieldTime(CustomField customField, String customFieldValue, Duration duration, Boolean group) {
@@ -340,11 +338,9 @@ public class Report {
 	 * Creates a report
 	 *
 	 * @param dataManager the DataManager reference
-	 * @param exceptionHandler the exception handler
 	 */
-	public Report(DataManager dataManager, ObjectProperty<ExceptionHandler> exceptionHandler) {
+	public Report(DataManager dataManager) {
 		this.dataManager = dataManager;
-		this.exceptionHandler = exceptionHandler;
 	}
 
 	/**
@@ -879,12 +875,10 @@ public class Report {
 			reportHTML = stream.toString("utf-8"); //NOI18N
 		} catch (UnsupportedEncodingException | DRException ex) {
 			Logger.getLogger(Report.class.getName()).log(Level.SEVERE, null, ex);
-			if (exceptionHandler.get() != null)
-				exceptionHandler.get().showException(null, ex);
+			ExceptionLogger.getInstance().showException(null, ex);
 		} catch (Throwable ex) {
 			Logger.getLogger(Report.class.getName()).log(Level.SEVERE, null, ex);
-			if (exceptionHandler.get() != null)
-				exceptionHandler.get().showException(null, ex);
+			ExceptionLogger.getInstance().showException(null, ex);
 		}
 	}
 }
