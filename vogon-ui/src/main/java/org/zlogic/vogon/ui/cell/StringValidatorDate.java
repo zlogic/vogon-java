@@ -10,8 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.property.ObjectProperty;
-import org.zlogic.vogon.ui.ExceptionHandler;
+import org.zlogic.vogon.ui.ExceptionLogger;
 
 /**
  * Validator which validates dates.
@@ -30,10 +29,6 @@ public class StringValidatorDate implements StringCellValidator {
 	 */
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
-	 * Exception handler
-	 */
-	private ObjectProperty<ExceptionHandler> exceptionHandler;
-	/**
 	 * The date format to be used
 	 */
 	private String format;
@@ -44,9 +39,8 @@ public class StringValidatorDate implements StringCellValidator {
 	 * @param format the date format for validation
 	 * @param exceptionHandler the exception handler
 	 */
-	public StringValidatorDate(String format, ObjectProperty<ExceptionHandler> exceptionHandler) {
+	public StringValidatorDate(String format) {
 		this.format = format;
-		this.exceptionHandler = exceptionHandler;
 	}
 
 	@Override
@@ -57,8 +51,7 @@ public class StringValidatorDate implements StringCellValidator {
 			return true;
 		} catch (ParseException ex) {
 			log.log(Level.SEVERE, null, ex);
-			if (exceptionHandler.get() != null)
-				exceptionHandler.get().showException(MessageFormat.format(messages.getString("CANNOT_PARSE_DATE"), new Object[]{date, ex.getMessage()}), ex);
+			ExceptionLogger.getInstance().showException(MessageFormat.format(messages.getString("CANNOT_PARSE_DATE"), new Object[]{date, ex.getMessage()}), ex);
 			return false;
 		}
 	}
