@@ -181,7 +181,8 @@ public class Report {
 		/**
 		 * Constructor of a DateTimeSegment
 		 *
-		 * @param date the date
+		 * @param dayStart the starting date day
+		 * @param dayEnd the ending date day
 		 * @param timeSegment the TimeSegment
 		 */
 		private DateTimeSegment(Date dayStart, Date dayEnd, TimeSegment timeSegment) {
@@ -258,7 +259,7 @@ public class Report {
 		 *
 		 * @param customField the associated CustomField
 		 * @param customFieldValue the value of the associated CustomField
-		 * @param duration the duration for this CustomFieldTime
+		 * @param group true if the field should be grouped
 		 */
 		private CustomFieldTime(CustomField customField, String customFieldValue, Duration duration, Boolean group) {
 			this.customField = customField;

@@ -154,8 +154,6 @@ public class Launcher extends Application {
 				System.err.println(messages.getString("ERROR_WHEN_LOADING_LOGGING_CONFIGURATION"));
 			}
 		}
-		//Configure console logger
-		new ConsoleLogger().init();
 	}
 
 	/**
@@ -164,6 +162,7 @@ public class Launcher extends Application {
 	 * @param args application arguments
 	 */
 	public static void main(String[] args) {
+		ExceptionLogger.init();
 		launch(args);
 	}
 }

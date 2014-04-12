@@ -170,6 +170,7 @@ public class FilterValueCell extends TableCell<FilterHolder, Object> {
 	 * to obtain the while filter.
 	 *
 	 * @param item the value which should be converted to string
+	 * @return the string value for an value item
 	 */
 	private String getStringValue(Object item) {
 		if (item == null)

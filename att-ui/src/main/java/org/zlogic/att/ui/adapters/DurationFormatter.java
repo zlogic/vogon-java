@@ -17,6 +17,9 @@ import java.util.ResourceBundle;
  */
 public class DurationFormatter {
 
+	/**
+	 * The formatter for durations
+	 */
 	private static final MessageFormat format = new MessageFormat(ResourceBundle.getBundle("org/zlogic/att/ui/adapters/messages").getString("{0,NUMBER,0}:{1,NUMBER,00}:{2,NUMBER,00}"));
 
 	/**

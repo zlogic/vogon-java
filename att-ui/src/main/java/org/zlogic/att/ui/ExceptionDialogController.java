@@ -74,9 +74,10 @@ public class ExceptionDialogController implements Initializable, ExceptionHandle
 	public void setWindowIcons(ObservableList<Image> icons) {
 		stage.getIcons().setAll(icons);
 	}
-
+	
 	@Override
 	public void showException(String explanation, Throwable ex) {
+		ExceptionLogger.getInstance().uncaughtException(Thread.currentThread(), ex);
 		if (Platform.isFxApplicationThread()) {
 			//Show the dialog
 			if (explanation != null)
@@ -91,12 +92,12 @@ public class ExceptionDialogController implements Initializable, ExceptionHandle
 			Platform.runLater(new Runnable() {
 				private String explanation;
 				private Throwable ex;
-
+				
 				@Override
 				public void run() {
 					showException(explanation, ex);
 				}
-
+				
 				public Runnable setParameters(String explanation, Throwable ex) {
 					this.explanation = explanation;
 					this.ex = ex;

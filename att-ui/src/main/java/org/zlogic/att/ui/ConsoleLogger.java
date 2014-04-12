@@ -1,3 +1,8 @@
+/*
+ * Awesome Time Tracker project.
+ * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ */
 package org.zlogic.att.ui;
 
 import java.io.IOException;
@@ -56,6 +61,8 @@ public class ConsoleLogger {
 		 * Initializes the logger stream
 		 *
 		 * @param logLevel the log level for this stream
+		 * @param checkRecursion true if recursion should be checked to prevent
+		 * a stack overflow
 		 */
 		public LoggerStream(Level logLevel, boolean checkRecursion) {
 			super();

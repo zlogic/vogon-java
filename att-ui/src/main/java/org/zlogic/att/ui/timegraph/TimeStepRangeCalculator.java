@@ -43,21 +43,49 @@ public class TimeStepRangeCalculator {
 	 */
 	private class TimeStep {
 
+		/**
+		 * Initialized the TimeStep
+		 *
+		 * @param stepMultipliers multipliers for the current step
+		 * @param nextStepMultiplier multiplier when jumping to the next step
+		 */
 		public TimeStep(long[] stepMultipliers, long nextStepMultiplier) {
 			this.stepMultipliers = stepMultipliers;
 			this.nextStepMultiplier = nextStepMultiplier;
 		}
+		/**
+		 * Multipliers for the current step
+		 */
 		private long stepMultipliers[];
+		/**
+		 * Multiplier when jumping to the next step
+		 */
 		private long nextStepMultiplier;
 
+		/**
+		 * Returns the multiplier when jumping to the next step
+		 *
+		 * @return the multiplier when jumping to the next step
+		 */
 		public long getNextStepMultiplier() {
 			return nextStepMultiplier;
 		}
 
+		/**
+		 * Returns the multipliers for the current step
+		 *
+		 * @return the multipliers for the current step
+		 */
 		public long[] getStepMulipliers() {
 			return stepMultipliers;
 		}
 
+		/**
+		 * Returns the i-th step multiplier or -1 if it doesn't exist
+		 *
+		 * @param index the index of the step multiplier to be returned
+		 * @return the i-th step multiplier or -1 if it doesn't exist
+		 */
 		public long getStepMultiplier(int index) {
 			return (index >= 0 && index < stepMultipliers.length) ? stepMultipliers[index] : -1;
 		}

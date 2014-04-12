@@ -149,6 +149,9 @@ public class TimeGraphController implements Initializable {
 		}
 	};
 
+	/**
+	 * The time step calculator
+	 */
 	private TimeStepRangeCalculator stepCalculator = new TimeStepRangeCalculator();
 
 	/**

@@ -202,6 +202,8 @@ public class TaskEditorController implements Initializable {
 		/**
 		 * Binds this class to a list of TaskAdapters. If a new list is
 		 * supplied, re-binds to the new list.
+		 *
+		 * @param tasks the list to be bound
 		 */
 		public void bind(List<TaskAdapter> tasks) {
 			for (TaskAdapter existingTask : monitorTasks)
@@ -237,6 +239,9 @@ public class TaskEditorController implements Initializable {
 	/**
 	 * Time segment cell monitoring which blocks external updates until edit is
 	 * completed
+	 *
+	 * @param <S> the object type
+	 * @param <T> the table cell type
 	 */
 	private class UpdateBlockingTableCell<S, T> extends TextFieldTableCell<S, T> {
 

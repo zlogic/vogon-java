@@ -148,6 +148,8 @@ public class InactivityDialogController implements Initializable {
 				@Override
 				public void run() {
 					//Update the inactivity time property
+					if (inactivityStarted == null)
+						return;
 					String inactivityTimeString = DurationFormatter.formatDuration(Duration.between(inactivityStarted.toInstant(), Instant.now()));
 					inactivityTimeLabel.setText(inactivityTimeString);
 				}

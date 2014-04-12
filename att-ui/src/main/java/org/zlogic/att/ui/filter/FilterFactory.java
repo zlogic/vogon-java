@@ -95,6 +95,8 @@ public class FilterFactory {
 
 		/**
 		 * Constructs an DateFilterFactory
+		 *
+		 * @param type the filter type
 		 */
 		public DateFilterFactory(FilterDate.DateType type) {
 			super(type == FilterDate.DateType.DATE_AFTER ? messages.getString("AFTER_DATE") : messages.getString("BEFORE_DATE"));
@@ -132,6 +134,8 @@ public class FilterFactory {
 
 		/**
 		 * Constructs an CustomFieldFilterFactory
+		 *
+		 * @param customField the custom field to be filtered
 		 */
 		public CustomFieldFilterFactory(CustomFieldAdapter customField) {
 			super(customField.nameProperty().get());
