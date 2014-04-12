@@ -804,7 +804,12 @@ public class MainWindowController implements Initializable {
 	 * progress pane)
 	 */
 	private void beginBackgroundTask() {
-		statusPane.setVisible(true);
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				statusPane.setVisible(true);
+			}
+		});
 	}
 
 	/**
@@ -812,7 +817,12 @@ public class MainWindowController implements Initializable {
 	 * progress pane)
 	 */
 	private void endBackgroundTask() {
-		statusPane.setVisible(false);
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				statusPane.setVisible(false);
+			}
+		});
 	}
 
 	/**

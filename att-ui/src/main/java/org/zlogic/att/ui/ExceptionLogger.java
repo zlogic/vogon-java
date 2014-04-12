@@ -111,7 +111,7 @@ public class ExceptionLogger implements UncaughtExceptionHandler, ExceptionHandl
 		while (thr != null) {
 			exceptionStackTrace.append(stackTraceFormat.format(new Object[]{thr.getMessage()}));
 			for (StackTraceElement ste : thr.getStackTrace())
-				exceptionStackTrace.append("\n\t").append(ste.toString()); //NOI18N
+				exceptionStackTrace.append("\r\n\t").append(ste.toString()); //NOI18N
 			thr = thr.getCause();
 		}
 		return exceptionStackTrace.toString();
