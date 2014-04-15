@@ -518,14 +518,8 @@ public class MainWindowController implements Initializable {
 			}
 		});
 
-		//Set column sizes
-		//TODO: make sure this keeps working correctly
-		taskList.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
-		columnTaskName.prefWidthProperty().bind(taskList.widthProperty().multiply(10).divide(20));
-		columnTotalTime.prefWidthProperty().bind(taskList.widthProperty().multiply(2).divide(20));
-		columnFirstTime.prefWidthProperty().bind(taskList.widthProperty().multiply(3).divide(20));
-		columnLastTime.prefWidthProperty().bind(taskList.widthProperty().multiply(3).divide(20));
-		columnTaskCompleted.prefWidthProperty().bind(taskList.widthProperty().multiply(2).divide(20).subtract(15));
+		//Set column sizing policy
+		taskList.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
 		//Menu items and status pane
 		menuItemCleanupDB.disableProperty().bind(statusPane.visibleProperty());
@@ -793,7 +787,12 @@ public class MainWindowController implements Initializable {
 	private void updateSortOrder() {
 		if (taskList.getEditingCell() != null && taskList.getEditingCell().getRow() >= 0)
 			return;
+
+		TaskAdapter focusedAdapter = taskList.getFocusModel().getFocusedItem();
 		taskList.getSortPolicy().call(taskList);
+		//Restore lost focus
+		if (focusedAdapter != null && taskList.getFocusModel().getFocusedItem() == null)
+			taskList.getFocusModel().focus(taskList.getItems().indexOf(focusedAdapter));
 	}
 
 	/*

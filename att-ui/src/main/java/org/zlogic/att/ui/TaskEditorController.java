@@ -39,6 +39,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
@@ -430,15 +431,27 @@ public class TaskEditorController implements Initializable {
 			public void handle(MouseEvent event) {
 				Dragboard dragBoard = timeSegments.startDragAndDrop(TransferMode.MOVE);
 				ClipboardContent content = new ClipboardContent();
-				TimeSegmentAdapter selectedItem = timeSegments.getSelectionModel().getSelectedItem();
-				if (selectedItem != null && selectedItem.descriptionProperty().get() != null)
-					content.putString(selectedItem.descriptionProperty().get());
+				TimeSegmentAdapter focusedItem = timeSegments.getFocusModel().getFocusedItem();
+				if (focusedItem != null && focusedItem.descriptionProperty().get() != null)
+					content.putString(focusedItem.descriptionProperty().get());
 				dragBoard.setContent(content);
 
-				dragSegment = selectedItem;
+				dragSegment = focusedItem;
+				dataManager.pauseUpdatesProperty().set(true);
 
 				event.consume();
 			}
+		});
+		timeSegments.setOnDragDone(new EventHandler<DragEvent>() {
+
+			@Override
+			public void handle(DragEvent event) {
+				dataManager.pauseUpdatesProperty().set(false);//TODO: check if this doesn't unlock some other object
+				dragSegment = null;
+				
+				event.consume();
+			}
+
 		});
 		//Enable/disable Delete button and task fields
 		delete.disableProperty().bind(segmentSelectionSize.lessThanOrEqualTo(0).or(editingSingleTask.not()));
@@ -456,16 +469,9 @@ public class TaskEditorController implements Initializable {
 			}
 		});
 
-		//Set column sizes
-		//TODO: make sure this keeps working correctly
-		customProperties.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
-		columnField.prefWidthProperty().bind(customProperties.widthProperty().divide(2));
-		columnFieldValue.prefWidthProperty().bind(customProperties.widthProperty().divide(2).subtract(15));
-		timeSegments.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
-		columnStart.prefWidthProperty().bind(timeSegments.widthProperty().multiply(2).divide(10));
-		columnEnd.prefWidthProperty().bind(timeSegments.widthProperty().multiply(2).divide(10));
-		columnDuration.prefWidthProperty().bind(timeSegments.widthProperty().multiply(2).divide(10));
-		columnDescription.prefWidthProperty().bind(timeSegments.widthProperty().multiply(4).divide(10).subtract(15));
+		//Set column sizing policy
+		customProperties.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		timeSegments.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
 		//Default sort order
 		timeSegments.getSortOrder().add(columnEnd);
@@ -656,8 +662,15 @@ public class TaskEditorController implements Initializable {
 		} else if (timeSegments.getEditingCell() != null && timeSegments.getEditingCell().getColumn() != -1 && timeSegments.getEditingCell().getRow() != -1) {
 			log.log(Level.SEVERE, messages.getString("CANCELLING_INCORRECT_UPDATESORTORDER"), "editingCellProperty");
 			return;
+		} else if (dragSegment != null) {
+			log.log(Level.SEVERE, messages.getString("CANCELLING_INCORRECT_UPDATESORTORDER"), "dragSegment not null");
+			return;
 		}
+		TimeSegmentAdapter focusedAdapter = timeSegments.getFocusModel().getFocusedItem();
 		timeSegments.getSortPolicy().call(timeSegments);
+		//Restore lost focus
+		if(focusedAdapter!=null && timeSegments.getFocusModel().getFocusedItem()==null)
+			timeSegments.getFocusModel().focus(timeSegments.getItems().indexOf(focusedAdapter));
 	}
 
 	/**
