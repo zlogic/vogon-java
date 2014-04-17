@@ -254,19 +254,19 @@ public class TaskEditorController implements Initializable {
 
 		@Override
 		public void cancelEdit() {
-			dataManager.pauseUpdatesProperty().set(false);
+			dataManager.editingTaskProperty().set(false);
 			super.cancelEdit();
 		}
 
 		@Override
 		public void startEdit() {
-			dataManager.pauseUpdatesProperty().set(true);
+			dataManager.editingTaskProperty().set(true);
 			super.startEdit();
 		}
 
 		@Override
 		public void commitEdit(T t) {
-			dataManager.pauseUpdatesProperty().set(false);
+			dataManager.editingTaskProperty().set(false);
 			super.commitEdit(t);
 		}
 
@@ -437,7 +437,7 @@ public class TaskEditorController implements Initializable {
 				dragBoard.setContent(content);
 
 				dragSegment = focusedItem;
-				dataManager.pauseUpdatesProperty().set(true);
+				dataManager.draggingTaskProperty().set(true);
 
 				event.consume();
 			}
@@ -446,9 +446,9 @@ public class TaskEditorController implements Initializable {
 
 			@Override
 			public void handle(DragEvent event) {
-				dataManager.pauseUpdatesProperty().set(false);//TODO: check if this doesn't unlock some other object
+				dataManager.draggingTaskProperty().set(false);
 				dragSegment = null;
-				
+
 				event.consume();
 			}
 
@@ -662,15 +662,13 @@ public class TaskEditorController implements Initializable {
 		} else if (timeSegments.getEditingCell() != null && timeSegments.getEditingCell().getColumn() != -1 && timeSegments.getEditingCell().getRow() != -1) {
 			log.log(Level.SEVERE, messages.getString("CANCELLING_INCORRECT_UPDATESORTORDER"), "editingCellProperty");
 			return;
-		} else if (dragSegment != null) {
-			log.log(Level.SEVERE, messages.getString("CANCELLING_INCORRECT_UPDATESORTORDER"), "dragSegment not null");
-			return;
 		}
 		TimeSegmentAdapter focusedAdapter = timeSegments.getFocusModel().getFocusedItem();
+		TableColumn focusedColumn = timeSegments.getFocusModel().getFocusedCell().getTableColumn();
 		timeSegments.getSortPolicy().call(timeSegments);
 		//Restore lost focus
-		if(focusedAdapter!=null && timeSegments.getFocusModel().getFocusedItem()==null)
-			timeSegments.getFocusModel().focus(timeSegments.getItems().indexOf(focusedAdapter));
+		if (focusedAdapter != null && timeSegments.getFocusModel().getFocusedItem() == null)
+			timeSegments.getFocusModel().focus(timeSegments.getItems().indexOf(focusedAdapter), focusedColumn);
 	}
 
 	/**

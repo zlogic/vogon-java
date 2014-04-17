@@ -20,6 +20,8 @@ import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -113,7 +115,15 @@ public class DataManager {
 	 * Property indicating that task updates affecting sort order should be
 	 * paused
 	 */
-	private BooleanProperty pauseUpdates = new SimpleBooleanProperty();
+	private ReadOnlyBooleanWrapper pauseUpdates = new ReadOnlyBooleanWrapper();
+	/**
+	 * Property indicating that a task is being edited
+	 */
+	private BooleanProperty editingTask = new SimpleBooleanProperty(false);
+	/**
+	 * Property indicating that a task is being dragged'n'dropped
+	 */
+	private BooleanProperty draggingTask = new SimpleBooleanProperty(false);
 	/**
 	 * Tasks updated event
 	 */
@@ -128,6 +138,7 @@ public class DataManager {
 	 */
 	public DataManager() {
 		/*((DataManager) this).reloadTasks();*/
+		pauseUpdates.bind(editingTask.or(draggingTask));
 	}
 
 	/**
@@ -674,14 +685,32 @@ public class DataManager {
 	}
 
 	/**
+	 * Property indicating that a task is being edited
+	 *
+	 * @return the property indicating that a task is being edited
+	 */
+	public BooleanProperty editingTaskProperty() {
+		return editingTask;
+	}
+
+	/**
+	 * Property indicating that a task is being dragged'n'dropped
+	 *
+	 * @return the property indicating that a task is being dragged'n'dropped
+	 */
+	public BooleanProperty draggingTaskProperty() {
+		return draggingTask;
+	}
+
+	/**
 	 * Property indicating that task updates affecting sort order should be
 	 * paused
 	 *
 	 * @return the property indicating that task updates affecting sort order
 	 * should be paused
 	 */
-	public BooleanProperty pauseUpdatesProperty() {
-		return pauseUpdates;
+	public ReadOnlyBooleanProperty pauseUpdatesProperty() {
+		return pauseUpdates.getReadOnlyProperty();
 	}
 	/*
 	 * Getters/setters
