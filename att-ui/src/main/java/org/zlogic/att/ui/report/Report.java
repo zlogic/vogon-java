@@ -19,9 +19,10 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.util.Calendar;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,6 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.jasper.builder.export.Exporters;
@@ -60,7 +60,6 @@ import org.zlogic.att.data.Task;
 import org.zlogic.att.data.TimeSegment;
 import org.zlogic.att.data.reporting.DateTools;
 import org.zlogic.att.data.reporting.ReportQuery;
-import org.zlogic.att.ui.ExceptionHandler;
 import org.zlogic.att.ui.ExceptionLogger;
 import org.zlogic.att.ui.adapters.CustomFieldAdapter;
 import org.zlogic.att.ui.adapters.DataManager;
@@ -88,11 +87,11 @@ public class Report {
 	/**
 	 * Report start date
 	 */
-	private Date startDate;
+	private LocalDate startDate;
 	/**
 	 * Report end date
 	 */
-	private Date endDate;
+	private LocalDate endDate;
 	/**
 	 * Property to indicate the progress (0..1)
 	 */
@@ -224,7 +223,7 @@ public class Report {
 		 * @return the duration of the time segment
 		 */
 		public String getDuration() {
-			Duration period = timeSegment.getClippedDuration(startDate, endDate);
+			Duration period = timeSegment.getClippedDuration(DateTools.getInstance().convertDateToStartOfDay(startDate), DateTools.getInstance().convertDateToEndOfDay(endDate));
 			return DurationFormatter.formatDuration(period);
 		}
 	}
@@ -403,7 +402,7 @@ public class Report {
 	 *
 	 * @return the report starting date
 	 */
-	public Date getStartDate() {
+	public LocalDate getStartDate() {
 		return startDate;
 	}
 
@@ -413,8 +412,8 @@ public class Report {
 	 *
 	 * @param startDate the report starting date
 	 */
-	public void setStartDate(Date startDate) {
-		this.startDate = DateTools.getInstance().convertDateToStartOfDay(startDate);
+	public void setStartDate(LocalDate startDate) {
+		this.startDate = startDate;
 	}
 
 	/**
@@ -422,7 +421,7 @@ public class Report {
 	 *
 	 * @return the report ending date
 	 */
-	public Date getEndDate() {
+	public LocalDate getEndDate() {
 		return endDate;
 	}
 
@@ -431,8 +430,8 @@ public class Report {
 	 *
 	 * @param endDate the report ending date
 	 */
-	public void setEndDate(Date endDate) {
-		this.endDate = DateTools.getInstance().convertDateToEndOfDay(endDate);
+	public void setEndDate(LocalDate endDate) {
+		this.endDate = endDate;
 	}
 
 	/**
@@ -516,7 +515,10 @@ public class Report {
 	 * @return the builder for the report title component
 	 */
 	protected ComponentBuilder getTitle() {
-		String titleText = MessageFormat.format(messages.getString("TIMESHEET_HEADER"), new Object[]{getStartDate(), getEndDate()});
+		String titleText = MessageFormat.format(messages.getString("TIMESHEET_HEADER"), new Object[]{
+			DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(getStartDate()),
+			DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(getEndDate())
+		});
 		StyleBuilder titleStyle = DynamicReports.stl.style()
 				.setHorizontalAlignment(HorizontalAlignment.CENTER)
 				.setVerticalAlignment(VerticalAlignment.MIDDLE)
@@ -606,7 +608,7 @@ public class Report {
 			@Override
 			public Date evaluate(ReportParameters rp) {
 				TimeSegment timeSegment = rp.getFieldValue("timeSegment"); //NOI18N
-				Date clippedStartDate = timeSegment.getClippedStartTime(startDate, endDate);
+				Date clippedStartDate = timeSegment.getClippedStartTime(DateTools.getInstance().convertDateToStartOfDay(startDate), DateTools.getInstance().convertDateToEndOfDay(endDate));
 				if (clippedStartDate != null)
 					return clippedStartDate;
 				else
@@ -617,7 +619,7 @@ public class Report {
 			@Override
 			public Date evaluate(ReportParameters rp) {
 				TimeSegment timeSegment = rp.getFieldValue("timeSegment"); //NOI18N
-				Date clippedEndDate = timeSegment.getClippedEndTime(startDate, endDate);
+				Date clippedEndDate = timeSegment.getClippedEndTime(DateTools.getInstance().convertDateToStartOfDay(startDate), DateTools.getInstance().convertDateToEndOfDay(endDate));
 				if (clippedEndDate != null)
 					return clippedEndDate;
 				else
@@ -654,7 +656,7 @@ public class Report {
 				Task task = rp.getFieldValue("task"); //NOI18N
 				Date earliestStartDate = null;
 				for (TimeSegment timeSegment : task.getTimeSegments()) {
-					Date taskStartDate = timeSegment.getClippedStartTime(startDate, endDate);
+					Date taskStartDate = timeSegment.getClippedStartTime(DateTools.getInstance().convertDateToStartOfDay(startDate), DateTools.getInstance().convertDateToEndOfDay(endDate));
 					earliestStartDate = (earliestStartDate == null || (taskStartDate != null && timeSegment.getStartTime().before(earliestStartDate))) ? taskStartDate : earliestStartDate;
 				}
 				return earliestStartDate;
@@ -664,7 +666,7 @@ public class Report {
 			@Override
 			public Duration evaluate(ReportParameters rp) {
 				Task task = rp.getFieldValue("task"); //NOI18N
-				return task.getTotalTime(startDate, endDate);
+				return task.getTotalTime(DateTools.getInstance().convertDateToStartOfDay(startDate), DateTools.getInstance().convertDateToEndOfDay(endDate));
 			}
 		};
 		String header = messages.getString("TASKS");
@@ -696,7 +698,7 @@ public class Report {
 		//Prepare value-time map
 		Map<String, CustomFieldTime> customFieldData = new TreeMap<>();
 		for (Task task : tasks) {
-			Duration duration = task.getTotalTime(startDate, endDate);
+			Duration duration = task.getTotalTime(DateTools.getInstance().convertDateToStartOfDay(startDate), DateTools.getInstance().convertDateToEndOfDay(endDate));
 			String customFieldValue = task.getCustomField(customField);
 			customFieldValue = customFieldValue != null ? customFieldValue : ""; //NOI18N
 			if (customFieldData.containsKey(customFieldValue))
@@ -758,10 +760,9 @@ public class Report {
 		//Date-TimeSegment association list
 		List<DateTimeSegment> dataSource = new LinkedList<>();
 		{
-			Calendar calendar = new GregorianCalendar();
-			for (calendar.setTime(startDate); !calendar.getTime().after(endDate); calendar.add(Calendar.DAY_OF_MONTH, 1)) {
-				Date dayStart = DateTools.getInstance().convertDateToStartOfDay(calendar.getTime());
-				Date dayEnd = DateTools.getInstance().convertDateToEndOfDay(calendar.getTime());
+			for (LocalDate localDate = startDate; !localDate.isAfter(endDate); localDate = localDate.plusDays(1)) {
+				Date dayStart = DateTools.getInstance().convertDateToStartOfDay(localDate);
+				Date dayEnd = DateTools.getInstance().convertDateToEndOfDay(localDate);
 				for (TimeSegment timeSegment : timeSegments)
 					if (!timeSegment.getClippedDuration(dayStart, dayEnd).equals(Duration.ZERO))
 						dataSource.add(new DateTimeSegment(dayStart, dayEnd, timeSegment));

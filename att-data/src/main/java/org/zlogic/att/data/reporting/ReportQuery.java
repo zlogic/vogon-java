@@ -5,6 +5,7 @@
  */
 package org.zlogic.att.data.reporting;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,7 +66,7 @@ public class ReportQuery {
 	 *
 	 * @param startDate the report starting date
 	 */
-	public void setStartDate(Date startDate) {
+	public void setStartDate(LocalDate startDate) {
 		this.startDate = DateTools.getInstance().convertDateToStartOfDay(startDate);
 	}
 
@@ -83,7 +84,7 @@ public class ReportQuery {
 	 *
 	 * @param endDate the report ending date
 	 */
-	public void setEndDate(Date endDate) {
+	public void setEndDate(LocalDate endDate) {
 		this.endDate = DateTools.getInstance().convertDateToEndOfDay(endDate);
 	}
 
@@ -126,20 +127,20 @@ public class ReportQuery {
 				Expression<Date> startTime = timeSegmentRoot.get(TimeSegment_.startTime);
 				Expression<Date> endTime = timeSegmentRoot.get(TimeSegment_.endTime);
 				if (getStartDate() != null)
-					datePredicate =
-							criteriaBuilder.and(
-							criteriaBuilder.or(
-							(getEndDate() != null) ? criteriaBuilder.between(startTime, getStartDate(), getEndDate()) : criteriaBuilder.greaterThanOrEqualTo(startTime, getStartDate()),
-							criteriaBuilder.between(criteriaBuilder.literal(getStartDate()), startTime, endTime)),
-							datePredicate);
+					datePredicate
+							= criteriaBuilder.and(
+									criteriaBuilder.or(
+											(getEndDate() != null) ? criteriaBuilder.between(startTime, getStartDate(), getEndDate()) : criteriaBuilder.greaterThanOrEqualTo(startTime, getStartDate()),
+											criteriaBuilder.between(criteriaBuilder.literal(getStartDate()), startTime, endTime)),
+									datePredicate);
 
 				if (getEndDate() != null)
-					datePredicate =
-							criteriaBuilder.and(
-							criteriaBuilder.or(
-							(getEndDate() != null) ? criteriaBuilder.between(endTime, getStartDate(), getEndDate()) : criteriaBuilder.lessThanOrEqualTo(endTime, getEndDate()),
-							criteriaBuilder.between(criteriaBuilder.literal(getEndDate()), startTime, endTime)),
-							datePredicate);
+					datePredicate
+							= criteriaBuilder.and(
+									criteriaBuilder.or(
+											(getEndDate() != null) ? criteriaBuilder.between(endTime, getStartDate(), getEndDate()) : criteriaBuilder.lessThanOrEqualTo(endTime, getEndDate()),
+											criteriaBuilder.between(criteriaBuilder.literal(getEndDate()), startTime, endTime)),
+									datePredicate);
 				timeSegmentsCriteriaQuery.distinct(true);
 				timeSegmentsCriteriaQuery.where(datePredicate);
 

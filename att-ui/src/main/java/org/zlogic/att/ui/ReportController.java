@@ -8,7 +8,7 @@ package org.zlogic.att.ui;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,13 +21,12 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
-import javafx.util.converter.DateStringConverter;
 import net.sf.dynamicreports.report.exception.DRException;
 import org.zlogic.att.data.reporting.DateTools;
 import org.zlogic.att.ui.adapters.DataManager;
@@ -66,12 +65,12 @@ public class ReportController implements Initializable {
 	 * Start date field
 	 */
 	@FXML
-	private TextField startDate;
+	private DatePicker startDate;
 	/**
 	 * End date field
 	 */
 	@FXML
-	private TextField endDate;
+	private DatePicker endDate;
 	/**
 	 * Status pane
 	 */
@@ -108,14 +107,6 @@ public class ReportController implements Initializable {
 	@FXML
 	private Button saveReportButton;
 	/**
-	 * Extracted start date
-	 */
-	private ObjectProperty<Date> startDateValue = new SimpleObjectProperty<>();
-	/**
-	 * Extracted end date
-	 */
-	private ObjectProperty<Date> endDateValue = new SimpleObjectProperty<>();
-	/**
 	 * Report generation task thread
 	 */
 	private ObjectProperty<Thread> reportTaskThread = new SimpleObjectProperty<>();
@@ -132,10 +123,6 @@ public class ReportController implements Initializable {
 	 */
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
-		//Configure date fields
-		startDate.textProperty().bindBidirectional(startDateValue, new DateStringConverter());
-		endDate.textProperty().bindBidirectional(endDateValue, new DateStringConverter());
-
 		//Configure background task
 		statusPane.managedProperty().bind(statusPane.visibleProperty());
 		statusPane.visibleProperty().bind(reportTaskThread.isNotNull());
@@ -149,9 +136,8 @@ public class ReportController implements Initializable {
 		saveReportButton.disableProperty().bind(generatedReport.isNull());
 
 		//Configure dates
-		startDateValue.set(DateTools.getInstance().convertDateToStartOfMonth(new Date()));
-		endDateValue.set(DateTools.getInstance().convertDateToEndOfMonth(new Date()));
-
+		startDate.setValue(DateTools.getInstance().convertDateToStartOfMonth(LocalDate.now()));
+		endDate.setValue(DateTools.getInstance().convertDateToEndOfMonth(LocalDate.now()));
 	}
 
 	/**
@@ -195,8 +181,8 @@ public class ReportController implements Initializable {
 			protected Void call() throws Exception {
 				updateMessage(messages.getString("GENERATING_REPORT..."));
 				Report report = new Report(dataManager);
-				report.setStartDate(startDateValue.get());
-				report.setEndDate(endDateValue.get());
+				report.setStartDate(startDate.getValue());
+				report.setEndDate(endDate.getValue());
 				report.progressProperty().addListener(new ChangeListener<Number>() {
 					@Override
 					public void changed(ObservableValue<? extends Number> ov, Number oldValue, Number newValue) {
