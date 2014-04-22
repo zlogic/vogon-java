@@ -26,9 +26,12 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
+import javafx.scene.control.Cell;
 import javax.persistence.EntityManager;
 import org.zlogic.att.data.CustomField;
 import org.zlogic.att.data.Filter;
@@ -117,9 +120,13 @@ public class DataManager {
 	 */
 	private ReadOnlyBooleanWrapper pauseUpdates = new ReadOnlyBooleanWrapper();
 	/**
-	 * Property indicating that a task is being edited
+	 * Property indicating the cells being edited
 	 */
-	private BooleanProperty editingTask = new SimpleBooleanProperty(false);
+	private ObservableSet<Cell> editingCells = FXCollections.observableSet();
+	/**
+	 * Property indicating that a task is not being edited
+	 */
+	private BooleanProperty editingCellsEmpty = new SimpleBooleanProperty(true);
 	/**
 	 * Property indicating that a task is being dragged'n'dropped
 	 */
@@ -138,7 +145,14 @@ public class DataManager {
 	 */
 	public DataManager() {
 		/*((DataManager) this).reloadTasks();*/
-		pauseUpdates.bind(editingTask.or(draggingTask));
+		editingCells.addListener(new SetChangeListener<Cell>() {
+
+			@Override
+			public void onChanged(SetChangeListener.Change<? extends Cell> change) {
+				editingCellsEmpty.set(editingCells.isEmpty());
+			}
+		});
+		pauseUpdates.bind(editingCellsEmpty.not().or(draggingTask));
 	}
 
 	/**
@@ -685,12 +699,12 @@ public class DataManager {
 	}
 
 	/**
-	 * Property indicating that a task is being edited
+	 * Property indicating the cells being edited
 	 *
-	 * @return the property indicating that a task is being edited
+	 * @return the property indicating the cells being edited
 	 */
-	public BooleanProperty editingTaskProperty() {
-		return editingTask;
+	public ObservableSet<Cell> editingCellsProperty() {
+		return editingCells;
 	}
 
 	/**

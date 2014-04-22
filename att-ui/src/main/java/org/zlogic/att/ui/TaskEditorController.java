@@ -254,19 +254,19 @@ public class TaskEditorController implements Initializable {
 
 		@Override
 		public void cancelEdit() {
-			dataManager.editingTaskProperty().set(false);
+			dataManager.editingCellsProperty().remove(this);
 			super.cancelEdit();
 		}
 
 		@Override
 		public void startEdit() {
-			dataManager.editingTaskProperty().set(true);
+			dataManager.editingCellsProperty().add(this);
 			super.startEdit();
 		}
 
 		@Override
 		public void commitEdit(T t) {
-			dataManager.editingTaskProperty().set(false);
+			dataManager.editingCellsProperty().remove(this);
 			super.commitEdit(t);
 		}
 
@@ -347,7 +347,25 @@ public class TaskEditorController implements Initializable {
 		columnFieldValue.setCellFactory(new Callback<TableColumn<CustomFieldValueAdapter, String>, TableCell<CustomFieldValueAdapter, String>>() {
 			@Override
 			public TableCell<CustomFieldValueAdapter, String> call(TableColumn<CustomFieldValueAdapter, String> p) {
-				ComboBoxTableCell<CustomFieldValueAdapter, String> cell = new ComboBoxTableCell<>();
+				ComboBoxTableCell<CustomFieldValueAdapter, String> cell = new ComboBoxTableCell<CustomFieldValueAdapter, String>() {
+					@Override
+					public void cancelEdit() {
+						dataManager.editingCellsProperty().remove(this);
+						super.cancelEdit();
+					}
+
+					@Override
+					public void startEdit() {
+						dataManager.editingCellsProperty().add(this);
+						super.startEdit();
+					}
+
+					@Override
+					public void commitEdit(String t) {
+						dataManager.editingCellsProperty().remove(this);
+						super.commitEdit(t);
+					}
+				};
 				cell.setConverter(new DefaultStringConverter());
 				cell.setComboBoxEditable(true);
 				cell.tableRowProperty().addListener(new ChangeListener<TableRow>() {
