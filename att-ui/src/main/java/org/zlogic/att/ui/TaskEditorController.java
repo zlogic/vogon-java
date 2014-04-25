@@ -443,6 +443,20 @@ public class TaskEditorController implements Initializable {
 			}
 		});
 
+		//Avoid cursor reset while editing a task name
+		name.focusedProperty().addListener(new ChangeListener<Boolean>() {
+
+			@Override
+			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+				if (dataManager == null)
+					return;
+				if (newValue)
+					dataManager.editingCellsProperty().add(name);
+				else
+					dataManager.editingCellsProperty().remove(name);
+			}
+		});
+
 		//Drag'n'drop support
 		timeSegments.setOnDragDetected(new EventHandler<MouseEvent>() {
 			@Override

@@ -31,7 +31,7 @@ import javafx.collections.SetChangeListener;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
-import javafx.scene.control.Cell;
+import javafx.scene.Node;
 import javax.persistence.EntityManager;
 import org.zlogic.att.data.CustomField;
 import org.zlogic.att.data.Filter;
@@ -122,7 +122,7 @@ public class DataManager {
 	/**
 	 * Property indicating the cells being edited
 	 */
-	private ObservableSet<Cell> editingCells = FXCollections.observableSet();
+	private ObservableSet<Node> editingCells = FXCollections.observableSet();
 	/**
 	 * Property indicating that a task is not being edited
 	 */
@@ -145,10 +145,10 @@ public class DataManager {
 	 */
 	public DataManager() {
 		/*((DataManager) this).reloadTasks();*/
-		editingCells.addListener(new SetChangeListener<Cell>() {
+		editingCells.addListener(new SetChangeListener<Node>() {
 
 			@Override
-			public void onChanged(SetChangeListener.Change<? extends Cell> change) {
+			public void onChanged(SetChangeListener.Change<? extends Node> change) {
 				editingCellsEmpty.set(editingCells.isEmpty());
 			}
 		});
@@ -703,7 +703,7 @@ public class DataManager {
 	 *
 	 * @return the property indicating the cells being edited
 	 */
-	public ObservableSet<Cell> editingCellsProperty() {
+	public ObservableSet<Node> editingCellsProperty() {
 		return editingCells;
 	}
 
