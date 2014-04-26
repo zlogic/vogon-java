@@ -90,7 +90,6 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Amount
 	 * Constructs a Transaction properties editor/viewer
 	 *
 	 * @param dataManager the DataManager to be used
-	 * @param exceptionHandler the exception handler
 	 */
 	public TransactionEditor(DataManager dataManager) {
 		this.dataManager = dataManager;
