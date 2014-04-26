@@ -29,8 +29,6 @@ public class StringValidatorDouble implements StringCellValidator {
 
 	/**
 	 * Constructs a StringValidatorDouble
-	 *
-	 * @param exceptionHandler the exception handler
 	 */
 	public StringValidatorDouble() {
 	}

@@ -27,9 +27,9 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
                       </GridPane.margin>
                     </Label>
-                    <TextField fx:id="startDateField" onAction="#handleGenerateReport" GridPane.columnIndex="1" GridPane.margin="$x1" GridPane.rowIndex="0" />
+                    <DatePicker fx:id="startDateField" GridPane.columnIndex="1" GridPane.margin="$x1" GridPane.rowIndex="0" />
                     <Label text="%END_DATE" GridPane.columnIndex="0" GridPane.margin="$x1" GridPane.rowIndex="1" />
-                    <TextField fx:id="endDateField" onAction="#handleGenerateReport" GridPane.columnIndex="1" GridPane.margin="$x1" GridPane.rowIndex="1" />
+                    <DatePicker fx:id="endDateField" GridPane.columnIndex="1" GridPane.margin="$x1" GridPane.rowIndex="1" />
                     <CheckBox fx:id="transferTransactionsCheckbox" mnemonicParsing="false" text="%TRANSFER_TRANSACTIONS" GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.margin="$x1" GridPane.rowIndex="2" />
                     <CheckBox fx:id="incomeTransactionsCheckbox" mnemonicParsing="false" selected="true" text="%INCOME_TRANSACTIONS" GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.margin="$x1" GridPane.rowIndex="3" />
                     <CheckBox fx:id="expenseTransactionsCheckbox" mnemonicParsing="false" selected="true" text="%EXPENSE_TRANSACTIONS" GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.margin="$x1" GridPane.rowIndex="4" />

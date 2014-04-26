@@ -5,14 +5,21 @@
  */
 package org.zlogic.vogon.ui.cell;
 
-import java.text.DateFormat;
-import java.text.MessageFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.zlogic.vogon.ui.ExceptionLogger;
+
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.TableCell;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
 /**
  * String cell editor with date validation & parsing
@@ -21,7 +28,7 @@ import org.zlogic.vogon.ui.ExceptionLogger;
  * @author Dmitry Zolotukhin <a
  * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
  */
-public class DateCellEditor<BaseType> extends StringCellEditor<BaseType, Date> {
+public class DateCellEditor<BaseType> extends TableCell<BaseType, Date> {
 
 	/**
 	 * The logger
@@ -31,39 +38,128 @@ public class DateCellEditor<BaseType> extends StringCellEditor<BaseType, Date> {
 	 * Localization messages
 	 */
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
+
+	/**
+	 * The editor component
+	 */
+	protected DatePicker dateField;
 	/**
 	 * The date format to be used for validation
 	 */
-	protected SimpleDateFormat dateFormat;
-
+	protected DateTimeFormatter dateFormat;
 	/**
 	 * Creates a date editor
-	 *
-	 * @param exceptionHandler the exception handler
 	 */
 	public DateCellEditor() {
-		super(new StringValidatorDate(java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages").getString("PARSER_DATE")), Date.class);
-		dateFormat = new SimpleDateFormat(messages.getString("PARSER_DATE"));
+		dateFormat = DateTimeFormatter.ofPattern(messages.getString("PARSER_DATE"));
 	}
 
+
+	/**
+	 * Prepares the cell for editing
+	 */
 	@Override
-	protected Date propertyFromString(String value) {
-		try {
-			return dateFormat.parse(value);
-		} catch (ParseException ex) {
-			log.log(Level.SEVERE, null, ex);
-			ExceptionLogger.getInstance().showException(MessageFormat.format(messages.getString("CANNOT_PARSE_DATE"), new Object[]{value, ex.getMessage()}), ex);
+	public void startEdit() {
+		super.startEdit();
+
+		if (dateField == null)
+			createDateField();
+		setText(null);
+		setGraphic(dateField);
+		dateField.setValue(localDateFromDate(getItem()));
+	}
+
+	/**
+	 * Cancels cell editing
+	 */
+	@Override
+	public void cancelEdit() {
+		super.cancelEdit();
+		setText(getString());
+		setGraphic(null);
+	}
+
+	/**
+	 * Performs an item update
+	 *
+	 * @param item the updated cell type class instance
+	 * @param empty true if the item is empty
+	 */
+	@Override
+	public void updateItem(Date item, boolean empty) {
+		super.updateItem(item, empty);
+		if (empty) {
+			setText(null);
+			setGraphic(null);
+		} else {
+			if (isEditing()) {
+				if (dateField != null) {
+					dateField.setValue(localDateFromDate(item));
+				}
+				setText(null);
+				setGraphic(dateField);
+			} else {
+				setText(getString());
+				setGraphic(null);
+			}
 		}
-		return null;
 	}
 
-	@Override
+	/**
+	 * Creates the editor
+	 */
+	private void createDateField() {
+		dateField = new DatePicker();
+		dateField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2);
+		dateField.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				commitEdit(dateFromLocalDate(dateField.getValue()));
+			}
+		});
+		dateField.editorProperty().get().setAlignment(getAlignment());
+
+		dateField.editorProperty().get().setOnKeyPressed(
+				//dateField.editorProperty().get().addEventFilter(KeyEvent.KEY_PRESSED,
+				new EventHandler<KeyEvent>() {
+					@Override
+					public void handle(KeyEvent event) {
+						if (event.getCode() == KeyCode.ENTER) {
+							//event.consume();
+							commitEdit(dateFromLocalDate(dateField.getConverter().fromString(dateField.editorProperty().get().getText())));
+						} else if (event.getCode() == KeyCode.ESCAPE) {
+							cancelEdit();
+						}
+					}
+				}
+		);
+	}
+
+	/**
+	 * Converts a LocalDate into a Date
+	 * @param localDate the LocalDate to convert
+	 * @return the Date corresponding to the start of day of localDate
+	 */
+	private Date dateFromLocalDate(LocalDate localDate){
+		return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+	}
+
+	/**
+	 * Converts a Date into a LocalDate
+	 * @param date the Date to convert
+	 * @return the LocalDate corresponding to date
+	 */
+	private LocalDate localDateFromDate(Date date){
+		return LocalDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.systemDefault()).toLocalDate();
+	}
+
+	/**
+	 * Returns the string value of the edited property (before editing)
+	 *
+	 * @return the string value of the edited property
+	 */
 	protected String getString() {
-		if (getItem() == null)
-			return "";//NOI18N
-		if (isEditing())
-			return MessageFormat.format(messages.getString("FORMAT_DATE"), new Object[]{getItem()});
-		else
-			return DateFormat.getDateInstance(DateFormat.LONG).format(getItem());
+		Date date =  getItem();
+		return date == null ? "" : localDateFromDate(date).format(dateFormat);//NOI18N
 	}
 }

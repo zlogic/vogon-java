@@ -8,8 +8,10 @@ package org.zlogic.vogon.ui;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
@@ -17,7 +19,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -37,10 +38,10 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
@@ -77,10 +78,6 @@ public class AnalyticsController implements Initializable {
 	 */
 	protected DataManager dataManager;
 	/**
-	 * The date format for resulting tables
-	 */
-	protected DateFormat dateFormat;
-	/**
 	 * The processor for background tasks
 	 */
 	private Callback<Task<Void>, Void> backgroundTaskProcessor;
@@ -88,12 +85,12 @@ public class AnalyticsController implements Initializable {
 	 * Start date text field
 	 */
 	@FXML
-	private TextField startDateField;
+	private DatePicker startDateField;
 	/**
 	 * End date text field
 	 */
 	@FXML
-	private TextField endDateField;
+	private DatePicker endDateField;
 	/**
 	 * Transfer transactions checkbox
 	 */
@@ -173,7 +170,6 @@ public class AnalyticsController implements Initializable {
 	 */
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		dateFormat = new SimpleDateFormat(messages.getString("PARSER_DATE"));
 		//Configure columns
 		tagsSelectionTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		accountsSelectionTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -248,13 +244,8 @@ public class AnalyticsController implements Initializable {
 				updateProgress(-1, 1);
 				updateMessage(messages.getString("TASK_GENERATING_REPORT"));
 				//Set report parameters
-				try {
-					report.setEarliestDate(dateFormat.parse(startDateField.getText()));
-					report.setLatestDate(dateFormat.parse(endDateField.getText()));
-				} catch (ParseException ex) {
-					MessageDialog.showDialog(messages.getString("ANALYTICS_REPORT_EXCEPTION_DIALOG_TITLE"), new MessageFormat(messages.getString("ANALYTICS_REPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), org.zlogic.vogon.data.Utils.getStackTrace(ex)}));
-					log.log(Level.SEVERE, null, ex);
-				}
+				report.setEarliestDate(Date.from(startDateField.getValue().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
+				report.setLatestDate(Date.from(endDateField.getValue().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
 
 				List<FinanceAccount> selectedAccounts = new LinkedList<>();
 				for (AccountSelectionAdapter accountAdapter : accountsSelectionTable.getItems())
@@ -433,8 +424,8 @@ public class AnalyticsController implements Initializable {
 		//Update the form
 		report = new Report(dataManager.getFinanceData());
 
-		startDateField.setText(dateFormat.format(report.getEarliestDate()));
-		endDateField.setText(dateFormat.format(report.getLatestDate()));
+		startDateField.setValue(LocalDateTime.ofInstant(Instant.ofEpochMilli(report.getEarliestDate().getTime()),ZoneId.systemDefault()).toLocalDate());
+		endDateField.setValue(LocalDateTime.ofInstant(Instant.ofEpochMilli(report.getLatestDate().getTime()),ZoneId.systemDefault()).toLocalDate());
 
 		updateTagsSelectionTable();//TODO: move this to FinanceData
 		updateAccountsSelectionTable();//TODO: move this to FinanceData (add "select for report" property to regular adapter)

@@ -22,8 +22,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
- * Very simple dialog class. TODO: replace this with Alert once Java FX 3.0/8.0
- * is released
+ * Very simple dialog class.
+ * FIXME: replace this with Alert once added to Java FX
  *
  * @author Dmitry Zolotukhin <a
  * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>

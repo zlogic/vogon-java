@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.zlogic.vogon</groupId>
 		<artifactId>top</artifactId>
-		<version>0.0.6-SNAPSHOT</version>
+		<version>1.0-SNAPSHOT</version>
 	</parent>
 	<groupId>org.zlogic.vogon.resources</groupId>
 	<artifactId>vogon-resources</artifactId>
