@@ -122,7 +122,7 @@ public class ExceptionLogger implements UncaughtExceptionHandler, ExceptionHandl
 		logger.severe(uncaughtExceptionFormat.format(new Object[]{getExceptionStacktrace(e)}));
 		if (exceptionDialogController == null)
 			loadExceptionDialog();
-		exceptionDialogController.showExceptionMessage(uncaughtExceptionFormat.format(new Object[]{e.getMessage()}));
+		exceptionDialogController.showExceptionMessage(uncaughtExceptionFormat.format(new Object[]{e.toString()}));
 	}
 
 	@Override
@@ -131,7 +131,7 @@ public class ExceptionLogger implements UncaughtExceptionHandler, ExceptionHandl
 		if (explanation != null)
 			exceptionString = explanation;
 		else if (ex != null && ex.getMessage() != null)
-			exceptionString = uncaughtExceptionFormat.format(new Object[]{ex.getMessage()});
+			exceptionString = uncaughtExceptionFormat.format(new Object[]{ex.toString()});
 		else
 			exceptionString = messages.getString("UNKNOWN_ERROR");
 
