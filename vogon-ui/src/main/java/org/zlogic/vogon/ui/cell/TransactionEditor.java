@@ -100,6 +100,10 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Amount
 	 */
 	@Override
 	public void startEdit() {
+		if (getScene() == null) {
+			log.fine("Skipping edit because scene is null");
+			return;
+		}
 		super.startEdit();
 
 		if (editor == null)
