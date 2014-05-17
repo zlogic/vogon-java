@@ -10,17 +10,7 @@
 <?scenebuilder-preview-i18n-resource messages.properties?>
 <?language javascript?>
 
-<AnchorPane id="AnchorPane" minHeight="136.0" prefHeight="136.0" prefWidth="466.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2">
-  <fx:script><![CDATA[
-    function openUrl(event){
-		//TODO: Replace with a better way of lauching links?
-		java.awt.Desktop.getDesktop().browse(new java.net.URL(resources.getString("ABOUT_URL")).toURI());
-    }
-    function openEmail(event){
-		//TODO: Replace with a better way of lauching links?
-		java.awt.Desktop.getDesktop().mail(new java.net.URL("mailto:"+resources.getString("ABOUT_EMAIL")).toURI());
-    }
-  ]]></fx:script>
+<AnchorPane id="AnchorPane" minHeight="136.0" prefHeight="136.0" prefWidth="466.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
   <children>
     <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
       <image>
@@ -28,7 +18,7 @@
       </image>
     </ImageView>
     <Label prefWidth="435.9999000000025" text="%ABOUT_DEVELOPER" wrapText="false" AnchorPane.leftAnchor="164.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="44.0" />
-    <Hyperlink onAction="openUrl(event);" prefWidth="450.0" text="%ABOUT_URL" underline="true" visited="true" AnchorPane.leftAnchor="164.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="22.0" />
+    <Hyperlink onAction="java.awt.Desktop.getDesktop().browse(new java.net.URL(resources.getString(&quot;ABOUT_URL&quot;)).toURI());" prefWidth="450.0" text="%ABOUT_URL" underline="true" visited="true" AnchorPane.leftAnchor="164.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="22.0" />
     <Label prefWidth="450.0" text="%ABOUT_TITLE" AnchorPane.leftAnchor="164.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="6.0" />
   </children>
 </AnchorPane>

@@ -11,7 +11,7 @@
 <?scenebuilder-preview-i18n-resource messages.properties?>
 <?scenebuilder-stylesheet Style.css?>
 
-<VBox id="VBox" fx:id="rootNode" maxHeight="-1.0" maxWidth="-1.0" minHeight="-1.0" minWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.InactivityDialogController">
+<VBox id="VBox" fx:id="rootNode" maxHeight="-1.0" maxWidth="-1.0" minHeight="-1.0" minWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="org.zlogic.att.ui.InactivityDialogController">
   <children>
     <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
       <children>

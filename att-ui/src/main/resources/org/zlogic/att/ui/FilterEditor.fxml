@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.*?>
 <?import java.lang.*?>
 <?import java.util.*?>
 <?import java.net.URL?>
@@ -11,16 +12,16 @@
 <?import javafx.scene.paint.*?>
 <?scenebuilder-preview-i18n-resource messages.properties?>
 
-<VBox prefHeight="344.0" prefWidth="364.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.FilterEditorController">
+<VBox prefHeight="344.0" prefWidth="364.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="org.zlogic.att.ui.FilterEditorController">
   <children>
     <TableView fx:id="filters" editable="true" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
       <columns>
-        <TableColumn prefWidth="75.0" text="%FILTER_TYPE" fx:id="columnFilterType">
+        <TableColumn fx:id="columnFilterType" prefWidth="75.0" text="%FILTER_TYPE">
           <cellValueFactory>
             <PropertyValueFactory property="type" />
           </cellValueFactory>
         </TableColumn>
-        <TableColumn prefWidth="75.0" text="%FILTER_EXPRESSION" fx:id="columnFilterExpression">
+        <TableColumn fx:id="columnFilterExpression" prefWidth="75.0" text="%FILTER_EXPRESSION">
           <cellValueFactory>
             <PropertyValueFactory property="value" />
           </cellValueFactory>

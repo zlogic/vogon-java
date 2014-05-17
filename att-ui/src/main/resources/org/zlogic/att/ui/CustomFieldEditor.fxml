@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.*?>
 <?import java.lang.*?>
 <?import java.util.*?>
 <?import java.net.URL?>
@@ -11,11 +12,11 @@
 <?import javafx.scene.paint.*?>
 <?scenebuilder-preview-i18n-resource messages.properties?>
 
-<VBox id="VBox" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.att.ui.CustomFieldEditorController">
+<VBox id="VBox" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="org.zlogic.att.ui.CustomFieldEditorController">
   <children>
     <TableView fx:id="customFields" editable="true" VBox.vgrow="ALWAYS">
       <columns>
-        <TableColumn prefWidth="75.0" text="%CUSTOM_FIELD" fx:id="columnCustomField">
+        <TableColumn fx:id="columnCustomField" prefWidth="75.0" text="%CUSTOM_FIELD">
           <cellValueFactory>
             <PropertyValueFactory property="name" />
           </cellValueFactory>
