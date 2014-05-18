@@ -131,6 +131,9 @@
               </content>
             </TitledPane>
           </panes>
+          <expandedPane>
+            <fx:reference source="x2" />
+          </expandedPane>
         </Accordion>
       </children>
     </VBox>
