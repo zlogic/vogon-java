@@ -13,7 +13,7 @@
 <?scenebuilder-preview-i18n-resource messages.properties?>
 <?scenebuilder-stylesheet Style.css?>
 
-<VBox fx:id="transactionsVBox" prefHeight="608.0" prefWidth="810.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.TransactionsController">
+<VBox fx:id="transactionsVBox" prefHeight="608.0" prefWidth="810.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="org.zlogic.vogon.ui.TransactionsController">
   <children>
     <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0">
       <children>
@@ -28,27 +28,27 @@
     </HBox>
     <TableView fx:id="transactionsTable" editable="true">
       <columns>
-        <TableColumn prefWidth="75.0" sortable="false" style="" text="%TRANSACTION_DESCRIPTION" fx:id="columnDescription">
+        <TableColumn fx:id="columnDescription" prefWidth="75.0" sortable="false" style="" text="%TRANSACTION_DESCRIPTION">
           <cellValueFactory>
             <PropertyValueFactory property="description" />
           </cellValueFactory>
         </TableColumn>
-        <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_DATE" fx:id="columnDate">
+        <TableColumn fx:id="columnDate" prefWidth="75.0" sortable="false" text="%TRANSACTION_DATE">
           <cellValueFactory>
             <PropertyValueFactory property="date" />
           </cellValueFactory>
         </TableColumn>
-        <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_TAGS" fx:id="columnTags">
+        <TableColumn fx:id="columnTags" prefWidth="75.0" sortable="false" text="%TRANSACTION_TAGS">
           <cellValueFactory>
             <PropertyValueFactory property="tags" />
           </cellValueFactory>
         </TableColumn>
-        <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_AMOUNT" fx:id="columnAmount">
+        <TableColumn fx:id="columnAmount" prefWidth="75.0" sortable="false" text="%TRANSACTION_AMOUNT">
           <cellValueFactory>
             <PropertyValueFactory property="amount" />
           </cellValueFactory>
         </TableColumn>
-        <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_ACCOUNT" fx:id="columnAccount">
+        <TableColumn fx:id="columnAccount" prefWidth="75.0" sortable="false" text="%TRANSACTION_ACCOUNT">
           <cellValueFactory>
             <PropertyValueFactory property="accountName" />
           </cellValueFactory>

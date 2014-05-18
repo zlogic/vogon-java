@@ -11,7 +11,7 @@
 <?scenebuilder-preview-i18n-resource messages.properties?>
 <?scenebuilder-stylesheet Style.css?>
 
-<VBox id="AnchorPane" fx:id="rootNode" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="-1.0" prefWidth="-1.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.ExceptionDialogController">
+<VBox id="AnchorPane" fx:id="rootNode" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="-1.0" prefWidth="-1.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="org.zlogic.vogon.ui.ExceptionDialogController">
   <children>
     <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0">
       <children>

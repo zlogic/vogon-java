@@ -71,6 +71,7 @@ public class FinanceData {
 		try {
 			shuttingDownLock.writeLock().lock();
 			shuttingDown = true;
+			entityManagerFactory.close();
 		} finally {
 			shuttingDownLock.writeLock().unlock();
 		}

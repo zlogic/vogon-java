@@ -29,7 +29,7 @@ public class TransactionComponent implements Serializable {
 	 * The transaction ID (only for persistence)
 	 */
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	protected long id;
 	/**
 	 * The account
