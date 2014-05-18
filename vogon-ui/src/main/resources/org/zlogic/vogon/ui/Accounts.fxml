@@ -12,7 +12,7 @@
 <?scenebuilder-preview-i18n-resource messages.properties?>
 <?scenebuilder-stylesheet Style.css?>
 
-<VBox id="VBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.AccountsController">
+<VBox id="VBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="org.zlogic.vogon.ui.AccountsController">
   <children>
     <FlowPane minHeight="-Infinity">
       <children>
@@ -26,22 +26,22 @@
     </FlowPane>
     <TableView fx:id="accountsTable" editable="true" VBox.vgrow="ALWAYS">
       <columns>
-        <TableColumn prefWidth="75.0" text="%ACCOUNT_NAME" fx:id="columnName">
+        <TableColumn fx:id="columnName" prefWidth="75.0" text="%ACCOUNT_NAME">
           <cellValueFactory>
             <PropertyValueFactory property="name" />
           </cellValueFactory>
         </TableColumn>
-        <TableColumn editable="false" prefWidth="75.0" text="%ACCOUNT_BALANCE" fx:id="columnBalance">
+        <TableColumn fx:id="columnBalance" editable="false" prefWidth="75.0" text="%ACCOUNT_BALANCE">
           <cellValueFactory>
             <PropertyValueFactory property="balance" />
           </cellValueFactory>
         </TableColumn>
-        <TableColumn prefWidth="75.0" text="%ACCOUNT_CURRENCY" fx:id="columnCurrency">
+        <TableColumn fx:id="columnCurrency" prefWidth="75.0" text="%ACCOUNT_CURRENCY">
           <cellValueFactory>
             <PropertyValueFactory property="currency" />
           </cellValueFactory>
         </TableColumn>
-        <TableColumn prefWidth="75.0" text="%INCLUDE_IN_TOTAL" fx:id="columnIncludeInTotal">
+        <TableColumn fx:id="columnIncludeInTotal" prefWidth="75.0" text="%INCLUDE_IN_TOTAL">
           <cellValueFactory>
             <PropertyValueFactory property="includeInTotal" />
           </cellValueFactory>

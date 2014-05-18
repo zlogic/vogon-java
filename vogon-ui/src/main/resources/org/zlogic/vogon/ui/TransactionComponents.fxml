@@ -11,7 +11,7 @@
 <?import javafx.scene.paint.*?>
 <?scenebuilder-preview-i18n-resource messages.properties?>
 
-<TitledPane animated="false" collapsible="false" xmlns:fx="http://javafx.com/fxml" fx:controller="org.zlogic.vogon.ui.TransactionComponentsController">
+<TitledPane animated="false" collapsible="false" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="org.zlogic.vogon.ui.TransactionComponentsController">
   <content>
     <VBox id="VBox" minWidth="256.0" prefHeight="304.0" prefWidth="469.0">
       <children>
@@ -28,12 +28,12 @@
         </HBox>
         <TableView fx:id="transactionComponents" editable="true">
           <columns>
-            <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_ACCOUNT" fx:id="columnAccount">
+            <TableColumn fx:id="columnAccount" prefWidth="75.0" sortable="false" text="%TRANSACTION_ACCOUNT">
               <cellValueFactory>
                 <PropertyValueFactory property="account" />
               </cellValueFactory>
             </TableColumn>
-            <TableColumn prefWidth="75.0" sortable="false" text="%TRANSACTION_AMOUNT" fx:id="columnAmount">
+            <TableColumn fx:id="columnAmount" prefWidth="75.0" sortable="false" text="%TRANSACTION_AMOUNT">
               <cellValueFactory>
                 <PropertyValueFactory property="amount" />
               </cellValueFactory>

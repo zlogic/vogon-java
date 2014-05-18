@@ -12,9 +12,9 @@
 <?import javafx.scene.paint.*?>
 <?scenebuilder-preview-i18n-resource messages.properties?>
 
-<AnchorPane id="AnchorPane" maxHeight="-1.0" maxWidth="-1.0" minHeight="-1.0" minWidth="-1.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="org.zlogic.vogon.ui.AnalyticsController">
+<AnchorPane id="AnchorPane" maxHeight="-1.0" maxWidth="-1.0" minHeight="-1.0" minWidth="-1.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.zlogic.vogon.ui.AnalyticsController">
   <children>
-    <SplitPane dividerPositions="0.35, 0.70" focusTraversable="true" orientation="VERTICAL" prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <SplitPane dividerPositions="0.35, 0.7" focusTraversable="true" orientation="VERTICAL" prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <items>
         <HBox minHeight="180.0">
           <children>
@@ -56,12 +56,12 @@
                   <children>
                     <TableView fx:id="tagsSelectionTable" editable="true" prefHeight="173.0" prefWidth="263.0">
                       <columns>
-                        <TableColumn editable="false" prefWidth="75.0" text="%TAG_NAME" fx:id="tagsSelectionTagColumn">
+                        <TableColumn fx:id="tagsSelectionTagColumn" editable="false" prefWidth="75.0" text="%TAG_NAME">
                           <cellValueFactory>
                             <PropertyValueFactory property="tag" />
                           </cellValueFactory>
                         </TableColumn>
-                        <TableColumn prefWidth="75.0" text="%SHOW" fx:id="tagsSelectionShowColumn">
+                        <TableColumn fx:id="tagsSelectionShowColumn" prefWidth="75.0" text="%SHOW">
                           <cellValueFactory>
                             <PropertyValueFactory property="enabled" />
                           </cellValueFactory>
@@ -94,12 +94,12 @@
                   <children>
                     <TableView fx:id="accountsSelectionTable" editable="true" prefHeight="173.0" prefWidth="216.0">
                       <columns>
-                        <TableColumn editable="false" prefWidth="75.0" text="%ACCOUNT_NAME" fx:id="accountsSelectionAccountColumn">
+                        <TableColumn fx:id="accountsSelectionAccountColumn" editable="false" prefWidth="75.0" text="%ACCOUNT_NAME">
                           <cellValueFactory>
                             <PropertyValueFactory property="account" />
                           </cellValueFactory>
                         </TableColumn>
-                        <TableColumn prefWidth="75.0" text="%SHOW" fx:id="accountsSelectionShowColumn">
+                        <TableColumn fx:id="accountsSelectionShowColumn" prefWidth="75.0" text="%SHOW">
                           <cellValueFactory>
                             <PropertyValueFactory property="enabled" />
                           </cellValueFactory>
@@ -129,13 +129,13 @@
           <children>
             <TableView fx:id="tagsResultTable" prefHeight="150.0" prefWidth="350.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
               <columns>
-                <TableColumn prefWidth="75.0" text="%TAG_NAME" fx:id="tagsResultTagColumn">
+                <TableColumn fx:id="tagsResultTagColumn" prefWidth="75.0" text="%TAG_NAME">
                   <cellValueFactory>
                     <PropertyValueFactory property="tag" />
                   </cellValueFactory>
                 </TableColumn>
                 <!-- TODO: make this column sorted by default -->
-                <TableColumn prefWidth="75.0" text="%TRANSACTION_AMOUNT" fx:id="tagsResultAmountColumn">
+                <TableColumn fx:id="tagsResultAmountColumn" prefWidth="75.0" text="%TRANSACTION_AMOUNT">
                   <cellValueFactory>
                     <PropertyValueFactory property="amount" />
                   </cellValueFactory>
@@ -149,17 +149,17 @@
           <children>
             <TableView fx:id="transactionsResultTable" prefHeight="155.0" prefWidth="350.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
               <columns>
-                <TableColumn prefWidth="75.0" text="%TRANSACTION_NAME" fx:id="transactionsResultTransactionColumn">
+                <TableColumn fx:id="transactionsResultTransactionColumn" prefWidth="75.0" text="%TRANSACTION_NAME">
                   <cellValueFactory>
                     <PropertyValueFactory property="description" />
                   </cellValueFactory>
                 </TableColumn>
-                <TableColumn prefWidth="75.0" text="%TRANSACTION_DATE" fx:id="transactionsResultDateColumn">
+                <TableColumn fx:id="transactionsResultDateColumn" prefWidth="75.0" text="%TRANSACTION_DATE">
                   <cellValueFactory>
                     <PropertyValueFactory property="date" />
                   </cellValueFactory>
                 </TableColumn>
-                <TableColumn prefWidth="75.0" text="%TRANSACTION_AMOUNT" fx:id="transactionsResultAmountColumn">
+                <TableColumn fx:id="transactionsResultAmountColumn" prefWidth="75.0" text="%TRANSACTION_AMOUNT">
                   <cellValueFactory>
                     <PropertyValueFactory property="amount" />
                   </cellValueFactory>
