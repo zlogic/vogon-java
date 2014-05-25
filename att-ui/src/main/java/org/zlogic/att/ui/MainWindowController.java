@@ -8,9 +8,12 @@ package org.zlogic.att.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -134,6 +137,10 @@ public class MainWindowController implements Initializable {
 	 * Inactivity prompt dialog controller
 	 */
 	private InactivityDialogController inactivityDialogController;
+	/**
+	 * Confirmation prompt dialog controller
+	 */
+	private ConfirmationDialogController confirmationDialogController;
 	/**
 	 * Filters stage
 	 */
@@ -537,6 +544,7 @@ public class MainWindowController implements Initializable {
 		loadCurrentTaskNotification();
 		loadInactivityDialog();
 		loadWindowAbout();
+		confirmationDialogController = ConfirmationDialogController.createInstance();
 		taskEditorController.setDataManager(dataManager);
 		timeGraphController.setDataManager(dataManager);
 
@@ -628,6 +636,9 @@ public class MainWindowController implements Initializable {
 		ExceptionLogger.getInstance().setWindowIcons(icons);
 		currentTaskNotificationController.setWindowIcons(icons);
 		inactivityDialogController.setWindowIcons(icons);
+		taskEditorController.setWindowIcons(icons);
+		confirmationDialogController.setWindowIcons(icons);
+		customFieldEditorController.setWindowIcons(icons);
 	}
 
 	/**
@@ -779,6 +790,7 @@ public class MainWindowController implements Initializable {
 	protected void reloadTasks() {
 		dataManager.reloadTasks();
 		taskEditorController.setEditedTaskList(taskList.getSelectionModel().getSelectedItems());
+		updateSortOrder();
 	}
 
 	/**
@@ -899,8 +911,17 @@ public class MainWindowController implements Initializable {
 	 */
 	@FXML
 	private void deleteSelectedTasks() {
-		for (TaskAdapter selectedTask : taskList.getSelectionModel().getSelectedItems())
-			dataManager.deleteTask(selectedTask);
+		StringBuilder tasksToDelete = new StringBuilder();
+		List<TaskAdapter> tasksToDeleteList = new LinkedList(taskList.getSelectionModel().getSelectedItems());
+		for (TaskAdapter taskToDelete : tasksToDeleteList)
+			tasksToDelete.append(tasksToDelete.length() > 0 ? "\n" : "").append(taskToDelete.nameProperty().get()); //NOI18N
+		ConfirmationDialogController.Result result = confirmationDialogController.showDialog(
+				messages.getString("CONFIRM_TASK_DELETION"),
+				MessageFormat.format(messages.getString("ARE_YOU_SURE_YOU_WANT_TO_DELETE_THE_FOLLOWING_TASKS"), tasksToDelete)
+		);
+		if (result == ConfirmationDialogController.Result.CONFIRMED)
+			for (TaskAdapter taskToDelete : tasksToDeleteList)
+				dataManager.deleteTask(taskToDelete);
 	}
 
 	/**
@@ -1000,6 +1021,8 @@ public class MainWindowController implements Initializable {
 				dataManager.getPersistenceHelper().importData(importer);
 			else
 				log.fine(messages.getString("EXTENSION_NOT_RECOGNIZED"));
+
+			dataManager.reloadCustomFields();
 			reloadTasks();
 		}
 	}
@@ -1052,8 +1075,14 @@ public class MainWindowController implements Initializable {
 					updateProgress(1, 1);
 					updateMessage(""); //NOI18N
 
-					dataManager.reloadCustomFields();
-					reloadTasks();
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							dataManager.reloadCustomFields();
+							reloadTasks();
+							updateSortOrder();
+						}
+					});
 					return null;
 				}
 			}.setImporter(importer);

@@ -6,6 +6,7 @@
 package org.zlogic.att.ui;
 
 import java.net.URL;
+import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.Comparator;
 import java.util.Date;
@@ -38,6 +39,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.image.Image;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -159,6 +161,10 @@ public class TaskEditorController implements Initializable {
 	 */
 	@FXML
 	private TableView<CustomFieldValueAdapter> customProperties;
+	/**
+	 * Confirmation prompt dialog controller
+	 */
+	private ConfirmationDialogController confirmationDialogController;
 
 	/**
 	 * Returns the drag-n-drop source TimeSegmentAdapter only if source matches
@@ -518,6 +524,18 @@ public class TaskEditorController implements Initializable {
 		};
 		columnStart.setComparator(dateComparator);
 		columnEnd.setComparator(dateComparator);
+
+		//Confirmation dialog
+		confirmationDialogController = ConfirmationDialogController.createInstance();
+	}
+
+	/**
+	 * Sets the window icons
+	 *
+	 * @param icons the icons to be set
+	 */
+	public void setWindowIcons(ObservableList<Image> icons) {
+		confirmationDialogController.setWindowIcons(icons);
 	}
 
 	/**
@@ -689,10 +707,10 @@ public class TaskEditorController implements Initializable {
 	 */
 	private void updateSortOrder() {
 		if (dataManager.pauseUpdatesProperty().get()) {
-			log.log(Level.SEVERE, messages.getString("CANCELLING_INCORRECT_UPDATESORTORDER"), "pauseUpdatesProperty");
+			log.log(Level.SEVERE, messages.getString("CANCELLING_INCORRECT_UPDATESORTORDER"), "pauseUpdatesProperty"); //NOI18N
 			return;
 		} else if (timeSegments.getEditingCell() != null && timeSegments.getEditingCell().getColumn() != -1 && timeSegments.getEditingCell().getRow() != -1) {
-			log.log(Level.SEVERE, messages.getString("CANCELLING_INCORRECT_UPDATESORTORDER"), "editingCellProperty");
+			log.log(Level.SEVERE, messages.getString("CANCELLING_INCORRECT_UPDATESORTORDER"), "editingCellProperty"); //NOI18N
 			return;
 		}
 		TimeSegmentAdapter focusedAdapter = timeSegments.getFocusModel().getFocusedItem();
@@ -764,7 +782,17 @@ public class TaskEditorController implements Initializable {
 	 */
 	@FXML
 	private void deleteTimeSegment() {
-		for (TimeSegmentAdapter segment : timeSegments.getSelectionModel().getSelectedItems()) {
+		StringBuilder tasksToDelete = new StringBuilder();
+		List<TimeSegmentAdapter> segmentsToDeleteList = new LinkedList(timeSegments.getSelectionModel().getSelectedItems());
+		for (TimeSegmentAdapter segmentToDelete : segmentsToDeleteList)
+			tasksToDelete.append(tasksToDelete.length() > 0 ? "\n" : "").append(segmentToDelete.descriptionProperty().get()); //NOI18N
+		ConfirmationDialogController.Result result = confirmationDialogController.showDialog(
+				messages.getString("CONFIRM_TIME_SEGMENT_DELETION"),
+				MessageFormat.format(messages.getString("ARE_YOU_SURE_YOU_WANT_TO_DELETE_THE_FOLLOWING_TIME_SEGMENTS"), tasksToDelete)
+		);
+		if (result != ConfirmationDialogController.Result.CONFIRMED)
+			return;
+		for (TimeSegmentAdapter segment : segmentsToDeleteList) {
 			dataManager.deleteSegment(segment);
 			segment.ownerTaskProperty().get().updateFromDatabase();
 		}
