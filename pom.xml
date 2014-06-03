@@ -93,7 +93,7 @@
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-entitymanager</artifactId>
-				<version>4.2.12.Final</version>
+				<version>4.2.13.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
