@@ -8,7 +8,7 @@
 		<class>org.zlogic.vogon.data.CurrencyRate</class>
 		<class>org.zlogic.vogon.data.Preferences</class>
 		<properties>
-			<property name="javax.persistence.jdbc.url" value="jdbc:h2:Vogon"/>
+			<property name="javax.persistence.jdbc.url" value="jdbc:h2:${user.dir}/Vogon"/>
 			<property name="javax.persistence.jdbc.password" value=""/>
 			<property name="javax.persistence.jdbc.user" value=""/>
 			<property name="hibernate.hbm2ddl.auto" value="update"/>
