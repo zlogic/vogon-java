@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.zlogic.vogon</groupId>
 		<artifactId>top</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>1.1-SNAPSHOT</version>
 	</parent>
 	<groupId>org.zlogic.vogon.data</groupId>
 	<artifactId>vogon-data</artifactId>
