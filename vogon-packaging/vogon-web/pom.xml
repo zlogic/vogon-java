@@ -2,13 +2,13 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.zlogic.vogon</groupId>
+		<groupId>org.zlogic.vogon.packaging</groupId>
 		<artifactId>top</artifactId>
 		<version>1.1-SNAPSHOT</version>
 	</parent>
-	<groupId>org.zlogic.vogon.ui</groupId>
-	<artifactId>vogon-ui</artifactId>
-	<name>Vogon :: UI</name>
+	<artifactId>vogon-web</artifactId>
+	<name>Vogon :: Packaging :: Web</name>
+	<packaging>ear</packaging>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,9 +18,6 @@
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
-				<includes>
-					<include>**/*</include>
-				</includes>
 			</resource>
 		</resources>
 		<plugins>
@@ -32,13 +29,34 @@
 					<target>${version.java}</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-ear-plugin</artifactId>
+				<configuration>
+					<version>${version.java.ee}</version>
+					<defaultLibBundleDir>lib</defaultLibBundleDir>
+					<modules>
+						<ejbModule>
+							<groupId>org.zlogic.vogon.web</groupId>
+							<artifactId>vogon-web</artifactId>
+							<bundleDir>/vogon-web-ejb</bundleDir>
+						</ejbModule>
+					</modules>
+					<fileNameMapping>no-version</fileNameMapping>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.zlogic.vogon.data</groupId>
-			<artifactId>vogon-data-standalone</artifactId>
+			<groupId>org.zlogic.vogon.web</groupId>
+			<artifactId>vogon-web</artifactId>
+			<type>ejb</type>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
 		</dependency>
 	</dependencies>
 </project>
