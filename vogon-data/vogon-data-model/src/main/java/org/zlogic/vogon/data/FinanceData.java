@@ -5,15 +5,19 @@
  */
 package org.zlogic.vogon.data;
 
+import java.text.MessageFormat;
 import java.util.Currency;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
+import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -41,7 +45,7 @@ public class FinanceData {
 	/**
 	 * Entity manager factory
 	 */
-	private EntityManagerFactory entityManagerFactory = javax.persistence.Persistence.createEntityManagerFactory("VogonPU"); //NOI18N
+	private EntityManagerFactory entityManagerFactory;
 	/**
 	 * True if shutdown is started. Disables any transactions.
 	 */
@@ -59,6 +63,19 @@ public class FinanceData {
 	 * Default constructor
 	 */
 	public FinanceData() {
+		this(null);
+	}
+
+	/**
+	 * Construct with an alternative JDBC URL
+	 *
+	 * @param databasePath the database path
+	 */
+	public FinanceData(String jdbcUrl) {
+		Map<String, String> overrideProperties = new HashMap<>();
+		if (jdbcUrl != null)
+			overrideProperties.put("javax.persistence.jdbc.url", MessageFormat.format("jdbc:h2:{0}/Vogon", jdbcUrl));
+		entityManagerFactory = Persistence.createEntityManagerFactory("VogonPU", overrideProperties); //NOI18N
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		restoreFromDatabase(entityManager);
 		entityManager.close();
@@ -271,7 +288,7 @@ public class FinanceData {
 		Root<TransactionComponent> trc = transactionComponentCriteriaQuery.from(TransactionComponent.class);
 		transactionComponentCriteriaQuery.where(criteriaBuilder.equal(trc.get(TransactionComponent_.id), component.id));
 
-		//Post-fetch transaction and account		
+		//Post-fetch transaction and account
 		trc.fetch(TransactionComponent_.transaction, JoinType.LEFT);
 		trc.fetch(TransactionComponent_.account, JoinType.LEFT);
 

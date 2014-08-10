@@ -2,13 +2,14 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.zlogic.vogon</groupId>
+		<groupId>org.zlogic.vogon.data</groupId>
 		<artifactId>top</artifactId>
 		<version>1.1-SNAPSHOT</version>
 	</parent>
-	<groupId>org.zlogic.vogon.ui</groupId>
-	<artifactId>vogon-ui</artifactId>
-	<name>Vogon :: UI</name>
+	<groupId>org.zlogic.vogon.data</groupId>
+	<artifactId>vogon-data-standalone</artifactId>
+	<name>Vogon :: Data :: Standalone edition</name>
+	<description>Vogon data packaging for standalone, non-container deployment (e.g. Windows apps)</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,9 +19,6 @@
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
-				<includes>
-					<include>**/*</include>
-				</includes>
 			</resource>
 		</resources>
 		<plugins>
@@ -37,8 +35,16 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.zlogic.vogon.data</groupId>
-			<artifactId>vogon-data-standalone</artifactId>
+			<artifactId>vogon-data-model</artifactId>
 		</dependency>
 	</dependencies>
 </project>

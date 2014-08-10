@@ -5,3 +5,7 @@
 /vogon-ui/target/
 /vogon-resources/target/
 /vogon-data/target/
+/vogon-web/target/
+/vogon-data/vogon-data-standalone/target/
+/vogon-data/vogon-data-model/target/
+/vogon-packaging/vogon-web/target/

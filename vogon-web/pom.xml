@@ -6,9 +6,10 @@
 		<artifactId>top</artifactId>
 		<version>1.1-SNAPSHOT</version>
 	</parent>
-	<groupId>org.zlogic.vogon.ui</groupId>
-	<artifactId>vogon-ui</artifactId>
-	<name>Vogon :: UI</name>
+	<groupId>org.zlogic.vogon.web</groupId>
+	<artifactId>vogon-web</artifactId>
+	<name>Vogon :: Web</name>
+	<packaging>ejb</packaging>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,9 +19,6 @@
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
-				<includes>
-					<include>**/*</include>
-				</includes>
 			</resource>
 		</resources>
 		<plugins>
@@ -38,7 +36,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.zlogic.vogon.data</groupId>
-			<artifactId>vogon-data-standalone</artifactId>
+			<artifactId>vogon-data-model</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>
