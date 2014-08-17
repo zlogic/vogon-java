@@ -5,25 +5,27 @@
  */
 package org.zlogic.vogon.web;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.ManagedBean;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceData;
 
 /**
  * Class for initializing the Java EE services
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 @Singleton
 @Startup
+@ManagedBean
 public class Initializer {
 
+	/**
+	 * The logger
+	 */
 	private final static Logger logger = Logger.getLogger(Initializer.class.getName());
 
 	/**
@@ -31,21 +33,30 @@ public class Initializer {
 	 */
 	private FinanceData financeData;
 
-	public Initializer() {
-
-	}
-
+	/**
+	 * Initialize and start the FinanceData instance
+	 */
 	@PostConstruct
 	public void start() {
 		logger.info("Starting vogon");
 		financeData = new FinanceData("file:" + System.getProperty("jboss.server.data.dir") + "/h2db");
-		for (FinanceAccount account : financeData.getAccounts())
-			logger.log(Level.INFO, "Account: {0}", account.getName());
 	}
 
+	/**
+	 * Stop the FinanceData instance
+	 */
 	@PreDestroy
 	public void stop() {
 		logger.info("Stopping vogon");
 		financeData.shutdown();
+	}
+
+	/**
+	 * Returns the FinanceData instance
+	 *
+	 * @return the FinanceData instance
+	 */
+	public FinanceData getFinanceData() {
+		return financeData;
 	}
 }

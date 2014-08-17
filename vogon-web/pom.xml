@@ -1,47 +1,20 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.zlogic.vogon</groupId>
 		<artifactId>top</artifactId>
+		<groupId>org.zlogic.vogon</groupId>
 		<version>1.1-SNAPSHOT</version>
 	</parent>
+	<modelVersion>4.0.0</modelVersion>
+
 	<groupId>org.zlogic.vogon.web</groupId>
-	<artifactId>vogon-web</artifactId>
+	<artifactId>top</artifactId>
 	<name>Vogon :: Web</name>
-	<packaging>ejb</packaging>
+	<packaging>pom</packaging>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
-
-	<build>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-			</resource>
-		</resources>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>${version.java}</source>
-					<target>${version.java}</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-
-	<dependencies>
-		<dependency>
-			<groupId>org.zlogic.vogon.data</groupId>
-			<artifactId>vogon-data-model</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax</groupId>
-			<artifactId>javaee-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-	</dependencies>
+	<modules>
+		<module>vogon-web-service</module>
+	</modules>
 </project>
