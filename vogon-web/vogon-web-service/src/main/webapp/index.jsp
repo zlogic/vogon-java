@@ -2,12 +2,12 @@
 <html>
 	<head>
 		<title>Hello World</title>
-		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/${vogon.web.version.bootstrap}/css/bootstrap.min.css">
-		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/${vogon.web.version.bootstrap}/css/bootstrap-theme.min.css">
-		<script type="text/javascript" src="webjars/angularjs/${vogon.web.version.angularjs}/angular.min.js"></script>
-		<script type="text/javascript" src="webjars/angular-ui-bootstrap/${vogon.web.version.angularuibootstrap}/ui-bootstrap-tpls.min.js"></script>
-		<script type="text/javascript" src="webjars/jquery/${vogon.web.version.jquery}/jquery.min.js"></script>
-		<script type="text/javascript" src="webjars/bootstrap/${vogon.web.version.bootstrap}/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<%= org.zlogic.vogon.web.WebProperties.getProperty("bootstrap") %>/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<%= org.zlogic.vogon.web.WebProperties.getProperty("bootstrap") %>/css/bootstrap-theme.min.css">
+		<script type="text/javascript" src="webjars/angularjs/<%= org.zlogic.vogon.web.WebProperties.getProperty("angularjs") %>/angular.min.js"></script>
+		<script type="text/javascript" src="webjars/angular-ui-bootstrap/<%= org.zlogic.vogon.web.WebProperties.getProperty("angularuibootstrap") %>/ui-bootstrap-tpls.min.js"></script>
+		<script type="text/javascript" src="webjars/jquery/<%= org.zlogic.vogon.web.WebProperties.getProperty("jquery") %>/jquery.min.js"></script>
+		<script type="text/javascript" src="webjars/bootstrap/<%= org.zlogic.vogon.web.WebProperties.getProperty("bootstrap") %>/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="script/main.js"></script>
 	</head>
 	<body ng-app="vogon">
