@@ -6,11 +6,9 @@
 package org.zlogic.vogon.web;
 
 import java.util.logging.Logger;
-import javax.annotation.ManagedBean;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
+import org.springframework.stereotype.Service;
 import org.zlogic.vogon.data.FinanceData;
 
 /**
@@ -18,9 +16,7 @@ import org.zlogic.vogon.data.FinanceData;
  *
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
-@Singleton
-@Startup
-@ManagedBean
+@Service
 public class Initializer {
 
 	/**
@@ -38,8 +34,10 @@ public class Initializer {
 	 */
 	@PostConstruct
 	public void start() {
-		logger.info("Starting vogon");
-		financeData = new FinanceData("file:" + System.getProperty("jboss.server.data.dir") + "/h2db");
+		if (financeData == null) {
+			logger.info("Starting vogon");
+			financeData = new FinanceData("file:" + System.getProperty("jboss.server.data.dir") + "/h2db");
+		}
 	}
 
 	/**
@@ -47,8 +45,11 @@ public class Initializer {
 	 */
 	@PreDestroy
 	public void stop() {
-		logger.info("Stopping vogon");
-		financeData.shutdown();
+		if (financeData != null) {
+			logger.info("Stopping vogon");
+			financeData.shutdown();
+			financeData = null;
+		}
 	}
 
 	/**

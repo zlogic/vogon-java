@@ -6,9 +6,9 @@
 		<artifactId>top</artifactId>
 		<version>1.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>vogon-web</artifactId>
-	<name>Vogon :: Packaging :: Web</name>
-	<packaging>ear</packaging>
+	<artifactId>vogon-web-wildfly</artifactId>
+	<name>Vogon :: Packaging :: Web :: Wildfly</name>
+	<packaging>war</packaging>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -31,19 +31,14 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-ear-plugin</artifactId>
+				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
-					<version>${version.java.ee}</version>
-					<defaultLibBundleDir>lib</defaultLibBundleDir>
-					<modules>
-						<webModule>
+					<overlays>
+						<overlay>
 							<groupId>org.zlogic.vogon.web</groupId>
 							<artifactId>vogon-web-service</artifactId>
-							<bundleDir>/vogon-web</bundleDir>
-							<contextRoot>/vogon-web</contextRoot>
-						</webModule>
-					</modules>
-					<fileNameMapping>no-version</fileNameMapping>
+						</overlay>
+					</overlays>
 				</configuration>
 			</plugin>
 		</plugins>
