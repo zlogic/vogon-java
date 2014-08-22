@@ -124,7 +124,7 @@ public class StringCellEditor<BaseType, PropertyType> extends TableCell<BaseType
 		textField = new TextField(getString());
 		textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2);
 		textField.setAlignment(getAlignment());
-		textField.setOnKeyReleased(new EventHandler<KeyEvent>() {
+		textField.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent t) {
 				if (t.getCode() == KeyCode.ENTER) {
