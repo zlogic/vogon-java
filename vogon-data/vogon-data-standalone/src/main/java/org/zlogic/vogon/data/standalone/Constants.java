@@ -3,7 +3,7 @@
  * Licensed under Apache license: http://www.apache.org/licenses/LICENSE-2.0
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
-package org.zlogic.vogon.data;
+package org.zlogic.vogon.data.standalone;
 
 /**
  * Class for storing constants
@@ -14,7 +14,11 @@ package org.zlogic.vogon.data;
 public class Constants {
 
 	/**
-	 * Multiplier for converting from raw amount to double (10E[decimal points])
+	 * Batch fetch size for processing large amounts of data
 	 */
-	public static final double rawAmountMultiplier = 100.0D;
+	public static final int batchFetchSize = 200;
+	/**
+	 * Default username if only one user is supported
+	 */
+	public static final String defaultUsername = "Default";
 }

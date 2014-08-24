@@ -132,4 +132,13 @@ public class CurrencyRate implements Serializable {
 	public void setExchangeRate(double exchangeRate) {
 		this.exchangeRate = exchangeRate;
 	}
+
+	/**
+	 * Returns the ID for this class instance
+	 *
+	 * @return the ID for this class instance
+	 */
+	public long getId() {
+		return id;
+	}
 }

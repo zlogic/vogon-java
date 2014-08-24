@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 /**
  * Class for storing account data
@@ -32,6 +33,11 @@ public class FinanceAccount implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	protected long id;
+	/**
+	 * The account owner
+	 */
+	@ManyToOne
+	protected VogonUser owner;
 	/**
 	 * The account name
 	 */

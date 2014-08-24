@@ -25,9 +25,9 @@ import org.zlogic.vogon.data.ApplicationShuttingDownException;
 import org.zlogic.vogon.data.Constants;
 import org.zlogic.vogon.data.CurrencyRate;
 import org.zlogic.vogon.data.FinanceAccount;
-import org.zlogic.vogon.data.FinanceData;
+import org.zlogic.vogon.data.standalone.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
-import org.zlogic.vogon.data.Preferences;
+import org.zlogic.vogon.data.VogonUser;
 import org.zlogic.vogon.data.TransactedChange;
 import org.zlogic.vogon.data.interop.FileImporter;
 import org.zlogic.vogon.data.interop.VogonImportException;
@@ -98,8 +98,8 @@ public class DataManager {
 
 				@Override
 				public void performChange(EntityManager entityManager) {
-					Preferences preferences = financeData.getPreferencesFromDatabase(entityManager);
-					preferences.setDefaultCurrency(currency);
+					VogonUser user = financeData.getUserFromDatabase(entityManager);
+					user.setDefaultCurrency(currency);
 				}
 			}.setCurrency(newValue.getCurrency()));
 			refreshReportingAccounts();

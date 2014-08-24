@@ -20,6 +20,11 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan
 public class Runner {
 
+	/**
+	 * The main method to run the application
+	 *
+	 * @param args arguments
+	 */
 	public static void main(String[] args) {
 		System.setProperty("jboss.server.data.dir", System.getProperty("user.dir") + "/target");
 		SpringApplication.run(Runner.class, args);

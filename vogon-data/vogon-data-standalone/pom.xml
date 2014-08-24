@@ -10,6 +10,7 @@
 	<artifactId>vogon-data-standalone</artifactId>
 	<name>Vogon :: Data :: Standalone edition</name>
 	<description>Vogon data packaging for standalone, non-container deployment (e.g. Windows apps)</description>
+	<packaging>jar</packaging>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

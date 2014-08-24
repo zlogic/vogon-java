@@ -37,7 +37,7 @@
 						</div>
 					</div>
 					<div class="panel-footer">
-						<pagination total-items="totalItems" items-per-page="itemsPerPage" boundary-links="true" ng-model="currentPage" ng-change="pageChanged()">
+						<pagination total-items="totalPages" items-per-page="1" boundary-links="true" ng-model="currentPage" ng-change="pageChanged()">
 						</pagination>
 					</div>
 				</div>

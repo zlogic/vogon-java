@@ -3,16 +3,13 @@
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
-package org.zlogic.vogon.data;
+package org.zlogic.vogon.data.standalone;
 
-import java.text.MessageFormat;
 import java.util.Currency;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -23,6 +20,17 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
+import org.zlogic.vogon.data.ApplicationShuttingDownException;
+import org.zlogic.vogon.data.CurrencyRate;
+import org.zlogic.vogon.data.CurrencyRate_;
+import org.zlogic.vogon.data.FinanceAccount;
+import org.zlogic.vogon.data.FinanceTransaction;
+import org.zlogic.vogon.data.FinanceTransaction_;
+import org.zlogic.vogon.data.TransactedChange;
+import org.zlogic.vogon.data.TransactedQuery;
+import org.zlogic.vogon.data.TransactionComponent;
+import org.zlogic.vogon.data.TransactionComponent_;
+import org.zlogic.vogon.data.VogonUser;
 import org.zlogic.vogon.data.interop.FileExporter;
 import org.zlogic.vogon.data.interop.FileImporter;
 import org.zlogic.vogon.data.interop.VogonExportException;
@@ -63,19 +71,7 @@ public class FinanceData {
 	 * Default constructor
 	 */
 	public FinanceData() {
-		this(null);
-	}
-
-	/**
-	 * Construct with an alternative JDBC URL
-	 *
-	 * @param databasePath the database path
-	 */
-	public FinanceData(String jdbcUrl) {
-		Map<String, String> overrideProperties = new HashMap<>();
-		if (jdbcUrl != null)
-			overrideProperties.put("javax.persistence.jdbc.url", MessageFormat.format("jdbc:h2:{0}/Vogon", jdbcUrl));
-		entityManagerFactory = Persistence.createEntityManagerFactory("VogonPU", overrideProperties); //NOI18N
+		entityManagerFactory = Persistence.createEntityManagerFactory("VogonPU"); //NOI18N
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
 		restoreFromDatabase(entityManager);
 		entityManager.close();
@@ -180,16 +176,16 @@ public class FinanceData {
 
 			populateCurrencies(entityManager);
 
-			Preferences preferences = getPreferencesFromDatabase(entityManager);
-			Currency defaultCurrency = preferences.getDefaultCurrency();
+			VogonUser user = getUserFromDatabase(entityManager);
+			Currency defaultCurrency = user.getDefaultCurrency();
 
 			if (!getCurrencies().contains(defaultCurrency)) {
 				entityManager.getTransaction().begin();
-				preferences = entityManager.find(Preferences.class, preferences.id);
+				user = entityManager.find(VogonUser.class, user.getId());
 				if (getCurrencies().size() > 0)
-					preferences.setDefaultCurrency(getCurrencies().contains(Currency.getInstance(Locale.getDefault())) ? Currency.getInstance(Locale.getDefault()) : getCurrencies().get(0));
+					user.setDefaultCurrency(getCurrencies().contains(Currency.getInstance(Locale.getDefault())) ? Currency.getInstance(Locale.getDefault()) : getCurrencies().get(0));
 				else
-					preferences.setDefaultCurrency(Currency.getInstance(Locale.getDefault()));
+					user.setDefaultCurrency(Currency.getInstance(Locale.getDefault()));
 				entityManager.getTransaction().commit();
 			}
 			entityManager.close();
@@ -221,6 +217,8 @@ public class FinanceData {
 
 	/**
 	 * Restores all data from the persistence database
+	 *
+	 * @param entityManager the entity manager
 	 */
 	private void restoreFromDatabase(EntityManager entityManager) {
 		exchangeRates = getCurrencyRatesFromDatabase(entityManager);
@@ -247,7 +245,7 @@ public class FinanceData {
 		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
 		Root<FinanceTransaction> tr = transactionsCriteriaQuery.from(FinanceTransaction.class);
 		tr.fetch(FinanceTransaction_.tags, JoinType.LEFT);
-		transactionsCriteriaQuery.where(criteriaBuilder.equal(tr.get(FinanceTransaction_.id), transaction.id));
+		transactionsCriteriaQuery.where(criteriaBuilder.equal(tr.get(FinanceTransaction_.id), transaction.getId()));
 
 		FinanceTransaction result;
 		try {
@@ -260,7 +258,7 @@ public class FinanceData {
 		//Post-fetch components
 		CriteriaQuery<FinanceTransaction> transactionsComponentsFetchCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
 		Root<FinanceTransaction> trComponentsFetch = transactionsComponentsFetchCriteriaQuery.from(FinanceTransaction.class);
-		transactionsComponentsFetchCriteriaQuery.where(criteriaBuilder.equal(tr.get(FinanceTransaction_.id), transaction.id));
+		transactionsComponentsFetchCriteriaQuery.where(criteriaBuilder.equal(tr.get(FinanceTransaction_.id), transaction.getId()));
 		trComponentsFetch.fetch(FinanceTransaction_.components, JoinType.LEFT).fetch(TransactionComponent_.account, JoinType.LEFT);
 		entityManager.createQuery(transactionsComponentsFetchCriteriaQuery).getSingleResult();
 		return result;
@@ -286,7 +284,7 @@ public class FinanceData {
 		//Retreive the transactions
 		CriteriaQuery<TransactionComponent> transactionComponentCriteriaQuery = criteriaBuilder.createQuery(TransactionComponent.class);
 		Root<TransactionComponent> trc = transactionComponentCriteriaQuery.from(TransactionComponent.class);
-		transactionComponentCriteriaQuery.where(criteriaBuilder.equal(trc.get(TransactionComponent_.id), component.id));
+		transactionComponentCriteriaQuery.where(criteriaBuilder.equal(trc.get(TransactionComponent_.id), component.getId()));
 
 		//Post-fetch transaction and account
 		trc.fetch(TransactionComponent_.transaction, JoinType.LEFT);
@@ -412,22 +410,22 @@ public class FinanceData {
 	 * @return the Preferences class instance, or a new persisted instance if
 	 * the database doesn't contain any
 	 */
-	public Preferences getPreferencesFromDatabase(EntityManager entityManager) {
+	public VogonUser getUserFromDatabase(EntityManager entityManager) {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<Preferences> preferencesCriteriaQuery = criteriaBuilder.createQuery(Preferences.class);
-		preferencesCriteriaQuery.from(Preferences.class);
-		Preferences preferences = null;
+		CriteriaQuery<VogonUser> userCriteriaQuery = criteriaBuilder.createQuery(VogonUser.class);
+		userCriteriaQuery.from(VogonUser.class);
+		VogonUser user = null;
 		try {
-			preferences = entityManager.createQuery(preferencesCriteriaQuery).getSingleResult();
+			user = entityManager.createQuery(userCriteriaQuery).getSingleResult();
 		} catch (javax.persistence.NoResultException ex) {
 		}
-		if (preferences == null) {
-			preferences = new Preferences();
+		if (user == null) {
+			user = new VogonUser(Constants.defaultUsername);
 			entityManager.getTransaction().begin();
-			entityManager.persist(preferences);
+			entityManager.persist(user);
 			entityManager.getTransaction().commit();
 		}
-		return preferences;
+		return user;
 	}
 
 	/**
@@ -438,12 +436,12 @@ public class FinanceData {
 	 * currency
 	 */
 	protected Currency getDefaultCurrencyFromDatabase(EntityManager entityManager) {
-		Preferences preferences = getPreferencesFromDatabase(entityManager);
-		Currency currency = preferences.getDefaultCurrency();
+		VogonUser user = getUserFromDatabase(entityManager);
+		Currency currency = user.getDefaultCurrency();
 		if (currency == null) {
 			currency = Currency.getInstance(Locale.getDefault());
 
-			entityManager.merge(preferences);
+			entityManager.merge(user);
 		}
 		return currency;
 	}
@@ -529,7 +527,7 @@ public class FinanceData {
 		//Remove orphaned currencies
 		for (CurrencyRate rate : exchangeRates) {
 			if (!usedRates.contains(rate)) {
-				CurrencyRate foundRate = entityManager.find(CurrencyRate.class, rate.id);
+				CurrencyRate foundRate = entityManager.find(CurrencyRate.class, rate.getId());
 				if (foundRate != null)
 					entityManager.remove(foundRate);
 			}
@@ -620,7 +618,7 @@ public class FinanceData {
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
 
-			transaction = entityManager.find(FinanceTransaction.class, transaction.id);
+			transaction = entityManager.find(FinanceTransaction.class, transaction.getId());
 			FinanceTransaction newTransaction = transaction.clone();
 			for (TransactionComponent component : newTransaction.getComponents())
 				entityManager.persist(component);
@@ -656,8 +654,8 @@ public class FinanceData {
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
 
-			account = account != null ? entityManager.find(FinanceAccount.class, account.id) : null;
-			transaction = entityManager.find(FinanceTransaction.class, transaction.id);
+			account = account != null ? entityManager.find(FinanceAccount.class, account.getId()) : null;
+			transaction = entityManager.find(FinanceTransaction.class, transaction.getId());
 			TransactionComponent component = new TransactionComponent(account, transaction, amount);
 			entityManager.persist(component);
 
@@ -722,7 +720,7 @@ public class FinanceData {
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
 
-			component = entityManager.find(TransactionComponent.class, component.id);
+			component = entityManager.find(TransactionComponent.class, component.getId());
 
 			FinanceTransaction transaction = component.getTransaction();
 			FinanceAccount account = component.getAccount();
@@ -731,7 +729,7 @@ public class FinanceData {
 				entityManager.merge(transaction);
 			}
 
-			entityManager.remove(entityManager.find(TransactionComponent.class, component.id));
+			entityManager.remove(entityManager.find(TransactionComponent.class, component.getId()));
 
 			if (account != null)
 				entityManager.merge(account);
@@ -760,7 +758,7 @@ public class FinanceData {
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
 
-			transaction = entityManager.find(FinanceTransaction.class, transaction.id);
+			transaction = entityManager.find(FinanceTransaction.class, transaction.getId());
 
 			if (transaction == null)
 				return;
@@ -769,11 +767,11 @@ public class FinanceData {
 
 			//Remove all components
 			for (TransactionComponent component : transaction.getComponents())
-				entityManager.remove(entityManager.find(TransactionComponent.class, component.id));
+				entityManager.remove(entityManager.find(TransactionComponent.class, component.getId()));
 			transaction.removeAllComponents();
 
 			//Remove transaction
-			FinanceTransaction foundTransaction = entityManager.find(FinanceTransaction.class, transaction.id);
+			FinanceTransaction foundTransaction = entityManager.find(FinanceTransaction.class, transaction.getId());
 			entityManager.remove(foundTransaction);
 			for (FinanceAccount account : affectedAccounts)
 				entityManager.merge(account);
@@ -811,11 +809,11 @@ public class FinanceData {
 				if (!components.isEmpty())
 					entityManager.merge(transaction);
 				for (TransactionComponent component : components)
-					entityManager.remove(entityManager.find(TransactionComponent.class, component.id));
+					entityManager.remove(entityManager.find(TransactionComponent.class, component.getId()));
 			}
 
 			//Remove account
-			entityManager.remove(entityManager.find(FinanceAccount.class, account.id));
+			entityManager.remove(entityManager.find(FinanceAccount.class, account.getId()));
 
 			entityManager.getTransaction().commit();
 
@@ -845,7 +843,7 @@ public class FinanceData {
 			CriteriaBuilder criteriaBuilder = tempEntityManager.getCriteriaBuilder();
 			CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
 			transactionsCriteriaQuery.from(FinanceTransaction.class);
-			FinanceAccount tempAccount = tempEntityManager.find(FinanceAccount.class, account.id);
+			FinanceAccount tempAccount = tempEntityManager.find(FinanceAccount.class, account.getId());
 
 			//Recalculate balance from related transactions
 			tempEntityManager.getTransaction().begin();
@@ -1015,8 +1013,8 @@ public class FinanceData {
 	 */
 	public Currency getDefaultCurrency() {
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
-		Preferences preferences = getPreferencesFromDatabase(entityManager);
-		Currency defaultCurrency = preferences.getDefaultCurrency();
+		VogonUser user = getUserFromDatabase(entityManager);
+		Currency defaultCurrency = user.getDefaultCurrency();
 		entityManager.close();
 		return defaultCurrency;
 	}

@@ -18,6 +18,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Temporal;
@@ -59,6 +60,11 @@ public class FinanceTransaction implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	protected long id;
+	/**
+	 * The transaction owner
+	 */
+	@ManyToOne
+	protected VogonUser owner;
 	/**
 	 * The transaction type
 	 */

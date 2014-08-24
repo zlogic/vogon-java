@@ -16,6 +16,13 @@ import java.util.Properties;
  */
 public class WebProperties {
 
+	/**
+	 * Returns properties
+	 *
+	 * @param path path to properties file
+	 * @return the properties read
+	 * @throws IOException in case of failure
+	 */
 	private static Properties getProps(String path) throws IOException {
 		Properties props = new Properties();
 		InputStream in = null;
@@ -29,6 +36,13 @@ public class WebProperties {
 		return props;
 	}
 
+	/**
+	 * Returns property by its name
+	 *
+	 * @param name the property name
+	 * @return the property value
+	 * @throws IOException in case of failure
+	 */
 	public static String getProperty(String name) throws IOException {
 		return getProps("props.properties").getProperty(name);
 	}

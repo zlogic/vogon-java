@@ -21,16 +21,9 @@ app.controller('TransactionsController', function($scope, $http, AuthorizationSe
 	$scope.authorization = AuthorizationService;
 	$scope.transactions = [];
 	$scope.currentPage = 1;
-	$scope.totalItems = 100;
-	$scope.itemsPerPage = 100;
+	$scope.totalPages = 0;
 	$scope.loading = 0;
 	$scope.isLoading = false;
-	$scope.pageStartItem = function() {
-		return Math.min(($scope.currentPage - 1) * $scope.itemsPerPage, $scope.totalItems);
-	};
-	$scope.pageEndItem = function() {
-		return Math.min($scope.pageStartItem() + $scope.itemsPerPage, $scope.totalItems);
-	};
 	var updateIsLoading = function() {
 		$scope.isLoading = $scope.loading > 0;
 	};
@@ -38,7 +31,7 @@ app.controller('TransactionsController', function($scope, $http, AuthorizationSe
 		$scope.loading++;
 		updateIsLoading();
 		var nextPage = $scope.currentPage;
-		$http.get("service/transactions/" + $scope.pageStartItem() + "-" + $scope.pageEndItem()).success(function(data) {
+		$http.get("service/transactions/page_" + (nextPage-1)).success(function(data) {
 			$scope.transactions = data;
 			$scope.loading--;
 			updateIsLoading();
@@ -48,8 +41,8 @@ app.controller('TransactionsController', function($scope, $http, AuthorizationSe
 	var updateTransactionsCount = function() {
 		$scope.loading++;
 		updateIsLoading();
-		$http.get("service/transactions/count").success(function(data) {
-			$scope.totalItems = data;
+		$http.get("service/transactions/pages").success(function(data) {
+			$scope.totalPages = data;
 			$scope.loading--;
 			updateIsLoading();
 		});
