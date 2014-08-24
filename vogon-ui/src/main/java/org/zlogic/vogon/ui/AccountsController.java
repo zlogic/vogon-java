@@ -32,8 +32,7 @@ import org.zlogic.vogon.ui.adapter.DataManager;
 /**
  * The Accounts pane
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class AccountsController implements Initializable {
 

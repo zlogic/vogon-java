@@ -22,8 +22,7 @@ import javafx.stage.Stage;
 /**
  * Controller for the exception dialog
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class ExceptionDialogController implements Initializable {
 

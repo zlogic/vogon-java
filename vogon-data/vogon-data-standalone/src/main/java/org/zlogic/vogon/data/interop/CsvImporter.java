@@ -31,13 +31,11 @@ import org.zlogic.vogon.data.standalone.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
 import org.zlogic.vogon.data.Utils;
-import org.zlogic.vogon.data.VogonUser;
 
 /**
  * Implementation for importing data from CSV files
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class CsvImporter implements FileImporter {
 

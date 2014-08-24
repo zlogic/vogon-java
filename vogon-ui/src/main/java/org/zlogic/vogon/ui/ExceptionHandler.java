@@ -8,8 +8,7 @@ package org.zlogic.vogon.ui;
 /**
  * UI interface for displaying an exception
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public interface ExceptionHandler {
 

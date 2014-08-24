@@ -18,8 +18,7 @@ import org.zlogic.vogon.data.TransactionComponent;
 /**
  * Class for storing a transaction component with property change detection.
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class TransactionComponentModelAdapter {
 

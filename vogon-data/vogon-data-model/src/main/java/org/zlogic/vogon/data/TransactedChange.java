@@ -11,8 +11,7 @@ import javax.persistence.EntityManager;
  * Interface for allowing to perform a custom modification in an
  * EntityManager-managed transaction.
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public interface TransactedChange {
 

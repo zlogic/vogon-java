@@ -37,8 +37,7 @@ import org.zlogic.vogon.data.interop.VogonImportLogicalException;
  * Placeholder class to contain Java FX adapters. This class is a central point
  * for contacting the Data Storage layer.
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class DataManager {
 

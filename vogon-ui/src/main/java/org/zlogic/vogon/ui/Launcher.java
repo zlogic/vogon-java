@@ -25,8 +25,7 @@ import org.zlogic.vogon.ui.adapter.DataManager;
  * Main entry point for application. Performs initial initialization and loading
  * of Java FX code.
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class Launcher extends Application {
 

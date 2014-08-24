@@ -8,8 +8,7 @@ package org.zlogic.vogon.data.interop;
 /**
  * File import logical exception class (stack trace is useless)
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class VogonImportLogicalException extends Exception {
 

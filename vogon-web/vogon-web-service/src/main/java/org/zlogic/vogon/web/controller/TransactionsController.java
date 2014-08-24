@@ -61,8 +61,7 @@ public class TransactionsController {
 	/**
 	 * Returns all transactions in a specific range
 	 *
-	 * @param from the starting transaction index
-	 * @param to the ending transaction index
+	 * @param page the page number
 	 * @return the transactions
 	 */
 	@RequestMapping(value = "/page_{page}", method = RequestMethod.GET, produces = "application/json")

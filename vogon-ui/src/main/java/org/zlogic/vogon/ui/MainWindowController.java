@@ -44,8 +44,7 @@ import org.zlogic.vogon.ui.adapter.DataManager;
 /**
  * Main entry window controller.
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class MainWindowController implements Initializable {
 

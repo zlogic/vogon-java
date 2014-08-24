@@ -43,8 +43,7 @@ import org.zlogic.vogon.data.TransactionComponent_;
  * Central class for setting report parameters and generating various reports.
  * Interacts with DB directly.
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class Report {
 

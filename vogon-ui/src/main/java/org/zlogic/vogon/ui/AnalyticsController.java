@@ -55,8 +55,7 @@ import org.zlogic.vogon.ui.cell.DateConverter;
 /**
  * The Analytics pane
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class AnalyticsController implements Initializable {
 
@@ -423,8 +422,8 @@ public class AnalyticsController implements Initializable {
 		//Update the form
 		report = new Report(dataManager.getFinanceData());
 
-		startDateField.setValue(LocalDateTime.ofInstant(Instant.ofEpochMilli(report.getEarliestDate().getTime()),ZoneId.systemDefault()).toLocalDate());
-		endDateField.setValue(LocalDateTime.ofInstant(Instant.ofEpochMilli(report.getLatestDate().getTime()),ZoneId.systemDefault()).toLocalDate());
+		startDateField.setValue(LocalDateTime.ofInstant(Instant.ofEpochMilli(report.getEarliestDate().getTime()), ZoneId.systemDefault()).toLocalDate());
+		endDateField.setValue(LocalDateTime.ofInstant(Instant.ofEpochMilli(report.getLatestDate().getTime()), ZoneId.systemDefault()).toLocalDate());
 
 		updateTagsSelectionTable();//TODO: move this to FinanceData
 		updateAccountsSelectionTable();//TODO: move this to FinanceData (add "select for report" property to regular adapter)
