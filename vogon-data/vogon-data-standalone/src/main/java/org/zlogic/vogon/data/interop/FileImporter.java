@@ -11,8 +11,7 @@ import org.zlogic.vogon.data.standalone.FinanceData;
 /**
  * Interface for importing data from files
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public interface FileImporter {
 

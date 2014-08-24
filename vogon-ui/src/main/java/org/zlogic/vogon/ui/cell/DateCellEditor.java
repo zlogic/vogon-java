@@ -25,8 +25,7 @@ import javafx.scene.input.KeyEvent;
  * String cell editor with date validation & parsing
  *
  * @param <BaseType> the row type
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class DateCellEditor<BaseType> extends TableCell<BaseType, Date> {
 
@@ -47,13 +46,13 @@ public class DateCellEditor<BaseType> extends TableCell<BaseType, Date> {
 	 * The date format to be used for validation
 	 */
 	protected DateTimeFormatter dateFormat;
+
 	/**
 	 * Creates a date editor
 	 */
 	public DateCellEditor() {
 		dateFormat = DateTimeFormatter.ofPattern(messages.getString("PARSER_DATE"));
 	}
-
 
 	/**
 	 * Prepares the cell for editing
@@ -137,19 +136,21 @@ public class DateCellEditor<BaseType> extends TableCell<BaseType, Date> {
 
 	/**
 	 * Converts a LocalDate into a Date
+	 *
 	 * @param localDate the LocalDate to convert
 	 * @return the Date corresponding to the start of day of localDate
 	 */
-	private Date dateFromLocalDate(LocalDate localDate){
+	private Date dateFromLocalDate(LocalDate localDate) {
 		return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 	}
 
 	/**
 	 * Converts a Date into a LocalDate
+	 *
 	 * @param date the Date to convert
 	 * @return the LocalDate corresponding to date
 	 */
-	private LocalDate localDateFromDate(Date date){
+	private LocalDate localDateFromDate(Date date) {
 		return LocalDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.systemDefault()).toLocalDate();
 	}
 
@@ -159,7 +160,7 @@ public class DateCellEditor<BaseType> extends TableCell<BaseType, Date> {
 	 * @return the string value of the edited property
 	 */
 	protected String getString() {
-		Date date =  getItem();
+		Date date = getItem();
 		return date == null ? "" : localDateFromDate(date).format(dateFormat);//NOI18N
 	}
 }

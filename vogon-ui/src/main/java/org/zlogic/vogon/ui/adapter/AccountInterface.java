@@ -13,8 +13,7 @@ import javafx.beans.property.StringProperty;
  * Interface for representing an account. This is used for reporting (fictional)
  * accounts.
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public interface AccountInterface {
 

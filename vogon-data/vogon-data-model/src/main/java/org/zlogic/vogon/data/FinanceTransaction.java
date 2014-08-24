@@ -26,8 +26,7 @@ import javax.persistence.Temporal;
 /**
  * Interface for storing a single finance transaction
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 @Entity
 public class FinanceTransaction implements Serializable {

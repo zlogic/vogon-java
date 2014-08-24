@@ -21,12 +21,11 @@ import javafx.scene.control.Label;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+//FIXME: replace this with Alert once added to Java
 /**
  * Very simple dialog class.
- * FIXME: replace this with Alert once added to Java FX
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class MessageDialog implements Initializable {
 

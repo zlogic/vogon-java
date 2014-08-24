@@ -18,8 +18,7 @@ import javafx.scene.image.Image;
 /**
  * Class for logging uncaught exceptions
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class ExceptionLogger implements UncaughtExceptionHandler, ExceptionHandler {
 
@@ -106,6 +105,12 @@ public class ExceptionLogger implements UncaughtExceptionHandler, ExceptionHandl
 		exceptionDialogController.setWindowIcons(icons);
 	}
 
+	/**
+	 * Returns a stack trace string for a Throwable
+	 *
+	 * @param thr the Throwable
+	 * @return a stack trace string
+	 */
 	private String getExceptionStacktrace(Throwable thr) {
 		StringBuilder exceptionStackTrace = new StringBuilder();
 		while (thr != null) {

@@ -10,8 +10,7 @@ import java.util.ResourceBundle;
 /**
  * Application is shutting down exception
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class ApplicationShuttingDownException extends RuntimeException {
 

@@ -31,8 +31,7 @@ import org.zlogic.vogon.data.standalone.FinanceData;
 /**
  * Implementation for exporting data to XML files
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class XmlExporter implements FileExporter {
 

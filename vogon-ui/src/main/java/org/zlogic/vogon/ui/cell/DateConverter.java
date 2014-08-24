@@ -17,8 +17,7 @@ import org.zlogic.vogon.ui.ExceptionLogger;
 /**
  * Simple date converter for table cells.
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class DateConverter extends StringConverter<Date> {
 
@@ -39,7 +38,6 @@ public class DateConverter extends StringConverter<Date> {
 	 * Constructs the converter with a specific date format
 	 *
 	 * @param format the date format for parsing
-	 * @param exceptionHandler the exception handler
 	 */
 	public DateConverter(DateFormat format) {
 		this.format = format;

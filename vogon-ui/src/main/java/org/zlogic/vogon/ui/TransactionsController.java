@@ -36,8 +36,7 @@ import org.zlogic.vogon.ui.cell.TransactionEditor;
 /**
  * Transactions pane controller.
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class TransactionsController implements Initializable {
 

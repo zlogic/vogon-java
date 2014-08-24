@@ -16,8 +16,7 @@ import org.zlogic.vogon.data.FinanceTransaction;
  * Class for storing an amount with an overloaded toString method for better
  * customization of how it's rendered in a control.
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class AmountModelAdapter implements Comparable<AmountModelAdapter> {
 

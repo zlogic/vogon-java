@@ -22,8 +22,7 @@ import javax.persistence.Transient;
 /**
  * Class for storing user data
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 @Entity
 public class VogonUser implements Serializable {

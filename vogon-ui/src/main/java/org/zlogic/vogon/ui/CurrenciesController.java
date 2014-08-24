@@ -24,8 +24,7 @@ import org.zlogic.vogon.ui.adapter.DataManager;
 /**
  * Currencies pane controller.
  *
- * @author Dmitry Zolotukhin <a
- * href="mailto:zlogic@gmail.com">zlogic@gmail.com</a>
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class CurrenciesController implements Initializable {
 
