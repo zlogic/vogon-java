@@ -24,9 +24,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.zlogic.vogon.data.CurrencyRate;
 import org.zlogic.vogon.data.FinanceAccount;
-import org.zlogic.vogon.data.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
+import org.zlogic.vogon.data.standalone.FinanceData;
 
 /**
  * Implementation for exporting data to XML files

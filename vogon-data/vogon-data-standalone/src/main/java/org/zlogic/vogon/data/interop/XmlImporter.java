@@ -37,10 +37,11 @@ import org.zlogic.vogon.data.CurrencyRate;
 import org.zlogic.vogon.data.CurrencyRate_;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceAccount_;
-import org.zlogic.vogon.data.FinanceData;
+import org.zlogic.vogon.data.standalone.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
-import org.zlogic.vogon.data.Preferences;
+import org.zlogic.vogon.data.VogonUser;
 import org.zlogic.vogon.data.TransactionComponent;
+import org.zlogic.vogon.data.standalone.Constants;
 
 /**
  * Implementation for importing data from XML files
@@ -105,20 +106,20 @@ public class XmlImporter implements FileImporter {
 				String defaultCurrency = rootNode.getAttributes().getNamedItem("DefaultCurrency").getNodeValue(); //NOI18N
 
 				CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-				CriteriaQuery<Preferences> preferencesCriteriaQuery = criteriaBuilder.createQuery(Preferences.class);
-				preferencesCriteriaQuery.from(Preferences.class);
-				Preferences foundPreferences = null;
+				CriteriaQuery<VogonUser> userCriteriaQuery = criteriaBuilder.createQuery(VogonUser.class);
+				userCriteriaQuery.from(VogonUser.class);
+				VogonUser foundUser = null;
 				try {
-					foundPreferences = entityManager.createQuery(preferencesCriteriaQuery).getSingleResult();
+					foundUser = entityManager.createQuery(userCriteriaQuery).getSingleResult();
 				} catch (javax.persistence.NoResultException ex) {
 				}
 
-				if (foundPreferences == null) {
-					Preferences preferences = new Preferences();
-					entityManager.persist(preferences);
-					preferences.setDefaultCurrency(Currency.getInstance(defaultCurrency));
-				} else if (foundPreferences.getDefaultCurrency() == null) {
-					foundPreferences.setDefaultCurrency(Currency.getInstance(defaultCurrency));
+				if (foundUser == null) {
+					VogonUser user = new VogonUser(Constants.defaultUsername);
+					entityManager.persist(user);
+					user.setDefaultCurrency(Currency.getInstance(defaultCurrency));
+				} else if (foundUser.getDefaultCurrency() == null) {
+					foundUser.setDefaultCurrency(Currency.getInstance(defaultCurrency));
 				}
 			}
 

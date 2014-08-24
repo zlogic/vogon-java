@@ -6,8 +6,8 @@
 		<artifactId>top</artifactId>
 		<version>1.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>vogon-web-tomcat</artifactId>
-	<name>Vogon :: Packaging :: Web :: Tomcat</name>
+	<artifactId>vogon-web-wildfly</artifactId>
+	<name>Vogon :: Packaging :: Web :: Wildfly</name>
 	<packaging>war</packaging>
 
 	<properties>
@@ -49,10 +49,6 @@
 			<groupId>org.zlogic.vogon.web</groupId>
 			<artifactId>vogon-web-service</artifactId>
 			<type>war</type>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>

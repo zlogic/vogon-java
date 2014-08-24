@@ -27,10 +27,11 @@ import javax.persistence.criteria.Root;
 import org.zlogic.vogon.data.Constants;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceAccount_;
-import org.zlogic.vogon.data.FinanceData;
+import org.zlogic.vogon.data.standalone.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
 import org.zlogic.vogon.data.Utils;
+import org.zlogic.vogon.data.VogonUser;
 
 /**
  * Implementation for importing data from CSV files

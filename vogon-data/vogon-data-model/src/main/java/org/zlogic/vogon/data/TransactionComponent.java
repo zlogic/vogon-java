@@ -32,6 +32,11 @@ public class TransactionComponent implements Serializable {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	protected long id;
 	/**
+	 * The transaction owner
+	 */
+	@ManyToOne
+	protected VogonUser owner;
+	/**
 	 * The account
 	 */
 	@ManyToOne

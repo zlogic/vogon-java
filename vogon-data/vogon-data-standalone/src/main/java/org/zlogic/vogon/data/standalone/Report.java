@@ -3,7 +3,7 @@
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
-package org.zlogic.vogon.data;
+package org.zlogic.vogon.data.standalone;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -29,6 +29,15 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.SingularAttribute;
+import org.zlogic.vogon.data.Constants;
+import org.zlogic.vogon.data.FinanceAccount;
+import org.zlogic.vogon.data.FinanceAccount_;
+import org.zlogic.vogon.data.FinanceTransaction;
+import org.zlogic.vogon.data.FinanceTransaction_;
+import org.zlogic.vogon.data.TransactedChange;
+import org.zlogic.vogon.data.TransactedQuery;
+import org.zlogic.vogon.data.TransactionComponent;
+import org.zlogic.vogon.data.TransactionComponent_;
 
 /**
  * Central class for setting report parameters and generating various reports.
@@ -368,7 +377,6 @@ public class Report {
 			transactionTypePredicate = criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.get(FinanceTransaction_.type), FinanceTransaction.Type.EXPENSEINCOME));
 		if (enabledTransferTransactions)
 			transactionTypePredicate = criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.get(FinanceTransaction_.type), FinanceTransaction.Type.TRANSFER));
-
 
 		//Expense/income filter
 		Predicate expenseTypePredicate = criteriaBuilder.disjunction();

@@ -5,7 +5,7 @@
  */
 package org.zlogic.vogon.data.interop;
 
-import org.zlogic.vogon.data.FinanceData;
+import org.zlogic.vogon.data.standalone.FinanceData;
 
 /**
  * Interface for exporting data to files

@@ -6,7 +6,7 @@
 		<class>org.zlogic.vogon.data.FinanceTransaction</class>
 		<class>org.zlogic.vogon.data.TransactionComponent</class>
 		<class>org.zlogic.vogon.data.CurrencyRate</class>
-		<class>org.zlogic.vogon.data.Preferences</class>
+		<class>org.zlogic.vogon.data.VogonUser</class>
 		<properties>
 			<property name="javax.persistence.jdbc.url" value="jdbc:h2:${user.dir}/Vogon"/>
 			<property name="javax.persistence.jdbc.password" value=""/>

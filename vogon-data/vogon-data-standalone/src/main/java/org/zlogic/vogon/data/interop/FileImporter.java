@@ -6,7 +6,7 @@
 package org.zlogic.vogon.data.interop;
 
 import javax.persistence.EntityManager;
-import org.zlogic.vogon.data.FinanceData;
+import org.zlogic.vogon.data.standalone.FinanceData;
 
 /**
  * Interface for importing data from files
