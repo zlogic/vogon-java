@@ -187,7 +187,9 @@ public class TransactionEditor extends TableCell<TransactionModelAdapter, Amount
 			popup.getContent().add(editor);
 		} catch (IOException ex) {
 			log.log(Level.SEVERE, null, ex);
-			ExceptionLogger.getInstance().showException(MessageFormat.format(messages.getString("CANNOT_LOAD_TRANSACTION_EDITOR"), new Object[]{ex.getMessage()}), ex);
+			ExceptionLogger.getInstance().showException(MessageFormat.format(messages.getString("CANNOT_LOAD_TRANSACTION_EDITOR"),
+					new Object[]{ex.getClass().getName() + (ex.getMessage() != null ? " (" + ex.getMessage() + ")" : "")}
+			), ex);
 		}
 	}
 

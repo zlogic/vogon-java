@@ -114,7 +114,9 @@ public class ExceptionLogger implements UncaughtExceptionHandler, ExceptionHandl
 	private String getExceptionStacktrace(Throwable thr) {
 		StringBuilder exceptionStackTrace = new StringBuilder();
 		while (thr != null) {
-			exceptionStackTrace.append(stackTraceFormat.format(new Object[]{thr.getMessage()}));
+			exceptionStackTrace.append(stackTraceFormat.format(
+					new Object[]{thr.getClass().getName() + (thr.getMessage() != null ? " (" + thr.getMessage() + ")" : "")}
+			));
 			for (StackTraceElement ste : thr.getStackTrace())
 				exceptionStackTrace.append("\r\n\t").append(ste.toString()); //NOI18N
 			thr = thr.getCause();
@@ -127,7 +129,9 @@ public class ExceptionLogger implements UncaughtExceptionHandler, ExceptionHandl
 		logger.severe(uncaughtExceptionFormat.format(new Object[]{getExceptionStacktrace(e)}));
 		if (exceptionDialogController == null)
 			loadExceptionDialog();
-		exceptionDialogController.showExceptionMessage(uncaughtExceptionFormat.format(new Object[]{e.toString()}));
+		exceptionDialogController.showExceptionMessage(uncaughtExceptionFormat.format(
+				new Object[]{e.getClass().getName() + (e.getMessage() != null ? " (" + e.getMessage() + ")" : "")}
+		));
 	}
 
 	@Override
@@ -135,8 +139,10 @@ public class ExceptionLogger implements UncaughtExceptionHandler, ExceptionHandl
 		String exceptionString = null;
 		if (explanation != null)
 			exceptionString = explanation;
-		else if (ex != null && ex.getMessage() != null)
-			exceptionString = uncaughtExceptionFormat.format(new Object[]{ex.toString()});
+		else if (ex != null)
+			exceptionString = uncaughtExceptionFormat.format(
+					new Object[]{ex.getClass().getName() + (ex.getMessage() != null ? " (" + ex.getMessage() + ")" : "")}
+			);
 		else
 			exceptionString = messages.getString("UNKNOWN_ERROR");
 
