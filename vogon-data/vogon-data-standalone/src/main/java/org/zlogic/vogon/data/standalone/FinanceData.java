@@ -1012,8 +1012,7 @@ public class FinanceData {
 	 */
 	public Currency getDefaultCurrency() {
 		EntityManager entityManager = entityManagerFactory.createEntityManager();
-		VogonUser user = getUserFromDatabase(entityManager);
-		Currency defaultCurrency = user.getDefaultCurrency();
+		Currency defaultCurrency = getDefaultCurrencyFromDatabase(entityManager);
 		entityManager.close();
 		return defaultCurrency;
 	}
