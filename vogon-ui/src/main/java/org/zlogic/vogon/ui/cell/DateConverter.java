@@ -66,7 +66,9 @@ public class DateConverter extends StringConverter<Date> {
 			return format.parse(string);
 		} catch (ParseException ex) {
 			log.log(Level.SEVERE, null, ex);
-			ExceptionLogger.getInstance().showException(MessageFormat.format(messages.getString("CANNOT_PARSE_DATE"), new Object[]{string, ex.getMessage()}), ex);
+			ExceptionLogger.getInstance().showException(MessageFormat.format(messages.getString("CANNOT_PARSE_DATE"),
+					new Object[]{string, ex.getClass().getName() + (ex.getMessage() != null ? " (" + ex.getMessage() + ")" : "")}
+			), ex);
 			return null;
 		}
 	}

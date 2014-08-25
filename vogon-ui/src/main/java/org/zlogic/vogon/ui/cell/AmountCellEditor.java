@@ -43,7 +43,9 @@ public class AmountCellEditor<BaseType> extends StringCellEditor<BaseType, Amoun
 			return new AmountModelAdapter(Double.parseDouble(value), getItem().okProperty().get(), getItem().getCurrency(), getItem().isCurrencyConverted(), getItem().getTransactionType());
 		} catch (NumberFormatException ex) {
 			log.log(Level.SEVERE, null, ex);
-			ExceptionLogger.getInstance().showException(MessageFormat.format(messages.getString("CANNOT_PARSE_NUMBER"), new Object[]{value, ex.getMessage()}), ex);
+			ExceptionLogger.getInstance().showException(MessageFormat.format(messages.getString("CANNOT_PARSE_NUMBER"),
+					new Object[]{value, ex.getClass().getName() + (ex.getMessage() != null ? " (" + ex.getMessage() + ")" : "")}
+			), ex);
 		}
 		return null;
 	}
