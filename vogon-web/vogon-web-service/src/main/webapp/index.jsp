@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Hello World</title>
+		<title>Vogon finance tracker</title>
 		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<%= org.zlogic.vogon.web.WebProperties.getProperty("bootstrap") %>/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<%= org.zlogic.vogon.web.WebProperties.getProperty("bootstrap") %>/css/bootstrap-theme.min.css">
 		<script type="text/javascript" src="webjars/angularjs/<%= org.zlogic.vogon.web.WebProperties.getProperty("angularjs") %>/angular.min.js"></script>
+		<script type="text/javascript" src="webjars/angularjs/<%= org.zlogic.vogon.web.WebProperties.getProperty("angularjs") %>/angular-cookies.js"></script>
 		<script type="text/javascript" src="webjars/angular-ui-bootstrap/<%= org.zlogic.vogon.web.WebProperties.getProperty("angularuibootstrap") %>/ui-bootstrap-tpls.min.js"></script>
 		<script type="text/javascript" src="webjars/jquery/<%= org.zlogic.vogon.web.WebProperties.getProperty("jquery") %>/jquery.min.js"></script>
 		<script type="text/javascript" src="webjars/bootstrap/<%= org.zlogic.vogon.web.WebProperties.getProperty("bootstrap") %>/js/bootstrap.min.js"></script>
@@ -13,8 +14,11 @@
 	<body ng-app="vogon">
 		<div ng-controller="AuthController">
 			<div ng-hide="authorization.authorized">
-				Enter username: <input type="text" ng-model="username" />
-				<button ng-click="login(username)" class="btn btn-default">Login</button>
+				<form>
+					<input type="text" ng-model="username" placeholder="Enter username"/>
+					<input type="password" ng-model="password" placeholder="Enter password" />
+					<button ng-click="login()" class="btn btn-default">Login</button>
+				</form>
 			</div>
 			<div ng-show="authorization.authorized">
 				Vogon for {{authorization.username}}
