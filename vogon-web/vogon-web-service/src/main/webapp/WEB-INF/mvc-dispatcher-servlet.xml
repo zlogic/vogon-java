@@ -70,7 +70,7 @@ http://www.springframework.org/schema/security/oauth2 http://www.springframework
 		<security:authentication-provider user-service-ref="clientDetailsUserService"/>
 	</security:authentication-manager>
 	<oauth:client-details-service id="clientDetails">
-		<oauth:client client-id="vogonweb" authorized-grant-types="password,authorization_code,refresh_token,implicit" authorities="ROLE_USER" scope="read,write,trust" access-token-validity="600"/>
+		<oauth:client client-id="vogonweb" authorized-grant-types="password,authorization_code,refresh_token,implicit" authorities="ROLE_USER" scope="read,write,trust" access-token-validity="120" refresh-token-validity="1440"/>
 	</oauth:client-details-service>
 	<bean id="clientDetailsUserService" class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService">
 		<constructor-arg ref="clientDetails" />
