@@ -1,18 +1,18 @@
 var app = angular.module('vogon', ['ngCookies', 'ui.bootstrap']);
 
-app.service('AuthorizationService', function($http, $cookies) {
+app.service('AuthorizationService', function($http, $cookies, $interval) {
 	var that = this;
 	var authorized = false;
 	var access_token = undefined;
 	var refresh_token = undefined;
 	var headers = {};
 	var username = undefined;
+	var password = undefined;
 	var clientId = "vogonweb";
-	var setToken = function(access_token, refresh_token, username) {
+	var setToken = function(access_token, refresh_token, username, password) {
 		if (access_token !== undefined && refresh_token !== undefined) {
 			that.access_token = access_token;
 			that.refresh_token = refresh_token;
-			$cookies.access_token = access_token;
 			$cookies.refresh_token = refresh_token;
 			that.headers = {Authorization: "Bearer " + access_token};
 			that.authorized = true;
@@ -20,24 +20,28 @@ app.service('AuthorizationService', function($http, $cookies) {
 				that.username = username;
 				$cookies.username = username;
 			}
+			if (password !== undefined)
+				that.password = password;
 		}
 	};
 	var refreshToken = function(refresh_token, username) {
+		if (refresh_token === undefined || username === undefined)
+			return;
 		var params = {client_id: clientId, grant_type: "refresh_token", refresh_token: refresh_token};
 		$http.get("oauth/token", {params: params}).success(function(data) {
-			setToken(data.access_token, data.refresh_token, username);
+			setToken(data.access_token, data.refresh_token);
 		}).error(function() {
-			that.resetAuthorization();
+			that.refresh_token = undefined;
+			if(that.username!==undefined && that.password !==undefined)
+				that.performAuthorization(that.username,that.password);
+			else
+				that.resetAuthorization();
 		});
 	};
 	this.performAuthorization = function(username, password) {
 		var params = {username: username, password: password, client_id: clientId, grant_type: "password"};
-		if (that.refresh_token !== undefined) {
-			params.refresh_token = that.refresh_token;
-			params.grant_type = "refresh_token";
-		}
 		$http.get("oauth/token", {params: params}).success(function(data) {
-			setToken(data.access_token, data.refresh_token, username);
+			setToken(data.access_token, data.refresh_token, username, password);
 		}).error(function() {
 			if (that.refresh_token !== undefined) {
 				that.refresh_token = undefined;
@@ -47,17 +51,28 @@ app.service('AuthorizationService', function($http, $cookies) {
 			}
 		});
 	};
+	this.fixAuthorization = function() {
+		if (that.refresh_token !== undefined && that.username !== undefined) {
+			refreshToken(that.refresh_token, that.username);
+		} else {
+			that.resetAuthorization();
+		}
+	}
 	this.resetAuthorization = function() {
+		//TODO: show login failed error
 		that.username = undefined;
+		that.password = undefined;
 		that.access_token = undefined;
 		that.refresh_token = undefined;
 		that.headers = {};
 		that.authorized = false;
 		delete $cookies.username;
-		delete $cookies.access_token;
 		delete $cookies.refresh_token;
 	};
 	refreshToken($cookies.refresh_token, $cookies.username);
+	$interval(function() {
+		refreshToken(that.refresh_token, that.username);
+	}, 60 * 1000);
 });
 
 app.controller('AuthController', function($scope, AuthorizationService) {
@@ -88,8 +103,8 @@ app.controller('TransactionsController', function($scope, $http, AuthorizationSe
 		$scope.loading--;
 		updateIsLoading();
 		if (status === 401) {
-			AuthorizationService.resetAuthorization();
-			//TODO: show error or retry?
+			AuthorizationService.fixAuthorization();
+			//TODO: show error
 		} else {
 		}
 	};
@@ -119,6 +134,8 @@ app.controller('TransactionsController', function($scope, $http, AuthorizationSe
 		if (AuthorizationService.authorized) {
 			updateTransactions();
 			updateTransactionsCount();
+		} else {
+			$scope.transactions = [];
 		}
 	};
 	$scope.$watch('authorization.authorized', function() {
