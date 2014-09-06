@@ -15,4 +15,11 @@ import org.zlogic.vogon.data.VogonUser;
  */
 public interface UserRepository extends JpaRepository<VogonUser, Long> {
 
+	/**
+	 * Finds a user by its username
+	 *
+	 * @param name the username to search
+	 * @return the found user
+	 */
+	public VogonUser findByUsername(String name);
 }

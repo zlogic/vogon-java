@@ -27,10 +27,11 @@ import javax.persistence.criteria.Root;
 import org.zlogic.vogon.data.Constants;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceAccount_;
-import org.zlogic.vogon.data.standalone.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
 import org.zlogic.vogon.data.Utils;
+import org.zlogic.vogon.data.VogonUser;
+import org.zlogic.vogon.data.standalone.FinanceData;
 
 /**
  * Implementation for importing data from CSV files
@@ -62,6 +63,8 @@ public class CsvImporter implements FileImporter {
 		try (CSVReader reader = new CSVReader(new java.io.InputStreamReader(new java.io.FileInputStream(inputFile), "UTF8"))) {//NOI18N
 			entityManager.getTransaction().begin();
 
+			VogonUser defaultUser = financeData.getUserFromDatabase(entityManager);
+
 			List<FinanceAccount> accounts = new ArrayList<>();
 			String[] columns;
 			String[] columnsHeader = null;
@@ -89,7 +92,7 @@ public class CsvImporter implements FileImporter {
 						if (foundAccount != null && foundAccount.getName().equals(columns[i])) {
 							accounts.add(foundAccount);
 						} else {
-							FinanceAccount account = new FinanceAccount(columns[i], null);
+							FinanceAccount account = new FinanceAccount(defaultUser, columns[i], null);
 							entityManager.persist(account);
 							accounts.add(account);
 						}
@@ -121,7 +124,7 @@ public class CsvImporter implements FileImporter {
 						transactionType = FinanceTransaction.Type.TRANSFER;
 					if (transactionType != null) {
 						//Expense transaction
-						transaction = new FinanceTransaction(columns[0], tags, date, transactionType);
+						transaction = new FinanceTransaction(defaultUser, columns[0], tags, date, transactionType);
 					} else {
 						reader.close();
 						throw new VogonImportLogicalException((new MessageFormat(messages.getString("CSV_TRANSACTION_TOO_COMPLEX"))).format(new Object[]{Utils.join(columns, ",")})); //NOI18N

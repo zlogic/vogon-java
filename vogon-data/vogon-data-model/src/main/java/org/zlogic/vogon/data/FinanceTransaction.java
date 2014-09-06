@@ -105,17 +105,19 @@ public class FinanceTransaction implements Serializable {
 	/**
 	 * Constructor for a transaction
 	 *
+	 * @param owner the transaction owner
 	 * @param description the transaction description
 	 * @param tags the transaction tags
 	 * @param date the transaction date
 	 * @param type the transaction type
 	 */
-	public FinanceTransaction(String description, String[] tags, Date date, Type type) {
+	public FinanceTransaction(VogonUser owner, String description, String[] tags, Date date, Type type) {
 		this.description = description;
 		this.tags = tags != null ? Arrays.asList(tags) : new LinkedList<String>();
 		this.transactionDate = date;
 		this.components = new LinkedList<>();
 		this.type = type;
+		FinanceTransaction.this.setOwner(owner);
 	}
 
 	@Override
@@ -133,6 +135,7 @@ public class FinanceTransaction implements Serializable {
 		cloneTransaction.transactionDate = new Date();
 		//cloneTransaction.amount = amount;
 
+		cloneTransaction.setOwner(owner);
 		return cloneTransaction;
 	}
 
@@ -482,6 +485,31 @@ public class FinanceTransaction implements Serializable {
 	public void setType(Type type) {
 		this.type = type;
 		updateAmounts();
+	}
+
+	/**
+	 * Returns the transaction owner
+	 *
+	 * @return the transaction owner
+	 */
+	public VogonUser getOwner() {
+		return owner;
+	}
+
+	/**
+	 * Sets the transaction owner
+	 *
+	 * @param owner the owner to set
+	 */
+	public void setOwner(VogonUser owner) {
+		if (owner == this.owner)
+			return;
+		VogonUser oldOwner = this.owner;
+		this.owner = owner;
+		if (oldOwner != null)
+			oldOwner.removeTransaction(this);
+		if (owner != null)
+			owner.addTransaction(this);
 	}
 
 	/**

@@ -19,5 +19,9 @@ public class Constants {
 	/**
 	 * Default username if only one user is supported
 	 */
-	public static final String defaultUsername = "Default";
+	public static final String defaultUserUsername = "Default";
+	/**
+	 * Default password if only one user is supported
+	 */
+	public static final String defaultUserPassword = "Default";
 }
