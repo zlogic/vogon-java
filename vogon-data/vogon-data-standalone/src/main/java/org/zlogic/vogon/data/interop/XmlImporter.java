@@ -101,6 +101,7 @@ public class XmlImporter implements FileImporter {
 			}
 
 			//Process default properties
+			VogonUser defaultUser = null;
 			{
 				String defaultCurrency = rootNode.getAttributes().getNamedItem("DefaultCurrency").getNodeValue(); //NOI18N
 
@@ -114,11 +115,13 @@ public class XmlImporter implements FileImporter {
 				}
 
 				if (foundUser == null) {
-					VogonUser user = new VogonUser(Constants.defaultUsername);
+					VogonUser user = new VogonUser(Constants.defaultUserUsername, Constants.defaultUserPassword);
 					entityManager.persist(user);
 					user.setDefaultCurrency(Currency.getInstance(defaultCurrency));
+					defaultUser = user;
 				} else if (foundUser.getDefaultCurrency() == null) {
 					foundUser.setDefaultCurrency(Currency.getInstance(defaultCurrency));
+					defaultUser = foundUser;
 				}
 			}
 
@@ -151,7 +154,7 @@ public class XmlImporter implements FileImporter {
 				if (foundAccount != null && foundAccount.getName().equals(accountName)) {
 					accountsMap.put(accountId, foundAccount);
 				} else {
-					FinanceAccount account = new FinanceAccount(accountName, currency != null ? Currency.getInstance(currency) : null);
+					FinanceAccount account = new FinanceAccount(defaultUser, accountName, currency != null ? Currency.getInstance(currency) : null);
 					account.setIncludeInTotal(includeInTotal);
 					accountsMap.put(accountId, account);
 					entityManager.persist(account);
@@ -218,7 +221,7 @@ public class XmlImporter implements FileImporter {
 				}
 				if (transactionTypeEnum == FinanceTransaction.Type.UNDEFINED)
 					throw new VogonImportLogicalException(MessageFormat.format(messages.getString("UNKNOWN_TRANSACTION_TYPE"), transactionType));
-				FinanceTransaction transaction = new FinanceTransaction(transactionDescription, null, transactionDate, transactionTypeEnum);
+				FinanceTransaction transaction = new FinanceTransaction(defaultUser, transactionDescription, null, transactionDate, transactionTypeEnum);
 				transactionsMap.put(transactionId, transaction);
 				entityManager.persist(transaction);
 

@@ -64,14 +64,16 @@ public class FinanceAccount implements Serializable {
 	/**
 	 * Creates an account
 	 *
+	 * @param owner the account owner
 	 * @param name the account name
 	 * @param currency the account currency
 	 */
-	public FinanceAccount(String name, Currency currency) {
+	public FinanceAccount(VogonUser owner, String name, Currency currency) {
 		includeInTotal = true;
 		this.name = name;
 		this.balance = 0L;
 		this.currency = (currency != null ? currency : Currency.getInstance(Locale.getDefault())).getCurrencyCode();
+		FinanceAccount.this.setOwner(owner);
 	}
 
 	/**
@@ -157,6 +159,31 @@ public class FinanceAccount implements Serializable {
 	 */
 	public void setIncludeInTotal(boolean includeInTotal) {
 		this.includeInTotal = includeInTotal;
+	}
+
+	/**
+	 * Returns the transaction owner
+	 *
+	 * @return the transaction owner
+	 */
+	public VogonUser getOwner() {
+		return owner;
+	}
+
+	/**
+	 * Sets the transaction owner
+	 *
+	 * @param owner the owner to set
+	 */
+	public void setOwner(VogonUser owner) {
+		if (owner == this.owner)
+			return;
+		VogonUser oldOwner = this.owner;
+		this.owner = owner;
+		if (oldOwner != null)
+			oldOwner.removeAccount(this);
+		if (owner != null)
+			owner.addAccount(this);
 	}
 
 	/**

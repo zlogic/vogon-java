@@ -419,7 +419,7 @@ public class FinanceData {
 		} catch (javax.persistence.NoResultException ex) {
 		}
 		if (user == null) {
-			user = new VogonUser(Constants.defaultUsername);
+			user = new VogonUser(Constants.defaultUserUsername, Constants.defaultUserPassword);
 			entityManager.getTransaction().begin();
 			entityManager.persist(user);
 			entityManager.getTransaction().commit();
@@ -556,7 +556,8 @@ public class FinanceData {
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
 
-			FinanceAccount account = new FinanceAccount(name, currency);
+			VogonUser owner = getUserFromDatabase(entityManager);
+			FinanceAccount account = new FinanceAccount(owner, name, currency);
 			entityManager.persist(account);
 
 			entityManager.getTransaction().commit();
@@ -588,7 +589,8 @@ public class FinanceData {
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			entityManager.getTransaction().begin();
 
-			FinanceTransaction transaction = new FinanceTransaction(description, tags, date, type);
+			VogonUser owner = getUserFromDatabase(entityManager);
+			FinanceTransaction transaction = new FinanceTransaction(owner, description, tags, date, type);
 			entityManager.persist(transaction);
 
 			entityManager.getTransaction().commit();

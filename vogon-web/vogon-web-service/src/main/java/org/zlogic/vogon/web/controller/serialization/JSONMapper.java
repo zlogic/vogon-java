@@ -8,6 +8,8 @@ package org.zlogic.vogon.web.controller.serialization;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.InitializingBean;
+import org.zlogic.vogon.data.FinanceAccount;
+import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
 
 /**
@@ -26,6 +28,22 @@ public class JSONMapper extends ObjectMapper implements InitializingBean {
 	}
 
 	/**
+	 * Wrapper class for FinanceTransaction
+	 */
+	@JsonIgnoreProperties({"owner"})
+	private static class TransactionJson extends FinanceTransaction {
+
+	}
+
+	/**
+	 * Wrapper class for FinanceAccount
+	 */
+	@JsonIgnoreProperties({"owner"})
+	private static class AccountJson extends FinanceAccount {
+
+	}
+
+	/**
 	 * Adds MixIn Annotations
 	 *
 	 * @throws Exception in case of errors
@@ -33,5 +51,7 @@ public class JSONMapper extends ObjectMapper implements InitializingBean {
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		this.addMixInAnnotations(TransactionComponent.class, TransactionComponentJson.class);
+		this.addMixInAnnotations(FinanceTransaction.class, TransactionJson.class);
+		this.addMixInAnnotations(FinanceAccount.class, AccountJson.class);
 	}
 }

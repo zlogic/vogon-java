@@ -7,8 +7,8 @@ package org.zlogic.vogon.data;
 
 import java.io.Serializable;
 import java.util.Currency;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -42,15 +42,19 @@ public class VogonUser implements Serializable {
 	 */
 	protected String username;
 	/**
+	 * The password
+	 */
+	protected String password;
+	/**
 	 * The user's accounts
 	 */
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-	protected List<FinanceAccount> accounts;
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	protected Set<FinanceAccount> accounts;
 	/**
 	 * The user's transaction
 	 */
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-	protected List<FinanceTransaction> transactions;
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	protected Set<FinanceTransaction> transactions;
 	/**
 	 * The "Currency" key in preferences
 	 */
@@ -73,9 +77,51 @@ public class VogonUser implements Serializable {
 	 * Creates a user
 	 *
 	 * @param username the user name
+	 * @param password the password
 	 */
-	public VogonUser(String username) {
+	public VogonUser(String username, String password) {
 		this.username = username;
+		this.password = password;
+	}
+
+	/**
+	 * Adds a transaction to this user
+	 *
+	 * @param transaction the transaction to add
+	 */
+	public void addTransaction(FinanceTransaction transaction) {
+		transactions.add(transaction);
+		transaction.setOwner(this);
+	}
+
+	/**
+	 * Adds an account to this user
+	 *
+	 * @param account the account to add
+	 */
+	public void addAccount(FinanceAccount account) {
+		accounts.add(account);
+		account.setOwner(this);
+	}
+
+	/**
+	 * Removes a transaction from this user
+	 *
+	 * @param transaction the transaction to remove
+	 */
+	public void removeTransaction(FinanceTransaction transaction) {
+		transactions.remove(transaction);
+		transaction.setOwner(null);
+	}
+
+	/**
+	 * Removes an account from this user
+	 *
+	 * @param account the account to remove
+	 */
+	public void removeAccount(FinanceAccount account) {
+		accounts.remove(account);
+		account.setOwner(null);
 	}
 	/*
 	 * Getters/setters
@@ -99,6 +145,24 @@ public class VogonUser implements Serializable {
 		if (username.isEmpty())
 			return;
 		this.username = username;
+	}
+
+	/**
+	 * Returns the password
+	 *
+	 * @return the password
+	 */
+	public String getPassword() {
+		return password;
+	}
+
+	/**
+	 * Sets the password
+	 *
+	 * @param password the password
+	 */
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	/**
