@@ -5,12 +5,13 @@
  */
 package org.zlogic.vogon.web.controller.serialization;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.InitializingBean;
 import org.zlogic.vogon.data.FinanceAccount;
-import org.zlogic.vogon.data.FinanceTransaction;
-import org.zlogic.vogon.data.TransactionComponent;
+import org.zlogic.vogon.web.data.model.FinanceTransactionJson;
 
 /**
  * JSON mapper configuration to not send unnecessary data to client
@@ -20,27 +21,47 @@ import org.zlogic.vogon.data.TransactionComponent;
 public class JSONMapper extends ObjectMapper implements InitializingBean {
 
 	/**
-	 * Wrapper class for TransactionComponent
-	 */
-	@JsonIgnoreProperties({"transaction"})
-	private static class TransactionComponentJson extends TransactionComponent {
-
-	}
-
-	/**
 	 * Wrapper class for FinanceTransaction
 	 */
-	@JsonIgnoreProperties({"owner"})
-	private static class TransactionJson extends FinanceTransaction {
+	@JsonIgnoreProperties(value = {"owner", "accounts", "fromAccounts", "toAccounts", "amountOk", "currencies"})
+	private interface FinanceTransactionAnnotations {
 
+		/**
+		 * Disables returning of raw amount
+		 */
+		@JsonIgnore
+		public void getRawAmount();
+
+		/**
+		 * Allows returning of amount
+		 */
+		@JsonProperty
+		public void getAmount();
+
+		/**
+		 * Disables setting of amount
+		 */
+		@JsonIgnore
+		public void setAmount();
+
+		/**
+		 * Disables setting of components (an alternative API is used instead)
+		 */
+		@JsonIgnore
+		public void setComponents();
+
+		/**
+		 * Disables getting of components (an alternative API is used instead)
+		 */
+		@JsonIgnore
+		public void getComponents();
 	}
 
 	/**
 	 * Wrapper class for FinanceAccount
 	 */
 	@JsonIgnoreProperties({"owner"})
-	private static class AccountJson extends FinanceAccount {
-
+	private interface FinanceAccountAnnotations {
 	}
 
 	/**
@@ -50,8 +71,7 @@ public class JSONMapper extends ObjectMapper implements InitializingBean {
 	 */
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		this.addMixInAnnotations(TransactionComponent.class, TransactionComponentJson.class);
-		this.addMixInAnnotations(FinanceTransaction.class, TransactionJson.class);
-		this.addMixInAnnotations(FinanceAccount.class, AccountJson.class);
+		this.addMixInAnnotations(FinanceTransactionJson.class, FinanceTransactionAnnotations.class);
+		this.addMixInAnnotations(FinanceAccount.class, FinanceAccountAnnotations.class);
 	}
 }

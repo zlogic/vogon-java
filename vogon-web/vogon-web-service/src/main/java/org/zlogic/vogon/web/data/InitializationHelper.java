@@ -6,8 +6,11 @@
 package org.zlogic.vogon.web.data;
 
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import org.springframework.stereotype.Component;
 import org.zlogic.vogon.data.FinanceTransaction;
+import org.zlogic.vogon.web.data.model.FinanceTransactionJson;
 
 /**
  * Bean to extract all data from beans to prevent lazy initialization
@@ -18,17 +21,25 @@ import org.zlogic.vogon.data.FinanceTransaction;
 public class InitializationHelper {
 
 	/**
+	 * Initialize transaction
+	 *
+	 * @param transaction transaction to initialize
+	 * @return the transaction
+	 */
+	public FinanceTransactionJson initializeTransaction(FinanceTransaction transaction) {
+		return new FinanceTransactionJson(transaction);
+	}
+
+	/**
 	 * Initialize transactions
 	 *
 	 * @param transactions transactions to initialize
 	 * @return the transactions list
 	 */
-	public Collection<FinanceTransaction> initializeTransactions(Collection<FinanceTransaction> transactions) {
-		for (FinanceTransaction transaction : transactions) {
-			transaction.getAccounts();
-			transaction.getComponents();
-			transaction.getTags();
-		}
-		return transactions;
+	public Collection<FinanceTransactionJson> initializeTransactions(Collection<FinanceTransaction> transactions) {
+		List<FinanceTransactionJson> newTransactions = new LinkedList<>();
+		for (FinanceTransaction transaction : transactions)
+			newTransactions.add(initializeTransaction(transaction));
+		return newTransactions;
 	}
 }

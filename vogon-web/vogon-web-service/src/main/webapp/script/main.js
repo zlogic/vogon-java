@@ -29,11 +29,11 @@ app.service('AuthorizationService', function($http, $cookies, $interval) {
 			return;
 		var params = {client_id: clientId, grant_type: "refresh_token", refresh_token: refresh_token};
 		$http.get("oauth/token", {params: params}).success(function(data) {
-			setToken(data.access_token, data.refresh_token);
+			setToken(data.access_token, data.refresh_token, username);
 		}).error(function() {
 			that.refresh_token = undefined;
-			if(that.username!==undefined && that.password !==undefined)
-				that.performAuthorization(that.username,that.password);
+			if (that.username !== undefined && that.password !== undefined)
+				that.performAuthorization(that.username, that.password);
 			else
 				that.resetAuthorization();
 		});
@@ -57,7 +57,7 @@ app.service('AuthorizationService', function($http, $cookies, $interval) {
 		} else {
 			that.resetAuthorization();
 		}
-	}
+	};
 	this.resetAuthorization = function() {
 		//TODO: show login failed error
 		that.username = undefined;
@@ -89,13 +89,54 @@ app.controller('AuthController', function($scope, AuthorizationService) {
 	};
 });
 
-app.controller('TransactionsController', function($scope, $http, AuthorizationService) {
+app.service('AccountsService', function($http, $rootScope, AuthorizationService) {
+	var that = this;
+	var accounts = [];
+	var processError = function(data, status) {
+		if (status === 401) {
+			AuthorizationService.fixAuthorization();
+			//TODO: show error
+		} else {
+			//TODO: retry?
+		}
+	};
+	this.update = function() {
+		if (AuthorizationService.authorized) {
+			$http.get("service/accounts", {headers: AuthorizationService.headers})
+					.success(function(data) {
+						that.accounts = data;
+						//TODO: show loading popup just like transactions do
+					}).error(processError);
+		} else {
+			that.accounts = [];
+		}
+	};
+	this.getAccount = function(id) {
+		return that.accounts.filter(function(obj) {
+			return obj.id === id;
+		})[0];
+	};
+	$rootScope.$watch(function() {
+		return AuthorizationService.authorized;
+	}, function() {
+		that.update();
+	});
+});
+
+app.controller('AccountsController', function($scope, AuthorizationService, AccountsService) {
 	$scope.authorization = AuthorizationService;
+	$scope.accountService = AccountsService;
+});
+
+app.controller('TransactionsController', function($scope, $http, AuthorizationService, AccountsService) {
+	$scope.authorization = AuthorizationService;
+	$scope.accounts = AccountsService;
 	$scope.transactions = [];
 	$scope.currentPage = 1;
 	$scope.totalPages = 0;
 	$scope.loading = 0;
 	$scope.isLoading = false;
+	$scope.transactionTypes = [{name: "Expense/income", value: "EXPENSEINCOME"}, {name: "Transfer", value: "TRANSFER"}]
 	var updateIsLoading = function() {
 		$scope.isLoading = $scope.loading > 0;
 	};
@@ -106,6 +147,8 @@ app.controller('TransactionsController', function($scope, $http, AuthorizationSe
 			AuthorizationService.fixAuthorization();
 			//TODO: show error
 		} else {
+			updateTransactions();
+			AccountsService.update();
 		}
 	};
 	var updateTransactions = function() {
@@ -118,6 +161,7 @@ app.controller('TransactionsController', function($scope, $http, AuthorizationSe
 					$scope.loading--;
 					updateIsLoading();
 					$scope.currentPage = nextPage;
+					AccountsService.update();
 				}).error(processError);
 	};
 	var updateTransactionsCount = function() {
@@ -137,6 +181,98 @@ app.controller('TransactionsController', function($scope, $http, AuthorizationSe
 		} else {
 			$scope.transactions = [];
 		}
+	};
+	var updateTransactionLocal = function(data) {
+		var found = false;
+		$scope.transactions.forEach(
+				function(transaction, i) {
+					if (transaction.id === data.id) {
+						$scope.transactions[i] = data;
+						found = true;
+						AccountsService.update();
+					}
+				});
+		return found;
+	};
+	var updateTransaction = function(id) {
+		if (id === undefined)
+			return updateTransactions();
+		$scope.loading++;
+		updateIsLoading();
+		$http.get("service/transactions/" + id, {headers: AuthorizationService.headers})
+				.success(function(data) {
+					$scope.loading--;
+					updateIsLoading();
+					if (!updateTransactionLocal(data))
+						updateTransactions();
+				}).error(processError);
+	};
+	var submitTransaction = function(transaction) {
+		$scope.loading++;
+		updateIsLoading();
+		$http.post("service/transactions/submit", transaction, {headers: AuthorizationService.headers})
+				.success(function(data) {
+					$scope.loading--;
+					updateIsLoading();
+					if (!updateTransactionLocal(data))
+						updateTransactions();
+				}).error(
+				function(data, status) {
+					processError(data, status);
+					update();
+				});
+	};
+	var deleteTransaction = function(transaction) {
+		if (transaction === undefined || transaction.id === undefined)
+			return updateTransactions();
+		$scope.loading++;
+		updateIsLoading();
+		$http.get("service/transactions/delete/" + transaction.id, {headers: AuthorizationService.headers})
+				.success(function() {
+					$scope.loading--;
+					updateIsLoading();
+					updateTransactions();
+				}).error(
+				function(data, status) {
+					processError(data, status);
+					update();
+				});
+	};
+	$scope.addTransactionComponent = function(transaction) {
+		transaction.components.push({});
+	};
+	$scope.deleteTransactionComponent = function(transaction, component) {
+		transaction.components = transaction.components.filter(function(comp) {
+			return comp !== component;
+		});
+	};
+	$scope.addTransaction = function() {
+		$scope.transactions.unshift({isEditing: true, components: [], date: new Date().toJSON().split("T")[0], tags: [], type: $scope.transactionTypes[0].value});
+	};
+	$scope.startEditing = function(transaction) {
+		transaction.isEditing = true;
+	};
+	$scope.duplicateTransaction = function(transaction) {
+		transaction.isEditing = false;
+		var newTransaction = angular.copy(transaction);
+		newTransaction.isEditing = true;
+		newTransaction.id = undefined;
+		newTransaction.components.forEach(function(component) {
+			component.id = undefined;
+		});
+		$scope.transactions.unshift(newTransaction);
+	};
+	$scope.submitEditing = function(transaction) {
+		transaction.isEditing = undefined;
+		submitTransaction(transaction);
+	};
+	$scope.deleteTransaction = function(transaction) {
+		transaction.isEditing = undefined;
+		deleteTransaction(transaction);
+	};
+	$scope.cancelEditing = function(transaction) {
+		updateTransaction(transaction.id);
+		AccountsService.update();
 	};
 	$scope.$watch('authorization.authorized', function() {
 		update();
