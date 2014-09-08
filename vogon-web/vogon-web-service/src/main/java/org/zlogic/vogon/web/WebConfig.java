@@ -19,7 +19,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 @Configuration
-@ImportResource({"file:src/main/webapp/WEB-INF/mvc-dispatcher-servlet.xml"})
+@ImportResource({"classpath:/mvc-dispatcher-servlet.xml"})
 public class WebConfig extends WebMvcConfigurerAdapter {
 
 	/**

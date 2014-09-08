@@ -17,7 +17,7 @@
 	<modules>
 		<module>vogon-ui-javafx</module>
 		<module>vogon-distribution</module>
-		<module>vogon-web-wildfly</module>
+		<!--<module>vogon-web-wildfly</module>-->
 		<module>vogon-web-tomcat</module>
 	</modules>
 
