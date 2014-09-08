@@ -9,39 +9,39 @@ import java.util.Collection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.zlogic.vogon.data.FinanceTransaction;
+import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.VogonUser;
 
 /**
- * The transactions JpaRepository
+ * The accounts JpaRepository
  *
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
-public interface TransactionRepository extends JpaRepository<FinanceTransaction, Long> {
+public interface AccountRepository extends JpaRepository<FinanceAccount, Long> {
 
 	/**
-	 * Finds a transaction by its VogonUser owner and ID
+	 * Finds an account by its VogonUser owner and ID
 	 *
 	 * @param owner the VogonUser owner
-	 * @param id the transaction ID
-	 * @return transaction for owner and id
+	 * @param id the account ID
+	 * @return account for owner and id
 	 */
-	public FinanceTransaction findByOwnerAndId(VogonUser owner, Long id);
+	public FinanceAccount findByOwnerAndId(VogonUser owner, Long id);
 
 	/**
-	 * Finds transactions by their VogonUser owner
+	 * Finds accounts by their VogonUser owner
 	 *
 	 * @param owner the VogonUser owner
 	 * @param pageable the Pageable object
-	 * @return transactions for owner
+	 * @return accounts for owner
 	 */
-	public Page<FinanceTransaction> findByOwner(VogonUser owner, Pageable pageable);
+	public Page<FinanceAccount> findByOwner(VogonUser owner, Pageable pageable);
 
 	/**
-	 * Finds transactions by their VogonUser owner
+	 * Finds accounts by their VogonUser owner
 	 *
 	 * @param owner the VogonUser owner
-	 * @return transactions for owner
+	 * @return accounts for owner
 	 */
-	public Collection<FinanceTransaction> findByOwner(VogonUser owner);
+	public Collection<FinanceAccount> findByOwner(VogonUser owner);
 }
