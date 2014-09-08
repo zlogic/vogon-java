@@ -7,6 +7,8 @@ package org.zlogic.vogon.web;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.web.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableAutoConfiguration
 @ComponentScan
-public class Runner {
+public class Application extends SpringBootServletInitializer {
 
 	/**
 	 * The main method to run the application
@@ -26,7 +28,17 @@ public class Runner {
 	 * @param args arguments
 	 */
 	public static void main(String[] args) {
-		System.setProperty("jboss.server.data.dir", System.getProperty("user.dir") + "/target");
-		SpringApplication.run(Runner.class, args);
+		SpringApplication.run(Application.class, args);
+	}
+
+	/**
+	 * Configures the application when being run from a war container
+	 *
+	 * @param application SpringApplicationBuilder instance
+	 * @return SpringApplicationBuilder with the annotations
+	 */
+	@Override
+	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+		return application.sources(Application.class);
 	}
 }
