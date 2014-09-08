@@ -31,7 +31,7 @@ public class FinanceAccount implements Serializable {
 	 */
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	protected long id;
+	protected Long id;
 	/**
 	 * The account owner
 	 */
@@ -176,14 +176,7 @@ public class FinanceAccount implements Serializable {
 	 * @param owner the owner to set
 	 */
 	public void setOwner(VogonUser owner) {
-		if (owner == this.owner)
-			return;
-		VogonUser oldOwner = this.owner;
 		this.owner = owner;
-		if (oldOwner != null)
-			oldOwner.removeAccount(this);
-		if (owner != null)
-			owner.addAccount(this);
 	}
 
 	/**
@@ -200,14 +193,14 @@ public class FinanceAccount implements Serializable {
 	 *
 	 * @return the ID for this class instance
 	 */
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof FinanceAccount)
-			return id == ((FinanceAccount) obj).id;
+			return id != null ? id.equals(((FinanceAccount) obj).id) : null;
 		else
 			return this == obj;
 	}

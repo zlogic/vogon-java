@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -58,7 +59,7 @@ public class FinanceTransaction implements Serializable {
 	 */
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	protected long id;
+	protected Long id;
 	/**
 	 * The transaction owner
 	 */
@@ -81,7 +82,7 @@ public class FinanceTransaction implements Serializable {
 	 * Contains the related accounts and the transaction's distribution into
 	 * them
 	 */
-	@OneToMany
+	@OneToMany(cascade = CascadeType.ALL)
 	@OrderBy("id ASC")
 	protected List<TransactionComponent> components;
 	/**
@@ -200,6 +201,8 @@ public class FinanceTransaction implements Serializable {
 	 * Updates the transaction's amount from its components
 	 */
 	public void updateAmounts() {
+		if (components == null)
+			return;
 		if (type == Type.EXPENSEINCOME) {
 			amount = 0;
 			for (TransactionComponent component : components)
@@ -502,14 +505,7 @@ public class FinanceTransaction implements Serializable {
 	 * @param owner the owner to set
 	 */
 	public void setOwner(VogonUser owner) {
-		if (owner == this.owner)
-			return;
-		VogonUser oldOwner = this.owner;
 		this.owner = owner;
-		if (oldOwner != null)
-			oldOwner.removeTransaction(this);
-		if (owner != null)
-			owner.addTransaction(this);
 	}
 
 	/**
@@ -517,14 +513,14 @@ public class FinanceTransaction implements Serializable {
 	 *
 	 * @return the ID for this class instance
 	 */
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof FinanceTransaction)
-			return id == ((FinanceTransaction) obj).id;
+			return id != null ? id.equals(((FinanceTransaction) obj).id) : false;
 		else
 			return this == obj;
 	}
