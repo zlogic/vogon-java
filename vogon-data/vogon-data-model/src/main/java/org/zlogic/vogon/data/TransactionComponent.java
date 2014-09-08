@@ -29,12 +29,7 @@ public class TransactionComponent implements Serializable {
 	 */
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	protected long id;
-	/**
-	 * The transaction owner
-	 */
-	@ManyToOne
-	protected VogonUser owner;
+	protected Long id;
 	/**
 	 * The account
 	 */
@@ -143,14 +138,14 @@ public class TransactionComponent implements Serializable {
 	 *
 	 * @return the ID for this class instance
 	 */
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof TransactionComponent)
-			return id == ((TransactionComponent) obj).id;
+			return id != null ? id.equals(((TransactionComponent) obj).id) : false;
 		else
 			return this == obj;
 	}

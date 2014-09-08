@@ -8,15 +8,11 @@ package org.zlogic.vogon.data;
 import java.io.Serializable;
 import java.util.Currency;
 import java.util.Map;
-import java.util.Set;
-import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
 /**
@@ -46,16 +42,6 @@ public class VogonUser implements Serializable {
 	 */
 	protected String password;
 	/**
-	 * The user's accounts
-	 */
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	protected Set<FinanceAccount> accounts;
-	/**
-	 * The user's transaction
-	 */
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	protected Set<FinanceTransaction> transactions;
-	/**
 	 * The "Currency" key in preferences
 	 */
 	@Transient
@@ -82,46 +68,6 @@ public class VogonUser implements Serializable {
 	public VogonUser(String username, String password) {
 		this.username = username;
 		this.password = password;
-	}
-
-	/**
-	 * Adds a transaction to this user
-	 *
-	 * @param transaction the transaction to add
-	 */
-	public void addTransaction(FinanceTransaction transaction) {
-		transactions.add(transaction);
-		transaction.setOwner(this);
-	}
-
-	/**
-	 * Adds an account to this user
-	 *
-	 * @param account the account to add
-	 */
-	public void addAccount(FinanceAccount account) {
-		accounts.add(account);
-		account.setOwner(this);
-	}
-
-	/**
-	 * Removes a transaction from this user
-	 *
-	 * @param transaction the transaction to remove
-	 */
-	public void removeTransaction(FinanceTransaction transaction) {
-		transactions.remove(transaction);
-		transaction.setOwner(null);
-	}
-
-	/**
-	 * Removes an account from this user
-	 *
-	 * @param account the account to remove
-	 */
-	public void removeAccount(FinanceAccount account) {
-		accounts.remove(account);
-		account.setOwner(null);
 	}
 	/*
 	 * Getters/setters
