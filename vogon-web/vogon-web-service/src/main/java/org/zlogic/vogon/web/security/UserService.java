@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 import org.zlogic.vogon.data.VogonUser;
 import org.zlogic.vogon.web.data.UserRepository;
 
@@ -18,6 +19,7 @@ import org.zlogic.vogon.web.data.UserRepository;
  *
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
+@Service
 public class UserService implements UserDetailsService, InitializingBean {
 
 	/**

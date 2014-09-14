@@ -2,13 +2,13 @@
 <html>
 	<head>
 		<title>Vogon finance tracker</title>
-		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<%= org.zlogic.vogon.web.WebProperties.getProperty("bootstrap") %>/css/bootstrap.min.css">
-		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<%= org.zlogic.vogon.web.WebProperties.getProperty("bootstrap") %>/css/bootstrap-theme.min.css">
-		<script type="text/javascript" src="webjars/angularjs/<%= org.zlogic.vogon.web.WebProperties.getProperty("angularjs") %>/angular.min.js"></script>
-		<script type="text/javascript" src="webjars/angularjs/<%= org.zlogic.vogon.web.WebProperties.getProperty("angularjs") %>/angular-cookies.js"></script>
-		<script type="text/javascript" src="webjars/angular-ui-bootstrap/<%= org.zlogic.vogon.web.WebProperties.getProperty("angularuibootstrap") %>/ui-bootstrap-tpls.min.js"></script>
-		<script type="text/javascript" src="webjars/jquery/<%= org.zlogic.vogon.web.WebProperties.getProperty("jquery") %>/jquery.min.js"></script>
-		<script type="text/javascript" src="webjars/bootstrap/<%= org.zlogic.vogon.web.WebProperties.getProperty("bootstrap") %>/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("bootstrap") %>/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("bootstrap") %>/css/bootstrap-theme.min.css">
+		<script type="text/javascript" src="webjars/angularjs/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("angularjs") %>/angular.min.js"></script>
+		<script type="text/javascript" src="webjars/angularjs/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("angularjs") %>/angular-cookies.js"></script>
+		<script type="text/javascript" src="webjars/angular-ui-bootstrap/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("angularuibootstrap") %>/ui-bootstrap-tpls.min.js"></script>
+		<script type="text/javascript" src="webjars/jquery/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("jquery") %>/jquery.min.js"></script>
+		<script type="text/javascript" src="webjars/bootstrap/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("bootstrap") %>/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="script/main.js"></script>
 	</head>
 	<body ng-app="vogon">

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.stereotype.Service;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.web.data.model.FinanceTransactionJson;
 
@@ -18,6 +19,7 @@ import org.zlogic.vogon.web.data.model.FinanceTransactionJson;
  *
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
+@Service
 public class JSONMapper extends ObjectMapper implements InitializingBean {
 
 	/**
