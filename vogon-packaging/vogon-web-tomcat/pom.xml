@@ -50,17 +50,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!--
-				<configuration>
-					<overlays>
-						<overlay>
-							<groupId>org.zlogic.vogon.web</groupId>
-							<artifactId>vogon-web-service</artifactId>
-						</overlay>
-					</overlays>
-				</configuration>
-			</plugin>
-			-->
 		</plugins>
 	</build>
 
@@ -69,14 +58,6 @@
 			<groupId>org.zlogic.vogon.web</groupId>
 			<artifactId>vogon-web-service</artifactId>
 			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
 		</dependency>
 	</dependencies>
 </project>
