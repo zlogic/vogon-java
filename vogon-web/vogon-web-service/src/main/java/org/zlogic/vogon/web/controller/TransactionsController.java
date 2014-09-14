@@ -29,7 +29,6 @@ import org.zlogic.vogon.data.TransactionComponent;
 import org.zlogic.vogon.web.data.AccountRepository;
 import org.zlogic.vogon.web.data.InitializationHelper;
 import org.zlogic.vogon.web.data.TransactionRepository;
-import org.zlogic.vogon.web.data.UserRepository;
 import org.zlogic.vogon.web.data.model.FinanceTransactionJson;
 import org.zlogic.vogon.web.data.model.TransactionComponentJson;
 import org.zlogic.vogon.web.security.VogonSecurityUser;
@@ -53,12 +52,6 @@ public class TransactionsController {
 	 */
 	@PersistenceContext
 	private EntityManager em;
-
-	/**
-	 * The users repository
-	 */
-	@Autowired
-	private UserRepository userRepository;
 	/**
 	 * The transactions repository
 	 */

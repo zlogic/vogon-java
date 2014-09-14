@@ -5,10 +5,16 @@
  */
 package org.zlogic.vogon.web;
 
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportResource;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.web.bind.support.AuthenticationPrincipalArgumentResolver;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
@@ -19,8 +25,13 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 @Configuration
-@ImportResource({"classpath:/mvc-dispatcher-servlet.xml"})
 public class WebConfig extends WebMvcConfigurerAdapter {
+
+	/**
+	 * The customized MappingJackson2HttpMessageConverter instance
+	 */
+	@Autowired
+	private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
 	/**
 	 * Adds view controllers to the registry
@@ -44,5 +55,38 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 		resolver.setPrefix("/");
 		resolver.setSuffix(".jsp");
 		return resolver;
+	}
+
+	/**
+	 * Configures message converters and adds the customized JSON converter
+	 *
+	 * @param converters the converters list to use
+	 */
+	@Override
+	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+		converters.add(jacksonMessageConverter);
+		super.configureMessageConverters(converters);
+	}
+
+	/**
+	 * Adds argument resolvers and adds the
+	 * AuthenticationPrincipalArgumentResolver
+	 *
+	 * @param argumentResolvers list of argument resolvers to add
+	 */
+	@Override
+	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+		argumentResolvers.add(new AuthenticationPrincipalArgumentResolver());
+		super.addArgumentResolvers(argumentResolvers);
+	}
+
+	/**
+	 * Enable default servlet handler
+	 *
+	 * @param configurer DefaultServletHandlerConfigurer instance
+	 */
+	@Override
+	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+		configurer.enable();
 	}
 }

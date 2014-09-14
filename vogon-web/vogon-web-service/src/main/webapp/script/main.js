@@ -9,6 +9,13 @@ app.service('AuthorizationService', function($http, $cookies, $interval) {
 	var username = undefined;
 	var password = undefined;
 	var clientId = "vogonweb";
+	var postHeaders = {"Content-Type": "application/x-www-form-urlencoded"};
+	var encodeForm = function (data) {
+		var buffer = [];
+		for (var name in data)
+			buffer.push([encodeURIComponent(name),encodeURIComponent(data[name])].join("="));
+		return buffer.join("&");
+	};
 	var setToken = function(access_token, refresh_token, username, password) {
 		if (access_token !== undefined && refresh_token !== undefined) {
 			that.access_token = access_token;
@@ -28,7 +35,7 @@ app.service('AuthorizationService', function($http, $cookies, $interval) {
 		if (refresh_token === undefined || username === undefined)
 			return;
 		var params = {client_id: clientId, grant_type: "refresh_token", refresh_token: refresh_token};
-		$http.get("oauth/token", {params: params}).success(function(data) {
+		$http.post("oauth/token", encodeForm(params), {headers:postHeaders}).success(function(data) {
 			setToken(data.access_token, data.refresh_token, username);
 		}).error(function() {
 			that.refresh_token = undefined;
@@ -40,7 +47,7 @@ app.service('AuthorizationService', function($http, $cookies, $interval) {
 	};
 	this.performAuthorization = function(username, password) {
 		var params = {username: username, password: password, client_id: clientId, grant_type: "password"};
-		$http.get("oauth/token", {params: params}).success(function(data) {
+		$http.post("oauth/token", encodeForm(params), {headers:postHeaders}).success(function(data) {
 			setToken(data.access_token, data.refresh_token, username, password);
 		}).error(function() {
 			if (that.refresh_token !== undefined) {
@@ -136,7 +143,7 @@ app.controller('TransactionsController', function($scope, $http, AuthorizationSe
 	$scope.totalPages = 0;
 	$scope.loading = 0;
 	$scope.isLoading = false;
-	$scope.transactionTypes = [{name: "Expense/income", value: "EXPENSEINCOME"}, {name: "Transfer", value: "TRANSFER"}]
+	$scope.transactionTypes = [{name: "Expense/income", value: "EXPENSEINCOME"}, {name: "Transfer", value: "TRANSFER"}];
 	var updateIsLoading = function() {
 		$scope.isLoading = $scope.loading > 0;
 	};

@@ -13,7 +13,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<vogon.web.version.bootstrap>3.2.0</vogon.web.version.bootstrap>
-		<vogon.web.version.angularjs>1.2.21</vogon.web.version.angularjs>
+		<vogon.web.version.angularjs>1.2.23</vogon.web.version.angularjs>
 		<vogon.web.version.angularuibootstrap>0.11.0</vogon.web.version.angularuibootstrap>
 		<vogon.web.version.jquery>1.11.1</vogon.web.version.jquery>
 	</properties>
