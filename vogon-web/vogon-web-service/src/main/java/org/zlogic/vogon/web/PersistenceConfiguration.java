@@ -27,6 +27,9 @@ public class PersistenceConfiguration {
 	 * @return the path to the database
 	 */
 	public String getDatabasePath() {
+		String openshiftDataDir = System.getenv("OPENSHIFT_DATA_DIR");
+		if (openshiftDataDir != null)
+			return openshiftDataDir;
 		return System.getProperty("jboss.server.data.dir", System.getProperty("catalina.home", System.getProperty("user.dir")));
 	}
 

@@ -14,9 +14,8 @@
 	</organization>
 
 	<properties>
-		<version.java>1.8</version.java>
+		<version.java>1.7</version.java>
 		<version.java.launch4j>1.8.0</version.java.launch4j>
-		<version.java.ee>7</version.java.ee>
 		<version.windows>1.0.0.0</version.windows>
 		<version.javafx>8.0</version.javafx>
 	</properties>

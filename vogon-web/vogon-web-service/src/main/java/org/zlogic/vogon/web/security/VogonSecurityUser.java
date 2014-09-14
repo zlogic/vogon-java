@@ -27,7 +27,7 @@ public class VogonSecurityUser implements UserDetails {
 	/**
 	 * The user authorities list
 	 */
-	private static final List<GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority(AUTHORITY));
+	private static final List<SimpleGrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority(AUTHORITY));
 
 	/**
 	 * The VogonUser form JPA
