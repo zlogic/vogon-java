@@ -36,14 +36,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.zlogic.vogon.data</groupId>
 			<artifactId>vogon-data-model</artifactId>
 		</dependency>
