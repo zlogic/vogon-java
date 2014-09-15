@@ -217,6 +217,10 @@ app.controller('TransactionsController', function ($scope, $http, AuthorizationS
 	var submitTransaction = function (transaction) {
 		$scope.loading++;
 		updateIsLoading();
+		if (transaction.date instanceof Date)
+			transaction.date = transaction.date.toJSON().split("T")[0];
+		if (transaction.tags.constructor === String)
+			transaction.tags = transaction.tags.split(",");
 		$http.post("service/transactions/submit", transaction, {headers: AuthorizationService.headers})
 				.success(function (data) {
 					$scope.loading--;
@@ -264,6 +268,7 @@ app.controller('TransactionsController', function ($scope, $http, AuthorizationS
 		var newTransaction = angular.copy(transaction);
 		newTransaction.isEditing = true;
 		newTransaction.id = undefined;
+		newTransaction.date = new Date().toJSON().split("T")[0];
 		newTransaction.components.forEach(function (component) {
 			component.id = undefined;
 		});

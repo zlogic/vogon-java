@@ -125,8 +125,14 @@ public class TransactionsController {
 	FinanceTransactionJson submitTransaction(@RequestBody FinanceTransactionJson transaction, @AuthenticationPrincipal VogonSecurityUser user) {
 		FinanceTransaction existingTransaction = transactionRepository.findByOwnerAndId(user.getUser(), transaction.getId());
 		//Merge with database
-		if (existingTransaction == null)
+		if (existingTransaction == null) {
 			existingTransaction = new FinanceTransaction(user.getUser(), transaction.getDescription(), transaction.getTags(), transaction.getDate(), transaction.getType());
+		} else {
+			existingTransaction.setDescription(transaction.getDescription());
+			existingTransaction.setTags(transaction.getTags());
+			existingTransaction.setType(transaction.getType());
+			existingTransaction.setDate(transaction.getDate());
+		}
 		List<TransactionComponent> removedComponents = new LinkedList<>(existingTransaction.getComponents());
 		for (TransactionComponentJson newComponent : transaction.getComponentsJson()) {
 			FinanceAccount existingAccount = accountRepository.findByOwnerAndId(user.getUser(), newComponent.getAccountId());

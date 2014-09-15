@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.text.SimpleDateFormat;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.zlogic.vogon.data.FinanceAccount;
@@ -75,5 +76,6 @@ public class JSONMapper extends ObjectMapper implements InitializingBean {
 	public void afterPropertiesSet() throws Exception {
 		this.addMixInAnnotations(FinanceTransactionJson.class, FinanceTransactionAnnotations.class);
 		this.addMixInAnnotations(FinanceAccount.class, FinanceAccountAnnotations.class);
+		this.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
 	}
 }
