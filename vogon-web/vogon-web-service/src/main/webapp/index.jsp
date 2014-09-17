@@ -49,11 +49,14 @@
 			</div>
 		</div>
 	</div>
+	<div ng-controller="NotificationController" >
+		<div class="navbar-fixed-top">
+			<div class="alert alert-warning" role="alert" ng-show="httpService.isLoading"><span class="glyphicon glyphicon-refresh"></span> Loading...</div>
+			<alert ng-repeat="alert in alertService.alerts" type="{{alert.type}}" close="alertService.closeAlert($index)">{{alert.msg}}</alert>
+		</div>
+	</div>
 	<div ng-controller="TransactionsController">
 		<div ng-show="authorization.authorized">
-			<div class="navbar-fixed-top">
-				<div class="alert alert-warning" role="alert" ng-show="isLoading"><span class="glyphicon glyphicon-refresh"></span> Loading...</div>
-			</div>
 			<div class="panel panel-default">
 				<div class="panel-heading">Transactions for {{authorization.username}}</div>
 				<div class="panel-body">

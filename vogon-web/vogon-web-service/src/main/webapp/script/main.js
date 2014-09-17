@@ -1,11 +1,86 @@
-var app = angular.module('vogon', ['ngCookies', 'ui.bootstrap']);
+var app = angular.module("vogon", ["ngCookies", "ui.bootstrap"]);
 
-app.service('AuthorizationService', function ($http, $cookies, $interval) {
+app.service("AlertService", function ($timeout) {
+	var that = this;
+	this.alerts = [];
+	this.closeAlert = function (alertIndex) {
+		that.alerts.splice(alertIndex, 1);
+	};
+	this.addAlert = function (message) {
+		var alert = {msg: message, type: "danger"};
+		that.alerts.push(alert);
+		$timeout(function () {
+			var alertIndex = that.alerts.indexOf(alert);
+			if (alertIndex !== -1)
+				that.closeAlert(alertIndex);
+		}, 30000);
+	};
+});
+
+app.service("HTTPService", function ($http, AlertService) {
+	var that = this;
+	var pendingRequests = 0;
+	var isLoading = false;
+	var authorizationHeaders = {};
+	var mergeHeaders = function (extraHeaders) {
+		var headers = {};
+		merge(headers, that.authorizationHeaders);
+		if (extraHeaders !== undefined)
+			merge(headers, extraHeaders);
+		return headers;
+	};
+	var merge = function (a, b) {
+		for (var prop in b)
+			a[prop] = b[prop];
+	};
+	var startRequest = function () {
+		that.pendingRequests++;
+		that.isLoading = true;
+	};
+	var endRequest = function () {
+		that.pendingRequests--;
+		that.isLoading = pendingRequests > 0;
+	};
+	var errorHandler = function (data) {
+		endRequest();
+		AlertService.addAlert("HTTP error: " + data.status + "(" + data.data + ")");
+		if (data.status === 401) {
+			that.fixAuthorization();
+		} else {
+			//TODO: update accounts and transactions
+		}
+		return data;
+	};
+	var successHandler = function (data) {
+		endRequest();
+		return data;
+	};
+	this.get = function (url, extraHeaders) {
+		startRequest();
+		var headers = mergeHeaders(extraHeaders);
+		return $http.get(url, {headers: headers}).then(successHandler, errorHandler);
+	};
+	this.post = function (url, data, extraHeaders) {
+		startRequest();
+		var headers = mergeHeaders(extraHeaders);
+		return $http.post(url, data, {headers: headers}).then(successHandler, errorHandler);
+	};
+	this.fixAuthorization = function () {
+		throw "fixAuthorization not properly initialized";
+	};
+	this.setAccessToken = function (access_token) {
+		if (access_token !== undefined)
+			that.authorizationHeaders = {Authorization: "Bearer " + access_token};
+		else
+			that.authorizationHeaders = {};
+	};
+});
+
+app.service("AuthorizationService", function ($cookies, $interval, AlertService, HTTPService) {
 	var that = this;
 	var authorized = false;
 	var access_token = undefined;
 	var refresh_token = undefined;
-	var headers = {};
 	var username = undefined;
 	var password = undefined;
 	var clientId = "vogonweb";
@@ -21,7 +96,7 @@ app.service('AuthorizationService', function ($http, $cookies, $interval) {
 			that.access_token = access_token;
 			that.refresh_token = refresh_token;
 			$cookies.refresh_token = refresh_token;
-			that.headers = {Authorization: "Bearer " + access_token};
+			HTTPService.setAccessToken(access_token);
 			that.authorized = true;
 			if (username !== undefined) {
 				that.username = username;
@@ -35,46 +110,54 @@ app.service('AuthorizationService', function ($http, $cookies, $interval) {
 		if (refresh_token === undefined || username === undefined)
 			return;
 		var params = {client_id: clientId, grant_type: "refresh_token", refresh_token: refresh_token};
-		$http.post("oauth/token", encodeForm(params), {headers: postHeaders}).success(function (data) {
-			setToken(data.access_token, data.refresh_token, username);
-		}).error(function () {
-			that.refresh_token = undefined;
-			if (that.username !== undefined && that.password !== undefined)
-				that.performAuthorization(that.username, that.password);
-			else
-				that.resetAuthorization();
-		});
+		HTTPService.post("oauth/token", encodeForm(params), postHeaders)
+				.then(function (data) {
+					data = data.data;
+					setToken(data.access_token, data.refresh_token, username);
+				}, function () {
+					that.refresh_token = undefined;
+					if (that.username !== undefined && that.password !== undefined)
+						that.performAuthorization(that.username, that.password);
+					else
+						that.resetAuthorization("Unable to refresh token");
+				});
 	};
 	this.performAuthorization = function (username, password) {
 		var params = {username: username, password: password, client_id: clientId, grant_type: "password"};
-		$http.post("oauth/token", encodeForm(params), {headers: postHeaders}).success(function (data) {
-			setToken(data.access_token, data.refresh_token, username, password);
-		}).error(function () {
-			if (that.refresh_token !== undefined) {
-				that.refresh_token = undefined;
-				that.performAuthorization(username, password);
-			} else {
-				that.resetAuthorization();
-			}
-		});
+		HTTPService.post("oauth/token", encodeForm(params), postHeaders)
+				.then(function (data) {
+					data = data.data;
+					setToken(data.access_token, data.refresh_token, username, password);
+				}, function () {
+					if (that.refresh_token !== undefined) {
+						that.refresh_token = undefined;
+						that.performAuthorization(username, password);
+					} else {
+						that.resetAuthorization("Unable to authenticate");
+					}
+				});
 	};
 	this.fixAuthorization = function () {
 		if (that.refresh_token !== undefined && that.username !== undefined) {
 			refreshToken(that.refresh_token, that.username);
 		} else {
-			that.resetAuthorization();
+			that.resetAuthorization("Unable to refresh token");
 		}
 	};
-	this.resetAuthorization = function () {
-		//TODO: show login failed error
+	this.resetAuthorization = function (message) {
 		that.username = undefined;
 		that.password = undefined;
 		that.access_token = undefined;
 		that.refresh_token = undefined;
-		that.headers = {};
+		HTTPService.setAccessToken();
 		that.authorized = false;
 		delete $cookies.username;
 		delete $cookies.refresh_token;
+		if (message !== undefined)
+			AlertService.addAlert(message);
+	};
+	HTTPService.fixAuthorization = function () {
+		that.fixAuthorization();
 	};
 	refreshToken($cookies.refresh_token, $cookies.username);
 	$interval(function () {
@@ -82,7 +165,13 @@ app.service('AuthorizationService', function ($http, $cookies, $interval) {
 	}, 60 * 1000);
 });
 
-app.controller('AuthController', function ($scope, AuthorizationService) {
+app.controller("NotificationController", function ($scope, HTTPService, AlertService) {
+	$scope.httpService = HTTPService;
+	$scope.alertService = AlertService;
+	$scope.closeAlert = AlertService.closeAlert;
+});
+
+app.controller("AuthController", function ($scope, AuthorizationService) {
 	$scope.authorization = AuthorizationService;
 	$scope.username = "";
 	$scope.password = "";
@@ -96,24 +185,15 @@ app.controller('AuthController', function ($scope, AuthorizationService) {
 	};
 });
 
-app.service('AccountsService', function ($http, $rootScope, AuthorizationService) {
+app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationService) {
 	var that = this;
 	var accounts = [];
-	var processError = function (data, status) {
-		if (status === 401) {
-			AuthorizationService.fixAuthorization();
-			//TODO: show error
-		} else {
-			//TODO: retry?
-		}
-	};
 	this.update = function () {
 		if (AuthorizationService.authorized) {
-			$http.get("service/accounts", {headers: AuthorizationService.headers})
-					.success(function (data) {
-						that.accounts = data;
-						//TODO: show loading popup just like transactions do
-					}).error(processError);
+			HTTPService.get("service/accounts")
+					.then(function (data) {
+						that.accounts = data.data;
+					}, that.update);
 		} else {
 			that.accounts = [];
 		}
@@ -125,9 +205,7 @@ app.service('AccountsService', function ($http, $rootScope, AuthorizationService
 	};
 	$rootScope.$watch(function () {
 		return AuthorizationService.authorized;
-	}, function () {
-		that.update();
-	});
+	}, that.update());
 });
 
 app.controller('AccountsController', function ($scope, AuthorizationService, AccountsService) {
@@ -135,51 +213,27 @@ app.controller('AccountsController', function ($scope, AuthorizationService, Acc
 	$scope.accountService = AccountsService;
 });
 
-app.controller('TransactionsController', function ($scope, $http, AuthorizationService, AccountsService) {
+app.controller('TransactionsController', function ($scope, HTTPService, AuthorizationService, AccountsService) {
 	$scope.authorization = AuthorizationService;
 	$scope.accounts = AccountsService;
 	$scope.transactions = [];
 	$scope.currentPage = 1;
 	$scope.totalPages = 0;
-	$scope.loading = 0;
-	$scope.isLoading = false;
 	$scope.transactionTypes = [{name: "Expense/income", value: "EXPENSEINCOME"}, {name: "Transfer", value: "TRANSFER"}];
-	var updateIsLoading = function () {
-		$scope.isLoading = $scope.loading > 0;
-	};
-	var processError = function (data, status) {
-		$scope.loading--;
-		updateIsLoading();
-		if (status === 401) {
-			AuthorizationService.fixAuthorization();
-			//TODO: show error
-		} else {
-			updateTransactions();
-			AccountsService.update();
-		}
-	};
 	var updateTransactions = function () {
-		$scope.loading++;
-		updateIsLoading();
 		var nextPage = $scope.currentPage;
-		$http.get("service/transactions/page_" + (nextPage - 1), {headers: AuthorizationService.headers})
-				.success(function (data) {
-					$scope.transactions = data;
-					$scope.loading--;
-					updateIsLoading();
+		HTTPService.get("service/transactions/page_" + (nextPage - 1))
+				.then(function (data) {
+					$scope.transactions = data.data;
 					$scope.currentPage = nextPage;
 					AccountsService.update();
-				}).error(processError);
+				}, update);
 	};
 	var updateTransactionsCount = function () {
-		$scope.loading++;
-		updateIsLoading();
-		$http.get("service/transactions/pages", {headers: AuthorizationService.headers})
-				.success(function (data) {
-					$scope.totalPages = data;
-					$scope.loading--;
-					updateIsLoading();
-				}).error(processError);
+		HTTPService.get("service/transactions/pages")
+				.then(function (data) {
+					$scope.totalPages = data.data;
+				}, update);
 	};
 	var update = function () {
 		if (AuthorizationService.authorized) {
@@ -187,6 +241,8 @@ app.controller('TransactionsController', function ($scope, $http, AuthorizationS
 			updateTransactionsCount();
 		} else {
 			$scope.transactions = [];
+			$scope.currentPage = 1;
+			$scope.totalPages = 0;
 		}
 	};
 	var updateTransactionLocal = function (data) {
@@ -196,58 +252,48 @@ app.controller('TransactionsController', function ($scope, $http, AuthorizationS
 					if (transaction.id === data.id) {
 						$scope.transactions[i] = data;
 						found = true;
-						AccountsService.update();
 					}
 				});
+		AccountsService.update();
 		return found;
 	};
 	var updateTransaction = function (id) {
 		if (id === undefined)
 			return updateTransactions();
-		$scope.loading++;
-		updateIsLoading();
-		$http.get("service/transactions/" + id, {headers: AuthorizationService.headers})
-				.success(function (data) {
-					$scope.loading--;
-					updateIsLoading();
-					if (!updateTransactionLocal(data))
+		HTTPService.get("service/transactions/" + id)
+				.then(function (data) {
+					if (!updateTransactionLocal(data.data))
 						updateTransactions();
-				}).error(processError);
+				}, update);
 	};
 	var submitTransaction = function (transaction) {
-		$scope.loading++;
-		updateIsLoading();
-		if (transaction.date instanceof Date)
-			transaction.date = transaction.date.toJSON().split("T")[0];
-		if (transaction.tags.constructor === String)
-			transaction.tags = transaction.tags.split(",");
-		$http.post("service/transactions/submit", transaction, {headers: AuthorizationService.headers})
-				.success(function (data) {
-					$scope.loading--;
-					updateIsLoading();
-					if (!updateTransactionLocal(data))
+		transaction.date = dateToJson(transaction.date);
+		transaction.tags = tagsToJson(transaction.tags);
+		HTTPService.post("service/transactions/submit", transaction)
+				.then(function (data) {
+					if (!updateTransactionLocal(data.data))
 						updateTransactions();
-				}).error(
-				function (data, status) {
-					processError(data, status);
-					update();
-				});
+				}, update);
 	};
 	var deleteTransaction = function (transaction) {
 		if (transaction === undefined || transaction.id === undefined)
 			return updateTransactions();
-		$scope.loading++;
-		updateIsLoading();
-		$http.get("service/transactions/delete/" + transaction.id, {headers: AuthorizationService.headers})
-				.success(function () {
-					$scope.loading--;
-					updateIsLoading();
+		HTTPService.get("service/transactions/delete/" + transaction.id)
+				.then(function () {
 					updateTransactions();
-				}).error(
-				function (data, status) {
-					processError(data, status);
-					update();
-				});
+				}, update);
+	};
+	var dateToJson = function (date) {
+		if (date instanceof Date)
+			return date.toJSON().split("T")[0];
+		else
+			return date;
+	};
+	var tagsToJson = function (tags) {
+		if (tags.constructor === String)
+			return tags.split(",");
+		else
+			return tags;
 	};
 	$scope.addTransactionComponent = function (transaction) {
 		transaction.components.push({});
@@ -258,7 +304,7 @@ app.controller('TransactionsController', function ($scope, $http, AuthorizationS
 		});
 	};
 	$scope.addTransaction = function () {
-		$scope.transactions.unshift({isEditing: true, components: [], date: new Date().toJSON().split("T")[0], tags: [], type: $scope.transactionTypes[0].value});
+		$scope.transactions.unshift({isEditing: true, components: [], date: dateToJson(new Date()), tags: [], type: $scope.transactionTypes[0].value});
 	};
 	$scope.startEditing = function (transaction) {
 		transaction.isEditing = true;
@@ -268,7 +314,7 @@ app.controller('TransactionsController', function ($scope, $http, AuthorizationS
 		var newTransaction = angular.copy(transaction);
 		newTransaction.isEditing = true;
 		newTransaction.id = undefined;
-		newTransaction.date = new Date().toJSON().split("T")[0];
+		newTransaction.date = dateToJson(new Date());
 		newTransaction.components.forEach(function (component) {
 			component.id = undefined;
 		});
@@ -286,11 +332,9 @@ app.controller('TransactionsController', function ($scope, $http, AuthorizationS
 		updateTransaction(transaction.id);
 		AccountsService.update();
 	};
-	$scope.$watch('authorization.authorized', function () {
-		update();
-	});
+	$scope.$watch(function () {
+		return AuthorizationService.authorized;
+	}, update);
 	update();
-	$scope.pageChanged = function () {
-		update();
-	};
+	$scope.pageChanged = update;
 });
