@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<%@ page session="false" %><!DOCTYPE html>
 <html>
 	<head>
 		<title>Vogon finance tracker</title>
