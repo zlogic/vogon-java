@@ -10,6 +10,7 @@
 		<script type="text/javascript" src="webjars/jquery/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("jquery") %>/jquery.min.js"></script>
 		<script type="text/javascript" src="webjars/bootstrap/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("bootstrap") %>/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="script/main.js"></script>
+		<link rel="icon" type="image/png" href="images/vogon-favicon.png" />
 	</head>
 	<body ng-app="vogon">
 		<div ng-controller="AuthController" class="well well-sm">
