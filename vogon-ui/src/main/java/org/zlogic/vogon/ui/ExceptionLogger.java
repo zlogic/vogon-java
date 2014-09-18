@@ -111,7 +111,7 @@ public class ExceptionLogger implements UncaughtExceptionHandler, ExceptionHandl
 	 * @param thr the Throwable
 	 * @return a stack trace string
 	 */
-	private String getExceptionStacktrace(Throwable thr) {
+	public String getExceptionStacktrace(Throwable thr) {
 		StringBuilder exceptionStackTrace = new StringBuilder();
 		while (thr != null) {
 			exceptionStackTrace.append(stackTraceFormat.format(

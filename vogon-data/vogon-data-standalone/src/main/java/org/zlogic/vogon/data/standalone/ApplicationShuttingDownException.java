@@ -3,7 +3,7 @@
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
-package org.zlogic.vogon.data;
+package org.zlogic.vogon.data.standalone;
 
 import java.util.ResourceBundle;
 
@@ -17,7 +17,7 @@ public class ApplicationShuttingDownException extends RuntimeException {
 	/**
 	 * Localization messages
 	 */
-	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/data/messages");
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/data/standalone/messages");
 
 	/**
 	 * Default constructor

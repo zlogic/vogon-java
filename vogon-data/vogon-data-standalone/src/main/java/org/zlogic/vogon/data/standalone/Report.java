@@ -34,8 +34,6 @@ import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceAccount_;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.FinanceTransaction_;
-import org.zlogic.vogon.data.TransactedChange;
-import org.zlogic.vogon.data.TransactedQuery;
 import org.zlogic.vogon.data.TransactionComponent;
 import org.zlogic.vogon.data.TransactionComponent_;
 

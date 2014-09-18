@@ -18,7 +18,7 @@ import javafx.beans.value.ObservableValue;
 import javax.persistence.EntityManager;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceTransaction;
-import org.zlogic.vogon.data.TransactedChange;
+import org.zlogic.vogon.data.standalone.TransactedChange;
 
 /**
  * Class for storing an account with an overloaded toString method for better

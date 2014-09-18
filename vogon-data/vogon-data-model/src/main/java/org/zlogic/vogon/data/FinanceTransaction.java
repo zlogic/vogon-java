@@ -23,6 +23,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Temporal;
+import javax.persistence.Version;
 
 /**
  * Interface for storing a single finance transaction
@@ -60,6 +61,11 @@ public class FinanceTransaction implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	protected Long id;
+	/**
+	 * JPA version
+	 */
+	@Version
+	private long version = 0L;
 	/**
 	 * The transaction owner
 	 */
@@ -515,6 +521,24 @@ public class FinanceTransaction implements Serializable {
 	 */
 	public Long getId() {
 		return id;
+	}
+
+	/**
+	 * Returns the version for this class instance
+	 *
+	 * @return the version for this class instance
+	 */
+	public long getVersion() {
+		return version;
+	}
+
+	/**
+	 * Sets the version of this class instance
+	 *
+	 * @param version the version of this class instance
+	 */
+	protected void setVersion(long version) {
+		this.version = version;
 	}
 
 	@Override

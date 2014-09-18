@@ -28,7 +28,7 @@ import javafx.util.StringConverter;
 import javax.persistence.EntityManager;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceTransaction;
-import org.zlogic.vogon.data.TransactedChange;
+import org.zlogic.vogon.data.standalone.TransactedChange;
 import org.zlogic.vogon.data.TransactionComponent;
 
 /**
@@ -256,7 +256,7 @@ public class TransactionModelAdapter {
 		return new StringConverter<List<String>>() {
 			@Override
 			public String toString(List<String> t) {
-				return org.zlogic.vogon.data.Utils.join(t, ","); //NOI18N
+				return String.join(",", t); //NOI18N
 			}
 
 			@Override

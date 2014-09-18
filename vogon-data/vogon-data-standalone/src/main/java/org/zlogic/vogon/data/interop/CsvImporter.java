@@ -29,7 +29,6 @@ import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceAccount_;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
-import org.zlogic.vogon.data.Utils;
 import org.zlogic.vogon.data.VogonUser;
 import org.zlogic.vogon.data.standalone.FinanceData;
 
@@ -71,7 +70,7 @@ public class CsvImporter implements FileImporter {
 			while ((columns = reader.readNext()) != null) {
 				if (columns.length < 5) {
 					reader.close();
-					throw new VogonImportLogicalException((new MessageFormat(messages.getString("CSV_FORMAT_EXCEPTION"))).format(new Object[]{Utils.join(columns, ",")}));  //NOI18N
+					throw new VogonImportLogicalException((new MessageFormat(messages.getString("CSV_FORMAT_EXCEPTION"))).format(new Object[]{String.join(",", columns)}));  //NOI18N
 				}
 				if (columnsHeader == null) {
 					columnsHeader = columns;
@@ -127,7 +126,7 @@ public class CsvImporter implements FileImporter {
 						transaction = new FinanceTransaction(defaultUser, columns[0], tags, date, transactionType);
 					} else {
 						reader.close();
-						throw new VogonImportLogicalException((new MessageFormat(messages.getString("CSV_TRANSACTION_TOO_COMPLEX"))).format(new Object[]{Utils.join(columns, ",")})); //NOI18N
+						throw new VogonImportLogicalException((new MessageFormat(messages.getString("CSV_TRANSACTION_TOO_COMPLEX"))).format(new Object[]{String.join(",", columns)})); //NOI18N
 					}
 
 					//Add components

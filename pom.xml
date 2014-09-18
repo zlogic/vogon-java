@@ -24,7 +24,6 @@
 		<module>vogon-data</module>
 		<module>vogon-web</module>
 		<module>vogon-ui</module>
-		<module>vogon-resources</module>
 		<module>vogon-packaging</module>
 	</modules>
 
@@ -116,11 +115,6 @@
 			<dependency>
 				<groupId>org.zlogic.vogon.ui</groupId>
 				<artifactId>vogon-ui</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.zlogic.vogon.resources</groupId>
-				<artifactId>vogon-resources</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
