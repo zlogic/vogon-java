@@ -45,6 +45,7 @@ public class FinanceTransactionJson extends FinanceTransaction {
 		this.tags = Arrays.asList(transaction.getTags());
 		this.transactionDate = transaction.getDate();
 		this.type = transaction.getType();
+		this.setVersion(transaction.getVersion());
 		for (TransactionComponent component : transaction.getComponents())
 			componentsJson.add(new TransactionComponentJson(component));
 	}

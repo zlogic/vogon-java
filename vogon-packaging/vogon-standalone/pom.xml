@@ -9,15 +9,11 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>vogon-distribution</artifactId>
-	<name>Vogon :: Packaging :: Distribution</name>
+	<artifactId>vogon-standalone</artifactId>
+	<name>Vogon :: Packaging :: Standalone distribution</name>
 	<packaging>pom</packaging>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.zlogic.vogon.resources</groupId>
-			<artifactId>vogon-resources</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>vogon-ui-javafx</artifactId>

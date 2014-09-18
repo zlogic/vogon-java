@@ -6,6 +6,7 @@
 package org.zlogic.vogon.web.controller;
 
 import java.util.Collection;
+import java.util.ConcurrentModificationException;
 import java.util.LinkedList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,7 +42,7 @@ import org.zlogic.vogon.web.security.VogonSecurityUser;
  */
 @Controller
 @RequestMapping(value = "/service/transactions")
-@Transactional
+@Transactional(propagation = Propagation.REQUIRED)
 public class TransactionsController {
 
 	/**
@@ -129,6 +131,8 @@ public class TransactionsController {
 			existingTransaction = new FinanceTransaction(user.getUser(), transaction.getDescription(), transaction.getTags(), transaction.getDate(), transaction.getType());
 		} else {
 			existingTransaction.setDescription(transaction.getDescription());
+			if (transaction.getVersion() != existingTransaction.getVersion())
+				throw new ConcurrentModificationException("Transaction was already updated");
 			existingTransaction.setTags(transaction.getTags());
 			existingTransaction.setType(transaction.getType());
 			existingTransaction.setDate(transaction.getDate());
@@ -142,6 +146,8 @@ public class TransactionsController {
 				existingTransaction.addComponent(createdComponent);
 			} else {
 				TransactionComponent existingComponent = existingTransaction.getComponents().get(existingTransaction.getComponents().indexOf(newComponent));
+				if (newComponent.getVersion() != existingComponent.getVersion())
+					throw new ConcurrentModificationException("Transaction was already updated");
 				existingTransaction.updateComponentAccount(existingComponent, existingAccount);
 				existingTransaction.updateComponentRawAmount(existingComponent, newComponent.getAmount());
 				removedComponents.remove(existingComponent);

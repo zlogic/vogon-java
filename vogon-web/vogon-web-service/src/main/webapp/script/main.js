@@ -43,7 +43,7 @@ app.service("HTTPService", function ($http, AlertService) {
 	};
 	var errorHandler = function (data) {
 		endRequest();
-		AlertService.addAlert("HTTP error: " + data.status + "(" + data.data + ")");
+		AlertService.addAlert("HTTP error: " + data.status + "(" + angular.toJson(data.data) + ")");
 		if (data.status === 401) {
 			that.fixAuthorization();
 		} else {
@@ -314,9 +314,11 @@ app.controller('TransactionsController', function ($scope, HTTPService, Authoriz
 		var newTransaction = angular.copy(transaction);
 		newTransaction.isEditing = true;
 		newTransaction.id = undefined;
+		newTransaction.version = undefined;
 		newTransaction.date = dateToJson(new Date());
 		newTransaction.components.forEach(function (component) {
 			component.id = undefined;
+			component.version = undefined;
 		});
 		$scope.transactions.unshift(newTransaction);
 	};

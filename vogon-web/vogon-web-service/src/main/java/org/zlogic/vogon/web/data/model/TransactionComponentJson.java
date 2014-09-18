@@ -50,6 +50,7 @@ public class TransactionComponentJson extends TransactionComponent {
 		this.transaction = component.getTransaction();
 		this.account = component.getAccount();
 		this.accountId = component.getAccount().getId();
+		this.setVersion(component.getVersion());
 	}
 
 	/**

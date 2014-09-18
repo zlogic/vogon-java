@@ -13,7 +13,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javax.persistence.EntityManager;
 import org.zlogic.vogon.data.CurrencyRate;
-import org.zlogic.vogon.data.TransactedChange;
+import org.zlogic.vogon.data.standalone.TransactedChange;
 
 /**
  * Class for storing a currency rate with property change detection.

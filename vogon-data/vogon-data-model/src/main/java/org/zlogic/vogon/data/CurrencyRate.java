@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Version;
 
 /**
  * Class for storing a currency exchange rate
@@ -31,6 +32,11 @@ public class CurrencyRate implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	protected long id;
+	/**
+	 * JPA version
+	 */
+	@Version
+	private long version = 0L;
 	/**
 	 * The source currency
 	 */
@@ -139,5 +145,23 @@ public class CurrencyRate implements Serializable {
 	 */
 	public long getId() {
 		return id;
+	}
+
+	/**
+	 * Returns the version for this class instance
+	 *
+	 * @return the version for this class instance
+	 */
+	public long getVersion() {
+		return version;
+	}
+
+	/**
+	 * Sets the version of this class instance
+	 *
+	 * @param version the version of this class instance
+	 */
+	protected void setVersion(long version) {
+		this.version = version;
 	}
 }

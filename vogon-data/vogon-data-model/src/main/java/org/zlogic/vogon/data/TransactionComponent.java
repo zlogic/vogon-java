@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.Version;
 
 /**
  * Implements a transaction (amount associated with a specific account)
@@ -30,6 +31,11 @@ public class TransactionComponent implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	protected Long id;
+	/**
+	 * JPA version
+	 */
+	@Version
+	private long version = 0L;
 	/**
 	 * The account
 	 */
@@ -140,6 +146,24 @@ public class TransactionComponent implements Serializable {
 	 */
 	public Long getId() {
 		return id;
+	}
+
+	/**
+	 * Returns the version for this class instance
+	 *
+	 * @return the version for this class instance
+	 */
+	public long getVersion() {
+		return version;
+	}
+
+	/**
+	 * Sets the version of this class instance
+	 *
+	 * @param version the version of this class instance
+	 */
+	protected void setVersion(long version) {
+		this.version = version;
 	}
 
 	@Override

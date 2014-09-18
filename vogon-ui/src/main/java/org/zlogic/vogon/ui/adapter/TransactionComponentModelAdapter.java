@@ -12,7 +12,7 @@ import javafx.beans.value.ObservableValue;
 import javax.persistence.EntityManager;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceTransaction;
-import org.zlogic.vogon.data.TransactedChange;
+import org.zlogic.vogon.data.standalone.TransactedChange;
 import org.zlogic.vogon.data.TransactionComponent;
 
 /**

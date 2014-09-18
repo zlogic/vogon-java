@@ -3,7 +3,7 @@
  * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
  * Author: Dmitry Zolotukhin <zlogic@gmail.com>
  */
-package org.zlogic.vogon.data;
+package org.zlogic.vogon.data.standalone;
 
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;

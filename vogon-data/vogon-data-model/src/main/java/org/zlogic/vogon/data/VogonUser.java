@@ -14,6 +14,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 
 /**
  * Class for storing user data
@@ -33,6 +34,11 @@ public class VogonUser implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	protected long id;
+	/**
+	 * JPA version
+	 */
+	@Version
+	private long version = 0L;
 	/**
 	 * The username
 	 */
@@ -138,5 +144,23 @@ public class VogonUser implements Serializable {
 	 */
 	public long getId() {
 		return id;
+	}
+
+	/**
+	 * Returns the version for this class instance
+	 *
+	 * @return the version for this class instance
+	 */
+	protected long getVersion() {
+		return version;
+	}
+
+	/**
+	 * Sets the version of this class instance
+	 *
+	 * @param version the version of this class instance
+	 */
+	public void setVersion(long version) {
+		this.version = version;
 	}
 }
