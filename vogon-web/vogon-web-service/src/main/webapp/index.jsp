@@ -16,14 +16,14 @@
 		<div ng-controller="AuthController" class="well well-sm">
 			<div ng-hide="authorization.authorized">
 				<form class="form-inline">
-					<input type="text" class="form-control" ng-model="username" placeholder="Enter username"/>
-					<input type="password" class="form-control" ng-model="password" placeholder="Enter password" />
-					<button ng-click="login()" class="btn btn-primary"><span class="glyphicon glyphicon glyphicon-log-in"></span> Login</button>
+					<input type="text" class="form-control" ng-model="username" ng-disabled="$eval(loginLocked)" placeholder="Enter username"/>
+					<input type="password" class="form-control" ng-model="password" ng-disabled="$eval(loginLocked)" placeholder="Enter password" />
+					<button ng-click="login()" ng-disabled="$eval(loginLocked) || !username || !password" class="btn btn-primary"><span class="glyphicon glyphicon glyphicon-log-in"></span> Login</button>
 				</form>
 			</div>
 			<div ng-show="authorization.authorized">
 				<span class="control-label">Vogon for {{authorization.username}}</span>
-				<button ng-click="logout()" class="btn btn-default"><span class="glyphicon glyphicon glyphicon-log-out"></span> Logout</button>
+				<button ng-click="logout()" ng-disabled="$eval(logoutLocked)" class="btn btn-default"><span class="glyphicon glyphicon glyphicon-log-out"></span> Logout</button>
 			</div>
 		</div>
 	</div>
@@ -50,7 +50,7 @@
 			</div>
 		</div>
 	</div>
-	<div ng-controller="NotificationController" >
+	<div ng-controller="NotificationController">
 		<div class="navbar-fixed-top">
 			<div class="alert alert-warning" role="alert" ng-show="httpService.isLoading"><span class="glyphicon glyphicon-refresh"></span> Loading...</div>
 			<alert ng-repeat="alert in alertService.alerts" type="{{alert.type}}" close="alertService.closeAlert($index)">{{alert.msg}}</alert>
