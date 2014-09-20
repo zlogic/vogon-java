@@ -149,12 +149,11 @@ public class SecurityConfig {
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			clients.inMemory().withClient("vogonweb")
-					.authorizedGrantTypes("password", "authorization_code", "refresh_token", "implicit")
+					.authorizedGrantTypes("password", "authorization_code")
 					.authorities(VogonSecurityUser.AUTHORITY)
 					.scopes("read", "write", "trust")
 					.resourceIds(resourceId)
-					.accessTokenValiditySeconds(120)
-					.refreshTokenValiditySeconds(1440);
+					.accessTokenValiditySeconds(60 * 24);
 		}
 
 		/**
