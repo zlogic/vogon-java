@@ -6,7 +6,12 @@ app.service("AlertService", function ($timeout) {
 	this.closeAlert = function (alertIndex) {
 		that.alerts.splice(alertIndex, 1);
 	};
+	this.enabled = function () {
+		return true;
+	};
 	this.addAlert = function (message) {
+		if (!that.enabled())
+			return;
 		var alert = {msg: message, type: "danger"};
 		that.alerts.push(alert);
 		$timeout(function () {
@@ -47,10 +52,10 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 	};
 	var errorHandler = function (data) {
 		endRequest();
+		var deferred = $q.defer();
 		if (data.status === 401) {
 			var fixAuthCall = that.fixAuthorization();
 			if (fixAuthCall !== undefined) {
-				var deferred = $q.defer();
 				fixAuthCall
 						.then(function () {
 							retryRequest(data.config).then(deferred.resolve, deferred.reject), deferred.reject;
@@ -62,7 +67,8 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 			AlertService.addAlert("HTTP error: " + data.status + "(" + angular.toJson(data.data) + ")");
 			//TODO: update accounts and transactions
 		}
-		return data;
+		deferred.reject(data);
+		return deferred.promise;
 	};
 	var successHandler = function (data) {
 		endRequest();
@@ -89,7 +95,7 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 	};
 });
 
-app.service("AuthorizationService", function (AlertService, HTTPService) {
+app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
 	var that = this;
 	var clientId = "vogonweb";
 	var postHeaders = {"Content-Type": "application/x-www-form-urlencoded"};
@@ -121,8 +127,12 @@ app.service("AuthorizationService", function (AlertService, HTTPService) {
 				.then(function (data) {
 					data = data.data;
 					setToken(data.access_token, username, password);
-				}, function () {
+					return data;
+				}, function (data) {
 					that.resetAuthorization("Unable to authenticate");
+					var deferred = $q.defer();
+					deferred.reject(data);
+					return deferred.promise;
 				});
 	};
 	this.fixAuthorization = function () {
@@ -132,6 +142,12 @@ app.service("AuthorizationService", function (AlertService, HTTPService) {
 			that.resetAuthorization();
 			return that.performAuthorization(username, password);
 		} else {
+			var message;
+			if (that.authorized)
+				if (that.username !== undefined && that.password !== undefined)
+					message = "Username/password not accepted";
+				else if (that.access_token !== undefined)
+					message = "Access token rejected";
 			that.resetAuthorization(that.authorized ? "Can't fix authorization" : undefined);
 		}
 	};
@@ -146,6 +162,9 @@ app.service("AuthorizationService", function (AlertService, HTTPService) {
 			AlertService.addAlert(message);
 	};
 	HTTPService.fixAuthorization = this.fixAuthorization;
+	AlertService.enabled = function () {
+		return that.authorized;
+	};
 
 	this.access_token = localStorage["access_token"];
 	if (this.access_token !== undefined) {
@@ -157,7 +176,8 @@ app.service("AuthorizationService", function (AlertService, HTTPService) {
 				}, function () {
 					that.authorized = false;
 				});
-	}
+	} else
+		that.authorized = false;
 });
 
 app.controller("NotificationController", function ($scope, HTTPService, AlertService) {
@@ -166,21 +186,45 @@ app.controller("NotificationController", function ($scope, HTTPService, AlertSer
 	$scope.closeAlert = AlertService.closeAlert;
 });
 
-app.controller("AuthController", function ($scope, AuthorizationService, HTTPService) {
+app.controller("LoginController", function ($scope, AuthorizationService, HTTPService) {
 	$scope.authorization = AuthorizationService;
 	$scope.httpService = HTTPService;
-	$scope.username = "";
-	$scope.password = "";
 	$scope.loginLocked = "authorization.authorized || httpService.isLoading";
-	$scope.logoutLocked = "!authorization.authorized";
+	$scope.failed = false;
 	$scope.login = function () {
-		AuthorizationService.performAuthorization($scope.username, $scope.password);
+		AuthorizationService.performAuthorization(AuthorizationService.username, AuthorizationService.password)
+				.catch(function () {
+					$scope.failed = true;
+				});
 	};
+});
+
+app.controller("AuthController", function ($scope, $modal, AuthorizationService, HTTPService) {
+	$scope.authorization = AuthorizationService;
+	$scope.httpService = HTTPService;
+	$scope.logoutLocked = "!authorization.authorized";
 	$scope.logout = function () {
-		AuthorizationService.resetAuthorization();
-		$scope.username = "";
-		$scope.password = "";
+		$scope.authorization.resetAuthorization();
 	};
+	$scope.toggleLoginDialog = function () {
+		if (!AuthorizationService.authorized && AuthorizationService.access_token === undefined && $scope.loginDialog === undefined) {
+			$scope.loginDialog = $modal.open({
+				templateUrl: "loginDialog",
+				controller: "LoginController",
+				backdrop: "static"
+			});
+		} else if (AuthorizationService.authorized && $scope.loginDialog !== undefined) {
+			$scope.loginDialog.dismiss();
+			delete $scope.loginDialog;
+		}
+	};
+	$scope.$watch(function () {
+		return AuthorizationService.authorized;
+	}, $scope.toggleLoginDialog);
+	$scope.$watch(function () {
+		return AuthorizationService.access_token;
+	}, $scope.toggleLoginDialog);
+	$scope.toggleLoginDialog();
 });
 
 app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationService) {
