@@ -203,6 +203,7 @@ app.controller("AuthController", function ($scope, $modal, AuthorizationService,
 	$scope.authorization = AuthorizationService;
 	$scope.httpService = HTTPService;
 	$scope.logoutLocked = "!authorization.authorized";
+	$scope.loginDialog = undefined;
 	$scope.logout = function () {
 		$scope.authorization.resetAuthorization();
 	};
@@ -250,18 +251,59 @@ app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationS
 	}, that.update());
 });
 
-app.controller('AccountsController', function ($scope, AuthorizationService, AccountsService) {
+app.controller("AccountsController", function ($scope, AuthorizationService, AccountsService) {
 	$scope.authorization = AuthorizationService;
 	$scope.accountService = AccountsService;
 });
 
-app.controller('TransactionsController', function ($scope, HTTPService, AuthorizationService, AccountsService) {
+app.controller("TransactionEditorController", function ($scope, $modalInstance, HTTPService, AccountsService, transaction, transactionTypes) {
+	$scope.transaction = transaction;
+	$scope.accounts = AccountsService;
+	$scope.transactionTypes = transactionTypes;
+	$scope.calendarOpened = false;
+	$scope.tags = transaction.tags.join(",");
+	$scope.openCalendar = function ($event) {
+		$event.preventDefault();
+		$event.stopPropagation();
+		$scope.calendarOpened = true;
+	};
+	$scope.addTransactionComponent = function () {
+		$scope.transaction.components.push({});
+	};
+	$scope.deleteTransactionComponent = function (component) {
+		transaction.components = transaction.components.filter(function (comp) {
+			return comp !== component;
+		});
+	};
+	$scope.submitEditing = function () {
+		$modalInstance.close({action: "submit", transaction: $scope.transaction});
+	};
+	$scope.cancelEditing = function () {
+		$modalInstance.dismiss(transaction);
+	};
+	$scope.deleteTransaction = function () {
+		$modalInstance.close({action: "delete", transaction: $scope.transaction});
+	};
+	var tagsToJson = function (tags) {
+		if (tags.constructor === String)
+			return tags.split(",");
+		else
+			return tags;
+	};
+	$scope.syncTags = function () {
+		$scope.transaction.tags = tagsToJson($scope.tags);
+	};
+});
+
+app.controller("TransactionsController", function ($scope, $modal, HTTPService, AuthorizationService, AccountsService) {
 	$scope.authorization = AuthorizationService;
 	$scope.accounts = AccountsService;
 	$scope.transactions = [];
 	$scope.currentPage = 1;
 	$scope.totalPages = 0;
 	$scope.transactionTypes = [{name: "Expense/income", value: "EXPENSEINCOME"}, {name: "Transfer", value: "TRANSFER"}];
+	$scope.editor = undefined;
+	$scope.editingTransaction = undefined;
 	var updateTransactions = function () {
 		var nextPage = $scope.currentPage;
 		HTTPService.get("service/transactions/page_" + (nextPage - 1))
@@ -309,7 +351,6 @@ app.controller('TransactionsController', function ($scope, HTTPService, Authoriz
 	};
 	var submitTransaction = function (transaction) {
 		transaction.date = dateToJson(transaction.date);
-		transaction.tags = tagsToJson(transaction.tags);
 		return HTTPService.post("service/transactions/submit", transaction)
 				.then(function (data) {
 					if (!updateTransactionLocal(data.data))
@@ -330,30 +371,48 @@ app.controller('TransactionsController', function ($scope, HTTPService, Authoriz
 		else
 			return date;
 	};
-	var tagsToJson = function (tags) {
-		if (tags.constructor === String)
-			return tags.split(",");
-		else
-			return tags;
-	};
-	$scope.addTransactionComponent = function (transaction) {
-		transaction.components.push({});
-	};
-	$scope.deleteTransactionComponent = function (transaction, component) {
-		transaction.components = transaction.components.filter(function (comp) {
-			return comp !== component;
-		});
+	var closeEditor = function () {
+		$scope.editingTransaction = undefined;
+		if ($scope.editor !== undefined) {
+			var deleteFunction = function () {
+				$scope.editor = undefined;
+			};
+			$scope.editor.then(deleteFunction, deleteFunction);
+		}
 	};
 	$scope.addTransaction = function () {
-		$scope.transactions.unshift({isEditing: true, components: [], date: dateToJson(new Date()), tags: [], type: $scope.transactionTypes[0].value});
+		var transaction = {components: [], date: dateToJson(new Date()), tags: [], type: $scope.transactionTypes[0].value};
+		$scope.transactions.unshift(transaction);
+		$scope.startEditing(transaction);
 	};
 	$scope.startEditing = function (transaction) {
-		transaction.isEditing = true;
+		closeEditor();
+		$scope.editingTransaction = transaction;
+		$scope.editor = $modal.open({
+			templateUrl: "editTransactionDialog",
+			controller: "TransactionEditorController",
+			size: "lg",
+			resolve: {
+				transaction: function () {
+					return $scope.editingTransaction;
+				},
+				transactionTypes: function () {
+					return $scope.transactionTypes;
+				}
+			}
+		}).result.then(function (response) {
+			if (response.action === "submit")
+				submitTransaction(response.transaction);
+			else if (response.action === "delete")
+				deleteTransaction(response.transaction);
+			closeEditor();
+		}, function (transaction) {
+			updateTransaction(transaction.id).then(AccountsService.update);
+			closeEditor();
+		});
 	};
 	$scope.duplicateTransaction = function (transaction) {
-		transaction.isEditing = false;
 		var newTransaction = angular.copy(transaction);
-		newTransaction.isEditing = true;
 		newTransaction.id = undefined;
 		newTransaction.version = undefined;
 		newTransaction.date = dateToJson(new Date());
@@ -362,17 +421,7 @@ app.controller('TransactionsController', function ($scope, HTTPService, Authoriz
 			component.version = undefined;
 		});
 		$scope.transactions.unshift(newTransaction);
-	};
-	$scope.submitEditing = function (transaction) {
-		transaction.isEditing = undefined;
-		submitTransaction(transaction);
-	};
-	$scope.deleteTransaction = function (transaction) {
-		transaction.isEditing = undefined;
-		deleteTransaction(transaction);
-	};
-	$scope.cancelEditing = function (transaction) {
-		updateTransaction(transaction.id).then(AccountsService.update);
+		$scope.startEditing(transaction);
 	};
 	$scope.$watch(function () {
 		return AuthorizationService.authorized;
