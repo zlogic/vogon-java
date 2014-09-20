@@ -156,7 +156,7 @@ public class TransactionsController {
 		//Remove deleted components
 		for (TransactionComponent removedComponent : removedComponents)
 			existingTransaction.removeComponent(removedComponent);
-		existingTransaction = transactionRepository.save(existingTransaction);
+		existingTransaction = transactionRepository.saveAndFlush(existingTransaction);
 		return initializationHelper.initializeTransaction(existingTransaction);
 	}
 

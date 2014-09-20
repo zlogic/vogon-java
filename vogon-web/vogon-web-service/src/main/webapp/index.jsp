@@ -10,6 +10,7 @@
 		<script type="text/javascript" src="webjars/jquery/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("jquery") %>/jquery.min.js"></script>
 		<script type="text/javascript" src="webjars/bootstrap/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("bootstrap") %>/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="script/main.js"></script>
+		<link rel="stylesheet" type="text/css" href="css/style.css">
 		<link rel="icon" type="image/png" href="images/vogon-favicon.png" />
 	</head>
 	<body ng-app="vogon">
@@ -18,7 +19,9 @@
 			<button ng-click="logout()" ng-disabled="$eval(logoutLocked)" class="btn btn-default"><span class="glyphicon glyphicon glyphicon-log-out"></span> Logout</button>
 		</div>
 		<script type="text/ng-template" id="loginDialog">
-			<div class="modal-header">Log in</div>
+			<div class="modal-header">
+				<h3 class="modal-title">Log in</h3>
+			</div>
 			<form class="form-inline" submit="login()">
 				<div class="modal-body">
 					<input type="text" class="form-control" ng-model="authorization.username" ng-disabled="$eval(loginLocked)" placeholder="Enter username"/>
@@ -31,6 +34,43 @@
 					<button ng-click="login()" ng-disabled="$eval(loginLocked) || !authorization.username || !authorization.password" class="btn btn-primary"><span class="glyphicon glyphicon glyphicon-log-in"></span> Login</button>
 				</div>
 			</form>
+		</script>
+		<script type="text/ng-template" id="editTransactionDialog">
+			<div class="modal-header">
+				<h3 class="modal-title">Edit transaction</h3>
+			</div>
+			<div class="modal-body">
+				<div class="row form-control-static">
+					<div class="form-inline col-md-12">
+						<input type="text" ng-model="transaction.description" class="form-control" placeholder="Enter transaction description"/>
+						<select ng-model="transaction.type" ng-init="transaction.type = transaction.type || transactionTypes[0]" ng-options="transactionType.value as transactionType.name for transactionType in transactionTypes" class="form-control"></select>
+						<div class="input-group">
+							<input type="text" class="form-control" datepicker-popup ng-model="transaction.date" is-open="$parent.calendarOpened" />
+							<span class="input-group-btn">
+								<button type="button" class="btn btn-default" ng-click="openCalendar($event)"><span class="glyphicon glyphicon-calendar"></span></button>
+							</span>
+						</div>
+						<input type="text" ng-model="$parent.tags" ng-change="syncTags()" placeholder="Enter tags" class="form-control"/>
+					</div>
+				</div>
+				<div class="row form-control-static">
+					<div class="col-md-12">
+						<button ng-click="addTransactionComponent()" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span> Add component</button>
+					</div>
+				</div>
+				<div class="row form-control-static" ng-repeat="component in transaction.components">
+					<div class="form-inline col-md-12">
+						<input type="text" ng-model="component.amount" placeholder="Enter amount" class="text-right form-control" smart-float/>
+						<select ng-model="component.accountId" ng-options="account.id as account.name for account in accounts.accounts" class="form-control"></select>
+						<button ng-click="deleteTransactionComponent(component)" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete</button>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button ng-click="deleteTransaction()" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Delete</button>
+				<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+				<button ng-click="submitEditing()" class="btn btn-primary"><span class="glyphicon glyphicon-ok"></span> Apply</button>
+			</div>
 		</script>
 		<div ng-controller="AccountsController">
 			<div ng-show="authorization.authorized" class="panel panel-default">
@@ -66,7 +106,7 @@
 				<div class="panel panel-default">
 					<div class="panel-heading">Transactions for {{authorization.username}}</div>
 					<div class="panel-body">
-						<button ng-click="addTransaction()" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span> Add transaction</button>
+						<button ng-click="addTransaction()" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> Add transaction</button>
 						<table class="table">
 							<thead>
 								<tr>
@@ -79,53 +119,22 @@
 								</tr>
 							</thead>
 							<tbody ng-repeat-start="transaction in transactions" ng-repeat-end>
-								<tr ng-hide="transaction.isEditing">
-									<td ng-click="startEditing(transaction)">{{transaction.description}}</td>
-									<td ng-click="startEditing(transaction)">{{transaction.date| date}}</td>
-									<td ng-click="startEditing(transaction)">
+								<tr>
+									<td ng-click="startEditing(transaction)" class="editable">{{transaction.description}}</td>
+									<td ng-click="startEditing(transaction)" class="editable">{{transaction.date| date}}</td>
+									<td ng-click="startEditing(transaction)" class="editable">
 										<div ng-repeat="tag in transaction.tags">
 											{{tag}}{{$last ? '' : ', '}}
 										</div>
 									</td>
-									<td ng-click="startEditing(transaction)" class="text-right">{{transaction.amount| number:2}}</td>
-									<td ng-click="startEditing(transaction)">
+									<td ng-click="startEditing(transaction)" class="text-right editable">{{transaction.amount| number:2}}</td>
+									<td ng-click="startEditing(transaction)" class="editable">
 										<div ng-repeat="component in transaction.components">
 											{{accounts.getAccount(component.accountId).name}}{{$last ? '' : ', '}}
 										</div>
 									</td>
 									<td>
 										<button ng-click="duplicateTransaction(transaction)" class="btn btn-default"><span class="glyphicon glyphicon-asterisk"></span> Duplicate</button>
-									</td>
-								</tr>
-								<tr ng-show="transaction.isEditing">
-									<td colspan="6">
-										<div class="well well-sm">
-											<div class="row form-control-static">
-												<div class="form-inline col-md-8">
-													<input type="text" ng-model="transaction.description" class="form-control" placeholder="Enter transaction description"/>
-													<select ng-model="transaction.type" ng-init="transaction.type = transaction.type || transactionTypes[0]" ng-options="transactionType.value as transactionType.name for transactionType in transactionTypes" class="form-control"></select>
-													<input type="date" ng-model="transaction.date" class="form-control"/>
-													<input type="text" ng-model="transaction.tags" placeholder="Enter tags" class="form-control"/>
-												</div>
-												<div class="form-inline col-md-4 pull-right text-right">
-													<button ng-click="submitEditing(transaction)" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span> Apply</button>
-													<button ng-click="cancelEditing(transaction)" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
-													<button ng-click="deleteTransaction(transaction)" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete</button>
-												</div>
-											</div>
-											<div class="row form-control-static">
-												<div class="col-md-12">
-													<button ng-click="addTransactionComponent(transaction)" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span> Add component</button>
-												</div>
-											</div>
-											<div class="row form-control-static">
-												<div class="form-inline col-md-12" ng-repeat="component in transaction.components">
-													<input type="text" ng-model="component.amount" placeholder="Enter amount" class="text-right form-control" smart-float/>
-													<select ng-model="component.accountId" ng-options="account.id as account.name for account in accounts.accounts" class="form-control"></select>
-													<button ng-click="deleteTransactionComponent(transaction, component)" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete</button>
-												</div>
-											</div>
-										</div>
 									</td>
 								</tr>
 							</tbody>
