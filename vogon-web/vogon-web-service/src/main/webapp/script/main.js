@@ -166,17 +166,20 @@ app.controller("NotificationController", function ($scope, HTTPService, AlertSer
 	$scope.closeAlert = AlertService.closeAlert;
 });
 
-app.controller("AuthController", function ($scope, AuthorizationService) {
+app.controller("AuthController", function ($scope, AuthorizationService, HTTPService) {
 	$scope.authorization = AuthorizationService;
+	$scope.httpService = HTTPService;
 	$scope.username = "";
 	$scope.password = "";
+	$scope.loginLocked = "authorization.authorized || httpService.isLoading";
+	$scope.logoutLocked = "!authorization.authorized";
 	$scope.login = function () {
 		AuthorizationService.performAuthorization($scope.username, $scope.password);
-		$scope.username = "";
-		$scope.password = "";
 	};
 	$scope.logout = function () {
 		AuthorizationService.resetAuthorization();
+		$scope.username = "";
+		$scope.password = "";
 	};
 });
 
