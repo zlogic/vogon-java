@@ -3,7 +3,7 @@
 	<head>
 		<title>Vogon finance tracker</title>
 		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("bootstrap") %>/css/bootstrap.min.css">
-		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("bootstrap") %>/css/bootstrap-theme.min.css">
+		<!--<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("bootstrap") %>/css/bootstrap-theme.min.css">-->
 		<script type="text/javascript" src="webjars/angularjs/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("angularjs") %>/angular.min.js"></script>
 		<script type="text/javascript" src="webjars/angularjs/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("angularjs") %>/angular-cookies.js"></script>
 		<script type="text/javascript" src="webjars/angular-ui-bootstrap/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("angularuibootstrap") %>/ui-bootstrap-tpls.min.js"></script>
@@ -14,8 +14,8 @@
 		<link rel="icon" type="image/png" href="images/vogon-favicon.png" />
 	</head>
 	<body ng-app="vogon">
-		<div ng-controller="AuthController" class="well well-sm" ng-show="authorization.authorized">
-			<span class="control-label">Vogon for {{authorization.username}} </span>
+		<div ng-controller="AuthController" class="well well-sm" ng-show="authorizationService.authorized">
+			<span class="control-label">Vogon for {{authorizationService.username}} </span>
 			<button ng-click="logout()" ng-disabled="$eval(logoutLocked)" class="btn btn-default"><span class="glyphicon glyphicon glyphicon-log-out"></span> Logout</button>
 		</div>
 		<script type="text/ng-template" id="loginDialog">
@@ -24,14 +24,14 @@
 			</div>
 			<form class="form-inline" submit="login()">
 				<div class="modal-body">
-					<input type="text" class="form-control" ng-model="authorization.username" ng-disabled="$eval(loginLocked)" placeholder="Enter username"/>
-					<input type="password" class="form-control" ng-model="authorization.password" ng-disabled="$eval(loginLocked)" placeholder="Enter password" />
+					<input type="text" class="form-control" ng-model="authorizationService.username" ng-disabled="$eval(loginLocked)" placeholder="Enter username"/>
+					<input type="password" class="form-control" ng-model="authorizationService.password" ng-disabled="$eval(loginLocked)" placeholder="Enter password" />
 				</div>
 				<div class="modal-body" ng-show="failed">
 					<alert type="danger">Login failed</div>
 				</div>
 				<div class="modal-footer">
-					<button ng-click="login()" ng-disabled="$eval(loginLocked) || !authorization.username || !authorization.password" class="btn btn-primary"><span class="glyphicon glyphicon glyphicon-log-in"></span> Login</button>
+					<button ng-click="login()" ng-disabled="$eval(loginLocked) || !authorizationService.username || !authorizationService.password" class="btn btn-primary"><span class="glyphicon glyphicon glyphicon-log-in"></span> Login</button>
 				</div>
 			</form>
 		</script>
@@ -61,7 +61,8 @@
 				<div class="row form-control-static" ng-repeat="component in transaction.components">
 					<div class="form-inline col-md-12">
 						<input type="text" ng-model="component.amount" placeholder="Enter amount" class="text-right form-control" smart-float/>
-						<select ng-model="component.accountId" ng-options="account.id as account.name for account in accounts.accounts" class="form-control"></select>
+						<span style="form-control">{{accountService.getAccount(component.accountId).currency}}</span>
+						<select ng-model="component.accountId" ng-options="account.id as account.name for account in accountService.accounts | filter:{showInList:true}" class="form-control"></select>
 						<button ng-click="deleteTransactionComponent(component)" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete</button>
 					</div>
 				</div>
@@ -72,10 +73,50 @@
 				<button ng-click="submitEditing()" class="btn btn-primary"><span class="glyphicon glyphicon-ok"></span> Apply</button>
 			</div>
 		</script>
+		<script type="text/ng-template" id="editAccountsDialog">
+			<div class="modal-header">
+				<h3 class="modal-title">Edit accounts</h3>
+			</div>
+			<div class="modal-body">
+				<div class="row form-control-static">
+					<div class="col-md-12">
+						<button ng-click="addAccount()" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span> Add account</button>
+					</div>
+				</div>
+				<div class="row form-control-static" ng-repeat="account in accounts.accounts | orderBy:'id'">
+					<div class="form-inline col-md-9">
+						<div class="row">
+							<div class="form-inline col-md-12">
+								<input type="text" ng-model="account.name" placeholder="Enter account name" class="form-control"/>
+								<select ng-model="account.currency" ng-options="currency.symbol as currency.displayName for currency in currencies.currencies" class="form-control"></select>
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-inline col-md-12">
+								<label class="checkbox-inline">
+									<input type="checkbox" ng-model="account.includeInTotal" class=""/> Include in total
+								</label>
+								<label class="checkbox-inline">
+									<input type="checkbox" ng-model="account.showInList" class=""/> Show in accounts list
+								</label>
+							</div>
+						</div>
+					</div>
+					<div class="form-inline col-md-3 text-right">
+						<button ng-click="deleteAccount(account)" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete</button>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+				<button ng-click="submitEditing()" class="btn btn-primary"><span class="glyphicon glyphicon-ok"></span> Apply</button>
+			</div>
+		</script>
 		<div ng-controller="AccountsController">
-			<div ng-show="authorization.authorized" class="panel panel-default">
-				<div class="panel-heading">Accounts for {{authorization.username}}</div>
+			<div ng-show="authorizationService.authorized" class="panel panel-default">
+				<div class="panel-heading">Accounts for {{authorizationService.username}}</div>
 				<div class="panel-body">
+					<button ng-click="editAccounts()" class="btn btn-primary"><span class="glyphicon glyphicon-edit"></span> Edit accounts</button>
 					<table class="table">
 						<thead>
 							<tr>
@@ -85,7 +126,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr ng-repeat="account in accountService.accounts">
+							<tr ng-repeat="account in accountService.accounts | filter:{showInList:true} | orderBy:'id'">
 								<td>{{account.name}}</td>
 								<td class="text-right">{{account.balance| number:2}}</td>
 								<td>{{account.currency}}</td>
@@ -102,7 +143,7 @@
 			</div>
 		</div>
 		<div ng-controller="TransactionsController">
-			<div ng-show="authorization.authorized">
+			<div ng-show="authorizationService.authorized">
 				<div class="panel panel-default">
 					<div class="panel-heading">Transactions for {{authorization.username}}</div>
 					<div class="panel-body">
@@ -118,10 +159,10 @@
 									<th></th>
 								</tr>
 							</thead>
-							<tbody ng-repeat-start="transaction in transactions" ng-repeat-end>
+							<tbody ng-repeat-start="transaction in transactionsService.transactions" ng-repeat-end>
 								<tr>
 									<td ng-click="startEditing(transaction)" class="editable">{{transaction.description}}</td>
-									<td ng-click="startEditing(transaction)" class="editable">{{transaction.date| date}}</td>
+									<td ng-click="startEditing(transaction)" class="editable">{{transaction.date | date}}</td>
 									<td ng-click="startEditing(transaction)" class="editable">
 										<div ng-repeat="tag in transaction.tags">
 											{{tag}}{{$last ? '' : ', '}}
@@ -130,7 +171,7 @@
 									<td ng-click="startEditing(transaction)" class="text-right editable">{{transaction.amount| number:2}}</td>
 									<td ng-click="startEditing(transaction)" class="editable">
 										<div ng-repeat="component in transaction.components">
-											{{accounts.getAccount(component.accountId).name}}{{$last ? '' : ', '}}
+											{{accountsService.getAccount(component.accountId).name}}{{$last ? '' : ', '}}
 										</div>
 									</td>
 									<td>
@@ -141,7 +182,7 @@
 						</table>
 					</div>
 					<div class="panel-footer">
-						<pagination total-items="totalPages" items-per-page="1" boundary-links="true" ng-model="currentPage" ng-change="pageChanged()">
+						<pagination total-items="transactionsService.totalPages" items-per-page="1" boundary-links="true" ng-model="transactionsService.currentPage" ng-change="pageChanged()">
 						</pagination>
 					</div>
 				</div>

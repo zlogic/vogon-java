@@ -59,6 +59,10 @@ public class FinanceAccount implements Serializable {
 	 * If this account should be included in the total
 	 */
 	protected Boolean includeInTotal;
+	/**
+	 * If this account should be shown in the accounts list
+	 */
+	protected Boolean showInList;
 
 	/**
 	 * Creates an account
@@ -165,6 +169,25 @@ public class FinanceAccount implements Serializable {
 	 */
 	public void setIncludeInTotal(boolean includeInTotal) {
 		this.includeInTotal = includeInTotal;
+	}
+
+	/**
+	 * Returns if this account should be shown in the account list
+	 *
+	 * @return true if this account should be shown in account list
+	 */
+	public boolean getShowInList() {
+		return showInList == null ? true : showInList;
+	}
+
+	/**
+	 * Sets if this account should be shown in the account list
+	 *
+	 * @param showInList true if this account should be shown in the account
+	 * list
+	 */
+	public void setShowInList(boolean showInList) {
+		this.showInList = showInList;
 	}
 
 	/**

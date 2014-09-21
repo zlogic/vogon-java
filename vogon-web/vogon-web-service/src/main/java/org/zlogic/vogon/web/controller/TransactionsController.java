@@ -120,7 +120,7 @@ public class TransactionsController {
 	 *
 	 * @param transaction the updated transaction
 	 * @param user the authenticated user
-	 * @return the transactions
+	 * @return the transactions from database after update
 	 */
 	@RequestMapping(value = "/submit", method = RequestMethod.POST, produces = "application/json")
 	public @ResponseBody
@@ -128,8 +128,10 @@ public class TransactionsController {
 		FinanceTransaction existingTransaction = transactionRepository.findByOwnerAndId(user.getUser(), transaction.getId());
 		//Merge with database
 		if (existingTransaction == null) {
+			//TODO: add functionality to initialise transaction to FinanceTransaction class
 			existingTransaction = new FinanceTransaction(user.getUser(), transaction.getDescription(), transaction.getTags(), transaction.getDate(), transaction.getType());
 		} else {
+			//TODO: add functionality to merge existing transaction to FinanceTransaction class
 			existingTransaction.setDescription(transaction.getDescription());
 			if (transaction.getVersion() != existingTransaction.getVersion())
 				throw new ConcurrentModificationException("Transaction was already updated");
@@ -141,10 +143,12 @@ public class TransactionsController {
 		for (TransactionComponentJson newComponent : transaction.getComponentsJson()) {
 			FinanceAccount existingAccount = accountRepository.findByOwnerAndId(user.getUser(), newComponent.getAccountId());
 			if (!existingTransaction.getComponents().contains(newComponent)) {
+				//TODO: add functionality to initialise transaction component to TransactionComponent class
 				TransactionComponent createdComponent = new TransactionComponent(existingAccount, existingTransaction, newComponent.getRawAmount());
 				em.persist(createdComponent);
 				existingTransaction.addComponent(createdComponent);
 			} else {
+				//TODO: add functionality to merge existing transaction component to TransactionComponent class
 				TransactionComponent existingComponent = existingTransaction.getComponents().get(existingTransaction.getComponents().indexOf(newComponent));
 				if (newComponent.getVersion() != existingComponent.getVersion())
 					throw new ConcurrentModificationException("Transaction was already updated");
@@ -161,11 +165,11 @@ public class TransactionsController {
 	}
 
 	/**
-	 * Updates or creates a new transaction
+	 * Deletes a transaction
 	 *
 	 * @param id the transaction id
 	 * @param user the authenticated user
-	 * @return the transactions
+	 * @return null
 	 */
 	@RequestMapping(value = "/delete/{id}", method = RequestMethod.GET, produces = "application/json")
 	public @ResponseBody
