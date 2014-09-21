@@ -63,8 +63,14 @@ public class JSONMapper extends ObjectMapper implements InitializingBean {
 	/**
 	 * Wrapper class for FinanceAccount
 	 */
-	@JsonIgnoreProperties({"owner"})
+	@JsonIgnoreProperties({"owner", "rawBalance"})
 	private interface FinanceAccountAnnotations {
+
+		/**
+		 * Disables getting of balance
+		 */
+		@JsonIgnore
+		public void setBalance();
 	}
 
 	/**

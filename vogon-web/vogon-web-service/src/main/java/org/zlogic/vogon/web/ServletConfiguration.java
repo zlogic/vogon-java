@@ -28,6 +28,7 @@ public class ServletConfiguration implements EmbeddedServletContainerCustomizer 
 	public void customize(ConfigurableEmbeddedServletContainer container) {
 		MimeMappings mappings = new MimeMappings(MimeMappings.DEFAULT);
 		mappings.add("woff", "application/font-woff");
+		mappings.add("eot", "application/vnd.ms-fontobject");
 		container.setMimeMappings(mappings);
 	}
 }

@@ -187,9 +187,9 @@ app.controller("NotificationController", function ($scope, HTTPService, AlertSer
 });
 
 app.controller("LoginController", function ($scope, AuthorizationService, HTTPService) {
-	$scope.authorization = AuthorizationService;
+	$scope.authorizationService = AuthorizationService;
 	$scope.httpService = HTTPService;
-	$scope.loginLocked = "authorization.authorized || httpService.isLoading";
+	$scope.loginLocked = "authorizationService.authorized || httpService.isLoading";
 	$scope.failed = false;
 	$scope.login = function () {
 		AuthorizationService.performAuthorization(AuthorizationService.username, AuthorizationService.password)
@@ -200,12 +200,12 @@ app.controller("LoginController", function ($scope, AuthorizationService, HTTPSe
 });
 
 app.controller("AuthController", function ($scope, $modal, AuthorizationService, HTTPService) {
-	$scope.authorization = AuthorizationService;
+	$scope.authorizationService = AuthorizationService;
 	$scope.httpService = HTTPService;
-	$scope.logoutLocked = "!authorization.authorized";
+	$scope.logoutLocked = "!authorizationService.authorized";
 	$scope.loginDialog = undefined;
 	$scope.logout = function () {
-		$scope.authorization.resetAuthorization();
+		$scope.authorizationService.resetAuthorization();
 	};
 	$scope.toggleLoginDialog = function () {
 		if (!AuthorizationService.authorized && AuthorizationService.access_token === undefined && $scope.loginDialog === undefined) {
@@ -231,6 +231,9 @@ app.controller("AuthController", function ($scope, $modal, AuthorizationService,
 app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationService) {
 	var that = this;
 	this.accounts = [];
+	this.updateTransactions = function () {
+		throw "updateTransactions not properly initialized";
+	};
 	this.update = function () {
 		if (AuthorizationService.authorized) {
 			HTTPService.get("service/accounts")
@@ -240,6 +243,13 @@ app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationS
 		} else {
 			that.accounts = [];
 		}
+	};
+	this.submitAccounts = function (accounts) {
+		return HTTPService.post("service/accounts", accounts)
+				.then(function (data) {
+					that.accounts = data.data;
+					that.updateTransactions();
+				}, that.update);
 	};
 	this.getAccount = function (id) {
 		return that.accounts.filter(function (obj) {
@@ -251,15 +261,75 @@ app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationS
 	}, that.update());
 });
 
-app.controller("AccountsController", function ($scope, AuthorizationService, AccountsService) {
-	$scope.authorization = AuthorizationService;
-	$scope.accountService = AccountsService;
+
+app.service("CurrencyService", function ($rootScope, HTTPService, AuthorizationService) {
+	var that = this;
+	this.currencies = [];
+	this.update = function () {
+		if (AuthorizationService.authorized) {
+			HTTPService.get("service/currencies")
+					.then(function (data) {
+						that.currencies = data.data;
+					}, that.update);
+		} else {
+			that.currencies = [];
+		}
+	};
+	$rootScope.$watch(function () {
+		return AuthorizationService.authorized;
+	}, that.update());
 });
 
-app.controller("TransactionEditorController", function ($scope, $modalInstance, HTTPService, AccountsService, transaction, transactionTypes) {
-	$scope.transaction = transaction;
+app.controller("AccountsEditorController", function ($scope, $modalInstance, AccountsService, CurrencyService) {
 	$scope.accounts = AccountsService;
-	$scope.transactionTypes = transactionTypes;
+	$scope.currencies = CurrencyService;
+	$scope.addAccount = function () {
+		var account = {includeInTotal: true, showInList: true};
+		AccountsService.accounts.unshift(account);
+	};
+	$scope.deleteAccount = function (account) {
+		AccountsService.accounts = AccountsService.accounts.filter(function (comp) {
+			return comp !== account;
+		});
+	};
+	$scope.cancelEditing = function () {
+		$modalInstance.dismiss();
+	};
+	$scope.submitEditing = function () {
+		$modalInstance.close(AccountsService.accounts);
+	};
+});
+
+app.controller("AccountsController", function ($scope, $modal, AuthorizationService, AccountsService) {
+	$scope.authorizationService = AuthorizationService;
+	$scope.accountService = AccountsService;
+	$scope.editor = undefined;
+	$scope.editAccounts = function () {
+		closeEditor();
+		$scope.editor = $modal.open({
+			templateUrl: "editAccountsDialog",
+			controller: "AccountsEditorController",
+			size: "lg"
+		}).result.then(function (accounts) {
+			AccountsService.submitAccounts(accounts);
+		}, function () {
+			AccountsService.update();
+		});
+	};
+	var closeEditor = function () {
+		if ($scope.editor !== undefined) {
+			var deleteFunction = function () {
+				$scope.editor = undefined;
+			};
+			$scope.editor.then(deleteFunction, deleteFunction);
+		}
+	};
+});
+
+app.controller("TransactionEditorController", function ($scope, $modalInstance, AccountsService, TransactionsService, transaction) {
+	$scope.transaction = transaction;
+	$scope.accountService = AccountsService;
+	$scope.transactionTypes = TransactionsService.transactionTypes;
 	$scope.calendarOpened = false;
 	$scope.tags = transaction.tags.join(",");
 	$scope.openCalendar = function ($event) {
@@ -276,13 +346,16 @@ app.controller("TransactionEditorController", function ($scope, $modalInstance, 
 		});
 	};
 	$scope.submitEditing = function () {
-		$modalInstance.close({action: "submit", transaction: $scope.transaction});
+		TransactionsService.submitTransaction($scope.transaction);
+		$modalInstance.close();
 	};
 	$scope.cancelEditing = function () {
-		$modalInstance.dismiss(transaction);
+		TransactionsService.updateTransaction(transaction.id).then(AccountsService.update);
+		$modalInstance.dismiss();
 	};
 	$scope.deleteTransaction = function () {
-		$modalInstance.close({action: "delete", transaction: $scope.transaction});
+		TransactionsService.deleteTransaction($scope.transaction);
+		$modalInstance.close();
 	};
 	var tagsToJson = function (tags) {
 		if (tags.constructor === String)
@@ -295,82 +368,97 @@ app.controller("TransactionEditorController", function ($scope, $modalInstance, 
 	};
 });
 
-app.controller("TransactionsController", function ($scope, $modal, HTTPService, AuthorizationService, AccountsService) {
-	$scope.authorization = AuthorizationService;
-	$scope.accounts = AccountsService;
-	$scope.transactions = [];
-	$scope.currentPage = 1;
-	$scope.totalPages = 0;
-	$scope.transactionTypes = [{name: "Expense/income", value: "EXPENSEINCOME"}, {name: "Transfer", value: "TRANSFER"}];
-	$scope.editor = undefined;
-	$scope.editingTransaction = undefined;
+
+app.service("TransactionsService", function (HTTPService, AuthorizationService, AccountsService) {
+	var that = this;
+	this.transactions = [];
+	this.transactionTypes = [{name: "Expense/income", value: "EXPENSEINCOME"}, {name: "Transfer", value: "TRANSFER"}];
+	this.defaultTransactionType = this.transactionTypes[0];
+	this.currentPage = 1;
+	this.totalPages = 0;
+	var dateToJson = function (date) {
+		if (date instanceof Date)
+			return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).toJSON().split("T")[0];
+		else
+			return date;
+	};
 	var updateTransactions = function () {
-		var nextPage = $scope.currentPage;
-		HTTPService.get("service/transactions/page_" + (nextPage - 1))
+		var nextPage = that.currentPage;
+		return HTTPService.get("service/transactions/page_" + (nextPage - 1))
 				.then(function (data) {
-					$scope.transactions = data.data;
-					$scope.currentPage = nextPage;
+					that.transactions = data.data;
+					that.currentPage = nextPage;
 					AccountsService.update();
-				}, update);
+				}, that.update);
 	};
 	var updateTransactionsCount = function () {
-		HTTPService.get("service/transactions/pages")
+		return HTTPService.get("service/transactions/pages")
 				.then(function (data) {
-					$scope.totalPages = data.data;
-				}, update);
+					that.totalPages = data.data;
+				}, that.update);
 	};
-	var update = function () {
+	this.update = function () {
 		if (AuthorizationService.authorized) {
 			updateTransactions();
 			updateTransactionsCount();
 		} else {
-			$scope.transactions = [];
-			$scope.currentPage = 1;
-			$scope.totalPages = 0;
+			that.transactions = [];
+			that.currentPage = 1;
+			that.totalPages = 0;
 		}
 	};
 	var updateTransactionLocal = function (data) {
 		var found = false;
-		$scope.transactions.forEach(
+		that.transactions.forEach(
 				function (transaction, i) {
 					if (transaction.id === data.id) {
-						$scope.transactions[i] = data;
+						that.transactions[i] = data;
 						found = true;
 					}
 				});
 		return found;
 	};
-	var updateTransaction = function (id) {
+	this.updateTransaction = function (id) {
 		if (id === undefined)
 			return updateTransactions();
 		return HTTPService.get("service/transactions/" + id)
 				.then(function (data) {
-					if (!updateTransactionLocal(data.data))
+					if (updateTransactionLocal(data.data))
+						AccountsService.update();
+					else
 						updateTransactions();
-				}, update);
+				}, that.update);
 	};
-	var submitTransaction = function (transaction) {
+	this.submitTransaction = function (transaction) {
 		transaction.date = dateToJson(transaction.date);
 		return HTTPService.post("service/transactions/submit", transaction)
 				.then(function (data) {
-					if (!updateTransactionLocal(data.data))
+					if (updateTransactionLocal(data.data))
+						AccountsService.update();
+					else
 						updateTransactions();
-				}, update);
+				}, that.update);
 	};
-	var deleteTransaction = function (transaction) {
+	this.deleteTransaction = function (transaction) {
 		if (transaction === undefined || transaction.id === undefined)
 			return updateTransactions();
 		return HTTPService.get("service/transactions/delete/" + transaction.id)
 				.then(function () {
 					updateTransactions();
-				}, update);
+				}, that.update);
 	};
-	var dateToJson = function (date) {
-		if (date instanceof Date)
-			return date.toJSON().split("T")[0];
-		else
-			return date;
+	this.getDate = function () {
+		return dateToJson(new Date());
 	};
+	AccountsService.updateTransactions = this.update;
+});
+
+app.controller("TransactionsController", function ($scope, $modal, TransactionsService, AuthorizationService, AccountsService) {
+	$scope.transactionsService = TransactionsService;
+	$scope.authorizationService = AuthorizationService;
+	$scope.accountsService = AccountsService;
+	$scope.editor = undefined;
+	$scope.editingTransaction = undefined;
 	var closeEditor = function () {
 		$scope.editingTransaction = undefined;
 		if ($scope.editor !== undefined) {
@@ -381,8 +469,8 @@ app.controller("TransactionsController", function ($scope, $modal, HTTPService, 
 		}
 	};
 	$scope.addTransaction = function () {
-		var transaction = {components: [], date: dateToJson(new Date()), tags: [], type: $scope.transactionTypes[0].value};
-		$scope.transactions.unshift(transaction);
+		var transaction = {components: [], date: TransactionsService.getDate(), tags: [], type: TransactionsService.defaultTransactionType.value};
+		$scope.transactionsService.transactions.unshift(transaction);
 		$scope.startEditing(transaction);
 	};
 	$scope.startEditing = function (transaction) {
@@ -395,37 +483,25 @@ app.controller("TransactionsController", function ($scope, $modal, HTTPService, 
 			resolve: {
 				transaction: function () {
 					return $scope.editingTransaction;
-				},
-				transactionTypes: function () {
-					return $scope.transactionTypes;
 				}
 			}
-		}).result.then(function (response) {
-			if (response.action === "submit")
-				submitTransaction(response.transaction);
-			else if (response.action === "delete")
-				deleteTransaction(response.transaction);
-			closeEditor();
-		}, function (transaction) {
-			updateTransaction(transaction.id).then(AccountsService.update);
-			closeEditor();
-		});
+		}).result.then(closeEditor, closeEditor);
 	};
 	$scope.duplicateTransaction = function (transaction) {
 		var newTransaction = angular.copy(transaction);
 		newTransaction.id = undefined;
 		newTransaction.version = undefined;
-		newTransaction.date = dateToJson(new Date());
+		newTransaction.date = TransactionsService.getDate();
 		newTransaction.components.forEach(function (component) {
 			component.id = undefined;
 			component.version = undefined;
 		});
-		$scope.transactions.unshift(newTransaction);
-		$scope.startEditing(transaction);
+		$scope.transactionsService.transactions.unshift(newTransaction);
+		$scope.startEditing(newTransaction);
 	};
 	$scope.$watch(function () {
 		return AuthorizationService.authorized;
-	}, update);
-	update();
-	$scope.pageChanged = update;
+	}, TransactionsService.update);
+	TransactionsService.update();
+	$scope.pageChanged = TransactionsService.update;
 });
