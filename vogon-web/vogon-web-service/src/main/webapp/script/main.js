@@ -48,7 +48,13 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 	};
 	var retryRequest = function (config) {
 		config.headers = mergeHeaders(config.headers);
-		return $http(config);
+		return $http(config).then(
+				function (data) {
+					that.updateAccounts();
+					that.updateTransactions();
+					return data;
+				}
+		);
 	};
 	var errorHandler = function (data) {
 		endRequest();
@@ -62,10 +68,10 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 						});
 				return deferred.promise;
 			}
-			//TODO: after fixing, update accounts and transactions
 		} else {
 			AlertService.addAlert("HTTP error: " + data.status + "(" + angular.toJson(data.data) + ")");
-			//TODO: update accounts and transactions
+			that.updateAccounts();
+			that.updateTransactions();
 		}
 		deferred.reject(data);
 		return deferred.promise;
@@ -92,6 +98,12 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 			that.authorizationHeaders = {Authorization: "Bearer " + access_token};
 		else
 			that.authorizationHeaders = {};
+	};
+	this.updateAccounts = function () {
+		throw "updateAccounts not properly initialized";
+	};
+	this.updateTransactions = function () {
+		throw "updateTransactions not properly initialized";
 	};
 });
 
@@ -259,6 +271,7 @@ app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationS
 	$rootScope.$watch(function () {
 		return AuthorizationService.authorized;
 	}, that.update());
+	HTTPService.updateAccounts = this.update;
 });
 
 
@@ -451,6 +464,7 @@ app.service("TransactionsService", function (HTTPService, AuthorizationService, 
 		return dateToJson(new Date());
 	};
 	AccountsService.updateTransactions = this.update;
+	HTTPService.updateTransactions = this.update;
 });
 
 app.controller("TransactionsController", function ($scope, $modal, TransactionsService, AuthorizationService, AccountsService) {
@@ -492,6 +506,7 @@ app.controller("TransactionsController", function ($scope, $modal, TransactionsS
 		newTransaction.id = undefined;
 		newTransaction.version = undefined;
 		newTransaction.date = TransactionsService.getDate();
+		newTransaction.amount = undefined;
 		newTransaction.components.forEach(function (component) {
 			component.id = undefined;
 			component.version = undefined;
