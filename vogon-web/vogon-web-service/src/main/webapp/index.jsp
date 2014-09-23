@@ -15,8 +15,9 @@
 	</head>
 	<body ng-app="vogon">
 		<div ng-controller="AuthController" class="well well-sm" ng-show="authorizationService.authorized">
-			<span class="control-label">Vogon for {{authorizationService.username}} </span>
-			<button ng-click="logout()" ng-disabled="$eval(logoutLocked)" class="btn btn-default"><span class="glyphicon glyphicon glyphicon-log-out"></span> Logout</button>
+			<span class="control-label">Vogon for {{userService.userData.username}} </span>
+			<button ng-click="showUserSettingsDialog()" class="btn btn-default"><span class="glyphicon glyphicon-edit"></span> Edit settings</button>
+			<button ng-click="logout()" ng-disabled="$eval(logoutLocked)" class="btn btn-default"><span class="glyphicon glyphicon-log-out"></span> Logout</button>
 		</div>
 		<script type="text/ng-template" id="loginDialog">
 			<div class="modal-header">
@@ -31,9 +32,32 @@
 					<alert type="danger">Login failed</div>
 				</div>
 				<div class="modal-footer">
-					<button ng-click="login()" ng-disabled="$eval(loginLocked) || !authorizationService.username || !authorizationService.password" class="btn btn-primary"><span class="glyphicon glyphicon glyphicon-log-in"></span> Login</button>
+					<button ng-click="login()" ng-disabled="$eval(loginLocked) || !authorizationService.username || !authorizationService.password" class="btn btn-primary"><span class="glyphicon glyphicon-log-in"></span> Login</button>
 				</div>
 			</form>
+		</script>
+		<script type="text/ng-template" id="userSettingsDialog">
+			<div class="modal-header">
+				<h3 class="modal-title">Settings for {{user.username}}</h3>
+			</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label>Username</label>
+						<input type="text" id="username" class="form-control" ng-model="user.username" placeholder="Enter username"/>
+					</div>
+					<div class="form-group">
+						<label>Password</label>
+						<input type="password" class="form-control" ng-model="user.password" placeholder="Enter new password" />
+					</div>
+					<div class="form-group">
+						<label>Default currency</label>
+						<select ng-model="user.defaultCurrency" ng-options="currency.symbol as currency.displayName for currency in currencies.currencies" class="form-control"></select>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+					<button ng-click="submitEditing()" class="btn btn-primary"><span class="glyphicon glyphicon-ok"></span> Apply</button>
+				</div>
 		</script>
 		<script type="text/ng-template" id="editTransactionDialog">
 			<div class="modal-header">
@@ -114,9 +138,9 @@
 		</script>
 		<div ng-controller="AccountsController">
 			<div ng-show="authorizationService.authorized" class="panel panel-default">
-				<div class="panel-heading">Accounts for {{authorizationService.username}}</div>
+				<div class="panel-heading">Accounts for {{userService.userData.username}}</div>
 				<div class="panel-body">
-					<button ng-click="editAccounts()" class="btn btn-primary"><span class="glyphicon glyphicon-edit"></span> Edit accounts</button>
+					<button ng-click="editAccounts()" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span> Edit accounts</button>
 					<table class="table">
 						<thead>
 							<tr>
@@ -139,13 +163,13 @@
 		<div ng-controller="NotificationController">
 			<div class="navbar-fixed-top" ng-show="alertService.enabled()">
 				<div class="alert alert-warning" role="alert" ng-show="httpService.isLoading"><span class="glyphicon glyphicon-refresh"></span> Loading...</div>
-				<alert ng-repeat="alert in alertService.alerts" type="{{alert.type}}" close="alertService.closeAlert($index)">{{alert.msg}}</alert>
+				<alert ng-repeat="alert in alertService.alerts" type="{{alert.type}}" close="alertService.closeAlert($index)"><span class="glyphicon glyphicon-exclamation-sign"></span> {{alert.msg}}</alert>
 			</div>
 		</div>
 		<div ng-controller="TransactionsController">
 			<div ng-show="authorizationService.authorized">
 				<div class="panel panel-default">
-					<div class="panel-heading">Transactions for {{authorization.username}}</div>
+					<div class="panel-heading">Transactions for {{userService.userData.username}}</div>
 					<div class="panel-body">
 						<button ng-click="addTransaction()" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> Add transaction</button>
 						<table class="table">

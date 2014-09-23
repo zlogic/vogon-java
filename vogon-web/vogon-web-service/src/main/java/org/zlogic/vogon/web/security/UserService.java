@@ -53,6 +53,18 @@ public class UserService implements UserDetailsService, InitializingBean {
 	}
 
 	/**
+	 * Updates user from database (e.g. to reflect
+	 *
+	 * @param securityUser user to update
+	 */
+	public void refreshUser(VogonSecurityUser securityUser) {
+		if (securityUser.getUser() != null) {
+			VogonUser user = userRepository.findOne(securityUser.getUser().getId());
+			securityUser.setUser(user);
+		}
+	}
+
+	/**
 	 * Applies default properties and creates default user if needed
 	 *
 	 * @throws Exception in case of errors

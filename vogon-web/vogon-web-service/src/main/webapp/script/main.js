@@ -24,6 +24,7 @@ app.service("AlertService", function ($timeout) {
 
 app.service("HTTPService", function ($http, $q, AlertService) {
 	var that = this;
+	var tokenRegex = /^oauth\/token$/;
 	this.pendingRequests = 0;
 	this.isLoading = false;
 	this.authorizationHeaders = {};
@@ -52,26 +53,30 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 				function (data) {
 					that.updateAccounts();
 					that.updateTransactions();
+					that.updateUser();
 					return data;
 				}
 		);
+	};
+	var isTokenURL = function (url) {
+		return tokenRegex.test(url);
 	};
 	var errorHandler = function (data) {
 		endRequest();
 		var deferred = $q.defer();
 		if (data.status === 401) {
 			var fixAuthCall = that.fixAuthorization();
-			if (fixAuthCall !== undefined) {
+			if (fixAuthCall !== undefined)
 				fixAuthCall
 						.then(function () {
-							retryRequest(data.config).then(deferred.resolve, deferred.reject), deferred.reject;
-						});
-				return deferred.promise;
-			}
+							retryRequest(data.config).then(deferred.resolve, deferred.reject);
+						}, deferred.reject);
+			return deferred.promise;
 		} else {
 			AlertService.addAlert("HTTP error: " + data.status + "(" + angular.toJson(data.data) + ")");
 			that.updateAccounts();
 			that.updateTransactions();
+			that.updateUser();
 		}
 		deferred.reject(data);
 		return deferred.promise;
@@ -82,12 +87,12 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 	};
 	this.get = function (url, extraHeaders) {
 		startRequest();
-		var headers = mergeHeaders(extraHeaders);
+		var headers = isTokenURL(url) ? extraHeaders : mergeHeaders(extraHeaders);
 		return $http.get(url, {headers: headers}).then(successHandler, errorHandler);
 	};
 	this.post = function (url, data, extraHeaders) {
 		startRequest();
-		var headers = mergeHeaders(extraHeaders);
+		var headers = isTokenURL(url) ? extraHeaders : mergeHeaders(extraHeaders);
 		return $http.post(url, data, {headers: headers}).then(successHandler, errorHandler);
 	};
 	this.fixAuthorization = function () {
@@ -104,6 +109,9 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 	};
 	this.updateTransactions = function () {
 		throw "updateTransactions not properly initialized";
+	};
+	this.updateUser = function () {
+		throw "updateUser not properly initialized";
 	};
 });
 
@@ -149,10 +157,7 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
 	};
 	this.fixAuthorization = function () {
 		if (that.username !== undefined && that.password !== undefined) {
-			var username = that.username;
-			var password = that.password;
-			that.resetAuthorization();
-			return that.performAuthorization(username, password);
+			return that.performAuthorization(that.username, that.password);
 		} else {
 			var message;
 			if (that.authorized)
@@ -181,15 +186,10 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
 	this.access_token = localStorage["access_token"];
 	if (this.access_token !== undefined) {
 		HTTPService.setAccessToken(this.access_token);
-		HTTPService.get("service/user")
-				.then(function (data) {
-					that.username = data.data.username;
-					that.authorized = true;
-				}, function () {
-					that.authorized = false;
-				});
-	} else
+		that.authorized = true;
+	} else {
 		that.authorized = false;
+	}
 });
 
 app.controller("NotificationController", function ($scope, HTTPService, AlertService) {
@@ -211,11 +211,30 @@ app.controller("LoginController", function ($scope, AuthorizationService, HTTPSe
 	};
 });
 
-app.controller("AuthController", function ($scope, $modal, AuthorizationService, HTTPService) {
+app.controller("UserSettingsController", function ($scope, $modalInstance, AuthorizationService, UserService, CurrencyService) {
+	$scope.userService = UserService;
+	$scope.user = UserService.userData;
+	$scope.currencies = CurrencyService;
+	$scope.submitEditing = function () {
+		AuthorizationService.username = $scope.user.username;
+		if ($scope.user.password !== undefined)
+			AuthorizationService.password = $scope.user.password;
+		UserService.submit($scope.user);
+		$modalInstance.close();
+	};
+	$scope.cancelEditing = function () {
+		UserService.update();
+		$modalInstance.dismiss();
+	};
+});
+
+app.controller("AuthController", function ($scope, $modal, AuthorizationService, UserService, HTTPService) {
 	$scope.authorizationService = AuthorizationService;
+	$scope.userService = UserService;
 	$scope.httpService = HTTPService;
 	$scope.logoutLocked = "!authorizationService.authorized";
 	$scope.loginDialog = undefined;
+	$scope.userSettingsDialog = undefined;
 	$scope.logout = function () {
 		$scope.authorizationService.resetAuthorization();
 	};
@@ -231,6 +250,21 @@ app.controller("AuthController", function ($scope, $modal, AuthorizationService,
 			delete $scope.loginDialog;
 		}
 	};
+	var closeUserSettingsDialog = function () {
+		if ($scope.userSettingsDialog !== undefined) {
+			var deleteFunction = function () {
+				$scope.userSettingsDialog = undefined;
+			};
+			$scope.userSettingsDialog.then(deleteFunction, deleteFunction);
+		}
+	};
+	$scope.showUserSettingsDialog = function () {
+		closeUserSettingsDialog();
+		$scope.userSettingsDialog = $modal.open({
+			templateUrl: "userSettingsDialog",
+			controller: "UserSettingsController"
+		}).result.then(closeUserSettingsDialog, closeUserSettingsDialog);
+	};
 	$scope.$watch(function () {
 		return AuthorizationService.authorized;
 	}, $scope.toggleLoginDialog);
@@ -238,6 +272,31 @@ app.controller("AuthController", function ($scope, $modal, AuthorizationService,
 		return AuthorizationService.access_token;
 	}, $scope.toggleLoginDialog);
 	$scope.toggleLoginDialog();
+});
+
+app.service("UserService", function ($rootScope, AuthorizationService, HTTPService) {
+	var that = this;
+	this.userData = undefined;
+	this.update = function () {
+		if (AuthorizationService.authorized)
+			HTTPService.get("service/user")
+					.then(function (data) {
+						that.userData = data.data;
+					}, function () {
+						that.userData = undefined;
+					});
+	};
+	this.submit = function (user) {
+		return HTTPService.post("service/user", user)
+				.then(function (data) {
+					that.userData = data.data;
+				}, that.update);
+	};
+	$rootScope.$watch(function () {
+		return AuthorizationService.authorized;
+	}, this.update);
+	this.update();
+	HTTPService.updateUser = this.update;
 });
 
 app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationService) {
@@ -313,10 +372,11 @@ app.controller("AccountsEditorController", function ($scope, $modalInstance, Acc
 	};
 });
 
-app.controller("AccountsController", function ($scope, $modal, AuthorizationService, AccountsService) {
+app.controller("AccountsController", function ($scope, $modal, AuthorizationService, AccountsService, UserService) {
 	$scope.authorizationService = AuthorizationService;
 	$scope.accountService = AccountsService;
 	$scope.editor = undefined;
+	$scope.userService = UserService;
 	$scope.editAccounts = function () {
 		closeEditor();
 		$scope.editor = $modal.open({
@@ -467,12 +527,13 @@ app.service("TransactionsService", function (HTTPService, AuthorizationService, 
 	HTTPService.updateTransactions = this.update;
 });
 
-app.controller("TransactionsController", function ($scope, $modal, TransactionsService, AuthorizationService, AccountsService) {
+app.controller("TransactionsController", function ($scope, $modal, TransactionsService, AuthorizationService, AccountsService, UserService) {
 	$scope.transactionsService = TransactionsService;
 	$scope.authorizationService = AuthorizationService;
 	$scope.accountsService = AccountsService;
 	$scope.editor = undefined;
 	$scope.editingTransaction = undefined;
+	$scope.userService = UserService;
 	var closeEditor = function () {
 		$scope.editingTransaction = undefined;
 		if ($scope.editor !== undefined) {
