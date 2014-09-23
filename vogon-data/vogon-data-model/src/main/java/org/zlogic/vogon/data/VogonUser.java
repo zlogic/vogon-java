@@ -7,6 +7,7 @@ package org.zlogic.vogon.data;
 
 import java.io.Serializable;
 import java.util.Currency;
+import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -134,6 +135,8 @@ public class VogonUser implements Serializable {
 	 * @param currency the new preferred currency
 	 */
 	public void setDefaultCurrency(Currency currency) {
+		if (preferences == null)
+			preferences = new HashMap<>();
 		preferences.put(CURRENCY, currency.getCurrencyCode());
 	}
 

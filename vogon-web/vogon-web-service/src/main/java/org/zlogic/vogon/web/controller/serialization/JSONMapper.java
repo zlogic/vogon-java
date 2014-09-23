@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.zlogic.vogon.data.FinanceAccount;
+import org.zlogic.vogon.data.VogonUser;
 import org.zlogic.vogon.web.data.model.FinanceTransactionJson;
 
 /**
@@ -74,6 +75,26 @@ public class JSONMapper extends ObjectMapper implements InitializingBean {
 	}
 
 	/**
+	 * Wrapper class for VogonUser
+	 */
+	private interface VogonUserAnnotations {
+
+		/**
+		 * Disables getting of password
+		 */
+		@JsonIgnore
+		public void getPassword();
+
+		/**
+		 * Allows setting of password
+		 *
+		 * @param password the password to set
+		 */
+		@JsonProperty
+		public void setPassword(String password);
+	}
+
+	/**
 	 * Adds MixIn Annotations
 	 *
 	 * @throws Exception in case of errors
@@ -82,6 +103,7 @@ public class JSONMapper extends ObjectMapper implements InitializingBean {
 	public void afterPropertiesSet() throws Exception {
 		this.addMixInAnnotations(FinanceTransactionJson.class, FinanceTransactionAnnotations.class);
 		this.addMixInAnnotations(FinanceAccount.class, FinanceAccountAnnotations.class);
+		this.addMixInAnnotations(VogonUser.class, VogonUserAnnotations.class);
 		this.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
 	}
 }

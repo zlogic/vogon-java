@@ -53,6 +53,15 @@ public class VogonSecurityUser implements UserDetails {
 	}
 
 	/**
+	 * Sets the associated VogonUser
+	 *
+	 * @param user the associated VogonUser
+	 */
+	protected void setUser(VogonUser user) {
+		this.user = user;
+	}
+
+	/**
 	 * Returns all associated authorities
 	 *
 	 * @return all associated authorities
@@ -69,7 +78,7 @@ public class VogonSecurityUser implements UserDetails {
 	 */
 	@Override
 	public String getUsername() {
-		return user.getUsername();
+		return user != null ? user.getUsername() : null;
 	}
 
 	/**
@@ -79,7 +88,7 @@ public class VogonSecurityUser implements UserDetails {
 	 */
 	@Override
 	public String getPassword() {
-		return user.getPassword();
+		return user != null ? user.getPassword() : null;
 	}
 
 	/**
@@ -89,7 +98,7 @@ public class VogonSecurityUser implements UserDetails {
 	 */
 	@Override
 	public boolean isAccountNonExpired() {
-		return true;
+		return user != null;
 	}
 
 	/**
@@ -99,7 +108,7 @@ public class VogonSecurityUser implements UserDetails {
 	 */
 	@Override
 	public boolean isAccountNonLocked() {
-		return true;
+		return user != null;
 	}
 
 	/**
@@ -109,7 +118,7 @@ public class VogonSecurityUser implements UserDetails {
 	 */
 	@Override
 	public boolean isCredentialsNonExpired() {
-		return true;
+		return user != null;
 	}
 
 	/**
@@ -119,6 +128,6 @@ public class VogonSecurityUser implements UserDetails {
 	 */
 	@Override
 	public boolean isEnabled() {
-		return true;
+		return user != null;
 	}
 }
