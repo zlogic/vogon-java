@@ -1,3 +1,7 @@
 .editable{
 	cursor: pointer
 }
+
+.total-amount{
+	font-style: italic;
+}
