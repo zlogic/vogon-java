@@ -141,7 +141,7 @@
 				<div class="panel-heading">Accounts for {{userService.userData.username}}</div>
 				<div class="panel-body">
 					<button ng-click="editAccounts()" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span> Edit accounts</button>
-					<table class="table">
+					<table class="table table-hover">
 						<thead>
 							<tr>
 								<th>Account name</th>
@@ -152,10 +152,17 @@
 						<tbody>
 							<tr ng-repeat="account in accountService.accounts | filter:{showInList:true} | orderBy:'id'">
 								<td>{{account.name}}</td>
-								<td class="text-right">{{account.balance| number:2}}</td>
+								<td class="text-right">{{account.balance | number:2}}</td>
 								<td>{{account.currency}}</td>
 							</tr>
 						</tbody>
+						<tfoot>
+							<tr class="total-amount" ng-repeat="(currency,data) in accountService.totalsForCurrency | orderBy:'id'">
+								<td>Total for {{data.name}}</td>
+								<td class="text-right">{{data.total | number:2}}</td>
+								<td>{{currency}}</td>
+							</tr>
+						</tfoot>
 					</table>
 				</div>
 			</div>
@@ -172,7 +179,7 @@
 					<div class="panel-heading">Transactions for {{userService.userData.username}}</div>
 					<div class="panel-body">
 						<button ng-click="addTransaction()" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> Add transaction</button>
-						<table class="table">
+						<table class="table table-hover">
 							<thead>
 								<tr>
 									<th>Transaction name</th>
@@ -183,8 +190,8 @@
 									<th></th>
 								</tr>
 							</thead>
-							<tbody ng-repeat-start="transaction in transactionsService.transactions" ng-repeat-end>
-								<tr>
+							<tbody>
+								<tr ng-repeat="transaction in transactionsService.transactions">
 									<td ng-click="startEditing(transaction)" class="editable">{{transaction.description}}</td>
 									<td ng-click="startEditing(transaction)" class="editable">{{transaction.date | date}}</td>
 									<td ng-click="startEditing(transaction)" class="editable">

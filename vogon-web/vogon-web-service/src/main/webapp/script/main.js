@@ -299,17 +299,30 @@ app.service("UserService", function ($rootScope, AuthorizationService, HTTPServi
 	HTTPService.updateUser = this.update;
 });
 
-app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationService) {
+app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationService, CurrencyService) {
 	var that = this;
 	this.accounts = [];
+	this.totalsForCurrency = {};
 	this.updateTransactions = function () {
 		throw "updateTransactions not properly initialized";
+	};
+	var setAccounts = function (data) {
+		that.accounts = data;
+		var totals = {};
+		//Compute totals for currencies
+		that.accounts.forEach(
+				function (account) {
+					if (totals[account.currency] === undefined)
+						totals[account.currency] = {total: 0, name: CurrencyService.findCurrency(account.currency)};
+					totals[account.currency].total += account.balance;
+				});
+		that.totalsForCurrency = totals;
 	};
 	this.update = function () {
 		if (AuthorizationService.authorized) {
 			HTTPService.get("service/accounts")
 					.then(function (data) {
-						that.accounts = data.data;
+						setAccounts(data.data);
 					}, that.update);
 		} else {
 			that.accounts = [];
@@ -318,7 +331,7 @@ app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationS
 	this.submitAccounts = function (accounts) {
 		return HTTPService.post("service/accounts", accounts)
 				.then(function (data) {
-					that.accounts = data.data;
+					setAccounts(data.data);
 					that.updateTransactions();
 				}, that.update);
 	};
@@ -333,7 +346,6 @@ app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationS
 	HTTPService.updateAccounts = this.update;
 });
 
-
 app.service("CurrencyService", function ($rootScope, HTTPService, AuthorizationService) {
 	var that = this;
 	this.currencies = [];
@@ -347,9 +359,17 @@ app.service("CurrencyService", function ($rootScope, HTTPService, AuthorizationS
 			that.currencies = [];
 		}
 	};
+	this.findCurrency = function (symbol) {
+		var result = that.currencies.filter(
+				function (currency) {
+					return currency.symbol === symbol;
+				});
+		if (result.length > 0)
+			return result[0].displayName;
+	};
 	$rootScope.$watch(function () {
 		return AuthorizationService.authorized;
-	}, that.update());
+	}, that.update);
 });
 
 app.controller("AccountsEditorController", function ($scope, $modalInstance, AccountsService, CurrencyService) {
