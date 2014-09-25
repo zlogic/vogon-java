@@ -86,7 +86,7 @@
 					<div class="form-inline col-md-12">
 						<input type="text" ng-model="component.amount" placeholder="Enter amount" class="text-right form-control" smart-float/>
 						<span style="form-control">{{accountService.getAccount(component.accountId).currency}}</span>
-						<select ng-model="component.accountId" ng-options="account.id as account.name for account in accountService.accounts | filter:{showInList:true}" class="form-control"></select>
+						<select ng-model="component.accountId" ng-options="account.id as account.name for account in accountService.accounts | filter:isAccountVisible" class="form-control"></select>
 						<button ng-click="deleteTransactionComponent(component)" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete</button>
 					</div>
 				</div>

@@ -459,6 +459,11 @@ app.controller("TransactionEditorController", function ($scope, $modalInstance, 
 	$scope.syncTags = function () {
 		$scope.transaction.tags = tagsToJson($scope.tags);
 	};
+	$scope.isAccountVisible = function (account) {
+		return account.showInList || $scope.transaction.components.some(function (component) {
+			return component.accountId === account.id;
+		});
+	};
 });
 
 
