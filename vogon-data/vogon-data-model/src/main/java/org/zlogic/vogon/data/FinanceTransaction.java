@@ -6,13 +6,13 @@
 package org.zlogic.vogon.data;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -83,14 +83,14 @@ public class FinanceTransaction implements Serializable {
 	 * Contains the expense tags
 	 */
 	@ElementCollection
-	protected List<String> tags;
+	protected Set<String> tags;
 	/**
 	 * Contains the related accounts and the transaction's distribution into
 	 * them
 	 */
 	@OneToMany(cascade = CascadeType.ALL)
 	@OrderBy("id ASC")
-	protected List<TransactionComponent> components;
+	protected Set<TransactionComponent> components;
 	/**
 	 * Contains the transaction date
 	 */
@@ -120,9 +120,9 @@ public class FinanceTransaction implements Serializable {
 	 */
 	public FinanceTransaction(VogonUser owner, String description, String[] tags, Date date, Type type) {
 		this.description = description;
-		this.tags = tags != null ? Arrays.asList(tags) : new LinkedList<String>();
+		this.tags = tags != null ? new HashSet<>(Arrays.asList(tags)) : new HashSet<String>();
 		this.transactionDate = date;
-		this.components = new LinkedList<>();
+		this.components = new HashSet<>();
 		this.type = type;
 		FinanceTransaction.this.setOwner(owner);
 	}
@@ -132,10 +132,10 @@ public class FinanceTransaction implements Serializable {
 		FinanceTransaction cloneTransaction = new FinanceTransaction();
 		cloneTransaction.type = type;
 		cloneTransaction.description = description;
-		cloneTransaction.tags = new LinkedList<>();
+		cloneTransaction.tags = new HashSet<>();
 		for (String tag : tags)
 			cloneTransaction.tags.add(tag);
-		cloneTransaction.components = new LinkedList<>();
+		cloneTransaction.components = new HashSet<>();
 		for (TransactionComponent component : components)
 			cloneTransaction.addComponent(new TransactionComponent(component.getAccount(), cloneTransaction, component.getRawAmount()));
 		//cloneTransaction.transactionDate = (Date) transactionDate.clone();
@@ -384,7 +384,7 @@ public class FinanceTransaction implements Serializable {
 	 */
 	void addTag(String tag) {
 		if (tags == null)
-			tags = new ArrayList<>();
+			tags = new HashSet<>();
 		if (!tags.contains(tag))
 			tags.add(tag);
 	}
@@ -455,8 +455,8 @@ public class FinanceTransaction implements Serializable {
 	 *
 	 * @param tags the new transaction's tags
 	 */
-	public void setTags(String[] tags) {
-		this.tags = new ArrayList<>(Arrays.asList(tags));
+	public void setTags(String... tags) {
+		this.tags = new HashSet<>(Arrays.asList(tags));
 	}
 
 	/**
