@@ -156,11 +156,14 @@ public class TransactionsController {
 				existingTransaction.updateComponentRawAmount(existingComponent, newComponent.getAmount());
 				removedComponents.remove(existingComponent);
 			}
+			existingTransaction = transactionRepository.save(existingTransaction);
+			accountRepository.save(existingAccount);
 		}
 		//Remove deleted components
 		for (TransactionComponent removedComponent : removedComponents)
 			existingTransaction.removeComponent(removedComponent);
 		existingTransaction = transactionRepository.saveAndFlush(existingTransaction);
+		accountRepository.flush();
 		return initializationHelper.initializeTransaction(existingTransaction);
 	}
 
