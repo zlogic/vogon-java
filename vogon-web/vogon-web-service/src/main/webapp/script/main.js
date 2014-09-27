@@ -586,7 +586,7 @@ app.service("TransactionsService", function (HTTPService, AuthorizationService, 
 		transaction.components.forEach(
 				function (component) {
 					var account = AccountsService.getAccount(component.accountId);
-					if (predicate(component) && !accounts.some(function (checkAccount) {
+					if (account !== undefined && predicate(component) && !accounts.some(function (checkAccount) {
 						return checkAccount.id === account.id;
 					}))
 						accounts.unshift(account);
@@ -607,6 +607,8 @@ app.service("TransactionsService", function (HTTPService, AuthorizationService, 
 		transaction.components.forEach(
 				function (component) {
 					var account = AccountsService.getAccount(component.accountId);
+					if (account === undefined)
+						return;
 					if (totals[account.currency] === undefined)
 						totals[account.currency] = {positiveAmount: 0, negativeAmount: 0};
 					if (component.amount > 0 || that.isExpenseIncomeTransaction(transaction))
