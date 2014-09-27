@@ -40,24 +40,30 @@
 			<div class="modal-header">
 				<h3 class="modal-title">Settings for {{user.username}}</h3>
 			</div>
-				<div class="modal-body">
-					<div class="form-group">
-						<label>Username</label>
-						<input type="text" id="username" class="form-control" ng-model="user.username" placeholder="Enter username"/>
-					</div>
-					<div class="form-group">
-						<label>Password</label>
-						<input type="password" class="form-control" ng-model="user.password" placeholder="Enter new password" />
-					</div>
-					<div class="form-group">
-						<label>Default currency</label>
-						<select ng-model="user.defaultCurrency" ng-options="currency.symbol as currency.displayName for currency in currencies.currencies" class="form-control"></select>
+			<div class="modal-body">
+				<div class="form-group">
+					<label>Username</label>
+					<input type="text" id="username" class="form-control" ng-model="user.username" placeholder="Enter username"/>
+				</div>
+				<div class="form-group">
+					<label>Password</label>
+					<input type="password" class="form-control" ng-model="user.password" placeholder="Enter new password" />
+				</div>
+				<div class="form-group">
+					<label>Default currency</label>
+					<select ng-model="user.defaultCurrency" ng-options="currency.symbol as currency.displayName for currency in currencies.currencies" class="form-control"></select>
+				</div>
+				<div class="form-group">
+					<div class="form-inline">
+						<button ng-click="importData()" ng-disabled="!file" class="btn btn-default form-control"><span class="glyphicon glyphicon-import"></span> Import data</button>		
+						<input type="file" onchange="angular.element(this).scope().setFile(this)" class="form-control-file" />
 					</div>
 				</div>
-				<div class="modal-footer">
-					<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
-					<button ng-click="submitEditing()" class="btn btn-primary"><span class="glyphicon glyphicon-ok"></span> Apply</button>
-				</div>
+			</div>
+			<div class="modal-footer">
+				<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+				<button ng-click="submitEditing()" class="btn btn-primary"><span class="glyphicon glyphicon-ok"></span> Apply</button>
+			</div>
 		</script>
 		<script type="text/ng-template" id="editTransactionDialog">
 			<div class="modal-header">

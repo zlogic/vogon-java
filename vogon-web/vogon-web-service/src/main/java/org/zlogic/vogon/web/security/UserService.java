@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.zlogic.vogon.data.Constants;
 import org.zlogic.vogon.data.VogonUser;
 import org.zlogic.vogon.web.data.UserRepository;
 
@@ -30,11 +31,11 @@ public class UserService implements UserDetailsService, InitializingBean {
 	/**
 	 * The default user username
 	 */
-	private String defaultUserUsername;
+	private String defaultUserUsername = Constants.defaultUserUsername;//TODO: load this from config or environment instead
 	/**
 	 * The default user password
 	 */
-	private String defaultUserPassword;
+	private String defaultUserPassword = Constants.defaultUserPassword;//TODO: load this from config or environment instead
 
 	/**
 	 * Loads a user by username
@@ -117,5 +118,4 @@ public class UserService implements UserDetailsService, InitializingBean {
 	public void setDefaultUserPassword(String defaultUserPassword) {
 		this.defaultUserPassword = defaultUserPassword;
 	}
-
 }

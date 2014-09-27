@@ -7,6 +7,7 @@ package org.zlogic.vogon.data.interop;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -26,14 +27,14 @@ import org.zlogic.vogon.data.CurrencyRate;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
-import org.zlogic.vogon.data.standalone.FinanceData;
+import org.zlogic.vogon.data.VogonUser;
 
 /**
  * Implementation for exporting data to XML files
  *
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
-public class XmlExporter implements FileExporter {
+public class XmlExporter implements Exporter {
 
 	/**
 	 * The output XML file
@@ -52,12 +53,11 @@ public class XmlExporter implements FileExporter {
 	/**
 	 * Exports data into an XML file
 	 *
-	 * @param financeData the data to be exported
 	 * @throws VogonExportException in case of any import errors (I/O, format
 	 * etc.)
 	 */
 	@Override
-	public void exportFile(FinanceData financeData) throws VogonExportException {
+	public void exportData(VogonUser owner, Collection<FinanceAccount> accounts, Collection<FinanceTransaction> transactions, Collection<CurrencyRate> currencyRates) throws VogonExportException {
 		Map<FinanceTransaction.Type, String> transactionTypes = new TreeMap<>();
 		transactionTypes.put(FinanceTransaction.Type.TRANSFER, "Transfer"); //NOI18N
 		transactionTypes.put(FinanceTransaction.Type.EXPENSEINCOME, "ExpenseIncome"); //NOI18N
@@ -68,13 +68,14 @@ public class XmlExporter implements FileExporter {
 			DocumentBuilder docBuilder;
 			docBuilder = docFactory.newDocumentBuilder();
 
+			//TODO: use constants for element names
 			// Top element (FinanceData)
 			Document doc = docBuilder.newDocument();
 			Element rootElement = doc.createElement("VogonFinanceData"); //NOI18N
 			doc.appendChild(rootElement);
 
 			//Set global parameters
-			rootElement.setAttribute("DefaultCurrency", financeData.getDefaultCurrency().getCurrencyCode()); //NOI18N
+			rootElement.setAttribute("DefaultCurrency", owner.getDefaultCurrency().getCurrencyCode()); //NOI18N
 
 			//Accounts node
 			Element accountsElement = doc.createElement("Accounts"); //NOI18N
@@ -89,18 +90,19 @@ public class XmlExporter implements FileExporter {
 			rootElement.appendChild(transactionsElement);
 
 			//Accounts list
-			for (FinanceAccount account : financeData.getAccounts()) {
+			for (FinanceAccount account : accounts) {
 				Element accountElement = doc.createElement("Account"); //NOI18N
 				accountElement.setAttribute("Id", Long.toString(account.getId())); //NOI18N
 				accountElement.setAttribute("Name", account.getName()); //NOI18N
 				accountElement.setAttribute("Currency", account.getCurrency().getCurrencyCode()); //NOI18N
 				accountElement.setAttribute("IncludeInTotal", Boolean.toString(account.getIncludeInTotal())); //NOI18N
+				accountElement.setAttribute("ShowInList", Boolean.toString(account.getShowInList())); //NOI18N
 				//accountElement.setAttribute("Balance", Long.toString(account.getRawBalance()));
 				accountsElement.appendChild(accountElement);
 			}
 
 			//Currencies list
-			for (CurrencyRate rate : financeData.getCurrencyRates()) {
+			for (CurrencyRate rate : currencyRates) {
 				Element currencyElement = doc.createElement("CurrencyRate"); //NOI18N
 				currencyElement.setAttribute("Source", rate.getSource().getCurrencyCode()); //NOI18N
 				currencyElement.setAttribute("Destination", rate.getDestination().getCurrencyCode()); //NOI18N
@@ -109,7 +111,7 @@ public class XmlExporter implements FileExporter {
 			}
 
 			//Transactions list
-			for (FinanceTransaction transaction : financeData.getTransactions()) {
+			for (FinanceTransaction transaction : transactions) {
 				Element transactionElement = doc.createElement("Transaction"); //NOI18N
 				transactionElement.setAttribute("Type", transactionTypes.get(transaction.getType())); //NOI18N
 				transactionElement.setAttribute("Id", Long.toString(transaction.getId())); //NOI18N
