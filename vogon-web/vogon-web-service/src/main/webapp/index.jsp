@@ -191,7 +191,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								<tr ng-repeat="transaction in transactionsService.transactions">
+								<tr ng-repeat="transaction in transactionsService.transactions" ng-class="{danger:!transactionsService.isAmountOk(transaction)}">
 									<td ng-click="startEditing(transaction)" class="editable">{{transaction.description}}</td>
 									<td ng-click="startEditing(transaction)" class="editable">{{transaction.date | date}}</td>
 									<td ng-click="startEditing(transaction)" class="editable">
@@ -199,10 +199,28 @@
 											{{tag}}{{$last ? '' : ', '}}
 										</div>
 									</td>
-									<td ng-click="startEditing(transaction)" class="text-right editable">{{transaction.amount| number:2}}</td>
+									<td ng-click="startEditing(transaction)" class="text-right editable">
+										<div ng-repeat="(symbol,total) in totals=(transactionsService.totalsByCurrency(transaction))">
+											<span ng-show="transactionsService.isTransferTransaction(transaction)">
+												&sum;
+											</span>
+											{{total | number:2}} {{symbol}}
+										</div>
+									</td>
 									<td ng-click="startEditing(transaction)" class="editable">
-										<div ng-repeat="component in transaction.components">
-											{{accountsService.getAccount(component.accountId).name}}{{$last ? '' : ', '}}
+										<div ng-show="transactionsService.isExpenseIncomeTransaction(transaction)">
+											<div ng-repeat="account in accounts=(transactionsService.getAccounts(transaction,transactionsService.allAccountsPredicate))">
+												{{account.name}}{{$last ? '' : ', '}}
+											</div>
+										</div>
+										<div ng-show="transactionsService.isTransferTransaction(transaction)">
+											<div ng-repeat="account in accounts=(transactionsService.getAccounts(transaction,transactionsService.fromAccountsPredicate))">
+												{{$first && accounts.length>1?'(':''}}{{account.name}}{{$last ? '' : ', '}}{{$last && accounts.length>1?')':''}}
+											</div>
+											<span class="glyphicon glyphicon-arrow-down"></span>
+											<div ng-repeat="account in accounts=(transactionsService.getAccounts(transaction,transactionsService.toAccountsPredicate))">
+												{{$first && accounts.length>1?'(':''}}{{account.name}}{{$last ? '' : ', '}}{{$last && accounts.length>1?')':''}}
+											</div>
 										</div>
 									</td>
 									<td>

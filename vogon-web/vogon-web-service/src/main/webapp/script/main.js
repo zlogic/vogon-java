@@ -466,7 +466,6 @@ app.controller("TransactionEditorController", function ($scope, $modalInstance, 
 	};
 });
 
-
 app.service("TransactionsService", function (HTTPService, AuthorizationService, AccountsService) {
 	var that = this;
 	this.transactions = [];
@@ -547,6 +546,73 @@ app.service("TransactionsService", function (HTTPService, AuthorizationService, 
 	};
 	this.getDate = function () {
 		return dateToJson(new Date());
+	};
+	this.isExpenseIncomeTransaction = function (transaction) {
+		return transaction.type === this.transactionTypes[0].value;
+	};
+	this.isTransferTransaction = function (transaction) {
+		return transaction.type === this.transactionTypes[1].value;
+	};
+	this.getAccounts = function (transaction, predicate) {
+		var accounts = [];
+		transaction.components.forEach(
+				function (component) {
+					var account = AccountsService.getAccount(component.accountId);
+					if (predicate(component) && !accounts.some(function (checkAccount) {
+						return checkAccount.id === account.id;
+					}))
+						accounts.unshift(account);
+				});
+		return accounts;
+	};
+	this.fromAccountsPredicate = function (component) {
+		return component.amount < 0;
+	};
+	this.toAccountsPredicate = function (component) {
+		return component.amount > 0;
+	};
+	this.allAccountsPredicate = function () {
+		return true;
+	};
+	var getTotalsByCurrency = function (transaction) {
+		var totals = {};
+		transaction.components.forEach(
+				function (component) {
+					var account = AccountsService.getAccount(component.accountId);
+					if (totals[account.currency] === undefined)
+						totals[account.currency] = {positiveAmount: 0, negativeAmount: 0};
+					if (component.amount > 0 || that.isExpenseIncomeTransaction(transaction))
+						totals[account.currency].positiveAmount += component.amount;
+					else if (component.amount < 0)
+						totals[account.currency].negativeAmount -= component.amount;
+				});
+		return totals;
+	};
+	this.isAmountOk = function (transaction) {
+		if (this.isExpenseIncomeTransaction(transaction))
+			return true;
+		if (this.isTransferTransaction(transaction)) {
+			var totals = getTotalsByCurrency(transaction);
+			for (var currency in totals) {
+				var total = totals[currency];
+				if (total.positiveAmount !== total.negativeAmount)
+					return false;
+			}
+			return true;
+		} else
+			return false;
+	};
+	this.totalsByCurrency = function (transaction) {
+		var totals = {};
+		var totalsData = getTotalsByCurrency(transaction);
+		for (var currency in totalsData) {
+			var total = totalsData[currency];
+			if (this.isExpenseIncomeTransaction(transaction))
+				totals[currency] = total.positiveAmount;
+			else if (this.isTransferTransaction(transaction))
+				totals[currency] = total.positiveAmount > total.negativeAmount ? total.positiveAmount : total.negativeAmount;
+		}
+		return totals;
 	};
 	AccountsService.updateTransactions = this.update;
 	HTTPService.updateTransactions = this.update;
