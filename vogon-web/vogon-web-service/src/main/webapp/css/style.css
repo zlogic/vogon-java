@@ -1,7 +1,11 @@
-.editable{
+.editable {
 	cursor: pointer
 }
 
-.total-amount{
+.total-amount {
 	font-style: italic;
+}
+
+input[type=file].form-control-file {
+	display: inline-block;
 }

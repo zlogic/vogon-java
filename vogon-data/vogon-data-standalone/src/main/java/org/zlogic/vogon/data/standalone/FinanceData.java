@@ -28,8 +28,8 @@ import org.zlogic.vogon.data.FinanceTransaction_;
 import org.zlogic.vogon.data.TransactionComponent;
 import org.zlogic.vogon.data.TransactionComponent_;
 import org.zlogic.vogon.data.VogonUser;
-import org.zlogic.vogon.data.interop.FileExporter;
-import org.zlogic.vogon.data.interop.FileImporter;
+import org.zlogic.vogon.data.interop.Exporter;
+import org.zlogic.vogon.data.interop.Importer;
 import org.zlogic.vogon.data.interop.VogonExportException;
 import org.zlogic.vogon.data.interop.VogonImportException;
 import org.zlogic.vogon.data.interop.VogonImportLogicalException;
@@ -149,10 +149,10 @@ public class FinanceData {
 
 	/**
 	 * Imports and persists data into this instance by using the output of the
-	 * specified FileImporter. If process is shutting down, the change is
+ specified Importer. If process is shutting down, the change is
 	 * ignored.
 	 *
-	 * @param importer a configured FileImporter instance
+	 * @param importer a configured Importer instance
 	 * @throws VogonImportException in case of import errors (I/O, format,
 	 * indexing etc.)
 	 * @throws VogonImportLogicalException in case of logical errors (without
@@ -160,19 +160,22 @@ public class FinanceData {
 	 * @throws ApplicationShuttingDownException if application is shutting down
 	 * and database requests are ignored
 	 */
-	public void importData(FileImporter importer) throws VogonImportException, VogonImportLogicalException, ApplicationShuttingDownException {
+	public void importData(Importer importer) throws VogonImportException, VogonImportLogicalException, ApplicationShuttingDownException {
 		try {
 			shuttingDownLock.readLock().lock();
 			if (shuttingDown)
 				throw new ApplicationShuttingDownException();
 			EntityManager entityManager = entityManagerFactory.createEntityManager();
-			importer.importFile(this, entityManager);
+			VogonUser user = getUserFromDatabase(entityManager);
+			entityManager.getTransaction().begin();
+			importer.importData(user, entityManager);
+			entityManager.getTransaction().commit();
 
 			restoreFromDatabase(entityManager);
 
 			populateCurrencies(entityManager);
 
-			VogonUser user = getUserFromDatabase(entityManager);
+			user = getUserFromDatabase(entityManager);
 			Currency defaultCurrency = user.getDefaultCurrency();
 
 			if (!getCurrencies().contains(defaultCurrency)) {
@@ -191,21 +194,24 @@ public class FinanceData {
 	}
 
 	/**
-	 * Exports data by using the specified FileExporter. If process is shutting
+	 * Exports data by using the specified Exporter. If process is shutting
 	 * down, the request is ignored.
 	 *
-	 * @param exporter a configured FileExporter instance
+	 * @param exporter a configured Exporter instance
 	 * @throws VogonExportException in case of export errors (I/O, format,
 	 * indexing etc.)
 	 * @throws ApplicationShuttingDownException if application is shutting down
 	 * and database requests are ignored
 	 */
-	public void exportData(FileExporter exporter) throws VogonExportException, ApplicationShuttingDownException {
+	public void exportData(Exporter exporter) throws VogonExportException, ApplicationShuttingDownException {
 		try {
 			shuttingDownLock.readLock().lock();
+
+			EntityManager entityManager = entityManagerFactory.createEntityManager();
 			if (shuttingDown)
 				throw new ApplicationShuttingDownException();
-			exporter.exportFile(this);
+			exporter.exportData(getUserFromDatabase(entityManager), getAccounts(), getTransactions(), getCurrencyRates());
+			entityManager.close();
 		} finally {
 			shuttingDownLock.readLock().unlock();
 		}
@@ -416,7 +422,7 @@ public class FinanceData {
 		} catch (javax.persistence.NoResultException ex) {
 		}
 		if (user == null) {
-			user = new VogonUser(Constants.defaultUserUsername, Constants.defaultUserPassword);
+			user = new VogonUser(org.zlogic.vogon.data.Constants.defaultUserUsername, org.zlogic.vogon.data.Constants.defaultUserPassword);
 			entityManager.getTransaction().begin();
 			entityManager.persist(user);
 			entityManager.getTransaction().commit();

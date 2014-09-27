@@ -6,6 +6,8 @@
 package org.zlogic.vogon.ui;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.Map;
@@ -31,8 +33,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
 import org.zlogic.vogon.data.interop.CsvImporter;
-import org.zlogic.vogon.data.interop.FileExporter;
-import org.zlogic.vogon.data.interop.FileImporter;
+import org.zlogic.vogon.data.interop.Exporter;
+import org.zlogic.vogon.data.interop.Importer;
 import org.zlogic.vogon.data.interop.VogonExportException;
 import org.zlogic.vogon.data.interop.VogonImportLogicalException;
 import org.zlogic.vogon.data.interop.XmlExporter;
@@ -181,7 +183,7 @@ public class MainWindowController implements Initializable {
 			preferenceStorage.put("lastDirectory", lastDirectory.toString()); //NOI18N
 
 			//Choose the importer based on the file extension
-			FileImporter importer = null;
+			Importer importer = null;
 			String extension = selectedFile.isFile() ? selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".")) : null; //NOI18N
 			extension = extensionFilters.get(extension);
 			if (extension == null)
@@ -189,13 +191,18 @@ public class MainWindowController implements Initializable {
 			else if (extension.equals(messages.getString("CSV_FILES_(COMMA-SEPARATED)")))
 				importer = new CsvImporter(selectedFile);
 			else if (extension.equals(messages.getString("XML_FILES")))
-				importer = new XmlImporter(selectedFile);
+				try {
+					importer = new XmlImporter(new FileInputStream(selectedFile));
+				} catch (FileNotFoundException ex) {
+					log.log(Level.SEVERE, null, ex);
+					MessageDialog.showDialog(messages.getString("IMPORT_EXCEPTION_DIALOG_TITLE"), new MessageFormat(messages.getString("IMPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), ExceptionLogger.getInstance().getExceptionStacktrace(ex)}));
+				}
 
 			//Prepare the background task
 			Task<Void> task = new Task<Void>() {
-				private FileImporter importer;
+				private Importer importer;
 
-				public Task<Void> setImporter(FileImporter importer) {
+				public Task<Void> setImporter(Importer importer) {
 					this.importer = importer;
 					return this;
 				}
@@ -250,12 +257,12 @@ public class MainWindowController implements Initializable {
 			if (extension == null || extension.isEmpty())
 				selectedFile = new File(selectedFile.getParentFile(), selectedFile.getName() + ".xml"); //NOI18N
 
-			FileExporter exporter = new XmlExporter(selectedFile);
+			Exporter exporter = new XmlExporter(selectedFile);
 			//Prepare the background task
 			Task<Void> task = new Task<Void>() {
-				private FileExporter exporter;
+				private Exporter exporter;
 
-				public Task<Void> setExporter(FileExporter exporter) {
+				public Task<Void> setExporter(Exporter exporter) {
 					this.exporter = exporter;
 					return this;
 				}

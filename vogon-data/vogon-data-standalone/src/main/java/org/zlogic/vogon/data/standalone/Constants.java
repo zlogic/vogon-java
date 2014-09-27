@@ -16,12 +16,4 @@ public class Constants {
 	 * Batch fetch size for processing large amounts of data
 	 */
 	public static final int batchFetchSize = 200;
-	/**
-	 * Default username if only one user is supported
-	 */
-	public static final String defaultUserUsername = "Default";
-	/**
-	 * Default password if only one user is supported
-	 */
-	public static final String defaultUserPassword = "Default";
 }

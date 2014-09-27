@@ -6,19 +6,19 @@
 package org.zlogic.vogon.data.interop;
 
 import javax.persistence.EntityManager;
-import org.zlogic.vogon.data.standalone.FinanceData;
+import org.zlogic.vogon.data.VogonUser;
 
 /**
  * Interface for importing data from files
  *
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
-public interface FileImporter {
+public interface Importer {
 
 	/**
 	 * Imports a file containing financial transactions
 	 *
-	 * @param financeData the FinanceData to be used for obtaining data
+	 * @param owner the user who will be the owner of imported data
 	 * @param entityManager the EntityManager to be used for storing new items
 	 * and checking for duplicates
 	 *
@@ -27,5 +27,5 @@ public interface FileImporter {
 	 * @throws VogonImportLogicalException in case of any logical errors (such
 	 * as an incorrect number of columns)
 	 */
-	public void importFile(FinanceData financeData, EntityManager entityManager) throws VogonImportException, VogonImportLogicalException;
+	public void importData(VogonUser owner, EntityManager entityManager) throws VogonImportException, VogonImportLogicalException;
 }

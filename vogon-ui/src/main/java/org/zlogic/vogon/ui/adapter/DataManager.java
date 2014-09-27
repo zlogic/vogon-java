@@ -29,7 +29,7 @@ import org.zlogic.vogon.data.standalone.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.VogonUser;
 import org.zlogic.vogon.data.standalone.TransactedChange;
-import org.zlogic.vogon.data.interop.FileImporter;
+import org.zlogic.vogon.data.interop.Importer;
 import org.zlogic.vogon.data.interop.VogonImportException;
 import org.zlogic.vogon.data.interop.VogonImportLogicalException;
 
@@ -252,7 +252,7 @@ public class DataManager {
 	 * Imports data into database. If process is shutting down, the change is
 	 * ignored.
 	 *
-	 * @param importer a configured FileImporter instance
+	 * @param importer a configured Importer instance
 	 * @throws VogonImportException in case of import errors (I/O, format,
 	 * indexing etc.)
 	 * @throws VogonImportLogicalException in case of logical errors (without
@@ -260,7 +260,7 @@ public class DataManager {
 	 * @throws ApplicationShuttingDownException if application is shutting down
 	 * and database requests are ignored
 	 */
-	public void importData(FileImporter importer) throws ApplicationShuttingDownException, VogonImportException, VogonImportLogicalException {
+	public void importData(Importer importer) throws ApplicationShuttingDownException, VogonImportException, VogonImportLogicalException {
 		financeData.importData(importer);
 		if (Platform.isFxApplicationThread())
 			reloadData();

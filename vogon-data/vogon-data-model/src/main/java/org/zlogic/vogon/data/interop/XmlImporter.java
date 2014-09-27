@@ -5,9 +5,9 @@
  */
 package org.zlogic.vogon.data.interop;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -37,51 +37,49 @@ import org.zlogic.vogon.data.CurrencyRate;
 import org.zlogic.vogon.data.CurrencyRate_;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceAccount_;
-import org.zlogic.vogon.data.standalone.FinanceData;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.VogonUser;
 import org.zlogic.vogon.data.TransactionComponent;
-import org.zlogic.vogon.data.standalone.Constants;
 
 /**
  * Implementation for importing data from XML files
  *
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
-public class XmlImporter implements FileImporter {
+public class XmlImporter implements Importer {
 
 	/**
 	 * Localization messages
 	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/data/messages");
 	/**
-	 * The input CSV file
+	 * The input XML file
 	 */
-	protected File inputFile;
+	protected InputStream inputStream;
 
 	/**
 	 * Creates an instance of the CSV Importer
 	 *
-	 * @param inputFile the input file to read
+	 * @param inputStream the input stream to read
 	 */
-	public XmlImporter(File inputFile) {
-		this.inputFile = inputFile;
+	public XmlImporter(InputStream inputStream) {
+		this.inputStream = inputStream;
 	}
 
 	@Override
-	public void importFile(FinanceData financeData, EntityManager entityManager) throws VogonImportException, VogonImportLogicalException {
+	public void importData(VogonUser owner, EntityManager entityManager) throws VogonImportException, VogonImportLogicalException {
 		try {
-			entityManager.getTransaction().begin();
-
 			Map<Long, FinanceTransaction> transactionsMap = new HashMap<>();
 			Map<Long, FinanceAccount> accountsMap = new HashMap<>();
 
 			//Read XML
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			Document doc = dBuilder.parse(inputFile);
+			Document doc = dBuilder.parse(inputStream);
 			doc.getDocumentElement().normalize();
 
+			//TODO: use constants for element names
+			//TODO: do not throw exceptions on missing elements
 			//Get root node
 			Node rootNode = doc.getFirstChild();
 			if (rootNode == null || !rootNode.getNodeName().equals("VogonFinanceData")) //NOI18N
@@ -101,28 +99,10 @@ public class XmlImporter implements FileImporter {
 			}
 
 			//Process default properties
-			VogonUser defaultUser = null;
 			{
 				String defaultCurrency = rootNode.getAttributes().getNamedItem("DefaultCurrency").getNodeValue(); //NOI18N
 
-				CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-				CriteriaQuery<VogonUser> userCriteriaQuery = criteriaBuilder.createQuery(VogonUser.class);
-				userCriteriaQuery.from(VogonUser.class);
-				VogonUser foundUser = null;
-				try {
-					foundUser = entityManager.createQuery(userCriteriaQuery).getSingleResult();
-				} catch (javax.persistence.NoResultException ex) {
-				}
-
-				if (foundUser == null) {
-					VogonUser user = new VogonUser(Constants.defaultUserUsername, Constants.defaultUserPassword);
-					entityManager.persist(user);
-					user.setDefaultCurrency(Currency.getInstance(defaultCurrency));
-					defaultUser = user;
-				} else if (foundUser.getDefaultCurrency() == null) {
-					foundUser.setDefaultCurrency(Currency.getInstance(defaultCurrency));
-					defaultUser = foundUser;
-				}
+				owner.setDefaultCurrency(Currency.getInstance(defaultCurrency));
 			}
 
 			//Process accounts
@@ -135,6 +115,7 @@ public class XmlImporter implements FileImporter {
 				String accountName = attributes.getNamedItem("Name").getNodeValue(); //NOI18N
 				long accountId = Long.parseLong(attributes.getNamedItem("Id").getNodeValue()); //NOI18N
 				boolean includeInTotal = Boolean.parseBoolean(attributes.getNamedItem("IncludeInTotal").getNodeValue()); //NOI18N
+				boolean showInList = Boolean.parseBoolean(attributes.getNamedItem("ShowInList").getNodeValue()); //NOI18N
 				String currency = attributes.getNamedItem("Currency") != null ? attributes.getNamedItem("Currency").getNodeValue() : null; //NOI18N
 				//long accountBalance = Long.parseLong(attributes.getNamedItem("Balance").getNodeValue());
 
@@ -154,8 +135,9 @@ public class XmlImporter implements FileImporter {
 				if (foundAccount != null && foundAccount.getName().equals(accountName)) {
 					accountsMap.put(accountId, foundAccount);
 				} else {
-					FinanceAccount account = new FinanceAccount(defaultUser, accountName, currency != null ? Currency.getInstance(currency) : null);
+					FinanceAccount account = new FinanceAccount(owner, accountName, currency != null ? Currency.getInstance(currency) : null);
 					account.setIncludeInTotal(includeInTotal);
+					account.setShowInList(showInList);
 					accountsMap.put(accountId, account);
 					entityManager.persist(account);
 				}
@@ -221,7 +203,7 @@ public class XmlImporter implements FileImporter {
 				}
 				if (transactionTypeEnum == FinanceTransaction.Type.UNDEFINED)
 					throw new VogonImportLogicalException(MessageFormat.format(messages.getString("UNKNOWN_TRANSACTION_TYPE"), transactionType));
-				FinanceTransaction transaction = new FinanceTransaction(defaultUser, transactionDescription, null, transactionDate, transactionTypeEnum);
+				FinanceTransaction transaction = new FinanceTransaction(owner, transactionDescription, null, transactionDate, transactionTypeEnum);
 				transactionsMap.put(transactionId, transaction);
 				entityManager.persist(transaction);
 
@@ -249,7 +231,6 @@ public class XmlImporter implements FileImporter {
 
 				transaction.setTags(tagsList.toArray(new String[0]));
 			}
-			entityManager.getTransaction().commit();
 		} catch (VogonImportLogicalException e) {
 			throw new VogonImportLogicalException(e);
 		} catch (FileNotFoundException e) {

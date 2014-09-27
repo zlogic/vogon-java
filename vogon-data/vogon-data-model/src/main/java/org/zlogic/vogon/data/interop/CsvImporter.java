@@ -30,14 +30,13 @@ import org.zlogic.vogon.data.FinanceAccount_;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
 import org.zlogic.vogon.data.VogonUser;
-import org.zlogic.vogon.data.standalone.FinanceData;
 
 /**
  * Implementation for importing data from CSV files
  *
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
-public class CsvImporter implements FileImporter {
+public class CsvImporter implements Importer {
 
 	/**
 	 * Localization messages
@@ -58,11 +57,9 @@ public class CsvImporter implements FileImporter {
 	}
 
 	@Override
-	public void importFile(FinanceData financeData, EntityManager entityManager) throws VogonImportException, VogonImportLogicalException {
+	public void importData(VogonUser owner, EntityManager entityManager) throws VogonImportException, VogonImportLogicalException {
 		try (CSVReader reader = new CSVReader(new java.io.InputStreamReader(new java.io.FileInputStream(inputFile), "UTF8"))) {//NOI18N
 			entityManager.getTransaction().begin();
-
-			VogonUser defaultUser = financeData.getUserFromDatabase(entityManager);
 
 			List<FinanceAccount> accounts = new ArrayList<>();
 			String[] columns;
@@ -91,7 +88,7 @@ public class CsvImporter implements FileImporter {
 						if (foundAccount != null && foundAccount.getName().equals(columns[i])) {
 							accounts.add(foundAccount);
 						} else {
-							FinanceAccount account = new FinanceAccount(defaultUser, columns[i], null);
+							FinanceAccount account = new FinanceAccount(owner, columns[i], null);
 							entityManager.persist(account);
 							accounts.add(account);
 						}
@@ -123,7 +120,7 @@ public class CsvImporter implements FileImporter {
 						transactionType = FinanceTransaction.Type.TRANSFER;
 					if (transactionType != null) {
 						//Expense transaction
-						transaction = new FinanceTransaction(defaultUser, columns[0], tags, date, transactionType);
+						transaction = new FinanceTransaction(owner, columns[0], tags, date, transactionType);
 					} else {
 						reader.close();
 						throw new VogonImportLogicalException((new MessageFormat(messages.getString("CSV_TRANSACTION_TOO_COMPLEX"))).format(new Object[]{String.join(",", columns)})); //NOI18N
@@ -152,6 +149,5 @@ public class CsvImporter implements FileImporter {
 		} catch (VogonImportLogicalException e) {
 			throw new VogonImportLogicalException(e);
 		}
-
 	}
 }

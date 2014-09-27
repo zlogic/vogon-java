@@ -51,9 +51,7 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 		config.headers = mergeHeaders(config.headers);
 		return $http(config).then(
 				function (data) {
-					that.updateAccounts();
-					that.updateTransactions();
-					that.updateUser();
+					that.updateAllData();
 					return data;
 				}
 		);
@@ -74,9 +72,7 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 			return deferred.promise;
 		} else {
 			AlertService.addAlert("HTTP error: " + data.status + "(" + angular.toJson(data.data) + ")");
-			that.updateAccounts();
-			that.updateTransactions();
-			that.updateUser();
+			that.updateAllData();
 		}
 		deferred.reject(data);
 		return deferred.promise;
@@ -90,10 +86,13 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 		var headers = isTokenURL(url) ? extraHeaders : mergeHeaders(extraHeaders);
 		return $http.get(url, {headers: headers}).then(successHandler, errorHandler);
 	};
-	this.post = function (url, data, extraHeaders) {
+	this.post = function (url, data, extraHeaders, transformRequest) {
 		startRequest();
 		var headers = isTokenURL(url) ? extraHeaders : mergeHeaders(extraHeaders);
-		return $http.post(url, data, {headers: headers}).then(successHandler, errorHandler);
+		var params = {headers: headers};
+		if (transformRequest !== undefined)
+			params.transformRequest = transformRequest;
+		return $http.post(url, data, params).then(successHandler, errorHandler);
 	};
 	this.fixAuthorization = function () {
 		throw "fixAuthorization not properly initialized";
@@ -103,6 +102,11 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 			that.authorizationHeaders = {Authorization: "Bearer " + access_token};
 		else
 			that.authorizationHeaders = {};
+	};
+	this.updateAllData = function () {
+		that.updateAccounts();
+		that.updateTransactions();
+		that.updateUser();
 	};
 	this.updateAccounts = function () {
 		throw "updateAccounts not properly initialized";
@@ -211,10 +215,12 @@ app.controller("LoginController", function ($scope, AuthorizationService, HTTPSe
 	};
 });
 
-app.controller("UserSettingsController", function ($scope, $modalInstance, AuthorizationService, UserService, CurrencyService) {
+app.controller("UserSettingsController", function ($scope, $modalInstance, AuthorizationService, UserService, CurrencyService, HTTPService) {
 	$scope.userService = UserService;
 	$scope.user = UserService.userData;
 	$scope.currencies = CurrencyService;
+	$scope.file = undefined;
+	var importPostHeaders = {"Content-Type": undefined};
 	$scope.submitEditing = function () {
 		AuthorizationService.username = $scope.user.username;
 		if ($scope.user.password !== undefined)
@@ -225,6 +231,19 @@ app.controller("UserSettingsController", function ($scope, $modalInstance, Autho
 	$scope.cancelEditing = function () {
 		UserService.update();
 		$modalInstance.dismiss();
+	};
+	$scope.setFile = function (file) {
+		$scope.file = file.files[0];
+	};
+	$scope.importData = function () {
+		if ($scope.file === undefined)
+			return;
+		var formData = new FormData();
+		formData.append("file", $scope.file);
+		HTTPService.post("service/import", formData, importPostHeaders, angular.identity).then(function () {
+			$modalInstance.dismiss();
+			HTTPService.updateAllData();
+		});
 	};
 });
 
