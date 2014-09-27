@@ -53,7 +53,7 @@ public class XmlImporter implements Importer {
 	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/data/messages");
 	/**
-	 * The input XML file
+	 * The input XML stream
 	 */
 	protected InputStream inputStream;
 

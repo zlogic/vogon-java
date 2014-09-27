@@ -5,7 +5,7 @@
  */
 package org.zlogic.vogon.data.interop;
 
-import java.io.File;
+import java.io.OutputStream;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Map;
@@ -37,25 +37,19 @@ import org.zlogic.vogon.data.VogonUser;
 public class XmlExporter implements Exporter {
 
 	/**
-	 * The output XML file
+	 * The output XML stream
 	 */
-	protected File outputFile;
+	protected OutputStream outputStream;
 
 	/**
 	 * Creates an instance of the XML Exporter
 	 *
-	 * @param outputFile the output file to write
+	 * @param outputStream the output stream to write
 	 */
-	public XmlExporter(File outputFile) {
-		this.outputFile = outputFile;
+	public XmlExporter(OutputStream outputStream) {
+		this.outputStream = outputStream;
 	}
 
-	/**
-	 * Exports data into an XML file
-	 *
-	 * @throws VogonExportException in case of any import errors (I/O, format
-	 * etc.)
-	 */
 	@Override
 	public void exportData(VogonUser owner, Collection<FinanceAccount> accounts, Collection<FinanceTransaction> transactions, Collection<CurrencyRate> currencyRates) throws VogonExportException {
 		Map<FinanceTransaction.Type, String> transactionTypes = new TreeMap<>();
@@ -102,13 +96,14 @@ public class XmlExporter implements Exporter {
 			}
 
 			//Currencies list
-			for (CurrencyRate rate : currencyRates) {
-				Element currencyElement = doc.createElement("CurrencyRate"); //NOI18N
-				currencyElement.setAttribute("Source", rate.getSource().getCurrencyCode()); //NOI18N
-				currencyElement.setAttribute("Destination", rate.getDestination().getCurrencyCode()); //NOI18N
-				currencyElement.setAttribute("Rate", Double.toString(rate.getExchangeRate())); //NOI18N
-				currenciesElement.appendChild(currencyElement);
-			}
+			if (currencyRates != null)
+				for (CurrencyRate rate : currencyRates) {
+					Element currencyElement = doc.createElement("CurrencyRate"); //NOI18N
+					currencyElement.setAttribute("Source", rate.getSource().getCurrencyCode()); //NOI18N
+					currencyElement.setAttribute("Destination", rate.getDestination().getCurrencyCode()); //NOI18N
+					currencyElement.setAttribute("Rate", Double.toString(rate.getExchangeRate())); //NOI18N
+					currenciesElement.appendChild(currencyElement);
+				}
 
 			//Transactions list
 			for (FinanceTransaction transaction : transactions) {
@@ -141,7 +136,7 @@ public class XmlExporter implements Exporter {
 			Transformer transformer = transformerFactory.newTransformer();
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //NOI18N
 			DOMSource source = new DOMSource(doc);
-			StreamResult result = new StreamResult(outputFile);
+			StreamResult result = new StreamResult(outputStream);
 
 			transformer.transform(source, result);
 		} catch (ParserConfigurationException | TransformerException e) {

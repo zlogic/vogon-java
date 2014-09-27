@@ -59,6 +59,9 @@
 						<input type="file" onchange="angular.element(this).scope().setFile(this)" class="form-control-file" />
 					</div>
 				</div>
+				<div class="form-group">
+					<button ng-click="exportData()" class="btn btn-default"><span class="glyphicon glyphicon-export"></span> Export data</button>
+				</div>
 			</div>
 			<div class="modal-footer">
 				<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
