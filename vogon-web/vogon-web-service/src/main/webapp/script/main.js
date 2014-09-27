@@ -245,6 +245,15 @@ app.controller("UserSettingsController", function ($scope, $modalInstance, Autho
 			HTTPService.updateAllData();
 		});
 	};
+	$scope.exportData = function () {
+		HTTPService.get("service/export").then(function (data) {
+			var blob = new Blob([data.data], {'type': "text/xml"});
+			var a = document.createElement("a");
+			a.href = window.URL.createObjectURL(blob);
+			a.download = "vogon-" + new Date().toISOString() + ".xml";
+			a.click();
+		});
+	};
 });
 
 app.controller("AuthController", function ($scope, $modal, AuthorizationService, UserService, HTTPService) {

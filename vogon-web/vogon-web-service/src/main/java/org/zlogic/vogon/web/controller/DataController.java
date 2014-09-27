@@ -6,6 +6,8 @@
 package org.zlogic.vogon.web.controller;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +20,13 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.zlogic.vogon.data.VogonUser;
+import org.zlogic.vogon.data.interop.VogonExportException;
 import org.zlogic.vogon.data.interop.VogonImportException;
 import org.zlogic.vogon.data.interop.VogonImportLogicalException;
+import org.zlogic.vogon.data.interop.XmlExporter;
 import org.zlogic.vogon.data.interop.XmlImporter;
+import org.zlogic.vogon.web.data.AccountRepository;
+import org.zlogic.vogon.web.data.TransactionRepository;
 import org.zlogic.vogon.web.data.UserRepository;
 import org.zlogic.vogon.web.security.VogonSecurityUser;
 
@@ -44,6 +50,16 @@ public class DataController {
 	 */
 	@Autowired
 	private UserRepository userRepository;
+	/**
+	 * The transactions repository
+	 */
+	@Autowired
+	private TransactionRepository transactionRepository;
+	/**
+	 * The accounts repository
+	 */
+	@Autowired
+	private AccountRepository accountRepository;
 
 	/**
 	 * Imports uploaded XML data
@@ -63,5 +79,23 @@ public class DataController {
 			throw new RuntimeException(ex);
 		}
 		return true;
+	}
+
+	/**
+	 * Returns all currencies
+	 *
+	 * @param data the file to import
+	 * @param userPrincipal the authenticated user
+	 * @return true of import succeeded
+	 */
+	@RequestMapping(value = "/export", method = RequestMethod.GET, produces = "application/xml")
+	public void exportData(OutputStream outputStream, @AuthenticationPrincipal VogonSecurityUser userPrincipal) throws RuntimeException {
+		VogonUser user = userRepository.findByUsername(userPrincipal.getUsername());
+		XmlExporter exporter = new XmlExporter(outputStream);
+		try {
+			exporter.exportData(user, accountRepository.findByOwner(user), transactionRepository.findByOwner(user), null);
+		} catch (VogonExportException ex) {
+			throw new RuntimeException(ex);
+		}
 	}
 }

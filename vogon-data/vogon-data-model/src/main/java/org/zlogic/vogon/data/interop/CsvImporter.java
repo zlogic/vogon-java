@@ -6,7 +6,7 @@
 package org.zlogic.vogon.data.interop;
 
 import au.com.bytecode.opencsv.CSVReader;
-import java.io.File;
+import java.io.InputStream;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -43,22 +43,22 @@ public class CsvImporter implements Importer {
 	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/data/messages");
 	/**
-	 * The input CSV file
+	 * The input CSV stream
 	 */
-	protected File inputFile;
+	protected InputStream inputStream;
 
 	/**
 	 * Creates an instance of the CSV Importer
 	 *
-	 * @param inputFile the input file to read
+	 * @param inputStream the input stream to read
 	 */
-	public CsvImporter(File inputFile) {
-		this.inputFile = inputFile;
+	public CsvImporter(InputStream inputStream) {
+		this.inputStream = inputStream;
 	}
 
 	@Override
 	public void importData(VogonUser owner, EntityManager entityManager) throws VogonImportException, VogonImportLogicalException {
-		try (CSVReader reader = new CSVReader(new java.io.InputStreamReader(new java.io.FileInputStream(inputFile), "UTF8"))) {//NOI18N
+		try (CSVReader reader = new CSVReader(new java.io.InputStreamReader(inputStream, "UTF8"))) {//NOI18N
 			entityManager.getTransaction().begin();
 
 			List<FinanceAccount> accounts = new ArrayList<>();
