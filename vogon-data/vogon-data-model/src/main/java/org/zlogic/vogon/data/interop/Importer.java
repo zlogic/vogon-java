@@ -20,7 +20,8 @@ public interface Importer {
 	 *
 	 * @param owner the user who will be the owner of imported data
 	 * @param entityManager the EntityManager to be used for storing new items
-	 * and checking for duplicates
+	 * and checking for duplicates; should have a transaction opened and closed
+	 * before calling this function
 	 *
 	 * @throws VogonImportException in case of any import errors (I/O, format
 	 * etc.)

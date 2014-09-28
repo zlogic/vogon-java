@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -33,6 +34,8 @@ import org.zlogic.vogon.data.interop.Importer;
 import org.zlogic.vogon.data.interop.VogonExportException;
 import org.zlogic.vogon.data.interop.VogonImportException;
 import org.zlogic.vogon.data.interop.VogonImportLogicalException;
+import org.zlogic.vogon.data.report.Report;
+import org.zlogic.vogon.data.report.ReportFactory;
 
 /**
  * Class for storing the finance data, performing database operations and
@@ -149,8 +152,7 @@ public class FinanceData {
 
 	/**
 	 * Imports and persists data into this instance by using the output of the
- specified Importer. If process is shutting down, the change is
-	 * ignored.
+	 * specified Importer. If process is shutting down, the change is ignored.
 	 *
 	 * @param importer a configured Importer instance
 	 * @throws VogonImportException in case of import errors (I/O, format,
@@ -1020,5 +1022,42 @@ public class FinanceData {
 		Currency defaultCurrency = getDefaultCurrencyFromDatabase(entityManager);
 		entityManager.close();
 		return defaultCurrency;
+	}
+
+	/**
+	 * Returns the report factory for the default user
+	 *
+	 * @return the report factory for the default user
+	 */
+	public ReportFactory getReportFactory() {
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
+		ReportFactory reportFactory = new ReportFactory(getUserFromDatabase(entityManager));
+		entityManager.close();
+		return reportFactory;
+	}
+
+	/**
+	 * Builds a report
+	 *
+	 * @param reportFactory the report configuration to use
+	 * @return the generated report
+	 */
+	public Report buildReport(ReportFactory reportFactory) {
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
+		Report report = reportFactory.buildReport(entityManager);
+		entityManager.close();
+		return report;
+	}
+
+	/**
+	 * Returns the list of all tags
+	 *
+	 * @return the list of all tags
+	 */
+	public Set<String> getAllTags() {
+		EntityManager entityManager = entityManagerFactory.createEntityManager();
+		Set<String> tags = new ReportFactory(getUserFromDatabase(entityManager)).getAllTags(entityManager);
+		entityManager.close();
+		return tags;
 	}
 }

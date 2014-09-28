@@ -463,6 +463,21 @@ public class DataManager {
 	}
 
 	/**
+	 * Converts an amount
+	 *
+	 * @param amount the amount to convert
+	 * @param sourceCurrency the amount source currency
+	 * @param destinationCurrency the destination currency
+	 * @return the converted amount
+	 */
+	public double convertAmount(double amount, Currency sourceCurrency, Currency destinationCurrency) {
+		for (CurrencyRateModelAdapter currencyRate : exchangeRates)
+			if (currencyRate.getSourceCurrency() == sourceCurrency && currencyRate.getDestinationCurrency() == destinationCurrency)
+				return Math.round(amount * currencyRate.exchangeRateProperty().get() * Constants.rawAmountMultiplier) / Constants.rawAmountMultiplier;
+		throw new RuntimeException(MessageFormat.format(messages.getString("CANNOT_FIND_EXCHANGE_RATE"), new Object[]{sourceCurrency, destinationCurrency}));
+	}
+
+	/**
 	 * Returns the list of currencies
 	 *
 	 * @return the list of currencies

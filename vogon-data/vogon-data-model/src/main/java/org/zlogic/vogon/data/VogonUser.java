@@ -166,4 +166,19 @@ public class VogonUser implements Serializable {
 	public void setVersion(long version) {
 		this.version = version;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof VogonUser)
+			return id == (((VogonUser) obj).id);
+		else
+			return this == obj;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 3;
+		hash = 79 * hash + (int) (this.id ^ (this.id >>> 32));
+		return hash;
+	}
 }
