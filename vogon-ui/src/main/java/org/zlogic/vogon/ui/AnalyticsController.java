@@ -11,13 +11,16 @@ import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Collections;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.Currency;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.TreeMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -46,7 +49,11 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceTransaction;
-import org.zlogic.vogon.data.standalone.Report;
+import org.zlogic.vogon.data.report.DateBalance;
+import org.zlogic.vogon.data.report.Report;
+import org.zlogic.vogon.data.report.ReportFactory;
+import org.zlogic.vogon.data.report.TagExpense;
+import org.zlogic.vogon.ui.adapter.AccountInterface;
 import org.zlogic.vogon.ui.adapter.AccountModelAdapter;
 import org.zlogic.vogon.ui.adapter.AmountModelAdapter;
 import org.zlogic.vogon.ui.adapter.DataManager;
@@ -68,9 +75,9 @@ public class AnalyticsController implements Initializable {
 	 */
 	private java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("org/zlogic/vogon/ui/messages");
 	/**
-	 * The report generator
+	 * The reportFactory generator
 	 */
-	protected Report report;
+	protected ReportFactory reportFactory;
 	/**
 	 * The finance data reference
 	 */
@@ -109,6 +116,12 @@ public class AnalyticsController implements Initializable {
 	 */
 	@FXML
 	private TableView<TagSelectionAdapter> tagsSelectionTable;
+
+	/**
+	 * The tags selection table's checkbox column
+	 */
+	@FXML
+	private TableColumn<TagSelectionAdapter, String> tagsSelectionTagColumn;
 	/**
 	 * The tags selection table's checkbox column
 	 */
@@ -229,6 +242,17 @@ public class AnalyticsController implements Initializable {
 				return cell;
 			}
 		});
+
+		//Set sort order
+		tagsSelectionTable.getSortOrder().add(tagsSelectionTagColumn);
+		tagsSelectionTagColumn.setSortType(TableColumn.SortType.ASCENDING);
+		tagsSelectionTagColumn.setComparator(new Comparator<String>() {
+
+			@Override
+			public int compare(String o1, String o2) {
+				return o1.compareTo(o2);
+			}
+		});
 	}
 
 	/**
@@ -242,37 +266,41 @@ public class AnalyticsController implements Initializable {
 				updateProgress(-1, 1);
 				updateMessage(messages.getString("TASK_GENERATING_REPORT"));
 				//Set report parameters
-				report.setEarliestDate(Date.from(startDateField.getValue().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
-				report.setLatestDate(Date.from(endDateField.getValue().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
+				reportFactory.setEarliestDate(Date.from(startDateField.getValue().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
+				reportFactory.setLatestDate(Date.from(endDateField.getValue().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
 
 				List<FinanceAccount> selectedAccounts = new LinkedList<>();
 				for (AccountSelectionAdapter accountAdapter : accountsSelectionTable.getItems())
 					if (accountAdapter.enabledProperty().get())
 						selectedAccounts.add(accountAdapter.accountProperty().get().getAccount());
-				report.setSelectedAccounts(selectedAccounts);
+				reportFactory.setSelectedAccounts(selectedAccounts);
 
 				List<String> selectedTags = new LinkedList<>();
 				for (TagSelectionAdapter tagAdapter : tagsSelectionTable.getItems())
 					if (tagAdapter.enabledProperty().get())
 						selectedTags.add(tagAdapter.tagProperty().get());
-				report.setSelectedTags(selectedTags);
+				reportFactory.setSelectedTags(selectedTags);
 
-				report.setEnabledTransferTransactions(transferTransactionsCheckbox.selectedProperty().get());
-				report.setEnabledIncomeTransactions(incomeTransactionsCheckbox.selectedProperty().get());
-				report.setEnabledExpenseTransactions(expenseTransactionsCheckbox.selectedProperty().get());
+				reportFactory.setEnabledTransferTransactions(transferTransactionsCheckbox.selectedProperty().get());
+				reportFactory.setEnabledIncomeTransactions(incomeTransactionsCheckbox.selectedProperty().get());
+				reportFactory.setEnabledExpenseTransactions(expenseTransactionsCheckbox.selectedProperty().get());
 
 				//Generate the report
-				List<Report.TagExpense> tagExpenses = report.getTagExpenses();
-				List<FinanceTransaction> transactions = report.getTransactions();
-				Map<Date, Double> balanceGraph = report.getAccountsBalanceGraph();
+				Report report = null;
+				try {
+					report = dataManager.getFinanceData().buildReport(reportFactory);
+				} catch (Exception ex) {
+					log.log(Level.SEVERE, null, ex);
+					MessageDialog.showDialog(messages.getString("REPORT_EXCEPTION_DIALOG_TITLE"), new MessageFormat(messages.getString("REPORT_EXCEPTION_DIALOG_TEXT")).format(new Object[]{ex.getLocalizedMessage(), ExceptionLogger.getInstance().getExceptionStacktrace(ex)}));
+				}
 
 				//Update the UI
 				Platform.runLater(new Runnable() {
-					protected List<Report.TagExpense> tagExpenses;
+					protected List<TagExpense> tagExpenses;
 					protected List<FinanceTransaction> transactions;
-					protected Map<Date, Double> balanceGraph;
+					protected Map<String, DateBalance<Double>> balanceGraph;
 
-					public Runnable setData(List<Report.TagExpense> tagExpenses, List<FinanceTransaction> transactions, Map<Date, Double> balanceGraph) {
+					public Runnable setData(List<TagExpense> tagExpenses, List<FinanceTransaction> transactions, Map<String, DateBalance<Double>> balanceGraph) {
 						this.tagExpenses = tagExpenses;
 						this.transactions = transactions;
 						this.balanceGraph = balanceGraph;
@@ -283,10 +311,10 @@ public class AnalyticsController implements Initializable {
 					public void run() {
 						updateTagsResultTable(tagExpenses);
 						updateTransactionsResultTable(transactions);//TODO: add paging
-						updateTagsChart(tagExpenses);
+						updateTagsChart();
 						updateBalanceChart(balanceGraph);
 					}
-				}.setData(tagExpenses, transactions, balanceGraph));
+				}.setData(report.getTagExpenses(), report.getTransactions(), report.getAccountsBalanceGraph()));
 
 				updateProgress(1, 1);
 				updateMessage("");//NOI18N
@@ -337,13 +365,14 @@ public class AnalyticsController implements Initializable {
 
 	/**
 	 * Updates the table for selecting tags
+	 *
+	 * @param tags the tags to set
 	 */
-	private void updateTagsSelectionTable() {
+	private void updateTagsSelectionTable(Collection<String> tags) {
 		tagsSelectionTable.getItems().clear();
-		List<String> tags = report.getAllTags();
-		Collections.sort(tags);
 		for (String tag : tags)
 			tagsSelectionTable.getItems().add(new TagSelectionAdapter(tag, true));
+		tagsSelectionTable.getSortPolicy().call(tagsSelectionTable);
 	}
 
 	/**
@@ -351,8 +380,9 @@ public class AnalyticsController implements Initializable {
 	 */
 	private void updateAccountsSelectionTable() {
 		accountsSelectionTable.getItems().clear();
-		for (FinanceAccount account : report.getAllAccounts())
-			accountsSelectionTable.getItems().add(new AccountSelectionAdapter(new AccountModelAdapter(account, dataManager), account.getIncludeInTotal()));
+		for (AccountInterface account : dataManager.getAccounts())
+			if (account instanceof AccountModelAdapter)
+				accountsSelectionTable.getItems().add(new AccountSelectionAdapter((AccountModelAdapter) account, ((AccountModelAdapter) account).includeInTotalProperty().get()));
 	}
 
 	/**
@@ -360,10 +390,22 @@ public class AnalyticsController implements Initializable {
 	 *
 	 * @param values the list of expenses grouped by tag
 	 */
-	private void updateTagsResultTable(List<Report.TagExpense> values) {
+	private void updateTagsResultTable(List<TagExpense> values) {
 		tagsResultTable.getItems().clear();
-		for (Report.TagExpense tagExpense : values)
-			tagsResultTable.getItems().add(new TagResultAdapter(tagExpense.getTag(), tagExpense.getAmount(), tagExpense.getCurrency(), tagExpense.isCurrencyConverted()));
+		Currency defaultCurrency = dataManager.defaultCurrencyProperty().get().getCurrency();
+		for (TagExpense tagExpense : values) {
+			double amount = 0;
+			boolean amountConverted = false;
+			for (Map.Entry<Currency, Double> currencyAmount : tagExpense.getAmounts().entrySet())
+				if (currencyAmount.getKey() == defaultCurrency) {
+					amount += currencyAmount.getValue();
+				} else {
+					amountConverted = true;
+					amount += dataManager.convertAmount(currencyAmount.getValue(), currencyAmount.getKey(), defaultCurrency);
+				}
+
+			tagsResultTable.getItems().add(new TagResultAdapter(tagExpense.getTag(), amount, defaultCurrency, amountConverted));
+		}
 	}
 
 	/**
@@ -378,17 +420,15 @@ public class AnalyticsController implements Initializable {
 	}
 
 	/**
-	 * Updates the tags chart
-	 *
-	 * @param values the list of expenses grouped by tag
+	 * Updates the tags chart (uses the tags table for source data)
 	 */
-	private void updateTagsChart(List<Report.TagExpense> values) {
+	private void updateTagsChart() {
 		ObservableList<PieChart.Data> data = FXCollections.observableList(new LinkedList<PieChart.Data>());
-		for (Report.TagExpense tagExpense : values) {
-			TagResultAdapter tagResult = new TagResultAdapter(tagExpense.getTag(), tagExpense.getAmount(), tagExpense.getCurrency(), tagExpense.isCurrencyConverted());
-			String tagLabel = MessageFormat.format(messages.getString("PIECHART_TAG_FORMAT"), new Object[]{tagExpense.getTag(), tagResult.amountProperty().get().toString()});
-			data.add(new PieChart.Data(tagLabel, dataManager.getFinanceData().getExchangeRate(tagExpense.getCurrency(), dataManager.defaultCurrencyProperty().get().getCurrency())
-					* Math.abs(tagExpense.getAmount())));
+		for (TagResultAdapter tagResult : tagsResultTable.getItems()) {
+			//TagResultAdapter tagResult = new TagResultAdapter(tagExpense.getTag(), tagExpense.getAmount(), tagExpense.getCurrency(), tagExpense.isCurrencyConverted());
+			String tagLabel = MessageFormat.format(messages.getString("PIECHART_TAG_FORMAT"), new Object[]{tagResult.tagProperty().get(), tagResult.amountProperty().get().toString()});
+			data.add(new PieChart.Data(tagLabel, dataManager.getFinanceData().getExchangeRate(tagResult.amountProperty().get().getCurrency(), dataManager.defaultCurrencyProperty().get().getCurrency())
+					* Math.abs(tagResult.amountProperty().get().getAmount())));
 		}
 
 		tagsChart.dataProperty().set(data);
@@ -399,14 +439,31 @@ public class AnalyticsController implements Initializable {
 	 *
 	 * @param values the balance graph, grouped by date
 	 */
-	private void updateBalanceChart(Map<Date, Double> values) {
+	private void updateBalanceChart(Map<String, DateBalance<Double>> values) {
 		if (!balanceChart.getData().isEmpty())
 			balanceChart.getXAxis().invalidateRange(new LinkedList<String>());
 
 		balanceChart.getData().clear();
 
 		XYChart.Series<String, Double> series = new XYChart.Series<>();
-		for (Map.Entry<Date, Double> entry : values.entrySet())
+
+		Currency defaultCurrency = dataManager.defaultCurrencyProperty().get().getCurrency();
+		Map<Date, Double> convertedValues = new TreeMap<>();
+
+		for (Map.Entry<String, DateBalance<Double>> dateBalanceCurrency : values.entrySet()) {
+			Currency currency = Currency.getInstance(dateBalanceCurrency.getKey());
+			for (Map.Entry<Date, Double> dateBalance : dateBalanceCurrency.getValue().getData().entrySet()) {
+				if (!convertedValues.containsKey(dateBalance.getKey()))
+					convertedValues.put(dateBalance.getKey(), 0.0);
+				double amount = convertedValues.get(dateBalance.getKey());
+				if (currency == defaultCurrency)
+					amount += dateBalance.getValue();
+				else
+					amount += dataManager.convertAmount(dateBalance.getValue(), currency, defaultCurrency);
+				convertedValues.put(dateBalance.getKey(), amount);
+			}
+		}
+		for (Map.Entry<Date, Double> entry : convertedValues.entrySet())
 			series.getData().add(new XYChart.Data<>(DateFormat.getDateInstance(DateFormat.FULL).format(entry.getKey()), entry.getValue(), entry.getKey()));
 		balanceChart.getData().add(series);
 	}
@@ -420,13 +477,13 @@ public class AnalyticsController implements Initializable {
 		this.dataManager = dataManager;
 
 		//Update the form
-		report = new Report(dataManager.getFinanceData());
+		reportFactory = dataManager.getFinanceData().getReportFactory();
 
-		startDateField.setValue(LocalDateTime.ofInstant(Instant.ofEpochMilli(report.getEarliestDate().getTime()), ZoneId.systemDefault()).toLocalDate());
-		endDateField.setValue(LocalDateTime.ofInstant(Instant.ofEpochMilli(report.getLatestDate().getTime()), ZoneId.systemDefault()).toLocalDate());
+		startDateField.setValue(LocalDateTime.ofInstant(Instant.ofEpochMilli(reportFactory.getEarliestDate().getTime()), ZoneId.systemDefault()).toLocalDate());
+		endDateField.setValue(LocalDateTime.ofInstant(Instant.ofEpochMilli(reportFactory.getLatestDate().getTime()), ZoneId.systemDefault()).toLocalDate());
 
-		updateTagsSelectionTable();//TODO: move this to FinanceData
-		updateAccountsSelectionTable();//TODO: move this to FinanceData (add "select for report" property to regular adapter)
+		updateTagsSelectionTable(dataManager.getFinanceData().getAllTags());//TODO: move this to FinanceData
+		updateAccountsSelectionTable();//TODO: move this to FinanceData (add "select for reportFactory" property to regular adapter)
 	}
 
 	/**
