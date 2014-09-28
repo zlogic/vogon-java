@@ -42,7 +42,6 @@ public class UserService implements UserDetailsService, InitializingBean {
 	 *
 	 * @param username the username
 	 * @return the loaded user
-	 * @throws UsernameNotFoundException if username is not found
 	 */
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

@@ -6,7 +6,6 @@
 package org.zlogic.vogon.data.report;
 
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Currency;
 import java.util.Date;
@@ -58,7 +57,7 @@ public class ReportFactory {
 	/**
 	 * The report owner user
 	 */
-	private VogonUser user;
+	private VogonUser owner;
 	/**
 	 * The low cutoff date for generating the report
 	 */
@@ -117,12 +116,9 @@ public class ReportFactory {
 	};
 
 	/**
-	 * Default constructor
-	 *
-	 * @param user the reporting user
+	 * Constructs ReportFactory with no user
 	 */
-	public ReportFactory(VogonUser user) {
-		this.user = user;
+	public ReportFactory() {
 		//Prepare start/end dates
 		Calendar calendar = new GregorianCalendar();
 		calendar.set(Calendar.DAY_OF_MONTH, 1);
@@ -131,9 +127,37 @@ public class ReportFactory {
 		latestDate = calendar.getTime();
 	}
 
+	/**
+	 * Constructs ReportFactory for user
+	 *
+	 * @param user the reporting user
+	 */
+	public ReportFactory(VogonUser user) {
+		this();
+		setOwner(user);
+	}
+
 	/*
 	 * Set report parameters and filters
 	 */
+	/**
+	 * Returns the report owner user
+	 *
+	 * @return the report owner user
+	 */
+	public VogonUser getOwner() {
+		return owner;
+	}
+
+	/**
+	 * Sets the report owner user
+	 *
+	 * @param owner the report owner user
+	 */
+	public void setOwner(VogonUser owner) {
+		this.owner = owner;
+	}
+
 	/**
 	 * Returns the low cutoff date for generating the report
 	 *
@@ -189,18 +213,6 @@ public class ReportFactory {
 			this.selectedTags = null;
 		else
 			this.selectedTags = selectedTags;
-	}
-
-	/**
-	 * Sets the tags to be included in the report.
-	 *
-	 * @param selectedTags the tags to be included in the report
-	 */
-	public void setSelectedTags(String[] selectedTags) {
-		if (selectedTags == null || selectedTags.length == 0)
-			this.selectedTags = null;
-		else
-			this.selectedTags = Arrays.asList(selectedTags);
 	}
 
 	/**
@@ -289,7 +301,9 @@ public class ReportFactory {
 	 * function
 	 * @return the report
 	 */
-	public Report buildReport(EntityManager entityManager) {
+	public Report buildReport(EntityManager entityManager) throws SecurityException {
+		if (owner == null)
+			throw new SecurityException(messages.getString("NOT_ALLOWED_TO_GET_DATA_FOR_UNKNOWN_USER"));
 		Report report = new Report();
 		report.setTransactions(getTransactions(entityManager));
 		report.setTagExpenses(getTagExpenses(entityManager));
@@ -380,7 +394,7 @@ public class ReportFactory {
 	 */
 	protected ConstructedPredicate getFilteredTransactionsPredicate(CriteriaBuilder criteriaBuilder, Root<FinanceTransaction> tr, EnumSet<FilterType> appliedFilters) {
 		//User filter
-		Predicate userPredicate = criteriaBuilder.equal(tr.get(FinanceTransaction_.owner), user);
+		Predicate userPredicate = criteriaBuilder.equal(tr.get(FinanceTransaction_.owner), owner.getId());
 
 		//Date filter
 		Predicate datePredicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), earliestDate),
@@ -498,11 +512,13 @@ public class ReportFactory {
 	 * @param entityManager the EntityManager to be used for making queries
 	 * @return a list of all tags
 	 */
-	public Set<String> getAllTags(EntityManager entityManager) {
+	public Set<String> getAllTags(EntityManager entityManager) throws SecurityException {
+		if (owner == null)
+			throw new SecurityException(messages.getString("NOT_ALLOWED_TO_GET_DATA_FOR_UNKNOWN_USER"));
 		CriteriaQuery<String> tagsCriteriaQuery = entityManager.getCriteriaBuilder().createQuery(String.class);
 		Root<FinanceTransaction> tr = tagsCriteriaQuery.from(FinanceTransaction.class);
 
-		Predicate userPredicate = entityManager.getCriteriaBuilder().equal(tr.get(FinanceTransaction_.owner), user);
+		Predicate userPredicate = entityManager.getCriteriaBuilder().equal(tr.get(FinanceTransaction_.owner), owner);
 		tagsCriteriaQuery.where(userPredicate);
 
 		tagsCriteriaQuery.select(tr.join(FinanceTransaction_.tags)).distinct(true);
@@ -517,8 +533,8 @@ public class ReportFactory {
 	 * @param byDate the date
 	 * @return the raw balance
 	 */
-	protected long getRawAccountBalanceByDate(EntityManager entityManager, FinanceAccount account, Date byDate) {
-		if (!account.getOwner().equals(user))
+	protected long getRawAccountBalanceByDate(EntityManager entityManager, FinanceAccount account, Date byDate) throws SecurityException {
+		if (!account.getOwner().equals(owner))
 			throw new SecurityException(MessageFormat.format(messages.getString("NOT_ALLOWED_TO_GET_DATA_FOR_ANOTHER_USER"), new Object[]{account.getOwner().getUsername()}));
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Long> transactionsCriteriaQuery = entityManager.getCriteriaBuilder().createQuery(Long.class);
@@ -549,11 +565,12 @@ public class ReportFactory {
 	protected Map<String, DateBalance<Double>> getAccountsBalanceGraph(EntityManager entityManager) {
 		Map<String, Long> sumBalance = new HashMap<>();
 
-		for (FinanceAccount account : selectedAccounts) {
-			if (!sumBalance.containsKey(account.getCurrency().getCurrencyCode()))
-				sumBalance.put(account.getCurrency().getCurrencyCode(), 0L);
-			sumBalance.put(account.getCurrency().getCurrencyCode(), sumBalance.get(account.getCurrency().getCurrencyCode()) + getRawAccountBalanceByDate(entityManager, account, earliestDate));
-		}
+		if (selectedAccounts != null)
+			for (FinanceAccount account : selectedAccounts) {
+				if (!sumBalance.containsKey(account.getCurrency().getCurrencyCode()))
+					sumBalance.put(account.getCurrency().getCurrencyCode(), 0L);
+				sumBalance.put(account.getCurrency().getCurrencyCode(), sumBalance.get(account.getCurrency().getCurrencyCode()) + getRawAccountBalanceByDate(entityManager, account, earliestDate));
+			}
 
 		//Process transactions
 		Map<String, DateBalance<Long>> currentBalance = new HashMap<>();
@@ -567,9 +584,10 @@ public class ReportFactory {
 		//Calculate sum for accounts/currencies for each transaction
 		for (FinanceTransaction transaction : transactions) {
 			//Compute balance change for transaction
-			for (FinanceAccount account : selectedAccounts)
-				for (TransactionComponent component : transaction.getComponentsForAccount(account))
-					sumBalance.put(account.getCurrency().getCurrencyCode(), sumBalance.get(account.getCurrency().getCurrencyCode()) + component.getRawAmount());
+			if (selectedAccounts != null)
+				for (FinanceAccount account : selectedAccounts)
+					for (TransactionComponent component : transaction.getComponentsForAccount(account))
+						sumBalance.put(account.getCurrency().getCurrencyCode(), sumBalance.get(account.getCurrency().getCurrencyCode()) + component.getRawAmount());
 
 			//Update balance map
 			for (Map.Entry<String, Long> sumBalanceCurrency : sumBalance.entrySet()) {
@@ -602,8 +620,9 @@ public class ReportFactory {
 		Map<String, TagExpense> result = new TreeMap<>();
 		//Process currencies separately
 		Set<Currency> currencies = new HashSet<>();
-		for (FinanceAccount account : selectedAccounts)
-			currencies.add(account.getCurrency());
+		if (selectedAccounts != null)
+			for (FinanceAccount account : selectedAccounts)
+				currencies.add(account.getCurrency());
 		for (Currency currency : currencies) {
 			//Obtain the tag-total sum table via a query
 			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();

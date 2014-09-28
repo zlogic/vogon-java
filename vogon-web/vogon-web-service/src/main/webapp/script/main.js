@@ -1,4 +1,11 @@
-var app = angular.module("vogon", ["ngCookies", "ui.bootstrap"]);
+var app = angular.module("vogon", ["ngCookies", "ui.bootstrap", 'nvd3ChartDirectives']);
+
+var dateToJson = function (date) {
+	if (date instanceof Date)
+		return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).toJSON().split("T")[0];
+	else
+		return date;
+};
 
 app.service("AlertService", function ($timeout) {
 	var that = this;
@@ -215,6 +222,162 @@ app.controller("LoginController", function ($scope, AuthorizationService, HTTPSe
 	};
 });
 
+app.controller("AnalyticsController", function ($scope, $modalInstance, AccountsService, TransactionsService, CurrencyService, HTTPService) {
+	$scope.accountService = AccountsService;
+	$scope.transactionsService = TransactionsService;
+	$scope.currencyService = CurrencyService;
+	$scope.tags = {};
+	$scope.accounts = {};
+	var currentTime = new Date();
+	$scope.startDate = new Date(currentTime.getFullYear(), currentTime.getMonth(), 1);
+	$scope.endDate = new Date((new Date(currentTime.getFullYear(), currentTime.getMonth() + 1, 1)) - 1);
+	$scope.transactionTypeEnabled = {
+		transfer: false,
+		income: true,
+		expense: true
+	};
+	$scope.report = undefined;
+	$scope.tagsChartData = [];
+	$scope.balanceChartData = [];
+	$scope.currencies = [];
+	HTTPService.get("service/analytics/tags").then(function (data) {
+		$scope.tags = {};
+		data.data.forEach(function (tag) {
+			$scope.tags[tag] = true;
+		});
+	});
+	$scope.updateAccounts = function () {
+		$scope.accounts = {};
+		AccountsService.accounts.forEach(function (account) {
+			$scope.accounts[account.id] = true;
+		});
+	};
+	$scope.selectAllTags = function () {
+		for (var tag in $scope.tags)
+			$scope.tags[tag] = true;
+	};
+	$scope.deselectAllTags = function () {
+		for (var tag in $scope.tags)
+			$scope.tags[tag] = false;
+	};
+	$scope.selectAllAccounts = function () {
+		for (var account in $scope.accounts)
+			$scope.accounts[account] = true;
+	};
+	$scope.deselectAllAccounts = function () {
+		for (var account in $scope.accounts)
+			$scope.accounts[account] = false;
+	};
+	$scope.openStartDateCalendar = function ($event) {
+		$event.preventDefault();
+		$event.stopPropagation();
+		$scope.startDateCalendarOpened = true;
+	};
+	$scope.openEndDateCalendar = function ($event) {
+		$event.preventDefault();
+		$event.stopPropagation();
+		$scope.endDateCalendarOpened = true;
+	};
+	$scope.buildReport = function () {
+		var reportConfiguration = {
+			earliestDate: dateToJson($scope.startDate),
+			latestDate: dateToJson($scope.endDate),
+			enabledTransferTransactions: $scope.transactionTypeEnabled.transfer,
+			enabledIncomeTransactions: $scope.transactionTypeEnabled.income,
+			enabledExpenseTransactions: $scope.transactionTypeEnabled.expense
+		};
+		reportConfiguration.selectedTags = [];
+		for (var tag in $scope.tags)
+			if ($scope.tags[tag])
+				reportConfiguration.selectedTags.unshift(tag);
+		reportConfiguration.selectedAccounts = [];
+		for (var accountId in $scope.accounts) {
+			if ($scope.accounts[accountId]) {
+				var account = AccountsService.getAccount(Number(accountId));
+				if (account !== undefined)
+					reportConfiguration.selectedAccounts.unshift(account);
+			}
+		}
+		HTTPService.post("service/analytics", reportConfiguration).then(function (data) {
+			$scope.report = data.data;
+			updateCurrencies();
+			updateTagsChart();
+			updateBalanceChart();
+		});
+	};
+	var updateCurrencies = function () {
+		var newCurrencies = {};
+		$scope.report.tagExpenses.forEach(function (tagExpense) {
+			for (var currency in tagExpense.amounts)
+				if (newCurrencies[currency] === undefined)
+					newCurrencies[currency] = currency;
+		});
+		var newCurrenciesList = [];
+		for (var currency in newCurrencies)
+			newCurrenciesList.unshift(currency);
+		$scope.report.currencies = newCurrenciesList;
+		$scope.report.selectedCurrency = newCurrenciesList[0];
+	};
+	$scope.currencyChanged = function () {
+		updateTagsChart();
+		updateBalanceChart();
+	};
+	var updateTagsChart = function () {
+		var newChartData = [];
+		var allZero = true;
+		$scope.report.tagExpenses.forEach(function (tagExpense) {
+			var amount = tagExpense.amounts[$scope.report.selectedCurrency] !== undefined ? tagExpense.amounts[$scope.report.selectedCurrency] : 0;
+			if (amount !== 0)
+				allZero = false;
+			var chartEntry = [
+				tagExpense.tag, Math.abs(amount), amount
+			];
+			newChartData.unshift(chartEntry);
+		});
+		if (allZero)
+			$scope.tagsChartData = [];
+		else
+			$scope.tagsChartData = newChartData;
+	};
+	var updateBalanceChart = function () {
+		var newChartData = [];
+		var accountGraph = $scope.report.accountsBalanceGraph[$scope.report.selectedCurrency];
+		if (accountGraph !== undefined)
+			for (var date in accountGraph.data) {
+				var entry = [new Date(date), accountGraph.data[date]];
+				newChartData.unshift(entry);
+			}
+		if (accountGraph === undefined || Object.keys(accountGraph.data).length <= 0)
+			$scope.balanceChartData = [];
+		else
+			$scope.balanceChartData = [{
+					key: "Balance",
+					values: newChartData
+				}];
+	};
+	$scope.filterCurrency = function (currency) {
+		return $scope.report !== undefined && $scope.report.currencies.indexOf(currency.symbol) !== -1;
+	};
+	$scope.tagsChartToolTipContentFunction = function () {
+		return function (key, y, e) {
+			return  key + " (" + e.point[2] + ")";
+		};
+	};
+	$scope.balanceChartXTickFormat = function () {
+		return function (value) {
+			var dateString = dateToJson(new Date(value));
+			return dateString;
+		};
+	};
+	$scope.close = function () {
+		$modalInstance.dismiss();
+	};
+	$scope.updateAccounts();
+	$scope.accountListener = $scope.$watch(function () {
+		return AccountsService.accounts;
+	}, $scope.updateAccounts);
+	$modalInstance.result.then($scope.accountListener, $scope.accountListener);
+});
 app.controller("UserSettingsController", function ($scope, $modalInstance, AuthorizationService, UserService, CurrencyService, HTTPService) {
 	$scope.userService = UserService;
 	$scope.user = UserService.userData;
@@ -263,6 +426,7 @@ app.controller("AuthController", function ($scope, $modal, AuthorizationService,
 	$scope.logoutLocked = "!authorizationService.authorized";
 	$scope.loginDialog = undefined;
 	$scope.userSettingsDialog = undefined;
+	$scope.analyticsDialog = undefined;
 	$scope.logout = function () {
 		$scope.authorizationService.resetAuthorization();
 	};
@@ -286,12 +450,28 @@ app.controller("AuthController", function ($scope, $modal, AuthorizationService,
 			$scope.userSettingsDialog.then(deleteFunction, deleteFunction);
 		}
 	};
+	var closeAnalyticsDialog = function () {
+		if ($scope.analyticsDialog !== undefined) {
+			var deleteFunction = function () {
+				$scope.analyticsDialog = undefined;
+			};
+			$scope.analyticsDialog.then(deleteFunction, deleteFunction);
+		}
+	};
 	$scope.showUserSettingsDialog = function () {
 		closeUserSettingsDialog();
 		$scope.userSettingsDialog = $modal.open({
 			templateUrl: "userSettingsDialog",
 			controller: "UserSettingsController"
 		}).result.then(closeUserSettingsDialog, closeUserSettingsDialog);
+	};
+	$scope.showAnalyticsDialog = function () {
+		closeAnalyticsDialog();
+		$scope.userSettingsDialog = $modal.open({
+			templateUrl: "analyticsDialog",
+			controller: "AnalyticsController",
+			size: "lg"
+		}).result.then(closeAnalyticsDialog, closeAnalyticsDialog);
 	};
 	$scope.$watch(function () {
 		return AuthorizationService.authorized;
@@ -501,12 +681,6 @@ app.service("TransactionsService", function (HTTPService, AuthorizationService, 
 	this.defaultTransactionType = this.transactionTypes[0];
 	this.currentPage = 1;
 	this.totalPages = 0;
-	var dateToJson = function (date) {
-		if (date instanceof Date)
-			return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())).toJSON().split("T")[0];
-		else
-			return date;
-	};
 	var updateTransactions = function () {
 		var nextPage = that.currentPage;
 		return HTTPService.get("service/transactions/page_" + (nextPage - 1))
