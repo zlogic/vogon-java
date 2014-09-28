@@ -82,11 +82,10 @@ public class DataController {
 	}
 
 	/**
-	 * Returns all currencies
+	 * Returns all data
 	 *
-	 * @param data the file to import
+	 * @param outputStream the stream for XML output
 	 * @param userPrincipal the authenticated user
-	 * @return true of import succeeded
 	 */
 	@RequestMapping(value = "/export", method = RequestMethod.GET, produces = "application/xml")
 	public void exportData(OutputStream outputStream, @AuthenticationPrincipal VogonSecurityUser userPrincipal) throws RuntimeException {

@@ -206,6 +206,21 @@
 				<artifactId>angular-ui-bootstrap</artifactId>
 				<version>0.11.0-3</version>
 			</dependency>
+			<dependency>
+				<groupId>org.webjars</groupId>
+				<artifactId>d3js</artifactId>
+				<version>3.4.11</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars</groupId>
+				<artifactId>nvd3</artifactId>
+				<version>1.1.15-beta-2</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars</groupId>
+				<artifactId>angularjs-nvd3-directives</artifactId>
+				<version>0.0.7-1</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 </project>

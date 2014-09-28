@@ -37,7 +37,7 @@ public class InitializationHelper {
 	 * @param transactions transactions to initialize
 	 * @return the transactions list
 	 */
-	public Collection<FinanceTransactionJson> initializeTransactions(Collection<FinanceTransaction> transactions) {
+	public List<FinanceTransactionJson> initializeTransactions(Collection<FinanceTransaction> transactions) {
 		List<FinanceTransactionJson> newTransactions = new LinkedList<>();
 		for (FinanceTransaction transaction : transactions)
 			newTransactions.add(initializeTransaction(transaction));
