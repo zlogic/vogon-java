@@ -35,6 +35,7 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 	this.pendingRequests = 0;
 	this.isLoading = false;
 	this.authorizationHeaders = {};
+	this.authorized = false;
 	var mergeHeaders = function (extraHeaders) {
 		var headers = {};
 		if (extraHeaders !== undefined)
@@ -73,13 +74,17 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 			var fixAuthCall = that.fixAuthorization();
 			if (fixAuthCall !== undefined)
 				fixAuthCall
-						.then(function () {
-							retryRequest(data.config).then(deferred.resolve, deferred.reject);
+						.then(function (authData) {
+							if (that.authorized)
+								retryRequest(data.config).then(deferred.resolve, deferred.reject);
+							else
+								deferred.reject(authData);
 						}, deferred.reject);
 			return deferred.promise;
 		} else {
 			AlertService.addAlert("HTTP error: " + data.status + "(" + angular.toJson(data.data) + ")");
-			that.updateAllData();
+			if (that.authorized && data.config.customData.updateOnFailure === true)
+				that.updateAllData();
 		}
 		deferred.reject(data);
 		return deferred.promise;
@@ -88,17 +93,27 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 		endRequest();
 		return data;
 	};
-	this.get = function (url, extraHeaders) {
+	this.buildRequestParams = function (updateOnFailure) {
+		return {
+			updateOnFailure: updateOnFailure !== undefined ? updateOnFailure : true
+		};
+	};
+	this.get = function (url, extraHeaders, requestParams) {
 		startRequest();
 		var headers = isTokenURL(url) ? extraHeaders : mergeHeaders(extraHeaders);
-		return $http.get(url, {headers: headers}).then(successHandler, errorHandler);
+		if (requestParams === undefined)
+			requestParams = that.buildRequestParams();
+		return $http.get(url, {headers: headers, customData: requestParams}).then(successHandler, errorHandler);
 	};
-	this.post = function (url, data, extraHeaders, transformRequest) {
+	this.post = function (url, data, extraHeaders, requestParams, transformRequest) {
 		startRequest();
 		var headers = isTokenURL(url) ? extraHeaders : mergeHeaders(extraHeaders);
 		var params = {headers: headers};
 		if (transformRequest !== undefined)
 			params.transformRequest = transformRequest;
+		if (requestParams === undefined)
+			requestParams = that.buildRequestParams();
+		params.customData = requestParams;
 		return $http.post(url, data, params).then(successHandler, errorHandler);
 	};
 	this.fixAuthorization = function () {
@@ -145,12 +160,16 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
 			that.access_token = access_token;
 			localStorage.setItem("access_token", access_token);
 			HTTPService.setAccessToken(access_token);
-			that.authorized = true;
+			setAuthorized(true);
 			if (username !== undefined)
 				that.username = username;
 			if (password !== undefined)
 				that.password = password;
 		}
+	};
+	var setAuthorized = function (authorized) {
+		that.authorized = authorized;
+		HTTPService.authorized = authorized;
 	};
 	this.performAuthorization = function (username, password) {
 		var params = {username: username, password: password, client_id: clientId, grant_type: "password"};
@@ -184,7 +203,7 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
 		that.password = undefined;
 		that.access_token = undefined;
 		HTTPService.setAccessToken();
-		that.authorized = false;
+		setAuthorized(false);
 		localStorage.removeItem("access_token");
 		if (message !== undefined)
 			AlertService.addAlert(message);
@@ -197,9 +216,9 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
 	this.access_token = localStorage["access_token"];
 	if (this.access_token !== undefined) {
 		HTTPService.setAccessToken(this.access_token);
-		that.authorized = true;
+		setAuthorized(true);
 	} else {
-		that.authorized = false;
+		setAuthorized(false);
 	}
 });
 
@@ -399,14 +418,16 @@ app.controller("UserSettingsController", function ($scope, $modalInstance, Autho
 		$modalInstance.dismiss();
 	};
 	$scope.setFile = function (file) {
-		$scope.file = file.files[0];
+		$scope.$apply(function () {
+			$scope.file = file.files[0];
+		});
 	};
 	$scope.importData = function () {
 		if ($scope.file === undefined)
 			return;
 		var formData = new FormData();
 		formData.append("file", $scope.file);
-		HTTPService.post("service/import", formData, importPostHeaders, angular.identity).then(function () {
+		HTTPService.post("service/import", formData, importPostHeaders, undefined, angular.identity).then(function () {
 			$modalInstance.dismiss();
 			HTTPService.updateAllData();
 		});
@@ -490,7 +511,7 @@ app.service("UserService", function ($rootScope, AuthorizationService, HTTPServi
 	this.userData = undefined;
 	this.update = function () {
 		if (AuthorizationService.authorized)
-			HTTPService.get("service/user")
+			HTTPService.get("service/user", undefined, HTTPService.buildRequestParams(false))
 					.then(function (data) {
 						that.userData = data.data;
 					}, function () {
@@ -531,10 +552,10 @@ app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationS
 	};
 	this.update = function () {
 		if (AuthorizationService.authorized) {
-			HTTPService.get("service/accounts")
+			HTTPService.get("service/accounts", undefined, HTTPService.buildRequestParams(false))
 					.then(function (data) {
 						setAccounts(data.data);
-					}, that.update);
+					});
 		} else {
 			that.accounts = [];
 		}
@@ -565,7 +586,7 @@ app.service("CurrencyService", function ($rootScope, HTTPService, AuthorizationS
 			HTTPService.get("service/currencies")
 					.then(function (data) {
 						that.currencies = data.data;
-					}, that.update);
+					});
 		} else {
 			that.currencies = [];
 		}
@@ -686,12 +707,12 @@ app.service("TransactionsService", function (HTTPService, AuthorizationService, 
 	this.totalPages = 0;
 	var updateTransactions = function () {
 		var nextPage = that.currentPage;
-		return HTTPService.get("service/transactions/page_" + (nextPage - 1))
+		return HTTPService.get("service/transactions/page_" + (nextPage - 1), undefined, HTTPService.buildRequestParams(false))
 				.then(function (data) {
 					that.transactions = data.data;
 					that.currentPage = nextPage;
 					AccountsService.update();
-				}, that.update);
+				});
 	};
 	var updateTransactionsCount = function () {
 		return HTTPService.get("service/transactions/pages")
