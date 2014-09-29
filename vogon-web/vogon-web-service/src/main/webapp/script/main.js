@@ -222,7 +222,7 @@ app.controller("LoginController", function ($scope, AuthorizationService, HTTPSe
 	};
 });
 
-app.controller("AnalyticsController", function ($scope, $modalInstance, AccountsService, TransactionsService, CurrencyService, HTTPService) {
+app.controller("AnalyticsController", function ($scope, $modalInstance, AccountsService, TransactionsService, CurrencyService, HTTPService, UserService) {
 	$scope.accountService = AccountsService;
 	$scope.transactionsService = TransactionsService;
 	$scope.currencyService = CurrencyService;
@@ -316,7 +316,10 @@ app.controller("AnalyticsController", function ($scope, $modalInstance, Accounts
 		for (var currency in newCurrencies)
 			newCurrenciesList.unshift(currency);
 		$scope.report.currencies = newCurrenciesList;
-		$scope.report.selectedCurrency = newCurrenciesList[0];
+		if (newCurrenciesList.indexOf(UserService.userData.defaultCurrency) !== -1)
+			$scope.report.selectedCurrency = UserService.userData.defaultCurrency;
+		else
+			$scope.report.selectedCurrency = newCurrenciesList[0];
 	};
 	$scope.currencyChanged = function () {
 		updateTagsChart();
