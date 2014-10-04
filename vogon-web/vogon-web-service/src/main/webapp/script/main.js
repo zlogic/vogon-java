@@ -82,7 +82,7 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 						}, deferred.reject);
 			return deferred.promise;
 		} else {
-			AlertService.addAlert("HTTP error: " + data.status + "(" + angular.toJson(data.data) + ")");
+			AlertService.addAlert(complex_messages.HTTP_ERROR_FORMAT(data.status, data.data));
 			if (that.authorized && data.config.customData.updateOnFailure === true)
 				that.updateAllData();
 		}
@@ -124,7 +124,7 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 		return $http.post(url, data, params).then(successHandler, errorHandler);
 	};
 	this.fixAuthorization = function () {
-		throw "fixAuthorization not properly initialized";
+		throw messages.FIX_AUTHORIZATION_NOT_INITIALIZED;
 	};
 	this.setAccessToken = function (access_token) {
 		if (access_token !== undefined)
@@ -138,13 +138,13 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 		that.updateUser();
 	};
 	this.updateAccounts = function () {
-		throw "updateAccounts not properly initialized";
+		throw messages.UPDATE_ACCOUNTS_NOT_INITIALIZED;
 	};
 	this.updateTransactions = function () {
-		throw "updateTransactions not properly initialized";
+		throw messages.UPDATE_TRANSACTIONS_NOT_INITIALIZED;
 	};
 	this.updateUser = function () {
-		throw "updateUser not properly initialized";
+		throw messages.UPDATE_USER_NOT_INITIALIZED;
 	};
 });
 
@@ -186,7 +186,7 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
 					setToken(data.access_token, username, password);
 					return data;
 				}, function (data) {
-					that.resetAuthorization("Unable to authenticate");
+					that.resetAuthorization(messages.UNABLE_TO_AUTHENTICATE);
 					var deferred = $q.defer();
 					deferred.reject(data);
 					return deferred.promise;
@@ -199,10 +199,10 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
 			var message;
 			if (that.authorized)
 				if (that.username !== undefined && that.password !== undefined)
-					message = "Username/password not accepted";
+					message = messages.USERNAME_PASSWORD_NOT_ACCEPTED;
 				else if (that.access_token !== undefined)
-					message = "Access token rejected";
-			that.resetAuthorization(that.authorized ? "Can't fix authorization" : undefined);
+					message = messages.ACCESS_TOKEN_REJECTED;
+			that.resetAuthorization(that.authorized ? messages.CANT_FIX_AUTHORIZATION : undefined);
 		}
 	};
 	this.resetAuthorization = function (message) {
@@ -380,7 +380,7 @@ app.controller("AnalyticsController", function ($scope, $modalInstance, Accounts
 			$scope.balanceChartData = [];
 		else
 			$scope.balanceChartData = [{
-					key: "Balance",
+					key: messages.BALANCE,
 					values: newChartData
 				}];
 	};
@@ -389,7 +389,7 @@ app.controller("AnalyticsController", function ($scope, $modalInstance, Accounts
 	};
 	$scope.tagsChartToolTipContentFunction = function () {
 		return function (key, y, e) {
-			return  key + " (" + e.point[2] + ")";
+			return complex_messages.TAGS_CHART_TOOLTIP(key, e.point[2]);
 		};
 	};
 	$scope.balanceChartXTickFormat = function () {
@@ -568,7 +568,7 @@ app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationS
 	this.accounts = [];
 	this.totalsForCurrency = {};
 	this.updateTransactions = function () {
-		throw "updateTransactions not properly initialized";
+		throw messages.UPDATE_TRANSACTIONS_NOT_INITIALIZED;
 	};
 	var setAccounts = function (data) {
 		that.accounts = data;
@@ -688,7 +688,7 @@ app.controller("TransactionEditorController", function ($scope, $modalInstance, 
 	$scope.accountService = AccountsService;
 	$scope.transactionTypes = TransactionsService.transactionTypes;
 	$scope.calendarOpened = false;
-	$scope.tags = transaction.tags.join(",");
+	$scope.tags = transaction.tags.join(messages.TAGS_SEPARATOR);
 	$scope.openCalendar = function ($event) {
 		$event.preventDefault();
 		$event.stopPropagation();
@@ -716,7 +716,7 @@ app.controller("TransactionEditorController", function ($scope, $modalInstance, 
 	};
 	var tagsToJson = function (tags) {
 		if (tags.constructor === String)
-			return tags.split(",");
+			return tags.split(messages.TAGS_SEPARATOR);
 		else
 			return tags;
 	};
@@ -733,7 +733,7 @@ app.controller("TransactionEditorController", function ($scope, $modalInstance, 
 app.service("TransactionsService", function (HTTPService, AuthorizationService, AccountsService) {
 	var that = this;
 	this.transactions = [];
-	this.transactionTypes = [{name: "Expense/income", value: "EXPENSEINCOME"}, {name: "Transfer", value: "TRANSFER"}];
+	this.transactionTypes = [{name: messages.EXPENSEINCOME, value: "EXPENSEINCOME"}, {name: messages.TRANSFER, value: "TRANSFER"}];
 	this.defaultTransactionType = this.transactionTypes[0];
 	this.currentPage = 1;
 	this.totalPages = 0;
@@ -747,10 +747,10 @@ app.service("TransactionsService", function (HTTPService, AuthorizationService, 
 				});
 	};
 	var updateTransactionsCount = function () {
-		return HTTPService.get("service/transactions/pages")
+		return HTTPService.get("service/transactions/pages", undefined, HTTPService.buildRequestParams(false))
 				.then(function (data) {
 					that.totalPages = data.data;
-				}, that.update);
+				});
 	};
 	this.update = function () {
 		if (AuthorizationService.authorized) {
