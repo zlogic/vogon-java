@@ -36,6 +36,7 @@ import org.zlogic.vogon.data.interop.VogonImportException;
 import org.zlogic.vogon.data.interop.VogonImportLogicalException;
 import org.zlogic.vogon.data.report.Report;
 import org.zlogic.vogon.data.report.ReportFactory;
+import org.zlogic.vogon.data.tools.DatabaseMaintenance;
 
 /**
  * Class for storing the finance data, performing database operations and
@@ -846,31 +847,11 @@ public class FinanceData {
 				throw new ApplicationShuttingDownException();
 			//Request all transactions from database
 			EntityManager tempEntityManager = entityManagerFactory.createEntityManager();
-			CriteriaBuilder criteriaBuilder = tempEntityManager.getCriteriaBuilder();
-			CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
-			transactionsCriteriaQuery.from(FinanceTransaction.class);
-			FinanceAccount tempAccount = tempEntityManager.find(FinanceAccount.class, account.getId());
-
-			//Recalculate balance from related transactions
 			tempEntityManager.getTransaction().begin();
-			tempAccount.updateRawBalance(-tempAccount.getRawBalance());
 
-			TypedQuery<FinanceTransaction> transactionsBatchQuery = tempEntityManager.createQuery(transactionsCriteriaQuery);
+			new DatabaseMaintenance().refreshAccountBalance(account, tempEntityManager);
 
-			int currentTransaction = 0;
-			boolean done = false;
-			while (!done) {
-				List<FinanceTransaction> transactions = transactionsBatchQuery.setFirstResult(currentTransaction).setMaxResults(Constants.batchFetchSize).getResultList();
-				currentTransaction += transactions.size();
-				done = transactions.isEmpty();
-				for (FinanceTransaction transaction : transactions)
-					for (TransactionComponent component : transaction.getComponentsForAccount(tempAccount))
-						tempAccount.updateRawBalance(component.getRawAmount());
-			}
 			tempEntityManager.getTransaction().commit();
-
-			//Update real account balance from temporary account
-			account.updateRawBalance(-account.getRawBalance() + tempAccount.getRawBalance());
 
 			tempEntityManager.close();
 		} finally {
@@ -879,8 +860,8 @@ public class FinanceData {
 	}
 
 	/**
-	 * Deletes all orphaned transactions, accounts and transaction components.
-	 * If process is shutting down, the change is ignored.
+	 * Deletes all orphaned transaction components. If process is shutting down,
+	 * the change is ignored.
 	 *
 	 * @throws ApplicationShuttingDownException if application is shutting down
 	 * and database requests are ignored
@@ -891,37 +872,14 @@ public class FinanceData {
 			if (shuttingDown)
 				throw new ApplicationShuttingDownException();
 			EntityManager tempEntityManager = entityManagerFactory.createEntityManager();
-			CriteriaBuilder componentCriteriaBuilder = tempEntityManager.getCriteriaBuilder();
-			CriteriaQuery<TransactionComponent> componentsCriteriaQuery = componentCriteriaBuilder.createQuery(TransactionComponent.class);
-			componentsCriteriaQuery.from(TransactionComponent.class);
-
-			CriteriaBuilder transactionCriteriaBuilder = tempEntityManager.getCriteriaBuilder();
-			CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = transactionCriteriaBuilder.createQuery(FinanceTransaction.class);
-			transactionsCriteriaQuery.from(FinanceTransaction.class);
 
 			tempEntityManager.getTransaction().begin();
-
-			//Get all data from DB
-			List<TransactionComponent> componentsDB = tempEntityManager.createQuery(componentsCriteriaQuery).getResultList();
-			List<FinanceTransaction> transactionsDB = tempEntityManager.createQuery(transactionsCriteriaQuery).getResultList();
-
-			//Remove OK items from list
-			for (FinanceTransaction transaction : transactionsDB)
-				componentsDB.removeAll(transaction.getComponents());
-
-			//Remove anything that still exists
-			for (TransactionComponent component : componentsDB) {
-				if (component.getTransaction() != null)
-					component.getTransaction().removeComponent(component);
-				component.setTransaction(null);
-				tempEntityManager.remove(component);
-			}
-
-			tempEntityManager.getTransaction().commit();
+			new DatabaseMaintenance().cleanup(tempEntityManager);
 
 			populateCurrencies(tempEntityManager);
 			restoreFromDatabase(tempEntityManager);
 
+			tempEntityManager.getTransaction().commit();
 			tempEntityManager.close();
 		} finally {
 			shuttingDownLock.readLock().unlock();

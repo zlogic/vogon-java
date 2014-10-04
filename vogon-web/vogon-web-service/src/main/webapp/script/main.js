@@ -405,6 +405,7 @@ app.controller("UserSettingsController", function ($scope, $modalInstance, Autho
 	$scope.user = UserService.userData;
 	$scope.currencies = CurrencyService;
 	$scope.file = undefined;
+	$scope.operationSuccessful = false;
 	var importPostHeaders = {"Content-Type": undefined};
 	$scope.submitEditing = function () {
 		AuthorizationService.username = $scope.user.username;
@@ -439,6 +440,18 @@ app.controller("UserSettingsController", function ($scope, $modalInstance, Autho
 			a.href = window.URL.createObjectURL(blob);
 			a.download = "vogon-" + new Date().toISOString() + ".xml";
 			a.click();
+		});
+	};
+	$scope.performCleanup = function () {
+		$scope.operationSuccessful = false;
+		$scope.userService.performCleanup().then(function () {
+			$scope.operationSuccessful = true;
+		});
+	};
+	$scope.performRecalculateBalance = function () {
+		$scope.operationSuccessful = false;
+		$scope.userService.performRecalculateBalance().then(function () {
+			$scope.operationSuccessful = true;
 		});
 	};
 });
@@ -523,6 +536,18 @@ app.service("UserService", function ($rootScope, AuthorizationService, HTTPServi
 				.then(function (data) {
 					that.userData = data.data;
 				}, that.update);
+	};
+	this.performCleanup = function () {
+		return HTTPService.get("service/cleanup")
+				.then(function () {
+					HTTPService.updateAllData();
+				});
+	};
+	this.performRecalculateBalance = function () {
+		return HTTPService.get("service/recalculateBalance")
+				.then(function () {
+					HTTPService.updateAccounts();
+				});
 	};
 	$rootScope.$watch(function () {
 		return AuthorizationService.authorized;
