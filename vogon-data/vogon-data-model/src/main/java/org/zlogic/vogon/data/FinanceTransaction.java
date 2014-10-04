@@ -7,6 +7,7 @@ package org.zlogic.vogon.data;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
@@ -110,7 +111,7 @@ public class FinanceTransaction implements Serializable {
 	}
 
 	/**
-	 * Constructor for a transaction
+	 * Creates a new FinanceTransaction
 	 *
 	 * @param owner the transaction owner
 	 * @param description the transaction description
@@ -119,6 +120,7 @@ public class FinanceTransaction implements Serializable {
 	 * @param type the transaction type
 	 */
 	public FinanceTransaction(VogonUser owner, String description, String[] tags, Date date, Type type) {
+		this();
 		this.description = description;
 		this.tags = tags != null ? new HashSet<>(Arrays.asList(tags)) : new HashSet<String>();
 		this.transactionDate = date;
@@ -127,22 +129,42 @@ public class FinanceTransaction implements Serializable {
 		FinanceTransaction.this.setOwner(owner);
 	}
 
+	/**
+	 * Creates a new FinanceTransaction by merging another transaction's
+	 * properties
+	 *
+	 * @param owner the transaction owner
+	 * @param transaction the transaction from which to merge properties
+	 */
+	public FinanceTransaction(VogonUser owner, FinanceTransaction transaction) {
+		this.components = new HashSet<>();
+		FinanceTransaction.this.merge(transaction);
+		FinanceTransaction.this.setOwner(owner);
+	}
+
+	/**
+	 * Merges properties from another FinanceTransaction instance to this
+	 * instance; only merges properties, and not components
+	 *
+	 * @param transaction the transaction from which to merge properties
+	 */
+	public void merge(FinanceTransaction transaction) {
+		if (version != transaction.version)
+			throw new ConcurrentModificationException("Transaction was already updated");
+		this.type = transaction.type;
+		this.description = transaction.description;
+		this.tags = new HashSet<>();
+		for (String tag : transaction.tags)
+			this.tags.add(tag);
+		this.transactionDate = (Date) transaction.transactionDate.clone();
+	}
+
 	@Override
 	public FinanceTransaction clone() {
-		FinanceTransaction cloneTransaction = new FinanceTransaction();
-		cloneTransaction.type = type;
-		cloneTransaction.description = description;
-		cloneTransaction.tags = new HashSet<>();
-		for (String tag : tags)
-			cloneTransaction.tags.add(tag);
-		cloneTransaction.components = new HashSet<>();
+		FinanceTransaction cloneTransaction = new FinanceTransaction(this.owner, this);
 		for (TransactionComponent component : components)
 			cloneTransaction.addComponent(new TransactionComponent(component.getAccount(), cloneTransaction, component.getRawAmount()));
-		//cloneTransaction.transactionDate = (Date) transactionDate.clone();
 		cloneTransaction.transactionDate = new Date();
-		//cloneTransaction.amount = amount;
-
-		cloneTransaction.setOwner(owner);
 		return cloneTransaction;
 	}
 

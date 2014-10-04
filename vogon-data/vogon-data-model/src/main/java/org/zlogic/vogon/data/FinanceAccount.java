@@ -69,21 +69,49 @@ public class FinanceAccount implements Serializable {
 	 */
 	protected FinanceAccount() {
 		includeInTotal = true;
+		showInList = true;
 	}
 
 	/**
-	 * Creates an account
+	 * Creates a new FinanceAccount
 	 *
 	 * @param owner the account owner
 	 * @param name the account name
 	 * @param currency the account currency
 	 */
 	public FinanceAccount(VogonUser owner, String name, Currency currency) {
+		this();
 		includeInTotal = true;
+		showInList = true;
 		this.name = name;
 		this.balance = 0L;
 		this.currency = (currency != null ? currency : Currency.getInstance(Locale.getDefault())).getCurrencyCode();
 		FinanceAccount.this.setOwner(owner);
+	}
+
+	/**
+	 * Creates a new FinanceAccount by merging another account's properties
+	 *
+	 * @param owner the account owner
+	 * @param account the account from which to merge properties
+	 */
+	public FinanceAccount(VogonUser owner, FinanceAccount account) {
+		this();
+		balance = 0L;
+		FinanceAccount.this.setOwner(owner);
+		FinanceAccount.this.merge(account);
+	}
+
+	/**
+	 * Merges properties from another FinanceAccount instance to this instance
+	 *
+	 * @param account the account from which to merge properties
+	 */
+	public void merge(FinanceAccount account) {
+		includeInTotal = account.includeInTotal != null ? account.includeInTotal : includeInTotal;
+		showInList = account.showInList != null ? account.showInList : showInList;
+		name = account.name;
+		currency = (account.currency != null ? account.currency : Currency.getInstance(Locale.getDefault()).getCurrencyCode());
 	}
 
 	/**

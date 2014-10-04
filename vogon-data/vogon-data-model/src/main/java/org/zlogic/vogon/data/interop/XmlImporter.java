@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
@@ -78,21 +77,20 @@ public class XmlImporter implements Importer {
 			Document doc = dBuilder.parse(inputStream);
 			doc.getDocumentElement().normalize();
 
-			//TODO: use constants for element names
 			//TODO: do not throw exceptions on missing elements
 			//Get root node
 			Node rootNode = doc.getFirstChild();
-			if (rootNode == null || !rootNode.getNodeName().equals("VogonFinanceData")) //NOI18N
+			if (rootNode == null || !rootNode.getNodeName().equals(XmlFields.ROOT_NODE))
 				throw new VogonImportLogicalException(messages.getString("MISSING_VOGONFINANCEDATA_NODE_IN_XML"));
 
 			//Iterate through root children
 			Node accountsNode = null, currenciesNode = null, transactionsNode = null;
 			for (Node currentNode = rootNode.getFirstChild(); currentNode != null; currentNode = currentNode.getNextSibling()) {
-				if (currentNode.getNodeName().equals("Accounts")) //NOI18N
+				if (currentNode.getNodeName().equals(XmlFields.ACCOUNTS_NODE))
 					accountsNode = currentNode;
-				else if (currentNode.getNodeName().equals("Currencies")) //NOI18N
+				else if (currentNode.getNodeName().equals(XmlFields.CURRENCIES_NODE))
 					currenciesNode = currentNode;
-				else if (currentNode.getNodeName().equals("Transactions")) //NOI18N
+				else if (currentNode.getNodeName().equals(XmlFields.TRANSACTIONS_NODE))
 					transactionsNode = currentNode;
 				else if (currentNode.getNodeType() != Node.TEXT_NODE)
 					Logger.getLogger(XmlImporter.class.getName()).log(Level.WARNING, MessageFormat.format(messages.getString("UNRECOGNIZED_NODE"), currentNode.getNodeName()));
@@ -100,7 +98,7 @@ public class XmlImporter implements Importer {
 
 			//Process default properties
 			{
-				String defaultCurrency = rootNode.getAttributes().getNamedItem("DefaultCurrency").getNodeValue(); //NOI18N
+				String defaultCurrency = rootNode.getAttributes().getNamedItem(XmlFields.DEFAULT_CURRENCY_ATTRIBUTE).getNodeValue();
 
 				owner.setDefaultCurrency(Currency.getInstance(defaultCurrency));
 			}
@@ -112,12 +110,12 @@ public class XmlImporter implements Importer {
 
 				//Extract attributes from XML
 				NamedNodeMap attributes = currentNode.getAttributes();
-				String accountName = attributes.getNamedItem("Name").getNodeValue(); //NOI18N
-				long accountId = Long.parseLong(attributes.getNamedItem("Id").getNodeValue()); //NOI18N
-				boolean includeInTotal = Boolean.parseBoolean(attributes.getNamedItem("IncludeInTotal").getNodeValue()); //NOI18N
-				boolean showInList = Boolean.parseBoolean(attributes.getNamedItem("ShowInList").getNodeValue()); //NOI18N
-				String currency = attributes.getNamedItem("Currency") != null ? attributes.getNamedItem("Currency").getNodeValue() : null; //NOI18N
-				//long accountBalance = Long.parseLong(attributes.getNamedItem("Balance").getNodeValue());
+				String accountName = attributes.getNamedItem(XmlFields.NAME_ATTRIBUTE).getNodeValue(); //NOI18N
+				long accountId = Long.parseLong(attributes.getNamedItem(XmlFields.ID_ATTRIBUTE).getNodeValue());
+				boolean includeInTotal = attributes.getNamedItem(XmlFields.INCLUDE_IN_TOTAL_ATTRIBUTE) != null ? Boolean.parseBoolean(attributes.getNamedItem(XmlFields.INCLUDE_IN_TOTAL_ATTRIBUTE).getNodeValue()) : true;
+				boolean showInList = attributes.getNamedItem(XmlFields.SHOW_IN_LIST_ATTRIBUTE) != null ? Boolean.parseBoolean(attributes.getNamedItem(XmlFields.SHOW_IN_LIST_ATTRIBUTE).getNodeValue()) : true;
+				String currency = attributes.getNamedItem(XmlFields.CURRENCY_ATTRIBUTE) != null ? attributes.getNamedItem(XmlFields.CURRENCY_ATTRIBUTE).getNodeValue() : null;
+				//long accountBalance = Long.parseLong(attributes.getNamedItem(XmlFields.BALANCE_ATTRIBUTE).getNodeValue());
 
 				//Search existing accounts in DB
 				CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -150,9 +148,9 @@ public class XmlImporter implements Importer {
 
 				//Extract attributes from XML
 				NamedNodeMap attributes = currentNode.getAttributes();
-				String sourceCurrencyName = attributes.getNamedItem("Source").getNodeValue(); //NOI18N
-				String destinationCurrencyName = attributes.getNamedItem("Destination").getNodeValue(); //NOI18N
-				double exchangeRate = Double.parseDouble(attributes.getNamedItem("Rate").getNodeValue()); //NOI18N
+				String sourceCurrencyName = attributes.getNamedItem(XmlFields.SOURCE_ATTRIBUTE).getNodeValue();
+				String destinationCurrencyName = attributes.getNamedItem(XmlFields.DESTINATION_ATTRIBUTE).getNodeValue();
+				double exchangeRate = Double.parseDouble(attributes.getNamedItem(XmlFields.RATE_ATTRIBUTE).getNodeValue());
 
 				//Search existing currency rates in DB
 				CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -181,20 +179,19 @@ public class XmlImporter implements Importer {
 
 				//Extract attributes from XML
 				NamedNodeMap attributes = currentNode.getAttributes();
-				String transactionType = attributes.getNamedItem("Type").getNodeValue(); //NOI18N
-				long transactionId = Long.parseLong(attributes.getNamedItem("Id").getNodeValue()); //NOI18N
-				String transactionDescription = attributes.getNamedItem("Description").getNodeValue(); //NOI18N
-				//String transactionAmount = attributes.getNamedItem("Amount").getNodeValue();
-				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); //NOI18N
-				Date transactionDate = dateFormat.parse(attributes.getNamedItem("Date").getNodeValue()); //NOI18N
+				String transactionType = attributes.getNamedItem(XmlFields.TYPE_ATTRIBUTE).getNodeValue();
+				long transactionId = Long.parseLong(attributes.getNamedItem(XmlFields.ID_ATTRIBUTE).getNodeValue());
+				String transactionDescription = attributes.getNamedItem(XmlFields.DESCRIPTION_ATTRIBUTE).getNodeValue();
+				//String transactionAmount = attributes.getNamedItem(XmlFields.AMOUNT_ATTRIBUTE).getNodeValue();
+				Date transactionDate = XmlFields.DATE_FORMAT.parse(attributes.getNamedItem(XmlFields.DATE_ATTRIBUTE).getNodeValue());
 
 				//Create transaction instance
 				FinanceTransaction.Type transactionTypeEnum;
 				switch (transactionType) {
-					case "Transfer":
+					case XmlFields.TRANSACTION_TYPE_TRANSFER_VALUE:
 						transactionTypeEnum = FinanceTransaction.Type.TRANSFER;
 						break;
-					case "ExpenseIncome":
+					case XmlFields.TRANSACTION_TYPE_EXPENSEINCOME_VALUE:
 						transactionTypeEnum = FinanceTransaction.Type.EXPENSEINCOME;
 						break;
 					default:
@@ -213,15 +210,15 @@ public class XmlImporter implements Importer {
 					if (childNode.getNodeType() != Node.ELEMENT_NODE)
 						continue;
 					switch (childNode.getNodeName()) {
-						case "Tag":	//NOI18N
+						case XmlFields.TAG_NODE:
 							String tag = childNode.getTextContent();
 							tagsList.add(tag);
 							break;
-						case "Component"://NOI18N
-							//long componentId = Long.parseLong(childNode.getAttributes().getNamedItem("Id").getNodeValue());
-							long componentAccountId = Long.parseLong(childNode.getAttributes().getNamedItem("Account").getNodeValue()); //NOI18N
-							long componentAmount = Long.parseLong(childNode.getAttributes().getNamedItem("Amount").getNodeValue()); //NOI18N
-							long componentTransactionId = Long.parseLong(childNode.getAttributes().getNamedItem("Transaction").getNodeValue()); //NOI18N
+						case XmlFields.TRANSACTION_COMPONENT_NODE:
+							//long componentId = Long.parseLong(childNode.getAttributes().getNamedItem(XmlFields.ID_ATTRIBUTE).getNodeValue());
+							long componentAccountId = Long.parseLong(childNode.getAttributes().getNamedItem(XmlFields.ACCOUNT_ATTRIBUTE).getNodeValue());
+							long componentAmount = Long.parseLong(childNode.getAttributes().getNamedItem(XmlFields.AMOUNT_ATTRIBUTE).getNodeValue());
+							long componentTransactionId = Long.parseLong(childNode.getAttributes().getNamedItem(XmlFields.TRANSACTION_ATTRIBUTE).getNodeValue());
 							TransactionComponent component = new TransactionComponent(accountsMap.get(componentAccountId), transactionsMap.get(componentTransactionId), componentAmount);
 							entityManager.persist(component);
 							transaction.addComponent(component);
