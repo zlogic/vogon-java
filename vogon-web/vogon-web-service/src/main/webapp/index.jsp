@@ -1,99 +1,104 @@
-<%@ page session="false" %><!DOCTYPE html>
+<%@ page session="false" trimDirectiveWhitespaces="true" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setBundle basename="org.zlogic.vogon.web.messages" />
+<fmt:setBundle basename="org.zlogic.vogon.web.webjars" var="webjars"/>
+<!DOCTYPE html>
 <html>
 	<head>
-		<title>Vogon finance tracker</title>
-		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("bootstrap") %>/css/bootstrap.min.css">
-		<link rel="stylesheet" type="text/css" href="webjars/nvd3/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("nvd3") %>/nv.d3.min.css">
-		<!--<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("bootstrap") %>/css/bootstrap-theme.min.css">-->
-		<script type="text/javascript" src="webjars/angularjs/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("angularjs") %>/angular.min.js"></script>
-		<script type="text/javascript" src="webjars/angularjs/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("angularjs") %>/angular-cookies.js"></script>
-		<script type="text/javascript" src="webjars/angular-ui-bootstrap/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("angularuibootstrap") %>/ui-bootstrap-tpls.min.js"></script>
-		<script type="text/javascript" src="webjars/jquery/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("jquery") %>/jquery.min.js"></script>
-		<script type="text/javascript" src="webjars/bootstrap/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("bootstrap") %>/js/bootstrap.min.js"></script>
-		<script type="text/javascript" src="webjars/d3js/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("d3js") %>/d3.min.js"></script>
-		<script type="text/javascript" src="webjars/nvd3/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("nvd3") %>/nv.d3.min.js"></script>
-		<script type="text/javascript" src="webjars/angularjs-nvd3-directives/<%= org.zlogic.vogon.web.utils.WebProperties.getProperty("angularjsnvd3directives") %>/angularjs-nvd3-directives.js"></script>
+		<title><fmt:message key="VOGON_PAGE_TITLE"/></title>
+		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<fmt:message key="bootstrap" bundle="${webjars}"/>/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="webjars/nvd3/<fmt:message key="nvd3" bundle="${webjars}"/>/nv.d3.min.css">
+		<!--<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<fmt:message key="bootstrap" bundle="${webjars}"/>/css/bootstrap-theme.min.css">-->
+		<script type="text/javascript" src="webjars/angularjs/<fmt:message key="angularjs" bundle="${webjars}"/>/angular.min.js"></script>
+		<script type="text/javascript" src="webjars/angularjs/<fmt:message key="angularjs" bundle="${webjars}"/>/angular-cookies.js"></script>
+		<script type="text/javascript" src="webjars/angular-ui-bootstrap/<fmt:message key="angularuibootstrap" bundle="${webjars}"/>/ui-bootstrap-tpls.min.js"></script>
+		<script type="text/javascript" src="webjars/jquery/<fmt:message key="jquery" bundle="${webjars}"/>/jquery.min.js"></script>
+		<script type="text/javascript" src="webjars/bootstrap/<fmt:message key="bootstrap" bundle="${webjars}"/>/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="webjars/d3js/<fmt:message key="d3js" bundle="${webjars}"/>/d3.min.js"></script>
+		<script type="text/javascript" src="webjars/nvd3/<fmt:message key="nvd3" bundle="${webjars}"/>/nv.d3.min.js"></script>
+		<script type="text/javascript" src="webjars/angularjs-nvd3-directives/<fmt:message key="angularjsnvd3directives" bundle="${webjars}"/>/angularjs-nvd3-directives.js"></script>
+		<script type="text/javascript" src="script/messages.js"></script>
 		<script type="text/javascript" src="script/main.js"></script>
 		<link rel="stylesheet" type="text/css" href="css/style.css">
 		<link rel="icon" type="image/png" href="images/vogon-favicon.png" />
 	</head>
 	<body ng-app="vogon">
 		<div ng-controller="AuthController" class="well well-sm" ng-show="authorizationService.authorized">
-			<span class="control-label">Vogon for {{userService.userData.username}} </span>
-			<button ng-click="showUserSettingsDialog()" class="btn btn-default"><span class="glyphicon glyphicon-edit"></span> Edit settings</button>
-			<button ng-click="showAnalyticsDialog()" class="btn btn-default"><span class="glyphicon glyphicon-stats"></span> Show analytics</button>
-			<button ng-click="logout()" ng-disabled="$eval(logoutLocked)" class="btn btn-default"><span class="glyphicon glyphicon-log-out"></span> Logout</button>
+			<span class="control-label"><fmt:message key="WELCOME_MESSAGE"/> </span>
+			<button ng-click="showUserSettingsDialog()" class="btn btn-default"><span class="glyphicon glyphicon-edit"></span> <fmt:message key="EDIT_SETTINGS"/></button>
+			<button ng-click="showAnalyticsDialog()" class="btn btn-default"><span class="glyphicon glyphicon-stats"></span> <fmt:message key="SHOW_ANALYTICS"/></button>
+			<button ng-click="logout()" ng-disabled="$eval(logoutLocked)" class="btn btn-default"><span class="glyphicon glyphicon-log-out"></span> <fmt:message key="LOGOUT"/></button>
 		</div>
 		<script type="text/ng-template" id="loginDialog">
 			<div class="modal-header">
-				<h3 class="modal-title">Log in</h3>
+				<h3 class="modal-title"><fmt:message key="LOG_IN_TITLE"/></h3>
 			</div>
 			<form class="form-inline" submit="login()">
 				<div class="modal-body">
-					<input type="text" class="form-control" ng-model="authorizationService.username" ng-disabled="$eval(loginLocked)" placeholder="Enter username" />
-					<input type="password" class="form-control" ng-model="authorizationService.password" ng-disabled="$eval(loginLocked)" placeholder="Enter password" />
+					<input type="text" class="form-control" ng-model="authorizationService.username" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_USERNAME"/>" />
+					<input type="password" class="form-control" ng-model="authorizationService.password" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_PASSWORD"/>" />
 				</div>
 				<div class="modal-body" ng-show="failed">
-					<alert type="danger">Login failed</alert>
+					<alert type="danger"><fmt:message key="LOGIN_FAILED"/></alert>
 				</div>
 				<div class="modal-footer">
-					<button ng-click="login()" ng-disabled="$eval(loginLocked) || !authorizationService.username || !authorizationService.password" class="btn btn-primary"><span class="glyphicon glyphicon-log-in"></span> Login</button>
+					<button ng-click="login()" ng-disabled="$eval(loginLocked) || !authorizationService.username || !authorizationService.password" class="btn btn-primary"><span class="glyphicon glyphicon-log-in"></span> <fmt:message key="LOGIN"/></button>
 				</div>
 			</form>
 		</script>
 		<script type="text/ng-template" id="userSettingsDialog">
 			<form name="userSettingsForm" novalidate>
 				<div class="modal-header">
-					<h3 class="modal-title">Settings for {{user.username}}</h3>
+				<h3 class="modal-title"><fmt:message key="USER_SETTINGS_TITLE"/></h3>
 				</div>
 				<div class="modal-body">
 					<div class="form-group" ng-class="{ 'has-error': userSettingsForm.username.$invalid }">
-						<label>Username</label>
-						<input type="text" name="username" class="form-control" ng-model="user.username" placeholder="Enter username" required />
+						<label><fmt:message key="USERNAME"/></label>
+						<input type="text" name="username" class="form-control" ng-model="user.username" placeholder="<fmt:message key="ENTER_USERNAME"/>" required />
 					</div>
 					<div class="form-group">
-						<label>Password</label>
-						<input type="password" class="form-control" ng-model="user.password" placeholder="Enter new password" />
+						<label><fmt:message key="PASSWORD"/></label>
+						<input type="password" class="form-control" ng-model="user.password" placeholder="<fmt:message key="ENTER_NEW_PASSWORD"/>" />
 					</div>
 					<div class="form-group">
-						<label>Default currency</label>
+						<label><fmt:message key="DEFAULT_CURRENCY"/></label>
 						<select ng-model="user.defaultCurrency" ng-options="currency.symbol as currency.displayName for currency in currencies.currencies" class="form-control"></select>
 					</div>
 					<div class="form-group">
 						<div class="form-inline">
-							<button ng-click="importData()" ng-disabled="!file" class="btn btn-default"><span class="glyphicon glyphicon-import"></span> Import data</button>
+							<button ng-click="importData()" ng-disabled="!file" class="btn btn-default"><span class="glyphicon glyphicon-import"></span> <fmt:message key="IMPORT_DATA"/></button>
 							<input type="file" onchange="angular.element(this).scope().setFile(this)" class="form-control-file" />
 						</div>
 					</div>
 					<div class="form-group">
-						<button ng-click="exportData()" class="btn btn-default"><span class="glyphicon glyphicon-export"></span> Export data</button>
+						<button ng-click="exportData()" class="btn btn-default"><span class="glyphicon glyphicon-export"></span> <fmt:message key="EXPORT_DATA"/></button>
 					</div>
 					<div class="form-group">
 						<div class="form-inline">
-							<button ng-click="performRecalculateBalance()" class="btn btn-default"><span class="glyphicon glyphicon-repeat"></span> Recalculate balance</button>
-							<button ng-click="performCleanup()" class="btn btn-default"><span class="glyphicon glyphicon-flash"></span> Cleanup database</button>
+							<button ng-click="performRecalculateBalance()" class="btn btn-default"><span class="glyphicon glyphicon-repeat"></span> <fmt:message key="RECALCULATE_BALANCE"/></button>
+							<button ng-click="performCleanup()" class="btn btn-default"><span class="glyphicon glyphicon-flash"></span> <fmt:message key="CLEANUP_DATABASE"/></button>
 						</div>
 					</div>
 					<div class="form-group" ng-show="operationSuccessful">
-						<alert type="success">Done!</alert>
+						<alert type="success"><span class="glyphicon glyphicon-ok"></span> <fmt:message key="DONE_ALERT"/></alert>
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
-					<button ng-click="submitEditing()" class="btn btn-primary" ng-disabled="userSettingsForm.$invalid"><span class="glyphicon glyphicon-ok"></span> Apply</button>
+					<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> <fmt:message key="CANCEL"/></button>
+					<button ng-click="submitEditing()" class="btn btn-primary" ng-disabled="userSettingsForm.$invalid"><span class="glyphicon glyphicon-ok"></span> <fmt:message key="APPLY"/></button>
 				</div>
 			</form>
 		</script>
 		<script type="text/ng-template" id="editTransactionDialog">
 			<form name="transactionEditorForm" novalidate>
 				<div class="modal-header">
-					<h3 class="modal-title">Edit transaction</h3>
+					<h3 class="modal-title"><fmt:message key="EDIT_TRANSACTION_TITLE"/></h3>
 				</div>
 				<div class="modal-body">
 					<div class="row form-control-static">
 						<div class="form-inline col-md-12">
 							<span ng-class="{ 'has-error': transactionEditorForm.description.$invalid }" >
-								<input type="text" ng-model="transaction.description" class="form-control" placeholder="Enter transaction description" name="description" required />
+								<input type="text" ng-model="transaction.description" class="form-control" placeholder="<fmt:message key="ENTER_TRANSACTION_DESCRIPTION"/>" name="description" required />
 							</span>
 							<select ng-model="transaction.type" ng-init="transaction.type = transaction.type || transactionTypes[0]" ng-options="transactionType.value as transactionType.name for transactionType in transactionTypes" class="form-control"></select>
 							<div class="input-group">
@@ -102,45 +107,45 @@
 									<button type="button" class="btn btn-default" ng-click="openCalendar($event)"><span class="glyphicon glyphicon-calendar"></span></button>
 								</span>
 							</div>
-							<input type="text" ng-model="$parent.tags" ng-change="syncTags()" placeholder="Enter tags" class="form-control"/>
+							<input type="text" ng-model="$parent.tags" ng-change="syncTags()" placeholder="<fmt:message key="ENTER_TAGS"/>" class="form-control"/>
 						</div>
 					</div>
 					<div class="row form-control-static">
 						<div class="col-md-12">
-							<button ng-click="addTransactionComponent()" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span> Add component</button>
+							<button ng-click="addTransactionComponent()" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span> <fmt:message key="ADD_COMPONENT"/></button>
 						</div>
 					</div>
 					<div class="row form-control-static" ng-repeat="component in transaction.components">
 						<div class="form-inline col-md-12">
 							<ng-form name="transactionForm">
 								<span ng-class="{ 'has-error': transactionForm.amount.$invalid }" >
-									<input type="text" ng-model="component.amount" placeholder="Enter amount" class="text-right form-control" name="amount" smart-float required/>
+									<input type="text" ng-model="component.amount" placeholder="<fmt:message key="ENTER_AMOUNT"/>" class="text-right form-control" name="amount" smart-float required/>
 								</span>
 								<span style="form-control">{{accountService.getAccount(component.accountId).currency}}</span>
 								<span ng-class="{ 'has-error': transactionForm.account.$invalid }" >
 									<select ng-model="component.accountId" ng-options="account.id as account.name for account in accountService.accounts | filter:isAccountVisible" class="form-control" name="account" required></select>
 								</span>
-								<button ng-click="deleteTransactionComponent(component)" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete</button>
+								<button ng-click="deleteTransactionComponent(component)" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> <fmt:message key="DELETE"/></button>
 							</ng-form>
 						</div>
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button ng-click="deleteTransaction()" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Delete</button>
-					<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
-					<button ng-click="submitEditing()" class="btn btn-primary" ng-disabled="transactionEditorForm.$invalid"><span class="glyphicon glyphicon-ok"></span> Apply</button>
+					<button ng-click="deleteTransaction()" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> <fmt:message key="DELETE"/></button>
+					<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> <fmt:message key="CANCEL"/></button>
+					<button ng-click="submitEditing()" class="btn btn-primary" ng-disabled="transactionEditorForm.$invalid"><span class="glyphicon glyphicon-ok"></span> <fmt:message key="APPLY"/></button>
 				</div>
 			</form>
 		</script>
 		<script type="text/ng-template" id="editAccountsDialog">
 			<form name="accountEditorForm" novalidate>
 				<div class="modal-header">
-					<h3 class="modal-title">Edit accounts</h3>
+					<h3 class="modal-title"><fmt:message key="EDIT_ACCOUNTS_TITLE"/></h3>
 				</div>
 				<div class="modal-body">
 					<div class="row form-control-static">
 						<div class="col-md-12">
-							<button ng-click="addAccount()" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span> Add account</button>
+							<button ng-click="addAccount()" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span> <fmt:message key="ADD_ACCOUNT"/></button>
 						</div>
 					</div>
 					<div class="row form-control-static" ng-repeat="account in accounts.accounts | orderBy:'id'">
@@ -149,7 +154,7 @@
 								<div class="row">
 									<div class="form-inline col-md-12">
 										<span ng-class="{ 'has-error': accountForm.accountName.$invalid }" >
-											<input type="text" ng-model="account.name" placeholder="Enter account name" class="form-control" name="accountName" required/>
+											<input type="text" ng-model="account.name" placeholder="<fmt:message key="ENTER_ACCOUNT_NAME"/>" class="form-control" name="accountName" required/>
 										</span>
 										<span ng-class="{ 'has-error': accountForm.accountCurrency.$invalid }" >
 											<select ng-model="account.currency" ng-options="currency.symbol as currency.displayName for currency in currencies.currencies" class="form-control" name="accountCurrency" required></select>
@@ -159,29 +164,29 @@
 								<div class="row">
 									<div class="form-inline col-md-12">
 										<label class="checkbox-inline">
-											<input type="checkbox" ng-model="account.includeInTotal"/> Include in total
+											<input type="checkbox" ng-model="account.includeInTotal"/> <fmt:message key="INCLUDE_IN_TOTAL"/>
 										</label>
 										<label class="checkbox-inline">
-											<input type="checkbox" ng-model="account.showInList"> Show in accounts list
+											<input type="checkbox" ng-model="account.showInList"> <fmt:message key="SHOW_IN_ACCOUNTS_LIST"/>
 										</label>
 									</div>
 								</div>
 							</div>
 							<div class="form-inline col-md-3 text-right">
-								<button ng-click="deleteAccount(account)" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete</button>
+								<button ng-click="deleteAccount(account)" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> <fmt:message key="DELETE"/></button>
 							</div>
 						</ng-form>
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
-					<button ng-click="submitEditing()" class="btn btn-primary" ng-disabled="accountEditorForm.$invalid"><span class="glyphicon glyphicon-ok"></span> Apply</button>
+					<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> <fmt:message key="CANCEL"/></button>
+					<button ng-click="submitEditing()" class="btn btn-primary" ng-disabled="accountEditorForm.$invalid"><span class="glyphicon glyphicon-ok"></span> <fmt:message key="APPLY"/></button>
 				</div>
 			</form>
 		</script>
 		<script type="text/ng-template" id="analyticsDialog">
 			<div class="modal-header">
-				<h3 class="modal-title">Vogon analytics</h3>
+				<h3 class="modal-title"><fmt:message key="ANALYTICS_TITLE"/></h3>
 			</div>
 			<div class="modal-body">
 				<div class="row">
@@ -189,8 +194,8 @@
 						<div class="form-group">
 							<label>Tags</label>
 							<div class="form-group">
-								<button ng-click="selectAllTags()" class="btn btn-default"><span class="glyphicon glyphicon-check"></span> Select all tags</button>
-								<button ng-click="deselectAllTags()" class="btn btn-default"><span class="glyphicon glyphicon-unchecked"></span> Deselect all tags</button>
+								<button ng-click="selectAllTags()" class="btn btn-default"><span class="glyphicon glyphicon-check"></span> <fmt:message key="SELECT_ALL_TAGS"/></button>
+								<button ng-click="deselectAllTags()" class="btn btn-default"><span class="glyphicon glyphicon-unchecked"></span> <fmt:message key="DESELECT_ALL_TAGS"/></button>
 							</div>
 							<div class="pre-scrollable">
 								<div class="checkbox" ng-repeat="(tag,selected) in tags | orderBy:'tag'">
@@ -205,8 +210,8 @@
 						<div class="form-group">
 							<label>Accounts</label>
 							<div class="form-group">
-								<button ng-click="selectAllAccounts()" class="btn btn-default"><span class="glyphicon glyphicon-check"></span> Select all accounts</button>
-								<button ng-click="deselectAllAccounts()" class="btn btn-default"><span class="glyphicon glyphicon-unchecked"></span> Deselect all accounts</button>
+								<button ng-click="selectAllAccounts()" class="btn btn-default"><span class="glyphicon glyphicon-check"></span> <fmt:message key="SELECT_ALL_ACCOUNTS"/></button>
+								<button ng-click="deselectAllAccounts()" class="btn btn-default"><span class="glyphicon glyphicon-unchecked"></span> <fmt:message key="DESELECT_ALL_ACCOUNTS"/></button>
 							</div>
 							<div class="pre-scrollable">
 								<div class="checkbox" ng-repeat="account in accountService.accounts">
@@ -220,7 +225,7 @@
 				</div>
 				<div class="row">
 					<div class="col-md-6">
-						<label>Start date</label>
+						<label><fmt:message key="START_DATE"/></label>
 						<div class="input-group">
 							<input type="text" class="form-control" datepicker-popup ng-model="$parent.startDate" is-open="$parent.startDateCalendarOpened" />
 							<span class="input-group-btn">
@@ -229,7 +234,7 @@
 						</div>
 					</div>
 					<div class="col-md-6">
-						<label>End date</label>
+						<label><fmt:message key="END_DATE"/></label>
 						<div class="input-group">
 							<input type="text" class="form-control" datepicker-popup ng-model="$parent.endDate" is-open="$parent.endDateCalendarOpened" />
 							<span class="input-group-btn">
@@ -242,37 +247,37 @@
 					<div class="col-md-12">
 						<div class="checkbox">
 							<label class="checkbox">
-								<input type="checkbox" ng-model="transactionTypeEnabled.transfer"/> Transfer transactions
+								<input type="checkbox" ng-model="transactionTypeEnabled.transfer"/> <fmt:message key="TRANSFER_TRANSACTIONS"/>
 							</label>
 						</div>
 						<div class="checkbox">
 							<label class="checkbox">
-								<input type="checkbox" ng-model="transactionTypeEnabled.income"/> Income transactions
+								<input type="checkbox" ng-model="transactionTypeEnabled.income"/> <fmt:message key="INCOME_TRANSACTIONS"/>
 							</label>
 						</div>
 						<div class="checkbox">
 							<label class="checkbox">
-								<input type="checkbox" ng-model="transactionTypeEnabled.expense"/> Expense transactions
+								<input type="checkbox" ng-model="transactionTypeEnabled.expense"/> <fmt:message key="EXPENSE_TRANSACTIONS"/>
 							</label>
 						</div>
 					</div>
 				</div>
 				<div class="row form-control-static">
 					<div class="col-md-12">
-						<button ng-click="buildReport()" class="btn btn-default btn-primary form-control"><span class="glyphicon glyphicon-ok"></span> Build report</button>
+						<button ng-click="buildReport()" class="btn btn-default btn-primary form-control"><span class="glyphicon glyphicon-ok"></span> <fmt:message key="BUILD_REPORT"/></button>
 					</div>
 				</div>
 				<div class="well well-sm form-control-static" ng-show="report">
 					<div class="row">
 						<div class="col-md-6">
-							<label class="form-control-static">Report by transactions</label>
+							<label class="form-control-static"><fmt:message key="REPORT_BY_TRANSACTIONS"/></label>
 							<div class="pre-scrollable">
 								<table class="table table-hover">
 									<thead>
 										<tr>
-											<th>Transaction</th>
-											<th class="text-right">Amount</th>
-											<th>Date</th>
+											<th><fmt:message key="TRANSACTION"/></th>
+											<th class="text-right"><fmt:message key="AMOUNT"/></th>
+											<th><fmt:message key="DATE"/></th>
 										</tr>
 									</thead>
 									<tbody>
@@ -293,13 +298,13 @@
 							</div>
 						</div>
 						<div class="col-md-6 form-group">
-							<label class="form-control-static">Report by tags</label>
+							<label class="form-control-static"><fmt:message key="REPORT_BY_TAGS"/></label>
 							<div class="pre-scrollable">
 								<table class="table table-hover">
 									<thead>
 										<tr>
-											<th>Tag</th>
-											<th class="text-right">Amount</th>
+											<th><fmt:message key="TAG"/></th>
+											<th class="text-right"><fmt:message key="AMOUNT"/></th>
 										</tr>
 									</thead>
 									<tbody>
@@ -318,13 +323,13 @@
 					</div>
 					<div class="row form-control-static">
 						<div class="col-md-12 form-inline">
-							<label>Select charts currency: </label>
+							<label><fmt:message key="SELECT_CHARTS_CURRENCY"/> </label>
 							<select ng-model="report.selectedCurrency" ng-change="currencyChanged()" ng-options="currency.symbol as currency.displayName for currency in currencyService.currencies|filter:filterCurrency" class="form-control"></select>
 						</div>
 					</div>
 					<div class="row form-control-static">
 						<div class="col-md-12">
-							<label>Tags chart</label>
+							<label><fmt:message key="TAGS_CHART"/></label>
 							<nvd3-pie-chart class="form-control-static" data="tagsChartData" height="300" showLabels="false" donut="true" tooltips="true" tooltipcontent="tagsChartToolTipContentFunction()" donutLabelsOutside="true" showLegend="true">
 								<svg></svg>
 							</nvd3-pie-chart>
@@ -332,7 +337,7 @@
 					</div>
 					<div class="row form-control-static">
 						<div class="col-md-12">
-							<label>Balance chart</label>
+							<label><fmt:message key="BALANCE_CHART"/></label>
 							<nvd3-line-chart id="balanceChartId" data="balanceChartData" height="300" showXAxis="true" showYAxis="true" tooltips="true" xAxisTickFormat="balanceChartXTickFormat()" useInteractiveGuideline="true" yaxisshowmaxmin="true">
 								<svg></svg>
 							</nvd3-line-chart>
@@ -341,20 +346,20 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button ng-click="close()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Close</button>
+				<button ng-click="close()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> <fmt:message key="CLOSE"/></button>
 			</div>
 		</script>
 		<div ng-controller="AccountsController">
 			<div ng-show="authorizationService.authorized" class="panel panel-default">
-				<div class="panel-heading">Accounts for {{userService.userData.username}}</div>
+				<div class="panel-heading"><fmt:message key="ACCOUNTS_LIST_TITLE"/></div>
 				<div class="panel-body">
-					<button ng-click="editAccounts()" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span> Edit accounts</button>
+					<button ng-click="editAccounts()" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span> <fmt:message key="EDIT_ACCOUNTS"/></button>
 					<table class="table table-hover">
 						<thead>
 							<tr>
-								<th>Account name</th>
-								<th class="text-right">Balance</th>
-								<th>Currency</th>
+								<th><fmt:message key="ACCOUNT_NAME"/></th>
+								<th class="text-right"><fmt:message key="BALANCE"/></th>
+								<th><fmt:message key="CURRENCY"/></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -366,7 +371,7 @@
 						</tbody>
 						<tfoot>
 							<tr class="total-amount" ng-repeat="(currency,data) in accountService.totalsForCurrency | orderBy:'id'">
-								<td>Total for {{data.name}}</td>
+								<td><fmt:message key="TOTAL_FOR_CURRENCY"/></td>
 								<td class="text-right">{{data.total | number:2}}</td>
 								<td>{{currency}}</td>
 							</tr>
@@ -377,24 +382,24 @@
 		</div>
 		<div ng-controller="NotificationController">
 			<div class="navbar-fixed-top" ng-show="alertService.enabled()">
-				<div class="alert alert-warning" role="alert" ng-show="httpService.isLoading"><span class="glyphicon glyphicon-refresh"></span> Loading...</div>
+				<div class="alert alert-warning" role="alert" ng-show="httpService.isLoading"><span class="glyphicon glyphicon-refresh"></span> <fmt:message key="LOADING_ALERT"/></div>
 				<alert ng-repeat="alert in alertService.alerts" type="{{alert.type}}" close="alertService.closeAlert($index)"><span class="glyphicon glyphicon-exclamation-sign"></span> {{alert.msg}}</alert>
 			</div>
 		</div>
 		<div ng-controller="TransactionsController">
 			<div ng-show="authorizationService.authorized">
 				<div class="panel panel-default">
-					<div class="panel-heading">Transactions for {{userService.userData.username}}</div>
+					<div class="panel-heading"><fmt:message key="TRANSACTIONS_LIST_TITLE"/></div>
 					<div class="panel-body">
-						<button ng-click="addTransaction()" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> Add transaction</button>
+						<button ng-click="addTransaction()" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> <fmt:message key="ADD_TRANSACTION"/></button>
 						<table class="table table-hover">
 							<thead>
 								<tr>
-									<th>Transaction name</th>
-									<th>Date</th>
-									<th>Tags</th>
-									<th class="text-right">Amount</th>
-									<th>Account</th>
+									<th><fmt:message key="TRANSACTION_NAME"/></th>
+									<th><fmt:message key="DATE"/></th>
+									<th><fmt:message key="TAGS"/></th>
+									<th class="text-right"><fmt:message key="AMOUNT"/></th>
+									<th><fmt:message key="ACCOUNT"/></th>
 									<th></th>
 								</tr>
 							</thead>
@@ -404,7 +409,7 @@
 									<td ng-click="startEditing(transaction)" class="editable">{{transaction.date | date}}</td>
 									<td ng-click="startEditing(transaction)" class="editable">
 										<div ng-repeat="tag in transaction.tags">
-											{{tag}}{{$last ? '' : ', '}}
+											{{tag}}{{$last ? "" : <fmt:message key="TAGS_SEPARATOR" />}}
 										</div>
 									</td>
 									<td ng-click="startEditing(transaction)" class="text-right editable">
@@ -432,7 +437,7 @@
 										</div>
 									</td>
 									<td>
-										<button ng-click="duplicateTransaction(transaction)" class="btn btn-default"><span class="glyphicon glyphicon-asterisk"></span> Duplicate</button>
+										<button ng-click="duplicateTransaction(transaction)" class="btn btn-default"><span class="glyphicon glyphicon-asterisk"></span> <fmt:message key="DUPLICATE"/></button>
 									</td>
 								</tr>
 							</tbody>
