@@ -34,7 +34,7 @@
 					<input type="password" class="form-control" ng-model="authorizationService.password" ng-disabled="$eval(loginLocked)" placeholder="Enter password" />
 				</div>
 				<div class="modal-body" ng-show="failed">
-					<alert type="danger">Login failed</div>
+					<alert type="danger">Login failed</alert>
 				</div>
 				<div class="modal-footer">
 					<button ng-click="login()" ng-disabled="$eval(loginLocked) || !authorizationService.username || !authorizationService.password" class="btn btn-primary"><span class="glyphicon glyphicon-log-in"></span> Login</button>
@@ -60,12 +60,21 @@
 				</div>
 				<div class="form-group">
 					<div class="form-inline">
-						<button ng-click="importData()" ng-disabled="!file" class="btn btn-default form-control"><span class="glyphicon glyphicon-import"></span> Import data</button>
+						<button ng-click="importData()" ng-disabled="!file" class="btn btn-default"><span class="glyphicon glyphicon-import"></span> Import data</button>
 						<input type="file" onchange="angular.element(this).scope().setFile(this)" class="form-control-file" />
 					</div>
 				</div>
 				<div class="form-group">
 					<button ng-click="exportData()" class="btn btn-default"><span class="glyphicon glyphicon-export"></span> Export data</button>
+				</div>
+				<div class="form-group">
+					<div class="form-inline">
+						<button ng-click="performRecalculateBalance()" class="btn btn-default"><span class="glyphicon glyphicon-repeat"></span> Recalculate balance</button>
+						<button ng-click="performCleanup()" class="btn btn-default"><span class="glyphicon glyphicon-flash"></span> Cleanup database</button>
+					</div>
+				</div>
+				<div class="form-group" ng-show="operationSuccessful">
+					<alert type="success">Done!</alert>
 				</div>
 			</div>
 			<div class="modal-footer">
@@ -396,7 +405,7 @@
 											<div ng-repeat="account in accounts=(transactionsService.getAccounts(transaction,transactionsService.fromAccountsPredicate))">
 												{{$first && accounts.length>1?'(':''}}{{account.name}}{{$last ? '' : ', '}}{{$last && accounts.length>1?')':''}}
 											</div>
-											<span class="glyphicon glyphicon-arrow-down"></span>
+											<span class="glyphicon glyphicon-chevron-down"></span>
 											<div ng-repeat="account in accounts=(transactionsService.getAccounts(transaction,transactionsService.toAccountsPredicate))">
 												{{$first && accounts.length>1?'(':''}}{{account.name}}{{$last ? '' : ', '}}{{$last && accounts.length>1?')':''}}
 											</div>

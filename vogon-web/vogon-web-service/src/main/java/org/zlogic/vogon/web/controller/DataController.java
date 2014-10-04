@@ -7,7 +7,6 @@ package org.zlogic.vogon.web.controller;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.Writer;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +18,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.VogonUser;
 import org.zlogic.vogon.data.interop.VogonExportException;
 import org.zlogic.vogon.data.interop.VogonImportException;
 import org.zlogic.vogon.data.interop.VogonImportLogicalException;
 import org.zlogic.vogon.data.interop.XmlExporter;
 import org.zlogic.vogon.data.interop.XmlImporter;
+import org.zlogic.vogon.data.tools.DatabaseMaintenance;
 import org.zlogic.vogon.web.data.AccountRepository;
 import org.zlogic.vogon.web.data.TransactionRepository;
 import org.zlogic.vogon.web.data.UserRepository;
@@ -96,5 +97,34 @@ public class DataController {
 		} catch (VogonExportException ex) {
 			throw new RuntimeException(ex);
 		}
+	}
+
+	/**
+	 * Recalculates balance for all user's accounts
+	 *
+	 * @param userPrincipal the authenticated user
+	 * @return true on success
+	 */
+	@RequestMapping(value = "/recalculateBalance", method = RequestMethod.GET, produces = "application/json")
+	public @ResponseBody
+	Boolean recalculateBalance(@AuthenticationPrincipal VogonSecurityUser userPrincipal) {
+		VogonUser user = userRepository.findByUsername(userPrincipal.getUsername());
+		DatabaseMaintenance databaseMaintenance = new DatabaseMaintenance();
+		for (FinanceAccount account : accountRepository.findByOwner(user))
+			databaseMaintenance.refreshAccountBalance(account, em);
+		return true;
+	}
+
+	/**
+	 * Performs a DB cleanup operation
+	 *
+	 * @return true on success
+	 */
+	@RequestMapping(value = "/cleanup", method = RequestMethod.GET, produces = "application/json")
+	public @ResponseBody
+	Boolean cleanup() {
+		DatabaseMaintenance databaseMaintenance = new DatabaseMaintenance();
+		databaseMaintenance.cleanup(em);//TODO: allows this action only for administrative users?
+		return true;
 	}
 }
