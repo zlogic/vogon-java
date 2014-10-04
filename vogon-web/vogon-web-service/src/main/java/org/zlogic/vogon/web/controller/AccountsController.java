@@ -73,17 +73,11 @@ public class AccountsController {
 		//Merge with database
 		for (FinanceAccount newAccount : accounts) {
 			if (newAccount.getId() == null || !existingAccounts.contains(newAccount)) {
-				//TODO: add functionality to initialise account to FinanceAccount class
-				FinanceAccount createdAccount = new FinanceAccount(user.getUser(), newAccount.getName(), newAccount.getCurrency());
+				FinanceAccount createdAccount = new FinanceAccount(user.getUser(),newAccount);
 				accountRepository.save(createdAccount);
 			} else {
-				//TODO: add functionality to merge existing account component to FinanceAccount class
 				FinanceAccount existingAccount = existingAccounts.get(existingAccounts.indexOf(newAccount));
-				existingAccount.setOwner(user.getUser());
-				existingAccount.setName(newAccount.getName());
-				existingAccount.setCurrency(newAccount.getCurrency());
-				existingAccount.setIncludeInTotal(newAccount.getIncludeInTotal());
-				existingAccount.setShowInList(newAccount.getShowInList());
+				existingAccount.merge(newAccount);
 				removedAccounts.remove(newAccount);
 			}
 		}

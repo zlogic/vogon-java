@@ -6,7 +6,6 @@
 package org.zlogic.vogon.data.interop;
 
 import java.io.OutputStream;
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
@@ -53,9 +52,9 @@ public class XmlExporter implements Exporter {
 	@Override
 	public void exportData(VogonUser owner, Collection<FinanceAccount> accounts, Collection<FinanceTransaction> transactions, Collection<CurrencyRate> currencyRates) throws VogonExportException {
 		Map<FinanceTransaction.Type, String> transactionTypes = new TreeMap<>();
-		transactionTypes.put(FinanceTransaction.Type.TRANSFER, "Transfer"); //NOI18N
-		transactionTypes.put(FinanceTransaction.Type.EXPENSEINCOME, "ExpenseIncome"); //NOI18N
-		transactionTypes.put(FinanceTransaction.Type.UNDEFINED, ""); //NOI18N
+		transactionTypes.put(FinanceTransaction.Type.TRANSFER, XmlFields.TRANSACTION_TYPE_TRANSFER_VALUE);
+		transactionTypes.put(FinanceTransaction.Type.EXPENSEINCOME, XmlFields.TRANSACTION_TYPE_EXPENSEINCOME_VALUE);
+		transactionTypes.put(FinanceTransaction.Type.UNDEFINED, XmlFields.TRANSACTION_TYPE_UNDEFINED_VALUE);
 		try {
 
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -65,67 +64,67 @@ public class XmlExporter implements Exporter {
 			//TODO: use constants for element names
 			// Top element (FinanceData)
 			Document doc = docBuilder.newDocument();
-			Element rootElement = doc.createElement("VogonFinanceData"); //NOI18N
+			Element rootElement = doc.createElement(XmlFields.ROOT_NODE);
 			doc.appendChild(rootElement);
 
 			//Set global parameters
-			rootElement.setAttribute("DefaultCurrency", owner.getDefaultCurrency().getCurrencyCode()); //NOI18N
+			rootElement.setAttribute(XmlFields.DEFAULT_CURRENCY_ATTRIBUTE, owner.getDefaultCurrency().getCurrencyCode());
 
 			//Accounts node
-			Element accountsElement = doc.createElement("Accounts"); //NOI18N
+			Element accountsElement = doc.createElement(XmlFields.ACCOUNTS_NODE);
 			rootElement.appendChild(accountsElement);
 
 			//Currencies node
-			Element currenciesElement = doc.createElement("Currencies"); //NOI18N
+			Element currenciesElement = doc.createElement(XmlFields.CURRENCIES_NODE);
 			rootElement.appendChild(currenciesElement);
 
 			//Transactions node
-			Element transactionsElement = doc.createElement("Transactions"); //NOI18N
+			Element transactionsElement = doc.createElement(XmlFields.TRANSACTIONS_NODE);
 			rootElement.appendChild(transactionsElement);
 
 			//Accounts list
 			for (FinanceAccount account : accounts) {
-				Element accountElement = doc.createElement("Account"); //NOI18N
-				accountElement.setAttribute("Id", Long.toString(account.getId())); //NOI18N
-				accountElement.setAttribute("Name", account.getName()); //NOI18N
-				accountElement.setAttribute("Currency", account.getCurrency().getCurrencyCode()); //NOI18N
-				accountElement.setAttribute("IncludeInTotal", Boolean.toString(account.getIncludeInTotal())); //NOI18N
-				accountElement.setAttribute("ShowInList", Boolean.toString(account.getShowInList())); //NOI18N
-				//accountElement.setAttribute("Balance", Long.toString(account.getRawBalance()));
+				Element accountElement = doc.createElement(XmlFields.ACCOUNT_NODE);
+				accountElement.setAttribute(XmlFields.ID_ATTRIBUTE, Long.toString(account.getId()));
+				accountElement.setAttribute(XmlFields.NAME_ATTRIBUTE, account.getName());
+				accountElement.setAttribute(XmlFields.CURRENCY_ATTRIBUTE, account.getCurrency().getCurrencyCode());
+				accountElement.setAttribute(XmlFields.INCLUDE_IN_TOTAL_ATTRIBUTE, Boolean.toString(account.getIncludeInTotal()));
+				accountElement.setAttribute(XmlFields.SHOW_IN_LIST_ATTRIBUTE, Boolean.toString(account.getShowInList()));
+				//accountElement.setAttribute(XmlFields.BALANCE_ATTRIBUTE, Long.toString(account.getRawBalance()));
 				accountsElement.appendChild(accountElement);
 			}
 
 			//Currencies list
 			if (currencyRates != null)
 				for (CurrencyRate rate : currencyRates) {
-					Element currencyElement = doc.createElement("CurrencyRate"); //NOI18N
-					currencyElement.setAttribute("Source", rate.getSource().getCurrencyCode()); //NOI18N
-					currencyElement.setAttribute("Destination", rate.getDestination().getCurrencyCode()); //NOI18N
-					currencyElement.setAttribute("Rate", Double.toString(rate.getExchangeRate())); //NOI18N
+					Element currencyElement = doc.createElement(XmlFields.CURRENCY_RATE_NODE);
+					currencyElement.setAttribute(XmlFields.SOURCE_ATTRIBUTE, rate.getSource().getCurrencyCode());
+					currencyElement.setAttribute(XmlFields.DESTINATION_ATTRIBUTE, rate.getDestination().getCurrencyCode());
+					currencyElement.setAttribute(XmlFields.RATE_ATTRIBUTE, Double.toString(rate.getExchangeRate()));
 					currenciesElement.appendChild(currencyElement);
 				}
 
 			//Transactions list
 			for (FinanceTransaction transaction : transactions) {
-				Element transactionElement = doc.createElement("Transaction"); //NOI18N
-				transactionElement.setAttribute("Type", transactionTypes.get(transaction.getType())); //NOI18N
-				transactionElement.setAttribute("Id", Long.toString(transaction.getId())); //NOI18N
-				transactionElement.setAttribute("Description", transaction.getDescription()); //NOI18N
-				//transactionElement.setAttribute("Amount", Long.toString(transaction.getRawAmount()));
-				transactionElement.setAttribute("Date", MessageFormat.format("{0,date,yyyy-MM-dd}", new Object[]{transaction.getDate()})); //NOI18N
+				Element transactionElement = doc.createElement(XmlFields.TRANSACTION_NODE);
+				transactionElement.setAttribute(XmlFields.TYPE_ATTRIBUTE, transactionTypes.get(transaction.getType()));
+				transactionElement.setAttribute(XmlFields.ID_ATTRIBUTE, Long.toString(transaction.getId()));
+				transactionElement.setAttribute(XmlFields.DESCRIPTION_ATTRIBUTE, transaction.getDescription());
+				//transactionElement.setAttribute(XmlFields.AMOUNT_ATTRIBUTE, Long.toString(transaction.getRawAmount()));
+				transactionElement.setAttribute(XmlFields.DATE_ATTRIBUTE, XmlFields.DATE_FORMAT.format(transaction.getDate()));
 				//Tags list
 				for (String tag : transaction.getTags()) {
-					Element tagElement = doc.createElement("Tag"); //NOI18N
+					Element tagElement = doc.createElement(XmlFields.TAG_NODE);
 					tagElement.setTextContent(tag);
 					transactionElement.appendChild(tagElement);
 				}
 				//Transaction components list
 				for (TransactionComponent component : transaction.getComponents()) {
-					Element compomentElement = doc.createElement("Component"); //NOI18N
-					compomentElement.setAttribute("Id", Long.toString(component.getId())); //NOI18N
-					compomentElement.setAttribute("Account", Long.toString(component.getAccount().getId())); //NOI18N
-					compomentElement.setAttribute("Amount", Long.toString(component.getRawAmount())); //NOI18N
-					compomentElement.setAttribute("Transaction", Long.toString(component.getTransaction().getId())); //NOI18N
+					Element compomentElement = doc.createElement(XmlFields.TRANSACTION_COMPONENT_NODE);
+					compomentElement.setAttribute(XmlFields.ID_ATTRIBUTE, Long.toString(component.getId()));
+					compomentElement.setAttribute(XmlFields.ACCOUNT_ATTRIBUTE, Long.toString(component.getAccount().getId()));
+					compomentElement.setAttribute(XmlFields.AMOUNT_ATTRIBUTE, Long.toString(component.getRawAmount()));
+					compomentElement.setAttribute(XmlFields.TRANSACTION_ATTRIBUTE, Long.toString(component.getTransaction().getId()));
 					transactionElement.appendChild(compomentElement);
 				}
 				transactionsElement.appendChild(transactionElement);
