@@ -30,7 +30,7 @@
 			</div>
 			<form class="form-inline" submit="login()">
 				<div class="modal-body">
-					<input type="text" class="form-control" ng-model="authorizationService.username" ng-disabled="$eval(loginLocked)" placeholder="Enter username"/>
+					<input type="text" class="form-control" ng-model="authorizationService.username" ng-disabled="$eval(loginLocked)" placeholder="Enter username" />
 					<input type="password" class="form-control" ng-model="authorizationService.password" ng-disabled="$eval(loginLocked)" placeholder="Enter password" />
 				</div>
 				<div class="modal-body" ng-show="failed">
@@ -42,122 +42,142 @@
 			</form>
 		</script>
 		<script type="text/ng-template" id="userSettingsDialog">
-			<div class="modal-header">
-				<h3 class="modal-title">Settings for {{user.username}}</h3>
-			</div>
-			<div class="modal-body">
-				<div class="form-group">
-					<label>Username</label>
-					<input type="text" id="username" class="form-control" ng-model="user.username" placeholder="Enter username"/>
+			<form name="userSettingsForm" novalidate>
+				<div class="modal-header">
+					<h3 class="modal-title">Settings for {{user.username}}</h3>
 				</div>
-				<div class="form-group">
-					<label>Password</label>
-					<input type="password" class="form-control" ng-model="user.password" placeholder="Enter new password" />
-				</div>
-				<div class="form-group">
-					<label>Default currency</label>
-					<select ng-model="user.defaultCurrency" ng-options="currency.symbol as currency.displayName for currency in currencies.currencies" class="form-control"></select>
-				</div>
-				<div class="form-group">
-					<div class="form-inline">
-						<button ng-click="importData()" ng-disabled="!file" class="btn btn-default"><span class="glyphicon glyphicon-import"></span> Import data</button>
-						<input type="file" onchange="angular.element(this).scope().setFile(this)" class="form-control-file" />
+				<div class="modal-body">
+					<div class="form-group" ng-class="{ 'has-error': userSettingsForm.username.$invalid }">
+						<label>Username</label>
+						<input type="text" name="username" class="form-control" ng-model="user.username" placeholder="Enter username" required />
+					</div>
+					<div class="form-group">
+						<label>Password</label>
+						<input type="password" class="form-control" ng-model="user.password" placeholder="Enter new password" />
+					</div>
+					<div class="form-group">
+						<label>Default currency</label>
+						<select ng-model="user.defaultCurrency" ng-options="currency.symbol as currency.displayName for currency in currencies.currencies" class="form-control"></select>
+					</div>
+					<div class="form-group">
+						<div class="form-inline">
+							<button ng-click="importData()" ng-disabled="!file" class="btn btn-default"><span class="glyphicon glyphicon-import"></span> Import data</button>
+							<input type="file" onchange="angular.element(this).scope().setFile(this)" class="form-control-file" />
+						</div>
+					</div>
+					<div class="form-group">
+						<button ng-click="exportData()" class="btn btn-default"><span class="glyphicon glyphicon-export"></span> Export data</button>
+					</div>
+					<div class="form-group">
+						<div class="form-inline">
+							<button ng-click="performRecalculateBalance()" class="btn btn-default"><span class="glyphicon glyphicon-repeat"></span> Recalculate balance</button>
+							<button ng-click="performCleanup()" class="btn btn-default"><span class="glyphicon glyphicon-flash"></span> Cleanup database</button>
+						</div>
+					</div>
+					<div class="form-group" ng-show="operationSuccessful">
+						<alert type="success">Done!</alert>
 					</div>
 				</div>
-				<div class="form-group">
-					<button ng-click="exportData()" class="btn btn-default"><span class="glyphicon glyphicon-export"></span> Export data</button>
+				<div class="modal-footer">
+					<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+					<button ng-click="submitEditing()" class="btn btn-primary" ng-disabled="userSettingsForm.$invalid"><span class="glyphicon glyphicon-ok"></span> Apply</button>
 				</div>
-				<div class="form-group">
-					<div class="form-inline">
-						<button ng-click="performRecalculateBalance()" class="btn btn-default"><span class="glyphicon glyphicon-repeat"></span> Recalculate balance</button>
-						<button ng-click="performCleanup()" class="btn btn-default"><span class="glyphicon glyphicon-flash"></span> Cleanup database</button>
-					</div>
-				</div>
-				<div class="form-group" ng-show="operationSuccessful">
-					<alert type="success">Done!</alert>
-				</div>
-			</div>
-			<div class="modal-footer">
-				<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
-				<button ng-click="submitEditing()" class="btn btn-primary"><span class="glyphicon glyphicon-ok"></span> Apply</button>
-			</div>
+			</form>
 		</script>
 		<script type="text/ng-template" id="editTransactionDialog">
-			<div class="modal-header">
-				<h3 class="modal-title">Edit transaction</h3>
-			</div>
-			<div class="modal-body">
-				<div class="row form-control-static">
-					<div class="form-inline col-md-12">
-						<input type="text" ng-model="transaction.description" class="form-control" placeholder="Enter transaction description"/>
-						<select ng-model="transaction.type" ng-init="transaction.type = transaction.type || transactionTypes[0]" ng-options="transactionType.value as transactionType.name for transactionType in transactionTypes" class="form-control"></select>
-						<div class="input-group">
-							<input type="text" class="form-control" datepicker-popup ng-model="transaction.date" is-open="$parent.calendarOpened" />
-							<span class="input-group-btn">
-								<button type="button" class="btn btn-default" ng-click="openCalendar($event)"><span class="glyphicon glyphicon-calendar"></span></button>
+			<form name="transactionEditorForm" novalidate>
+				<div class="modal-header">
+					<h3 class="modal-title">Edit transaction</h3>
+				</div>
+				<div class="modal-body">
+					<div class="row form-control-static">
+						<div class="form-inline col-md-12">
+							<span ng-class="{ 'has-error': transactionEditorForm.description.$invalid }" >
+								<input type="text" ng-model="transaction.description" class="form-control" placeholder="Enter transaction description" name="description" required />
 							</span>
+							<select ng-model="transaction.type" ng-init="transaction.type = transaction.type || transactionTypes[0]" ng-options="transactionType.value as transactionType.name for transactionType in transactionTypes" class="form-control"></select>
+							<div class="input-group">
+								<input type="text" class="form-control" datepicker-popup ng-model="transaction.date" is-open="$parent.calendarOpened" />
+								<span class="input-group-btn">
+									<button type="button" class="btn btn-default" ng-click="openCalendar($event)"><span class="glyphicon glyphicon-calendar"></span></button>
+								</span>
+							</div>
+							<input type="text" ng-model="$parent.tags" ng-change="syncTags()" placeholder="Enter tags" class="form-control"/>
 						</div>
-						<input type="text" ng-model="$parent.tags" ng-change="syncTags()" placeholder="Enter tags" class="form-control"/>
+					</div>
+					<div class="row form-control-static">
+						<div class="col-md-12">
+							<button ng-click="addTransactionComponent()" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span> Add component</button>
+						</div>
+					</div>
+					<div class="row form-control-static" ng-repeat="component in transaction.components">
+						<div class="form-inline col-md-12">
+							<ng-form name="transactionForm">
+								<span ng-class="{ 'has-error': transactionForm.amount.$invalid }" >
+									<input type="text" ng-model="component.amount" placeholder="Enter amount" class="text-right form-control" name="amount" smart-float required/>
+								</span>
+								<span style="form-control">{{accountService.getAccount(component.accountId).currency}}</span>
+								<span ng-class="{ 'has-error': transactionForm.account.$invalid }" >
+									<select ng-model="component.accountId" ng-options="account.id as account.name for account in accountService.accounts | filter:isAccountVisible" class="form-control" name="account" required></select>
+								</span>
+								<button ng-click="deleteTransactionComponent(component)" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete</button>
+							</ng-form>
+						</div>
 					</div>
 				</div>
-				<div class="row form-control-static">
-					<div class="col-md-12">
-						<button ng-click="addTransactionComponent()" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span> Add component</button>
-					</div>
+				<div class="modal-footer">
+					<button ng-click="deleteTransaction()" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Delete</button>
+					<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+					<button ng-click="submitEditing()" class="btn btn-primary" ng-disabled="transactionEditorForm.$invalid"><span class="glyphicon glyphicon-ok"></span> Apply</button>
 				</div>
-				<div class="row form-control-static" ng-repeat="component in transaction.components">
-					<div class="form-inline col-md-12">
-						<input type="text" ng-model="component.amount" placeholder="Enter amount" class="text-right form-control" smart-float/>
-						<span style="form-control">{{accountService.getAccount(component.accountId).currency}}</span>
-						<select ng-model="component.accountId" ng-options="account.id as account.name for account in accountService.accounts | filter:isAccountVisible" class="form-control"></select>
-						<button ng-click="deleteTransactionComponent(component)" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete</button>
-					</div>
-				</div>
-			</div>
-			<div class="modal-footer">
-				<button ng-click="deleteTransaction()" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Delete</button>
-				<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
-				<button ng-click="submitEditing()" class="btn btn-primary"><span class="glyphicon glyphicon-ok"></span> Apply</button>
-			</div>
+			</form>
 		</script>
 		<script type="text/ng-template" id="editAccountsDialog">
-			<div class="modal-header">
-				<h3 class="modal-title">Edit accounts</h3>
-			</div>
-			<div class="modal-body">
-				<div class="row form-control-static">
-					<div class="col-md-12">
-						<button ng-click="addAccount()" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span> Add account</button>
-					</div>
+			<form name="accountEditorForm" novalidate>
+				<div class="modal-header">
+					<h3 class="modal-title">Edit accounts</h3>
 				</div>
-				<div class="row form-control-static" ng-repeat="account in accounts.accounts | orderBy:'id'">
-					<div class="form-inline col-md-9">
-						<div class="row">
-							<div class="form-inline col-md-12">
-								<input type="text" ng-model="account.name" placeholder="Enter account name" class="form-control"/>
-								<select ng-model="account.currency" ng-options="currency.symbol as currency.displayName for currency in currencies.currencies" class="form-control"></select>
-							</div>
-						</div>
-						<div class="row">
-							<div class="form-inline col-md-12">
-								<label class="checkbox-inline">
-									<input type="checkbox" ng-model="account.includeInTotal" class=""/> Include in total
-								</label>
-								<label class="checkbox-inline">
-									<input type="checkbox" ng-model="account.showInList" class=""/> Show in accounts list
-								</label>
-							</div>
+				<div class="modal-body">
+					<div class="row form-control-static">
+						<div class="col-md-12">
+							<button ng-click="addAccount()" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span> Add account</button>
 						</div>
 					</div>
-					<div class="form-inline col-md-3 text-right">
-						<button ng-click="deleteAccount(account)" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete</button>
+					<div class="row form-control-static" ng-repeat="account in accounts.accounts | orderBy:'id'">
+						<ng-form name="accountForm">
+							<div class="form-inline col-md-9">
+								<div class="row">
+									<div class="form-inline col-md-12">
+										<span ng-class="{ 'has-error': accountForm.accountName.$invalid }" >
+											<input type="text" ng-model="account.name" placeholder="Enter account name" class="form-control" name="accountName" required/>
+										</span>
+										<span ng-class="{ 'has-error': accountForm.accountCurrency.$invalid }" >
+											<select ng-model="account.currency" ng-options="currency.symbol as currency.displayName for currency in currencies.currencies" class="form-control" name="accountCurrency" required></select>
+										</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="form-inline col-md-12">
+										<label class="checkbox-inline">
+											<input type="checkbox" ng-model="account.includeInTotal"/> Include in total
+										</label>
+										<label class="checkbox-inline">
+											<input type="checkbox" ng-model="account.showInList"> Show in accounts list
+										</label>
+									</div>
+								</div>
+							</div>
+							<div class="form-inline col-md-3 text-right">
+								<button ng-click="deleteAccount(account)" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> Delete</button>
+							</div>
+						</ng-form>
 					</div>
 				</div>
-			</div>
-			<div class="modal-footer">
-				<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
-				<button ng-click="submitEditing()" class="btn btn-primary"><span class="glyphicon glyphicon-ok"></span> Apply</button>
-			</div>
+				<div class="modal-footer">
+					<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+					<button ng-click="submitEditing()" class="btn btn-primary" ng-disabled="accountEditorForm.$invalid"><span class="glyphicon glyphicon-ok"></span> Apply</button>
+				</div>
+			</form>
 		</script>
 		<script type="text/ng-template" id="analyticsDialog">
 			<div class="modal-header">
