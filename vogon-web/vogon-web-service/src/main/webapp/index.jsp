@@ -1,6 +1,6 @@
 <%@ page session="false" trimDirectiveWhitespaces="true" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<fmt:setBundle basename="org.zlogic.vogon.web.messages" />
+<fmt:setBundle basename="org.zlogic.vogon.web.webmessages" />
 <fmt:setBundle basename="org.zlogic.vogon.web.webjars" var="webjars"/>
 <!DOCTYPE html>
 <html>
