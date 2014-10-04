@@ -105,6 +105,13 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 			requestParams = that.buildRequestParams();
 		return $http.get(url, {headers: headers, customData: requestParams}).then(successHandler, errorHandler);
 	};
+	this.delete = function (url, extraHeaders, requestParams) {
+		startRequest();
+		var headers = isTokenURL(url) ? extraHeaders : mergeHeaders(extraHeaders);
+		if (requestParams === undefined)
+			requestParams = that.buildRequestParams();
+		return $http.delete(url, {headers: headers, customData: requestParams}).then(successHandler, errorHandler);
+	};
 	this.post = function (url, data, extraHeaders, requestParams, transformRequest) {
 		startRequest();
 		var headers = isTokenURL(url) ? extraHeaders : mergeHeaders(extraHeaders);
@@ -732,7 +739,7 @@ app.service("TransactionsService", function (HTTPService, AuthorizationService, 
 	this.totalPages = 0;
 	var updateTransactions = function () {
 		var nextPage = that.currentPage;
-		return HTTPService.get("service/transactions/page_" + (nextPage - 1), undefined, HTTPService.buildRequestParams(false))
+		return HTTPService.get("service/transactions/?page=" + (nextPage - 1), undefined, HTTPService.buildRequestParams(false))
 				.then(function (data) {
 					that.transactions = data.data;
 					that.currentPage = nextPage;
@@ -769,7 +776,7 @@ app.service("TransactionsService", function (HTTPService, AuthorizationService, 
 	this.updateTransaction = function (id) {
 		if (id === undefined)
 			return updateTransactions();
-		return HTTPService.get("service/transactions/" + id)
+		return HTTPService.get("service/transactions/transaction/" + id)
 				.then(function (data) {
 					if (updateTransactionLocal(data.data))
 						AccountsService.update();
@@ -779,7 +786,7 @@ app.service("TransactionsService", function (HTTPService, AuthorizationService, 
 	};
 	this.submitTransaction = function (transaction) {
 		transaction.date = dateToJson(transaction.date);
-		return HTTPService.post("service/transactions/submit", transaction)
+		return HTTPService.post("service/transactions", transaction)
 				.then(function (data) {
 					if (updateTransactionLocal(data.data))
 						AccountsService.update();
@@ -790,7 +797,7 @@ app.service("TransactionsService", function (HTTPService, AuthorizationService, 
 	this.deleteTransaction = function (transaction) {
 		if (transaction === undefined || transaction.id === undefined)
 			return updateTransactions();
-		return HTTPService.get("service/transactions/delete/" + transaction.id)
+		return HTTPService.delete("service/transactions/transaction/" + transaction.id)
 				.then(function () {
 					updateTransactions();
 				}, that.update);

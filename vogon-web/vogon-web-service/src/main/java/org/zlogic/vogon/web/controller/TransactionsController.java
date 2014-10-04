@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceTransaction;
@@ -76,15 +77,18 @@ public class TransactionsController {
 	private Sort sort = new JpaSort(Sort.Direction.DESC, FinanceTransaction_.transactionDate, FinanceTransaction_.id);
 
 	/**
-	 * Returns all transactions in a specific range
+	 * Returns all transactions in a specific range, or all transactions if page
+	 * parameter is missing
 	 *
 	 * @param page the page number
 	 * @param user the authenticated user
 	 * @return the transactions
 	 */
-	@RequestMapping(value = "/page_{page}", method = RequestMethod.GET, produces = "application/json")
+	@RequestMapping(method = RequestMethod.GET, produces = "application/json")
 	public @ResponseBody
-	Collection<FinanceTransactionJson> getTransactions(@PathVariable int page, @AuthenticationPrincipal VogonSecurityUser user) {
+	Collection<FinanceTransactionJson> getTransactions(@RequestParam("page") Integer page, @AuthenticationPrincipal VogonSecurityUser user) {
+		if (page == null)
+			return initializationHelper.initializeTransactions(transactionRepository.findByOwner(user.getUser()));
 		PageRequest pageRequest = new PageRequest(page, PAGE_SIZE, sort);
 		return initializationHelper.initializeTransactions(transactionRepository.findByOwner(user.getUser(), pageRequest).getContent());
 	}
@@ -109,7 +113,7 @@ public class TransactionsController {
 	 * @param user the authenticated user
 	 * @return the number of transactions
 	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
+	@RequestMapping(value = "/transaction/{id}", method = RequestMethod.GET, produces = "application/json")
 	public @ResponseBody
 	FinanceTransactionJson getTransaction(@PathVariable long id, @AuthenticationPrincipal VogonSecurityUser user) {
 		return initializationHelper.initializeTransaction(transactionRepository.findByOwnerAndId(user.getUser(), id));
@@ -122,7 +126,7 @@ public class TransactionsController {
 	 * @param user the authenticated user
 	 * @return the transactions from database after update
 	 */
-	@RequestMapping(value = "/submit", method = RequestMethod.POST, produces = "application/json")
+	@RequestMapping(method = RequestMethod.POST, produces = "application/json")
 	public @ResponseBody
 	FinanceTransactionJson submitTransaction(@RequestBody FinanceTransactionJson transaction, @AuthenticationPrincipal VogonSecurityUser user) {
 		FinanceTransaction existingTransaction = transactionRepository.findByOwnerAndId(user.getUser(), transaction.getId());
@@ -164,7 +168,7 @@ public class TransactionsController {
 	 * @param user the authenticated user
 	 * @return null
 	 */
-	@RequestMapping(value = "/delete/{id}", method = RequestMethod.GET, produces = "application/json")
+	@RequestMapping(value = "/transaction/{id}", method = RequestMethod.DELETE, produces = "application/json")
 	public @ResponseBody
 	FinanceTransactionJson deleteTransaction(@PathVariable long id, @AuthenticationPrincipal VogonSecurityUser user) {
 		FinanceTransaction existingTransaction = transactionRepository.findByOwnerAndId(user.getUser(), id);
@@ -175,17 +179,5 @@ public class TransactionsController {
 			return initializationHelper.initializeTransaction(existingTransaction);
 		}
 		return null;
-	}
-
-	/**
-	 * Returns all transactions
-	 *
-	 * @param user the authenticated user
-	 * @return the transactions
-	 */
-	@RequestMapping(method = RequestMethod.GET, produces = "application/json")
-	public @ResponseBody
-	Collection<FinanceTransactionJson> getAllTransactions(@AuthenticationPrincipal VogonSecurityUser user) {
-		return initializationHelper.initializeTransactions(transactionRepository.findByOwner(user.getUser()));
 	}
 }
