@@ -200,7 +200,7 @@
 							<div class="pre-scrollable">
 								<div class="checkbox" ng-repeat="(tag,selected) in tags | orderBy:'tag'">
 									<label>
-										<input type="checkbox" ng-model="selected" /> {{tag.length>0?tag:"&nbsp;"}}
+										<input type="checkbox" ng-model="tags[tag]" /> {{tag.length>0?tag:"&nbsp;"}}
 									</label>
 								</div>
 							</div>
