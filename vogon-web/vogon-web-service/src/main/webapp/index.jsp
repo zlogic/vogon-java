@@ -107,7 +107,7 @@
 									<button type="button" class="btn btn-default" ng-click="openCalendar($event)"><span class="glyphicon glyphicon-calendar"></span></button>
 								</span>
 							</div>
-							<input type="text" ng-model="$parent.tags" ng-change="syncTags()" placeholder="<fmt:message key="ENTER_TAGS"/>" class="form-control"/>
+							<input type="text" ng-model="tags" ng-change="syncTags()" placeholder="<fmt:message key="ENTER_TAGS"/>" class="form-control"/>
 						</div>
 					</div>
 					<div class="row form-control-static">
