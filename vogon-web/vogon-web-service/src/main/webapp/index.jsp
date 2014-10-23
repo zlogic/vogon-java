@@ -9,10 +9,11 @@
 		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<fmt:message key="bootstrap" bundle="${webjars}"/>/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="webjars/nvd3/<fmt:message key="nvd3" bundle="${webjars}"/>/nv.d3.min.css">
 		<!--<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<fmt:message key="bootstrap" bundle="${webjars}"/>/css/bootstrap-theme.min.css">-->
+		<script type="text/javascript" src="webjars/jquery/<fmt:message key="jquery" bundle="${webjars}"/>/jquery.min.js"></script>
 		<script type="text/javascript" src="webjars/angularjs/<fmt:message key="angularjs" bundle="${webjars}"/>/angular.min.js"></script>
 		<script type="text/javascript" src="webjars/angularjs/<fmt:message key="angularjs" bundle="${webjars}"/>/angular-cookies.js"></script>
 		<script type="text/javascript" src="webjars/angular-ui-bootstrap/<fmt:message key="angularuibootstrap" bundle="${webjars}"/>/ui-bootstrap-tpls.min.js"></script>
-		<script type="text/javascript" src="webjars/jquery/<fmt:message key="jquery" bundle="${webjars}"/>/jquery.min.js"></script>
+		<script type="text/javascript" src="webjars/ngInfiniteScroll/<fmt:message key="nginfinitescroll" bundle="${webjars}"/>/ng-infinite-scroll.min.js"></script>
 		<script type="text/javascript" src="webjars/bootstrap/<fmt:message key="bootstrap" bundle="${webjars}"/>/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="webjars/d3js/<fmt:message key="d3js" bundle="${webjars}"/>/d3.min.js"></script>
 		<script type="text/javascript" src="webjars/nvd3/<fmt:message key="nvd3" bundle="${webjars}"/>/nv.d3.min.js"></script>
@@ -392,60 +393,61 @@
 					<div class="panel-heading"><fmt:message key="TRANSACTIONS_LIST_TITLE"/></div>
 					<div class="panel-body">
 						<button ng-click="addTransaction()" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> <fmt:message key="ADD_TRANSACTION"/></button>
-						<table class="table table-hover">
-							<thead>
-								<tr>
-									<th><fmt:message key="TRANSACTION_NAME"/></th>
-									<th><fmt:message key="DATE"/></th>
-									<th><fmt:message key="TAGS"/></th>
-									<th class="text-right"><fmt:message key="AMOUNT"/></th>
-									<th><fmt:message key="ACCOUNT"/></th>
-									<th></th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr ng-repeat="transaction in transactionsService.transactions" ng-class="{danger:!transactionsService.isAmountOk(transaction)}">
-									<td ng-click="startEditing(transaction)" class="editable">{{transaction.description}}</td>
-									<td ng-click="startEditing(transaction)" class="editable">{{transaction.date | date}}</td>
-									<td ng-click="startEditing(transaction)" class="editable">
-										<div ng-repeat="tag in transaction.tags">
-											{{tag}}{{$last ? "" : <fmt:message key="TAGS_SEPARATOR" />}}
-										</div>
-									</td>
-									<td ng-click="startEditing(transaction)" class="text-right editable">
-										<div ng-repeat="(symbol,total) in totals=(transactionsService.totalsByCurrency(transaction))">
-											<span ng-show="transactionsService.isTransferTransaction(transaction)">
-												&sum;
-											</span>
-											{{total | number:2}} {{symbol}}
-										</div>
-									</td>
-									<td ng-click="startEditing(transaction)" class="editable">
-										<div ng-show="transactionsService.isExpenseIncomeTransaction(transaction)">
-											<div ng-repeat="account in accounts=(transactionsService.getAccounts(transaction,transactionsService.allAccountsPredicate))">
-												{{account.name}}{{$last ? '' : ', '}}
+						<div infinite-scroll="transactionsService.nextPage()" infinite-scroll-disabled="transactionsService.loadingNextPage">
+							<table class="table table-hover">
+								<thead>
+									<tr>
+										<th><fmt:message key="TRANSACTION_NAME"/></th>
+										<th><fmt:message key="DATE"/></th>
+										<th><fmt:message key="TAGS"/></th>
+										<th class="text-right"><fmt:message key="AMOUNT"/></th>
+										<th><fmt:message key="ACCOUNT"/></th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr ng-repeat="transaction in transactionsService.transactions" ng-class="{danger:!transactionsService.isAmountOk(transaction)}">
+										<td ng-click="startEditing(transaction)" class="editable">{{transaction.description}}</td>
+										<td ng-click="startEditing(transaction)" class="editable">{{transaction.date | date}}</td>
+										<td ng-click="startEditing(transaction)" class="editable">
+											<div ng-repeat="tag in transaction.tags">
+												{{tag}}{{$last ? "" : <fmt:message key="TAGS_SEPARATOR" />}}
 											</div>
-										</div>
-										<div ng-show="transactionsService.isTransferTransaction(transaction)">
-											<div ng-repeat="account in accounts=(transactionsService.getAccounts(transaction,transactionsService.fromAccountsPredicate))">
-												{{$first && accounts.length>1?'(':''}}{{account.name}}{{$last ? '' : ', '}}{{$last && accounts.length>1?')':''}}
+										</td>
+										<td ng-click="startEditing(transaction)" class="text-right editable">
+											<div ng-repeat="(symbol,total) in totals=(transactionsService.totalsByCurrency(transaction))">
+												<span ng-show="transactionsService.isTransferTransaction(transaction)">
+													&sum;
+												</span>
+												{{total | number:2}} {{symbol}}
 											</div>
-											<span class="glyphicon glyphicon-chevron-down"></span>
-											<div ng-repeat="account in accounts=(transactionsService.getAccounts(transaction,transactionsService.toAccountsPredicate))">
-												{{$first && accounts.length>1?'(':''}}{{account.name}}{{$last ? '' : ', '}}{{$last && accounts.length>1?')':''}}
+										</td>
+										<td ng-click="startEditing(transaction)" class="editable">
+											<div ng-show="transactionsService.isExpenseIncomeTransaction(transaction)">
+												<div ng-repeat="account in accounts=(transactionsService.getAccounts(transaction,transactionsService.allAccountsPredicate))">
+													{{account.name}}{{$last ? '' : ', '}}
+												</div>
 											</div>
-										</div>
-									</td>
-									<td>
-										<button ng-click="duplicateTransaction(transaction)" class="btn btn-default"><span class="glyphicon glyphicon-asterisk"></span> <fmt:message key="DUPLICATE"/></button>
-									</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-					<div class="panel-footer">
-						<pagination total-items="transactionsService.totalPages" items-per-page="1" boundary-links="true" ng-model="transactionsService.currentPage" ng-change="pageChanged()">
-						</pagination>
+											<div ng-show="transactionsService.isTransferTransaction(transaction)">
+												<div ng-repeat="account in accounts=(transactionsService.getAccounts(transaction,transactionsService.fromAccountsPredicate))">
+													{{$first && accounts.length>1?'(':''}}{{account.name}}{{$last ? '' : ', '}}{{$last && accounts.length>1?')':''}}
+												</div>
+												<span class="glyphicon glyphicon-chevron-down"></span>
+												<div ng-repeat="account in accounts=(transactionsService.getAccounts(transaction,transactionsService.toAccountsPredicate))">
+													{{$first && accounts.length>1?'(':''}}{{account.name}}{{$last ? '' : ', '}}{{$last && accounts.length>1?')':''}}
+												</div>
+											</div>
+										</td>
+										<td>
+											<button ng-click="duplicateTransaction(transaction)" class="btn btn-default"><span class="glyphicon glyphicon-asterisk"></span> <fmt:message key="DUPLICATE"/></button>
+										</td>
+									</tr>
+									<tr class="text-center" ng-show="transactionsService.loadingNextPage">
+										<td colspan="6"><span class="glyphicon glyphicon-refresh"></span> <fmt:message key="LOADING_ALERT"/></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
 					</div>
 				</div>
 			</div>

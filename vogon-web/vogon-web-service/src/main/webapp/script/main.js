@@ -1,4 +1,4 @@
-var app = angular.module("vogon", ["ngCookies", "ui.bootstrap", 'nvd3ChartDirectives']);
+var app = angular.module("vogon", ["ngCookies", "ui.bootstrap", "nvd3ChartDirectives", "infinite-scroll"]);
 
 var dateToJson = function (date) {
 	if (date instanceof Date)
@@ -80,6 +80,8 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 							else
 								deferred.reject(authData);
 						}, deferred.reject);
+			else
+				deferred.reject();
 			return deferred.promise;
 		} else {
 			AlertService.addAlert(complex_messages.HTTP_ERROR_FORMAT(data.status, data.data));
@@ -730,37 +732,54 @@ app.controller("TransactionEditorController", function ($scope, $modalInstance, 
 	};
 });
 
-app.service("TransactionsService", function (HTTPService, AuthorizationService, AccountsService) {
+app.service("TransactionsService", function ($q, HTTPService, AuthorizationService, AccountsService) {
 	var that = this;
 	this.transactions = [];
 	this.transactionTypes = [{name: messages.EXPENSEINCOME, value: "EXPENSEINCOME"}, {name: messages.TRANSFER, value: "TRANSFER"}];
 	this.defaultTransactionType = this.transactionTypes[0];
-	this.currentPage = 1;
-	this.totalPages = 0;
-	var updateTransactions = function () {
-		var nextPage = that.currentPage;
-		return HTTPService.get("service/transactions/?page=" + (nextPage - 1), undefined, HTTPService.buildRequestParams(false))
-				.then(function (data) {
-					that.transactions = data.data;
-					that.currentPage = nextPage;
-					AccountsService.update();
-				});
+	this.currentPage = 0;
+	this.nextPageRequest = undefined;
+	this.loadingNextPage = false;
+	this.lastPage = false;
+	var reset = function () {
+		that.currentPage = 0;
+		that.transactions = [];
+		that.lastPage = false;
+		that.loadingNextPage = that.nextPageRequest !== undefined;
 	};
-	var updateTransactionsCount = function () {
-		return HTTPService.get("service/transactions/pages", undefined, HTTPService.buildRequestParams(false))
-				.then(function (data) {
-					that.totalPages = data.data;
-				});
+	this.nextPage = function () {
+		if (that.lastPage) {
+			that.loadingNextPage = false;
+		} else if (AuthorizationService.authorized) {
+			if (that.nextPageRequest === undefined) {
+				that.loadingNextPage = true;
+				return that.nextPageRequest = HTTPService.get("service/transactions/?page=" + that.currentPage, undefined, HTTPService.buildRequestParams(false))
+						.then(function (data) {
+							that.nextPageRequest = undefined;
+							that.loadingNextPage = false;
+							if (data.data.length !== 0)
+								that.transactions = that.transactions.concat(data.data);
+							else
+								that.lastPage = true;
+							that.currentPage++;
+						}, function () {
+							that.nextPageRequest = undefined;
+							reset();
+						});
+			} else {
+				return that.nextPageRequest;
+			}
+		} else {
+			reset();
+		}
+		var deferred = $q.defer();
+		deferred.reject();
+		return deferred;
 	};
 	this.update = function () {
-		if (AuthorizationService.authorized) {
-			updateTransactions();
-			updateTransactionsCount();
-		} else {
-			that.transactions = [];
-			that.currentPage = 1;
-			that.totalPages = 0;
-		}
+		reset();
+		AccountsService.update();
+		return that.nextPage();
 	};
 	var updateTransactionLocal = function (data) {
 		var found = false;
@@ -775,13 +794,13 @@ app.service("TransactionsService", function (HTTPService, AuthorizationService, 
 	};
 	this.updateTransaction = function (id) {
 		if (id === undefined)
-			return updateTransactions();
+			return that.update();
 		return HTTPService.get("service/transactions/transaction/" + id)
 				.then(function (data) {
 					if (updateTransactionLocal(data.data))
 						AccountsService.update();
 					else
-						updateTransactions();
+						that.update();
 				}, that.update);
 	};
 	this.submitTransaction = function (transaction) {
@@ -791,16 +810,14 @@ app.service("TransactionsService", function (HTTPService, AuthorizationService, 
 					if (updateTransactionLocal(data.data))
 						AccountsService.update();
 					else
-						updateTransactions();
+						that.update();
 				}, that.update);
 	};
 	this.deleteTransaction = function (transaction) {
 		if (transaction === undefined || transaction.id === undefined)
-			return updateTransactions();
+			return that.update();
 		return HTTPService.delete("service/transactions/transaction/" + transaction.id)
-				.then(function () {
-					updateTransactions();
-				}, that.update);
+				.then(that.update, that.update);
 	};
 	this.getDate = function () {
 		return dateToJson(new Date());
@@ -853,6 +870,12 @@ app.service("TransactionsService", function (HTTPService, AuthorizationService, 
 			return true;
 		if (this.isTransferTransaction(transaction)) {
 			var totals = getTotalsByCurrency(transaction);
+			var totalsCount = 0;
+			for (var currency in totals) {
+				if (totalsCount > 0)
+					return true;
+				totalsCount++;
+			}
 			for (var currency in totals) {
 				var total = totals[currency];
 				if (total.positiveAmount !== total.negativeAmount)
@@ -930,5 +953,4 @@ app.controller("TransactionsController", function ($scope, $modal, TransactionsS
 		return AuthorizationService.authorized;
 	}, TransactionsService.update);
 	TransactionsService.update();
-	$scope.pageChanged = TransactionsService.update;
 });
