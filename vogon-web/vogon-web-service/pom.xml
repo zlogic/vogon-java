@@ -15,6 +15,7 @@
 		<vogon.web.version.bootstrap>3.2.0</vogon.web.version.bootstrap>
 		<vogon.web.version.angularjs>1.2.26</vogon.web.version.angularjs>
 		<vogon.web.version.angularuibootstrap>0.11.2</vogon.web.version.angularuibootstrap>
+		<vogon.web.version.nginfinitescroll>1.1.2</vogon.web.version.nginfinitescroll>
 		<vogon.web.version.jquery>1.11.1</vogon.web.version.jquery>
 		<vogon.web.version.d3js>3.4.11</vogon.web.version.d3js>
 		<vogon.web.version.nvd3>1.1.15-beta</vogon.web.version.nvd3>
@@ -128,6 +129,11 @@
 		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>angular-ui-bootstrap</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>ngInfiniteScroll</artifactId>
+			<version>1.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.webjars</groupId>
