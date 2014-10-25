@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.VogonUser;
@@ -20,7 +21,7 @@ import org.zlogic.vogon.data.VogonUser;
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 @Repository
-public interface TransactionRepository extends JpaRepository<FinanceTransaction, Long> {
+public interface TransactionRepository extends JpaRepository<FinanceTransaction, Long>, JpaSpecificationExecutor {
 
 	/**
 	 * Finds a transaction by its VogonUser owner and ID

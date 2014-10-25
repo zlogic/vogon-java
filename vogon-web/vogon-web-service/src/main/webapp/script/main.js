@@ -7,6 +7,18 @@ var dateToJson = function (date) {
 		return date;
 };
 
+var tagsToJson = function (tags) {
+	if (tags.constructor === String)
+		return tags.split(messages.TAGS_SEPARATOR);
+	else
+		return tags;
+};
+var encodeForm = function (data) {
+	var buffer = [];
+	for (var name in data)
+		buffer.push([encodeURIComponent(name), encodeURIComponent(data[name])].join("="));
+	return buffer.join("&");
+};
 app.service("AlertService", function ($timeout) {
 	var that = this;
 	this.alerts = [];
@@ -158,12 +170,6 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
 	this.access_token = undefined;
 	this.username = undefined;
 	this.password = undefined;
-	var encodeForm = function (data) {
-		var buffer = [];
-		for (var name in data)
-			buffer.push([encodeURIComponent(name), encodeURIComponent(data[name])].join("="));
-		return buffer.join("&");
-	};
 	var setToken = function (access_token, username, password) {
 		if (access_token !== undefined) {
 			that.access_token = access_token;
@@ -716,12 +722,6 @@ app.controller("TransactionEditorController", function ($scope, $modalInstance, 
 		TransactionsService.deleteTransaction($scope.transaction);
 		$modalInstance.close();
 	};
-	var tagsToJson = function (tags) {
-		if (tags.constructor === String)
-			return tags.split(messages.TAGS_SEPARATOR);
-		else
-			return tags;
-	};
 	$scope.syncTags = function () {
 		$scope.transaction.tags = tagsToJson($scope.tags);
 	};
@@ -743,6 +743,9 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 	this.lastPage = false;
 	this.sortColumn = "date";
 	this.sortAsc = false;
+	this.filterDescription = undefined;
+	this.filterDate = undefined;
+	this.filterTags = undefined;
 	var reset = function () {
 		that.currentPage = 0;
 		that.transactions = [];
@@ -755,7 +758,18 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 		} else if (AuthorizationService.authorized) {
 			if (that.nextPageRequest === undefined) {
 				that.loadingNextPage = true;
-				return that.nextPageRequest = HTTPService.get("service/transactions/?page=" + that.currentPage + "&sortColumn=" + that.sortColumn.toUpperCase() + "&sortDirection=" + (that.sortAsc ? "ASC" : "DESC"), undefined, HTTPService.buildRequestParams(false))
+				var params = {
+					page: that.currentPage,
+					sortColumn: that.sortColumn.toUpperCase(),
+					sortDirection: that.sortAsc ? "ASC" : "DESC"
+				};
+				if (that.filterDate !== undefined && that.filterDate !== null && that.filterDate !== "")
+					params.filterDate = dateToJson(that.filterDate);
+				if (that.filterDescription !== undefined && that.filterDescription !== "")
+					params.filterDescription = that.filterDescription;
+				if (that.filterTags !== undefined && that.filterTags !== "")
+					params.filterTags = tagsToJson(that.filterTags);
+				return that.nextPageRequest = HTTPService.get("service/transactions/?" + encodeForm(params), undefined, HTTPService.buildRequestParams(false))
 						.then(function (data) {
 							that.nextPageRequest = undefined;
 							that.loadingNextPage = false;
@@ -912,13 +926,16 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 	HTTPService.updateTransactions = this.update;
 });
 
-app.controller("TransactionsController", function ($scope, $modal, TransactionsService, AuthorizationService, AccountsService, UserService) {
+app.controller("TransactionsController", function ($scope, $modal, $interval, TransactionsService, AuthorizationService, AccountsService, UserService) {
 	$scope.transactionsService = TransactionsService;
 	$scope.authorizationService = AuthorizationService;
 	$scope.accountsService = AccountsService;
 	$scope.editor = undefined;
 	$scope.editingTransaction = undefined;
 	$scope.userService = UserService;
+	$scope.filterTimer = undefined;
+	$scope.filterCalled = new Date();
+	$scope.filterChanged = new Date();
 	var closeEditor = function () {
 		$scope.editingTransaction = undefined;
 		if ($scope.editor !== undefined) {
@@ -959,6 +976,24 @@ app.controller("TransactionsController", function ($scope, $modal, TransactionsS
 		});
 		$scope.transactionsService.transactions.unshift(newTransaction);
 		$scope.startEditing(newTransaction);
+	};
+	$scope.openFilterDateCalendar = function ($event) {
+		$event.preventDefault();
+		$event.stopPropagation();
+		$scope.filterDateCalendarOpened = true;
+	};
+	$scope.applyFilter = function () {
+		$scope.filterCalled = new Date();
+		if ($scope.filterTimer === undefined) {
+			$scope.filterTimer = $interval(function () {
+				$scope.filterChanged = new Date();
+				TransactionsService.update();
+				$interval.cancel($scope.filterTimer);
+				$scope.filterTimer = undefined;
+				if ($scope.filterChanged < $scope.filterCalled)
+					$scope.applyFilter();
+			}, 1000);
+		}
 	};
 	$scope.$watch(function () {
 		return AuthorizationService.authorized;

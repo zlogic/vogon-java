@@ -168,7 +168,7 @@
 											<input type="checkbox" ng-model="account.includeInTotal"/> <fmt:message key="INCLUDE_IN_TOTAL"/>
 										</label>
 										<label class="checkbox-inline">
-											<input type="checkbox" ng-model="account.showInList"> <fmt:message key="SHOW_IN_ACCOUNTS_LIST"/>
+											<input type="checkbox" ng-model="account.showInList"/> <fmt:message key="SHOW_IN_ACCOUNTS_LIST"/>
 										</label>
 									</div>
 								</div>
@@ -418,6 +418,38 @@
 									</tr>
 								</thead>
 								<tbody>
+									<tr>
+										<td>
+											<div class="form-inline">
+												<div class="input-group">
+													<span class="input-group-addon"><span class="glyphicon glyphicon-filter"></span></span>
+													<input type="text" class="form-control" placeholder="<fmt:message key="ENTER_DESCRIPTION_FILTER"/>" ng-model="transactionsService.filterDescription" ng-change="applyFilter()"/>
+												</div>
+											</div>
+										</td>
+										<td>
+											<div class="form-inline">
+												<div class="input-group">
+													<span class="input-group-addon"><span class="glyphicon glyphicon-filter"></span></span>
+													<input type="text" class="form-control" datepicker-popup ng-model="transactionsService.filterDate" ng-change="applyFilter()" is-open="filterDateCalendarOpened" placeholder="<fmt:message key="ENTER_DATE_FILTER"/>" />
+													<span class="input-group-btn">
+														<button type="button" class="btn btn-default" ng-click="openFilterDateCalendar($event)"><span class="glyphicon glyphicon-calendar"></span></button>
+													</span>
+												</div>
+											</div>
+										</td>
+										<td>
+											<div class="form-inline">
+												<div class="input-group">
+													<span class="input-group-addon"><span class="glyphicon glyphicon-filter"></span></span>
+													<input type="text" class="form-control" placeholder="<fmt:message key="ENTER_TAGS_FILTER"/>" ng-model="transactionsService.filterTags" ng-change="applyFilter()"/>
+												</div>
+											</div>
+										</td>
+										<td></td>
+										<td></td>
+										<td></td>
+									</tr>
 									<tr ng-repeat="transaction in transactionsService.transactions" ng-class="{danger:!transactionsService.isAmountOk(transaction)}">
 										<td ng-click="startEditing(transaction)" class="editable">{{transaction.description}}</td>
 										<td ng-click="startEditing(transaction)" class="editable">{{transaction.date | date}}</td>
