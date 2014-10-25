@@ -397,10 +397,22 @@
 							<table class="table table-hover">
 								<thead>
 									<tr>
-										<th><fmt:message key="TRANSACTION_NAME"/></th>
-										<th><fmt:message key="DATE"/></th>
+										<th>
+											<div class="editable" ng-click="transactionsService.applySort('description')"><fmt:message key="TRANSACTION_NAME"/>
+												<span ng-show="transactionsService.sortColumn==='description'" class="glyphicon glyphicon-sort-by-alphabet" ng-class="transactionsService.sortAsc?'glyphicon-sort-by-alphabet':'glyphicon-sort-by-alphabet-alt'"></span>
+											</div>
+										</th>
+										<th>
+											<div class="editable" ng-click="transactionsService.applySort('date')"><fmt:message key="DATE"/>
+												<span ng-show="transactionsService.sortColumn==='date'" class="glyphicon glyphicon-sort-by-alphabet" ng-class="transactionsService.sortAsc?'glyphicon-sort-by-order':'glyphicon-sort-by-order-alt'"></span>
+											</div>
+										</th>
 										<th><fmt:message key="TAGS"/></th>
-										<th class="text-right"><fmt:message key="AMOUNT"/></th>
+										<th class="text-right">
+											<div class="editable" ng-click="transactionsService.applySort('amount')"><fmt:message key="AMOUNT"/>
+												<span ng-show="transactionsService.sortColumn==='amount'" class="glyphicon glyphicon-sort-by-alphabet" ng-class="transactionsService.sortAsc?'glyphicon-sort-by-order':'glyphicon-sort-by-order-alt'"></span>
+											</div>
+										</th>
 										<th><fmt:message key="ACCOUNT"/></th>
 										<th></th>
 									</tr>

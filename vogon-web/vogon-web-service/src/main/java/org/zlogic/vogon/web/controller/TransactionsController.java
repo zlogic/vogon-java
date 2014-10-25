@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.metamodel.Attribute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -72,23 +73,55 @@ public class TransactionsController {
 	private InitializationHelper initializationHelper;
 
 	/**
-	 * Default sort order
+	 * Sort column options
 	 */
-	private Sort sort = new JpaSort(Sort.Direction.DESC, FinanceTransaction_.transactionDate, FinanceTransaction_.id);
+	private enum SortColumn {
+
+		/**
+		 * FinanceTransaction_.transactionDate
+		 */
+		DATE,
+		/**
+		 * FinanceTransaction_.description
+		 */
+		DESCRIPTION,
+		/**
+		 * FinanceTransaction_.amount
+		 */
+		AMOUNT
+	};
 
 	/**
 	 * Returns all transactions in a specific range, or all transactions if page
 	 * parameter is missing
 	 *
 	 * @param page the page number
+	 * @param sortColumn the column used for sorting
+	 * @param sortDirection the sort direction
 	 * @param user the authenticated user
 	 * @return the transactions
 	 */
 	@RequestMapping(method = RequestMethod.GET, produces = "application/json")
 	public @ResponseBody
-	Collection<FinanceTransactionJson> getTransactions(@RequestParam("page") Integer page, @AuthenticationPrincipal VogonSecurityUser user) {
+	Collection<FinanceTransactionJson> getTransactions(@RequestParam("page") Integer page, @RequestParam(value = "sortColumn", required = false) SortColumn sortColumn, @RequestParam(value = "sortDirection", required = false) Sort.Direction sortDirection, @AuthenticationPrincipal VogonSecurityUser user) {
+		Attribute sortAttribute = FinanceTransaction_.transactionDate;
+		if (sortColumn != null)
+			switch (sortColumn) {
+				case AMOUNT:
+					sortAttribute = FinanceTransaction_.amount;
+					break;
+				case DATE:
+					sortAttribute = FinanceTransaction_.transactionDate;
+					break;
+				case DESCRIPTION:
+					sortAttribute = FinanceTransaction_.description;
+					break;
+			}
+		if (sortDirection == null)
+			sortDirection = Sort.Direction.fromStringOrNull(null);
+		Sort sort = new JpaSort(sortDirection, sortAttribute, FinanceTransaction_.id);
 		if (page == null)
-			return initializationHelper.initializeTransactions(transactionRepository.findByOwner(user.getUser()));
+			return initializationHelper.initializeTransactions(transactionRepository.findByOwner(user.getUser(), sort));
 		PageRequest pageRequest = new PageRequest(page, PAGE_SIZE, sort);
 		return initializationHelper.initializeTransactions(transactionRepository.findByOwner(user.getUser(), pageRequest).getContent());
 	}

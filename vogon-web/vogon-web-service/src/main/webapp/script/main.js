@@ -741,6 +741,8 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 	this.nextPageRequest = undefined;
 	this.loadingNextPage = false;
 	this.lastPage = false;
+	this.sortColumn = "date";
+	this.sortAsc = false;
 	var reset = function () {
 		that.currentPage = 0;
 		that.transactions = [];
@@ -753,7 +755,7 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 		} else if (AuthorizationService.authorized) {
 			if (that.nextPageRequest === undefined) {
 				that.loadingNextPage = true;
-				return that.nextPageRequest = HTTPService.get("service/transactions/?page=" + that.currentPage, undefined, HTTPService.buildRequestParams(false))
+				return that.nextPageRequest = HTTPService.get("service/transactions/?page=" + that.currentPage + "&sortColumn=" + that.sortColumn.toUpperCase() + "&sortDirection=" + (that.sortAsc ? "ASC" : "DESC"), undefined, HTTPService.buildRequestParams(false))
 						.then(function (data) {
 							that.nextPageRequest = undefined;
 							that.loadingNextPage = false;
@@ -896,6 +898,15 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 				totals[currency] = total.positiveAmount > total.negativeAmount ? total.positiveAmount : total.negativeAmount;
 		}
 		return totals;
+	};
+	this.applySort = function (column) {
+		if (that.sortColumn === column) {
+			that.sortAsc = !that.sortAsc;
+		} else {
+			that.sortAsc = column === "description";
+			that.sortColumn = column;
+		}
+		that.update();
 	};
 	AccountsService.updateTransactions = this.update;
 	HTTPService.updateTransactions = this.update;
