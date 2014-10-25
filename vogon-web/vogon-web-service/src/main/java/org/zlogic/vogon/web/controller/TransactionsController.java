@@ -7,6 +7,8 @@ package org.zlogic.vogon.web.controller;
 
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.JpaSort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Propagation;
@@ -32,6 +35,7 @@ import org.zlogic.vogon.data.FinanceTransaction_;
 import org.zlogic.vogon.data.TransactionComponent;
 import org.zlogic.vogon.web.data.AccountRepository;
 import org.zlogic.vogon.web.data.InitializationHelper;
+import org.zlogic.vogon.web.data.TransactionFilterSpecification;
 import org.zlogic.vogon.web.data.TransactionRepository;
 import org.zlogic.vogon.web.data.model.FinanceTransactionJson;
 import org.zlogic.vogon.web.data.model.TransactionComponentJson;
@@ -98,12 +102,22 @@ public class TransactionsController {
 	 * @param page the page number
 	 * @param sortColumn the column used for sorting
 	 * @param sortDirection the sort direction
+	 * @param filterDescription
+	 * @param filterTags the tags to be filtered
+	 * @param filterDate the date to be filtered
 	 * @param user the authenticated user
 	 * @return the transactions
 	 */
 	@RequestMapping(method = RequestMethod.GET, produces = "application/json")
 	public @ResponseBody
-	Collection<FinanceTransactionJson> getTransactions(@RequestParam("page") Integer page, @RequestParam(value = "sortColumn", required = false) SortColumn sortColumn, @RequestParam(value = "sortDirection", required = false) Sort.Direction sortDirection, @AuthenticationPrincipal VogonSecurityUser user) {
+	Collection<FinanceTransactionJson> getTransactions(
+			@RequestParam("page") Integer page,
+			@RequestParam(value = "sortColumn", required = false) SortColumn sortColumn,
+			@RequestParam(value = "sortDirection", required = false) Sort.Direction sortDirection,
+			@RequestParam(value = "filterDescription", required = false) String filterDescription,
+			@RequestParam(value = "filterDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date filterDate,
+			@RequestParam(value = "filterTags", required = false) Collection<String> filterTags,
+			@AuthenticationPrincipal VogonSecurityUser user) {
 		Attribute sortAttribute = FinanceTransaction_.transactionDate;
 		if (sortColumn != null)
 			switch (sortColumn) {
@@ -120,10 +134,16 @@ public class TransactionsController {
 		if (sortDirection == null)
 			sortDirection = Sort.Direction.fromStringOrNull(null);
 		Sort sort = new JpaSort(sortDirection, sortAttribute, FinanceTransaction_.id);
+		//TODO: Optimize if https://jira.spring.io/browse/DATAJPA-209 gets implemented?
+		TransactionFilterSpecification filter = new TransactionFilterSpecification(user.getUser());
+		filter.setFilterDescription(filterDescription);
+		filter.setFilterDate(filterDate);
+		if (filterTags != null)
+			filter.setFilterTags(new HashSet<>(filterTags));
 		if (page == null)
-			return initializationHelper.initializeTransactions(transactionRepository.findByOwner(user.getUser(), sort));
+			return initializationHelper.initializeTransactions(transactionRepository.findAll(filter, sort));
 		PageRequest pageRequest = new PageRequest(page, PAGE_SIZE, sort);
-		return initializationHelper.initializeTransactions(transactionRepository.findByOwner(user.getUser(), pageRequest).getContent());
+		return initializationHelper.initializeTransactions(transactionRepository.findAll(filter, pageRequest).getContent());
 	}
 
 	/**

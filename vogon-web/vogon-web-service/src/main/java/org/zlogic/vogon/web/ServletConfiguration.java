@@ -57,8 +57,11 @@ public class ServletConfiguration implements EmbeddedServletContainerCustomizer 
 		mappings.add("woff", "application/font-woff"); //NOI18N
 		mappings.add("eot", "application/vnd.ms-fontobject"); //NOI18N
 		container.setMimeMappings(mappings);
-		if (container instanceof TomcatEmbeddedServletContainerFactory)
-			configureSSL((TomcatEmbeddedServletContainerFactory) container);
+		if (container instanceof TomcatEmbeddedServletContainerFactory) {
+			TomcatEmbeddedServletContainerFactory tomcatContainer = ((TomcatEmbeddedServletContainerFactory) container);
+			tomcatContainer.setUriEncoding("utf-8");
+			configureSSL(tomcatContainer);
+		}
 	}
 
 	/**
@@ -77,6 +80,7 @@ public class ServletConfiguration implements EmbeddedServletContainerCustomizer 
 		connector.setPort(8443);
 		connector.setSecure(true);
 		connector.setScheme("https"); //NOI18N
+		connector.setURIEncoding(container.getUriEncoding());
 
 		Http11Protocol proto = (Http11Protocol) connector.getProtocolHandler();
 		proto.setSSLEnabled(true);
