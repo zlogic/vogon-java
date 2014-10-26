@@ -1,4 +1,4 @@
-var app = angular.module("vogon", ["ngCookies", "ui.bootstrap", "nvd3ChartDirectives", "infinite-scroll"]);
+var app = angular.module("vogon", ["ngCookies", "ui.bootstrap", "nvd3ChartDirectives", "infinite-scroll", "ngTagsInput"]);
 
 var dateToJson = function (date) {
 	if (date instanceof Date)
@@ -8,10 +8,10 @@ var dateToJson = function (date) {
 };
 
 var tagsToJson = function (tags) {
-	if (tags.constructor === String)
-		return tags.split(messages.TAGS_SEPARATOR);
-	else
-		return tags;
+	var tagsJson = [];
+	for (var tag in tags)
+		tagsJson.push(tags[tag].text);
+	return tagsJson;
 };
 var encodeForm = function (data) {
 	var buffer = [];
@@ -256,7 +256,7 @@ app.controller("LoginController", function ($scope, AuthorizationService, HTTPSe
 	};
 });
 
-app.controller("AnalyticsController", function ($scope, $modalInstance, AccountsService, TransactionsService, CurrencyService, HTTPService, UserService) {
+app.controller("AnalyticsController", function ($scope, $modalInstance, AccountsService, TransactionsService, CurrencyService, HTTPService, UserService, TagsService) {
 	$scope.accountService = AccountsService;
 	$scope.transactionsService = TransactionsService;
 	$scope.currencyService = CurrencyService;
@@ -274,9 +274,9 @@ app.controller("AnalyticsController", function ($scope, $modalInstance, Accounts
 	$scope.tagsChartData = [];
 	$scope.balanceChartData = [];
 	$scope.currencies = [];
-	HTTPService.get("service/analytics/tags").then(function (data) {
+	TagsService.update().then(function () {
 		$scope.tags = {};
-		data.data.forEach(function (tag) {
+		TagsService.tags.forEach(function (tag) {
 			$scope.tags[tag] = true;
 		});
 	});
@@ -534,17 +534,58 @@ app.controller("AuthController", function ($scope, $modal, AuthorizationService,
 	$scope.toggleLoginDialog();
 });
 
-app.service("UserService", function ($rootScope, AuthorizationService, HTTPService) {
+app.service("TagsService", function ($q, AuthorizationService, HTTPService) {
+	var that = this;
+	this.tags = [];
+	var convertTagsForAutocomplete = function (tags, query) {
+		var tagsAutocomplete = [];
+		tags.forEach(function (tag) {
+			if (query === undefined || tag.toLowerCase().indexOf(query.toLowerCase()) >= 0)
+				tagsAutocomplete.push({text: tag});
+		});
+		return tagsAutocomplete;
+	};
+	this.update = function () {
+		if (AuthorizationService.authorized) {
+			return HTTPService.get("service/analytics/tags").then(function (data) {
+				that.tags = data.data;
+				convertTagsForAutocomplete(that.tags);
+			});
+		} else {
+			var deferred = $q.defer();
+			deferred.reject();
+			return deferred.promise;
+		}
+	};
+	this.mergeTags = function (newTags) {
+		newTags.forEach(
+				function (newTag) {
+					if (!that.tags.some(function (tag) {
+						return tag === newTag;
+					}))
+						that.tags.push(newTag);
+				});
+	};
+	this.autocompleteQuery = function (query) {
+		var deferred = $q.defer();
+		deferred.resolve(convertTagsForAutocomplete(that.tags, query));
+		return deferred.promise;
+	}
+});
+
+app.service("UserService", function ($rootScope, AuthorizationService, HTTPService, TagsService) {
 	var that = this;
 	this.userData = undefined;
 	this.update = function () {
-		if (AuthorizationService.authorized)
+		if (AuthorizationService.authorized) {
 			HTTPService.get("service/user", undefined, HTTPService.buildRequestParams(false))
 					.then(function (data) {
 						that.userData = data.data;
 					}, function () {
 						that.userData = undefined;
 					});
+			TagsService.update();
+		}
 	};
 	this.submit = function (user) {
 		return HTTPService.post("service/user", user)
@@ -691,12 +732,21 @@ app.controller("AccountsController", function ($scope, $modal, AuthorizationServ
 	};
 });
 
-app.controller("TransactionEditorController", function ($scope, $modalInstance, AccountsService, TransactionsService, transaction) {
+app.controller("TransactionEditorController", function ($scope, $modalInstance, AccountsService, TransactionsService, TagsService, transaction) {
 	$scope.transaction = transaction;
 	$scope.accountService = AccountsService;
 	$scope.transactionTypes = TransactionsService.transactionTypes;
 	$scope.calendarOpened = false;
+	$scope.tagsService = TagsService;
 	$scope.tags = transaction.tags.join(messages.TAGS_SEPARATOR);
+	var tagsFromTransaction = function (transaction) {
+		$scope.tags = [];
+		transaction.tags.forEach(
+				function (tag) {
+					$scope.tags.push({text: tag});
+				});
+	}
+	tagsFromTransaction(transaction);
 	$scope.openCalendar = function ($event) {
 		$event.preventDefault();
 		$event.stopPropagation();
@@ -711,6 +761,7 @@ app.controller("TransactionEditorController", function ($scope, $modalInstance, 
 		});
 	};
 	$scope.submitEditing = function () {
+		TagsService.mergeTags($scope.transaction.tags);
 		TransactionsService.submitTransaction($scope.transaction);
 		$modalInstance.close();
 	};
@@ -767,8 +818,11 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 					params.filterDate = dateToJson(that.filterDate);
 				if (that.filterDescription !== undefined && that.filterDescription !== "")
 					params.filterDescription = that.filterDescription;
-				if (that.filterTags !== undefined && that.filterTags !== "")
-					params.filterTags = tagsToJson(that.filterTags);
+				if (that.filterTags !== undefined) {
+					var tags = tagsToJson(that.filterTags);
+					if (tags.length > 0)
+						params.filterTags = tags;
+				}
 				return that.nextPageRequest = HTTPService.get("service/transactions/?" + encodeForm(params), undefined, HTTPService.buildRequestParams(false))
 						.then(function (data) {
 							that.nextPageRequest = undefined;
@@ -790,7 +844,7 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 		}
 		var deferred = $q.defer();
 		deferred.reject();
-		return deferred;
+		return deferred.promise;
 	};
 	this.update = function () {
 		reset();
@@ -926,10 +980,11 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 	HTTPService.updateTransactions = this.update;
 });
 
-app.controller("TransactionsController", function ($scope, $modal, $interval, TransactionsService, AuthorizationService, AccountsService, UserService) {
+app.controller("TransactionsController", function ($scope, $modal, $interval, TransactionsService, AuthorizationService, AccountsService, UserService, TagsService) {
 	$scope.transactionsService = TransactionsService;
 	$scope.authorizationService = AuthorizationService;
 	$scope.accountsService = AccountsService;
+	$scope.tagsService = TagsService;
 	$scope.editor = undefined;
 	$scope.editingTransaction = undefined;
 	$scope.userService = UserService;

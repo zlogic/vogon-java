@@ -418,7 +418,7 @@ public class TransactionModelAdapter {
 		if (!(obj instanceof TransactionModelAdapter))
 			return false;
 		TransactionModelAdapter adapter = (TransactionModelAdapter) obj;
-		return transaction.getId() == adapter.transaction.getId();
+		return transaction.getId() == null ? adapter.transaction.getId() == null : transaction.getId().equals(adapter.transaction.getId());
 	}
 
 	@Override

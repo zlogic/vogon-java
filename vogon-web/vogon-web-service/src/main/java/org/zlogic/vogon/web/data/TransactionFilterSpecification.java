@@ -5,9 +5,7 @@
  */
 package org.zlogic.vogon.web.data;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -73,20 +71,9 @@ public class TransactionFilterSpecification implements Specification<FinanceTran
 				filterTagsLowercase.add(tag.toLowerCase());
 			tagsPredicate = cb.lower(root.join(FinanceTransaction_.tags)).in(cb.literal(filterTagsLowercase));
 		}
-		Predicate datePredicate = cb.conjunction();
-		if (filterDate != null) {
-			GregorianCalendar calendar = new GregorianCalendar();
-			calendar.setTime(filterDate);
-			calendar.set(Calendar.HOUR, 0);
-			calendar.set(Calendar.MINUTE, 0);
-			calendar.set(Calendar.SECOND, 0);
-			calendar.set(Calendar.MILLISECOND, 0);
-			Date startDayDate = calendar.getTime();
-			calendar.roll(Calendar.DATE, 1);
-			calendar.roll(Calendar.MILLISECOND, -1);
-			Date endDayDate = calendar.getTime();
-			datePredicate = cb.and(cb.greaterThanOrEqualTo(root.get(FinanceTransaction_.transactionDate), startDayDate), cb.lessThanOrEqualTo(root.get(FinanceTransaction_.transactionDate), endDayDate));
-		}
+		Predicate datePredicate = filterDate != null
+				? cb.equal(root.get(FinanceTransaction_.transactionDate), new java.sql.Date(filterDate.getTime()))
+				: cb.conjunction();
 		return cb.and(ownerPredicate, descriptionPredicate, datePredicate, tagsPredicate);
 	}
 
