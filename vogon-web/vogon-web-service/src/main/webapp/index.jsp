@@ -7,6 +7,7 @@
 	<head>
 		<title><fmt:message key="VOGON_PAGE_TITLE"/></title>
 		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<fmt:message key="bootstrap" bundle="${webjars}"/>/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="webjars/ng-tags-input/<fmt:message key="ngtagsinput" bundle="${webjars}"/>/ng-tags-input.min.css">
 		<link rel="stylesheet" type="text/css" href="webjars/nvd3/<fmt:message key="nvd3" bundle="${webjars}"/>/nv.d3.min.css">
 		<!--<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<fmt:message key="bootstrap" bundle="${webjars}"/>/css/bootstrap-theme.min.css">-->
 		<script type="text/javascript" src="webjars/jquery/<fmt:message key="jquery" bundle="${webjars}"/>/jquery.min.js"></script>
@@ -14,6 +15,7 @@
 		<script type="text/javascript" src="webjars/angularjs/<fmt:message key="angularjs" bundle="${webjars}"/>/angular-cookies.js"></script>
 		<script type="text/javascript" src="webjars/angular-ui-bootstrap/<fmt:message key="angularuibootstrap" bundle="${webjars}"/>/ui-bootstrap-tpls.min.js"></script>
 		<script type="text/javascript" src="webjars/ngInfiniteScroll/<fmt:message key="nginfinitescroll" bundle="${webjars}"/>/ng-infinite-scroll.min.js"></script>
+		<script type="text/javascript" src="webjars/ng-tags-input/<fmt:message key="ngtagsinput" bundle="${webjars}"/>/ng-tags-input.min.js"></script>
 		<script type="text/javascript" src="webjars/bootstrap/<fmt:message key="bootstrap" bundle="${webjars}"/>/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="webjars/d3js/<fmt:message key="d3js" bundle="${webjars}"/>/d3.min.js"></script>
 		<script type="text/javascript" src="webjars/nvd3/<fmt:message key="nvd3" bundle="${webjars}"/>/nv.d3.min.js"></script>
@@ -21,6 +23,7 @@
 		<script type="text/javascript" src="script/messages.js"></script>
 		<script type="text/javascript" src="script/main.js"></script>
 		<link rel="stylesheet" type="text/css" href="css/style.css">
+		<link rel="stylesheet" type="text/css" href="css/tags-bootstrap.css">
 		<link rel="icon" type="image/png" href="images/vogon-favicon.png" />
 	</head>
 	<body ng-app="vogon">
@@ -108,7 +111,9 @@
 									<button type="button" class="btn btn-default" ng-click="openCalendar($event)"><span class="glyphicon glyphicon-calendar"></span></button>
 								</span>
 							</div>
-							<input type="text" ng-model="tags" ng-change="syncTags()" placeholder="<fmt:message key="ENTER_TAGS"/>" class="form-control"/>
+							<tags-input class="bootstrap" ng-model="tags" placeholder="<fmt:message key="ADD_TAGS"/>" on-tag-added="syncTags()" on-tag-removed="syncTags()" replace-spaces-with-dashes="false" add-on-comma="false">
+								<auto-complete source="tagsService.autocompleteQuery($query)"></auto-complete>
+							</tags-input>
 						</div>
 					</div>
 					<div class="row form-control-static">
@@ -402,25 +407,25 @@
 												<span ng-show="transactionsService.sortColumn==='description'" class="glyphicon glyphicon-sort-by-alphabet" ng-class="transactionsService.sortAsc?'glyphicon-sort-by-alphabet':'glyphicon-sort-by-alphabet-alt'"></span>
 											</div>
 										</th>
-										<th>
+										<th width="20%">
 											<div class="editable" ng-click="transactionsService.applySort('date')"><fmt:message key="DATE"/>
 												<span ng-show="transactionsService.sortColumn==='date'" class="glyphicon glyphicon-sort-by-alphabet" ng-class="transactionsService.sortAsc?'glyphicon-sort-by-order':'glyphicon-sort-by-order-alt'"></span>
 											</div>
 										</th>
-										<th><fmt:message key="TAGS"/></th>
-										<th class="text-right">
+										<th width="20%"><fmt:message key="TAGS"/></th>
+										<th class="text-right" width="10%">
 											<div class="editable" ng-click="transactionsService.applySort('amount')"><fmt:message key="AMOUNT"/>
 												<span ng-show="transactionsService.sortColumn==='amount'" class="glyphicon glyphicon-sort-by-alphabet" ng-class="transactionsService.sortAsc?'glyphicon-sort-by-order':'glyphicon-sort-by-order-alt'"></span>
 											</div>
 										</th>
-										<th><fmt:message key="ACCOUNT"/></th>
-										<th></th>
+										<th width="10%"><fmt:message key="ACCOUNT"/></th>
+										<th width="10%"></th>
 									</tr>
 								</thead>
 								<tbody>
 									<tr>
 										<td>
-											<div class="form-inline">
+											<div class="form-horizontal">
 												<div class="input-group">
 													<span class="input-group-addon"><span class="glyphicon glyphicon-filter"></span></span>
 													<input type="text" class="form-control" placeholder="<fmt:message key="ENTER_DESCRIPTION_FILTER"/>" ng-model="transactionsService.filterDescription" ng-change="applyFilter()"/>
@@ -428,7 +433,7 @@
 											</div>
 										</td>
 										<td>
-											<div class="form-inline">
+											<div class="form-horizontal">
 												<div class="input-group">
 													<span class="input-group-addon"><span class="glyphicon glyphicon-filter"></span></span>
 													<input type="text" class="form-control" datepicker-popup ng-model="transactionsService.filterDate" ng-change="applyFilter()" is-open="filterDateCalendarOpened" placeholder="<fmt:message key="ENTER_DATE_FILTER"/>" />
@@ -439,10 +444,12 @@
 											</div>
 										</td>
 										<td>
-											<div class="form-inline">
+											<div class="form-horizontal">
 												<div class="input-group">
 													<span class="input-group-addon"><span class="glyphicon glyphicon-filter"></span></span>
-													<input type="text" class="form-control" placeholder="<fmt:message key="ENTER_TAGS_FILTER"/>" ng-model="transactionsService.filterTags" ng-change="applyFilter()"/>
+													<tags-input class="bootstrap" ng-model="transactionsService.filterTags" placeholder="<fmt:message key="ADD_FILTER_TAGS"/>" on-tag-added="applyFilter()" on-tag-removed="applyFilter()" replace-spaces-with-dashes="false" add-on-comma="false">
+														<auto-complete source="tagsService.autocompleteQuery($query)"></auto-complete>
+													</tags-input>
 												</div>
 											</div>
 										</td>
