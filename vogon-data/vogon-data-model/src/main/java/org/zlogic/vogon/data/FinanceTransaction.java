@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
@@ -33,6 +34,11 @@ import javax.persistence.Version;
  */
 @Entity
 public class FinanceTransaction implements Serializable {
+
+	/**
+	 * Localization messages
+	 */
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/data/messages");
 
 	/**
 	 * The transaction type
@@ -150,7 +156,7 @@ public class FinanceTransaction implements Serializable {
 	 */
 	public void merge(FinanceTransaction transaction) {
 		if (version != transaction.version)
-			throw new ConcurrentModificationException("Transaction was already updated");
+			throw new ConcurrentModificationException(messages.getString("TRANSACTION_WAS_ALREADY_UPDATED"));
 		this.type = transaction.type;
 		this.description = transaction.description;
 		this.tags = new HashSet<>();

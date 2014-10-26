@@ -5,6 +5,7 @@
  */
 package org.zlogic.vogon.web;
 
+import java.text.MessageFormat;
 import javax.persistence.EntityManagerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,10 +28,10 @@ public class PersistenceConfiguration {
 	 * @return the path to the database
 	 */
 	public String getDatabasePath() {
-		String openshiftDataDir = System.getenv("OPENSHIFT_DATA_DIR");
+		String openshiftDataDir = System.getenv("OPENSHIFT_DATA_DIR"); //NOI18N
 		if (openshiftDataDir != null)
 			return openshiftDataDir;
-		return System.getProperty("jboss.server.data.dir", System.getProperty("catalina.home", System.getProperty("user.dir")));
+		return System.getProperty("jboss.server.data.dir", System.getProperty("catalina.home", System.getProperty("user.dir"))); //NOI18N
 	}
 
 	/**
@@ -41,9 +42,9 @@ public class PersistenceConfiguration {
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
-		entityManagerFactory.setPersistenceUnitName("VogonPU");
-		entityManagerFactory.getJpaPropertyMap().put("javax.persistence.jdbc.url", "jdbc:h2:" + getDatabasePath() + "/Vogon");
-		entityManagerFactory.setPersistenceXmlLocation("classpath:META-INF/persistence.xml");
+		entityManagerFactory.setPersistenceUnitName("VogonPU"); //NOI18N
+		entityManagerFactory.getJpaPropertyMap().put("javax.persistence.jdbc.url", MessageFormat.format("jdbc:h2:{0}/Vogon", new Object[]{getDatabasePath()})); //NOI18N
+		entityManagerFactory.setPersistenceXmlLocation("classpath:META-INF/persistence.xml"); //NOI18N
 		return entityManagerFactory;
 	}
 

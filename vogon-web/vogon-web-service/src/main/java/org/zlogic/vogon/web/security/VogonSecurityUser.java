@@ -23,7 +23,7 @@ public class VogonSecurityUser implements UserDetails {
 	/**
 	 * The user authority
 	 */
-	public static final String AUTHORITY = "ROLE_VOGON_USER";
+	public static final String AUTHORITY = "ROLE_VOGON_USER"; //NOI18N
 	/**
 	 * The user authorities list
 	 */

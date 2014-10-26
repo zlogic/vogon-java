@@ -41,7 +41,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 		super.addViewControllers(registry);
-		registry.addViewController("/").setViewName("index");
+		registry.addViewController("/").setViewName("index"); //NOI18N
 	}
 
 	/**
@@ -52,8 +52,8 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 	@Bean
 	public ViewResolver getViewResolver() {
 		InternalResourceViewResolver resolver = new InternalResourceViewResolver();
-		resolver.setPrefix("/");
-		resolver.setSuffix(".jsp");
+		resolver.setPrefix("/"); //NOI18N
+		resolver.setSuffix(".jsp"); //NOI18N
 		return resolver;
 	}
 

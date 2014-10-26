@@ -59,7 +59,7 @@ public class ServletConfiguration implements EmbeddedServletContainerCustomizer 
 		container.setMimeMappings(mappings);
 		if (container instanceof TomcatEmbeddedServletContainerFactory) {
 			TomcatEmbeddedServletContainerFactory tomcatContainer = ((TomcatEmbeddedServletContainerFactory) container);
-			tomcatContainer.setUriEncoding("utf-8");
+			tomcatContainer.setUriEncoding("utf-8"); //NOI18N
 			configureSSL(tomcatContainer);
 		}
 	}

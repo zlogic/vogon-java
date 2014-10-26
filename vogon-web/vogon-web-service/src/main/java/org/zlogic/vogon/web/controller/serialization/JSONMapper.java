@@ -104,6 +104,6 @@ public class JSONMapper extends ObjectMapper implements InitializingBean {
 		this.addMixInAnnotations(FinanceTransactionJson.class, FinanceTransactionAnnotations.class);
 		this.addMixInAnnotations(FinanceAccount.class, FinanceAccountAnnotations.class);
 		this.addMixInAnnotations(VogonUser.class, VogonUserAnnotations.class);
-		this.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
+		this.setDateFormat(new SimpleDateFormat("yyyy-MM-dd")); //NOI18N
 	}
 }
