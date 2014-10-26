@@ -5,11 +5,13 @@
  */
 package org.zlogic.vogon.web.security;
 
+import java.util.ResourceBundle;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.zlogic.vogon.data.Constants;
 import org.zlogic.vogon.data.VogonUser;
@@ -24,10 +26,19 @@ import org.zlogic.vogon.web.data.UserRepository;
 public class UserService implements UserDetailsService, InitializingBean {
 
 	/**
+	 * Localization messages
+	 */
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/web/messages");
+	/**
 	 * The users repository
 	 */
 	@Autowired
 	private UserRepository userRepository;
+	/**
+	 * The PasswordEncoder instance
+	 */
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 	/**
 	 * The default user username
 	 */
@@ -47,7 +58,7 @@ public class UserService implements UserDetailsService, InitializingBean {
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		VogonUser user = userRepository.findByUsername(username);
 		if (user == null)
-			throw new UsernameNotFoundException("User cannot be found");
+			throw new UsernameNotFoundException(messages.getString("USER_CANNOT_BE_FOUND"));
 		else
 			return new VogonSecurityUser(user);
 	}
@@ -73,7 +84,7 @@ public class UserService implements UserDetailsService, InitializingBean {
 	public void afterPropertiesSet() throws Exception {
 		if (defaultUserUsername != null && defaultUserPassword != null) {
 			if (userRepository.count() == 0) {
-				VogonUser defaultUser = new VogonUser(defaultUserUsername, defaultUserPassword);
+				VogonUser defaultUser = new VogonUser(defaultUserUsername, passwordEncoder.encode(defaultUserPassword));
 				userRepository.saveAndFlush(defaultUser);
 			}
 		}

@@ -6,6 +6,7 @@
 package org.zlogic.vogon.web.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,18 +35,21 @@ public class UsersController {
 	 */
 	@Autowired
 	private InitializationHelper initializationHelper;
-
 	/**
 	 * The users repository
 	 */
 	@Autowired
 	private UserRepository userRepository;
-
 	/**
 	 * The Spring user service
 	 */
 	@Autowired
 	private UserService userService;
+	/**
+	 * The PasswordEncoder instance
+	 */
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	/**
 	 * Returns user details for the authenticated user
@@ -75,7 +79,7 @@ public class UsersController {
 		if (updatedUser.getUsername() != null && !updatedUser.getUsername().isEmpty())
 			user.setUsername(updatedUser.getUsername());
 		if (updatedUser.getPassword() != null)
-			user.setPassword(updatedUser.getPassword());
+			user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
 		user = userRepository.saveAndFlush(user);
 		userService.refreshUser(userPrincipal);
 		return initializationHelper.initializeUser(user);

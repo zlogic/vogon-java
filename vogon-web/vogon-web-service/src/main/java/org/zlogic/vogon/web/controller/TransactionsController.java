@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ResourceBundle;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.metamodel.Attribute;
@@ -51,6 +52,10 @@ import org.zlogic.vogon.web.security.VogonSecurityUser;
 @Transactional(propagation = Propagation.REQUIRED)
 public class TransactionsController {
 
+	/**
+	 * Localization messages
+	 */
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/web/messages");
 	/**
 	 * The page size
 	 */
@@ -198,7 +203,7 @@ public class TransactionsController {
 			} else {
 				TransactionComponent existingComponent = existingTransaction.getComponents().get(existingTransaction.getComponents().indexOf(newComponent));
 				if (newComponent.getVersion() != existingComponent.getVersion())
-					throw new ConcurrentModificationException("Transaction was already updated");
+					throw new ConcurrentModificationException(messages.getString("TRANSACTION_WAS_ALREADY_UPDATED"));
 				existingTransaction.updateComponentAccount(existingComponent, existingAccount);
 				existingTransaction.updateComponentRawAmount(existingComponent, newComponent.getAmount());
 				removedComponents.remove(existingComponent);
