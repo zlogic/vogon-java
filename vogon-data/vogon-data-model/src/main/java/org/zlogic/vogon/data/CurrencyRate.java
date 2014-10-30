@@ -76,7 +76,7 @@ public class CurrencyRate implements Serializable {
 	 * @return the amount, converted to destination currency
 	 */
 	double convert(long amount) {
-		return Math.round(amount * exchangeRate) / Constants.rawAmountMultiplier;
+		return Math.round(amount * exchangeRate) / Constants.RAW_AMOUNT_MULTIPLIER;
 	}
 
 	/*

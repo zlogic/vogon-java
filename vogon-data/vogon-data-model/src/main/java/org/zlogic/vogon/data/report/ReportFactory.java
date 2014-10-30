@@ -605,7 +605,7 @@ public class ReportFactory {
 				String currency = dateBalanceCurrency.getKey();
 				if (!result.containsKey(currency))
 					result.put(currency, new DateBalance<>(Double.class));
-				result.get(dateBalanceCurrency.getKey()).setBalance(dateBalance.getKey(), dateBalance.getValue() / Constants.rawAmountMultiplier);
+				result.get(dateBalanceCurrency.getKey()).setBalance(dateBalance.getKey(), dateBalance.getValue() / Constants.RAW_AMOUNT_MULTIPLIER);
 			}
 		return result;
 	}
@@ -643,7 +643,7 @@ public class ReportFactory {
 			//Convert results to a common currency if tag contains transactions in different currencies
 			for (Tuple tuple : resultForCurrency) {
 				String tag = tuple.get(1, String.class);
-				double amount = (tuple.get(0, Long.class) / Constants.rawAmountMultiplier);
+				double amount = (tuple.get(0, Long.class) / Constants.RAW_AMOUNT_MULTIPLIER);
 				if (!result.containsKey(tag))
 					result.put(tag, new TagExpense(tag));
 				TagExpense tagExpense = result.get(tag);

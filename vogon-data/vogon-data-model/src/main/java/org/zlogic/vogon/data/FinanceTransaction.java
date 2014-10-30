@@ -298,7 +298,7 @@ public class FinanceTransaction implements Serializable {
 	 * @param amount the new amount
 	 */
 	public void updateComponentRawAmount(TransactionComponent component, double amount) {
-		updateComponentRawAmount(component, Math.round(amount * Constants.rawAmountMultiplier));
+		updateComponentRawAmount(component, Math.round(amount * Constants.RAW_AMOUNT_MULTIPLIER));
 	}
 
 	/**
@@ -389,7 +389,7 @@ public class FinanceTransaction implements Serializable {
 	 * @return the transaction amount
 	 */
 	public double getAmount() {
-		return amount / Constants.rawAmountMultiplier;
+		return amount / Constants.RAW_AMOUNT_MULTIPLIER;
 	}
 
 	/**

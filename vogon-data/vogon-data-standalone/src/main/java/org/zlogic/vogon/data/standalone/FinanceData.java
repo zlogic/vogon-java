@@ -425,7 +425,7 @@ public class FinanceData {
 		} catch (javax.persistence.NoResultException ex) {
 		}
 		if (user == null) {
-			user = new VogonUser(org.zlogic.vogon.data.Constants.defaultUserUsername, org.zlogic.vogon.data.Constants.defaultUserPassword);
+			user = new VogonUser(org.zlogic.vogon.data.Constants.DEFAULT_USERNAME, org.zlogic.vogon.data.Constants.DEFAULT_PASSWORD);
 			entityManager.getTransaction().begin();
 			entityManager.persist(user);
 			entityManager.getTransaction().commit();

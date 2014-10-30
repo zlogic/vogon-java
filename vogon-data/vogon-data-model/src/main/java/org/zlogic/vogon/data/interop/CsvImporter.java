@@ -102,7 +102,7 @@ public class CsvImporter implements Importer {
 							double amount = Double.parseDouble(columns[i].replaceAll("[^ \\t]\\s+", "").replaceAll("[^0-9.-]", "")); //NOI18N
 							if (amount == 0)
 								continue;
-							amount = Math.round(amount * Constants.rawAmountMultiplier);
+							amount = Math.round(amount * Constants.RAW_AMOUNT_MULTIPLIER);
 							accountAmounts.put(accounts.get(i - 3), (long) (amount));
 							if (amount > 0)
 								hasPositiveAmounts = true;
