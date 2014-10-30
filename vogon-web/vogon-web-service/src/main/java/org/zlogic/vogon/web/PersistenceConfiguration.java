@@ -31,7 +31,7 @@ public class PersistenceConfiguration {
 		String openshiftDataDir = System.getenv("OPENSHIFT_DATA_DIR"); //NOI18N
 		if (openshiftDataDir != null)
 			return openshiftDataDir;
-		return System.getProperty("jboss.server.data.dir", System.getProperty("catalina.home", System.getProperty("user.dir"))); //NOI18N
+		return System.getProperty("vogon.database.dir", System.getProperty("jboss.server.data.dir", System.getProperty("catalina.home", System.getProperty("user.dir")))); //NOI18N
 	}
 
 	/**
