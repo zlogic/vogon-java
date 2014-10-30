@@ -263,17 +263,18 @@ app.controller("AnalyticsController", function ($scope, $modalInstance, Accounts
 	$scope.tags = {};
 	$scope.accounts = {};
 	var currentTime = new Date();
-	$scope.startDate = new Date(currentTime.getFullYear(), currentTime.getMonth(), 1);
-	$scope.endDate = new Date((new Date(currentTime.getFullYear(), currentTime.getMonth() + 1, 1)) - 1);
+	$scope.startDate = dateToJson(new Date(currentTime.getFullYear(), currentTime.getMonth(), 1));
+	$scope.endDate = dateToJson(new Date((new Date(currentTime.getFullYear(), currentTime.getMonth() + 1, 1)) - 1));
 	$scope.transactionTypeEnabled = {
 		transfer: false,
 		income: true,
 		expense: true
 	};
 	$scope.report = undefined;
-	$scope.tagsChartData = [];
-	$scope.balanceChartData = [];
+	$scope.tagsChartData = undefined;
+	$scope.balanceChartData = undefined;
 	$scope.currencies = [];
+	$scope.reportCompleted = false;
 	TagsService.update().then(function () {
 		$scope.tags = {};
 		TagsService.tags.forEach(function (tag) {
