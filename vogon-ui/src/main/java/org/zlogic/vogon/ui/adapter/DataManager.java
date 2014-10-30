@@ -292,9 +292,9 @@ public class DataManager {
 			if (account.getAccount().getCurrency() == currency)
 				totalBalance += account.getAccount().getRawBalance();
 			else if (currency == null)
-				totalBalance += Math.round(account.getAccount().getBalance() * financeData.getExchangeRate(account.getAccount().getCurrency(), defaultCurrency.get().getCurrency()) * Constants.rawAmountMultiplier);
+				totalBalance += Math.round(account.getAccount().getBalance() * financeData.getExchangeRate(account.getAccount().getCurrency(), defaultCurrency.get().getCurrency()) * Constants.RAW_AMOUNT_MULTIPLIER);
 		}
-		return totalBalance / Constants.rawAmountMultiplier;
+		return totalBalance / Constants.RAW_AMOUNT_MULTIPLIER;
 	}
 
 	/**
@@ -473,7 +473,7 @@ public class DataManager {
 	public double convertAmount(double amount, Currency sourceCurrency, Currency destinationCurrency) {
 		for (CurrencyRateModelAdapter currencyRate : exchangeRates)
 			if (currencyRate.getSourceCurrency() == sourceCurrency && currencyRate.getDestinationCurrency() == destinationCurrency)
-				return Math.round(amount * currencyRate.exchangeRateProperty().get() * Constants.rawAmountMultiplier) / Constants.rawAmountMultiplier;
+				return Math.round(amount * currencyRate.exchangeRateProperty().get() * Constants.RAW_AMOUNT_MULTIPLIER) / Constants.RAW_AMOUNT_MULTIPLIER;
 		throw new RuntimeException(MessageFormat.format(messages.getString("CANNOT_FIND_EXCHANGE_RATE"), new Object[]{sourceCurrency, destinationCurrency}));
 	}
 

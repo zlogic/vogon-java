@@ -15,14 +15,14 @@ public class Constants {
 	/**
 	 * Multiplier for converting from raw amount to double (10E[decimal points])
 	 */
-	public static final double rawAmountMultiplier = 100.0D;
+	public static final double RAW_AMOUNT_MULTIPLIER = 100.0D;
 
 	/**
 	 * Default username if only one user is supported
 	 */
-	public static final String defaultUserUsername = "Default"; //NOI18N
+	public static final String DEFAULT_USERNAME = "Default"; //NOI18N
 	/**
 	 * Default password if only one user is supported
 	 */
-	public static final String defaultUserPassword = "Default"; //NOI18N
+	public static final String DEFAULT_PASSWORD = "Default"; //NOI18N
 }

@@ -242,7 +242,7 @@ public class FinanceAccount implements Serializable {
 	 * @return the balance
 	 */
 	public double getBalance() {
-		return balance / Constants.rawAmountMultiplier;
+		return balance / Constants.RAW_AMOUNT_MULTIPLIER;
 	}
 
 	/**

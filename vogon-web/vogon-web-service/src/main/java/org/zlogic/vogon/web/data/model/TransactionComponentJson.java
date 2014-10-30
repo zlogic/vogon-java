@@ -80,6 +80,6 @@ public class TransactionComponentJson extends TransactionComponent {
 	 * @param amount the amount to set
 	 */
 	public void setAmount(double amount) {
-		this.setRawAmount(Math.round(amount * Constants.rawAmountMultiplier));
+		this.setRawAmount(Math.round(amount * Constants.RAW_AMOUNT_MULTIPLIER));
 	}
 }

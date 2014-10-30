@@ -7,14 +7,10 @@ package org.zlogic.vogon.data;
 
 import java.io.Serializable;
 import java.util.Currency;
-import java.util.HashMap;
-import java.util.Map;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 import javax.persistence.Version;
 
 /**
@@ -49,15 +45,9 @@ public class VogonUser implements Serializable {
 	 */
 	protected String password;
 	/**
-	 * The "Currency" key in preferences
+	 * The user's preferred currency
 	 */
-	@Transient
-	private static String CURRENCY = "Currency"; //NOI18N
-	/**
-	 * Preferences collection in string form
-	 */
-	@ElementCollection
-	Map<String, String> preferences;
+	private String defaultCurrency;
 
 	/**
 	 * Creates a user
@@ -124,8 +114,8 @@ public class VogonUser implements Serializable {
 	 * @return the default currency
 	 */
 	public Currency getDefaultCurrency() {
-		if (preferences != null && preferences.containsKey(CURRENCY))
-			return Currency.getInstance(preferences.get(CURRENCY));
+		if (defaultCurrency != null)
+			return Currency.getInstance(defaultCurrency);
 		return null;
 	}
 
@@ -135,9 +125,7 @@ public class VogonUser implements Serializable {
 	 * @param currency the new preferred currency
 	 */
 	public void setDefaultCurrency(Currency currency) {
-		if (preferences == null)
-			preferences = new HashMap<>();
-		preferences.put(CURRENCY, currency.getCurrencyCode());
+		defaultCurrency = currency.getCurrencyCode();
 	}
 
 	/**

@@ -39,14 +39,6 @@ public class UserService implements UserDetailsService, InitializingBean {
 	 */
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-	/**
-	 * The default user username
-	 */
-	private String defaultUserUsername = Constants.defaultUserUsername;//TODO: load this from config or environment instead
-	/**
-	 * The default user password
-	 */
-	private String defaultUserPassword = Constants.defaultUserPassword;//TODO: load this from config or environment instead
 
 	/**
 	 * Loads a user by username
@@ -82,50 +74,9 @@ public class UserService implements UserDetailsService, InitializingBean {
 	 */
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		if (defaultUserUsername != null && defaultUserPassword != null) {
-			if (userRepository.count() == 0) {
-				VogonUser defaultUser = new VogonUser(defaultUserUsername, passwordEncoder.encode(defaultUserPassword));
-				userRepository.saveAndFlush(defaultUser);
-			}
+		if (userRepository.count() == 0) {
+			VogonUser defaultUser = new VogonUser(Constants.DEFAULT_USERNAME, passwordEncoder.encode(Constants.DEFAULT_PASSWORD));
+			userRepository.saveAndFlush(defaultUser);
 		}
-	}
-	/*
-	 * Getters/setters
-	 */
-
-	/**
-	 * Returns the default username
-	 *
-	 * @return the default username
-	 */
-	public String getDefaultUserUsername() {
-		return defaultUserUsername;
-	}
-
-	/**
-	 * Sets the default username
-	 *
-	 * @param defaultUserUsername the default username
-	 */
-	public void setDefaultUserUsername(String defaultUserUsername) {
-		this.defaultUserUsername = defaultUserUsername;
-	}
-
-	/**
-	 * Returns the default password
-	 *
-	 * @return the default password
-	 */
-	public String getDefaultUserPassword() {
-		return defaultUserPassword;
-	}
-
-	/**
-	 * Sets the default password
-	 *
-	 * @param defaultUserPassword the default password
-	 */
-	public void setDefaultUserPassword(String defaultUserPassword) {
-		this.defaultUserPassword = defaultUserPassword;
 	}
 }

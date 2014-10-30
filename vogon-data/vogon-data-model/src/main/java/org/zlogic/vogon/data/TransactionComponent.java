@@ -136,7 +136,7 @@ public class TransactionComponent implements Serializable {
 	 * @return the raw amount
 	 */
 	public double getAmount() {
-		return amount / Constants.rawAmountMultiplier;
+		return amount / Constants.RAW_AMOUNT_MULTIPLIER;
 	}
 
 	/**
