@@ -336,7 +336,7 @@
 					<div class="row form-control-static">
 						<div class="col-md-12">
 							<label><fmt:message key="TAGS_CHART"/></label>
-							<nvd3-pie-chart class="form-control-static" data="tagsChartData" height="300" showLabels="false" donut="true" tooltips="true" tooltipcontent="tagsChartToolTipContentFunction()" donutLabelsOutside="true" showLegend="true">
+							<nvd3-pie-chart id="tags-chart" class="form-control-static" data="tagsChartData" height="400" showLabels="false" donut="true" tooltips="true" tooltipcontent="tagsChartToolTipContentFunction()" donutLabelsOutside="true" showLegend="true">
 								<svg></svg>
 							</nvd3-pie-chart>
 						</div>
@@ -387,7 +387,7 @@
 			</div>
 		</div>
 		<div ng-controller="NotificationController">
-			<div class="navbar-fixed-top" ng-show="alertService.enabled()">
+			<div class="navbar-fixed-top alert-over-modal" ng-show="alertService.enabled()">
 				<div class="alert alert-warning" role="alert" ng-show="httpService.isLoading"><span class="glyphicon glyphicon-refresh"></span> <fmt:message key="LOADING_ALERT"/></div>
 				<alert ng-repeat="alert in alertService.alerts" type="{{alert.type}}" close="alertService.closeAlert($index)"><span class="glyphicon glyphicon-exclamation-sign"></span> {{alert.msg}}</alert>
 			</div>
