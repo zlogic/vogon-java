@@ -483,18 +483,6 @@ app.controller("AuthController", function ($scope, $modal, AuthorizationService,
 	$scope.logout = function () {
 		$scope.authorizationService.resetAuthorization();
 	};
-	$scope.toggleLoginDialog = function () {
-		if (!AuthorizationService.authorized && AuthorizationService.access_token === undefined && $scope.loginDialog === undefined) {
-			$scope.loginDialog = $modal.open({
-				templateUrl: "loginDialog",
-				controller: "LoginController",
-				backdrop: "static"
-			});
-		} else if (AuthorizationService.authorized && $scope.loginDialog !== undefined) {
-			$scope.loginDialog.dismiss();
-			delete $scope.loginDialog;
-		}
-	};
 	var closeUserSettingsDialog = function () {
 		if ($scope.userSettingsDialog !== undefined) {
 			var deleteFunction = function () {
@@ -526,13 +514,6 @@ app.controller("AuthController", function ($scope, $modal, AuthorizationService,
 			size: "lg"
 		}).result.then(closeAnalyticsDialog, closeAnalyticsDialog);
 	};
-	$scope.$watch(function () {
-		return AuthorizationService.authorized;
-	}, $scope.toggleLoginDialog);
-	$scope.$watch(function () {
-		return AuthorizationService.access_token;
-	}, $scope.toggleLoginDialog);
-	$scope.toggleLoginDialog();
 });
 
 app.service("TagsService", function ($q, AuthorizationService, HTTPService) {
