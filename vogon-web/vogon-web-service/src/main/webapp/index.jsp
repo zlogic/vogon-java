@@ -27,29 +27,37 @@
 		<link rel="icon" type="image/png" href="images/vogon-favicon.png" />
 	</head>
 	<body ng-app="vogon">
+		<div ng-controller="NotificationController">
+			<div class="navbar-fixed-top alert-over-modal" ng-show="alertService.enabled()">
+				<div class="alert alert-warning" role="alert" ng-show="httpService.isLoading"><span class="glyphicon glyphicon-refresh"></span> <fmt:message key="LOADING_ALERT"/></div>
+				<alert ng-repeat="alert in alertService.alerts" type="{{alert.type}}" close="alertService.closeAlert($index)"><span class="glyphicon glyphicon-exclamation-sign"></span> {{alert.msg}}</alert>
+			</div>
+		</div>
+		<div ng-controller="LoginController">
+			<div class="container modal-dialog" ng-hide="authorizationService.authorized">
+				<form class="form-inline" submit="login()">
+					<div class="panel panel-default">
+						<div class="panel-heading"><h3><fmt:message key="LOG_IN_TITLE"/></h3></div>
+						<div class="panel-body">
+							<input type="text" class="form-control" ng-model="authorizationService.username" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_USERNAME"/>" />
+							<input type="password" class="form-control" ng-model="authorizationService.password" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_PASSWORD"/>" />
+						</div>
+						<div class="panel-body" ng-show="failed">
+							<alert type="danger"><fmt:message key="LOGIN_FAILED"/></alert>
+						</div>
+						<div class="panel-footer">
+							<button ng-click="login()" ng-disabled="$eval(loginLocked) || !authorizationService.username || !authorizationService.password" class="btn btn-primary"><span class="glyphicon glyphicon-log-in"></span> <fmt:message key="LOGIN"/></button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
 		<div ng-controller="AuthController" class="well well-sm" ng-show="authorizationService.authorized">
 			<span class="control-label"><fmt:message key="WELCOME_MESSAGE"/> </span>
 			<button ng-click="showUserSettingsDialog()" class="btn btn-default"><span class="glyphicon glyphicon-edit"></span> <fmt:message key="EDIT_SETTINGS"/></button>
 			<button ng-click="showAnalyticsDialog()" class="btn btn-default"><span class="glyphicon glyphicon-stats"></span> <fmt:message key="SHOW_ANALYTICS"/></button>
 			<button ng-click="logout()" ng-disabled="$eval(logoutLocked)" class="btn btn-default"><span class="glyphicon glyphicon-log-out"></span> <fmt:message key="LOGOUT"/></button>
 		</div>
-		<script type="text/ng-template" id="loginDialog">
-			<div class="modal-header">
-				<h3 class="modal-title"><fmt:message key="LOG_IN_TITLE"/></h3>
-			</div>
-			<form class="form-inline" submit="login()">
-				<div class="modal-body">
-					<input type="text" class="form-control" ng-model="authorizationService.username" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_USERNAME"/>" />
-					<input type="password" class="form-control" ng-model="authorizationService.password" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_PASSWORD"/>" />
-				</div>
-				<div class="modal-body" ng-show="failed">
-					<alert type="danger"><fmt:message key="LOGIN_FAILED"/></alert>
-				</div>
-				<div class="modal-footer">
-					<button ng-click="login()" ng-disabled="$eval(loginLocked) || !authorizationService.username || !authorizationService.password" class="btn btn-primary"><span class="glyphicon glyphicon-log-in"></span> <fmt:message key="LOGIN"/></button>
-				</div>
-			</form>
-		</script>
 		<script type="text/ng-template" id="userSettingsDialog">
 			<form name="userSettingsForm" novalidate>
 				<div class="modal-header">
@@ -384,12 +392,6 @@
 						</tfoot>
 					</table>
 				</div>
-			</div>
-		</div>
-		<div ng-controller="NotificationController">
-			<div class="navbar-fixed-top alert-over-modal" ng-show="alertService.enabled()">
-				<div class="alert alert-warning" role="alert" ng-show="httpService.isLoading"><span class="glyphicon glyphicon-refresh"></span> <fmt:message key="LOADING_ALERT"/></div>
-				<alert ng-repeat="alert in alertService.alerts" type="{{alert.type}}" close="alertService.closeAlert($index)"><span class="glyphicon glyphicon-exclamation-sign"></span> {{alert.msg}}</alert>
 			</div>
 		</div>
 		<div ng-controller="TransactionsController">
