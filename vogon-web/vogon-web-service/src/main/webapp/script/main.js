@@ -244,8 +244,9 @@ app.controller("NotificationController", function ($scope, HTTPService, AlertSer
 	$scope.closeAlert = AlertService.closeAlert;
 });
 
-app.controller("LoginController", function ($scope, $http, AuthorizationService) {
+app.controller("LoginController", function ($scope, $http, AuthorizationService, HTTPService) {
 	$scope.authorizationService = AuthorizationService;
+	$scope.httpService = HTTPService;
 	$scope.loginLocked = "authorizationService.authorized || httpService.isLoading";
 	$scope.loginError = undefined;
 	$scope.registrationError = undefined;
