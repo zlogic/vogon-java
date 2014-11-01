@@ -9,9 +9,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
+import org.zlogic.vogon.data.ConfigurationElement;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.VogonUser;
 import org.zlogic.vogon.web.data.model.FinanceTransactionJson;
@@ -95,6 +98,20 @@ public class JSONMapper extends ObjectMapper implements InitializingBean {
 	}
 
 	/**
+	 * Wrapper class for ConfigurationElement
+	 */
+	private interface ConfigurationElementAnnotations {
+
+		/**
+		 * Deserialize everything as strings
+		 *
+		 * @param configurationValue the value to deserialize
+		 */
+		@JsonDeserialize(as = String.class)
+		public void setValue(Serializable configurationValue);
+	}
+
+	/**
 	 * Adds MixIn Annotations
 	 *
 	 * @throws Exception in case of errors
@@ -104,6 +121,7 @@ public class JSONMapper extends ObjectMapper implements InitializingBean {
 		this.addMixInAnnotations(FinanceTransactionJson.class, FinanceTransactionAnnotations.class);
 		this.addMixInAnnotations(FinanceAccount.class, FinanceAccountAnnotations.class);
 		this.addMixInAnnotations(VogonUser.class, VogonUserAnnotations.class);
+		this.addMixInAnnotations(ConfigurationElement.class, ConfigurationElementAnnotations.class);
 		this.setDateFormat(new SimpleDateFormat("yyyy-MM-dd")); //NOI18N
 	}
 }

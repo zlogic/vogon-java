@@ -134,7 +134,7 @@ public class ReportFactory {
 	 */
 	public ReportFactory(VogonUser user) {
 		this();
-		setOwner(user);
+		ReportFactory.this.setOwner(user);
 	}
 
 	/*
@@ -487,6 +487,7 @@ public class ReportFactory {
 		transactionsCriteriaQuery.groupBy(tr, userOrderBy, predicate.getComponentsJoin(), predicate.getTagsJoin());
 
 		//Fetch data
+		//TODO: Remove this from web version
 		TypedQuery<Tuple> query = entityManager.createQuery(transactionsCriteriaQuery);
 		if (firstTransaction >= 0)
 			query = query.setFirstResult(firstTransaction);

@@ -97,8 +97,9 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 			return deferred.promise;
 		} else {
 			AlertService.addAlert(complex_messages.HTTP_ERROR_FORMAT(data.status, data.data));
-			if (that.authorized && data.config.customData.updateOnFailure === true)
+			if (that.authorized && data.config.customData.updateOnFailure)
 				that.updateAllData();
+			//TODO: else refresh page to reset state?
 		}
 		deferred.reject(data);
 		return deferred.promise;
@@ -243,17 +244,41 @@ app.controller("NotificationController", function ($scope, HTTPService, AlertSer
 	$scope.closeAlert = AlertService.closeAlert;
 });
 
-app.controller("LoginController", function ($scope, AuthorizationService, HTTPService) {
+app.controller("LoginController", function ($scope, $http, AuthorizationService) {
 	$scope.authorizationService = AuthorizationService;
-	$scope.httpService = HTTPService;
 	$scope.loginLocked = "authorizationService.authorized || httpService.isLoading";
-	$scope.failed = false;
-	$scope.login = function () {
-		AuthorizationService.performAuthorization(AuthorizationService.username, AuthorizationService.password)
-				.catch(function () {
-					$scope.failed = true;
-				});
+	$scope.loginError = undefined;
+	$scope.registrationError = undefined;
+	var displayLoginError = function (data) {
+		$scope.loginError = data.data.error_description;
 	};
+	var displayRegistrationError = function (data) {
+		$scope.registrationError = data.data.exception;
+	};
+	var reset = function () {
+		$scope.loginError = undefined;
+		$scope.registrationError = undefined;
+	};
+	$scope.login = function () {
+		reset();
+		AuthorizationService.performAuthorization(AuthorizationService.username, AuthorizationService.password)
+				.catch(displayLoginError);
+	};
+	$scope.register = function () {
+		reset();
+		var user = {username: AuthorizationService.username, password: AuthorizationService.password};
+		return $http.post("register", user)
+				.then($scope.login, displayRegistrationError);
+	};
+	$scope.doSelectedAction = function () {
+		if ($scope.selectedTab === "login")
+			$scope.login();
+		else if ($scope.selectedTab === "register")
+			$scope.register();
+	};
+	$scope.$watch(function () {
+		return AuthorizationService.authorized;
+	}, reset);
 });
 
 app.controller("AnalyticsController", function ($scope, $modalInstance, AccountsService, TransactionsService, CurrencyService, HTTPService, UserService, TagsService) {
@@ -427,8 +452,7 @@ app.controller("UserSettingsController", function ($scope, $modalInstance, Autho
 		AuthorizationService.username = $scope.user.username;
 		if ($scope.user.password !== undefined)
 			AuthorizationService.password = $scope.user.password;
-		UserService.submit($scope.user);
-		$modalInstance.close();
+		UserService.submit($scope.user).then($scope.importData);
 	};
 	$scope.cancelEditing = function () {
 		UserService.update();
@@ -440,11 +464,13 @@ app.controller("UserSettingsController", function ($scope, $modalInstance, Autho
 		});
 	};
 	$scope.importData = function () {
-		if ($scope.file === undefined)
+		if ($scope.file === undefined) {
+			$modalInstance.dismiss();
 			return;
+		}
 		var formData = new FormData();
 		formData.append("file", $scope.file);
-		HTTPService.post("service/import", formData, importPostHeaders, undefined, angular.identity).then(function () {
+		return HTTPService.post("service/import", formData, importPostHeaders, undefined, angular.identity).then(function () {
 			$modalInstance.dismiss();
 			HTTPService.updateAllData();
 		});
@@ -472,6 +498,36 @@ app.controller("UserSettingsController", function ($scope, $modalInstance, Autho
 	};
 });
 
+app.controller("AdminSettingsController", function ($scope, $modalInstance, HTTPService) {
+	$scope.configuration = {};
+	var updateConfigurationVariables = function (data) {
+		$scope.configuration = {};
+		data.forEach(function (configurationVariable) {
+			$scope.configuration[configurationVariable.name] = configurationVariable.value;
+			if (configurationVariable.name === "AllowRegistration")
+				$scope.allowRegistration = configurationVariable.value;
+		});
+	};
+	var convertConfigurationForPost = function () {
+		var configurationPost = [];
+		for (var name in $scope.configuration)
+			configurationPost.push({name: name, value: $scope.configuration[name]});
+		return configurationPost;
+	};
+	var update = function () {
+		return HTTPService.get("service/configuration").then(function (data) {
+			updateConfigurationVariables(data.data);
+		});
+	};
+	update();
+	$scope.submitEditing = function () {
+		HTTPService.post("service/configuration", convertConfigurationForPost($scope.configuration)).then($modalInstance.close, $modalInstance.close);
+	};
+	$scope.cancelEditing = function () {
+		$modalInstance.dismiss();
+	};
+});
+
 app.controller("AuthController", function ($scope, $modal, AuthorizationService, UserService, HTTPService) {
 	$scope.authorizationService = AuthorizationService;
 	$scope.userService = UserService;
@@ -480,6 +536,7 @@ app.controller("AuthController", function ($scope, $modal, AuthorizationService,
 	$scope.loginDialog = undefined;
 	$scope.userSettingsDialog = undefined;
 	$scope.analyticsDialog = undefined;
+	$scope.adminSettingsDialog = undefined;
 	$scope.logout = function () {
 		$scope.authorizationService.resetAuthorization();
 	};
@@ -499,6 +556,14 @@ app.controller("AuthController", function ($scope, $modal, AuthorizationService,
 			$scope.analyticsDialog.then(deleteFunction, deleteFunction);
 		}
 	};
+	var closeAdminSettingsDialog = function () {
+		if ($scope.adminSettingsDialog !== undefined) {
+			var deleteFunction = function () {
+				$scope.adminSettingsDialog = undefined;
+			};
+			$scope.adminSettingsDialog.then(deleteFunction, deleteFunction);
+		}
+	};
 	$scope.showUserSettingsDialog = function () {
 		closeUserSettingsDialog();
 		$scope.userSettingsDialog = $modal.open({
@@ -513,6 +578,19 @@ app.controller("AuthController", function ($scope, $modal, AuthorizationService,
 			controller: "AnalyticsController",
 			size: "lg"
 		}).result.then(closeAnalyticsDialog, closeAnalyticsDialog);
+	};
+	$scope.showAdminSettingsDialog = function () {
+		closeAdminSettingsDialog();
+		$scope.userSettingsDialog = $modal.open({
+			templateUrl: "adminSettingsDialog",
+			controller: "AdminSettingsController",
+			size: "lg"
+		}).result.then(closeAdminSettingsDialog, closeAdminSettingsDialog);
+	};
+	$scope.isAdmin = function () {
+		return UserService.userData !== undefined && UserService.userData.authorities.some(function (authority) {
+			return authority === "ROLE_VOGON_ADMIN";
+		});
 	};
 });
 
@@ -529,7 +607,7 @@ app.service("TagsService", function ($q, AuthorizationService, HTTPService) {
 	};
 	this.update = function () {
 		if (AuthorizationService.authorized) {
-			return HTTPService.get("service/analytics/tags").then(function (data) {
+			return HTTPService.get("service/analytics/tags", undefined, HTTPService.buildRequestParams(false)).then(function (data) {
 				that.tags = data.data;
 				convertTagsForAutocomplete(that.tags);
 			});
@@ -552,7 +630,7 @@ app.service("TagsService", function ($q, AuthorizationService, HTTPService) {
 		var deferred = $q.defer();
 		deferred.resolve(convertTagsForAutocomplete(that.tags, query));
 		return deferred.promise;
-	}
+	};
 });
 
 app.service("UserService", function ($rootScope, AuthorizationService, HTTPService, TagsService) {
@@ -727,7 +805,7 @@ app.controller("TransactionEditorController", function ($scope, $modalInstance, 
 				function (tag) {
 					$scope.tags.push({text: tag});
 				});
-	}
+	};
 	tagsFromTransaction(transaction);
 	$scope.openCalendar = function ($event) {
 		$event.preventDefault();
@@ -817,6 +895,7 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 						}, function () {
 							that.nextPageRequest = undefined;
 							reset();
+							that.lastPage = true;
 						});
 			} else {
 				return that.nextPageRequest;

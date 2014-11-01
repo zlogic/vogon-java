@@ -1,5 +1,6 @@
 <%@ page session="false" trimDirectiveWhitespaces="true" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="core" uri="http://java.sun.com/jsp/jstl/core" %>
 <fmt:setBundle basename="org.zlogic.vogon.web.webmessages" />
 <fmt:setBundle basename="org.zlogic.vogon.web.webjars" var="webjars"/>
 <!DOCTYPE html>
@@ -34,19 +35,34 @@
 			</div>
 		</div>
 		<div ng-controller="LoginController">
-			<div class="container modal-dialog" ng-hide="authorizationService.authorized">
-				<form class="form-inline" submit="login()">
+			<div class="container modal-dialog" ng-hide="authorizationService.authorized" ng-init="selectedTab='login'">
+				<form>
 					<div class="panel panel-default">
-						<div class="panel-heading"><h3><fmt:message key="LOG_IN_TITLE"/></h3></div>
+						<div class="panel-heading"><h3><fmt:message key="AUTHORIZATION_TITLE"/></h3></div>
 						<div class="panel-body">
-							<input type="text" class="form-control" ng-model="authorizationService.username" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_USERNAME"/>" />
-							<input type="password" class="form-control" ng-model="authorizationService.password" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_PASSWORD"/>" />
+							<core:if test="${configuration.allowRegistration}">
+								<ul class="nav nav-pills" role="tablist">
+									<li ng-class="{active:selectedTab==='login'}"><a href ng-click="selectedTab='login'"><fmt:message key="LOGIN"/></a></li>
+									<li ng-class="{active:selectedTab==='register'}"><a href ng-click="selectedTab='register'"><fmt:message key="REGISTER"/></a></li>
+								</ul>
+							</core:if>	
+							<div class="media">
+								<div class="form-inline">
+									<input type="text" class="form-control" ng-model="authorizationService.username" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_USERNAME"/>" />
+									<input type="password" class="form-control" ng-model="authorizationService.password" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_PASSWORD"/>" />
+								</div>
+							</div>
 						</div>
-						<div class="panel-body" ng-show="failed">
-							<alert type="danger"><fmt:message key="LOGIN_FAILED"/></alert>
+						<div class="panel-body" ng-show="loginError || registrationError">
+							<alert type="danger" ng-show="loginError"><fmt:message key="LOGIN_FAILED"/>: {{loginError}}</alert>
+							<alert type="danger" ng-show="registrationError"><fmt:message key="REGISTRATION_FAILED"/>: {{registrationError}}</alert>
 						</div>
-						<div class="panel-footer">
-							<button ng-click="login()" ng-disabled="$eval(loginLocked) || !authorizationService.username || !authorizationService.password" class="btn btn-primary"><span class="glyphicon glyphicon-log-in"></span> <fmt:message key="LOGIN"/></button>
+						<div class="panel-footer text-right">
+							<button ng-click="doSelectedAction(selectedTab)" ng-disabled="$eval(loginLocked) || !authorizationService.username || !authorizationService.password" class="btn btn-primary">
+								<span class="glyphicon" ng-class="{'glyphicon-log-in':selectedTab==='login','glyphicon-send':selectedTab==='register'}"></span>
+								<span ng-show="selectedTab==='login'"><fmt:message key="LOGIN"/></span>
+								<span ng-show="selectedTab==='register'"><fmt:message key="REGISTER"/></span>
+							</button>
 						</div>
 					</div>
 				</form>
@@ -56,6 +72,7 @@
 			<span class="control-label"><fmt:message key="WELCOME_MESSAGE"/> </span>
 			<button ng-click="showUserSettingsDialog()" class="btn btn-default"><span class="glyphicon glyphicon-edit"></span> <fmt:message key="EDIT_SETTINGS"/></button>
 			<button ng-click="showAnalyticsDialog()" class="btn btn-default"><span class="glyphicon glyphicon-stats"></span> <fmt:message key="SHOW_ANALYTICS"/></button>
+			<button ng-click="showAdminSettingsDialog()" ng-show="isAdmin()" class="btn btn-default"><span class="glyphicon glyphicon-wrench"></span> <fmt:message key="ADMINISTRATIVE_SETTINGS"/></button>
 			<button ng-click="logout()" ng-disabled="$eval(logoutLocked)" class="btn btn-default"><span class="glyphicon glyphicon-log-out"></span> <fmt:message key="LOGOUT"/></button>
 		</div>
 		<script type="text/ng-template" id="userSettingsDialog">
@@ -362,6 +379,22 @@
 			<div class="modal-footer">
 				<button ng-click="close()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> <fmt:message key="CLOSE"/></button>
 			</div>
+		</script>
+		<script type="text/ng-template" id="adminSettingsDialog">
+			<form name="adminSettingsForm">
+				<div class="modal-header">
+				<h3 class="modal-title"><fmt:message key="ADMINISTRATIVE_SETTINGS_TITLE"/></h3>
+				</div>
+				<div class="modal-body">
+					<label class="checkbox-inline">
+						<input type="checkbox" ng-model="configuration['AllowRegistration']"/> <fmt:message key="ALLOW_REGISTRATION"/>
+					</label>
+				</div>
+				<div class="modal-footer">
+					<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> <fmt:message key="CANCEL"/></button>
+					<button ng-click="submitEditing()" class="btn btn-primary"><span class="glyphicon glyphicon-ok"></span> <fmt:message key="APPLY"/></button>
+				</div>
+			</form>
 		</script>
 		<div ng-controller="AccountsController">
 			<div ng-show="authorizationService.authorized" class="panel panel-default">

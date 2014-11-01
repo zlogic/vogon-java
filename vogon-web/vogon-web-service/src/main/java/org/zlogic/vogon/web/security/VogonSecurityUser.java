@@ -5,9 +5,9 @@
  */
 package org.zlogic.vogon.web.security;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,11 +23,11 @@ public class VogonSecurityUser implements UserDetails {
 	/**
 	 * The user authority
 	 */
-	public static final String AUTHORITY = "ROLE_VOGON_USER"; //NOI18N
+	public static final String AUTHORITY_USER = "ROLE_VOGON_USER"; //NOI18N
 	/**
-	 * The user authorities list
+	 * The administrator authority
 	 */
-	private static final List<SimpleGrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority(AUTHORITY));
+	public static final String AUTHORITY_ADMIN = "ROLE_VOGON_ADMIN"; //NOI18N
 
 	/**
 	 * The VogonUser form JPA
@@ -68,6 +68,9 @@ public class VogonSecurityUser implements UserDetails {
 	 */
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
+		Set<GrantedAuthority> authorities = new HashSet<>();
+		for (String authority : user.getAuthorities())
+			authorities.add(new SimpleGrantedAuthority(authority));
 		return authorities;
 	}
 

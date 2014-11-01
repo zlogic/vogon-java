@@ -6,9 +6,9 @@
 package org.zlogic.vogon.data;
 
 import java.io.Serializable;
+import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Version;
 
 /**
  * Class for storing a configuration fragment
@@ -28,11 +28,6 @@ public class ConfigurationElement implements Serializable {
 	@Id
 	protected String name;
 	/**
-	 * JPA version
-	 */
-	@Version
-	private long version = 0L;
-	/**
 	 * The configuration element value
 	 */
 	protected Serializable configurationValue;
@@ -44,7 +39,7 @@ public class ConfigurationElement implements Serializable {
 	}
 
 	/**
-	 * Creates a currency exchange rate
+	 * Creates a configuration element
 	 *
 	 * @param name the configuration element name
 	 */
@@ -52,15 +47,26 @@ public class ConfigurationElement implements Serializable {
 		this.name = name;
 	}
 
+	/**
+	 * Creates a configuration element
+	 *
+	 * @param name the configuration element name
+	 * @param value the value to set
+	 */
+	public ConfigurationElement(String name, Serializable value) {
+		this.name = name;
+		this.configurationValue = value;
+	}
 	/*
 	 * Getters/setters
 	 */
+
 	/**
 	 * Returns the configuration element value
 	 *
 	 * @return the configuration element value
 	 */
-	public Object getValue() {
+	public Serializable getValue() {
 		return configurationValue;
 	}
 
@@ -82,21 +88,17 @@ public class ConfigurationElement implements Serializable {
 		return name;
 	}
 
-	/**
-	 * Returns the version for this class instance
-	 *
-	 * @return the version for this class instance
-	 */
-	public long getVersion() {
-		return version;
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 61 * hash + Objects.hashCode(this.name);
+		return hash;
 	}
 
-	/**
-	 * Sets the version of this class instance
-	 *
-	 * @param version the version of this class instance
-	 */
-	protected void setVersion(long version) {
-		this.version = version;
+	@Override
+	public boolean equals(Object el) {
+		if (el instanceof ConfigurationElement)
+			return (((ConfigurationElement) el).name == null ? name == null : ((ConfigurationElement) el).name.equals(name));
+		return false;
 	}
 }

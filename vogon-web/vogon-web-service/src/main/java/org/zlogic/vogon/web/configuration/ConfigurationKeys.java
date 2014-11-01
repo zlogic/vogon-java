@@ -5,6 +5,11 @@
  */
 package org.zlogic.vogon.web.configuration;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import org.zlogic.vogon.data.ConfigurationElement;
+
 /**
  * ConfigurationElement keys
  *
@@ -15,5 +20,9 @@ public class ConfigurationKeys {
 	/**
 	 * AllowRegistration key
 	 */
-	public static String ALLOW_REGISTRATION = "AllowRegistration";
+	public static final String ALLOW_REGISTRATION = "AllowRegistration"; //NOI18N
+	/**
+	 * Default ConfigurationElement values
+	 */
+	public static final Set<ConfigurationElement> DEFAULT_VALUES = new HashSet<>(Arrays.asList(new ConfigurationElement(ALLOW_REGISTRATION, true)));
 }

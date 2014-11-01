@@ -6,8 +6,13 @@
 package org.zlogic.vogon.data;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Currency;
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -48,6 +53,11 @@ public class VogonUser implements Serializable {
 	 * The user's preferred currency
 	 */
 	private String defaultCurrency;
+	/**
+	 * This user's authorities
+	 */
+	@ElementCollection(fetch = FetchType.EAGER)
+	private Set<String> authorities;
 
 	/**
 	 * Creates a user
@@ -126,6 +136,29 @@ public class VogonUser implements Serializable {
 	 */
 	public void setDefaultCurrency(Currency currency) {
 		defaultCurrency = currency.getCurrencyCode();
+	}
+
+	/**
+	 * Returns the user's assigned authorities
+	 *
+	 * @return the user's assigned authorities
+	 */
+	public Set<String> getAuthorities() {
+		if (authorities == null)
+			authorities = new HashSet<>();
+		return authorities;
+	}
+
+	/**
+	 * Assigns new authorities to user
+	 *
+	 * @param authorities the new authorities for user
+	 */
+	public void setAuthorities(String... authorities) {
+		if (this.authorities == null)
+			this.authorities = new HashSet<>();
+		this.authorities.clear();
+		this.authorities.addAll(Arrays.asList(authorities));
 	}
 
 	/**
