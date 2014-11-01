@@ -29,9 +29,9 @@
 	</head>
 	<body ng-app="vogon">
 		<div ng-controller="NotificationController">
-			<div class="navbar-fixed-top alert-over-modal" ng-show="alertService.enabled()">
+			<div class="navbar-fixed-top alert-over-modal">
 				<div class="alert alert-warning" role="alert" ng-show="httpService.isLoading"><span class="glyphicon glyphicon-refresh"></span> <fmt:message key="LOADING_ALERT"/></div>
-				<alert ng-repeat="alert in alertService.alerts" type="{{alert.type}}" close="alertService.closeAlert($index)"><span class="glyphicon glyphicon-exclamation-sign"></span> {{alert.msg}}</alert>
+				<alert ng-show="alertService.enabled()" ng-repeat="alert in alertService.alerts" type="{{alert.type}}" close="alertService.closeAlert($index)"><span class="glyphicon glyphicon-exclamation-sign"></span> {{alert.msg}}</alert>
 			</div>
 		</div>
 		<div ng-controller="LoginController">
