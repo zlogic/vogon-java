@@ -52,9 +52,9 @@ public class RegistrationController {
 	 */
 	@RequestMapping(method = RequestMethod.POST, produces = "application/json")
 	public @ResponseBody
-	void register(@RequestBody VogonUser registerUser) throws UsernameExistsException {
+	VogonUser register(@RequestBody VogonUser registerUser) throws UsernameExistsException {
 		if (!configuration.isAllowRegistration())
 			throw new SecurityException(messages.getString("REGISTRATION_IS_NOT_ALLOWED"));
-		userService.createUser(registerUser);
+		return userService.createUser(registerUser);
 	}
 }
