@@ -6,7 +6,6 @@
 package org.zlogic.vogon.web.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.zlogic.vogon.data.VogonUser;
-import org.zlogic.vogon.web.data.InitializationHelper;
 import org.zlogic.vogon.web.data.UserRepository;
 import org.zlogic.vogon.web.security.UserService;
+import org.zlogic.vogon.web.security.UsernameExistsException;
 import org.zlogic.vogon.web.security.VogonSecurityUser;
 
 /**
@@ -31,11 +30,6 @@ import org.zlogic.vogon.web.security.VogonSecurityUser;
 public class UsersController {
 
 	/**
-	 * InitializationHelper instance
-	 */
-	@Autowired
-	private InitializationHelper initializationHelper;
-	/**
 	 * The users repository
 	 */
 	@Autowired
@@ -45,11 +39,6 @@ public class UsersController {
 	 */
 	@Autowired
 	private UserService userService;
-	/**
-	 * The PasswordEncoder instance
-	 */
-	@Autowired
-	private PasswordEncoder passwordEncoder;
 
 	/**
 	 * Returns user details for the authenticated user
@@ -61,7 +50,7 @@ public class UsersController {
 	public @ResponseBody
 	VogonUser getUserData(@AuthenticationPrincipal VogonSecurityUser userPrincipal) {
 		VogonUser user = userRepository.findByUsername(userPrincipal.getUsername());
-		return initializationHelper.initializeUser(user);
+		return user;
 	}
 
 	/**
@@ -70,18 +59,12 @@ public class UsersController {
 	 * @param updatedUser the updated user
 	 * @param userPrincipal the authenticated user
 	 * @return the user details
+	 * @throws org.zlogic.vogon.web.security.UsernameExistsException in case the
+	 * new username is already in use
 	 */
 	@RequestMapping(method = RequestMethod.POST, produces = "application/json")
 	public @ResponseBody
-	VogonUser submitUser(@RequestBody VogonUser updatedUser, @AuthenticationPrincipal VogonSecurityUser userPrincipal) {
-		VogonUser user = userRepository.findByUsername(userPrincipal.getUsername());
-		user.setDefaultCurrency(updatedUser.getDefaultCurrency());
-		if (updatedUser.getUsername() != null && !updatedUser.getUsername().isEmpty())
-			user.setUsername(updatedUser.getUsername());
-		if (updatedUser.getPassword() != null)
-			user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
-		user = userRepository.saveAndFlush(user);
-		userService.refreshUser(userPrincipal);
-		return initializationHelper.initializeUser(user);
+	VogonUser submitUser(@RequestBody VogonUser updatedUser, @AuthenticationPrincipal VogonSecurityUser userPrincipal) throws UsernameExistsException {
+		return userService.updateUser(userPrincipal, updatedUser).getUser();
 	}
 }

@@ -73,7 +73,7 @@ public class AccountsController {
 		//Merge with database
 		for (FinanceAccount newAccount : accounts) {
 			if (newAccount.getId() == null || !existingAccounts.contains(newAccount)) {
-				FinanceAccount createdAccount = new FinanceAccount(user.getUser(),newAccount);
+				FinanceAccount createdAccount = new FinanceAccount(user.getUser(), newAccount);
 				accountRepository.save(createdAccount);
 			} else {
 				FinanceAccount existingAccount = existingAccounts.get(existingAccounts.indexOf(newAccount));

@@ -45,14 +45,17 @@ public class VogonConfiguration {
 	 * ConfigurationElement does not exist
 	 *
 	 * @param <T> the ConfigurationElement type
-	 * @param name the ConfigurationElement name
-	 * @param defaultValue the value to be returned in case the
-	 * ConfigurationElement doesn't exist
+	 * @param name the ConfigurationElement name ConfigurationElement doesn't
+	 * exist
 	 * @return the value of a ConfigurationElement or the default value if the
 	 * ConfigurationElement does not exist
 	 */
-	protected <T extends Serializable> T getValue(String name, T defaultValue) {
+	protected <T extends Serializable> T getValue(String name) {
 		ConfigurationElement element = configurationRepository.findOne(name);
+		T defaultValue = null;
+		for (ConfigurationElement checkElement : ConfigurationKeys.DEFAULT_VALUES)
+			if (checkElement.getName().equals(name))
+				defaultValue = (T) checkElement.getValue();
 		if (element == null)
 			return defaultValue;
 		if (element.getValue() == null)
@@ -79,7 +82,7 @@ public class VogonConfiguration {
 	 * @return true if registration is allowed
 	 */
 	public boolean isAllowRegistration() {
-		return getValue(ConfigurationKeys.ALLOW_REGISTRATION, true);
+		return getValue(ConfigurationKeys.ALLOW_REGISTRATION);
 	}
 
 	/**

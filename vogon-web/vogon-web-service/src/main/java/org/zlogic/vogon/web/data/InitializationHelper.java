@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import org.springframework.stereotype.Component;
 import org.zlogic.vogon.data.FinanceTransaction;
-import org.zlogic.vogon.data.VogonUser;
 import org.zlogic.vogon.web.data.model.FinanceTransactionJson;
 
 /**
@@ -42,16 +41,5 @@ public class InitializationHelper {
 		for (FinanceTransaction transaction : transactions)
 			newTransactions.add(initializeTransaction(transaction));
 		return newTransactions;
-	}
-
-	/**
-	 * Initialize user
-	 *
-	 * @param user user to initialize
-	 * @return the user
-	 */
-	public VogonUser initializeUser(VogonUser user) {
-		user.getDefaultCurrency();
-		return user;
 	}
 }

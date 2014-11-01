@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -33,6 +34,7 @@ import org.zlogic.vogon.web.security.VogonSecurityUser;
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 @Configuration
+@EnableGlobalMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
 
 	/**
@@ -139,7 +141,7 @@ public class SecurityConfig {
 					.requiresChannel().anyRequest().requiresSecure().and()
 					//.authorizeRequests().antMatchers("/oauth/token").fullyAuthenticated().and()
 					.authorizeRequests().antMatchers("/oauth/token").anonymous().and() //NOI18N
-					.authorizeRequests().antMatchers("/service/**").hasAuthority(VogonSecurityUser.AUTHORITY).and() //NOI18N
+					.authorizeRequests().antMatchers("/service/**").hasAuthority(VogonSecurityUser.AUTHORITY_USER).and() //NOI18N
 					.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		}
 	}
@@ -169,7 +171,7 @@ public class SecurityConfig {
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			clients.inMemory().withClient("vogonweb") //NOI18N
 					.authorizedGrantTypes("password", "authorization_code") //NOI18N
-					.authorities(VogonSecurityUser.AUTHORITY)
+					.authorities(VogonSecurityUser.AUTHORITY_USER)
 					.scopes("read", "write", "trust") //NOI18N
 					.resourceIds(resourceId)
 					.accessTokenValiditySeconds(60 * 24);
