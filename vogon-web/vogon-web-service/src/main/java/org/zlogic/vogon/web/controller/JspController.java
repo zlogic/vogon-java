@@ -8,7 +8,6 @@ package org.zlogic.vogon.web.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.zlogic.vogon.web.configuration.VogonConfiguration;
 
@@ -19,7 +18,6 @@ import org.zlogic.vogon.web.configuration.VogonConfiguration;
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 @Controller
-@RequestMapping("/")
 public class JspController {
 
 	/**
@@ -33,10 +31,9 @@ public class JspController {
 	 *
 	 * @return the configured ModelAndView
 	 */
-	@RequestMapping(method = RequestMethod.GET)
+	@RequestMapping(value = {"/"})
 	public ModelAndView indexModelAndView() {
-		//Name should be the same as ViewControllerRegistry.addViewController.setViewName
-		ModelAndView model = new ModelAndView("index"); //NOI18N
+		ModelAndView model = new ModelAndView("main"); //NOI18N
 		model.addObject("configuration", configuration); //NOI18N
 		return model;
 	}
