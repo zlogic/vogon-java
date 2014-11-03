@@ -135,12 +135,12 @@
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-entitymanager</artifactId>
-				<version>4.3.5.Final</version>
+				<version>4.3.7.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-jpamodelgen</artifactId>
-				<version>4.3.5.Final</version>
+				<version>4.3.7.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
@@ -150,7 +150,7 @@
 			<dependency>
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-jpa</artifactId>
-				<version>1.7.0.RELEASE</version>
+				<version>1.7.1.RELEASE</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.security.oauth</groupId>
@@ -187,7 +187,7 @@
 			<dependency>
 				<groupId>org.aspectj</groupId>
 				<artifactId>aspectjweaver</artifactId>
-				<version>1.8.2</version>
+				<version>1.8.3</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
@@ -235,7 +235,7 @@
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>d3js</artifactId>
-				<version>3.4.11</version>
+				<version>3.4.13</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
