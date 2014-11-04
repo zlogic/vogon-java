@@ -1,12 +1,7 @@
-*.fxml.bak
 /vogon-data/target/
-/vogon-data/vogon-data-model/target/
-/vogon-data/vogon-data-standalone/target/
 /vogon-web/target/
 /vogon-web/vogon-web-service/target/
-/vogon-ui/target/
 /vogon-packaging/target/
-/vogon-packaging/vogon-ui-javafx/target/
 /vogon-packaging/vogon-web-wildfly/target/
 /vogon-packaging/vogon-web-tomcat/target/
 /vogon-packaging/vogon-standalone/target/
