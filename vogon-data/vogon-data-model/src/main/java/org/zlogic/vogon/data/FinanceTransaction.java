@@ -144,7 +144,7 @@ public class FinanceTransaction implements Serializable {
 	 */
 	public FinanceTransaction(VogonUser owner, FinanceTransaction transaction) {
 		this.components = new HashSet<>();
-		FinanceTransaction.this.merge(transaction);
+		FinanceTransaction.this.merge(transaction, false);
 		FinanceTransaction.this.setOwner(owner);
 	}
 
@@ -155,7 +155,18 @@ public class FinanceTransaction implements Serializable {
 	 * @param transaction the transaction from which to merge properties
 	 */
 	public void merge(FinanceTransaction transaction) {
-		if (version != transaction.version)
+		merge(transaction, true);
+	}
+
+	/**
+	 * Merges properties from another FinanceTransaction instance to this
+	 * instance; only merges properties, and not components
+	 *
+	 * @param transaction the transaction from which to merge properties
+	 * @param verifyVersion true if a version mismatch would throw an exception
+	 */
+	protected void merge(FinanceTransaction transaction, boolean verifyVersion) {
+		if (verifyVersion && version != transaction.version)
 			throw new ConcurrentModificationException(messages.getString("TRANSACTION_WAS_ALREADY_UPDATED"));
 		this.type = transaction.type;
 		this.description = transaction.description;

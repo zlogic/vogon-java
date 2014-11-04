@@ -176,8 +176,9 @@ public class TransactionComponent implements Serializable {
 
 	@Override
 	public int hashCode() {
+		long hashId = this.id != null ? this.id : -1;
 		int hash = 7;
-		hash = 97 * hash + (int) (this.id ^ (this.id >>> 32));
+		hash = 97 * hash + (int) (hashId ^ (hashId >>> 32));
 		return hash;
 	}
 }
