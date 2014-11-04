@@ -3,24 +3,16 @@
 		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<parent>
+		<groupId>org.zlogic.vogon.packaging</groupId>
 		<artifactId>top</artifactId>
-		<groupId>org.zlogic.vogon</groupId>
 		<version>2.0</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.zlogic.vogon.packaging</groupId>
-	<artifactId>top</artifactId>
-	<name>Vogon :: Packaging</name>
-	<packaging>pom</packaging>
-
-	<modules>
-		<module>vogon-ui-javafx</module>
-		<module>vogon-standalone</module>
-		<module>vogon-web-readme</module>
-		<module>vogon-web-tomcat</module>
-		<module>vogon-web-wildfly</module>
-	</modules>
+	<artifactId>vogon-web-readme</artifactId>
+	<name>Vogon :: Packaging :: Readme for web versions</name>
+	<packaging>jar</packaging>
 
 	<dependencyManagement>
 		<dependencies>
