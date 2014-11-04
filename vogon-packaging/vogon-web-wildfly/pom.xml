@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.zlogic.vogon.packaging</groupId>
 		<artifactId>top</artifactId>
-		<version>1.1-SNAPSHOT</version>
+		<version>2.0</version>
 	</parent>
 	<artifactId>vogon-web-wildfly</artifactId>
 	<name>Vogon :: Packaging :: Web :: Wildfly</name>
@@ -12,6 +12,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<readme.server.name>WildFly 8.1</readme.server.name>
+		<readme.openshift.catridge_name>WildFly Application Server 8.1.0.Final</readme.openshift.catridge_name>
 	</properties>
 
 	<build>
@@ -29,6 +31,7 @@
 					<target>${version.java}</target>
 				</configuration>
 			</plugin>
+			<!-- Build WAR -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
@@ -50,6 +53,52 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- Unpack README -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>vogon-web-readme</artifactId>
+									<version>${project.version}</version>
+									<type>jar</type>
+									<overWrite>false</overWrite>
+									<excludes>META-INF/**</excludes>
+									<outputDirectory>${project.build.directory}/readme</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Package application with README -->
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>distro-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<appendAssemblyId>false</appendAssemblyId>
+							<descriptors>
+								<descriptor>src/main/assembly/tarbz-with-readme.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -66,16 +115,17 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>commons-fileupload</groupId>
 			<artifactId>commons-fileupload</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>vogon-web-readme</artifactId>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>

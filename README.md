@@ -14,8 +14,8 @@ Named after the Vogons (http://en.wikipedia.org/wiki/Vogon) race who were known 
 
 Requires Java 8 to build. [Releases](/../../releases) contain prepackaged WAR files for:
 
-* WildFly
-* Tomcat 7 (confirmed to run on the free [OpenShift](http://www.openshift.com/) Bronze account with *Tomcat 7 (JBoss EWS 2.0)* catridge installed. Just follow the [instructions](http://help.openshift.com/hc/en-us/articles/202399740) to deploy the WAR file.
+* WildFly (confirmed to run on the free [OpenShift](http://www.openshift.com/) Bronze account with *WildFly Application Server 8.1.0.Final* cartridge installed. Just follow the [instructions](http://help.openshift.com/hc/en-us/articles/202399740) to deploy the WAR file).
+* Tomcat 7 (confirmed to run on the free [OpenShift](http://www.openshift.com/) Bronze account with *Tomcat 7 (JBoss EWS 2.0)* cartridge installed. Just follow the [instructions](http://help.openshift.com/hc/en-us/articles/202399740) to deploy the WAR file).
 
 2.0 and earlier versions also include a standalone version using Java FX for UI. This version is no longer maintained and may be completely removed in future releases. Requires Java 8 to run.
 
