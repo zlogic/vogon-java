@@ -10,5 +10,5 @@ package org.zlogic.vogon.web.security;
  *
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
-public class UsernameExistsException extends Exception {
+public class UsernameExistsException extends RuntimeException {
 }

@@ -6,13 +6,20 @@
 package org.zlogic.vogon.web.security;
 
 import java.util.ResourceBundle;
+import javax.annotation.Resource;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.zlogic.vogon.data.Constants;
 import org.zlogic.vogon.data.VogonUser;
 import org.zlogic.vogon.web.data.UserRepository;
@@ -34,6 +41,11 @@ public class UserService implements UserDetailsService, InitializingBean {
 	 */
 	@Autowired
 	private UserRepository userRepository;
+	/**
+	 * The Spring PlatformTransactionManager instance
+	 */
+	@Resource
+	private PlatformTransactionManager transactionManager;
 	/**
 	 * The PasswordEncoder instance
 	 */
@@ -68,6 +80,43 @@ public class UserService implements UserDetailsService, InitializingBean {
 	}
 
 	/**
+	 * Returns true if the username is already in use
+	 *
+	 * @param username the username to check
+	 * @return true if the username is already in use
+	 */
+	private boolean isUsernameExists(final String username) {
+		TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+		transactionTemplate.setReadOnly(true);
+		transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		return transactionTemplate.execute(new TransactionCallback<Boolean>() {
+
+			@Override
+			public Boolean doInTransaction(TransactionStatus ts) {
+				return userRepository.findByUsername(username) != null;
+			}
+		});
+	}
+
+	/**
+	 * Saves a user
+	 *
+	 * @param user the VogonUser to save
+	 * @return the saved user
+	 * @throws UsernameExistsException if username is already in use
+	 */
+	private VogonUser saveUser(VogonUser user) throws UsernameExistsException {
+		try {
+			return userRepository.saveAndFlush(user);
+		} catch (JpaSystemException ex) {
+			if (isUsernameExists(user.getUsername()))
+				throw new UsernameExistsException();
+			else
+				throw ex;
+		}
+	}
+
+	/**
 	 * Creates a new user
 	 *
 	 * @param createUser the user parameters to use
@@ -76,11 +125,9 @@ public class UserService implements UserDetailsService, InitializingBean {
 	 * username is already in use
 	 */
 	public VogonUser createUser(VogonUser createUser) throws UsernameExistsException {
-		if (userRepository.findByUsername(createUser.getUsername()) != null)
-			throw new UsernameExistsException();
 		VogonUser user = new VogonUser(createUser.getUsername(), passwordEncoder.encode(createUser.getPassword()));
 		user.setAuthorities(VogonSecurityUser.AUTHORITY_USER);
-		userRepository.saveAndFlush(user);
+		saveUser(user);
 		return user;
 	}
 
@@ -97,13 +144,10 @@ public class UserService implements UserDetailsService, InitializingBean {
 		VogonUser user = userRepository.findByUsername(userPrincipal.getUsername());
 		user.setDefaultCurrency(updatedUser.getDefaultCurrency());
 		if (updatedUser.getUsername() != null && !updatedUser.getUsername().isEmpty() && !updatedUser.getUsername().equals(user.getUsername()))
-			if (userRepository.findByUsername(updatedUser.getUsername()) != null)
-				throw new UsernameExistsException();
-			else
-				user.setUsername(updatedUser.getUsername());
+			user.setUsername(updatedUser.getUsername());
 		if (updatedUser.getPassword() != null)
 			user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
-		userRepository.saveAndFlush(user);
+		saveUser(user);
 		refreshUser(userPrincipal);
 		return userPrincipal;
 	}

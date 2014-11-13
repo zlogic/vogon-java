@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Currency;
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -44,6 +45,7 @@ public class VogonUser implements Serializable {
 	/**
 	 * The username
 	 */
+	@Column(unique = true)
 	protected String username;
 	/**
 	 * The password
