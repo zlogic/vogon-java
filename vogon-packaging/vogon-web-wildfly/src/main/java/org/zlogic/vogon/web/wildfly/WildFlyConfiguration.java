@@ -7,7 +7,8 @@ package org.zlogic.vogon.web.wildfly;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.multipart.support.StandardServletMultipartResolver;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 /**
  * WildFly configuration options
@@ -18,13 +19,13 @@ import org.springframework.web.multipart.support.StandardServletMultipartResolve
 public class WildFlyConfiguration {
 
 	/**
-	 * The MultipartResolver proxy class which makes CommonsMultipartResolver to
-	 * be detected by Spring MultipartAutoConfiguration
+	 * The CommonsMultipartResolver to be used by Spring
+	 * MultipartAutoConfiguration
 	 *
-	 * @return the MultipartResolver proxy class instance
+	 * @return the CommonsMultipartResolver class instance
 	 */
 	@Bean
-	public StandardServletMultipartResolver multipartResolver() {
-		return new MultipartResolver();
+	public MultipartResolver multipartResolver() {
+		return new CommonsMultipartResolver();
 	}
 }
