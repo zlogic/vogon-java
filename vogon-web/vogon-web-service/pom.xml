@@ -18,7 +18,7 @@
 		<vogon.web.version.nginfinitescroll>1.1.2</vogon.web.version.nginfinitescroll>
 		<vogon.web.version.ngtagsinput>2.1.1</vogon.web.version.ngtagsinput>
 		<vogon.web.version.jquery>1.11.1</vogon.web.version.jquery>
-		<vogon.web.version.d3js>3.5.2</vogon.web.version.d3js>
+		<vogon.web.version.d3js>3.5.3</vogon.web.version.d3js>
 		<vogon.web.version.nvd3>1.1.15-beta</vogon.web.version.nvd3>
 		<vogon.web.version.angularjsnvd3directives>0.0.7</vogon.web.version.angularjsnvd3directives>
 	</properties>
