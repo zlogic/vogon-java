@@ -143,7 +143,7 @@
 					</div>
 					<div class="row form-control-static">
 						<div class="col-md-12">
-							<button ng-click="addTransactionComponent()" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span> <fmt:message key="ADD_COMPONENT"/></button>
+							<button ng-click="addTransactionComponent()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-plus"></span> <fmt:message key="ADD_COMPONENT"/></button>
 						</div>
 					</div>
 					<div class="row form-control-static" ng-repeat="component in transaction.components">
@@ -156,15 +156,15 @@
 								<span ng-class="{ 'has-error': transactionForm.account.$invalid }" >
 									<select ng-model="component.accountId" ng-options="account.id as account.name for account in accountService.accounts | filter:isAccountVisible" class="form-control" name="account" required></select>
 								</span>
-								<button ng-click="deleteTransactionComponent(component)" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> <fmt:message key="DELETE"/></button>
+								<button ng-click="deleteTransactionComponent(component)" class="btn btn-default" type="button"><span class="glyphicon glyphicon-trash"></span> <fmt:message key="DELETE"/></button>
 							</ng-form>
 						</div>
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button ng-click="deleteTransaction()" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> <fmt:message key="DELETE"/></button>
-					<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> <fmt:message key="CANCEL"/></button>
-					<button ng-click="submitEditing()" class="btn btn-primary" ng-disabled="transactionEditorForm.$invalid"><span class="glyphicon glyphicon-ok"></span> <fmt:message key="APPLY"/></button>
+					<button ng-click="deleteTransaction()" class="btn btn-danger" type="button"><span class="glyphicon glyphicon-trash"></span> <fmt:message key="DELETE"/></button>
+					<button ng-click="cancelEditing()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span> <fmt:message key="CANCEL"/></button>
+					<button ng-click="submitEditing()" class="btn btn-primary" type="submit" ng-disabled="transactionEditorForm.$invalid"><span class="glyphicon glyphicon-ok"></span> <fmt:message key="APPLY"/></button>
 				</div>
 			</form>
 		</script>
@@ -176,7 +176,7 @@
 				<div class="modal-body">
 					<div class="row form-control-static">
 						<div class="col-md-12">
-							<button ng-click="addAccount()" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span> <fmt:message key="ADD_ACCOUNT"/></button>
+							<button ng-click="addAccount()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-plus"></span> <fmt:message key="ADD_ACCOUNT"/></button>
 						</div>
 					</div>
 					<div class="row form-control-static" ng-repeat="account in accounts.accounts | orderBy:'id'">
@@ -204,14 +204,14 @@
 								</div>
 							</div>
 							<div class="form-inline col-md-3 text-right">
-								<button ng-click="deleteAccount(account)" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span> <fmt:message key="DELETE"/></button>
+								<button ng-click="deleteAccount(account)" class="btn btn-default" type="button"><span class="glyphicon glyphicon-trash"></span> <fmt:message key="DELETE"/></button>
 							</div>
 						</ng-form>
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> <fmt:message key="CANCEL"/></button>
-					<button ng-click="submitEditing()" class="btn btn-primary" ng-disabled="accountEditorForm.$invalid"><span class="glyphicon glyphicon-ok"></span> <fmt:message key="APPLY"/></button>
+					<button ng-click="cancelEditing()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span> <fmt:message key="CANCEL"/></button>
+					<button ng-click="submitEditing()" class="btn btn-primary" type="submit" ng-disabled="accountEditorForm.$invalid"><span class="glyphicon glyphicon-ok"></span> <fmt:message key="APPLY"/></button>
 				</div>
 			</form>
 		</script>
