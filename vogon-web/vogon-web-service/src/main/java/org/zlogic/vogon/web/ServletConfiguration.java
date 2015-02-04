@@ -10,7 +10,7 @@ import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import org.apache.catalina.connector.Connector;
-import org.apache.coyote.http11.Http11Protocol;
+import org.apache.coyote.http11.AbstractHttp11JsseProtocol;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
@@ -82,7 +82,7 @@ public class ServletConfiguration implements EmbeddedServletContainerCustomizer 
 		connector.setScheme("https"); //NOI18N
 		connector.setURIEncoding(container.getUriEncoding());
 
-		Http11Protocol proto = (Http11Protocol) connector.getProtocolHandler();
+		AbstractHttp11JsseProtocol proto = (AbstractHttp11JsseProtocol) connector.getProtocolHandler();
 		proto.setSSLEnabled(true);
 		proto.setKeystoreFile(new File(keystoreFile).getAbsolutePath());
 		proto.setKeystorePass(keystorePass);
