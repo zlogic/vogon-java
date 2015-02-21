@@ -10,8 +10,8 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.zlogic.vogon.packaging</groupId>
-	<artifactId>vogon-web-readme</artifactId>
-	<name>Vogon :: Packaging :: Readme for web versions</name>
+	<artifactId>vogon-web-readme-openshift</artifactId>
+	<name>Vogon :: Packaging :: Readme for OpenShift web versions</name>
 	<packaging>jar</packaging>
 	
 </project>

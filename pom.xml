@@ -67,41 +67,19 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.zlogic.vogon.packaging</groupId>
-				<artifactId>vogon-web-readme</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.zlogic.vogon.web</groupId>
 				<artifactId>vogon-web-service</artifactId>
 				<version>${project.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.apache.tomcat.embed</groupId>
-						<artifactId>tomcat-embed-jasper</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.apache.tomcat.embed</groupId>
-						<artifactId>tomcat-embed-core</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.apache.tomcat.embed</groupId>
-						<artifactId>tomcat-embed-el</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.apache.tomcat.embed</groupId>
-						<artifactId>tomcat-embed-logging-juli</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.apache.tomcat.embed</groupId>
-						<artifactId>tomcat-embed-websocket</artifactId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
 				<version>1.4.185</version>
+			</dependency>
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>9.4-1200-jdbc41</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
@@ -111,6 +89,11 @@
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-jpamodelgen</artifactId>
+				<version>4.3.8.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-c3p0</artifactId>
 				<version>4.3.8.Final</version>
 			</dependency>
 			<dependency>
@@ -144,6 +127,13 @@
 				<artifactId>spring-boot-starter-actuator</artifactId>
 				<version>1.1.10.RELEASE</version>
 				<scope>compile</scope>
+				<exclusions>
+					<exclusion>
+						<!-- Conflicts with PostgreSQL dependencies -->
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-starter-logging</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
@@ -176,7 +166,26 @@
 				<groupId>org.apache.tomcat.embed</groupId>
 				<artifactId>tomcat-embed-jasper</artifactId>
 				<version>7.0.59</version>
-				<scope>runtime</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-core</artifactId>
+				<version>7.0.59</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-el</artifactId>
+				<version>7.0.59</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-logging-juli</artifactId>
+				<version>7.0.59</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-websocket</artifactId>
+				<version>7.0.59</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>

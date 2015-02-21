@@ -5,8 +5,15 @@
  */
 package org.zlogic.vogon.web;
 
+import java.net.URI;
 import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ResourceBundle;
 import javax.persistence.EntityManagerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -14,7 +21,7 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
- * Persitence/JPA configuration class
+ * Persistence/JPA configuration class
  *
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
@@ -23,15 +30,77 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class PersistenceConfiguration {
 
 	/**
-	 * Returns the path to the database
-	 *
-	 * @return the path to the database
+	 * The logger
 	 */
-	public String getDatabasePath() {
-		String openshiftDataDir = System.getenv("OPENSHIFT_DATA_DIR"); //NOI18N
-		if (openshiftDataDir != null)
-			return openshiftDataDir;
-		return System.getProperty("vogon.database.dir", System.getProperty("jboss.server.data.dir", System.getProperty("catalina.home", System.getProperty("user.dir")))); //NOI18N
+	private final static Logger log = LoggerFactory.getLogger(PersistenceConfiguration.class);
+
+	/**
+	 * Localization messages
+	 */
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/web/messages");
+
+	/**
+	 * The ServerTypeDetector instance
+	 */
+	@Autowired
+	private ServerTypeDetector serverTypeDetector;
+
+	/**
+	 * Returns the path to the H2 database
+	 *
+	 * @return the path to the H2 database
+	 */
+	protected String getH2DatabasePath() {
+		if (serverTypeDetector.getCloudType() == ServerTypeDetector.CloudType.OPENSHIFT)
+			return System.getenv("OPENSHIFT_DATA_DIR"); //NOI18N
+		if (serverTypeDetector.getCloudType() == ServerTypeDetector.CloudType.NONE) {
+			if (serverTypeDetector.getServerType() == ServerTypeDetector.ServerType.TOMCAT)
+				return System.getProperty("catalina.home"); //NOI18N
+			else if (serverTypeDetector.getServerType() == ServerTypeDetector.ServerType.WILDFLY)
+				return System.getProperty("jboss.server.data.dir"); //NOI18N
+		}
+		return System.getProperty("vogon.database.dir", System.getProperty("user.dir")); //NOI18N
+	}
+
+	/**
+	 * Returns the JPA configuration overrides for database configuration
+	 *
+	 * @return the map of JPA configuration variables to override for the
+	 * database connection
+	 */
+	protected Map<String, Object> getDatabaseConfiguration() {
+		Map<String, Object> jpaProperties = new HashMap<>();
+		boolean fallback = true;
+		jpaProperties.put("hibernate.connection.provider_class", "org.hibernate.connection.C3P0ConnectionProvider");
+		if (serverTypeDetector.getDatabaseType() == ServerTypeDetector.DatabaseType.POSTGRESQL) {
+			String dbURL = null;
+			if (serverTypeDetector.getCloudType() == ServerTypeDetector.CloudType.HEROKU)
+				dbURL = System.getenv("DATABASE_URL"); //NOI18N
+			else if (serverTypeDetector.getCloudType() == ServerTypeDetector.CloudType.OPENSHIFT)
+				dbURL = System.getenv("OPENSHIFT_POSTGRESQL_DB_URL") + "/" + System.getenv("OPENSHIFT_APP_NAME"); //NOI18N
+			try {
+				URI dbUri = new URI(dbURL);
+				String dbConnectionURL = "jdbc:postgresql://" + dbUri.getHost() + ":" + dbUri.getPort() + dbUri.getPath();
+				String[] usernamePassword = dbUri.getUserInfo().split(":", 2); //NOI18N
+				jpaProperties.put("javax.persistence.jdbc.url", dbConnectionURL); //NOI18N
+				jpaProperties.put("javax.persistence.jdbc.user", usernamePassword[0]); //NOI18N
+				jpaProperties.put("javax.persistence.jdbc.password", usernamePassword[1]); //NOI18N
+				jpaProperties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect"); //NOI18N
+				jpaProperties.put("hibernate.connection.driver_class", "org.postgresql.Driver"); //NOI18N
+				fallback = false;
+			} catch (Exception ex) {
+				log.error(messages.getString("ERROR_EXTRACTING_DATABASE_CONFIGURATION"), ex);
+			}
+		}
+		if (serverTypeDetector.getDatabaseType() == ServerTypeDetector.DatabaseType.H2 || fallback) {
+			String dbConnectionURL = MessageFormat.format("jdbc:h2:{0}/Vogon", new Object[]{getH2DatabasePath()}); //NOI18N
+			jpaProperties.put("javax.persistence.jdbc.url", dbConnectionURL); //NOI18N
+			jpaProperties.put("javax.persistence.jdbc.user", ""); //NOI18N
+			jpaProperties.put("javax.persistence.jdbc.password", ""); //NOI18N
+			jpaProperties.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect"); //NOI18N
+			jpaProperties.put("hibernate.connection.driver_class", "org.h2.Driver"); //NOI18N
+		}
+		return jpaProperties;
 	}
 
 	/**
@@ -43,7 +112,7 @@ public class PersistenceConfiguration {
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
 		entityManagerFactory.setPersistenceUnitName("VogonPU"); //NOI18N
-		entityManagerFactory.getJpaPropertyMap().put("javax.persistence.jdbc.url", MessageFormat.format("jdbc:h2:{0}/Vogon", new Object[]{getDatabasePath()})); //NOI18N
+		entityManagerFactory.getJpaPropertyMap().putAll(getDatabaseConfiguration());
 		entityManagerFactory.setPersistenceXmlLocation("classpath:META-INF/persistence.xml"); //NOI18N
 		return entityManagerFactory;
 	}
