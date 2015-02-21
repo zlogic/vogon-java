@@ -8,9 +8,10 @@ package org.zlogic.vogon.web;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
-import java.util.logging.Logger;
 import org.apache.catalina.connector.Connector;
 import org.apache.coyote.http11.AbstractHttp11JsseProtocol;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
@@ -29,7 +30,7 @@ public class ServletConfiguration implements EmbeddedServletContainerCustomizer 
 	/**
 	 * The logger
 	 */
-	private final static Logger log = Logger.getLogger(ServletConfiguration.class.getName());
+	private final static Logger log = LoggerFactory.getLogger(ServletConfiguration.class);
 	/**
 	 * Localization messages
 	 */
@@ -72,10 +73,10 @@ public class ServletConfiguration implements EmbeddedServletContainerCustomizer 
 	 */
 	private void configureSSL(TomcatEmbeddedServletContainerFactory container) {
 		if (keystoreFile.isEmpty() || keystorePass.isEmpty()) {
-			log.fine(messages.getString("KEYSTORE_FILE_OR_PASSWORD_NOT_DEFINED"));
+			log.debug(messages.getString("KEYSTORE_FILE_OR_PASSWORD_NOT_DEFINED"));
 			return;
 		}
-		log.severe(MessageFormat.format(messages.getString("USING_KEYSTORE_WITH_PASSWORD"), new Object[]{keystoreFile, keystorePass.replaceAll(".{1}", "*")})); //NOI18N
+		log.error(MessageFormat.format(messages.getString("USING_KEYSTORE_WITH_PASSWORD"), new Object[]{keystoreFile, keystorePass.replaceAll(".{1}", "*")})); //NOI18N
 		Connector connector = new Connector();
 		connector.setPort(8443);
 		connector.setSecure(true);

@@ -119,6 +119,12 @@ public class SecurityConfig {
 	protected static class ResourceServer extends ResourceServerConfigurerAdapter {
 
 		/**
+		 * The ServerTypeDetector instance
+		 */
+		@Autowired
+		private ServerTypeDetector serverTypeDetector;
+
+		/**
 		 * Configures ResourceServerSecurity
 		 *
 		 * @param resources the ResourceServerSecurityConfigurer instance to
@@ -137,8 +143,9 @@ public class SecurityConfig {
 		 */
 		@Override
 		public void configure(HttpSecurity http) throws Exception {
-			http
-					.requiresChannel().anyRequest().requiresSecure().and()
+			(serverTypeDetector.getCloudType() != ServerTypeDetector.CloudType.HEROKU
+					? http.requiresChannel().anyRequest().requiresSecure().and()
+					: http)
 					//.authorizeRequests().antMatchers("/oauth/token").fullyAuthenticated().and()
 					.authorizeRequests().antMatchers("/oauth/token").anonymous().and() //NOI18N
 					.authorizeRequests().antMatchers("/service/**").hasAuthority(VogonSecurityUser.AUTHORITY_USER).and() //NOI18N

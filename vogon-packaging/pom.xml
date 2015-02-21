@@ -13,10 +13,47 @@
 	<artifactId>top</artifactId>
 	<name>Vogon :: Packaging</name>
 	<packaging>pom</packaging>
-
-	<modules>
-		<module>vogon-web-readme</module>
-		<module>vogon-web-tomcat</module>
-		<module>vogon-web-wildfly</module>
-	</modules>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.zlogic.vogon.packaging</groupId>
+				<artifactId>vogon-web-readme-heroku</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.zlogic.vogon.packaging</groupId>
+				<artifactId>vogon-web-readme-openshift</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<profiles>
+		<profile>
+			<id>heroku</id>
+			<activation>
+				<property>
+					<name>env.DYNO</name>
+				</property>
+			</activation>
+			<modules>
+				<module>vogon-web-readme-heroku</module>
+				<module>vogon-web-standalone</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>default</id>
+			<activation>
+				<property>
+					<name>!env.DYNO</name>
+				</property>
+			</activation>
+			<modules>
+				<module>vogon-web-readme-heroku</module>
+				<module>vogon-web-readme-openshift</module>
+				<module>vogon-web-tomcat</module>
+				<module>vogon-web-wildfly</module>
+				<module>vogon-web-standalone</module>
+			</modules>
+		</profile>
+	</profiles>
 </project>

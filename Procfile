@@ -1,0 +1,1 @@
+web: java $JAVA_OPTS -Dserver.port=$PORT -jar vogon-packaging/vogon-web-standalone/target/*.war
