@@ -499,11 +499,13 @@ public class ReportFactory {
 			transactions.add(tuple.get(tr));
 
 		//Post-fetch components
-		CriteriaQuery<FinanceTransaction> transactionsComponentsFetchCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
-		Root<FinanceTransaction> trComponentsFetch = transactionsComponentsFetchCriteriaQuery.from(FinanceTransaction.class);
-		transactionsComponentsFetchCriteriaQuery.where(tr.in(transactions));
-		trComponentsFetch.fetch(FinanceTransaction_.components, JoinType.LEFT).fetch(TransactionComponent_.account, JoinType.LEFT);
-		entityManager.createQuery(transactionsComponentsFetchCriteriaQuery).getResultList();
+		if (!transactions.isEmpty()) {
+			CriteriaQuery<FinanceTransaction> transactionsComponentsFetchCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
+			Root<FinanceTransaction> trComponentsFetch = transactionsComponentsFetchCriteriaQuery.from(FinanceTransaction.class);
+			transactionsComponentsFetchCriteriaQuery.where(tr.in(transactions));
+			trComponentsFetch.fetch(FinanceTransaction_.components, JoinType.LEFT).fetch(TransactionComponent_.account, JoinType.LEFT);
+			entityManager.createQuery(transactionsComponentsFetchCriteriaQuery).getResultList();
+		}
 		return transactions;
 	}
 
