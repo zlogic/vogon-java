@@ -50,6 +50,7 @@
 								<div class="form-inline">
 									<input type="text" class="form-control" ng-model="authorizationService.username" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_USERNAME"/>" />
 									<input type="password" class="form-control" ng-model="authorizationService.password" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_PASSWORD"/>" />
+									<div class="checkbox"><label><input type="checkbox" ng-model="authorizationService.rememberToken"> <fmt:message key="REMEMBER_TOKEN"/></label></div>
 								</div>
 							</div>
 						</div>

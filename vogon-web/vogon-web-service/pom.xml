@@ -62,7 +62,8 @@
 					<keypass>password</keypass>
 					<alias>vogonkey</alias>
 					<dname>cn=localhost</dname>
-					<sigalg>SHA1withDSA</sigalg>
+					<sigalg>SHA256withRSA</sigalg>
+					<keyalg>RSA</keyalg>
 					<validity>10</validity>
 					<skipIfExist>true</skipIfExist>
 				</configuration>

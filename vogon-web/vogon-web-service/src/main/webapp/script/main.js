@@ -167,14 +167,17 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
 	var that = this;
 	var clientId = "vogonweb";
 	var postHeaders = {"Content-Type": "application/x-www-form-urlencoded"};
+	var defaultRememberToken = false;
 	this.authorized = false;
 	this.access_token = undefined;
 	this.username = undefined;
 	this.password = undefined;
+	this.rememberToken = defaultRememberToken;
 	var setToken = function (access_token, username, password) {
 		if (access_token !== undefined) {
 			that.access_token = access_token;
-			localStorage.setItem("access_token", access_token);
+			if (that.rememberToken)
+				localStorage.setItem("access_token", access_token);
 			HTTPService.setAccessToken(access_token);
 			setAuthorized(true);
 			if (username !== undefined)
@@ -221,6 +224,7 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
 		HTTPService.setAccessToken();
 		setAuthorized(false);
 		localStorage.removeItem("access_token");
+		this.rememberToken = defaultRememberToken;
 		if (message !== undefined)
 			AlertService.addAlert(message);
 	};
