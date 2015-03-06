@@ -181,7 +181,7 @@ public class SecurityConfig {
 					.authorities(VogonSecurityUser.AUTHORITY_USER)
 					.scopes("read", "write", "trust") //NOI18N
 					.resourceIds(resourceId)
-					.accessTokenValiditySeconds(60 * 24);
+					.accessTokenValiditySeconds(60 * 60 * 24 * 30);
 		}
 
 		/**
