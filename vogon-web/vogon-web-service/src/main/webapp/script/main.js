@@ -1055,8 +1055,7 @@ app.controller("TransactionsController", function ($scope, $modal, $interval, Tr
 	$scope.editingTransaction = undefined;
 	$scope.userService = UserService;
 	$scope.filterTimer = undefined;
-	$scope.filterCalled = new Date();
-	$scope.filterChanged = new Date();
+	$scope.filterDirty = false;
 	var closeEditor = function () {
 		$scope.editingTransaction = undefined;
 		if ($scope.editor !== undefined) {
@@ -1104,15 +1103,16 @@ app.controller("TransactionsController", function ($scope, $modal, $interval, Tr
 		$scope.filterDateCalendarOpened = true;
 	};
 	$scope.applyFilter = function () {
-		$scope.filterCalled = new Date();
+		$scope.filterDirty = true;
 		if ($scope.filterTimer === undefined) {
 			$scope.filterTimer = $interval(function () {
-				$scope.filterChanged = new Date();
-				TransactionsService.update();
+				$scope.filterDirty = false;
+				TransactionsService.update().then(function () {
+					if ($scope.filterDirty)
+						$scope.applyFilter();
+				});
 				$interval.cancel($scope.filterTimer);
 				$scope.filterTimer = undefined;
-				if ($scope.filterChanged < $scope.filterCalled)
-					$scope.applyFilter();
 			}, 1000);
 		}
 	};
