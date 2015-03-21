@@ -7,6 +7,8 @@ package org.zlogic.vogon.data.interop;
 
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -82,10 +84,14 @@ public class XmlExporter implements Exporter {
 			Element transactionsElement = doc.createElement(XmlFields.TRANSACTIONS_NODE);
 			rootElement.appendChild(transactionsElement);
 
+			Map<Long, Long> accountRemapping = new HashMap<>();
+
 			//Accounts list
 			for (FinanceAccount account : accounts) {
+				long id = accountRemapping.isEmpty() ? 0 : Collections.max(accountRemapping.values()) + 1;
+				accountRemapping.put(account.getId(), id);
 				Element accountElement = doc.createElement(XmlFields.ACCOUNT_NODE);
-				accountElement.setAttribute(XmlFields.ID_ATTRIBUTE, Long.toString(account.getId()));
+				accountElement.setAttribute(XmlFields.ID_ATTRIBUTE, Long.toString(id));
 				accountElement.setAttribute(XmlFields.NAME_ATTRIBUTE, account.getName());
 				accountElement.setAttribute(XmlFields.CURRENCY_ATTRIBUTE, account.getCurrency().getCurrencyCode());
 				accountElement.setAttribute(XmlFields.INCLUDE_IN_TOTAL_ATTRIBUTE, Boolean.toString(account.getIncludeInTotal()));
@@ -108,7 +114,7 @@ public class XmlExporter implements Exporter {
 			for (FinanceTransaction transaction : transactions) {
 				Element transactionElement = doc.createElement(XmlFields.TRANSACTION_NODE);
 				transactionElement.setAttribute(XmlFields.TYPE_ATTRIBUTE, transactionTypes.get(transaction.getType()));
-				transactionElement.setAttribute(XmlFields.ID_ATTRIBUTE, Long.toString(transaction.getId()));
+				//transactionElement.setAttribute(XmlFields.ID_ATTRIBUTE, Long.toString(transaction.getId()));
 				transactionElement.setAttribute(XmlFields.DESCRIPTION_ATTRIBUTE, transaction.getDescription());
 				//transactionElement.setAttribute(XmlFields.AMOUNT_ATTRIBUTE, Long.toString(transaction.getRawAmount()));
 				transactionElement.setAttribute(XmlFields.DATE_ATTRIBUTE, XmlFields.DATE_FORMAT.format(transaction.getDate()));
@@ -121,10 +127,11 @@ public class XmlExporter implements Exporter {
 				//Transaction components list
 				for (TransactionComponent component : transaction.getComponents()) {
 					Element compomentElement = doc.createElement(XmlFields.TRANSACTION_COMPONENT_NODE);
-					compomentElement.setAttribute(XmlFields.ID_ATTRIBUTE, Long.toString(component.getId()));
-					compomentElement.setAttribute(XmlFields.ACCOUNT_ATTRIBUTE, Long.toString(component.getAccount().getId()));
+					long accountId = accountRemapping.get(component.getAccount().getId());
+					//compomentElement.setAttribute(XmlFields.ID_ATTRIBUTE, Long.toString(component.getId()));
+					compomentElement.setAttribute(XmlFields.ACCOUNT_ATTRIBUTE, Long.toString(accountId));
 					compomentElement.setAttribute(XmlFields.AMOUNT_ATTRIBUTE, Long.toString(component.getRawAmount()));
-					compomentElement.setAttribute(XmlFields.TRANSACTION_ATTRIBUTE, Long.toString(component.getTransaction().getId()));
+					//compomentElement.setAttribute(XmlFields.TRANSACTION_ATTRIBUTE, Long.toString(component.getTransaction().getId()));
 					transactionElement.appendChild(compomentElement);
 				}
 				transactionsElement.appendChild(transactionElement);

@@ -686,6 +686,9 @@ app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationS
 	};
 	var setAccounts = function (data) {
 		that.accounts = data;
+		that.updateTotalsForCurrencies();
+	};
+	this.updateTotalsForCurrencies = function () {
 		var totals = {};
 		//Compute totals for currencies
 		that.accounts.forEach(
@@ -720,7 +723,10 @@ app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationS
 	};
 	$rootScope.$watch(function () {
 		return AuthorizationService.authorized;
-	}, that.update());
+	}, that.update);
+	$rootScope.$watch(function () {
+		return CurrencyService.currencies;
+	}, that.updateTotalsForCurrencies);
 	HTTPService.updateAccounts = this.update;
 });
 
