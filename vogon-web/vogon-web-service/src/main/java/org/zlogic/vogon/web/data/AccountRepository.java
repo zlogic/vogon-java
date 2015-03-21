@@ -8,6 +8,7 @@ package org.zlogic.vogon.web.data;
 import java.util.Collection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.zlogic.vogon.data.FinanceAccount;
@@ -46,4 +47,13 @@ public interface AccountRepository extends JpaRepository<FinanceAccount, Long> {
 	 * @return accounts for owner
 	 */
 	public Collection<FinanceAccount> findByOwner(VogonUser owner);
+
+	/**
+	 * Finds accounts by their VogonUser owner
+	 *
+	 * @param owner the VogonUser owner
+	 * @param sort the Sort object
+	 * @return accounts for owner
+	 */
+	public Collection<FinanceAccount> findByOwner(VogonUser owner, Sort sort);
 }

@@ -68,7 +68,6 @@ public class XmlImporter implements Importer {
 	@Override
 	public void importData(VogonUser owner, EntityManager entityManager) throws VogonImportException, VogonImportLogicalException {
 		try {
-			Map<Long, FinanceTransaction> transactionsMap = new HashMap<>();
 			Map<Long, FinanceAccount> accountsMap = new HashMap<>();
 
 			//Read XML
@@ -180,7 +179,7 @@ public class XmlImporter implements Importer {
 				//Extract attributes from XML
 				NamedNodeMap attributes = currentNode.getAttributes();
 				String transactionType = attributes.getNamedItem(XmlFields.TYPE_ATTRIBUTE).getNodeValue();
-				long transactionId = Long.parseLong(attributes.getNamedItem(XmlFields.ID_ATTRIBUTE).getNodeValue());
+				//long transactionId = Long.parseLong(attributes.getNamedItem(XmlFields.ID_ATTRIBUTE).getNodeValue());
 				String transactionDescription = attributes.getNamedItem(XmlFields.DESCRIPTION_ATTRIBUTE).getNodeValue();
 				//String transactionAmount = attributes.getNamedItem(XmlFields.AMOUNT_ATTRIBUTE).getNodeValue();
 				Date transactionDate = XmlFields.DATE_FORMAT.parse(attributes.getNamedItem(XmlFields.DATE_ATTRIBUTE).getNodeValue());
@@ -201,7 +200,6 @@ public class XmlImporter implements Importer {
 				if (transactionTypeEnum == FinanceTransaction.Type.UNDEFINED)
 					throw new VogonImportLogicalException(MessageFormat.format(messages.getString("UNKNOWN_TRANSACTION_TYPE"), transactionType));
 				FinanceTransaction transaction = new FinanceTransaction(owner, transactionDescription, null, transactionDate, transactionTypeEnum);
-				transactionsMap.put(transactionId, transaction);
 				entityManager.persist(transaction);
 
 				//Extract transaction tags and components from XML
@@ -218,8 +216,7 @@ public class XmlImporter implements Importer {
 							//long componentId = Long.parseLong(childNode.getAttributes().getNamedItem(XmlFields.ID_ATTRIBUTE).getNodeValue());
 							long componentAccountId = Long.parseLong(childNode.getAttributes().getNamedItem(XmlFields.ACCOUNT_ATTRIBUTE).getNodeValue());
 							long componentAmount = Long.parseLong(childNode.getAttributes().getNamedItem(XmlFields.AMOUNT_ATTRIBUTE).getNodeValue());
-							long componentTransactionId = Long.parseLong(childNode.getAttributes().getNamedItem(XmlFields.TRANSACTION_ATTRIBUTE).getNodeValue());
-							TransactionComponent component = new TransactionComponent(accountsMap.get(componentAccountId), transactionsMap.get(componentTransactionId), componentAmount);
+							TransactionComponent component = new TransactionComponent(accountsMap.get(componentAccountId), transaction, componentAmount);
 							entityManager.persist(component);
 							transaction.addComponent(component);
 							break;

@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,7 +94,9 @@ public class DataController {
 		VogonUser user = userRepository.findByUsername(userPrincipal.getUsername());
 		XmlExporter exporter = new XmlExporter(outputStream);
 		try {
-			exporter.exportData(user, accountRepository.findByOwner(user), transactionRepository.findByOwner(user), null);
+			Sort accountSort = new Sort(new Sort.Order(Sort.Direction.ASC, "id"));//NOI18N
+			Sort transactionSort = new Sort(new Sort.Order(Sort.Direction.ASC, "id"));//NOI18N
+			exporter.exportData(user, accountRepository.findByOwner(user, accountSort), transactionRepository.findByOwner(user, transactionSort), null);
 		} catch (VogonExportException ex) {
 			throw new RuntimeException(ex);
 		}
