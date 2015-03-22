@@ -5,9 +5,12 @@
  */
 package org.zlogic.vogon.web.data;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TimeZone;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -122,6 +125,15 @@ public class TransactionFilterSpecification implements Specification<FinanceTran
 	 * @param filterDate the date to be filtered
 	 */
 	public void setFilterDate(Date filterDate) {
+		//Convert to local time (OpenShift and other non-UTC servers workaround)
+		if (filterDate != null) {
+			Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC")); //NOI18N
+			calendar.setTime(filterDate);
+			Calendar newCalendar = new GregorianCalendar();
+			newCalendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE), 0, 0, 0);
+			newCalendar.set(Calendar.MILLISECOND, 0);
+			filterDate = newCalendar.getTime();
+		}
 		this.filterDate = filterDate;
 	}
 
