@@ -1114,12 +1114,11 @@ app.controller("TransactionsController", function ($scope, $modal, $interval, Tr
 			$scope.filterTimer = $interval(function () {
 				$scope.filterDirty = false;
 				TransactionsService.update().then(function () {
+					$scope.filterTimer = undefined;
 					if ($scope.filterDirty)
 						$scope.applyFilter();
 				});
-				$interval.cancel($scope.filterTimer);
-				$scope.filterTimer = undefined;
-			}, 1000);
+			}, 1000, 1);
 		}
 	};
 	$scope.$watch(function () {
