@@ -7,6 +7,7 @@ package org.zlogic.vogon.data;
 
 import java.io.Serializable;
 import java.util.Objects;
+import javax.persistence.Basic;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
@@ -30,6 +31,7 @@ public class ConfigurationElement implements Serializable {
 	/**
 	 * The configuration element value
 	 */
+	@Basic
 	protected Serializable configurationValue;
 
 	/**

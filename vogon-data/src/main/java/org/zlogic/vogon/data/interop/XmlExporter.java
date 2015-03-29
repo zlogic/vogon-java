@@ -6,6 +6,7 @@
 package org.zlogic.vogon.data.interop;
 
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -119,7 +120,9 @@ public class XmlExporter implements Exporter {
 				//transactionElement.setAttribute(XmlFields.AMOUNT_ATTRIBUTE, Long.toString(transaction.getRawAmount()));
 				transactionElement.setAttribute(XmlFields.DATE_ATTRIBUTE, XmlFields.DATE_FORMAT.format(transaction.getDate()));
 				//Tags list
-				for (String tag : transaction.getTags()) {
+				String[] tags = transaction.getTags();
+				Arrays.sort(tags);
+				for (String tag : tags) {
 					Element tagElement = doc.createElement(XmlFields.TAG_NODE);
 					tagElement.setTextContent(tag);
 					transactionElement.appendChild(tagElement);
