@@ -143,9 +143,8 @@ public class SecurityConfig {
 		 */
 		@Override
 		public void configure(HttpSecurity http) throws Exception {
-			(serverTypeDetector.getCloudType() != ServerTypeDetector.CloudType.HEROKU
-					? http.requiresChannel().anyRequest().requiresSecure().and()
-					: http)
+			boolean requireHttps = (serverTypeDetector.getCloudType() != ServerTypeDetector.CloudType.HEROKU) && (serverTypeDetector.getCloudType() != ServerTypeDetector.CloudType.AZURE);
+			(requireHttps ? http.requiresChannel().anyRequest().requiresSecure().and() : http)
 					//.authorizeRequests().antMatchers("/oauth/token").fullyAuthenticated().and()
 					.authorizeRequests().antMatchers("/oauth/token").anonymous().and() //NOI18N
 					.authorizeRequests().antMatchers("/service/**").hasAuthority(VogonSecurityUser.AUTHORITY_USER).and() //NOI18N
