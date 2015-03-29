@@ -51,7 +51,11 @@ public class ServerTypeDetector {
 		/**
 		 * Heroku
 		 */
-		HEROKU
+		HEROKU,
+		/**
+		 * Azure
+		 */
+		AZURE
 	}
 
 	/**
@@ -92,6 +96,8 @@ public class ServerTypeDetector {
 			return CloudType.HEROKU;
 		if (hasEnvironmentVariable(Pattern.compile("^OPENSHIFT_.*$"))) //NOI18N
 			return CloudType.OPENSHIFT;
+		if (hasEnvironmentVariable(Pattern.compile("^AZURE_.*$"))) //NOI18N
+			return CloudType.AZURE;
 		return CloudType.NONE;
 	}
 
@@ -110,13 +116,10 @@ public class ServerTypeDetector {
 				return ServerType.WILDFLY;
 			return ServerType.STANDALONE;
 		}
-		if (getCloudType() == CloudType.NONE) {
-			if (System.getProperty("jboss.server.data.dir") != null) //NOI18N
-				return ServerType.WILDFLY;
-			if (System.getProperty("catalina.home") != null) //NOI18N
-				return ServerType.TOMCAT;
-			return ServerType.STANDALONE;
-		}
+		if (System.getProperty("jboss.server.data.dir") != null) //NOI18N
+			return ServerType.WILDFLY;
+		if (System.getProperty("catalina.home") != null) //NOI18N
+			return ServerType.TOMCAT;
 		return ServerType.STANDALONE;
 	}
 
