@@ -6,10 +6,15 @@
 package org.zlogic.vogon.web;
 
 import java.net.URI;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import javax.annotation.PreDestroy;
 import javax.persistence.EntityManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +75,7 @@ public class PersistenceConfiguration {
 	protected Map<String, Object> getDatabaseConfiguration() {
 		Map<String, Object> jpaProperties = new HashMap<>();
 		boolean fallback = true;
-		jpaProperties.put("hibernate.connection.provider_class", "org.hibernate.connection.C3P0ConnectionProvider");
+		jpaProperties.put("hibernate.connection.provider_class", "org.hibernate.connection.C3P0ConnectionProvider"); //NOI18N
 		if (serverTypeDetector.getDatabaseType() == ServerTypeDetector.DatabaseType.POSTGRESQL) {
 			String dbURL = null;
 			if (serverTypeDetector.getCloudType() == ServerTypeDetector.CloudType.HEROKU)
@@ -79,7 +84,7 @@ public class PersistenceConfiguration {
 				dbURL = System.getenv("OPENSHIFT_POSTGRESQL_DB_URL") + "/" + System.getenv("OPENSHIFT_APP_NAME"); //NOI18N
 			try {
 				URI dbUri = new URI(dbURL);
-				String dbConnectionURL = "jdbc:postgresql://" + dbUri.getHost() + ":" + dbUri.getPort() + dbUri.getPath();
+				String dbConnectionURL = "jdbc:postgresql://" + dbUri.getHost() + ":" + dbUri.getPort() + dbUri.getPath(); //NOI18N
 				String[] usernamePassword = dbUri.getUserInfo().split(":", 2); //NOI18N
 				jpaProperties.put("javax.persistence.jdbc.url", dbConnectionURL); //NOI18N
 				jpaProperties.put("javax.persistence.jdbc.user", usernamePassword[0]); //NOI18N
@@ -127,5 +132,23 @@ public class PersistenceConfiguration {
 		JpaTransactionManager transactionManager = new JpaTransactionManager();
 		transactionManager.setEntityManagerFactory(emf);
 		return transactionManager;
+	}
+
+	@PreDestroy
+	public void unloadJDBCDriver() {
+		log.info(messages.getString("UNLOADING_JDBC_DRIVERS"));
+		for (Enumeration<Driver> drivers = DriverManager.getDrivers(); drivers.hasMoreElements();) {
+			try {
+				Driver driver = drivers.nextElement();
+				if (driver.getClass().getClassLoader() == PersistenceConfiguration.class.getClassLoader()) {
+					log.info(MessageFormat.format(messages.getString("UNLOADING_DRIVER"), new Object[]{driver}));
+					DriverManager.deregisterDriver(driver);
+				} else {
+					log.debug(MessageFormat.format(messages.getString("SKIPPING_DRIVER"), new Object[]{driver}));
+				}
+			} catch (SQLException ex) {
+				log.error(messages.getString("ERROR_UNLOADING_DRIVER"), ex);
+			}
+		}
 	}
 }
