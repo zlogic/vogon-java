@@ -134,6 +134,9 @@ public class PersistenceConfiguration {
 		return transactionManager;
 	}
 
+	/**
+	 * Unloads the loaded JDBC driver(s) to prevent memory leaks
+	 */
 	@PreDestroy
 	public void unloadJDBCDriver() {
 		log.info(messages.getString("UNLOADING_JDBC_DRIVERS"));

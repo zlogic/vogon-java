@@ -91,8 +91,8 @@ public class DataController {
 	/**
 	 * Returns all data
 	 *
-	 * @param outputStream the stream for XML output
 	 * @param userPrincipal the authenticated user
+	 * @return the HTTPEntity for the file download
 	 */
 	@RequestMapping(value = "/export", method = {RequestMethod.GET, RequestMethod.POST}, produces = "application/xml")
 	public HttpEntity<byte[]> exportData(@AuthenticationPrincipal VogonSecurityUser userPrincipal) throws RuntimeException {
