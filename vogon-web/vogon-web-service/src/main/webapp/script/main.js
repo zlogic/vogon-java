@@ -493,18 +493,12 @@ app.controller("UserSettingsController", function ($scope, $modalInstance, Autho
 		});
 	};
 	$scope.exportData = function () {
-		var form = document.createElement("form");
-		form.method = "post";
-		form.action = "service/export";
-
-		var input = document.createElement("input");
-		input.type = "hidden";
-		input.name = "access_token";
-		input.value = AuthorizationService.access_token;
-		form.appendChild(input);
-
-		form.submit();
-		form.remove();
+		var form = $('<form>', {
+			html: '<input type="hidden" name="access_token" value="' + AuthorizationService.access_token + '" />',
+			action: "service/export",
+			method: "post"
+		});
+		form.appendTo(document.body).submit().remove();
 	};
 	$scope.performCleanup = function () {
 		$scope.operationSuccessful = false;
