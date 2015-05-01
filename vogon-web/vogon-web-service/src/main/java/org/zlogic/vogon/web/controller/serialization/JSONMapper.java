@@ -118,10 +118,10 @@ public class JSONMapper extends ObjectMapper implements InitializingBean {
 	 */
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		this.addMixIn(FinanceTransactionJson.class, FinanceTransactionAnnotations.class);
-		this.addMixIn(FinanceAccount.class, FinanceAccountAnnotations.class);
-		this.addMixIn(VogonUser.class, VogonUserAnnotations.class);
-		this.addMixIn(ConfigurationElement.class, ConfigurationElementAnnotations.class);
+		this.addMixInAnnotations(FinanceTransactionJson.class, FinanceTransactionAnnotations.class);
+		this.addMixInAnnotations(FinanceAccount.class, FinanceAccountAnnotations.class);
+		this.addMixInAnnotations(VogonUser.class, VogonUserAnnotations.class);
+		this.addMixInAnnotations(ConfigurationElement.class, ConfigurationElementAnnotations.class);
 		this.setDateFormat(new SimpleDateFormat("yyyy-MM-dd")); //NOI18N
 	}
 }
