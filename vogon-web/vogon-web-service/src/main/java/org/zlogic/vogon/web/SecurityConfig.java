@@ -276,15 +276,15 @@ public class SecurityConfig {
 		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
 			oauthServer.allowFormAuthenticationForClients();
 		}
+	}
 
-		/**
-		 * Returns the TokenStore instance
-		 *
-		 * @return the TokenStore instance
-		 */
-		@Bean
-		public TokenStore tokenStore() {
-			return new InMemoryTokenStore();
-		}
+	/**
+	 * Returns the TokenStore instance
+	 *
+	 * @return the TokenStore instance
+	 */
+	@Bean
+	public TokenStore tokenStore() {
+		return new InMemoryTokenStore();
 	}
 }
