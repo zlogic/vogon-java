@@ -47,6 +47,7 @@ public class RegistrationController {
 	 * Registers a new user
 	 *
 	 * @param registerUser the user to register
+	 * @return the registered user
 	 * @throws org.zlogic.vogon.web.security.UsernameExistsException in case the
 	 * new username is already in use
 	 */
