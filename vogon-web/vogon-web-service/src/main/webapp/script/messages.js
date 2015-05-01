@@ -8,6 +8,7 @@ var messages = {
 	USERNAME_PASSWORD_NOT_ACCEPTED: "Username/password not accepted",
 	ACCESS_TOKEN_REJECTED: "Access token rejected",
 	CANT_FIX_AUTHORIZATION: "Can't fix authorization",
+	ALREADY_LOGGED_OUT: "Already logged out",
 	BALANCE: "Balance",
 	EXPENSEINCOME: "Expense/income",
 	TRANSFER: "Transfer"

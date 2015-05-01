@@ -204,6 +204,18 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
 					return deferred.promise;
 				});
 	};
+	this.logout = function () {
+		if (that.access_token !== undefined) {
+			var params = {token: that.access_token};
+			return HTTPService.post("logout", encodeForm(params), postHeaders)
+					.then(that.resetAuthorization(), that.resetAuthorization());
+		} else {
+			var deferred = $q.defer();
+			deferred.reject({data: {error_description: messages.ALREADY_LOGGED_OUT}});
+			that.resetAuthorization();
+			return deferred.promise;
+		}
+	};
 	this.fixAuthorization = function () {
 		if (that.username !== undefined && that.password !== undefined) {
 			return that.performAuthorization(that.username, that.password);
@@ -481,13 +493,18 @@ app.controller("UserSettingsController", function ($scope, $modalInstance, Autho
 		});
 	};
 	$scope.exportData = function () {
-		HTTPService.get("service/export").then(function (data) {
-			var blob = new Blob([data.data], {'type': "text/xml"});
-			var a = document.createElement("a");
-			a.href = window.URL.createObjectURL(blob);
-			a.download = "vogon-" + new Date().toISOString() + ".xml";
-			a.click();
-		});
+		var form = document.createElement("form");
+		form.method = "post";
+		form.action = "service/export";
+
+		var input = document.createElement("input");
+		input.type = "hidden";
+		input.name = "access_token";
+		input.value = AuthorizationService.access_token;
+		form.appendChild(input);
+
+		form.submit();
+		form.remove();
 	};
 	$scope.performCleanup = function () {
 		$scope.operationSuccessful = false;
@@ -543,7 +560,7 @@ app.controller("AuthController", function ($scope, $modal, AuthorizationService,
 	$scope.analyticsDialog = undefined;
 	$scope.adminSettingsDialog = undefined;
 	$scope.logout = function () {
-		$scope.authorizationService.resetAuthorization();
+		AuthorizationService.logout();
 	};
 	var closeUserSettingsDialog = function () {
 		if ($scope.userSettingsDialog !== undefined) {
