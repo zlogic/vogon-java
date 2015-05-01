@@ -5,12 +5,17 @@
  */
 package org.zlogic.vogon.web.controller;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,14 +94,24 @@ public class DataController {
 	 * @param outputStream the stream for XML output
 	 * @param userPrincipal the authenticated user
 	 */
-	@RequestMapping(value = "/export", method = RequestMethod.GET, produces = "application/xml")
-	public void exportData(OutputStream outputStream, @AuthenticationPrincipal VogonSecurityUser userPrincipal) throws RuntimeException {
+	@RequestMapping(value = "/export", method = {RequestMethod.GET, RequestMethod.POST}, produces = "application/xml")
+	public HttpEntity<byte[]> exportData(@AuthenticationPrincipal VogonSecurityUser userPrincipal) throws RuntimeException {
 		VogonUser user = userRepository.findByUsername(userPrincipal.getUsername());
-		XmlExporter exporter = new XmlExporter(outputStream);
 		try {
+			ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+			XmlExporter exporter = new XmlExporter(outStream);
 			Sort accountSort = new Sort(new Sort.Order(Sort.Direction.ASC, "id"));//NOI18N
 			Sort transactionSort = new Sort(new Sort.Order(Sort.Direction.ASC, "id"));//NOI18N
 			exporter.exportData(user, accountRepository.findByOwner(user, accountSort), transactionRepository.findByOwner(user, transactionSort), null);
+
+			String date = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date()); //NOI18N
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_XML);
+			headers.setContentLength(outStream.size());
+			headers.setContentDispositionFormData("attachment", "vogon-" + date + ".xml"); //NOI18N
+
+			return new HttpEntity<>(outStream.toByteArray(), headers);
 		} catch (VogonExportException ex) {
 			throw new RuntimeException(ex);
 		}

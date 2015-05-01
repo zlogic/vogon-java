@@ -5,6 +5,10 @@
  */
 package org.zlogic.vogon.web;
 
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,8 +19,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -25,6 +31,13 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.authentication.BearerTokenExtractor;
+import org.springframework.security.oauth2.provider.authentication.TokenExtractor;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.zlogic.vogon.web.security.UserService;
 import org.zlogic.vogon.web.security.VogonSecurityUser;
 
@@ -125,6 +138,12 @@ public class SecurityConfig {
 		private ServerTypeDetector serverTypeDetector;
 
 		/**
+		 * The TokenStore instance
+		 */
+		@Autowired
+		private TokenStore tokenStore;
+
+		/**
 		 * Configures ResourceServerSecurity
 		 *
 		 * @param resources the ResourceServerSecurityConfigurer instance to
@@ -144,11 +163,41 @@ public class SecurityConfig {
 		@Override
 		public void configure(HttpSecurity http) throws Exception {
 			boolean requireHttps = (serverTypeDetector.getCloudType() != ServerTypeDetector.CloudType.HEROKU) && (serverTypeDetector.getCloudType() != ServerTypeDetector.CloudType.AZURE);
+			//The logout handler to delete tokens
+			LogoutHandler logoutHandler = new LogoutHandler() {
+				/**
+				 * The TokenExtractor instance
+				 */
+				private TokenExtractor tokenExtractor = new BearerTokenExtractor();
+
+				@Override
+				public void logout(HttpServletRequest request, HttpServletResponse response, Authentication auth) {
+					auth = tokenExtractor.extract(request);
+
+					if (auth.getPrincipal().getClass() != String.class)
+						return;
+					OAuth2Authentication oauth2 = tokenStore.readAuthentication((String) auth.getPrincipal());
+
+					OAuth2AccessToken token = tokenStore.getAccessToken(oauth2);
+					if (token == null)
+						return;
+					tokenStore.removeAccessToken(token);//TODO: Remove refresh token as well?
+				}
+			};
+			// The logout success handler
+			LogoutSuccessHandler logoutSuccessHandler = new LogoutSuccessHandler() {
+
+				@Override
+				public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication auth) throws IOException, ServletException {
+
+				}
+			};
 			(requireHttps ? http.requiresChannel().anyRequest().requiresSecure().and() : http)
 					//.authorizeRequests().antMatchers("/oauth/token").fullyAuthenticated().and()
 					.authorizeRequests().antMatchers("/oauth/token").anonymous().and() //NOI18N
 					.authorizeRequests().antMatchers("/service/**").hasAuthority(VogonSecurityUser.AUTHORITY_USER).and() //NOI18N
-					.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+					.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+					.logout().addLogoutHandler(logoutHandler).logoutUrl("/logout").logoutSuccessHandler(logoutSuccessHandler); //NOI18N
 		}
 	}
 
@@ -164,6 +213,12 @@ public class SecurityConfig {
 		 */
 		@Autowired
 		private AuthenticationManager authenticationManager;
+
+		/**
+		 * The TokenStore instance
+		 */
+		@Autowired
+		private TokenStore tokenStore;
 
 		/**
 		 * Configures the ClientDetailsService
@@ -193,7 +248,7 @@ public class SecurityConfig {
 		 */
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-			endpoints.authenticationManager(authenticationManager);
+			endpoints.authenticationManager(authenticationManager).tokenStore(tokenStore);
 		}
 
 		/**
@@ -207,6 +262,16 @@ public class SecurityConfig {
 		@Override
 		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
 			oauthServer.allowFormAuthenticationForClients();
+		}
+
+		/**
+		 * Returns the TokenStore instance
+		 *
+		 * @return the TokenStore instance
+		 */
+		@Bean
+		public TokenStore tokenStore() {
+			return new InMemoryTokenStore();
 		}
 	}
 }
