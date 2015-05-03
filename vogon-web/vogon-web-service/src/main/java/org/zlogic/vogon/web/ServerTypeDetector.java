@@ -32,7 +32,11 @@ public class ServerTypeDetector {
 		/**
 		 * WildFly or JBoss
 		 */
-		WILDFLY
+		WILDFLY,
+		/**
+		 * Jetty
+		 */
+		JETTY
 	}
 
 	/**
@@ -120,6 +124,8 @@ public class ServerTypeDetector {
 			return ServerType.WILDFLY;
 		if (System.getProperty("catalina.home") != null) //NOI18N
 			return ServerType.TOMCAT;
+		if (System.getProperty("jetty.base") != null) //NOI18N
+			return ServerType.JETTY;
 		return ServerType.STANDALONE;
 	}
 
