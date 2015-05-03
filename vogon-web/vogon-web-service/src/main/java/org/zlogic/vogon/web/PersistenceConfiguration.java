@@ -62,6 +62,8 @@ public class PersistenceConfiguration {
 			return System.getProperty("catalina.home"); //NOI18N
 		else if (serverTypeDetector.getServerType() == ServerTypeDetector.ServerType.WILDFLY)
 			return System.getProperty("jboss.server.data.dir"); //NOI18N
+		else if (serverTypeDetector.getServerType() == ServerTypeDetector.ServerType.JETTY)
+			return System.getProperty("jetty.base"); //NOI18N
 		else
 			return System.getProperty("vogon.database.dir", System.getProperty("user.dir")); //NOI18N
 	}
