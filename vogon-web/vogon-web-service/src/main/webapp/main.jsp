@@ -20,7 +20,7 @@
 		<script type="text/javascript" src="webjars/bootstrap/<fmt:message key="bootstrap" bundle="${webjars}"/>/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="webjars/d3js/<fmt:message key="d3js" bundle="${webjars}"/>/d3.min.js"></script>
 		<script type="text/javascript" src="webjars/nvd3/<fmt:message key="nvd3" bundle="${webjars}"/>/nv.d3.min.js"></script>
-		<script type="text/javascript" src="webjars/angularjs-nvd3-directives/<fmt:message key="angularjsnvd3directives" bundle="${webjars}"/>/angularjs-nvd3-directives.js"></script>
+		<script type="text/javascript" src="webjars/angular-nvd3/<fmt:message key="angularnvd3" bundle="${webjars}"/>/angular-nvd3.min.js"></script>
 		<script type="text/javascript" src="script/messages.js"></script>
 		<script type="text/javascript" src="script/main.js"></script>
 		<link rel="stylesheet" type="text/css" href="css/style.css">
@@ -362,17 +362,17 @@
 					<div class="row form-control-static">
 						<div class="col-md-12">
 							<label><fmt:message key="TAGS_CHART"/></label>
-							<nvd3-pie-chart id="tags-chart" class="form-control-static" data="tagsChartData" height="400" showLabels="false" donut="true" tooltips="true" tooltipcontent="tagsChartToolTipContentFunction()" donutLabelsOutside="true" showLegend="true">
-								<svg></svg>
-							</nvd3-pie-chart>
+							<div id="tagsChartContainer">
+								<nvd3 options="tagsChart.options" data="tagsChart.data"></nvd3>
+							</div>
 						</div>
 					</div>
 					<div class="row form-control-static">
 						<div class="col-md-12">
 							<label><fmt:message key="BALANCE_CHART"/></label>
-							<nvd3-line-chart id="balanceChartId" data="balanceChartData" height="300" showXAxis="true" showYAxis="true" tooltips="true" xAxisTickFormat="balanceChartXTickFormat()" useInteractiveGuideline="true" yaxisshowmaxmin="true">
-								<svg></svg>
-							</nvd3-line-chart>
+							<div id="balanceChartContainer">
+								<nvd3 options="balanceChart.options" data="balanceChart.data"></nvd3>
+							</div>
 						</div>
 					</div>
 				</div>
