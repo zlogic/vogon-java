@@ -1,4 +1,4 @@
-var app = angular.module("vogon", ["ngCookies", "ui.bootstrap", "nvd3ChartDirectives", "infinite-scroll", "ngTagsInput"]);
+var app = angular.module("vogon", ["ngCookies", "ui.bootstrap", "nvd3", "infinite-scroll", "ngTagsInput"]);
 
 var dateToJson = function (date) {
 	if (date instanceof Date)
@@ -13,12 +13,14 @@ var tagsToJson = function (tags) {
 		tagsJson.push(tags[tag].text);
 	return tagsJson;
 };
+
 var encodeForm = function (data) {
 	var buffer = [];
 	for (var name in data)
 		buffer.push([encodeURIComponent(name), encodeURIComponent(data[name])].join("="));
 	return buffer.join("&");
 };
+
 app.service("AlertService", function ($timeout) {
 	var that = this;
 	this.alerts = [];
@@ -313,8 +315,60 @@ app.controller("AnalyticsController", function ($scope, $modalInstance, Accounts
 		expense: true
 	};
 	$scope.report = undefined;
-	$scope.tagsChartData = undefined;
-	$scope.balanceChartData = undefined;
+	$scope.tagsChart = {
+		data: [],
+		options: {
+			chart: {
+				type: "pieChart",
+				donut: true,
+				height: 400,
+				showLabels: false,
+				x: function (d) {
+					return d.tag;
+				},
+				y: function (d) {
+					return Math.abs(d.amount);
+				},
+				tooltipContent: function (key, y, e) {
+					return complex_messages.TAGS_CHART_TOOLTIP(key, e.point.amount);
+				}
+			}
+		}
+	};
+	$scope.balanceChart = {
+		data: [],
+		options: {
+			chart: {
+				type: "lineChart",
+				height: 500,
+				showLegend: false,
+				margin: {
+					top: 20,
+					right: 100,
+					bottom: 20,
+					left: 100
+				},
+				x: function (d) {
+					return d.x;
+				},
+				y: function (d) {
+					return d.y;
+				},
+				xAxis: {
+					tickFormat: function (d) {
+						return dateToJson(new Date(d));
+					},
+					axisLabelDistance: 30
+				},
+				yAxis: {
+					showMaxMin: true
+				},
+				lines: {
+					forceY: [0]
+				}
+			}
+		}
+	};
 	$scope.currencies = [];
 	$scope.reportCompleted = false;
 	TagsService.update().then(function () {
@@ -409,45 +463,40 @@ app.controller("AnalyticsController", function ($scope, $modalInstance, Accounts
 			var amount = tagExpense.amounts[$scope.report.selectedCurrency] !== undefined ? tagExpense.amounts[$scope.report.selectedCurrency] : 0;
 			if (amount !== 0)
 				allZero = false;
-			var chartEntry = [
-				tagExpense.tag, Math.abs(amount), amount
-			];
-			newChartData.unshift(chartEntry);
+			var chartEntry = {
+				tag: tagExpense.tag, amount: amount
+			};
+			newChartData.push(chartEntry);
 		});
 		if (allZero)
-			$scope.tagsChartData = [];
+			$scope.tagsChart.data = [];
 		else
-			$scope.tagsChartData = newChartData;
+			$scope.tagsChart.data = newChartData;
+		$scope.$applyAsync(function () {
+			$scope.tagsChart.options.chart.width = $("#tagsChartContainer").width();
+		});//FIXME: remove this workaround after angular-nvd3 is fixed
 	};
 	var updateBalanceChart = function () {
 		var newChartData = [];
 		var accountGraph = $scope.report.accountsBalanceGraph[$scope.report.selectedCurrency];
 		if (accountGraph !== undefined)
 			for (var date in accountGraph.data) {
-				var entry = [new Date(date), accountGraph.data[date]];
-				newChartData.unshift(entry);
+				var entry = {x: new Date(date), y: accountGraph.data[date]};
+				newChartData.push(entry);
 			}
 		if (accountGraph === undefined || Object.keys(accountGraph.data).length <= 0)
-			$scope.balanceChartData = [];
+			$scope.balanceChart.data = [];
 		else
-			$scope.balanceChartData = [{
+			$scope.balanceChart.data = [{
 					key: messages.BALANCE,
 					values: newChartData
 				}];
+		$scope.$applyAsync(function () {
+			$scope.balanceChart.options.chart.width = $("#balanceChartContainer").width();
+		});//FIXME: remove this workaround after angular-nvd3 is fixed
 	};
 	$scope.filterCurrency = function (currency) {
 		return $scope.report !== undefined && $scope.report.currencies.indexOf(currency.symbol) !== -1;
-	};
-	$scope.tagsChartToolTipContentFunction = function () {
-		return function (key, y, e) {
-			return complex_messages.TAGS_CHART_TOOLTIP(key, e.point[2]);
-		};
-	};
-	$scope.balanceChartXTickFormat = function () {
-		return function (value) {
-			var dateString = dateToJson(new Date(value));
-			return dateString;
-		};
 	};
 	$scope.close = function () {
 		$modalInstance.dismiss();
@@ -458,6 +507,7 @@ app.controller("AnalyticsController", function ($scope, $modalInstance, Accounts
 	}, $scope.updateAccounts);
 	$modalInstance.result.then($scope.accountListener, $scope.accountListener);
 });
+
 app.controller("UserSettingsController", function ($scope, $modalInstance, AuthorizationService, UserService, CurrencyService, HTTPService) {
 	$scope.userService = UserService;
 	$scope.user = UserService.userData;

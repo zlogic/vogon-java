@@ -19,8 +19,8 @@
 		<vogon.web.version.ngtagsinput>2.3.0</vogon.web.version.ngtagsinput>
 		<vogon.web.version.jquery>1.11.1</vogon.web.version.jquery>
 		<vogon.web.version.d3js>3.5.5</vogon.web.version.d3js>
-		<vogon.web.version.nvd3>1.1.15-beta</vogon.web.version.nvd3>
-		<vogon.web.version.angularjsnvd3directives>0.0.7</vogon.web.version.angularjsnvd3directives>
+		<vogon.web.version.nvd3>1.7.1</vogon.web.version.nvd3>
+		<vogon.web.version.angularnvd3>0.1.1</vogon.web.version.angularnvd3>
 	</properties>
 
 	<build>
@@ -171,7 +171,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.webjars</groupId>
-			<artifactId>angularjs-nvd3-directives</artifactId>
+			<artifactId>angular-nvd3</artifactId>
 		</dependency>
 	</dependencies>
 </project>
