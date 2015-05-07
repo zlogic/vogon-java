@@ -10,6 +10,15 @@ Simple web-based personal finance tracker using
 
 Named after the Vogons (http://en.wikipedia.org/wiki/Vogon) race who were known to be extremely boring accountants.
 
+**Demos**
+
+Check out the demo deployments:
+
+* [OpenShift (WildFly)](http://vogon-zlogic42demo.rhcloud.com)
+* [Heroku](http://vogon-demo.herokuapp.com) (may take a few minutes to load for the first time)
+* [Azure (Tomcat)](http://vogon-tomcat.azurewebsites.net) (may take a few minutes to load for the first time)
+* [Azure (Jetty)](http://vogon-jetty.azurewebsites.net) (may take a few minutes to load for the first time)
+
 **Prepackaged releases are available on [Github](/../../releases).**
 
 Requires Java 8 to build. [Releases](/../../releases) contain prepackaged WAR files for:
