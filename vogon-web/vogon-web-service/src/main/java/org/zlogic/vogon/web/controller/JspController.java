@@ -8,7 +8,6 @@ package org.zlogic.vogon.web.controller;
 import java.text.MessageFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -47,7 +46,10 @@ public class JspController {
 	 * @return the fragment ("/fragments") path
 	 */
 	@RequestMapping(value = {"/fragments/{fragment}.fragment"})
-	public String fragmentModel(@PathVariable String fragment, Model model) {
-		return MessageFormat.format("fragments/{0}", new Object[]{fragment}); //NOI18N
+	public ModelAndView fragmentModelAndView(@PathVariable String fragment) {
+		String target = MessageFormat.format("fragments/{0}", new Object[]{fragment}); //NOI18N
+		ModelAndView model = new ModelAndView(target);
+		model.addObject("configuration", configuration); //NOI18N
+		return model;
 	}
 }

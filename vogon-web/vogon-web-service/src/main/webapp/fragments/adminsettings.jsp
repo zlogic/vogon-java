@@ -11,7 +11,7 @@
 		</label>
 	</div>
 	<div class="modal-footer">
-		<button ng-click="cancelEditing()" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> <fmt:message key="CANCEL"/></button>
-		<button ng-click="submitEditing()" class="btn btn-primary"><span class="glyphicon glyphicon-ok"></span> <fmt:message key="APPLY"/></button>
+		<button ng-click="cancelEditing()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> <fmt:message key="CANCEL"/></button>
+		<button ng-click="submitEditing()" class="btn btn-primary" type="submit"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> <fmt:message key="APPLY"/></button>
 	</div>
 </form>

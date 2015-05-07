@@ -6,12 +6,13 @@ app.controller("NotificationController", function ($scope, HTTPService, AlertSer
 	$scope.closeAlert = AlertService.closeAlert;
 });
 
-app.controller("LoginController", function ($scope, $http, AuthorizationService, HTTPService) {
+app.controller("LoginController", function ($scope, $http, $modal, AuthorizationService, HTTPService) {
 	$scope.authorizationService = AuthorizationService;
 	$scope.httpService = HTTPService;
 	$scope.loginLocked = "authorizationService.authorized || httpService.isLoading";
 	$scope.loginError = undefined;
 	$scope.registrationError = undefined;
+	$scope.introDialog = undefined;
 	var displayLoginError = function (data) {
 		$scope.loginError = data.data.error_description;
 	};
@@ -21,6 +22,15 @@ app.controller("LoginController", function ($scope, $http, AuthorizationService,
 	var reset = function () {
 		$scope.loginError = undefined;
 		$scope.registrationError = undefined;
+		closeIntroDialog();
+	};
+	var closeIntroDialog = function () {
+		if ($scope.introDialog !== undefined) {
+			var deleteFunction = function () {
+				$scope.introDialog = undefined;
+			};
+			$scope.introDialog.then(deleteFunction, deleteFunction);
+		}
 	};
 	$scope.login = function () {
 		reset();
@@ -32,6 +42,12 @@ app.controller("LoginController", function ($scope, $http, AuthorizationService,
 		var user = {username: AuthorizationService.username, password: AuthorizationService.password};
 		return $http.post("register", user)
 				.then($scope.login, displayRegistrationError);
+	};
+	$scope.showIntroDialog = function () {
+		closeIntroDialog();
+		$scope.introDialog = $modal.open({
+			templateUrl: "fragments/intro.fragment"
+		}).result.then(closeIntroDialog, closeIntroDialog);
 	};
 	$scope.doSelectedAction = function () {
 		if ($scope.selectedTab === "login")
