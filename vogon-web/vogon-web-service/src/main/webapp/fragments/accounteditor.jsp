@@ -8,7 +8,7 @@
 	<div class="modal-body">
 		<div class="row form-control-static">
 			<div class="col-md-12">
-				<button ng-click="addAccount()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-plus"></span> <fmt:message key="ADD_ACCOUNT"/></button>
+				<button ng-click="addAccount()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> <fmt:message key="ADD_ACCOUNT"/></button>
 			</div>
 		</div>
 		<div class="row form-control-static" ng-repeat="account in accounts.accounts| orderBy:'id'">
@@ -36,13 +36,13 @@
 					</div>
 				</div>
 				<div class="form-inline col-md-3 text-right">
-					<button ng-click="deleteAccount(account)" class="btn btn-default" type="button"><span class="glyphicon glyphicon-trash"></span> <fmt:message key="DELETE"/></button>
+					<button ng-click="deleteAccount(account)" class="btn btn-default" type="button"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> <fmt:message key="DELETE"/></button>
 				</div>
 			</ng-form>
 		</div>
 	</div>
 	<div class="modal-footer">
-		<button ng-click="cancelEditing()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span> <fmt:message key="CANCEL"/></button>
-		<button ng-click="submitEditing()" class="btn btn-primary" type="submit" ng-disabled="accountEditorForm.$invalid"><span class="glyphicon glyphicon-ok"></span> <fmt:message key="APPLY"/></button>
+		<button ng-click="cancelEditing()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> <fmt:message key="CANCEL"/></button>
+		<button ng-click="submitEditing()" class="btn btn-primary" type="submit" ng-disabled="accountEditorForm.$invalid"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> <fmt:message key="APPLY"/></button>
 	</div>
 </form>

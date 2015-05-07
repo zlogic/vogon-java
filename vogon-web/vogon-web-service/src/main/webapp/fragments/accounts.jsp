@@ -4,7 +4,7 @@
 <div ng-show="authorizationService.authorized" class="panel panel-default">
 	<div class="panel-heading"><fmt:message key="ACCOUNTS_LIST_TITLE"/></div>
 	<div class="panel-body">
-		<button ng-click="editAccounts()" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span> <fmt:message key="EDIT_ACCOUNTS"/></button>
+		<button ng-click="editAccounts()" class="btn btn-primary"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> <fmt:message key="EDIT_ACCOUNTS"/></button>
 		<table class="table table-hover">
 			<thead>
 				<tr>

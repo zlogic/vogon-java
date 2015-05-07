@@ -5,7 +5,7 @@
 	<div class="panel panel-default">
 		<div class="panel-heading"><fmt:message key="TRANSACTIONS_LIST_TITLE"/></div>
 		<div class="panel-body">
-			<button ng-click="addTransaction()" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> <fmt:message key="ADD_TRANSACTION"/></button>
+			<button ng-click="addTransaction()" class="btn btn-primary"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> <fmt:message key="ADD_TRANSACTION"/></button>
 			<div infinite-scroll="transactionsService.nextPage()" infinite-scroll-disabled="transactionsService.loadingNextPage">
 				<table class="table table-hover">
 					<thead>
@@ -35,7 +35,7 @@
 							<td>
 								<div class="form-horizontal">
 									<div class="input-group">
-										<span class="input-group-addon"><span class="glyphicon glyphicon-filter"></span></span>
+										<span class="input-group-addon"><span class="glyphicon glyphicon-filter" aria-hidden="true"></span></span>
 										<input type="text" class="form-control" placeholder="<fmt:message key="ENTER_DESCRIPTION_FILTER"/>" ng-model="transactionsService.filterDescription" ng-change="applyFilter()"/>
 									</div>
 								</div>
@@ -43,7 +43,7 @@
 							<td>
 								<div class="form-horizontal">
 									<div class="input-group">
-										<span class="input-group-addon"><span class="glyphicon glyphicon-filter"></span></span>
+										<span class="input-group-addon"><span class="glyphicon glyphicon-filter" aria-hidden="true"></span></span>
 										<input type="text" class="form-control" datepicker-popup ng-model="transactionsService.filterDate" ng-change="applyFilter()" is-open="filterDateCalendarOpened" placeholder="<fmt:message key="ENTER_DATE_FILTER"/>" />
 										<span class="input-group-btn">
 											<button type="button" class="btn btn-default" ng-click="openFilterDateCalendar($event)"><span class="glyphicon glyphicon-calendar"></span></button>
@@ -54,7 +54,7 @@
 							<td>
 								<div class="form-horizontal">
 									<div class="input-group">
-										<span class="input-group-addon"><span class="glyphicon glyphicon-filter"></span></span>
+										<span class="input-group-addon"><span class="glyphicon glyphicon-filter" aria-hidden="true"></span></span>
 										<tags-input class="bootstrap" ng-model="transactionsService.filterTags" placeholder="<fmt:message key="ADD_FILTER_TAGS"/>" on-tag-added="applyFilter()" on-tag-removed="applyFilter()" replace-spaces-with-dashes="false" add-on-comma="false">
 											<auto-complete source="tagsService.autocompleteQuery($query)"></auto-complete>
 										</tags-input>
@@ -91,18 +91,18 @@
 									<div ng-repeat="account in accounts = (transactionsService.getAccounts(transaction, transactionsService.fromAccountsPredicate))">
 										{{$first && accounts.length > 1 ? '(' : ''}}{{account.name}}{{$last ? '' : ', '}}{{$last && accounts.length>1?')':''}}
 									</div>
-									<span class="glyphicon glyphicon-chevron-down"></span>
+									<span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
 									<div ng-repeat="account in accounts = (transactionsService.getAccounts(transaction, transactionsService.toAccountsPredicate))">
 										{{$first && accounts.length > 1 ? '(' : ''}}{{account.name}}{{$last ? '' : ', '}}{{$last && accounts.length>1?')':''}}
 									</div>
 								</div>
 							</td>
 							<td>
-								<button ng-click="duplicateTransaction(transaction)" class="btn btn-default"><span class="glyphicon glyphicon-asterisk"></span> <fmt:message key="DUPLICATE"/></button>
+								<button ng-click="duplicateTransaction(transaction)" class="btn btn-default"><span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span> <fmt:message key="DUPLICATE"/></button>
 							</td>
 						</tr>
 						<tr class="text-center" ng-show="transactionsService.loadingNextPage">
-							<td colspan="6"><span class="glyphicon glyphicon-refresh"></span> <fmt:message key="LOADING_ALERT"/></td>
+							<td colspan="6"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> <fmt:message key="LOADING_ALERT"/></td>
 						</tr>
 					</tbody>
 				</table>
