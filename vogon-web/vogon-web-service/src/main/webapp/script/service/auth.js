@@ -1,6 +1,8 @@
 app.service("AlertService", function ($timeout) {
 	var that = this;
 	this.alerts = [];
+	this.loadingRequests = 0;
+	this.isLoading = false;
 	this.closeAlert = function (alertIndex) {
 		that.alerts.splice(alertIndex, 1);
 	};
@@ -18,13 +20,19 @@ app.service("AlertService", function ($timeout) {
 				that.closeAlert(alertIndex);
 		}, 30000);
 	};
+	this.startLoadingRequest = function () {
+		that.loadingRequests++;
+		that.isLoading = that.loadingRequests > 0;
+	};
+	this.endLoadingRequest = function () {
+		that.loadingRequests--;
+		that.isLoading = that.loadingRequests > 0;
+	};
 });
 
 app.service("HTTPService", function ($http, $q, AlertService) {
 	var that = this;
 	var tokenRegex = /^oauth\/token$/;
-	this.pendingRequests = 0;
-	this.isLoading = false;
 	this.authorizationHeaders = {};
 	this.authorized = false;
 	var mergeHeaders = function (extraHeaders) {
@@ -37,14 +45,6 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 	var merge = function (a, b) {
 		for (var prop in b)
 			a[prop] = b[prop];
-	};
-	var startRequest = function () {
-		that.pendingRequests++;
-		that.isLoading = true;
-	};
-	var endRequest = function () {
-		that.pendingRequests--;
-		that.isLoading = that.pendingRequests > 0;
 	};
 	var retryRequest = function (config) {
 		config.headers = mergeHeaders(config.headers);
@@ -59,7 +59,7 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 		return tokenRegex.test(url);
 	};
 	var errorHandler = function (data) {
-		endRequest();
+		AlertService.endLoadingRequest();
 		var deferred = $q.defer();
 		if (data.status === 401) {
 			var fixAuthCall = that.fixAuthorization();
@@ -84,7 +84,7 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 		return deferred.promise;
 	};
 	var successHandler = function (data) {
-		endRequest();
+		AlertService.endLoadingRequest();
 		return data;
 	};
 	this.buildRequestParams = function (updateOnFailure) {
@@ -93,21 +93,21 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 		};
 	};
 	this.get = function (url, extraHeaders, requestParams) {
-		startRequest();
+		AlertService.startLoadingRequest();
 		var headers = isTokenURL(url) ? extraHeaders : mergeHeaders(extraHeaders);
 		if (requestParams === undefined)
 			requestParams = that.buildRequestParams();
 		return $http.get(url, {headers: headers, customData: requestParams}).then(successHandler, errorHandler);
 	};
 	this.delete = function (url, extraHeaders, requestParams) {
-		startRequest();
+		AlertService.startLoadingRequest();
 		var headers = isTokenURL(url) ? extraHeaders : mergeHeaders(extraHeaders);
 		if (requestParams === undefined)
 			requestParams = that.buildRequestParams();
 		return $http.delete(url, {headers: headers, customData: requestParams}).then(successHandler, errorHandler);
 	};
 	this.post = function (url, data, extraHeaders, requestParams, transformRequest) {
-		startRequest();
+		AlertService.startLoadingRequest();
 		var headers = isTokenURL(url) ? extraHeaders : mergeHeaders(extraHeaders);
 		var params = {headers: headers};
 		if (transformRequest !== undefined)
