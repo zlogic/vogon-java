@@ -1,7 +1,7 @@
 <%@ page session="false" trimDirectiveWhitespaces="true" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <fmt:setBundle basename="org.zlogic.vogon.web.webmessages" />
-<form name="analyticsForm">
+<form name="analyticsForm" novalidate>
 	<div class="modal-header">
 		<h3 class="modal-title"><fmt:message key="ANALYTICS_TITLE"/></h3>
 	</div>
@@ -43,8 +43,8 @@
 		<div class="row">
 			<div class="col-md-6">
 				<label><fmt:message key="START_DATE"/></label>
-				<div class="input-group">
-					<input type="text" class="form-control" datepicker-popup ng-model="startDate" is-open="startDateCalendarOpened" />
+				<div class="input-group" ng-class="{ 'has-error': analyticsForm.startDate.$invalid }">
+					<input type="text" class="form-control" datepicker-popup ng-model="startDate" name="startDate" is-open="startDateCalendarOpened" />
 					<span class="input-group-btn">
 						<button type="button" class="btn btn-default" ng-click="openStartDateCalendar($event)" type="button"><span class="glyphicon glyphicon-calendar"></span></button>
 					</span>
@@ -52,8 +52,8 @@
 			</div>
 			<div class="col-md-6">
 				<label><fmt:message key="END_DATE"/></label>
-				<div class="input-group">
-					<input type="text" class="form-control" datepicker-popup ng-model="endDate" is-open="endDateCalendarOpened" />
+				<div class="input-group" ng-class="{ 'has-error': analyticsForm.endDate.$invalid }">
+					<input type="text" class="form-control" datepicker-popup ng-model="endDate" name="endDate" is-open="endDateCalendarOpened" />
 					<span class="input-group-btn">
 						<button type="button" class="btn btn-default" ng-click="openEndDateCalendar($event)" type="button"><span class="glyphicon glyphicon-calendar"></span></button>
 					</span>
@@ -81,7 +81,7 @@
 		</div>
 		<div class="row form-control-static">
 			<div class="col-md-12">
-				<button ng-click="buildReport()" class="btn btn-default btn-primary form-control" type="submit"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> <fmt:message key="BUILD_REPORT"/></button>
+				<button ng-click="buildReport()" class="btn btn-default btn-primary form-control" type="submit" ng-disabled="analyticsForm.$invalid"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> <fmt:message key="BUILD_REPORT"/></button>
 			</div>
 		</div>
 		<div class="well well-sm form-control-static" ng-show="report">
