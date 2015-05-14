@@ -12,8 +12,8 @@
 					<input type="text" ng-model="transaction.description" class="form-control" placeholder="<fmt:message key="ENTER_TRANSACTION_DESCRIPTION"/>" name="description" required />
 				</span>
 				<select ng-model="transaction.type" ng-init="transaction.type = transaction.type || transactionTypes[0]" ng-options="transactionType.value as transactionType.name for transactionType in transactionTypes" class="form-control"></select>
-				<div class="input-group">
-					<input type="text" class="form-control" datepicker-popup ng-model="transaction.date" is-open="calendarOpened" />
+				<div class="input-group" ng-class="{ 'has-error': transactionEditorForm.date.$invalid }" >
+					<input type="text" class="form-control" datepicker-popup ng-model="transaction.date" name="date" is-open="calendarOpened" />
 					<span class="input-group-btn">
 						<button type="button" class="btn btn-default" ng-click="openCalendar($event)"><span class="glyphicon glyphicon-calendar"></span></button>
 					</span>
