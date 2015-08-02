@@ -1,40 +1,19 @@
-app.controller("TransactionsController", function ($scope, $modal, $interval, TransactionsService, AuthorizationService, AccountsService, UserService, TagsService) {
+app.controller("TransactionsController", function ($scope, $interval, TransactionsService, AuthorizationService, AccountsService, UserService, TagsService) {
 	$scope.transactionsService = TransactionsService;
 	$scope.authorizationService = AuthorizationService;
 	$scope.accountsService = AccountsService;
 	$scope.tagsService = TagsService;
-	$scope.editor = undefined;
 	$scope.editingTransaction = undefined;
 	$scope.userService = UserService;
 	$scope.filterTimer = undefined;
 	$scope.filterDirty = false;
-	var closeEditor = function () {
-		$scope.editingTransaction = undefined;
-		if ($scope.editor !== undefined) {
-			var deleteFunction = function () {
-				$scope.editor = undefined;
-			};
-			$scope.editor.then(deleteFunction, deleteFunction);
-		}
-	};
 	$scope.addTransaction = function () {
 		var transaction = {components: [], date: TransactionsService.getDate(), tags: [], type: TransactionsService.defaultTransactionType.value};
 		$scope.transactionsService.transactions.unshift(transaction);
 		$scope.startEditing(transaction);
 	};
 	$scope.startEditing = function (transaction) {
-		closeEditor();
 		$scope.editingTransaction = transaction;
-		$scope.editor = $modal.open({
-			templateUrl: "fragments/transactioneditor.fragment",
-			controller: "TransactionEditorController",
-			size: "lg",
-			resolve: {
-				transaction: function () {
-					return $scope.editingTransaction;
-				}
-			}
-		}).result.then(closeEditor, closeEditor);
 	};
 	$scope.duplicateTransaction = function (transaction) {
 		var newTransaction = angular.copy(transaction);

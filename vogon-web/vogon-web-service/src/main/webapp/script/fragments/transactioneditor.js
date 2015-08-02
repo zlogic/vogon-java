@@ -1,5 +1,5 @@
-app.controller("TransactionEditorController", function ($scope, $modalInstance, AccountsService, TransactionsService, TagsService, transaction) {
-	$scope.transaction = transaction;
+app.controller("TransactionEditorController", function ($scope, AccountsService, TransactionsService, TagsService) {
+	var transaction = $scope.transaction;
 	$scope.accountService = AccountsService;
 	$scope.transactionTypes = TransactionsService.transactionTypes;
 	$scope.calendarOpened = false;
@@ -29,15 +29,12 @@ app.controller("TransactionEditorController", function ($scope, $modalInstance, 
 	$scope.submitEditing = function () {
 		TagsService.mergeTags($scope.transaction.tags);
 		TransactionsService.submitTransaction($scope.transaction);
-		$modalInstance.close();
 	};
 	$scope.cancelEditing = function () {
 		TransactionsService.updateTransaction(transaction.id).then(AccountsService.update);
-		$modalInstance.dismiss();
 	};
 	$scope.deleteTransaction = function () {
 		TransactionsService.deleteTransaction($scope.transaction);
-		$modalInstance.close();
 	};
 	$scope.syncTags = function () {
 		$scope.transaction.tags = tagsToJson($scope.tags);
@@ -46,5 +43,9 @@ app.controller("TransactionEditorController", function ($scope, $modalInstance, 
 		return account.showInList || $scope.transaction.components.some(function (component) {
 			return component.accountId === account.id;
 		});
+	};
+	$scope.scrollToEditor = function () {
+		var divPosition = $("form[name='transactionEditorForm']").position();
+		$('html, body').animate({scrollTop: divPosition.top}, "slow");
 	};
 });

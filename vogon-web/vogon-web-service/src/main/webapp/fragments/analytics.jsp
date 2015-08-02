@@ -44,7 +44,7 @@
 			<div class="col-md-6">
 				<label><fmt:message key="START_DATE"/></label>
 				<div class="input-group" ng-class="{ 'has-error': analyticsForm.startDate.$invalid }">
-					<input type="text" class="form-control" datepicker-popup ng-model="startDate" name="startDate" is-open="startDateCalendarOpened" />
+					<input type="text" class="form-control" datepicker-popup ng-model="dateRange.start" name="startDate" is-open="startDateCalendarOpened" />
 					<span class="input-group-btn">
 						<button type="button" class="btn btn-default" ng-click="openStartDateCalendar($event)" type="button"><span class="glyphicon glyphicon-calendar"></span></button>
 					</span>
@@ -53,7 +53,7 @@
 			<div class="col-md-6">
 				<label><fmt:message key="END_DATE"/></label>
 				<div class="input-group" ng-class="{ 'has-error': analyticsForm.endDate.$invalid }">
-					<input type="text" class="form-control" datepicker-popup ng-model="endDate" name="endDate" is-open="endDateCalendarOpened" />
+					<input type="text" class="form-control" datepicker-popup ng-model="dateRange.end" name="endDate" is-open="endDateCalendarOpened" />
 					<span class="input-group-btn">
 						<button type="button" class="btn btn-default" ng-click="openEndDateCalendar($event)" type="button"><span class="glyphicon glyphicon-calendar"></span></button>
 					</span>

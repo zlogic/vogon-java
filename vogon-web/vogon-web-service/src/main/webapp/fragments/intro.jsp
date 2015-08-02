@@ -9,6 +9,6 @@
 		<jsp:include page="intro/default.jsp" />
 	</div>
 	<div class="modal-footer">
-		<button ng-click="$close()" class="btn btn-default" type="default"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> <fmt:message key="CLOSE"/></button>
+		<button ng-click="navigationService.navigateBack()" class="btn btn-default btn-primary" type="default"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> <fmt:message key="CLOSE"/></button>
 	</div>
 </form>

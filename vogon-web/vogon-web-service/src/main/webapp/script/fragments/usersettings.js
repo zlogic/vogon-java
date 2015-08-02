@@ -1,4 +1,4 @@
-app.controller("UserSettingsController", function ($scope, $modalInstance, AuthorizationService, UserService, CurrencyService, HTTPService) {
+app.controller("UserSettingsController", function ($scope, AuthorizationService, UserService, CurrencyService, HTTPService, NavigationService) {
 	$scope.userService = UserService;
 	$scope.user = UserService.userData;
 	$scope.currencies = CurrencyService;
@@ -13,7 +13,7 @@ app.controller("UserSettingsController", function ($scope, $modalInstance, Autho
 	};
 	$scope.cancelEditing = function () {
 		UserService.update();
-		$modalInstance.dismiss();
+		NavigationService.navigateBack();
 	};
 	$scope.setFile = function (file) {
 		$scope.$apply(function () {
@@ -22,13 +22,13 @@ app.controller("UserSettingsController", function ($scope, $modalInstance, Autho
 	};
 	$scope.importData = function () {
 		if ($scope.file === undefined) {
-			$modalInstance.dismiss();
+			NavigationService.navigateBack();
 			return;
 		}
 		var formData = new FormData();
 		formData.append("file", $scope.file);
 		return HTTPService.post("service/import", formData, importPostHeaders, undefined, angular.identity).then(function () {
-			$modalInstance.dismiss();
+			NavigationService.navigateBack();
 			HTTPService.updateAllData();
 		});
 	};
