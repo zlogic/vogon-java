@@ -1,7 +1,7 @@
 <%@ page session="false" trimDirectiveWhitespaces="true" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <fmt:setBundle basename="org.zlogic.vogon.web.webmessages" />
-<form name="transactionEditorForm" novalidate>
+<form name="transactionEditorForm" ng-init="scrollToEditor()" novalidate>
 	<div class="modal-header">
 		<h3 class="modal-title"><fmt:message key="EDIT_TRANSACTION_TITLE"/></h3>
 	</div>

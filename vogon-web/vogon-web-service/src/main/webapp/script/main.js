@@ -1,27 +1,17 @@
 var app = angular.module("vogon", ["ngCookies", "ui.bootstrap", "nvd3", "infinite-scroll", "ngTagsInput"]);
 
-app.run(function ($templateRequest) {
-	$templateRequest("fragments/accounteditor.fragment");
-	$templateRequest("fragments/transactioneditor.fragment");
-	$templateRequest("fragments/usersettings.fragment");
-	$templateRequest("fragments/analytics.fragment");
-	$templateRequest("fragments/adminsettings.fragment");
-	$templateRequest("fragments/intro.fragment");
-});
-
 app.controller("NotificationController", function ($scope, HTTPService, AlertService) {
 	$scope.httpService = HTTPService;
 	$scope.alertService = AlertService;
 	$scope.closeAlert = AlertService.closeAlert;
 });
 
-app.controller("LoginController", function ($scope, $http, $modal, AuthorizationService, HTTPService) {
+app.controller("LoginController", function ($scope, $http, AuthorizationService, HTTPService, NavigationService) {
 	$scope.authorizationService = AuthorizationService;
 	$scope.httpService = HTTPService;
 	$scope.loginLocked = "authorizationService.authorized || httpService.isLoading";
 	$scope.loginError = undefined;
 	$scope.registrationError = undefined;
-	$scope.introDialog = undefined;
 	var displayLoginError = function (data) {
 		$scope.loginError = data.data.error_description;
 	};
@@ -31,15 +21,7 @@ app.controller("LoginController", function ($scope, $http, $modal, Authorization
 	var reset = function () {
 		$scope.loginError = undefined;
 		$scope.registrationError = undefined;
-		closeIntroDialog();
-	};
-	var closeIntroDialog = function () {
-		if ($scope.introDialog !== undefined) {
-			var deleteFunction = function () {
-				$scope.introDialog = undefined;
-			};
-			$scope.introDialog.then(deleteFunction, deleteFunction);
-		}
+		NavigationService.reset();
 	};
 	$scope.login = function () {
 		reset();
@@ -53,10 +35,7 @@ app.controller("LoginController", function ($scope, $http, $modal, Authorization
 				.then($scope.login, displayRegistrationError);
 	};
 	$scope.showIntroDialog = function () {
-		closeIntroDialog();
-		$scope.introDialog = $modal.open({
-			templateUrl: "fragments/intro.fragment"
-		}).result.then(closeIntroDialog, closeIntroDialog);
+		NavigationService.navigateTo("intro");
 	};
 	$scope.doSelectedAction = function () {
 		if ($scope.selectedTab === "login")
@@ -69,25 +48,13 @@ app.controller("LoginController", function ($scope, $http, $modal, Authorization
 	}, reset);
 });
 
-app.controller("UserController", function ($scope, $modal, AuthorizationService, UserService, HTTPService) {
+app.controller("UserController", function ($scope, AuthorizationService, UserService, HTTPService, NavigationService) {
 	$scope.authorizationService = AuthorizationService;
 	$scope.userService = UserService;
 	$scope.httpService = HTTPService;
 	$scope.logoutLocked = "!authorizationService.authorized";
-	$scope.loginDialog = undefined;
-	$scope.userSettingsDialog = undefined;
-	$scope.analyticsDialog = undefined;
-	$scope.adminSettingsDialog = undefined;
 	$scope.logout = function () {
 		AuthorizationService.logout();
-	};
-	var closeUserSettingsDialog = function () {
-		if ($scope.userSettingsDialog !== undefined) {
-			var deleteFunction = function () {
-				$scope.userSettingsDialog = undefined;
-			};
-			$scope.userSettingsDialog.then(deleteFunction, deleteFunction);
-		}
 	};
 	var closeAnalyticsDialog = function () {
 		if ($scope.analyticsDialog !== undefined) {
@@ -106,31 +73,52 @@ app.controller("UserController", function ($scope, $modal, AuthorizationService,
 		}
 	};
 	$scope.showUserSettingsDialog = function () {
-		closeUserSettingsDialog();
-		$scope.userSettingsDialog = $modal.open({
-			templateUrl: "fragments/usersettings.fragment",
-			controller: "UserSettingsController"
-		}).result.then(closeUserSettingsDialog, closeUserSettingsDialog);
+		NavigationService.navigateTo("usersettings");
 	};
 	$scope.showAnalyticsDialog = function () {
-		closeAnalyticsDialog();
-		$scope.analyticsDialog = $modal.open({
-			templateUrl: "fragments/analytics.fragment",
-			controller: "AnalyticsController",
-			size: "lg"
-		}).result.then(closeAnalyticsDialog, closeAnalyticsDialog);
+		NavigationService.navigateTo("analytics");
 	};
 	$scope.showAdminSettingsDialog = function () {
-		closeAdminSettingsDialog();
-		$scope.adminSettingsDialog = $modal.open({
-			templateUrl: "fragments/adminsettings.fragment",
-			controller: "AdminSettingsController",
-			size: "lg"
-		}).result.then(closeAdminSettingsDialog, closeAdminSettingsDialog);
+		NavigationService.navigateTo("adminsettings");
 	};
 	$scope.isAdmin = function () {
 		return UserService.userData !== undefined && UserService.userData.authorities.some(function (authority) {
 			return authority === "ROLE_VOGON_ADMIN";
 		});
 	};
+});
+
+app.service("NavigationService", function (AuthorizationService) {
+	var that = this;
+	var allowedNonAdminPages = ["login", "intro"];
+	var defaultBreadcrumbs = ["login", "main"];
+	var filterBreadcrumbs = function () {
+		var filteredBreadcrumbs = [];
+		that.breadcrumbs.forEach(function (page) {
+			if (AuthorizationService.authorized || allowedNonAdminPages.indexOf(page) !== -1)
+				filteredBreadcrumbs.push(page);
+		});
+		return filteredBreadcrumbs;
+	};
+	this.currentPage = function () {
+		var breadcrumbs = filterBreadcrumbs();
+		return breadcrumbs[breadcrumbs.length - 1];
+	};
+	this.navigateTo = function (page) {
+		if (that.breadcrumbs.last === page)
+			return;
+		that.breadcrumbs.push(page);
+	};
+	this.reset = function () {
+		that.breadcrumbs = angular.copy(defaultBreadcrumbs);
+	};
+	this.navigateBack = function () {
+		if (that.breadcrumbs.length > 0)
+			that.breadcrumbs.pop();
+	};
+	this.reset();
+});
+
+app.controller("NavigationController", function ($scope, NavigationService) {
+	$scope.navigationService = NavigationService;
 });

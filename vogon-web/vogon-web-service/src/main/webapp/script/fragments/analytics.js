@@ -1,12 +1,14 @@
-app.controller("AnalyticsController", function ($scope, $modalInstance, AccountsService, TransactionsService, CurrencyService, HTTPService, UserService, TagsService) {
+app.controller("AnalyticsController", function ($scope, AccountsService, TransactionsService, CurrencyService, HTTPService, UserService, TagsService, NavigationService) {
 	$scope.accountService = AccountsService;
 	$scope.transactionsService = TransactionsService;
 	$scope.currencyService = CurrencyService;
 	$scope.tags = {};
 	$scope.accounts = {};
 	var currentTime = new Date();
-	$scope.startDate = dateToJson(new Date(currentTime.getFullYear(), currentTime.getMonth(), 1));
-	$scope.endDate = dateToJson(new Date((new Date(currentTime.getFullYear(), currentTime.getMonth() + 1, 1)) - 1));
+	$scope.dateRange = {
+		start: dateToJson(new Date(currentTime.getFullYear(), currentTime.getMonth(), 1)),
+		end: dateToJson(new Date((new Date(currentTime.getFullYear(), currentTime.getMonth() + 1, 1)) - 1))
+	};
 	$scope.transactionTypeEnabled = {
 		transfer: false,
 		income: true,
@@ -109,8 +111,8 @@ app.controller("AnalyticsController", function ($scope, $modalInstance, Accounts
 	};
 	$scope.buildReport = function () {
 		var reportConfiguration = {
-			earliestDate: dateToJson($scope.startDate),
-			latestDate: dateToJson($scope.endDate),
+			earliestDate: dateToJson($scope.dateRange.start),
+			latestDate: dateToJson($scope.dateRange.end),
 			enabledTransferTransactions: $scope.transactionTypeEnabled.transfer,
 			enabledIncomeTransactions: $scope.transactionTypeEnabled.income,
 			enabledExpenseTransactions: $scope.transactionTypeEnabled.expense
@@ -197,11 +199,11 @@ app.controller("AnalyticsController", function ($scope, $modalInstance, Accounts
 		return $scope.report !== undefined && $scope.report.currencies.indexOf(currency.symbol) !== -1;
 	};
 	$scope.close = function () {
-		$modalInstance.dismiss();
+		NavigationService.navigateBack();
+		$scope.accountListener;
 	};
 	$scope.updateAccounts();
 	$scope.accountListener = $scope.$watch(function () {
 		return AccountsService.accounts;
 	}, $scope.updateAccounts);
-	$modalInstance.result.then($scope.accountListener, $scope.accountListener);
 });

@@ -1,4 +1,4 @@
-app.controller("AccountsEditorController", function ($scope, $modalInstance, AccountsService, CurrencyService) {
+app.controller("AccountsEditorController", function ($scope, AccountsService, CurrencyService, NavigationService) {
 	$scope.accounts = AccountsService;
 	$scope.currencies = CurrencyService;
 	$scope.addAccount = function () {
@@ -11,9 +11,11 @@ app.controller("AccountsEditorController", function ($scope, $modalInstance, Acc
 		});
 	};
 	$scope.cancelEditing = function () {
-		$modalInstance.dismiss();
+		AccountsService.update();
+		NavigationService.navigateBack();
 	};
 	$scope.submitEditing = function () {
-		$modalInstance.close(AccountsService.accounts);
+		NavigationService.navigateBack();
+		AccountsService.submitAccounts(AccountsService.accounts);
 	};
 });

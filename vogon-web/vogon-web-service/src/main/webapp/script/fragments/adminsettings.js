@@ -1,4 +1,4 @@
-app.controller("AdminSettingsController", function ($scope, $modalInstance, HTTPService) {
+app.controller("AdminSettingsController", function ($scope, HTTPService, NavigationService) {
 	$scope.configuration = {};
 	var updateConfigurationVariables = function (data) {
 		$scope.configuration = {};
@@ -21,9 +21,9 @@ app.controller("AdminSettingsController", function ($scope, $modalInstance, HTTP
 	};
 	update();
 	$scope.submitEditing = function () {
-		HTTPService.post("service/configuration", convertConfigurationForPost($scope.configuration)).then($modalInstance.close, $modalInstance.close);
+		HTTPService.post("service/configuration", convertConfigurationForPost($scope.configuration)).then(NavigationService.navigateBack(), NavigationService.navigateBack());
 	};
 	$scope.cancelEditing = function () {
-		$modalInstance.dismiss();
+		NavigationService.navigateBack();
 	};
 });
