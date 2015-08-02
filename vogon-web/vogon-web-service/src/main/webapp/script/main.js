@@ -1,5 +1,14 @@
 var app = angular.module("vogon", ["ngCookies", "ui.bootstrap", "nvd3", "infinite-scroll", "ngTagsInput"]);
 
+app.run(function ($templateRequest) {
+	$templateRequest("fragments/accounteditor.fragment");
+	$templateRequest("fragments/transactioneditor.fragment");
+	$templateRequest("fragments/usersettings.fragment");
+	$templateRequest("fragments/analytics.fragment");
+	$templateRequest("fragments/adminsettings.fragment");
+	$templateRequest("fragments/intro.fragment");
+});
+
 app.controller("NotificationController", function ($scope, HTTPService, AlertService) {
 	$scope.httpService = HTTPService;
 	$scope.alertService = AlertService;
