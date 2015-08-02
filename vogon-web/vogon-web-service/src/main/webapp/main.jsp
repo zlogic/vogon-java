@@ -50,40 +50,44 @@
 		</div>
 		<div ng-controller="NavigationController">
 			<div ng-switch on="navigationService.currentPage()">
-				<div class="animate-switch" ng-controller="LoginController" ng-switch-when="login">
-					<div class="container" ng-hide="authorizationService.authorized" ng-init="selectedTab = 'login'">
-						<form>
-							<div class="panel panel-default">
-								<div class="panel-heading"><h3><fmt:message key="AUTHORIZATION_TITLE"/></h3></div>
-								<div class="panel-body">
-									<core:if test="${configuration.allowRegistration}">
-										<ul class="nav nav-pills" role="tablist">
-											<li ng-class="{active:selectedTab === 'login'}"><a href ng-click="selectedTab = 'login'"><fmt:message key="LOGIN"/></a></li>
-											<li ng-class="{active:selectedTab === 'register'}"><a href ng-click="selectedTab = 'register'"><fmt:message key="REGISTER"/></a></li>
-										</ul>
-									</core:if>
-									<div class="media">
-										<div class="form-inline">
-											<input type="text" class="form-control" ng-model="authorizationService.username" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_USERNAME"/>" />
-											<input type="password" class="form-control" ng-model="authorizationService.password" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_PASSWORD"/>" />
-											<div class="checkbox"><label><input type="checkbox" ng-model="authorizationService.rememberToken"> <fmt:message key="REMEMBER_TOKEN"/></label></div>
+				<div ng-controller="LoginController" ng-switch-when="login">
+					<div class="container center-contents" ng-init="selectedTab = 'login'">
+						<div class="row">
+							<div class="col-md-6 col-md-offset-3">
+								<form>
+									<div class="panel panel-default">
+										<div class="panel-heading"><h3><fmt:message key="AUTHORIZATION_TITLE"/></h3></div>
+										<div class="panel-body">
+											<core:if test="${configuration.allowRegistration}">
+												<ul class="nav nav-pills" role="tablist">
+													<li ng-class="{active:selectedTab === 'login'}"><a href ng-click="selectedTab = 'login'"><fmt:message key="LOGIN"/></a></li>
+													<li ng-class="{active:selectedTab === 'register'}"><a href ng-click="selectedTab = 'register'"><fmt:message key="REGISTER"/></a></li>
+												</ul>
+											</core:if>
+											<div class="media">
+												<div class="form-inline">
+													<input type="text" class="form-control" ng-model="authorizationService.username" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_USERNAME"/>" />
+													<input type="password" class="form-control" ng-model="authorizationService.password" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_PASSWORD"/>" />
+													<div class="checkbox"><label><input type="checkbox" ng-model="authorizationService.rememberToken"> <fmt:message key="REMEMBER_TOKEN"/></label></div>
+												</div>
+											</div>
+										</div>
+										<div class="panel-body" ng-show="loginError || registrationError">
+											<alert type="danger" ng-show="loginError"><fmt:message key="LOGIN_FAILED"/>: {{loginError}}</alert>
+											<alert type="danger" ng-show="registrationError"><fmt:message key="REGISTRATION_FAILED"/>: {{registrationError}}</alert>
+										</div>
+										<div class="panel-footer text-right">
+											<button ng-click="showIntroDialog()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> <fmt:message key="HELP"/></button>
+											<button ng-click="doSelectedAction(selectedTab)" ng-disabled="$eval(loginLocked) || !authorizationService.username || !authorizationService.password" class="btn btn-primary" type="submit">
+												<span class="glyphicon" ng-class="{'glyphicon-log-in':selectedTab === 'login','glyphicon-send':selectedTab === 'register'}" aria-hidden="true"></span>
+												<span ng-show="selectedTab === 'login'"><fmt:message key="LOGIN"/></span>
+												<span ng-show="selectedTab === 'register'"><fmt:message key="REGISTER"/></span>
+											</button>
 										</div>
 									</div>
-								</div>
-								<div class="panel-body" ng-show="loginError || registrationError">
-									<alert type="danger" ng-show="loginError"><fmt:message key="LOGIN_FAILED"/>: {{loginError}}</alert>
-									<alert type="danger" ng-show="registrationError"><fmt:message key="REGISTRATION_FAILED"/>: {{registrationError}}</alert>
-								</div>
-								<div class="panel-footer text-right">
-									<button ng-click="showIntroDialog()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> <fmt:message key="HELP"/></button>
-									<button ng-click="doSelectedAction(selectedTab)" ng-disabled="$eval(loginLocked) || !authorizationService.username || !authorizationService.password" class="btn btn-primary" type="submit">
-										<span class="glyphicon" ng-class="{'glyphicon-log-in':selectedTab === 'login','glyphicon-send':selectedTab === 'register'}" aria-hidden="true"></span>
-										<span ng-show="selectedTab === 'login'"><fmt:message key="LOGIN"/></span>
-										<span ng-show="selectedTab === 'register'"><fmt:message key="REGISTER"/></span>
-									</button>
-								</div>
+								</form>
 							</div>
-						</form>
+						</div>
 					</div>
 				</div>
 				<div ng-switch-when="intro">
