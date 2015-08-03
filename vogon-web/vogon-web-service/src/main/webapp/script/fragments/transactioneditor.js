@@ -44,8 +44,4 @@ app.controller("TransactionEditorController", function ($scope, AccountsService,
 			return component.accountId === account.id;
 		});
 	};
-	$scope.scrollToEditor = function () {
-		var divPosition = $("form[name='transactionEditorForm']").position();
-		$('html, body').animate({scrollTop: divPosition.top}, "slow");
-	};
 });

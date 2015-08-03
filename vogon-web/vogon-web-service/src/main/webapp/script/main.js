@@ -43,7 +43,7 @@ app.controller("LoginController", function ($scope, $http, AuthorizationService,
 		return $http.post("register", user)
 				.then($scope.login, displayRegistrationError);
 	};
-	$scope.showIntroDialog = function () {
+	$scope.navigateToIntro = function () {
 		NavigationService.navigateTo("intro");
 	};
 	$scope.doSelectedAction = function () {
@@ -65,29 +65,13 @@ app.controller("UserController", function ($scope, AuthorizationService, UserSer
 	$scope.logout = function () {
 		AuthorizationService.logout();
 	};
-	var closeAnalyticsDialog = function () {
-		if ($scope.analyticsDialog !== undefined) {
-			var deleteFunction = function () {
-				$scope.analyticsDialog = undefined;
-			};
-			$scope.analyticsDialog.then(deleteFunction, deleteFunction);
-		}
-	};
-	var closeAdminSettingsDialog = function () {
-		if ($scope.adminSettingsDialog !== undefined) {
-			var deleteFunction = function () {
-				$scope.adminSettingsDialog = undefined;
-			};
-			$scope.adminSettingsDialog.then(deleteFunction, deleteFunction);
-		}
-	};
-	$scope.showUserSettingsDialog = function () {
+	$scope.navigateToUserSettings = function () {
 		NavigationService.navigateTo("usersettings");
 	};
-	$scope.showAnalyticsDialog = function () {
+	$scope.navigateToAnalytics = function () {
 		NavigationService.navigateTo("analytics");
 	};
-	$scope.showAdminSettingsDialog = function () {
+	$scope.navigateToAdminSettings = function () {
 		NavigationService.navigateTo("adminsettings");
 	};
 	$scope.isAdmin = function () {

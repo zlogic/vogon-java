@@ -14,6 +14,13 @@ app.controller("TransactionsController", function ($scope, $interval, Transactio
 	};
 	$scope.startEditing = function (transaction) {
 		$scope.editingTransaction = transaction;
+		if (transaction.id === undefined) {
+			var transactionsTable = $("table[id='transactionsTable']");
+			var docViewTop = $(window).scrollTop();
+			var docViewBottom = docViewTop + $(window).height();
+			if (transactionsTable.position().top < docViewTop || transactionsTable.position().top > docViewBottom)
+				$('html, body').animate({scrollTop: transactionsTable.position().top}, "slow");
+		}
 	};
 	$scope.duplicateTransaction = function (transaction) {
 		var newTransaction = angular.copy(transaction);
