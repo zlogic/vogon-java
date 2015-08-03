@@ -51,9 +51,9 @@
 		<div ng-controller="NavigationController">
 			<div ng-switch on="navigationService.currentPage()">
 				<div ng-controller="LoginController" ng-switch-when="login">
-					<div class="container center-contents" ng-init="selectedTab = 'login'">
+					<div class="container-fluid center-contents" ng-init="selectedTab = 'login'">
 						<div class="row">
-							<div class="col-md-6 col-md-offset-3">
+							<div class="col-md-12">
 								<form>
 									<div class="panel panel-default">
 										<div class="panel-heading"><h3><fmt:message key="AUTHORIZATION_TITLE"/></h3></div>
@@ -77,7 +77,7 @@
 											<alert type="danger" ng-show="registrationError"><fmt:message key="REGISTRATION_FAILED"/>: {{registrationError}}</alert>
 										</div>
 										<div class="panel-footer text-right">
-											<button ng-click="showIntroDialog()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> <fmt:message key="HELP"/></button>
+											<button ng-click="navigateToIntro()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> <fmt:message key="HELP"/></button>
 											<button ng-click="doSelectedAction(selectedTab)" ng-disabled="$eval(loginLocked) || !authorizationService.username || !authorizationService.password" class="btn btn-primary" type="submit">
 												<span class="glyphicon" ng-class="{'glyphicon-log-in':selectedTab === 'login','glyphicon-send':selectedTab === 'register'}" aria-hidden="true"></span>
 												<span ng-show="selectedTab === 'login'"><fmt:message key="LOGIN"/></span>
@@ -96,9 +96,9 @@
 				<div ng-switch-when="main">
 					<div ng-controller="UserController" class="well well-sm">
 						<span class="control-label"><fmt:message key="WELCOME_MESSAGE"/> </span>
-						<button ng-click="showUserSettingsDialog()" class="btn btn-default"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span> <fmt:message key="EDIT_SETTINGS"/></button>
-						<button ng-click="showAnalyticsDialog()" class="btn btn-default"><span class="glyphicon glyphicon-stats" aria-hidden="true"></span> <fmt:message key="SHOW_ANALYTICS"/></button>
-						<button ng-click="showAdminSettingsDialog()" ng-show="isAdmin()" class="btn btn-default"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> <fmt:message key="ADMINISTRATIVE_SETTINGS"/></button>
+						<button ng-click="navigateToUserSettings()" class="btn btn-default"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span> <fmt:message key="EDIT_SETTINGS"/></button>
+						<button ng-click="navigateToAnalytics()" class="btn btn-default"><span class="glyphicon glyphicon-stats" aria-hidden="true"></span> <fmt:message key="SHOW_ANALYTICS"/></button>
+						<button ng-click="navigateToAdminSettings()" ng-show="isAdmin()" class="btn btn-default"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> <fmt:message key="ADMINISTRATIVE_SETTINGS"/></button>
 						<button ng-click="logout()" ng-disabled="$eval(logoutLocked)" class="btn btn-default"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> <fmt:message key="LOGOUT"/></button>
 					</div>
 					<div ng-controller="AccountsController" ng-include="'fragments/accounts.fragment'"></div>
