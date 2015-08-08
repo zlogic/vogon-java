@@ -2,13 +2,6 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <fmt:setBundle basename="org.zlogic.vogon.web.webmessages" />
 <div class="panel panel-default">
-	<div class="panel-heading clickable" data-toggle="collapse" data-target="#collapseAccounts" aria-expanded="false" aria-controls="collapseAccounts"><fmt:message key="ACCOUNTS"/></div>
-	<div class="collapse panel-body" id="collapseAccounts">
-		<div ng-controller="AccountsController" ng-include="'fragments/accounts.fragment'"></div>
-	</div>
-</div>
-<div class="panel panel-default">
-	<div class="panel-heading"><fmt:message key="TRANSACTIONS"/></div>
 	<div class="panel-body">
 		<button ng-click="addTransaction()" class="btn btn-primary"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> <fmt:message key="ADD_TRANSACTION"/></button>
 		<div infinite-scroll="transactionsService.nextPage()" infinite-scroll-disabled="transactionsService.loadingNextPage">

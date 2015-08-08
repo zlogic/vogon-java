@@ -14,6 +14,7 @@
 		<script type="text/javascript" src="webjars/jquery/<fmt:message key="jquery" bundle="${webjars}"/>/jquery.min.js"></script>
 		<script type="text/javascript" src="webjars/angularjs/<fmt:message key="angularjs" bundle="${webjars}"/>/angular.min.js"></script>
 		<script type="text/javascript" src="webjars/angularjs/<fmt:message key="angularjs" bundle="${webjars}"/>/angular-cookies.js"></script>
+		<script type="text/javascript" src="webjars/angularjs/<fmt:message key="angularjs" bundle="${webjars}"/>/angular-route.js"></script>
 		<script type="text/javascript" src="webjars/angular-ui-bootstrap/<fmt:message key="angularuibootstrap" bundle="${webjars}"/>/ui-bootstrap-tpls.min.js"></script>
 		<script type="text/javascript" src="webjars/ngInfiniteScroll/<fmt:message key="nginfinitescroll" bundle="${webjars}"/>/ng-infinite-scroll.min.js"></script>
 		<script type="text/javascript" src="webjars/ng-tags-input/<fmt:message key="ngtagsinput" bundle="${webjars}"/>/ng-tags-input.min.js"></script>
@@ -62,11 +63,11 @@
 					</div>
 					<div class="collapse navbar-collapse" id="navbarMain">
 						<ul class="nav navbar-nav">
-							<li ng-class="{active: isActivePath('/transactions')}"><a href="#/transactions"><span class="glyphicon glyphicon-list" aria-hidden="true"></span> <fmt:message key="TRANSACTIONS"/></a></li>
-							<li ng-class="{active: isActivePath('/accounts')}"><a href="#/accounts"><span class="glyphicon glyphicon-piggy-bank" aria-hidden="true"></span> <fmt:message key="ACCOUNTS"/></a></li>
-							<li ng-class="{active: isActivePath('/analytics')}"><a href="#/analytics"><span class="glyphicon glyphicon-list" aria-hidden="true"></span> <fmt:message key="ANALYTICS"/></a></li>
-							<li ng-class="{active: isActivePath('/usersettings')}"><a href="#/usersettings"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span> <fmt:message key="USER_SETTINGS"/></a></li>
-							<li ng-class="{active: isActivePath('/adminsettings')}"><a href="#/adminsettings"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> <fmt:message key="ADMINISTRATIVE_SETTINGS"/></a></li>
+							<li ng-class="{active: isActivePath('transactions')}"><a href="#/transactions"><span class="glyphicon glyphicon-list" aria-hidden="true"></span> <fmt:message key="TRANSACTIONS"/></a></li>
+							<li ng-class="{active: isActivePath('accounts')}"><a href="#/accounts"><span class="glyphicon glyphicon-piggy-bank" aria-hidden="true"></span> <fmt:message key="ACCOUNTS"/></a></li>
+							<li ng-class="{active: isActivePath('analytics')}"><a href="#/analytics"><span class="glyphicon glyphicon-list" aria-hidden="true"></span> <fmt:message key="ANALYTICS"/></a></li>
+							<li ng-class="{active: isActivePath('usersettings')}"><a href="#/usersettings"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span> <fmt:message key="USER_SETTINGS"/></a></li>
+							<li ng-class="{active: isActivePath('adminsettings')}"><a href="#/adminsettings"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> <fmt:message key="ADMINISTRATIVE_SETTINGS"/></a></li>
 						</ul>
 						<ul class="nav navbar-nav navbar-right">
 							<li><p class="navbar-text"><fmt:message key="SIGNED_IN_AS"/></p></li>
@@ -126,26 +127,8 @@
 			</div>
 		</div>
 		<div ng-controller="ContentController">
-			<div ng-show="authorizationService.authorized" ng-switch on="selectedTab()">
-				<div ng-switch-when="/transactions">
-					<div ng-controller="TransactionsController" ng-include="'fragments/transactions.fragment'"></div>
-				</div>
-				<div ng-switch-when="/accounts">
-					<div class="panel panel-default">
-						<div class="panel-body">
-							<div ng-controller="AccountsController" ng-include="'fragments/accounts.fragment'"></div>
-						</div>
-					</div>
-				</div>
-				<div ng-switch-when="/analytics">
-					<div ng-controller="AnalyticsController" ng-include="'fragments/analytics.fragment'"></div>
-				</div>
-				<div ng-switch-when="/usersettings">
-					<div ng-controller="UserSettingsController" ng-include="'fragments/usersettings.fragment'"></div>
-				</div>
-				<div ng-switch-when="/adminsettings">
-					<div ng-controller="AdminSettingsController" ng-include="'fragments/adminsettings.fragment'"></div>
-				</div>
+			<div ng-show="authorizationService.authorized">
+				<div ng-view />
 			</div>
 		</div>
 	</body>
