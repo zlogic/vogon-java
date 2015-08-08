@@ -1,4 +1,4 @@
-var app = angular.module("vogon", ["ngCookies", "ui.bootstrap", "nvd3", "infinite-scroll", "ngTagsInput"]);
+var app = angular.module("vogon", ["ngCookies", "ngRoute", "ui.bootstrap", "nvd3", "infinite-scroll", "ngTagsInput"]);
 
 app.run(function ($templateRequest) {
 	$templateRequest("fragments/accounts.fragment");
@@ -7,6 +7,32 @@ app.run(function ($templateRequest) {
 	$templateRequest("fragments/analytics.fragment");
 	$templateRequest("fragments/adminsettings.fragment");
 	$templateRequest("fragments/intro.fragment");
+});
+
+app.config(function ($routeProvider, $locationProvider) {
+	$routeProvider
+			.when('/transactions', {
+				templateUrl: 'fragments/transactions.fragment',
+				controller: 'TransactionsController'
+			})
+			.when('/accounts', {
+				templateUrl: 'fragments/accounts.fragment',
+				controller: 'AccountsController'
+			})
+			.when('/analytics', {
+				templateUrl: 'fragments/analytics.fragment',
+				controller: 'AnalyticsController'
+			})
+			.when('/usersettings', {
+				templateUrl: 'fragments/usersettings.fragment',
+				controller: 'UserSettingsController'
+			})
+			.when('/adminsettings', {
+				templateUrl: 'fragments/adminsettings.fragment',
+				controller: 'AdminSettingsController'
+			})
+			.otherwise({redirectTo: '/transactions'});
+	$locationProvider.html5Mode(false);
 });
 
 app.controller("NotificationController", function ($scope, HTTPService, AlertService) {
@@ -67,19 +93,10 @@ app.controller("UserController", function ($scope, $location, AuthorizationServi
 		});
 	};
 	$scope.isActivePath = function (path) {
-		return path === $location.path();
+		return path === $location.path().split("/")[1];
 	};
 });
 
-app.controller("ContentController", function ($scope, $location, AuthorizationService) {
+app.controller("ContentController", function ($scope, AuthorizationService) {
 	$scope.authorizationService = AuthorizationService;
-	var validPaths = ["transactions", "accounts", "analytics", "usersettings", "adminsettings"];
-	$scope.selectedTab = function () {
-		var path = $location.path();
-		for (var i in validPaths)
-			if (path === "/" + validPaths[i])
-				return path;
-		$location.path("transactions");
-		return $location.path();
-	};
 });
