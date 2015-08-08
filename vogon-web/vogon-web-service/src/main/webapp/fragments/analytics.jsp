@@ -3,9 +3,6 @@
 <fmt:setBundle basename="org.zlogic.vogon.web.webmessages" />
 <form name="analyticsForm" novalidate>
 	<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3><fmt:message key="ANALYTICS_TITLE"/></h3>
-		</div>
 		<div class="panel-body">
 			<div class="row">
 				<div class="col-md-6">
@@ -16,7 +13,7 @@
 							<button ng-click="deselectAllTags()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span> <fmt:message key="DESELECT_ALL_TAGS"/></button>
 						</div>
 						<div class="pre-scrollable">
-							<div class="checkbox" ng-repeat="(tag,selected) in tags | orderBy:'tag'">
+							<div class="checkbox" ng-repeat="(tag, selected) in tags | orderBy:'tag'">
 								<label>
 									<input type="checkbox" ng-model="tags[tag]" /> {{tag.length>0?tag:"&nbsp;"}}
 								</label>
@@ -102,7 +99,7 @@
 									<tr ng-repeat="transaction in report.transactions">
 										<td>{{transaction.description}}</td>
 										<td class="text-right">
-											<div ng-repeat="(symbol,total) in totals = (transactionsService.totalsByCurrency(transaction))">
+											<div ng-repeat="(symbol, total) in totals = (transactionsService.totalsByCurrency(transaction))">
 												<span ng-show="transactionsService.isTransferTransaction(transaction)">
 													&sum;
 												</span>
@@ -129,7 +126,7 @@
 									<tr ng-repeat="tagExpense in report.tagExpenses">
 										<td>{{tagExpense.tag}}</td>
 										<td class="text-right">
-											<div ng-repeat="(symbol,total) in tagExpense.amounts">
+											<div ng-repeat="(symbol, total) in tagExpense.amounts">
 												{{total| number:2}} {{symbol}}
 											</div>
 										</td>
@@ -162,9 +159,6 @@
 					</div>
 				</div>
 			</div>
-		</div>
-		<div class="panel-footer">
-			<button ng-click="close()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> <fmt:message key="CLOSE"/></button>
 		</div>
 	</div>
 </form>

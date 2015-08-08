@@ -1,4 +1,4 @@
-app.controller("AnalyticsController", function ($scope, AccountsService, TransactionsService, CurrencyService, HTTPService, UserService, TagsService, NavigationService) {
+app.controller("AnalyticsController", function ($scope, AccountsService, TransactionsService, CurrencyService, HTTPService, UserService, TagsService) {
 	$scope.accountService = AccountsService;
 	$scope.transactionsService = TransactionsService;
 	$scope.currencyService = CurrencyService;
@@ -199,7 +199,6 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 		return $scope.report !== undefined && $scope.report.currencies.indexOf(currency.symbol) !== -1;
 	};
 	$scope.close = function () {
-		NavigationService.navigateBack();
 		$scope.accountListener;
 	};
 	$scope.updateAccounts();

@@ -1,7 +1,7 @@
 var app = angular.module("vogon", ["ngCookies", "ui.bootstrap", "nvd3", "infinite-scroll", "ngTagsInput"]);
 
 app.run(function ($templateRequest) {
-	$templateRequest("fragments/accounteditor.fragment");
+	$templateRequest("fragments/accounts.fragment");
 	$templateRequest("fragments/transactioneditor.fragment");
 	$templateRequest("fragments/usersettings.fragment");
 	$templateRequest("fragments/analytics.fragment");
@@ -15,7 +15,7 @@ app.controller("NotificationController", function ($scope, HTTPService, AlertSer
 	$scope.closeAlert = AlertService.closeAlert;
 });
 
-app.controller("LoginController", function ($scope, $http, AuthorizationService, HTTPService, NavigationService) {
+app.controller("LoginController", function ($scope, $http, AuthorizationService, HTTPService) {
 	$scope.authorizationService = AuthorizationService;
 	$scope.httpService = HTTPService;
 	$scope.loginLocked = "authorizationService.authorized || httpService.isLoading";
@@ -30,7 +30,6 @@ app.controller("LoginController", function ($scope, $http, AuthorizationService,
 	var reset = function () {
 		$scope.loginError = undefined;
 		$scope.registrationError = undefined;
-		NavigationService.reset();
 	};
 	$scope.login = function () {
 		reset();
@@ -43,9 +42,6 @@ app.controller("LoginController", function ($scope, $http, AuthorizationService,
 		return $http.post("register", user)
 				.then($scope.login, displayRegistrationError);
 	};
-	$scope.navigateToIntro = function () {
-		NavigationService.navigateTo("intro");
-	};
 	$scope.doSelectedAction = function () {
 		if ($scope.selectedTab === "login")
 			$scope.login();
@@ -57,7 +53,7 @@ app.controller("LoginController", function ($scope, $http, AuthorizationService,
 	}, reset);
 });
 
-app.controller("UserController", function ($scope, AuthorizationService, UserService, HTTPService, NavigationService) {
+app.controller("UserController", function ($scope, $location, AuthorizationService, UserService, HTTPService) {
 	$scope.authorizationService = AuthorizationService;
 	$scope.userService = UserService;
 	$scope.httpService = HTTPService;
@@ -65,53 +61,25 @@ app.controller("UserController", function ($scope, AuthorizationService, UserSer
 	$scope.logout = function () {
 		AuthorizationService.logout();
 	};
-	$scope.navigateToUserSettings = function () {
-		NavigationService.navigateTo("usersettings");
-	};
-	$scope.navigateToAnalytics = function () {
-		NavigationService.navigateTo("analytics");
-	};
-	$scope.navigateToAdminSettings = function () {
-		NavigationService.navigateTo("adminsettings");
-	};
 	$scope.isAdmin = function () {
 		return UserService.userData !== undefined && UserService.userData.authorities.some(function (authority) {
 			return authority === "ROLE_VOGON_ADMIN";
 		});
 	};
+	$scope.isActivePath = function (path) {
+		return path === $location.path();
+	};
 });
 
-app.service("NavigationService", function (AuthorizationService) {
-	var that = this;
-	var allowedNonAdminPages = ["login", "intro"];
-	var defaultBreadcrumbs = ["login", "main"];
-	var filterBreadcrumbs = function () {
-		var filteredBreadcrumbs = [];
-		that.breadcrumbs.forEach(function (page) {
-			if (AuthorizationService.authorized || allowedNonAdminPages.indexOf(page) !== -1)
-				filteredBreadcrumbs.push(page);
-		});
-		return filteredBreadcrumbs;
+app.controller("ContentController", function ($scope, $location, AuthorizationService) {
+	$scope.authorizationService = AuthorizationService;
+	var validPaths = ["transactions", "accounts", "analytics", "usersettings", "adminsettings"];
+	$scope.selectedTab = function () {
+		var path = $location.path();
+		for (var i in validPaths)
+			if (path === "/" + validPaths[i])
+				return path;
+		$location.path("transactions");
+		return $location.path();
 	};
-	this.currentPage = function () {
-		var breadcrumbs = filterBreadcrumbs();
-		return breadcrumbs[breadcrumbs.length - 1];
-	};
-	this.navigateTo = function (page) {
-		if (that.breadcrumbs.last === page)
-			return;
-		that.breadcrumbs.push(page);
-	};
-	this.reset = function () {
-		that.breadcrumbs = angular.copy(defaultBreadcrumbs);
-	};
-	this.navigateBack = function () {
-		if (that.breadcrumbs.length > 0)
-			that.breadcrumbs.pop();
-	};
-	this.reset();
-});
-
-app.controller("NavigationController", function ($scope, NavigationService) {
-	$scope.navigationService = NavigationService;
 });
