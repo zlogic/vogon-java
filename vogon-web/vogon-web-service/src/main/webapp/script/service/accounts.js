@@ -7,6 +7,9 @@ app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationS
 	};
 	var setAccounts = function (data) {
 		that.accounts = data;
+		that.accounts.sort(function (a, b) {
+			return a.id - b.id;
+		});
 		that.updateTotalsForCurrencies();
 	};
 	this.updateTotalsForCurrencies = function () {

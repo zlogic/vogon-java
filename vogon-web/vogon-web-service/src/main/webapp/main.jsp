@@ -31,7 +31,6 @@
 		<script type="text/javascript" src="script/service/currency.js"></script>
 		<script type="text/javascript" src="script/service/transactions.js"></script>
 		<script type="text/javascript" src="script/fragments/usersettings.js"></script>
-		<script type="text/javascript" src="script/fragments/accounteditor.js"></script>
 		<script type="text/javascript" src="script/fragments/transactioneditor.js"></script>
 		<script type="text/javascript" src="script/fragments/analytics.js"></script>
 		<script type="text/javascript" src="script/fragments/adminsettings.js"></script>
@@ -48,73 +47,104 @@
 				<alert ng-show="alertService.enabled()" ng-repeat="alert in alertService.alerts" type="{{alert.type}}" close="alertService.closeAlert($index)"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> {{alert.msg}}</alert>
 			</div>
 		</div>
-		<div ng-controller="NavigationController">
-			<div ng-switch on="navigationService.currentPage()">
-				<div ng-controller="LoginController" ng-switch-when="login">
-					<div class="container-fluid center-contents" ng-init="selectedTab = 'login'">
-						<div class="row">
-							<div class="col-md-12">
-								<form>
-									<div class="panel panel-default">
-										<div class="panel-heading"><h3><fmt:message key="AUTHORIZATION_TITLE"/></h3></div>
-										<div class="panel-body">
-											<core:if test="${configuration.allowRegistration}">
-												<ul class="nav nav-pills" role="tablist">
-													<li ng-class="{active:selectedTab === 'login'}"><a href ng-click="selectedTab = 'login'"><fmt:message key="LOGIN"/></a></li>
-													<li ng-class="{active:selectedTab === 'register'}"><a href ng-click="selectedTab = 'register'"><fmt:message key="REGISTER"/></a></li>
-												</ul>
-											</core:if>
-											<div class="media">
-												<div class="form-inline">
-													<input type="text" class="form-control" ng-model="authorizationService.username" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_USERNAME"/>" />
-													<input type="password" class="form-control" ng-model="authorizationService.password" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_PASSWORD"/>" />
-													<div class="checkbox"><label><input type="checkbox" ng-model="authorizationService.rememberToken"> <fmt:message key="REMEMBER_TOKEN"/></label></div>
-												</div>
+		<div ng-controller="UserController">
+			<nav class="navbar navbar-default" ng-show="authorizationService.authorized">
+				<div class="container-fluid">
+					<!-- Brand and toggle get grouped for better mobile display -->
+					<div class="navbar-header">
+						<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbarMain" aria-expanded="false">
+							<span class="sr-only"><fmt:message key="TOGGLE_NAVIGATION"/></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</button>
+						<div class="navbar-brand"><fmt:message key="VOGON_NAME"/></div>
+					</div>
+					<div class="collapse navbar-collapse" id="navbarMain">
+						<ul class="nav navbar-nav">
+							<li ng-class="{active: isActivePath('/transactions')}"><a href="#/transactions"><span class="glyphicon glyphicon-list" aria-hidden="true"></span> <fmt:message key="TRANSACTIONS"/></a></li>
+							<li ng-class="{active: isActivePath('/accounts')}"><a href="#/accounts"><span class="glyphicon glyphicon-piggy-bank" aria-hidden="true"></span> <fmt:message key="ACCOUNTS"/></a></li>
+							<li ng-class="{active: isActivePath('/analytics')}"><a href="#/analytics"><span class="glyphicon glyphicon-list" aria-hidden="true"></span> <fmt:message key="ANALYTICS"/></a></li>
+							<li ng-class="{active: isActivePath('/usersettings')}"><a href="#/usersettings"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span> <fmt:message key="USER_SETTINGS"/></a></li>
+							<li ng-class="{active: isActivePath('/adminsettings')}"><a href="#/adminsettings"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> <fmt:message key="ADMINISTRATIVE_SETTINGS"/></a></li>
+						</ul>
+						<ul class="nav navbar-nav navbar-right">
+							<li><p class="navbar-text"><fmt:message key="SIGNED_IN_AS"/></p></li>
+							<li><button ng-click="logout()" ng-disabled="$eval(logoutLocked)" class="btn btn-default navbar-btn"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> <fmt:message key="LOGOUT"/></button></li>
+						</ul>
+					</div>
+				</div>
+			</nav>
+		</div>
+		<div ng-controller="LoginController">
+			<div class="container-fluid form-control-static" ng-hide="authorizationService.authorized" ng-init="selectedTab = 'login'">
+				<div class="row">
+					<div class="col-md-12">
+						<form>
+							<div class="panel panel-default">
+								<div class="panel-heading"><h3><fmt:message key="AUTHORIZATION_TITLE"/></h3></div>
+								<div class="panel-body">
+									<core:if test="${configuration.allowRegistration}">
+										<ul class="nav nav-pills" role="tablist">
+											<li ng-class="{active:selectedTab === 'login'}"><a href ng-click="selectedTab = 'login'"><fmt:message key="LOGIN"/></a></li>
+											<li ng-class="{active:selectedTab === 'register'}"><a href ng-click="selectedTab = 'register'"><fmt:message key="REGISTER"/></a></li>
+										</ul>
+									</core:if>
+									<div class="media">
+										<div class="form-inline">
+											<div class="form-group">
+												<input type="text" class="form-control" ng-model="authorizationService.username" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_USERNAME"/>" />
+											</div>
+											<div class="form-group">
+												<input type="password" class="form-control" ng-model="authorizationService.password" ng-disabled="$eval(loginLocked)" placeholder="<fmt:message key="ENTER_PASSWORD"/>" />
+											</div>
+											<div class="form-group">
+												<div class="checkbox"><label><input type="checkbox" ng-model="authorizationService.rememberToken"> <fmt:message key="REMEMBER_TOKEN"/></label></div>
 											</div>
 										</div>
-										<div class="panel-body" ng-show="loginError || registrationError">
-											<alert type="danger" ng-show="loginError"><fmt:message key="LOGIN_FAILED"/>: {{loginError}}</alert>
-											<alert type="danger" ng-show="registrationError"><fmt:message key="REGISTRATION_FAILED"/>: {{registrationError}}</alert>
-										</div>
-										<div class="panel-footer text-right">
-											<button ng-click="navigateToIntro()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> <fmt:message key="HELP"/></button>
-											<button ng-click="doSelectedAction(selectedTab)" ng-disabled="$eval(loginLocked) || !authorizationService.username || !authorizationService.password" class="btn btn-primary" type="submit">
-												<span class="glyphicon" ng-class="{'glyphicon-log-in':selectedTab === 'login','glyphicon-send':selectedTab === 'register'}" aria-hidden="true"></span>
-												<span ng-show="selectedTab === 'login'"><fmt:message key="LOGIN"/></span>
-												<span ng-show="selectedTab === 'register'"><fmt:message key="REGISTER"/></span>
-											</button>
-										</div>
 									</div>
-								</form>
+								</div>
+								<div class="panel-body" ng-show="loginError || registrationError">
+									<alert type="danger" ng-show="loginError"><fmt:message key="LOGIN_FAILED"/>: {{loginError}}</alert>
+									<alert type="danger" ng-show="registrationError"><fmt:message key="REGISTRATION_FAILED"/>: {{registrationError}}</alert>
+								</div>
+								<div class="panel-footer">
+									<div class="text-right">
+										<button class="btn btn-default" type="button" data-toggle="collapse" data-target="#collapseIntro" aria-expanded="false" aria-controls="collapseIntro"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> <fmt:message key="HELP_INFO"/></button>
+										<button ng-click="doSelectedAction(selectedTab)" ng-disabled="$eval(loginLocked) || !authorizationService.username || !authorizationService.password" class="btn btn-primary" type="submit">
+											<span class="glyphicon" ng-class="{'glyphicon-log-in':selectedTab === 'login', 'glyphicon-send':selectedTab === 'register'}" aria-hidden="true"></span>
+											<span ng-show="selectedTab === 'login'"><fmt:message key="LOGIN"/></span>
+											<span ng-show="selectedTab === 'register'"><fmt:message key="REGISTER"/></span>
+										</button>
+									</div>
+									<div class="collapse" id="collapseIntro" ng-include="'fragments/intro.fragment'"></div>
+								</div>
 							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div ng-controller="ContentController">
+			<div ng-show="authorizationService.authorized" ng-switch on="selectedTab()">
+				<div ng-switch-when="/transactions">
+					<div ng-controller="TransactionsController" ng-include="'fragments/transactions.fragment'"></div>
+				</div>
+				<div ng-switch-when="/accounts">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<div ng-controller="AccountsController" ng-include="'fragments/accounts.fragment'"></div>
 						</div>
 					</div>
 				</div>
-				<div ng-switch-when="intro">
-					<div ng-include="'fragments/intro.fragment'"></div>
-				</div>
-				<div ng-switch-when="main">
-					<div ng-controller="UserController" class="well well-sm">
-						<span class="control-label"><fmt:message key="WELCOME_MESSAGE"/> </span>
-						<button ng-click="navigateToUserSettings()" class="btn btn-default"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span> <fmt:message key="EDIT_SETTINGS"/></button>
-						<button ng-click="navigateToAnalytics()" class="btn btn-default"><span class="glyphicon glyphicon-stats" aria-hidden="true"></span> <fmt:message key="SHOW_ANALYTICS"/></button>
-						<button ng-click="navigateToAdminSettings()" ng-show="isAdmin()" class="btn btn-default"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> <fmt:message key="ADMINISTRATIVE_SETTINGS"/></button>
-						<button ng-click="logout()" ng-disabled="$eval(logoutLocked)" class="btn btn-default"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> <fmt:message key="LOGOUT"/></button>
-					</div>
-					<div ng-controller="AccountsController" ng-include="'fragments/accounts.fragment'"></div>
-					<div ng-controller="TransactionsController" ng-include="'fragments/transactions.fragment'"></div>
-				</div>
-				<div ng-switch-when="usersettings">
-					<div ng-controller="UserSettingsController" ng-include="'fragments/usersettings.fragment'"></div>
-				</div>
-				<div ng-switch-when="analytics">
+				<div ng-switch-when="/analytics">
 					<div ng-controller="AnalyticsController" ng-include="'fragments/analytics.fragment'"></div>
 				</div>
-				<div ng-switch-when="adminsettings">
-					<div ng-controller="AdminSettingsController" ng-include="'fragments/adminsettings.fragment'"></div>
+				<div ng-switch-when="/usersettings">
+					<div ng-controller="UserSettingsController" ng-include="'fragments/usersettings.fragment'"></div>
 				</div>
-				<div ng-switch-when="accounteditor">
-					<div ng-controller="AccountsEditorController" ng-include="'fragments/accounteditor.fragment'"></div>
+				<div ng-switch-when="/adminsettings">
+					<div ng-controller="AdminSettingsController" ng-include="'fragments/adminsettings.fragment'"></div>
 				</div>
 			</div>
 		</div>
