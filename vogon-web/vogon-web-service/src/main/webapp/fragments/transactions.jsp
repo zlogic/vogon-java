@@ -81,7 +81,7 @@
 								<p>{{tag}}{{$last ? "" : <fmt:message key="TAGS_SEPARATOR" />}}</p>
 							</div>
 						</div>
-						<div class="col-md-1 text-right">
+						<div class="col-md-1 col-sm-4 text-right">
 							<div ng-repeat="(symbol,total) in totals = (transactionsService.totalsByCurrency(transaction))">
 								<span ng-show="transactionsService.isTransferTransaction(transaction)">&sum;</span>{{total| number:2}} {{symbol}}
 							</div>
