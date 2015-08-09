@@ -97,6 +97,6 @@ app.controller("UserController", function ($scope, $location, AuthorizationServi
 	};
 });
 
-app.controller("ContentController", function ($scope, AuthorizationService) {
+app.controller("ContentController", function ($scope, AuthorizationService, TransactionsService, AccountsService, UserService) {
 	$scope.authorizationService = AuthorizationService;
 });
