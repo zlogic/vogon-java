@@ -78,7 +78,7 @@ public class DataController {
 	@RequestMapping(value = "/import", method = RequestMethod.POST, produces = "application/json", consumes = "multipart/form-data")
 	public @ResponseBody
 	Boolean importData(@RequestParam("file") MultipartFile data, @AuthenticationPrincipal VogonSecurityUser userPrincipal) throws RuntimeException {
-		VogonUser user = userRepository.findByUsername(userPrincipal.getUsername());
+		VogonUser user = userRepository.findByUsernameIgnoreCase(userPrincipal.getUsername());
 		try {
 			XmlImporter importer = new XmlImporter(data.getInputStream());
 			importer.importData(user, em);
@@ -96,7 +96,7 @@ public class DataController {
 	 */
 	@RequestMapping(value = "/export", method = {RequestMethod.GET, RequestMethod.POST}, produces = "application/xml")
 	public HttpEntity<byte[]> exportData(@AuthenticationPrincipal VogonSecurityUser userPrincipal) throws RuntimeException {
-		VogonUser user = userRepository.findByUsername(userPrincipal.getUsername());
+		VogonUser user = userRepository.findByUsernameIgnoreCase(userPrincipal.getUsername());
 		try {
 			ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 			XmlExporter exporter = new XmlExporter(outStream);
@@ -126,7 +126,7 @@ public class DataController {
 	@RequestMapping(value = "/recalculateBalance", method = RequestMethod.GET, produces = "application/json")
 	public @ResponseBody
 	Boolean recalculateBalance(@AuthenticationPrincipal VogonSecurityUser userPrincipal) {
-		VogonUser user = userRepository.findByUsername(userPrincipal.getUsername());
+		VogonUser user = userRepository.findByUsernameIgnoreCase(userPrincipal.getUsername());
 		DatabaseMaintenance databaseMaintenance = new DatabaseMaintenance();
 		for (FinanceAccount account : accountRepository.findByOwner(user))
 			databaseMaintenance.refreshAccountBalance(account, em);

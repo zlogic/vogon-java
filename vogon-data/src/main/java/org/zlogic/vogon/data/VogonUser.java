@@ -99,7 +99,7 @@ public class VogonUser implements Serializable {
 	public void setUsername(String username) {
 		if (username.isEmpty())
 			return;
-		this.username = username;
+		this.username = username.toLowerCase();
 	}
 
 	/**

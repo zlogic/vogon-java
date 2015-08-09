@@ -60,7 +60,7 @@ public class UserService implements UserDetailsService, InitializingBean {
 	 */
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		VogonUser user = userRepository.findByUsername(username);
+		VogonUser user = userRepository.findByUsernameIgnoreCase(username);
 		if (user == null)
 			throw new UsernameNotFoundException(messages.getString("USER_CANNOT_BE_FOUND"));
 		else
@@ -93,7 +93,7 @@ public class UserService implements UserDetailsService, InitializingBean {
 
 			@Override
 			public Boolean doInTransaction(TransactionStatus ts) {
-				return userRepository.findByUsername(username) != null;
+				return userRepository.findByUsernameIgnoreCase(username) != null;
 			}
 		});
 	}
@@ -141,7 +141,7 @@ public class UserService implements UserDetailsService, InitializingBean {
 	 * new username is already in use
 	 */
 	public VogonSecurityUser updateUser(VogonSecurityUser userPrincipal, VogonUser updatedUser) throws UsernameExistsException {
-		VogonUser user = userRepository.findByUsername(userPrincipal.getUsername());
+		VogonUser user = userRepository.findByUsernameIgnoreCase(userPrincipal.getUsername());
 		user.setDefaultCurrency(updatedUser.getDefaultCurrency());
 		if (updatedUser.getUsername() != null && !updatedUser.getUsername().isEmpty() && !updatedUser.getUsername().equals(user.getUsername()))
 			user.setUsername(updatedUser.getUsername());

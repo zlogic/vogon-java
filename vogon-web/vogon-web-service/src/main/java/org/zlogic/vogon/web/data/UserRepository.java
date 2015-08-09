@@ -18,10 +18,10 @@ import org.zlogic.vogon.data.VogonUser;
 public interface UserRepository extends JpaRepository<VogonUser, Long> {
 
 	/**
-	 * Finds a user by its username
+	 * Finds a user by its username (ignoring the case)
 	 *
 	 * @param name the username to search
 	 * @return the found user
 	 */
-	public VogonUser findByUsername(String name);
+	public VogonUser findByUsernameIgnoreCase(String name);
 }
