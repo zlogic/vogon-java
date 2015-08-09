@@ -49,7 +49,7 @@ public class UsersController {
 	@RequestMapping(method = RequestMethod.GET, produces = "application/json")
 	public @ResponseBody
 	VogonUser getUserData(@AuthenticationPrincipal VogonSecurityUser userPrincipal) {
-		VogonUser user = userRepository.findByUsername(userPrincipal.getUsername());
+		VogonUser user = userRepository.findByUsernameIgnoreCase(userPrincipal.getUsername());
 		return user;
 	}
 
