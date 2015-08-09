@@ -10,8 +10,8 @@
 					<hr/>
 					<div class="col-md-5 col-sm-12">
 						<label>
-							<div class="clickable" ng-click="transactionsService.applySort('description')"><fmt:message key="TRANSACTION_NAME"/>
-								<span ng-show="transactionsService.sortColumn === 'description'" class="glyphicon glyphicon-sort-by-alphabet" ng-class="{'glyphicon-sort-by-alphabet': transactionsService.sortAsc, 'glyphicon-sort-by-alphabet-alt': !transactionsService.sortAsc}"></span>
+							<div class="clickable" ng-click="transactionsService.applySort('description')"><fmt:message key="TRANSACTION_NAME"/>&nbsp;
+								<span ng-show="transactionsService.sortColumn === 'description'" class="glyphicon" ng-class="{'glyphicon-sort-by-alphabet': transactionsService.sortAsc, 'glyphicon-sort-by-alphabet-alt': !transactionsService.sortAsc}"></span>
 							</div>
 						</label>
 						<div class="form-horizontal">
@@ -23,8 +23,8 @@
 					</div>
 					<div class="col-md-2 col-sm-4">
 						<label>
-							<div class="clickable" ng-click="transactionsService.applySort('date')"><fmt:message key="DATE"/>
-								<span ng-show="transactionsService.sortColumn === 'date'" class="glyphicon glyphicon-sort-by-alphabet" ng-class="{'glyphicon-sort-by-order': transactionsService.sortAsc, 'glyphicon-sort-by-order-alt': !transactionsService.sortAsc}"></span>
+							<div class="clickable" ng-click="transactionsService.applySort('date')"><fmt:message key="DATE"/>&nbsp;
+								<span ng-show="transactionsService.sortColumn === 'date'" class="glyphicon" ng-class="{'glyphicon-sort-by-order': transactionsService.sortAsc, 'glyphicon-sort-by-order-alt': !transactionsService.sortAsc}"></span>
 							</div>
 						</label>
 						<div class="form-horizontal">
@@ -52,8 +52,8 @@
 					</div>
 					<div class="col-md-1 col-sm-12 text-right">
 						<label>
-							<div class="clickable" ng-click="transactionsService.applySort('amount')"><fmt:message key="AMOUNT"/>
-								<span ng-show="transactionsService.sortColumn === 'amount'" class="glyphicon glyphicon-sort-by-alphabet" ng-class="{'glyphicon-sort-by-order': transactionsService.sortAsc, 'glyphicon-sort-by-order-alt': !transactionsService.sortAsc}"></span>
+							<div class="clickable" ng-click="transactionsService.applySort('amount')"><fmt:message key="AMOUNT"/>&nbsp;
+								<span ng-show="transactionsService.sortColumn === 'amount'" class="glyphicon" ng-class="{'glyphicon-sort-by-order': transactionsService.sortAsc, 'glyphicon-sort-by-order-alt': !transactionsService.sortAsc}"></span>
 							</div>
 						</label>
 					</div>
