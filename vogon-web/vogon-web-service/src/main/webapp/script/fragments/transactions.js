@@ -55,6 +55,8 @@ app.controller("TransactionsController", function ($scope, $interval, Transactio
 	};
 	$scope.$watch(function () {
 		return AuthorizationService.authorized;
-	}, TransactionsService.update);
+	}, function () {
+		$scope.$applyAsync(TransactionsService.update);
+	});
 	TransactionsService.update();
 });

@@ -1,6 +1,5 @@
 app.controller("UserSettingsController", function ($scope, AuthorizationService, UserService, CurrencyService, HTTPService) {
 	$scope.userService = UserService;
-	$scope.user = UserService.userData;
 	$scope.currencies = CurrencyService;
 	$scope.file = undefined;
 	$scope.operationSuccessful = false;
@@ -48,4 +47,9 @@ app.controller("UserSettingsController", function ($scope, AuthorizationService,
 			$scope.operationSuccessful = true;
 		});
 	};
+	$scope.$watch(function () {
+		return UserService.userData;
+	}, function () {
+		$scope.user = UserService.userData;
+	});
 });

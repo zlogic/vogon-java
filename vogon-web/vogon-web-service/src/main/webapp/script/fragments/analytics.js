@@ -71,12 +71,12 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 	};
 	$scope.currencies = [];
 	$scope.reportCompleted = false;
-	TagsService.update().then(function () {
+	$scope.updateTags = function () {
 		$scope.tags = {};
 		TagsService.tags.forEach(function (tag) {
 			$scope.tags[tag] = true;
 		});
-	});
+	};
 	$scope.updateAccounts = function () {
 		$scope.accounts = {};
 		AccountsService.accounts.forEach(function (account) {
@@ -198,11 +198,15 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 	$scope.filterCurrency = function (currency) {
 		return $scope.report !== undefined && $scope.report.currencies.indexOf(currency.symbol) !== -1;
 	};
-	$scope.close = function () {
-		$scope.accountListener;
-	};
 	$scope.updateAccounts();
-	$scope.accountListener = $scope.$watch(function () {
+	$scope.$watch(function () {
 		return AccountsService.accounts;
-	}, $scope.updateAccounts);
+	}, function () {
+		$scope.$applyAsync($scope.updateAccounts);
+	});
+	$scope.$watch(function () {
+		return TagsService.tags;
+	}, function () {
+		$scope.$applyAsync($scope.updateTags);
+	});
 });

@@ -76,7 +76,9 @@ app.controller("LoginController", function ($scope, $http, AuthorizationService,
 	};
 	$scope.$watch(function () {
 		return AuthorizationService.authorized;
-	}, reset);
+	}, function () {
+		$scope.$applyAsync(reset);
+	});
 });
 
 app.controller("UserController", function ($scope, $location, AuthorizationService, UserService, HTTPService) {
@@ -86,11 +88,6 @@ app.controller("UserController", function ($scope, $location, AuthorizationServi
 	$scope.logoutLocked = "!authorizationService.authorized";
 	$scope.logout = function () {
 		AuthorizationService.logout();
-	};
-	$scope.isAdmin = function () {
-		return UserService.userData !== undefined && UserService.userData.authorities.some(function (authority) {
-			return authority === "ROLE_VOGON_ADMIN";
-		});
 	};
 	$scope.isActivePath = function (path) {
 		return path === $location.path().split("/")[1];
