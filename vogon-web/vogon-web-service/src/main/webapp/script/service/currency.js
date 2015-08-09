@@ -21,5 +21,7 @@ app.service("CurrencyService", function ($rootScope, HTTPService, AuthorizationS
 	};
 	$rootScope.$watch(function () {
 		return AuthorizationService.authorized;
-	}, that.update);
+	}, function () {
+		$rootScope.$applyAsync(that.update);
+	});
 });

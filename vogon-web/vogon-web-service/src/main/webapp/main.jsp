@@ -67,7 +67,7 @@
 							<li ng-class="{active: isActivePath('accounts')}"><a href="#/accounts"><span class="glyphicon glyphicon-piggy-bank" aria-hidden="true"></span> <fmt:message key="ACCOUNTS"/></a></li>
 							<li ng-class="{active: isActivePath('analytics')}"><a href="#/analytics"><span class="glyphicon glyphicon-list" aria-hidden="true"></span> <fmt:message key="ANALYTICS"/></a></li>
 							<li ng-class="{active: isActivePath('usersettings')}"><a href="#/usersettings"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span> <fmt:message key="USER_SETTINGS"/></a></li>
-							<li ng-class="{active: isActivePath('adminsettings')}"><a href="#/adminsettings"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> <fmt:message key="ADMINISTRATIVE_SETTINGS"/></a></li>
+							<li ng-class="{active: isActivePath('adminsettings')}" ng-show="userService.isAdmin()"><a href="#/adminsettings"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> <fmt:message key="ADMINISTRATIVE_SETTINGS"/></a></li>
 						</ul>
 						<ul class="nav navbar-nav navbar-right">
 							<li><p class="navbar-text"><fmt:message key="SIGNED_IN_AS"/></p></li>

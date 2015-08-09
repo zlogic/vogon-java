@@ -47,9 +47,13 @@ app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationS
 	};
 	$rootScope.$watch(function () {
 		return AuthorizationService.authorized;
-	}, that.update);
+	}, function () {
+		$rootScope.$applyAsync(that.update);
+	});
 	$rootScope.$watch(function () {
 		return CurrencyService.currencies;
-	}, that.updateTotalsForCurrencies);
+	}, function () {
+		$rootScope.$applyAsync(that.updateTotalsForCurrencies);
+	});
 	HTTPService.updateAccounts = this.update;
 });
