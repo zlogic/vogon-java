@@ -15,7 +15,7 @@ app.controller("TransactionsController", function ($scope, $interval, Transactio
 	$scope.startEditing = function (transaction) {
 		$scope.editingTransaction = transaction;
 		if (transaction.id === undefined) {
-			var transactionsTable = $("table[id='transactionsTable']");
+			var transactionsTable = $("div[id='transactionsTable']");
 			var docViewTop = $(window).scrollTop();
 			var docViewBottom = docViewTop + $(window).height();
 			if (transactionsTable.position().top < docViewTop || transactionsTable.position().top > docViewBottom)

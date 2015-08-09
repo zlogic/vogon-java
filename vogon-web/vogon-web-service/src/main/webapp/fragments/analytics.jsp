@@ -87,52 +87,58 @@
 					<div class="col-md-6">
 						<label class="form-control-static"><fmt:message key="REPORT_BY_TRANSACTIONS"/></label>
 						<div class="pre-scrollable">
-							<table class="table table-hover">
-								<thead>
-									<tr>
-										<th><fmt:message key="TRANSACTION"/></th>
-										<th class="text-right"><fmt:message key="AMOUNT"/></th>
-										<th><fmt:message key="DATE"/></th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr ng-repeat="transaction in report.transactions">
-										<td>{{transaction.description}}</td>
-										<td class="text-right">
-											<div ng-repeat="(symbol, total) in totals = (transactionsService.totalsByCurrency(transaction))">
-												<span ng-show="transactionsService.isTransferTransaction(transaction)">
-													&sum;
-												</span>
-												{{total| number:2}} {{symbol}}
-											</div>
-										</td>
-										<td>{{transaction.date| date}}</td>
-									</tr>
-								</tbody>
-							</table>
+							<div class="container-fluid">
+								<div class="row">
+									<div class="col-md-6">
+										<label><fmt:message key="TRANSACTION"/></label>
+									</div>
+									<div class="col-md-3 text-right">
+										<label><fmt:message key="AMOUNT"/></label>
+									</div>
+									<div class="col-md-3">
+										<label><fmt:message key="DATE"/></label>
+									</div>
+								</div>
+								<div class="row" ng-repeat="transaction in report.transactions">
+									<hr/>
+									<div class="col-md-6">{{transaction.description}}</div>
+									<div class="col-md-3 text-right">
+										<div ng-repeat="(symbol, total) in totals = (transactionsService.totalsByCurrency(transaction))">
+											<span ng-show="transactionsService.isTransferTransaction(transaction)">
+												&sum;
+											</span>
+											{{total| number:2}} {{symbol}}
+										</div>
+									</div>
+									<div class="col-md-3">{{transaction.date| date}}</div>
+								</div>
+							</div>
 						</div>
 					</div>
 					<div class="col-md-6 form-group">
 						<label class="form-control-static"><fmt:message key="REPORT_BY_TAGS"/></label>
 						<div class="pre-scrollable">
-							<table class="table table-hover">
-								<thead>
-									<tr>
-										<th><fmt:message key="TAG"/></th>
-										<th class="text-right"><fmt:message key="AMOUNT"/></th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr ng-repeat="tagExpense in report.tagExpenses">
-										<td>{{tagExpense.tag}}</td>
-										<td class="text-right">
-											<div ng-repeat="(symbol, total) in tagExpense.amounts">
-												{{total| number:2}} {{symbol}}
-											</div>
-										</td>
-									</tr>
-								</tbody>
-							</table>
+
+							<div class="container-fluid">
+								<div class="row">
+									<div class="col-md-9">
+										<label><fmt:message key="TAG"/></label>
+									</div>
+									<div class="col-md-3 text-right">
+										<label><fmt:message key="AMOUNT"/></label>
+									</div>
+								</div>
+
+								<div class="row" ng-repeat="tagExpense in report.tagExpenses">
+									<hr/>
+									<div class="col-md-9">{{tagExpense.tag}}</div>
+									<div class="col-md-3 text-right">
+										<div ng-repeat="(symbol, total) in tagExpense.amounts">
+											{{total| number:2}} {{symbol}}
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
