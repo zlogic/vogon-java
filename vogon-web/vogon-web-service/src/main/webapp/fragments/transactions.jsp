@@ -61,9 +61,9 @@
 						<label><fmt:message key="ACCOUNT"/></label>
 					</div>
 				</div>
-				<div class="row" id="transactionsTable"  ng-repeat="transaction in transactionsService.transactions" ng-class="{danger:!transactionsService.isAmountOk(transaction)}" ng-switch on="editingTransaction == transaction">
+				<div class="row" id="transactionsTable" ng-repeat="transaction in transactionsService.transactions" ng-switch on="editingTransaction == transaction">
 					<hr/>
-					<div ng-switch-when="false">
+					<div class="row" ng-class="{'bg-danger':!transactionsService.isAmountOk(transaction)}" ng-switch-when="false">
 						<div class="col-md-5 col-sm-12">
 							<label>{{transaction.description}}</label>
 							<div class="form-inline">
