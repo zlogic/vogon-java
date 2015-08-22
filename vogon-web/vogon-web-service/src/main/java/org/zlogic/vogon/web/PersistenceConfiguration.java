@@ -77,7 +77,8 @@ public class PersistenceConfiguration {
 	protected Map<String, Object> getDatabaseConfiguration() {
 		Map<String, Object> jpaProperties = new HashMap<>();
 		boolean fallback = true;
-		jpaProperties.put("hibernate.connection.provider_class", "org.hibernate.connection.C3P0ConnectionProvider"); //NOI18N
+		if (serverTypeDetector.getServerType() != ServerTypeDetector.ServerType.WILDFLY)
+			jpaProperties.put("hibernate.connection.provider_class", "org.hibernate.connection.C3P0ConnectionProvider"); //NOI18N
 		if (serverTypeDetector.getDatabaseType() == ServerTypeDetector.DatabaseType.POSTGRESQL) {
 			String dbURL = null;
 			if (serverTypeDetector.getCloudType() == ServerTypeDetector.CloudType.HEROKU)
