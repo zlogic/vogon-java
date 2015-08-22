@@ -96,7 +96,7 @@ public class ServerTypeDetector {
 	 * @return the detected cloud provider type
 	 */
 	public CloudType getCloudType() {
-		if (hasEnvironmentVariable(Pattern.compile("^HEROKU_.*$")) && hasEnvironmentVariable(Pattern.compile("^DATABASE_URL$"))) //NOI18N
+		if (hasEnvironmentVariable(Pattern.compile("^DYNO$")) && hasEnvironmentVariable(Pattern.compile("^DATABASE_URL$"))) //NOI18N
 			return CloudType.HEROKU;
 		if (hasEnvironmentVariable(Pattern.compile("^OPENSHIFT_.*$"))) //NOI18N
 			return CloudType.OPENSHIFT;
