@@ -2,7 +2,7 @@ app.controller("TransactionEditorController", function ($scope, AccountsService,
 	var transaction = $scope.transaction;
 	$scope.accountService = AccountsService;
 	$scope.transactionTypes = TransactionsService.transactionTypes;
-	$scope.calendarOpened = false;
+	$scope.calendar = {opened: false};
 	$scope.tagsService = TagsService;
 	$scope.tags = transaction.tags.join(messages.TAGS_SEPARATOR);
 	var tagsFromTransaction = function (transaction) {
@@ -16,7 +16,7 @@ app.controller("TransactionEditorController", function ($scope, AccountsService,
 	$scope.openCalendar = function ($event) {
 		$event.preventDefault();
 		$event.stopPropagation();
-		$scope.calendarOpened = true;
+		$scope.calendar.opened = true;
 	};
 	$scope.addTransactionComponent = function () {
 		$scope.transaction.components.push({});
