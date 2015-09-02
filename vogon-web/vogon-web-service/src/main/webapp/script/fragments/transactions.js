@@ -7,6 +7,7 @@ app.controller("TransactionsController", function ($scope, $interval, Transactio
 	$scope.userService = UserService;
 	$scope.filterTimer = undefined;
 	$scope.filterDirty = false;
+	$scope.filterDateCalendar = {opened: false};
 	$scope.addTransaction = function () {
 		var transaction = {components: [], date: TransactionsService.getDate(), tags: [], type: TransactionsService.defaultTransactionType.value};
 		$scope.transactionsService.transactions.unshift(transaction);
@@ -38,7 +39,7 @@ app.controller("TransactionsController", function ($scope, $interval, Transactio
 	$scope.openFilterDateCalendar = function ($event) {
 		$event.preventDefault();
 		$event.stopPropagation();
-		$scope.filterDateCalendarOpened = true;
+		$scope.filterDateCalendar.opened = true;
 	};
 	$scope.applyFilter = function () {
 		$scope.filterDirty = true;

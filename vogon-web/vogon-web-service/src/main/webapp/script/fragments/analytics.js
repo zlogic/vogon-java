@@ -4,6 +4,8 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 	$scope.currencyService = CurrencyService;
 	$scope.tags = {};
 	$scope.accounts = {};
+	$scope.startDateCalendar = {opened: false};
+	$scope.endDateCalendar = {opened: false};
 	var currentTime = new Date();
 	$scope.dateRange = {
 		start: dateToJson(new Date(currentTime.getFullYear(), currentTime.getMonth(), 1)),
@@ -102,12 +104,12 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 	$scope.openStartDateCalendar = function ($event) {
 		$event.preventDefault();
 		$event.stopPropagation();
-		$scope.startDateCalendarOpened = true;
+		$scope.startDateCalendar.opened = true;
 	};
 	$scope.openEndDateCalendar = function ($event) {
 		$event.preventDefault();
 		$event.stopPropagation();
-		$scope.endDateCalendarOpened = true;
+		$scope.endDateCalendar.opened = true;
 	};
 	$scope.buildReport = function () {
 		var reportConfiguration = {
