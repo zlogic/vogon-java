@@ -128,7 +128,7 @@
 		</div>
 		<div ng-controller="ContentController">
 			<div ng-show="authorizationService.authorized">
-				<div ng-view />
+				<div ng-view></div>
 			</div>
 		</div>
 	</body>

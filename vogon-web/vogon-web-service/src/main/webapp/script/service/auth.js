@@ -224,7 +224,12 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
 		return that.authorized;
 	};
 
-	this.access_token = localStorage["access_token"];
+	try {
+		this.access_token = localStorage["access_token"];
+	} catch (err) {
+		this.access_token = undefined;
+		AlertService.addAlert(err);
+	}
 	if (this.access_token !== undefined) {
 		HTTPService.setAccessToken(this.access_token);
 		setAuthorized(true);
