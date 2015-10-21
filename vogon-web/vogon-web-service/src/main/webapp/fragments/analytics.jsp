@@ -42,7 +42,7 @@
 				<div class="col-md-6">
 					<label><fmt:message key="START_DATE"/></label>
 					<div class="input-group" ng-class="{ 'has-error': analyticsForm.startDate.$invalid }">
-						<input type="text" class="form-control" datepicker-popup ng-model="dateRange.start" name="startDate" is-open="startDateCalendar.opened" />
+						<input type="text" class="form-control" uib-datepicker-popup ng-model="dateRange.start" name="startDate" is-open="startDateCalendar.opened" />
 						<span class="input-group-btn">
 							<button type="button" class="btn btn-default" ng-click="openStartDateCalendar($event)" type="button"><span class="glyphicon glyphicon-calendar"></span></button>
 						</span>
@@ -51,7 +51,7 @@
 				<div class="col-md-6">
 					<label><fmt:message key="END_DATE"/></label>
 					<div class="input-group" ng-class="{ 'has-error': analyticsForm.endDate.$invalid }">
-						<input type="text" class="form-control" datepicker-popup ng-model="dateRange.end" name="endDate" is-open="endDateCalendar.opened" />
+						<input type="text" class="form-control" uib-datepicker-popup ng-model="dateRange.end" name="endDate" is-open="endDateCalendar.opened" />
 						<span class="input-group-btn">
 							<button type="button" class="btn btn-default" ng-click="openEndDateCalendar($event)" type="button"><span class="glyphicon glyphicon-calendar"></span></button>
 						</span>

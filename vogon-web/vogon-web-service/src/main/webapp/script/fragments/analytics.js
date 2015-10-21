@@ -30,9 +30,6 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 				},
 				y: function (d) {
 					return Math.abs(d.amount);
-				},
-				tooltipContent: function (key, y, e) {
-					return complex_messages.TAGS_CHART_TOOLTIP(key, e.point.amount);
 				}
 			}
 		}
@@ -43,6 +40,7 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 			chart: {
 				type: "lineChart",
 				height: 500,
+				width: 300,
 				showLegend: false,
 				margin: {
 					top: 20,
