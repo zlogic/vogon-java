@@ -7,21 +7,21 @@
 <html>
 	<head>
 		<title><fmt:message key="VOGON_PAGE_TITLE"/></title>
-		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<fmt:message key="bootstrap" bundle="${webjars}"/>/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<fmt:message key="bootstrap" bundle="${webjars}"/>/dist/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="webjars/ng-tags-input/<fmt:message key="ngtagsinput" bundle="${webjars}"/>/ng-tags-input.min.css">
-		<link rel="stylesheet" type="text/css" href="webjars/nvd3/<fmt:message key="nvd3" bundle="${webjars}"/>/nv.d3.min.css">
+		<link rel="stylesheet" type="text/css" href="webjars/nvd3/<fmt:message key="nvd3" bundle="${webjars}"/>/build/nv.d3.min.css">
 		<!--<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<fmt:message key="bootstrap" bundle="${webjars}"/>/css/bootstrap-theme.min.css">-->
-		<script type="text/javascript" src="webjars/jquery/<fmt:message key="jquery" bundle="${webjars}"/>/jquery.min.js"></script>
+		<script type="text/javascript" src="webjars/jquery/<fmt:message key="jquery" bundle="${webjars}"/>/dist/jquery.min.js"></script>
 		<script type="text/javascript" src="webjars/angularjs/<fmt:message key="angularjs" bundle="${webjars}"/>/angular.min.js"></script>
 		<script type="text/javascript" src="webjars/angularjs/<fmt:message key="angularjs" bundle="${webjars}"/>/angular-cookies.js"></script>
 		<script type="text/javascript" src="webjars/angularjs/<fmt:message key="angularjs" bundle="${webjars}"/>/angular-route.js"></script>
-		<script type="text/javascript" src="webjars/angular-ui-bootstrap/<fmt:message key="angularuibootstrap" bundle="${webjars}"/>/ui-bootstrap-tpls.min.js"></script>
-		<script type="text/javascript" src="webjars/ngInfiniteScroll/<fmt:message key="nginfinitescroll" bundle="${webjars}"/>/ng-infinite-scroll.min.js"></script>
+		<script type="text/javascript" src="webjars/angular-bootstrap/<fmt:message key="angularbootstrap" bundle="${webjars}"/>/ui-bootstrap-tpls.min.js"></script>
+		<script type="text/javascript" src="webjars/ngInfiniteScroll/<fmt:message key="nginfinitescroll" bundle="${webjars}"/>/build/ng-infinite-scroll.min.js"></script>
 		<script type="text/javascript" src="webjars/ng-tags-input/<fmt:message key="ngtagsinput" bundle="${webjars}"/>/ng-tags-input.min.js"></script>
-		<script type="text/javascript" src="webjars/bootstrap/<fmt:message key="bootstrap" bundle="${webjars}"/>/js/bootstrap.min.js"></script>
-		<script type="text/javascript" src="webjars/d3js/<fmt:message key="d3js" bundle="${webjars}"/>/d3.min.js"></script>
-		<script type="text/javascript" src="webjars/nvd3/<fmt:message key="nvd3" bundle="${webjars}"/>/nv.d3.min.js"></script>
-		<script type="text/javascript" src="webjars/angular-nvd3/<fmt:message key="angularnvd3" bundle="${webjars}"/>/angular-nvd3.min.js"></script>
+		<script type="text/javascript" src="webjars/bootstrap/<fmt:message key="bootstrap" bundle="${webjars}"/>/dist/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="webjars/d3/<fmt:message key="d3" bundle="${webjars}"/>/d3.min.js"></script>
+		<script type="text/javascript" src="webjars/nvd3/<fmt:message key="nvd3" bundle="${webjars}"/>/build/nv.d3.min.js"></script>
+		<script type="text/javascript" src="webjars/angular-nvd3/<fmt:message key="angularnvd3" bundle="${webjars}"/>/dist/angular-nvd3.min.js"></script>
 		<script type="text/javascript" src="script/messages.js"></script>
 		<script type="text/javascript" src="script/helpers.js"></script>
 		<script type="text/javascript" src="script/main.js"></script>
@@ -45,7 +45,7 @@
 		<div ng-controller="NotificationController">
 			<div class="navbar-fixed-top">
 				<div class="alert alert-warning" role="alert" ng-show="alertService.isLoading"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> <fmt:message key="LOADING_ALERT"/></div>
-				<alert ng-show="alertService.enabled()" ng-repeat="alert in alertService.alerts" type="{{alert.type}}" close="alertService.closeAlert($index)"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> {{alert.msg}}</alert>
+				<uib-alert ng-show="alertService.enabled()" ng-repeat="alert in alertService.alerts" type="{{alert.type}}" close="alertService.closeAlert($index)"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> {{alert.msg}}</uib-alert>
 			</div>
 		</div>
 		<div ng-controller="UserController">
@@ -106,8 +106,8 @@
 									</div>
 								</div>
 								<div class="panel-body" ng-show="loginError || registrationError">
-									<alert type="danger" ng-show="loginError"><fmt:message key="LOGIN_FAILED"/>: {{loginError}}</alert>
-									<alert type="danger" ng-show="registrationError"><fmt:message key="REGISTRATION_FAILED"/>: {{registrationError}}</alert>
+									<uib-alert type="danger" ng-show="loginError"><fmt:message key="LOGIN_FAILED"/>: {{loginError}}</uib-alert>
+									<uib-alert type="danger" ng-show="registrationError"><fmt:message key="REGISTRATION_FAILED"/>: {{registrationError}}</uib-alert>
 								</div>
 								<div class="panel-footer">
 									<div class="text-right">

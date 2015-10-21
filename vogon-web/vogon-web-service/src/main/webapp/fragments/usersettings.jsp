@@ -32,7 +32,7 @@
 				</div>
 			</div>
 			<div class="form-group" ng-show="operationSuccessful">
-				<alert type="success"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> <fmt:message key="DONE_ALERT"/></alert>
+				<uib-alert type="success"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> <fmt:message key="DONE_ALERT"/></uib-alert>
 			</div>
 			<p>
 				<button ng-click="cancelEditing()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> <fmt:message key="CANCEL"/></button>

@@ -30,7 +30,7 @@
 						<div class="form-horizontal">
 							<div class="input-group" ng-class="{ 'has-error': transactionsDateFilterForm.filterDate.$invalid }">
 								<span class="input-group-addon"><span class="glyphicon glyphicon-filter" aria-hidden="true"></span></span>
-								<input type="text" class="form-control" datepicker-popup ng-model="transactionsService.filterDate" name="filterDate" ng-change="applyFilter()" is-open="filterDateCalendar.opened" placeholder="<fmt:message key="ENTER_DATE_FILTER"/>" />
+								<input type="text" class="form-control" uib-datepicker-popup ng-model="transactionsService.filterDate" name="filterDate" ng-change="applyFilter()" is-open="filterDateCalendar.opened" placeholder="<fmt:message key="ENTER_DATE_FILTER"/>" />
 								<span class="input-group-btn">
 									<button type="button" class="btn btn-default" ng-click="openFilterDateCalendar($event)"><span class="glyphicon glyphicon-calendar"></span></button>
 								</span>
