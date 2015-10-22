@@ -163,5 +163,9 @@
 			<artifactId>vogon-web-readme-openshift</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>webjars-locator-jboss-vfs</artifactId>
+		</dependency>
 	</dependencies>
 </project>

@@ -25,6 +25,11 @@
 				<artifactId>vogon-web-readme-openshift</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.zlogic.vogon.packaging</groupId>
+				<artifactId>webjars-locator-jboss-vfs</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<profiles>
@@ -53,6 +58,7 @@
 				<module>vogon-web-tomcat</module>
 				<module>vogon-web-wildfly</module>
 				<module>vogon-web-standalone</module>
+				<module>webjars-locator-jboss-vfs</module>
 			</modules>
 		</profile>
 	</profiles>
