@@ -16,8 +16,11 @@ import org.springframework.security.web.bind.support.AuthenticationPrincipalArgu
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.resource.ResourceResolver;
+import org.springframework.web.servlet.resource.WebJarsResourceResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
@@ -56,6 +59,21 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 		resolver.setPrefix("/"); //NOI18N
 		resolver.setSuffix(".jsp"); //NOI18N
 		return resolver;
+	}
+
+	/**
+	 * Configures resource handlers by auto-enabling the WebJarsResourceResolver
+	 *
+	 * @param registry ResourceHandlerRegistry instance
+	 */
+	@Override
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		//TODO: remove this and use "spring.resources.chain.enabled:true" in application.properties when upgrading Spring Boot
+		super.addResourceHandlers(registry);
+		registry
+				.addResourceHandler("/webjars/**")
+				.addResourceLocations("classpath:/META-INF/resources/webjars/")
+				.resourceChain(true);
 	}
 
 	/**

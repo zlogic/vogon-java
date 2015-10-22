@@ -7,21 +7,21 @@
 <html>
 	<head>
 		<title><fmt:message key="VOGON_PAGE_TITLE"/></title>
-		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<fmt:message key="bootstrap" bundle="${webjars}"/>/dist/css/bootstrap.min.css">
-		<link rel="stylesheet" type="text/css" href="webjars/ng-tags-input/<fmt:message key="ngtagsinput" bundle="${webjars}"/>/ng-tags-input.min.css">
-		<link rel="stylesheet" type="text/css" href="webjars/nvd3/<fmt:message key="nvd3" bundle="${webjars}"/>/build/nv.d3.min.css">
-		<!--<link rel="stylesheet" type="text/css" href="webjars/bootstrap/<fmt:message key="bootstrap" bundle="${webjars}"/>/css/bootstrap-theme.min.css">-->
-		<script type="text/javascript" src="webjars/jquery/<fmt:message key="jquery" bundle="${webjars}"/>/dist/jquery.min.js"></script>
-		<script type="text/javascript" src="webjars/angularjs/<fmt:message key="angularjs" bundle="${webjars}"/>/angular.min.js"></script>
-		<script type="text/javascript" src="webjars/angularjs/<fmt:message key="angularjs" bundle="${webjars}"/>/angular-cookies.js"></script>
-		<script type="text/javascript" src="webjars/angularjs/<fmt:message key="angularjs" bundle="${webjars}"/>/angular-route.js"></script>
-		<script type="text/javascript" src="webjars/angular-bootstrap/<fmt:message key="angularbootstrap" bundle="${webjars}"/>/ui-bootstrap-tpls.min.js"></script>
-		<script type="text/javascript" src="webjars/ngInfiniteScroll/<fmt:message key="nginfinitescroll" bundle="${webjars}"/>/build/ng-infinite-scroll.min.js"></script>
-		<script type="text/javascript" src="webjars/ng-tags-input/<fmt:message key="ngtagsinput" bundle="${webjars}"/>/ng-tags-input.min.js"></script>
-		<script type="text/javascript" src="webjars/bootstrap/<fmt:message key="bootstrap" bundle="${webjars}"/>/dist/js/bootstrap.min.js"></script>
-		<script type="text/javascript" src="webjars/d3/<fmt:message key="d3" bundle="${webjars}"/>/d3.min.js"></script>
-		<script type="text/javascript" src="webjars/nvd3/<fmt:message key="nvd3" bundle="${webjars}"/>/build/nv.d3.min.js"></script>
-		<script type="text/javascript" src="webjars/angular-nvd3/<fmt:message key="angularnvd3" bundle="${webjars}"/>/dist/angular-nvd3.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/dist/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="webjars/ng-tags-input/ng-tags-input.min.css">
+		<link rel="stylesheet" type="text/css" href="webjars/nvd3/nv.d3.min.css">
+		<!--<link rel="stylesheet" type="text/css" href="webjars/bootstrap/bootstrap-theme.min.css">-->
+		<script type="text/javascript" src="webjars/jquery/jquery.min.js"></script>
+		<script type="text/javascript" src="webjars/angularjs/angular.min.js"></script>
+		<script type="text/javascript" src="webjars/angular-cookies/angular-cookies.min.js"></script>
+		<script type="text/javascript" src="webjars/angular-route/angular-route.min.js"></script>
+		<script type="text/javascript" src="webjars/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+		<script type="text/javascript" src="webjars/ngInfiniteScroll/ng-infinite-scroll.min.js"></script>
+		<script type="text/javascript" src="webjars/ng-tags-input/ng-tags-input.min.js"></script>
+		<script type="text/javascript" src="webjars/bootstrap/bootstrap.min.js"></script>
+		<script type="text/javascript" src="webjars/d3/d3.min.js"></script>
+		<script type="text/javascript" src="webjars/nvd3/nv.d3.min.js"></script>
+		<script type="text/javascript" src="webjars/angular-nvd3/angular-nvd3.min.js"></script>
 		<script type="text/javascript" src="script/messages.js"></script>
 		<script type="text/javascript" src="script/helpers.js"></script>
 		<script type="text/javascript" src="script/main.js"></script>
