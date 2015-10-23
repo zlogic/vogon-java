@@ -4,7 +4,6 @@
 /vogon-packaging/target/
 /vogon-packaging/vogon-web-wildfly/target/
 /vogon-packaging/vogon-web-tomcat/target/
-/vogon-packaging/vogon-standalone/target/
 /vogon-packaging/vogon-web-standalone/target/
 /vogon-packaging/vogon-web-readme-openshift/target/
 /vogon-packaging/vogon-web-readme-heroku/target/
