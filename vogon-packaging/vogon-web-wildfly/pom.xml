@@ -12,8 +12,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<readme.server.name>WildFly 8.1</readme.server.name>
-		<readme.openshift.catridge_name>WildFly Application Server 8.1.0.Final</readme.openshift.catridge_name>
+		<readme.server.name>WildFly 9</readme.server.name>
+		<readme.openshift.catridge_name>WildFly Application Server 9</readme.openshift.catridge_name>
 	</properties>
 
 	<build>
