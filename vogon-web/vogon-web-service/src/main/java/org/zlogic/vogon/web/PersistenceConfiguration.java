@@ -58,14 +58,16 @@ public class PersistenceConfiguration {
 	protected String getH2DatabasePath() {
 		if (serverTypeDetector.getCloudType() == ServerTypeDetector.CloudType.OPENSHIFT)
 			return System.getenv("OPENSHIFT_DATA_DIR"); //NOI18N
-		if (serverTypeDetector.getServerType() == ServerTypeDetector.ServerType.TOMCAT)
-			return System.getProperty("catalina.home"); //NOI18N
-		else if (serverTypeDetector.getServerType() == ServerTypeDetector.ServerType.WILDFLY)
-			return System.getProperty("jboss.server.data.dir"); //NOI18N
-		else if (serverTypeDetector.getServerType() == ServerTypeDetector.ServerType.JETTY)
-			return System.getProperty("jetty.base"); //NOI18N
-		else
-			return System.getProperty("vogon.database.dir", System.getProperty("user.dir")); //NOI18N
+		if (null != serverTypeDetector.getServerType())
+			switch (serverTypeDetector.getServerType()) {
+				case TOMCAT:
+					return System.getProperty("catalina.home"); //NOI18N
+				case WILDFLY:
+					return System.getProperty("jboss.server.data.dir"); //NOI18N
+				case JETTY:
+					return System.getProperty("jetty.base"); //NOI18N
+			}
+		return System.getProperty("vogon.database.dir", System.getProperty("user.dir")); //NOI18N //NOI18N
 	}
 
 	/**
