@@ -187,7 +187,7 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
 		if (that.access_token !== undefined) {
 			var params = {token: that.access_token};
 			return HTTPService.post("logout", encodeForm(params), postHeaders)
-					.then(that.resetAuthorization(), that.resetAuthorization());
+					.then(that.resetAuthorization, that.resetAuthorization);
 		} else {
 			var deferred = $q.defer();
 			deferred.reject({data: {error_description: messages.ALREADY_LOGGED_OUT}});

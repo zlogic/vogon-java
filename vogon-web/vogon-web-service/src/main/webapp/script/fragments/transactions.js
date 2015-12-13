@@ -59,5 +59,4 @@ app.controller("TransactionsController", function ($scope, $interval, Transactio
 	}, function () {
 		$scope.$applyAsync(TransactionsService.update);
 	});
-	TransactionsService.update();
 });
