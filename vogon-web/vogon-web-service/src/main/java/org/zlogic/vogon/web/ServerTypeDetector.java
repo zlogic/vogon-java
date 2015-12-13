@@ -6,6 +6,7 @@
 package org.zlogic.vogon.web;
 
 import java.util.regex.Pattern;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -22,7 +23,7 @@ public class ServerTypeDetector {
 	public enum ServerType {
 
 		/**
-		 * Spring boot
+		 * Spring boot Tomcat
 		 */
 		STANDALONE,
 		/**
@@ -78,6 +79,17 @@ public class ServerTypeDetector {
 	}
 
 	/**
+	 * Keystore file
+	 */
+	@Value("${vogon.keystore.file:}")
+	private String keystoreFile;
+	/**
+	 * Keystore password
+	 */
+	@Value("${vogon.keystore.pass:}")
+	private String keystorePass;
+
+	/**
 	 * Returns true if environment has a variable matching the pattern
 	 *
 	 * @param pattern the pattern to search
@@ -112,7 +124,7 @@ public class ServerTypeDetector {
 	 */
 	public ServerType getServerType() {
 		if (getCloudType() == CloudType.HEROKU)
-			return ServerType.STANDALONE;
+			return ServerType.TOMCAT;
 		if (getCloudType() == CloudType.OPENSHIFT) {
 			if (hasEnvironmentVariable(Pattern.compile("^OPENSHIFT_JBOSSEWS.*"))) //NOI18N
 				return ServerType.TOMCAT;
@@ -144,5 +156,35 @@ public class ServerTypeDetector {
 				return DatabaseType.H2;
 		}
 		return DatabaseType.H2;
+	}
+
+	/**
+	 * Returns the keystore file
+	 *
+	 * @return the keystore file
+	 */
+	public String getKeystoreFile() {
+		return keystoreFile;
+	}
+
+	/**
+	 * Returns the keystore password
+	 *
+	 * @return the keystore password
+	 */
+	public String getKeystorePassword() {
+		return keystorePass;
+	}
+
+	/**
+	 * Returns true if SSL can be used (and false if SSL is not supported or its
+	 * support cannot be verified)
+	 *
+	 * @return true if SSL can be used
+	 */
+	public boolean isSslSupported() {
+		return (getCloudType() != ServerTypeDetector.CloudType.HEROKU)
+				&& (getCloudType() != ServerTypeDetector.CloudType.AZURE)
+				&& (getServerType() != ServerTypeDetector.ServerType.STANDALONE && !keystoreFile.isEmpty() && !keystorePass.isEmpty());
 	}
 }

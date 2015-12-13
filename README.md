@@ -30,6 +30,8 @@ Requires Java 8 to build. [Releases](/../../releases) contain prepackaged WAR fi
 
 Check out the readme for more details. Default username/password are Default/Default, make sure to change them to something more secure.
 
+If all works well, the server should auto-redirect to HTTPS, however it's tricky and may not always work - some cloud environments require non-standard ports and/or unencrypted HTTP connections. Double-check that your deployment is redirecting to HTTPS by default!
+
 2.0 and earlier versions also include a standalone version using Java FX for UI. This version is no longer maintained and may be completely removed in future releases. Requires Java 8 to run.
 
 This project has a rich history of UI rewrites, including versions using

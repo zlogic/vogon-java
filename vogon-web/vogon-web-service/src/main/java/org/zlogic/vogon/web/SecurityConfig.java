@@ -175,7 +175,6 @@ public class SecurityConfig {
 		 */
 		@Override
 		public void configure(HttpSecurity http) throws Exception {
-			boolean requireHttps = (serverTypeDetector.getCloudType() != ServerTypeDetector.CloudType.HEROKU) && (serverTypeDetector.getCloudType() != ServerTypeDetector.CloudType.AZURE);
 			//The logout handler to delete tokens
 			LogoutHandler logoutHandler = new LogoutHandler() {
 				/**
@@ -205,7 +204,7 @@ public class SecurityConfig {
 
 				}
 			};
-			(requireHttps ? http.requiresChannel().anyRequest().requiresSecure().and() : http)
+			(serverTypeDetector.isSslSupported() ? http.requiresChannel().anyRequest().requiresSecure().and() : http)
 					//.authorizeRequests().antMatchers("/oauth/token").fullyAuthenticated().and()
 					.authorizeRequests().antMatchers("/oauth/token").anonymous().and() //NOI18N
 					.authorizeRequests().antMatchers("/service/**").hasAuthority(VogonSecurityUser.AUTHORITY_USER).and() //NOI18N
