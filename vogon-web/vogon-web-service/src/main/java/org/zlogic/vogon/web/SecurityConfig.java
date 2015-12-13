@@ -190,6 +190,8 @@ public class SecurityConfig {
 						return;
 					OAuth2Authentication oauth2 = tokenStore.readAuthentication((String) auth.getPrincipal());
 
+					if (oauth2 == null)
+						return;
 					OAuth2AccessToken token = tokenStore.getAccessToken(oauth2);
 					if (token == null)
 						return;
