@@ -43,6 +43,7 @@ public class JspController {
 	/**
 	 * Returns the fragment ("/fragments") path
 	 *
+	 * @param fragment the fragment name
 	 * @return the fragment ("/fragments") path
 	 */
 	@RequestMapping(value = {"/fragments/{fragment}.fragment"})

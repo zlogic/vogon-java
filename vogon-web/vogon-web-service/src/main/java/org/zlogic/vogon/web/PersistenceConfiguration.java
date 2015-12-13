@@ -58,6 +58,10 @@ public class PersistenceConfiguration {
 	protected String getH2DatabasePath() {
 		if (serverTypeDetector.getCloudType() == ServerTypeDetector.CloudType.OPENSHIFT)
 			return System.getenv("OPENSHIFT_DATA_DIR"); //NOI18N
+		if (System.getenv("VOGON_DATABASE_DIR") != null) //NOI18N
+			return System.getenv("VOGON_DATABASE_DIR"); //NOI18N
+		if (System.getProperty("vogon.database.dir") != null) //NOI18N
+			return System.getProperty("vogon.database.dir"); //NOI18N
 		if (null != serverTypeDetector.getServerType())
 			switch (serverTypeDetector.getServerType()) {
 				case TOMCAT:
@@ -67,7 +71,7 @@ public class PersistenceConfiguration {
 				case JETTY:
 					return System.getProperty("jetty.base"); //NOI18N
 			}
-		return System.getProperty("vogon.database.dir", System.getProperty("user.dir")); //NOI18N //NOI18N
+		return System.getProperty("user.dir"); //NOI18N 
 	}
 
 	/**
@@ -89,7 +93,7 @@ public class PersistenceConfiguration {
 				dbURL = System.getenv("OPENSHIFT_POSTGRESQL_DB_URL") + "/" + System.getenv("OPENSHIFT_APP_NAME"); //NOI18N
 			try {
 				URI dbUri = new URI(dbURL);
-				String dbConnectionURL = "jdbc:postgresql://" + dbUri.getHost() + ":" + dbUri.getPort() + dbUri.getPath(); //NOI18N
+				String dbConnectionURL = "jdbc:postgresql://" + dbUri.getHost() + ":" + dbUri.getPort() + dbUri.getPath(); //NOI18N //NOI18N
 				String[] usernamePassword = dbUri.getUserInfo().split(":", 2); //NOI18N
 				jpaProperties.put("javax.persistence.jdbc.url", dbConnectionURL); //NOI18N
 				jpaProperties.put("javax.persistence.jdbc.user", usernamePassword[0]); //NOI18N
