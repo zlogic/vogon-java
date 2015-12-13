@@ -184,7 +184,6 @@ public class ServerTypeDetector {
 	 */
 	public boolean isSslSupported() {
 		return (getCloudType() != ServerTypeDetector.CloudType.HEROKU)
-				&& (getCloudType() != ServerTypeDetector.CloudType.AZURE)
-				&& (getServerType() != ServerTypeDetector.ServerType.STANDALONE && !keystoreFile.isEmpty() && !keystorePass.isEmpty());
+				&& (getCloudType() != ServerTypeDetector.CloudType.AZURE);
 	}
 }
