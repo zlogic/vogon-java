@@ -22,7 +22,7 @@ app.controller("AdminSettingsController", function ($scope, AuthorizationService
 	$scope.submitEditing = function () {
 		if (AuthorizationService.authorized && UserService.isAdmin())
 			HTTPService.post("service/configuration", convertConfigurationForPost(that.adminSettingsConfiguration))
-					.then(that.update(), that.update());
+					.then(that.update, that.update);
 	};
 	$scope.cancelEditing = function () {
 		that.update();
