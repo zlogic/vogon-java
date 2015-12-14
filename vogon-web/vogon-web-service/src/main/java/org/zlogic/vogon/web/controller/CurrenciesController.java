@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.zlogic.vogon.web.data.model.CurrencyFull;
+import org.zlogic.vogon.web.data.model.CurrencyDetails;
 
 /**
  * Spring MVC controller for currencies
@@ -34,10 +34,10 @@ public class CurrenciesController {
 	 * @return the wrapped currency list
 	 */
 	@Bean
-	public Collection<CurrencyFull> currencies() {
-		List<CurrencyFull> currencies = new ArrayList<>();
+	public Collection<CurrencyDetails> currencies() {
+		List<CurrencyDetails> currencies = new ArrayList<>();
 		for (Currency currency : Currency.getAvailableCurrencies())
-			currencies.add(new CurrencyFull(currency));
+			currencies.add(new CurrencyDetails(currency));
 		Collections.sort(currencies);
 		return currencies;
 	}
@@ -49,7 +49,7 @@ public class CurrenciesController {
 	 */
 	@RequestMapping(method = RequestMethod.GET, produces = "application/json")
 	public @ResponseBody
-	Collection<CurrencyFull> getAllCurrencies() {
+	Collection<CurrencyDetails> getAllCurrencies() {
 		return currencies();
 	}
 }

@@ -8,11 +8,14 @@ package org.zlogic.vogon.web.data.model;
 import java.util.Currency;
 
 /**
- * JSON wrapper for Currency class, used to provide full currency data
+ * JSON wrapper for Currency class, used to provide full currency data. Jackson
+ * uses special serializers for currencies and it's very difficult to replace
+ * them without breaking anything, so the next best thing is to create a
+ * Currency-like class.
  *
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
-public class CurrencyFull implements Comparable<CurrencyFull> {
+public class CurrencyDetails implements Comparable<CurrencyDetails> {
 
 	/**
 	 * The currency to wrap
@@ -20,11 +23,11 @@ public class CurrencyFull implements Comparable<CurrencyFull> {
 	private Currency currency;
 
 	/**
-	 * Creates a CurrencyFull wrapper for a Currency
+	 * Creates a CurrencyDetails wrapper for a Currency
 	 *
 	 * @param currency the Currency to wrap
 	 */
-	public CurrencyFull(Currency currency) {
+	public CurrencyDetails(Currency currency) {
 		this.currency = currency;
 	}
 
@@ -45,17 +48,18 @@ public class CurrencyFull implements Comparable<CurrencyFull> {
 	public String getSymbol() {
 		return currency.getSymbol();
 	}
-	
+
 	/**
 	 * Returns the currency code (Currency.getCurrencyCode())
+	 *
 	 * @return the currency code
 	 */
-	public String getCurrencyCode(){
+	public String getCurrencyCode() {
 		return currency.getCurrencyCode();
 	}
 
 	@Override
-	public int compareTo(CurrencyFull o) {
+	public int compareTo(CurrencyDetails o) {
 		return currency.getDisplayName().compareTo(o.currency.getDisplayName());
 	}
 }
