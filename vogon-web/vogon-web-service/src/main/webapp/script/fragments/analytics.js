@@ -40,7 +40,6 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 			chart: {
 				type: "lineChart",
 				height: 500,
-				width: 300,
 				showLegend: false,
 				margin: {
 					top: 20,
@@ -161,29 +160,21 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 		var allZero = true;
 		$scope.report.tagExpenses.forEach(function (tagExpense) {
 			var amount = tagExpense.amounts[$scope.report.selectedCurrency] !== undefined ? tagExpense.amounts[$scope.report.selectedCurrency] : 0;
-			if (amount !== 0)
+			if (amount !== 0) {
 				allZero = false;
-			var chartEntry = {
-				tag: tagExpense.tag, amount: amount
-			};
-			newChartData.push(chartEntry);
+				newChartData.push({tag: tagExpense.tag, amount: amount});
+			}
 		});
 		if (allZero)
-			$scope.tagsChart.data = [];
-		else
-			$scope.tagsChart.data = newChartData;
-		$scope.$applyAsync(function () {
-			$scope.tagsChart.options.chart.width = $("#tagsChartContainer").width();
-		});//FIXME: remove this workaround after angular-nvd3 is fixed
+			newChartData = [];
+		$scope.tagsChart.data = newChartData;
 	};
 	var updateBalanceChart = function () {
 		var newChartData = [];
 		var accountGraph = $scope.report.accountsBalanceGraph[$scope.report.selectedCurrency];
 		if (accountGraph !== undefined)
-			for (var date in accountGraph.data) {
-				var entry = {x: new Date(date), y: accountGraph.data[date]};
-				newChartData.push(entry);
-			}
+			for (var date in accountGraph.data)
+				newChartData.push({x: new Date(date), y: accountGraph.data[date]});
 		if (accountGraph === undefined || Object.keys(accountGraph.data).length <= 0)
 			$scope.balanceChart.data = [];
 		else
@@ -191,9 +182,6 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 					key: messages.BALANCE,
 					values: newChartData
 				}];
-		$scope.$applyAsync(function () {
-			$scope.balanceChart.options.chart.width = $("#balanceChartContainer").width();
-		});//FIXME: remove this workaround after angular-nvd3 is fixed
 	};
 	$scope.filterCurrency = function (currency) {
 		return $scope.report !== undefined && $scope.report.currencies.indexOf(currency.currencyCode) !== -1;

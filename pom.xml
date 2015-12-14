@@ -223,7 +223,7 @@
 			<dependency>
 				<groupId>org.webjars.bower</groupId>
 				<artifactId>d3</artifactId>
-				<version>3.5.9</version>
+				<version>3.5.10</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.bower</groupId>
@@ -233,7 +233,7 @@
 			<dependency>
 				<groupId>org.webjars.bower</groupId>
 				<artifactId>angular-nvd3</artifactId>
-				<version>1.0.3</version>
+				<version>1.0.5</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

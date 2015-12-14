@@ -82,7 +82,7 @@
 					<button ng-click="buildReport()" class="btn btn-default btn-primary form-control" type="submit" ng-disabled="analyticsForm.$invalid"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> <fmt:message key="BUILD_REPORT"/></button>
 				</div>
 			</div>
-			<div class="well well-sm form-control-static" ng-show="report">
+			<div class="well well-sm form-control-static" ng-if="report">
 				<div class="row">
 					<div class="col-md-6">
 						<label class="form-control-static"><fmt:message key="REPORT_BY_TRANSACTIONS"/></label>
@@ -151,17 +151,13 @@
 				<div class="row form-control-static">
 					<div class="col-md-12">
 						<label><fmt:message key="TAGS_CHART"/></label>
-						<div id="tagsChartContainer">
-							<nvd3 options="tagsChart.options" data="tagsChart.data"></nvd3>
-						</div>
+						<nvd3 options="tagsChart.options" data="tagsChart.data"></nvd3>
 					</div>
 				</div>
 				<div class="row form-control-static">
 					<div class="col-md-12">
 						<label><fmt:message key="BALANCE_CHART"/></label>
-						<div id="balanceChartContainer">
-							<nvd3 options="balanceChart.options" data="balanceChart.data"></nvd3>
-						</div>
+						<nvd3 options="balanceChart.options" data="balanceChart.data"></nvd3>
 					</div>
 				</div>
 			</div>
