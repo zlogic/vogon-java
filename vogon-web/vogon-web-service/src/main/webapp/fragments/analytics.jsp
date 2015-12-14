@@ -103,11 +103,11 @@
 									<hr/>
 									<div class="col-md-6">{{transaction.description}}</div>
 									<div class="col-md-3 text-right">
-										<div ng-repeat="(symbol, total) in totals = (transactionsService.totalsByCurrency(transaction))">
+										<div ng-repeat="(currencyCode, total) in totals = (transactionsService.totalsByCurrency(transaction))">
 											<span ng-show="transactionsService.isTransferTransaction(transaction)">
 												&sum;
 											</span>
-											{{total| number:2}} {{symbol}}
+											{{total| number:2}} {{currencyCode}}
 										</div>
 									</div>
 									<div class="col-md-3">{{transaction.date| date}}</div>
@@ -133,8 +133,8 @@
 									<hr/>
 									<div class="col-md-9">{{tagExpense.tag}}</div>
 									<div class="col-md-3 text-right">
-										<div ng-repeat="(symbol, total) in tagExpense.amounts">
-											{{total| number:2}} {{symbol}}
+										<div ng-repeat="(currencyCode, total) in tagExpense.amounts">
+											{{total| number:2}} {{currencyCode}}
 										</div>
 									</div>
 								</div>

@@ -82,8 +82,8 @@
 							</div>
 						</div>
 						<div class="col-md-1 col-sm-4 text-right">
-							<div ng-repeat="(symbol,total) in totals = (transactionsService.totalsByCurrency(transaction))">
-								<span ng-show="transactionsService.isTransferTransaction(transaction)">&sum;</span>{{total| number:2}} {{symbol}}
+							<div ng-repeat="(currencyCode,total) in totals = (transactionsService.totalsByCurrency(transaction))">
+								<span ng-show="transactionsService.isTransferTransaction(transaction)">&sum;</span>{{total| number:2}} {{currencyCode}}
 							</div>
 						</div>
 						<div class="col-md-1 col-sm-4">
