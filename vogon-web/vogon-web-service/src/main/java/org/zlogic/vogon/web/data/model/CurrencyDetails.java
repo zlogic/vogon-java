@@ -41,15 +41,6 @@ public class CurrencyDetails implements Comparable<CurrencyDetails> {
 	}
 
 	/**
-	 * Returns the currency symbol (Currency.getSymbol())
-	 *
-	 * @return the currency symbol
-	 */
-	public String getSymbol() {
-		return currency.getSymbol();
-	}
-
-	/**
 	 * Returns the currency code (Currency.getCurrencyCode())
 	 *
 	 * @return the currency code
