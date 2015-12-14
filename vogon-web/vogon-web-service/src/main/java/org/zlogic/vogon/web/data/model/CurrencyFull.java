@@ -8,7 +8,7 @@ package org.zlogic.vogon.web.data.model;
 import java.util.Currency;
 
 /**
- * JSON wrapper for Currency class class, used to provide full currency data
+ * JSON wrapper for Currency class, used to provide full currency data
  *
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
@@ -38,12 +38,20 @@ public class CurrencyFull implements Comparable<CurrencyFull> {
 	}
 
 	/**
-	 * Returns the currency symbol (Currency.getDisplayName())
+	 * Returns the currency symbol (Currency.getSymbol())
 	 *
 	 * @return the currency symbol
 	 */
 	public String getSymbol() {
 		return currency.getSymbol();
+	}
+	
+	/**
+	 * Returns the currency code (Currency.getCurrencyCode())
+	 * @return the currency code
+	 */
+	public String getCurrencyCode(){
+		return currency.getCurrencyCode();
 	}
 
 	@Override

@@ -18,7 +18,7 @@ app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationS
 		that.accounts.forEach(
 				function (account) {
 					if (totals[account.currency] === undefined)
-						totals[account.currency] = {total: 0, name: CurrencyService.findCurrency(account.currency)};
+						totals[account.currency] = {total: 0, name: CurrencyService.findCurrency(account.currency).currencyCode};
 					totals[account.currency].total += account.balance;
 				});
 		that.totalsForCurrency = totals;

@@ -9,7 +9,7 @@ app.controller("AccountsController", function ($scope, AuthorizationService, Acc
 		$scope.editingAccounts = true;
 	};
 	$scope.addAccount = function () {
-		var account = {includeInTotal: true, showInList: true};
+		var account = {includeInTotal: true, showInList: true, currency: UserService.userData.defaultCurrency};
 		AccountsService.accounts.unshift(account);
 	};
 	$scope.deleteAccount = function (account) {

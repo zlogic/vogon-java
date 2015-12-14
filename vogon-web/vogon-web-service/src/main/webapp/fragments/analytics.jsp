@@ -145,7 +145,7 @@
 				<div class="row form-control-static">
 					<div class="col-md-12 form-inline">
 						<label><fmt:message key="SELECT_CHARTS_CURRENCY"/> </label>
-						<select ng-model="report.selectedCurrency" ng-change="currencyChanged()" ng-options="currency.symbol as currency.displayName for currency in currencyService.currencies|filter:filterCurrency" class="form-control"></select>
+						<select ng-model="report.selectedCurrency" ng-change="currencyChanged()" ng-options="currency.currencyCode as currency.displayName for currency in currencyService.currencies|filter:filterCurrency" class="form-control"></select>
 					</div>
 				</div>
 				<div class="row form-control-static">
