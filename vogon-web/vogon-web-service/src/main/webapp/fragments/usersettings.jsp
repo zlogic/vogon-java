@@ -14,7 +14,7 @@
 			</div>
 			<div class="form-group" ng-class="{ 'has-error': userSettingsForm.currency.$invalid }">
 				<label><fmt:message key="DEFAULT_CURRENCY"/></label>
-				<select name="currency" ng-model="user.defaultCurrency" ng-options="currency.symbol as currency.displayName for currency in currencies.currencies" class="form-control" required></select>
+				<select name="currency" ng-model="user.defaultCurrency" ng-options="currency.currencyCode as currency.displayName for currency in currencies.currencies" class="form-control" required></select>
 			</div>
 			<div class="form-group">
 				<div class="form-inline">

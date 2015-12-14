@@ -57,7 +57,7 @@
 								</div>
 								<div class="form-inline col-md-3 col-sm-4">
 									<span ng-class="{ 'has-error': accountForm.accountCurrency.$invalid }" >
-										<select ng-model="account.currency" ng-options="currency.symbol as currency.displayName for currency in currencies.currencies" class="form-control" name="accountCurrency" required></select>
+										<select ng-model="account.currency" ng-options="currency.currencyCode as currency.displayName for currency in currencies.currencies" class="form-control" name="accountCurrency" required></select>
 									</span>
 								</div>
 								<div class="form-inline col-md-1 col-sm-1 text-right">

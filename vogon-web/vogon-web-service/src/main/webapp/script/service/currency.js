@@ -11,13 +11,13 @@ app.service("CurrencyService", function ($rootScope, HTTPService, AuthorizationS
 			that.currencies = [];
 		}
 	};
-	this.findCurrency = function (symbol) {
+	this.findCurrency = function (currencyCode) {
 		var result = that.currencies.filter(
 				function (currency) {
-					return currency.symbol === symbol;
+					return currency.currencyCode === currencyCode;
 				});
 		if (result.length > 0)
-			return result[0].displayName;
+			return result[0];
 	};
 	$rootScope.$watch(function () {
 		return AuthorizationService.authorized;

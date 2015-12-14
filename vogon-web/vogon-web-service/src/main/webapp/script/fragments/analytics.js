@@ -196,7 +196,7 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 		});//FIXME: remove this workaround after angular-nvd3 is fixed
 	};
 	$scope.filterCurrency = function (currency) {
-		return $scope.report !== undefined && $scope.report.currencies.indexOf(currency.symbol) !== -1;
+		return $scope.report !== undefined && $scope.report.currencies.indexOf(currency.currencyCode) !== -1;
 	};
 	$scope.updateAccounts();
 	$scope.$watch(function () {
