@@ -40,6 +40,6 @@
 <h3>About Vogon</h3>
 <p>Vogon is an open-source personal finance tracker.</p>
 <p>It runs on most cloud providers, even on free tiers.</p>
-<p>For more information, visit the project's <a href="http://github.com/zlogic/vogon">Github</a> or <a href="https://sourceforge.net/p/vogonfinance/">SourceForge</a> pages.</p>
+<p>For more information, visit the project's <a href="http://github.com/zlogic/vogon">Github</a> page.</p>
 <p>Developed by <a href="https://plus.google.com/+DmitryZolotukhin">Dmitry Zolotukhin</a>.</p>
 <p class="text-center"><img src="images/vogon-logo-large.png" alt="Vogon logo"/></p>
