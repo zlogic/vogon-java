@@ -8,8 +8,8 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 	$scope.endDateCalendar = {opened: false};
 	var currentTime = new Date();
 	$scope.dateRange = {
-		start: dateToJson(new Date(currentTime.getFullYear(), currentTime.getMonth(), 1)),
-		end: dateToJson(new Date((new Date(currentTime.getFullYear(), currentTime.getMonth() + 1, 1)) - 1))
+		start: new Date(currentTime.getFullYear(), currentTime.getMonth(), 1),
+		end: new Date((new Date(currentTime.getFullYear(), currentTime.getMonth() + 1, 1)) - 1)
 	};
 	$scope.transactionTypeEnabled = {
 		transfer: false,

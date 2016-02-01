@@ -18,6 +18,10 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 		that.lastPage = false;
 		that.loadingNextPage = that.nextPageRequest !== undefined;
 	};
+	var processReceivedTransaction = function (transaction) {
+		transaction.date = new Date(transaction.date);
+		return transaction;
+	};
 	this.nextPage = function () {
 		if (that.lastPage) {
 			that.loadingNextPage = false;
@@ -43,7 +47,7 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 							that.nextPageRequest = undefined;
 							that.loadingNextPage = false;
 							if (data.data.length !== 0)
-								that.transactions = that.transactions.concat(data.data);
+								that.transactions = that.transactions.concat(data.data.map(processReceivedTransaction));
 							else
 								that.lastPage = true;
 							that.currentPage++;
@@ -72,7 +76,7 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 		that.transactions.forEach(
 				function (transaction, i) {
 					if (transaction.id === data.id) {
-						that.transactions[i] = data;
+						that.transactions[i] = processReceivedTransaction(data);
 						found = true;
 					}
 				});
@@ -106,7 +110,7 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 				.then(that.update, that.update);
 	};
 	this.getDate = function () {
-		return dateToJson(new Date());
+		return new Date();
 	};
 	this.isExpenseIncomeTransaction = function (transaction) {
 		return transaction.type === this.transactionTypes[0].value;
