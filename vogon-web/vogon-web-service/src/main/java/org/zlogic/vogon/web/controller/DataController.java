@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,15 +27,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.VogonUser;
+import org.zlogic.vogon.data.interop.ClassExporter;
+import org.zlogic.vogon.data.interop.ExportedData;
 import org.zlogic.vogon.data.interop.VogonExportException;
 import org.zlogic.vogon.data.interop.VogonImportException;
 import org.zlogic.vogon.data.interop.VogonImportLogicalException;
 import org.zlogic.vogon.data.interop.XmlExporter;
 import org.zlogic.vogon.data.interop.XmlImporter;
 import org.zlogic.vogon.data.tools.DatabaseMaintenance;
+import org.zlogic.vogon.web.controller.serialization.JSONMapper;
 import org.zlogic.vogon.web.data.AccountRepository;
+import org.zlogic.vogon.web.data.InitializationHelper;
 import org.zlogic.vogon.web.data.TransactionRepository;
 import org.zlogic.vogon.web.data.UserRepository;
+import org.zlogic.vogon.web.data.model.FinanceTransactionJson;
 import org.zlogic.vogon.web.security.VogonSecurityUser;
 
 /**
@@ -67,6 +73,16 @@ public class DataController {
 	 */
 	@Autowired
 	private AccountRepository accountRepository;
+	/**
+	 * InitializationHelper instance
+	 */
+	@Autowired
+	private InitializationHelper initializationHelper;
+	/**
+	 * JSONMapper instance
+	 */
+	@Autowired
+	private JSONMapper jsonMapper;
 
 	/**
 	 * Imports uploaded XML data
@@ -94,8 +110,8 @@ public class DataController {
 	 * @param userPrincipal the authenticated user
 	 * @return the HTTPEntity for the file download
 	 */
-	@RequestMapping(value = "/export", method = {RequestMethod.GET, RequestMethod.POST}, produces = "application/xml")
-	public HttpEntity<byte[]> exportData(@AuthenticationPrincipal VogonSecurityUser userPrincipal) throws RuntimeException {
+	@RequestMapping(value = "/export/xml", method = {RequestMethod.GET, RequestMethod.POST})
+	public HttpEntity<byte[]> exportDataXML(@AuthenticationPrincipal VogonSecurityUser userPrincipal) throws RuntimeException {
 		VogonUser user = userRepository.findByUsernameIgnoreCase(userPrincipal.getUsername());
 		try {
 			ByteArrayOutputStream outStream = new ByteArrayOutputStream();
@@ -109,10 +125,49 @@ public class DataController {
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_XML);
 			headers.setContentLength(outStream.size());
-			headers.setContentDispositionFormData("attachment", "vogon-" + date + ".xml"); //NOI18N
+			headers.setContentDispositionFormData("attachment", "vogon-" + date + ".xml"); //NOI18N //NOI18N
 
 			return new HttpEntity<>(outStream.toByteArray(), headers);
 		} catch (VogonExportException ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+
+	/**
+	 * Returns all data
+	 *
+	 * @param userPrincipal the authenticated user
+	 * @return the HTTPEntity for the file download
+	 */
+	@RequestMapping(value = "/export/json", method = {RequestMethod.GET, RequestMethod.POST})
+	public HttpEntity<byte[]> exportDataJSON(@AuthenticationPrincipal VogonSecurityUser userPrincipal) throws RuntimeException {
+		VogonUser user = userRepository.findByUsernameIgnoreCase(userPrincipal.getUsername());
+		try {
+			ClassExporter exporter = new ClassExporter();
+			Sort accountSort = new Sort(new Sort.Order(Sort.Direction.ASC, "id"));//NOI18N
+			Sort transactionSort = new Sort(new Sort.Order(Sort.Direction.ASC, "id"));//NOI18N
+
+			exporter.exportData(user, accountRepository.findByOwner(user, accountSort), transactionRepository.findByOwner(user, transactionSort), null);
+			ExportedData exportedData = exporter.getExportedData();
+
+			//Process transactions for JSON
+			List<FinanceTransactionJson> processedTransactions = initializationHelper.initializeTransactions(exportedData.getTransactions());
+			exportedData.getTransactions().clear();
+			for (FinanceTransactionJson transaction : processedTransactions)
+				exportedData.getTransactions().add(transaction);
+
+			//Convert to JSON
+			byte[] output = jsonMapper.writer().withDefaultPrettyPrinter().writeValueAsString(exportedData).getBytes("utf-8"); //NOI18N
+
+			String date = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date()); //NOI18N
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+			headers.setContentLength(output.length);
+			headers.setContentDispositionFormData("attachment", "vogon-" + date + ".json"); //NOI18N //NOI18N
+
+			return new HttpEntity<>(output, headers);
+		} catch (VogonExportException | IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}

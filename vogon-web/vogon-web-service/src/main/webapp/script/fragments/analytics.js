@@ -2,7 +2,7 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 	$scope.accountService = AccountsService;
 	$scope.transactionsService = TransactionsService;
 	$scope.currencyService = CurrencyService;
-	$scope.tags = {};
+	$scope.tags = [];
 	$scope.accounts = {};
 	$scope.startDateCalendar = {opened: false};
 	$scope.endDateCalendar = {opened: false};
@@ -71,9 +71,9 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 	$scope.currencies = [];
 	$scope.reportCompleted = false;
 	$scope.updateTags = function () {
-		$scope.tags = {};
+		$scope.tags = [];
 		TagsService.tags.forEach(function (tag) {
-			$scope.tags[tag] = true;
+			$scope.tags.push({tag: tag, selected: true});
 		});
 	};
 	$scope.updateAccounts = function () {
@@ -84,11 +84,11 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 	};
 	$scope.selectAllTags = function () {
 		for (var tag in $scope.tags)
-			$scope.tags[tag] = true;
+			$scope.tags[tag].selected = true;
 	};
 	$scope.deselectAllTags = function () {
 		for (var tag in $scope.tags)
-			$scope.tags[tag] = false;
+			$scope.tags[tag].selected = false;
 	};
 	$scope.selectAllAccounts = function () {
 		for (var account in $scope.accounts)
@@ -118,8 +118,8 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 		};
 		reportConfiguration.selectedTags = [];
 		for (var tag in $scope.tags)
-			if ($scope.tags[tag])
-				reportConfiguration.selectedTags.unshift(tag);
+			if ($scope.tags[tag].selected)
+				reportConfiguration.selectedTags.unshift($scope.tags[tag].tag);
 		reportConfiguration.selectedAccounts = [];
 		for (var accountId in $scope.accounts) {
 			if ($scope.accounts[accountId]) {

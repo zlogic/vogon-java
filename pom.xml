@@ -29,7 +29,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.5</version>
+					<version>3.5.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -84,17 +84,17 @@
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-entitymanager</artifactId>
-				<version>5.0.7.Final</version>
+				<version>5.0.8.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-jpamodelgen</artifactId>
-				<version>5.0.7.Final</version>
+				<version>5.0.8.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-c3p0</artifactId>
-				<version>5.0.7.Final</version>
+				<version>5.0.8.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
@@ -168,12 +168,12 @@
 			<dependency>
 				<groupId>org.apache.tomcat.embed</groupId>
 				<artifactId>tomcat-embed-jasper</artifactId>
-				<version>8.0.30</version>
+				<version>8.0.32</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>webjars-locator</artifactId>
-				<version>0.29</version>
+				<version>0.30</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
@@ -183,17 +183,17 @@
 			<dependency>
 				<groupId>org.webjars.bower</groupId>
 				<artifactId>angularjs</artifactId>
-				<version>1.4.8</version>
+				<version>1.5.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.bower</groupId>
 				<artifactId>angular-cookies</artifactId>
-				<version>1.4.8</version>
+				<version>1.5.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.bower</groupId>
 				<artifactId>angular-route</artifactId>
-				<version>1.4.8</version>
+				<version>1.5.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.bower</groupId>
@@ -208,12 +208,12 @@
 			<dependency>
 				<groupId>org.webjars.bower</groupId>
 				<artifactId>angular-bootstrap</artifactId>
-				<version>1.1.0</version>
+				<version>1.1.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.bower</groupId>
 				<artifactId>ngInfiniteScroll</artifactId>
-				<version>1.2.1</version>
+				<version>1.2.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.bower</groupId>
@@ -223,12 +223,12 @@
 			<dependency>
 				<groupId>org.webjars.bower</groupId>
 				<artifactId>d3</artifactId>
-				<version>3.5.12</version>
+				<version>3.5.14</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.bower</groupId>
 				<artifactId>nvd3</artifactId>
-				<version>1.8.1</version>
+				<version>1.8.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.bower</groupId>

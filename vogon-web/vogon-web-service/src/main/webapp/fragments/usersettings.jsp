@@ -23,7 +23,8 @@
 				</div>
 			</div>
 			<div class="form-group">
-				<button ng-click="exportData()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> <fmt:message key="EXPORT_DATA"/></button>
+				<button ng-click="exportDataXML()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> <fmt:message key="EXPORT_DATA_XML"/></button>
+				<button ng-click="exportDataJSON()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> <fmt:message key="EXPORT_DATA_JSON"/></button>
 			</div>
 			<div class="form-group">
 				<div class="form-inline">

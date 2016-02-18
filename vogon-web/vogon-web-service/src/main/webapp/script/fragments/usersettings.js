@@ -27,10 +27,18 @@ app.controller("UserSettingsController", function ($scope, AuthorizationService,
 			HTTPService.updateAllData();
 		});
 	};
-	$scope.exportData = function () {
+	$scope.exportDataXML = function () {
 		var form = $('<form>', {
 			html: '<input type="hidden" name="access_token" value="' + AuthorizationService.access_token + '" />',
-			action: "service/export",
+			action: "service/export/xml",
+			method: "post"
+		});
+		form.appendTo(document.body).submit().remove();
+	};
+	$scope.exportDataJSON = function () {
+		var form = $('<form>', {
+			html: '<input type="hidden" name="access_token" value="' + AuthorizationService.access_token + '" />',
+			action: "service/export/json",
 			method: "post"
 		});
 		form.appendTo(document.body).submit().remove();
