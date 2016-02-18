@@ -13,9 +13,9 @@
 							<button ng-click="deselectAllTags()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span> <fmt:message key="DESELECT_ALL_TAGS"/></button>
 						</div>
 						<div class="pre-scrollable">
-							<div class="checkbox" ng-repeat="(tag, selected) in tags | orderBy:'tag'">
+							<div class="checkbox" ng-repeat="tag in tags | orderBy:'tag'">
 								<label>
-									<input type="checkbox" ng-model="tags[tag]" /> {{tag.length>0?tag:"&nbsp;"}}
+									<input type="checkbox" ng-model="tag.selected" /> {{tag.tag.length>0?tag.tag:"&nbsp;"}}
 								</label>
 							</div>
 						</div>
