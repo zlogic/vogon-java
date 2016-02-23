@@ -71,7 +71,8 @@ public class XmlExporter implements Exporter {
 			doc.appendChild(rootElement);
 
 			//Set global parameters
-			rootElement.setAttribute(XmlFields.DEFAULT_CURRENCY_ATTRIBUTE, owner.getDefaultCurrency().getCurrencyCode());
+			if (owner.getDefaultCurrency() != null)
+				rootElement.setAttribute(XmlFields.DEFAULT_CURRENCY_ATTRIBUTE, owner.getDefaultCurrency().getCurrencyCode());
 
 			//Accounts node
 			Element accountsElement = doc.createElement(XmlFields.ACCOUNTS_NODE);
