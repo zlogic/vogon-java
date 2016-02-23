@@ -97,9 +97,12 @@ public class XmlImporter implements Importer {
 
 			//Process default properties
 			{
-				String defaultCurrency = rootNode.getAttributes().getNamedItem(XmlFields.DEFAULT_CURRENCY_ATTRIBUTE).getNodeValue();
+				Node defaultCurrencyAttrubute = rootNode.getAttributes().getNamedItem(XmlFields.DEFAULT_CURRENCY_ATTRIBUTE);
+				if (defaultCurrencyAttrubute != null) {
+					String defaultCurrency = defaultCurrencyAttrubute.getNodeValue();
 
-				owner.setDefaultCurrency(Currency.getInstance(defaultCurrency));
+					owner.setDefaultCurrency(Currency.getInstance(defaultCurrency));
+				}
 			}
 
 			//Process accounts
