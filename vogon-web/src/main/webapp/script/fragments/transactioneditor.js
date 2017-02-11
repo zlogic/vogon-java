@@ -31,7 +31,7 @@ app.controller("TransactionEditorController", function ($scope, AccountsService,
 		TransactionsService.submitTransaction($scope.transaction);
 	};
 	$scope.cancelEditing = function () {
-		TransactionsService.updateTransaction(transaction.id).then(AccountsService.update);
+		TransactionsService.updateTransaction(transaction.id);
 	};
 	$scope.deleteTransaction = function () {
 		TransactionsService.deleteTransaction($scope.transaction);

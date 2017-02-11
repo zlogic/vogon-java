@@ -1,15 +1,18 @@
 app.service("CurrencyService", function ($rootScope, HTTPService, AuthorizationService) {
 	var that = this;
 	this.currencies = [];
-	this.update = function () {
+	var doUpdate = updateHelper(function () {
 		if (AuthorizationService.authorized) {
-			HTTPService.get("service/currencies")
+			return HTTPService.get("service/currencies")
 					.then(function (data) {
 						that.currencies = data.data;
 					});
 		} else {
 			that.currencies = [];
 		}
+	});
+	this.update = function () {
+		return doUpdate.update();
 	};
 	this.findCurrency = function (currencyCode) {
 		var result = that.currencies.filter(

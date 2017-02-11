@@ -1,4 +1,5 @@
 app.controller("AnalyticsController", function ($scope, AccountsService, TransactionsService, CurrencyService, HTTPService, UserService, TagsService) {
+	var that = this;
 	$scope.accountService = AccountsService;
 	$scope.transactionsService = TransactionsService;
 	$scope.currencyService = CurrencyService;
@@ -16,7 +17,7 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 		income: true,
 		expense: true
 	};
-	$scope.report = undefined;
+	this.report = undefined;
 	$scope.tagsChart = {
 		data: [],
 		options: {
@@ -69,7 +70,7 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 		}
 	};
 	$scope.currencies = [];
-	$scope.reportCompleted = false;
+	$scope.report = undefined;
 	$scope.updateTags = function () {
 		$scope.tags = [];
 		TagsService.tags.forEach(function (tag) {
@@ -119,63 +120,57 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 		reportConfiguration.selectedTags = [];
 		for (var tag in $scope.tags)
 			if ($scope.tags[tag].selected)
-				reportConfiguration.selectedTags.unshift($scope.tags[tag].tag);
+				reportConfiguration.selectedTags.push($scope.tags[tag].tag);
 		reportConfiguration.selectedAccounts = [];
 		for (var accountId in $scope.accounts) {
 			if ($scope.accounts[accountId]) {
-				var account = AccountsService.getAccount(Number(accountId));
-				if (account !== undefined)
-					reportConfiguration.selectedAccounts.unshift(account);
+				reportConfiguration.selectedAccounts.push(accountId);
 			}
 		}
 		HTTPService.post("service/analytics", reportConfiguration).then(function (data) {
-			$scope.report = data.data;
+			that.report = data.data;
 			updateCurrencies();
-			updateTagsChart();
-			updateBalanceChart();
+			$scope.reportCompleted = true;
 		});
 	};
 	var updateCurrencies = function () {
-		var newCurrencies = {};
-		$scope.report.tagExpenses.forEach(function (tagExpense) {
-			for (var currency in tagExpense.amounts)
-				if (newCurrencies[currency] === undefined)
-					newCurrencies[currency] = currency;
-		});
-		var newCurrenciesList = [];
-		for (var currency in newCurrencies)
-			newCurrenciesList.unshift(currency);
-		$scope.report.currencies = newCurrenciesList;
-		if (newCurrenciesList.indexOf(UserService.userData.defaultCurrency) !== -1)
-			$scope.report.selectedCurrency = UserService.userData.defaultCurrency;
-		else
-			$scope.report.selectedCurrency = newCurrenciesList[0];
+		$scope.currencies = Object.keys(that.report);
+		$scope.report = $scope.currencies.length > 0 ? {selectedCurrency: $scope.currencies[0]} : {};
+		$scope.currencyChanged();
 	};
 	$scope.currencyChanged = function () {
+		var currency = $scope.report.selectedCurrency;
+		$scope.report = (currency !== undefined) ? {
+			financeTransactions: that.report[currency].financeTransactions,
+			tagExpenses: that.report[currency].tagExpenses,
+			accountsBalanceGraph: that.report[currency].accountsBalanceGraph,
+			selectedCurrency: currency
+		} : {};
 		updateTagsChart();
 		updateBalanceChart();
 	};
 	var updateTagsChart = function () {
 		var newChartData = [];
 		var allZero = true;
-		$scope.report.tagExpenses.forEach(function (tagExpense) {
-			var amount = tagExpense.amounts[$scope.report.selectedCurrency] !== undefined ? tagExpense.amounts[$scope.report.selectedCurrency] : 0;
-			if (amount !== 0) {
-				allZero = false;
-				newChartData.push({tag: tagExpense.tag, amount: amount});
-			}
-		});
+		if($scope.report.tagExpenses !== undefined)
+			$scope.report.tagExpenses.forEach(function (tagExpense) {
+				var amount = tagExpense.amount;
+				if (amount !== 0) {
+					allZero = false;
+					newChartData.push(tagExpense);
+				}
+			});
 		if (allZero)
 			newChartData = [];
 		$scope.tagsChart.data = newChartData;
 	};
 	var updateBalanceChart = function () {
 		var newChartData = [];
-		var accountGraph = $scope.report.accountsBalanceGraph[$scope.report.selectedCurrency];
+		var accountGraph = $scope.report.accountsBalanceGraph;
 		if (accountGraph !== undefined)
-			for (var date in accountGraph.data)
-				newChartData.push({x: new Date(date), y: accountGraph.data[date]});
-		if (accountGraph === undefined || Object.keys(accountGraph.data).length <= 0)
+			for (var date in accountGraph)
+				newChartData.push({x: new Date(date), y: accountGraph[date]});
+		if (accountGraph === undefined || Object.keys(accountGraph).length <= 0)
 			$scope.balanceChart.data = [];
 		else
 			$scope.balanceChart.data = [{
@@ -184,7 +179,7 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 				}];
 	};
 	$scope.filterCurrency = function (currency) {
-		return $scope.report !== undefined && $scope.report.currencies.indexOf(currency.currencyCode) !== -1;
+		return that.report !== undefined && $scope.currencies.indexOf(currency.currencyCode) !== -1;
 	};
 	$scope.updateAccounts();
 	$scope.$watch(function () {

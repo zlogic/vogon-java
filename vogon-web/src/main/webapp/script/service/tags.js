@@ -16,7 +16,7 @@ app.service("TagsService", function ($q, AuthorizationService, HTTPService) {
 		});
 		return tagsAutocomplete;
 	};
-	this.update = function () {
+	var doUpdate = updateHelper(function () {
 		if (AuthorizationService.authorized) {
 			return HTTPService.get("service/analytics/tags", undefined, HTTPService.buildRequestParams(false)).then(function (data) {
 				that.tags = data.data;
@@ -27,6 +27,9 @@ app.service("TagsService", function ($q, AuthorizationService, HTTPService) {
 			deferred.reject();
 			return deferred.promise;
 		}
+	});
+	this.update = function () {
+		return doUpdate.update();
 	};
 	this.mergeTags = function (newTags) {
 		newTags.forEach(

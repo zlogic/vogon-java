@@ -4,7 +4,6 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 	this.transactionTypes = [{name: messages.EXPENSEINCOME, value: "EXPENSEINCOME"}, {name: messages.TRANSFER, value: "TRANSFER"}];
 	this.defaultTransactionType = this.transactionTypes[0];
 	this.currentPage = 0;
-	this.nextPageRequest = undefined;
 	this.loadingNextPage = false;
 	this.lastPage = false;
 	this.sortColumn = "date";
@@ -16,60 +15,55 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 		that.currentPage = 0;
 		that.transactions = [];
 		that.lastPage = false;
-		that.loadingNextPage = that.nextPageRequest !== undefined;
+		that.loadingNextPage = doUpdate.inProgress();
 	};
 	var processReceivedTransaction = function (transaction) {
 		transaction.date = new Date(transaction.date);
 		return transaction;
 	};
-	this.nextPage = function () {
-		if (that.lastPage) {
+	var doUpdate = updateHelper(function () {
+		if (that.lastPage || !AuthorizationService.authorized) {
+			if(!AuthorizationService.authorized)
+				reset();
 			that.loadingNextPage = false;
-		} else if (AuthorizationService.authorized) {
-			if (that.nextPageRequest === undefined) {
-				that.loadingNextPage = true;
-				var params = {
-					page: that.currentPage,
-					sortColumn: that.sortColumn.toUpperCase(),
-					sortDirection: that.sortAsc ? "ASC" : "DESC"
-				};
-				if (that.filterDate !== undefined && that.filterDate !== null && that.filterDate !== "")
-					params.filterDate = dateToJson(that.filterDate);
-				if (that.filterDescription !== undefined && that.filterDescription !== "")
-					params.filterDescription = that.filterDescription;
-				if (that.filterTags !== undefined) {
-					var tags = tagsToJson(that.filterTags);
-					if (tags.length > 0)
-						params.filterTags = tags;
-				}
-				return that.nextPageRequest = HTTPService.get("service/transactions/?" + encodeForm(params), undefined, HTTPService.buildRequestParams(false))
-						.then(function (data) {
-							that.nextPageRequest = undefined;
-							that.loadingNextPage = false;
-							if (data.data.length !== 0)
-								that.transactions = that.transactions.concat(data.data.map(processReceivedTransaction));
-							else
-								that.lastPage = true;
-							that.currentPage++;
-						}, function () {
-							that.nextPageRequest = undefined;
-							reset();
-							that.lastPage = true;
-						});
-			} else {
-				return that.nextPageRequest;
-			}
-		} else {
-			reset();
+			var deferred = $q.defer();
+			deferred.reject();
+			return deferred.promise;
 		}
-		var deferred = $q.defer();
-		deferred.reject();
-		return deferred.promise;
-	};
+		that.loadingNextPage = true;
+		var params = {
+			page: that.currentPage,
+			sortColumn: that.sortColumn.toUpperCase(),
+			sortDirection: that.sortAsc ? "ASC" : "DESC"
+		};
+		if (that.filterDate !== undefined && that.filterDate !== null && that.filterDate !== "")
+			params.filterDate = dateToJson(that.filterDate);
+		if (that.filterDescription !== undefined && that.filterDescription !== "")
+			params.filterDescription = that.filterDescription;
+		if (that.filterTags !== undefined) {
+			var tags = tagsToJson(that.filterTags);
+			if (tags.length > 0)
+				params.filterTags = JSON.stringify(tags);
+		}
+		return HTTPService.get("service/transactions/?" + encodeForm(params), undefined, HTTPService.buildRequestParams(false))
+				.then(function (data) {
+					that.loadingNextPage = false;
+					if (data.data.length !== 0)
+						that.transactions = that.transactions.concat(data.data.map(processReceivedTransaction));
+					else
+						that.lastPage = true;
+					that.currentPage++;
+				}, function () {
+					reset();
+					that.lastPage = true;
+				});
+	});
 	this.update = function () {
 		reset();
-		AccountsService.update();
-		return that.nextPage();
+		return doUpdate.update();
+	};
+	this.nextPage = function () {
+		doUpdate.update()
 	};
 	var updateTransactionLocal = function (data) {
 		var found = false;
@@ -87,9 +81,7 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 			return that.update();
 		return HTTPService.get("service/transactions/transaction/" + id)
 				.then(function (data) {
-					if (updateTransactionLocal(data.data))
-						AccountsService.update();
-					else
+					if (!updateTransactionLocal(data.data))
 						that.update();
 				}, that.update);
 	};
@@ -97,17 +89,20 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 		transaction.date = dateToJson(transaction.date);
 		return HTTPService.post("service/transactions", transaction)
 				.then(function (data) {
-					if (updateTransactionLocal(data.data))
-						AccountsService.update();
-					else
+					AccountsService.update();
+					if (!updateTransactionLocal(data.data))
 						that.update();
 				}, that.update);
 	};
 	this.deleteTransaction = function (transaction) {
 		if (transaction === undefined || transaction.id === undefined)
 			return that.update();
+		var afterDeletion = function(){
+			AccountsService.update();
+			that.update();
+		};
 		return HTTPService.delete("service/transactions/transaction/" + transaction.id)
-				.then(that.update, that.update);
+				.then(afterDeletion, afterDeletion);
 	};
 	this.getDate = function () {
 		return new Date();
@@ -126,7 +121,7 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
 					if (account !== undefined && predicate(component) && !accounts.some(function (checkAccount) {
 						return checkAccount.id === account.id;
 					}))
-						accounts.unshift(account);
+					    accounts.unshift(account);
 				});
 		return accounts;
 	};

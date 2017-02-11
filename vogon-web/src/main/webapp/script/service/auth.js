@@ -12,7 +12,7 @@ app.service("AlertService", function ($timeout) {
 	this.addAlert = function (message) {
 		if (!that.enabled())
 			return;
-		var alert = {msg: message, type: "danger"};
+		var alert = {msg: message, class: "alert-danger"};
 		that.alerts.push(alert);
 		$timeout(function () {
 			var alertIndex = that.alerts.indexOf(alert);
@@ -61,18 +61,10 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 	var errorHandler = function (data) {
 		AlertService.endLoadingRequest();
 		var deferred = $q.defer();
-		if (data.status === 401) {
-			var fixAuthCall = that.fixAuthorization();
-			if (fixAuthCall !== undefined)
-				fixAuthCall
-						.then(function (authData) {
-							if (that.authorized)
-								retryRequest(data.config).then(deferred.resolve, deferred.reject);
-							else
-								deferred.reject(authData);
-						}, deferred.reject);
-			else
-				deferred.reject();
+		if (data.status === 401)
+			that.resetAuthorization();
+		if (data.status === 401 && isTokenURL(data.config.url)){
+			deferred.reject({data: {error_description: data.data}});
 			return deferred.promise;
 		} else {
 			AlertService.addAlert(complex_messages.HTTP_ERROR_FORMAT(data.status, data.data));
@@ -117,8 +109,8 @@ app.service("HTTPService", function ($http, $q, AlertService) {
 		params.customData = requestParams;
 		return $http.post(url, data, params).then(successHandler, errorHandler);
 	};
-	this.fixAuthorization = function () {
-		throw messages.FIX_AUTHORIZATION_NOT_INITIALIZED;
+	this.resetAuthorization = function () {
+		throw messages.RESET_AUTHORIZATION_NOT_INITIALIZED;
 	};
 	this.setAccessToken = function (access_token) {
 		if (access_token !== undefined)
@@ -156,7 +148,7 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
 		if (access_token !== undefined) {
 			that.access_token = access_token;
 			if (that.rememberToken)
-				localStorage.setItem("access_token", access_token);
+				localStorage.setItem("vogon_access_token", access_token);
 			HTTPService.setAccessToken(access_token);
 			setAuthorized(true);
 			if (username !== undefined)
@@ -195,37 +187,24 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
 			return deferred.promise;
 		}
 	};
-	this.fixAuthorization = function () {
-		if (that.username !== undefined && that.password !== undefined) {
-			return that.performAuthorization(that.username, that.password);
-		} else {
-			var message;
-			if (that.authorized)
-				if (that.username !== undefined && that.password !== undefined)
-					message = messages.USERNAME_PASSWORD_NOT_ACCEPTED;
-				else if (that.access_token !== undefined)
-					message = messages.ACCESS_TOKEN_REJECTED;
-			that.resetAuthorization(that.authorized ? messages.CANT_FIX_AUTHORIZATION : undefined);
-		}
-	};
 	this.resetAuthorization = function (message) {
 		that.username = undefined;
 		that.password = undefined;
 		that.access_token = undefined;
 		HTTPService.setAccessToken();
 		setAuthorized(false);
-		localStorage.removeItem("access_token");
+		localStorage.removeItem("vogon_access_token");
 		this.rememberToken = defaultRememberToken;
 		if (message !== undefined)
 			AlertService.addAlert(message);
 	};
-	HTTPService.fixAuthorization = this.fixAuthorization;
+	HTTPService.resetAuthorization = this.resetAuthorization;
 	AlertService.enabled = function () {
 		return that.authorized;
 	};
 
 	try {
-		this.access_token = localStorage["access_token"];
+		this.access_token = localStorage["vogon_access_token"];
 	} catch (err) {
 		this.access_token = undefined;
 		AlertService.addAlert(err);
