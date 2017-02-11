@@ -3,8 +3,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.zlogic.vogon.packaging</groupId>
-		<artifactId>top</artifactId>
-		<version>2.2</version>
+		<artifactId>packaging</artifactId>
+		<version>2.3-SNAPSHOT</version>
 	</parent>
 	<artifactId>vogon-web-wildfly</artifactId>
 	<name>Vogon :: Packaging :: Web :: Wildfly</name>
@@ -104,8 +104,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.zlogic.vogon.web</groupId>
-			<artifactId>vogon-web-service</artifactId>
+			<groupId>org.zlogic.vogon</groupId>
+			<artifactId>vogon-web</artifactId>
 			<type>jar</type>
 			<exclusions>
 				<exclusion>
