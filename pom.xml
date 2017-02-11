@@ -3,8 +3,8 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.zlogic.vogon</groupId>
-	<artifactId>top</artifactId>
-	<version>2.2</version>
+	<artifactId>vogon</artifactId>
+	<version>2.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Vogon :: Top</name>
@@ -67,8 +67,8 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.zlogic.vogon.web</groupId>
-				<artifactId>vogon-web-service</artifactId>
+				<groupId>org.zlogic.vogon</groupId>
+				<artifactId>vogon-web</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

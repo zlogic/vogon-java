@@ -4,8 +4,8 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<parent>
 		<groupId>org.zlogic.vogon.packaging</groupId>
-		<artifactId>top</artifactId>
-		<version>2.2</version>
+		<artifactId>packaging</artifactId>
+		<version>2.3-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
