@@ -26,15 +26,18 @@ app.service("AccountsService", function ($rootScope, HTTPService, AuthorizationS
 				});
 		that.totalsForCurrency = totals;
 	};
-	this.update = function () {
+	var doUpdate = updateHelper(function () {
 		if (AuthorizationService.authorized) {
-			HTTPService.get("service/accounts", undefined, HTTPService.buildRequestParams(false))
+			return HTTPService.get("service/accounts", undefined, HTTPService.buildRequestParams(false))
 					.then(function (data) {
 						setAccounts(data.data);
 					});
 		} else {
 			that.accounts = [];
 		}
+	});
+	this.update = function () {
+		return doUpdate.update();
 	};
 	this.submitAccounts = function (accounts) {
 		return HTTPService.post("service/accounts", accounts)
