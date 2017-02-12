@@ -12,7 +12,7 @@
 		<link rel="stylesheet" type="text/css" href="webjars/nvd3/nv.d3.min.css">
 		<!--<link rel="stylesheet" type="text/css" href="webjars/bootstrap/bootstrap-theme.min.css">-->
 		<script type="text/javascript" src="webjars/jquery/jquery.min.js"></script>
-		<script type="text/javascript" src="webjars/angularjs/angular.min.js"></script>
+		<script type="text/javascript" src="webjars/angular/angular.min.js"></script>
 		<script type="text/javascript" src="webjars/angular-cookies/angular-cookies.min.js"></script>
 		<script type="text/javascript" src="webjars/angular-route/angular-route.min.js"></script>
 		<script type="text/javascript" src="webjars/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
@@ -40,12 +40,13 @@
 		<link rel="stylesheet" type="text/css" href="css/style.css">
 		<link rel="stylesheet" type="text/css" href="css/tags-bootstrap.css">
 		<link rel="icon" type="image/png" href="images/vogon-favicon.png" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 	</head>
 	<body ng-app="vogon">
 		<div ng-controller="NotificationController">
 			<div class="navbar-fixed-top">
-				<div class="alert alert-warning" role="alert" ng-show="alertService.isLoading"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> <fmt:message key="LOADING_ALERT"/></div>
-				<uib-alert ng-show="alertService.enabled()" ng-repeat="alert in alertService.alerts" type="{{alert.type}}" close="alertService.closeAlert($index)"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> {{alert.msg}}</uib-alert>
+				<div class="alert alert-warning" ng-show="alertService.isLoading"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> <fmt:message key="LOADING_ALERT"/></div>
+				<div uib-alert ng-show="alertService.enabled()" ng-repeat="alert in alertService.alerts" ng-class="alert.class" class="ng-hide" close="alertService.closeAlert($index)"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> {{alert.msg}}</div>
 			</div>
 		</div>
 		<div ng-controller="UserController">
@@ -63,11 +64,11 @@
 					</div>
 					<div class="collapse navbar-collapse" id="navbarMain">
 						<ul class="nav navbar-nav">
-							<li ng-class="{active: isActivePath('transactions')}"><a href="#/transactions"><span class="glyphicon glyphicon-list" aria-hidden="true"></span> <fmt:message key="TRANSACTIONS"/></a></li>
-							<li ng-class="{active: isActivePath('accounts')}"><a href="#/accounts"><span class="glyphicon glyphicon-piggy-bank" aria-hidden="true"></span> <fmt:message key="ACCOUNTS"/></a></li>
-							<li ng-class="{active: isActivePath('analytics')}"><a href="#/analytics"><span class="glyphicon glyphicon-list" aria-hidden="true"></span> <fmt:message key="ANALYTICS"/></a></li>
-							<li ng-class="{active: isActivePath('usersettings')}"><a href="#/usersettings"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span> <fmt:message key="USER_SETTINGS"/></a></li>
-							<li ng-class="{active: isActivePath('adminsettings')}" ng-show="userService.isAdmin()"><a href="#/adminsettings"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> <fmt:message key="ADMINISTRATIVE_SETTINGS"/></a></li>
+							<li ng-class="{active: isActivePath('transactions')}"><a href="#!/transactions"><span class="glyphicon glyphicon-list" aria-hidden="true"></span> <fmt:message key="TRANSACTIONS"/></a></li>
+							<li ng-class="{active: isActivePath('accounts')}"><a href="#!/accounts"><span class="glyphicon glyphicon-piggy-bank" aria-hidden="true"></span> <fmt:message key="ACCOUNTS"/></a></li>
+							<li ng-class="{active: isActivePath('analytics')}"><a href="#!/analytics"><span class="glyphicon glyphicon-list" aria-hidden="true"></span> <fmt:message key="ANALYTICS"/></a></li>
+							<li ng-class="{active: isActivePath('usersettings')}"><a href="#!/usersettings"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span> <fmt:message key="USER_SETTINGS"/></a></li>
+							<li ng-class="{active: isActivePath('adminsettings')}" ng-show="userService.isAdmin()"><a href="#!/adminsettings"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> <fmt:message key="ADMINISTRATIVE_SETTINGS"/></a></li>
 						</ul>
 						<ul class="nav navbar-nav navbar-right">
 							<li><p class="navbar-text"><fmt:message key="SIGNED_IN_AS"/></p></li>
@@ -106,8 +107,8 @@
 									</div>
 								</div>
 								<div class="panel-body" ng-show="loginError || registrationError">
-									<uib-alert type="danger" ng-show="loginError"><fmt:message key="LOGIN_FAILED"/>: {{loginError}}</uib-alert>
-									<uib-alert type="danger" ng-show="registrationError"><fmt:message key="REGISTRATION_FAILED"/>: {{registrationError}}</uib-alert>
+									<div uib-alert class="alert-danger ng-hide" ng-show="loginError"><fmt:message key="LOGIN_FAILED"/>: {{loginError}}</div>
+									<div uib-alert class="alert-danger ng-hide" ng-show="registrationError"><fmt:message key="REGISTRATION_FAILED"/>: {{registrationError}}</div>
 								</div>
 								<div class="panel-footer">
 									<div class="text-right">

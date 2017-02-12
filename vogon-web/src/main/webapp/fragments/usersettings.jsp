@@ -12,10 +12,6 @@
 				<label><fmt:message key="PASSWORD"/></label>
 				<input type="password" class="form-control" ng-model="user.password" placeholder="<fmt:message key="ENTER_NEW_PASSWORD"/>" />
 			</div>
-			<div class="form-group" ng-class="{ 'has-error': userSettingsForm.currency.$invalid }">
-				<label><fmt:message key="DEFAULT_CURRENCY"/></label>
-				<select name="currency" ng-model="user.defaultCurrency" ng-options="currency.currencyCode as currency.displayName for currency in currencies.currencies" class="form-control" required></select>
-			</div>
 			<div class="form-group">
 				<div class="form-inline">
 					<button ng-click="importData()" ng-disabled="!file" class="btn btn-default" type="button"><span class="glyphicon glyphicon-import" aria-hidden="true"></span> <fmt:message key="IMPORT_DATA"/></button>
@@ -23,17 +19,7 @@
 				</div>
 			</div>
 			<div class="form-group">
-				<button ng-click="exportDataXML()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> <fmt:message key="EXPORT_DATA_XML"/></button>
-				<button ng-click="exportDataJSON()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> <fmt:message key="EXPORT_DATA_JSON"/></button>
-			</div>
-			<div class="form-group">
-				<div class="form-inline">
-					<button ng-click="performRecalculateBalance()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-repeat" aria-hidden="true"></span> <fmt:message key="RECALCULATE_BALANCE"/></button>
-					<button ng-click="performCleanup()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-flash" aria-hidden="true"></span> <fmt:message key="CLEANUP_DATABASE"/></button>
-				</div>
-			</div>
-			<div class="form-group" ng-show="operationSuccessful">
-				<uib-alert type="success"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> <fmt:message key="DONE_ALERT"/></uib-alert>
+				<button ng-click="exportData()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> <fmt:message key="EXPORT_DATA"/></button>
 			</div>
 			<p>
 				<button ng-click="cancelEditing()" class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> <fmt:message key="CANCEL"/></button>

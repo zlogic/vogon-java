@@ -1,4 +1,4 @@
-<%@ page session="false" trimDirectiveWhitespaces="true" %>
+	<%@ page session="false" trimDirectiveWhitespaces="true" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <fmt:setBundle basename="org.zlogic.vogon.web.webmessages" />
 <form name="transactionEditorForm" novalidate>
@@ -9,15 +9,21 @@
 		<div class="panel-body">
 			<div class="row form-control-static">
 				<div class="form-inline col-md-12">
-					<span ng-class="{ 'has-error': transactionEditorForm.description.$invalid }" >
-						<input type="text" ng-model="transaction.description" class="form-control" placeholder="<fmt:message key="ENTER_TRANSACTION_DESCRIPTION"/>" name="description" required />
-					</span>
-					<select ng-model="transaction.type" ng-init="transaction.type = transaction.type || transactionTypes[0]" ng-options="transactionType.value as transactionType.name for transactionType in transactionTypes" class="form-control"></select>
-					<div class="input-group" ng-class="{ 'has-error': transactionEditorForm.date.$invalid }" >
-						<input type="text" class="form-control" uib-datepicker-popup ng-model="transaction.date" name="date" is-open="calendar.opened" />
-						<span class="input-group-btn">
-							<button type="button" class="btn btn-default" ng-click="openCalendar($event)"><span class="glyphicon glyphicon-calendar"></span></button>
+					<div class="form-group">
+						<span ng-class="{ 'has-error': transactionEditorForm.description.$invalid }" >
+							<input type="text" ng-model="transaction.description" class="form-control" placeholder="<fmt:message key="ENTER_TRANSACTION_DESCRIPTION"/>" name="description" required />
 						</span>
+					</div>
+					<div class="form-group">
+						<select ng-model="transaction.type" ng-init="transaction.type = transaction.type || transactionTypes[0]" ng-options="transactionType.value as transactionType.name for transactionType in transactionTypes" class="form-control"></select>
+					</div>
+					<div class="form-group">
+						<div class="input-group" ng-class="{ 'has-error': transactionEditorForm.date.$invalid }" >
+							<input type="text" class="form-control" uib-datepicker-popup="yyyy-MM-dd" ng-model="transaction.date" name="date" is-open="calendar.opened" />
+							<span class="input-group-btn">
+								<button type="button" class="btn btn-default" ng-click="openCalendar($event)"><span class="glyphicon glyphicon-calendar"></span></button>
+							</span>
+						</div>
 					</div>
 					<tags-input class="bootstrap" ng-model="tags" placeholder="<fmt:message key="ADD_TAGS"/>" on-tag-added="syncTags()" on-tag-removed="syncTags()" replace-spaces-with-dashes="false" add-on-comma="false">
 						<auto-complete source="tagsService.autocompleteQuery($query)"></auto-complete>
@@ -32,14 +38,22 @@
 			<div class="row form-control-static" ng-repeat="component in transaction.components">
 				<div class="form-inline col-md-12">
 					<ng-form name="transactionForm">
-						<span ng-class="{ 'has-error': transactionForm.amount.$invalid }" >
-							<input type="text" ng-model="component.amount" placeholder="<fmt:message key="ENTER_AMOUNT"/>" class="text-right form-control" name="amount" smart-float required/>
-						</span>
-						<span style="form-control">{{accountService.getAccount(component.accountId).currency}}</span>
-						<span ng-class="{ 'has-error': transactionForm.account.$invalid }" >
-							<select ng-model="component.accountId" ng-options="account.id as account.name for account in accountService.accounts | filter:isAccountVisible" class="form-control" name="account" required></select>
-						</span>
-						<button ng-click="deleteTransactionComponent(component)" class="btn btn-default" type="button"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> <fmt:message key="DELETE"/></button>
+						<div class="form-group">
+							<span ng-class="{ 'has-error': transactionForm.account.$invalid }">
+								<select ng-model="component.accountId" ng-options="account.id as account.name for account in accountService.accounts | filter:isAccountVisible" class="form-control" name="account" required></select>
+							</span>
+						</div>
+						<div class="form-group">
+							<span ng-class="{ 'has-error': transactionForm.amount.$invalid }">
+								<div class="input-group">
+									<input type="text" ng-model="component.amount" placeholder="<fmt:message key="ENTER_AMOUNT"/>" class="text-right form-control" name="amount" ng-pattern="/^-?\\\d+(\\\.\\\d+)?$/" required/>
+									<span class="input-group-addon">{{accountService.getAccount(component.accountId).currency}}</span>
+								</div>
+							</span>
+						</div>
+						<div class="form-control">
+							<button ng-click="deleteTransactionComponent(component)" class="btn btn-default" type="button"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> <fmt:message key="DELETE"/></button>
+						</div>
 					</ng-form>
 				</div>
 			</div>
