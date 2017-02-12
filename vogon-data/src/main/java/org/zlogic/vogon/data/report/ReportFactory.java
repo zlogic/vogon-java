@@ -312,7 +312,7 @@ public class ReportFactory {
 	}
 
 	/**
-	 * Returns all transactions matching the set filters, ordered by amount
+	 * Returns all transactions matching the set filters, ordered by date
 	 * descending
 	 *
 	 * @param entityManager the EntityManager to be used for making queries
@@ -320,7 +320,7 @@ public class ReportFactory {
 	 * amount descending
 	 */
 	protected List<FinanceTransaction> getTransactions(EntityManager entityManager) {
-		return getTransactions(entityManager, FinanceTransaction_.amount, false, true, EnumSet.allOf(FilterType.class), -1, -1);
+		return getTransactions(entityManager, FinanceTransaction_.transactionDate, true, true, EnumSet.allOf(FilterType.class), -1, -1);
 	}
 
 	/**
@@ -409,10 +409,12 @@ public class ReportFactory {
 
 		//Expense/income filter
 		Predicate expenseTypePredicate = criteriaBuilder.disjunction();
+		/**
 		if (enabledExpenseTransactions)
 			expenseTypePredicate = criteriaBuilder.or(expenseTypePredicate, criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.amount), new Long(0)));
 		if (enabledIncomeTransactions)
 			expenseTypePredicate = criteriaBuilder.or(expenseTypePredicate, criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.amount), new Long(0)));
+		**/
 
 		//Tags jon
 		Join<FinanceTransaction, String> tagsJoin = tr.join(FinanceTransaction_.tags);
