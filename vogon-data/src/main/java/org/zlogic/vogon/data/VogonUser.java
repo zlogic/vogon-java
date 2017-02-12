@@ -6,17 +6,17 @@
 package org.zlogic.vogon.data;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Currency;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Version;
 
 /**
@@ -51,15 +51,6 @@ public class VogonUser implements Serializable {
 	 * The password
 	 */
 	protected String password;
-	/**
-	 * The user's preferred currency
-	 */
-	private String defaultCurrency;
-	/**
-	 * This user's authorities
-	 */
-	@ElementCollection(fetch = FetchType.EAGER)
-	private Set<String> authorities;
 
 	/**
 	 * Creates a user
@@ -78,6 +69,7 @@ public class VogonUser implements Serializable {
 		this.username = username;
 		this.password = password;
 	}
+
 	/*
 	 * Getters/setters
 	 */
@@ -118,49 +110,6 @@ public class VogonUser implements Serializable {
 	 */
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-	/**
-	 * Returns the default (preferred) currency
-	 *
-	 * @return the default currency
-	 */
-	public Currency getDefaultCurrency() {
-		if (defaultCurrency != null)
-			return Currency.getInstance(defaultCurrency);
-		return null;
-	}
-
-	/**
-	 * Sets the default (preferred) currency
-	 *
-	 * @param currency the new preferred currency
-	 */
-	public void setDefaultCurrency(Currency currency) {
-		defaultCurrency = currency.getCurrencyCode();
-	}
-
-	/**
-	 * Returns the user's assigned authorities
-	 *
-	 * @return the user's assigned authorities
-	 */
-	public Set<String> getAuthorities() {
-		if (authorities == null)
-			authorities = new HashSet<>();
-		return authorities;
-	}
-
-	/**
-	 * Assigns new authorities to user
-	 *
-	 * @param authorities the new authorities for user
-	 */
-	public void setAuthorities(String... authorities) {
-		if (this.authorities == null)
-			this.authorities = new HashSet<>();
-		this.authorities.clear();
-		this.authorities.addAll(Arrays.asList(authorities));
 	}
 
 	/**
