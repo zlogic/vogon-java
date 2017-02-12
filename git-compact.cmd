@@ -1,3 +1,5 @@
-"C:\Program Files (x86)\Git\bin\sh.exe" -login -i -c "git gc --prune=now --aggressive"
-"C:\Program Files (x86)\Git\bin\sh.exe" -login -i -c "git reflog expire --all"
-pause
+SET PATH="C:\Program Files\Git\bin";%PATH%
+cd vogon-nj-code
+git gc --prune=now --aggressive
+git reflog expire --all
+git clean -xdf
