@@ -9,10 +9,12 @@ import java.util.ResourceBundle;
 import javax.annotation.Resource;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -150,6 +152,16 @@ public class UserService implements UserDetailsService, InitializingBean {
 		saveUser(user);
 		refreshUser(userPrincipal);
 		return userPrincipal;
+	}
+
+	/**
+	 * Returns the PasswordEncoder bean
+	 *
+	 * @return the PasswordEncoder bean
+	 */
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
 	}
 
 	/**

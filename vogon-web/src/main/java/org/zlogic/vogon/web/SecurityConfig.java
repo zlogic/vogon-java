@@ -13,16 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -39,7 +34,6 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
-import org.zlogic.vogon.web.security.UserService;
 import org.zlogic.vogon.web.security.VogonSecurityUser;
 
 /**
@@ -57,91 +51,11 @@ public class SecurityConfig {
 	private static final String resourceId = "springsec"; //NOI18N
 
 	/**
-	 * Spring web security configuration
-	 */
-	@Configuration
-	@EnableWebSecurity
-	protected static class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
-
-		/**
-		 * The UserService instance
-		 */
-		@Autowired
-		private UserService userService;
-		/**
-		 * The PasswordEncoder instance
-		 */
-		@Autowired
-		private PasswordEncoder passwordEncoder;
-
-		/**
-		 * Adds the UserService to the AuthenticationManager
-		 *
-		 * @param auth the AuthenticationManagerBuilder instance
-		 * @throws Exception if
-		 * AuthenticationManagerBuilder.userDetailsService() throws an exception
-		 */
-		@Autowired
-		protected void registerAuthentication(AuthenticationManagerBuilder auth) throws Exception {
-			auth
-					.userDetailsService(userService)
-					.passwordEncoder(passwordEncoder);
-		}
-
-		/**
-		 * Returns the authenticationManagerBean used by other configurators
-		 *
-		 * @return the authenticationManagerBean used by other configurators
-		 * @throws Exception if
-		 * WebSecurityConfigurerAdapter.authenticationManagerBean() throws an
-		 * exception
-		 */
-		@Override
-		@Bean
-		public AuthenticationManager authenticationManagerBean() throws Exception {
-			return super.authenticationManagerBean();
-		}
-
-		/**
-		 * Performs HttpSecurity configuration
-		 *
-		 * @param http the HttpSecurity instance to configure
-		 * @throws Exception if HttpSecurity throws an exception
-		 */
-		@Override
-		protected void configure(HttpSecurity http) throws Exception {
-			http
-					.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-		}
-
-		/**
-		 * Performs WebSecurity configuration
-		 *
-		 * @param web the WebSecurity instance to configure
-		 * @throws Exception if WebSecurity throws an exception
-		 */
-		@Override
-		public void configure(WebSecurity web) throws Exception {
-			web
-					.ignoring().antMatchers("/webjars/**");//Fix IE SSL font download bug //NOI18N
-		}
-
-		/**
-		 * Returns the PasswordEncoder bean
-		 *
-		 * @return the PasswordEncoder bean
-		 */
-		@Bean
-		public PasswordEncoder passwordEncoder() {
-			return new BCryptPasswordEncoder();
-		}
-	}
-
-	/**
 	 * Spring ResourceServer configuration
 	 */
 	@Configuration
 	@EnableResourceServer
+	@EnableWebSecurity
 	protected static class ResourceServer extends ResourceServerConfigurerAdapter {
 
 		/**
