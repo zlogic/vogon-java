@@ -42,7 +42,7 @@
 				<div class="col-md-6">
 					<label><fmt:message key="START_DATE"/></label>
 					<div class="input-group" ng-class="{ 'has-error': analyticsForm.startDate.$invalid }">
-						<input type="text" class="form-control" uib-datepicker-popup ng-model="dateRange.start" name="startDate" is-open="startDateCalendar.opened" />
+						<input type="text" class="form-control" uib-datepicker-popup="yyyy-MM-dd" ng-model="dateRange.start" name="startDate" is-open="startDateCalendar.opened" />
 						<span class="input-group-btn">
 							<button type="button" class="btn btn-default" ng-click="openStartDateCalendar($event)" type="button"><span class="glyphicon glyphicon-calendar"></span></button>
 						</span>
@@ -51,7 +51,7 @@
 				<div class="col-md-6">
 					<label><fmt:message key="END_DATE"/></label>
 					<div class="input-group" ng-class="{ 'has-error': analyticsForm.endDate.$invalid }">
-						<input type="text" class="form-control" uib-datepicker-popup ng-model="dateRange.end" name="endDate" is-open="endDateCalendar.opened" />
+						<input type="text" class="form-control" uib-datepicker-popup="yyyy-MM-dd" ng-model="dateRange.end" name="endDate" is-open="endDateCalendar.opened" />
 						<span class="input-group-btn">
 							<button type="button" class="btn btn-default" ng-click="openEndDateCalendar($event)" type="button"><span class="glyphicon glyphicon-calendar"></span></button>
 						</span>
@@ -83,6 +83,12 @@
 				</div>
 			</div>
 			<div class="well well-sm form-control-static" ng-if="report">
+				<div class="row form-control-static">
+					<div class="col-md-12 form-inline">
+						<label><fmt:message key="SELECT_CURRENCY"/> </label>
+						<select ng-model="report.selectedCurrency" ng-change="currencyChanged()" ng-options="currency.currencyCode as currency.displayName for currency in currencyService.currencies|filter:filterCurrency" class="form-control"></select>
+					</div>
+				</div>
 				<div class="row">
 					<div class="col-md-6">
 						<label class="form-control-static"><fmt:message key="REPORT_BY_TRANSACTIONS"/></label>
@@ -103,12 +109,10 @@
 									<hr/>
 									<div class="col-md-6">{{transaction.description}}</div>
 									<div class="col-md-3 text-right">
-										<div ng-repeat="(currencyCode, total) in totals = (transactionsService.totalsByCurrency(transaction))">
-											<span ng-show="transactionsService.isTransferTransaction(transaction)">
-												&sum;
-											</span>
-											{{total| number:2}} {{currencyCode}}
-										</div>
+										<span ng-show="transactionsService.isTransferTransaction(transaction)">
+											&sum;
+										</span>
+										{{total| number:2}} {{report.selectedCurrency}}
 									</div>
 									<div class="col-md-3">{{transaction.date| date}}</div>
 								</div>
@@ -118,7 +122,6 @@
 					<div class="col-md-6 form-group">
 						<label class="form-control-static"><fmt:message key="REPORT_BY_TAGS"/></label>
 						<div class="pre-scrollable">
-
 							<div class="container-fluid">
 								<div class="row">
 									<div class="col-md-9">
@@ -128,24 +131,17 @@
 										<label><fmt:message key="AMOUNT"/></label>
 									</div>
 								</div>
-
 								<div class="row" ng-repeat="tagExpense in report.tagExpenses">
 									<hr/>
 									<div class="col-md-9">{{tagExpense.tag}}</div>
 									<div class="col-md-3 text-right">
 										<div ng-repeat="(currencyCode, total) in tagExpense.amounts">
-											{{total| number:2}} {{currencyCode}}
+											{{total| number:2}} {{report.selectedCurrency}}
 										</div>
 									</div>
 								</div>
 							</div>
 						</div>
-					</div>
-				</div>
-				<div class="row form-control-static">
-					<div class="col-md-12 form-inline">
-						<label><fmt:message key="SELECT_CHARTS_CURRENCY"/> </label>
-						<select ng-model="report.selectedCurrency" ng-change="currencyChanged()" ng-options="currency.currencyCode as currency.displayName for currency in currencyService.currencies|filter:filterCurrency" class="form-control"></select>
 					</div>
 				</div>
 				<div class="row form-control-static">

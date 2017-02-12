@@ -4,64 +4,59 @@
 <div class="panel panel-default">
 	<div class="panel-body">
 		<button ng-click="addTransaction()" class="btn btn-primary"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> <fmt:message key="ADD_TRANSACTION"/></button>
-		<div infinite-scroll="transactionsService.nextPage()" infinite-scroll-disabled="transactionsService.loadingNextPage">
+		<div infinite-scroll="transactionsService.nextPage()" infinite-scroll-disabled="transactionsService.loadingNextPage || transactionsService.lastPage">
 			<div class="container-fluid">
-				<div class="row" id="transactionsTable">
+				<div class="row">
 					<hr/>
-					<div class="col-md-5 col-sm-12">
-						<label>
-							<div class="clickable" ng-click="transactionsService.applySort('description')"><fmt:message key="TRANSACTION_NAME"/>&nbsp;
-								<span ng-show="transactionsService.sortColumn === 'description'" class="glyphicon" ng-class="{'glyphicon-sort-by-alphabet': transactionsService.sortAsc, 'glyphicon-sort-by-alphabet-alt': !transactionsService.sortAsc}"></span>
-							</div>
-						</label>
-						<div class="form-horizontal">
+					<div class="row">
+						<div class="col-md-5 col-sm-12">
+							<label class="form-control-static">
+								<div class="clickable" ng-click="transactionsService.applySort('description')"><fmt:message key="TRANSACTION_NAME"/>&nbsp;
+									<span ng-show="transactionsService.sortColumn === 'description'" class="glyphicon" ng-class="{'glyphicon-sort-by-alphabet': transactionsService.sortAsc, 'glyphicon-sort-by-alphabet-alt': !transactionsService.sortAsc}"></span>
+								</div>
+							</label>
 							<div class="input-group">
 								<span class="input-group-addon"><span class="glyphicon glyphicon-filter" aria-hidden="true"></span></span>
 								<input type="text" class="form-control" placeholder="<fmt:message key="ENTER_DESCRIPTION_FILTER"/>" ng-model="transactionsService.filterDescription" ng-change="applyFilter()"/>
 							</div>
 						</div>
-					</div>
-					<div class="col-md-2 col-sm-4">
-						<label>
-							<div class="clickable" ng-click="transactionsService.applySort('date')"><fmt:message key="DATE"/>&nbsp;
-								<span ng-show="transactionsService.sortColumn === 'date'" class="glyphicon" ng-class="{'glyphicon-sort-by-order': transactionsService.sortAsc, 'glyphicon-sort-by-order-alt': !transactionsService.sortAsc}"></span>
-							</div>
-						</label>
-						<div class="form-horizontal">
+						<div class="col-md-2 col-sm-4">
+							<label class="form-control-static">
+								<div class="clickable" ng-click="transactionsService.applySort('date')"><fmt:message key="DATE"/>&nbsp;
+									<span ng-show="transactionsService.sortColumn === 'date'" class="glyphicon" ng-class="{'glyphicon-sort-by-order': transactionsService.sortAsc, 'glyphicon-sort-by-order-alt': !transactionsService.sortAsc}"></span>
+								</div>
+							</label>
 							<div class="input-group" ng-class="{ 'has-error': transactionsDateFilterForm.filterDate.$invalid }">
 								<span class="input-group-addon"><span class="glyphicon glyphicon-filter" aria-hidden="true"></span></span>
-								<input type="text" class="form-control" uib-datepicker-popup ng-model="transactionsService.filterDate" name="filterDate" ng-change="applyFilter()" is-open="filterDateCalendar.opened" placeholder="<fmt:message key="ENTER_DATE_FILTER"/>" />
+								<input type="text" class="form-control" uib-datepicker-popup="yyyy-MM-dd" ng-model="transactionsService.filterDate" name="filterDate" ng-change="applyFilter()" is-open="filterDateCalendar.opened" placeholder="<fmt:message key="ENTER_DATE_FILTER"/>" />
 								<span class="input-group-btn">
 									<button type="button" class="btn btn-default" ng-click="openFilterDateCalendar($event)"><span class="glyphicon glyphicon-calendar"></span></button>
 								</span>
 							</div>
 						</div>
-					</div>
-					<div class="col-md-2 col-sm-4">
-						<label>
-							<fmt:message key="TAGS"/>
-						</label>
-						<div class="form-horizontal">
-							<div class="input-group">
-								<span class="input-group-addon"><span class="glyphicon glyphicon-filter" aria-hidden="true"></span></span>
-								<tags-input class="bootstrap" ng-model="transactionsService.filterTags" placeholder="<fmt:message key="ADD_FILTER_TAGS"/>" on-tag-added="applyFilter()" on-tag-removed="applyFilter()" replace-spaces-with-dashes="false" add-on-comma="false">
-									<auto-complete source="tagsService.autocompleteQuery($query)"></auto-complete>
-								</tags-input>
+						<div class="col-md-2 col-sm-4">
+							<label class="form-control-static">
+								<fmt:message key="TAGS"/>
+							</label>
+							<div class="form-horizontal">
+								<div class="input-group">
+									<span class="input-group-addon"><span class="glyphicon glyphicon-filter" aria-hidden="true"></span></span>
+									<tags-input class="bootstrap" ng-model="transactionsService.filterTags" placeholder="<fmt:message key="ADD_FILTER_TAGS"/>" on-tag-added="applyFilter()" on-tag-removed="applyFilter()" replace-spaces-with-dashes="false" add-on-comma="false">
+										<auto-complete source="tagsService.autocompleteQuery($query)"></auto-complete>
+									</tags-input>
+								</div>
 							</div>
 						</div>
-					</div>
-					<div class="col-md-1 col-sm-12 text-right">
-						<label>
-							<div class="clickable" ng-click="transactionsService.applySort('amount')"><fmt:message key="AMOUNT"/>&nbsp;
-								<span ng-show="transactionsService.sortColumn === 'amount'" class="glyphicon" ng-class="{'glyphicon-sort-by-order': transactionsService.sortAsc, 'glyphicon-sort-by-order-alt': !transactionsService.sortAsc}"></span>
-							</div>
-						</label>
-					</div>
-					<div class="col-md-1 col-sm-4">
-						<label><fmt:message key="ACCOUNT"/></label>
+						<div class="col-md-1 col-sm-4 text-right">
+							<label class="form-control-static"><fmt:message key="AMOUNT"/></label>
+						</div>
+						<div class="col-md-1 col-sm-4">
+							<label class="form-control-static"><fmt:message key="ACCOUNT"/></label>
+						</div>
 					</div>
 				</div>
-				<div class="row" id="transactionsTable" ng-repeat="transaction in transactionsService.transactions" ng-switch on="editingTransaction == transaction">
+				<div id="transactionsTableStart"></div>
+				<div class="row" ng-repeat="transaction in transactionsService.transactions" ng-switch="editingTransaction == transaction">
 					<hr/>
 					<div class="row" ng-class="{'bg-danger':!transactionsService.isAmountOk(transaction)}" ng-switch-when="false">
 						<div class="col-md-5 col-sm-12">

@@ -6,7 +6,7 @@
 	<core:when test="${configuration.allowRegistration}">
 		<h3>Registration</h3>
 		<p>To register, select the "<fmt:message key="REGISTER"/>" tab and enter a username and password.</p>
-		<p>Press "<fmt:message key="REGISTER"/>" and you'll be registered logged into your account.</p>
+		<p>Press "<fmt:message key="REGISTER"/>" and you'll be registered and logged into your account.</p>
 		<p>
 			<span class="label label-info">Notice</span>
 			If you have entered an already existing username, you'll see an error and should use another username and password.
