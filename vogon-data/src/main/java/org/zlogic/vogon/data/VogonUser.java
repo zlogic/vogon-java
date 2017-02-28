@@ -6,17 +6,11 @@
 package org.zlogic.vogon.data;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Version;
 
 /**
@@ -66,7 +60,7 @@ public class VogonUser implements Serializable {
 	 * @param password the password
 	 */
 	public VogonUser(String username, String password) {
-		this.username = username;
+		setUsername(username);
 		this.password = password;
 	}
 
@@ -91,7 +85,7 @@ public class VogonUser implements Serializable {
 	public void setUsername(String username) {
 		if (username.isEmpty())
 			return;
-		this.username = username.toLowerCase();
+		this.username = username.trim().toLowerCase();
 	}
 
 	/**

@@ -16,6 +16,7 @@ import javax.persistence.Id;
  *
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
+//TODO: consider removing this
 @Entity
 public class ConfigurationElement implements Serializable {
 

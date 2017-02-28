@@ -32,6 +32,7 @@ import javax.persistence.Version;
  *
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
+//TODO: consider moving account modification code into TransactionComponents
 @Entity
 public class FinanceTransaction implements Serializable {
 
@@ -121,6 +122,7 @@ public class FinanceTransaction implements Serializable {
 	 * @param type the transaction type
 	 */
 	public FinanceTransaction(VogonUser owner, String description, String[] tags, Date date, Type type) {
+		//TODO: consider removing this
 		this();
 		this.description = description;
 		this.tags = tags != null ? new HashSet<>(Arrays.asList(tags)) : new HashSet<String>();
@@ -138,6 +140,7 @@ public class FinanceTransaction implements Serializable {
 	 * @param transaction the transaction from which to merge properties
 	 */
 	public FinanceTransaction(VogonUser owner, FinanceTransaction transaction) {
+				//TODO: consider removing this
 		this.components = new HashSet<>();
 		FinanceTransaction.this.merge(transaction, false);
 		FinanceTransaction.this.setOwner(owner);
@@ -173,6 +176,7 @@ public class FinanceTransaction implements Serializable {
 
 	@Override
 	public FinanceTransaction clone() {
+		//TODO: consider removing this
 		FinanceTransaction cloneTransaction = new FinanceTransaction(this.owner, this);
 		for (TransactionComponent component : components)
 			cloneTransaction.addComponent(new TransactionComponent(component.getAccount(), cloneTransaction, component.getRawAmount()));
@@ -193,7 +197,7 @@ public class FinanceTransaction implements Serializable {
 	}
 
 	/**
-	 * Adds components to this account
+	 * Adds components to this trabsaction
 	 *
 	 * @param components the components to add
 	 */
@@ -241,6 +245,7 @@ public class FinanceTransaction implements Serializable {
 	 * account
 	 */
 	public List<TransactionComponent> getComponentsForAccount(FinanceAccount account) {
+		//TODO: consider removing this
 		List<TransactionComponent> foundComponents = new LinkedList<>();
 		for (TransactionComponent component : components)
 			if (component.getAccount().equals(account))
@@ -254,6 +259,7 @@ public class FinanceTransaction implements Serializable {
 	 * @return the list of all accounts affected by this transaction
 	 */
 	public List<FinanceAccount> getAccounts() {
+		//TODO: consider removing this
 		List<FinanceAccount> accounts = new LinkedList<>();
 		for (TransactionComponent component : components)
 			if (!accounts.contains(component.getAccount()))
@@ -267,6 +273,7 @@ public class FinanceTransaction implements Serializable {
 	 * @return the list of all transaction components
 	 */
 	public List<TransactionComponent> getComponents() {
+		//TODO: do not copy, or return a non-modifiable wrapper?
 		List<TransactionComponent> foundComponents = new LinkedList<>();
 		foundComponents.addAll(components);
 		return foundComponents;
@@ -331,6 +338,7 @@ public class FinanceTransaction implements Serializable {
 	 * @return true if amount is OK
 	 */
 	public boolean isAmountOk() {
+		//TODO: consider removing this
 		if (type == Type.EXPENSEINCOME)
 			return true;
 		else if (type == Type.TRANSFER) {
@@ -359,6 +367,7 @@ public class FinanceTransaction implements Serializable {
 	 * @return the list of all currencies used in this transaction's components
 	 */
 	public List<Currency> getCurrencies() {
+		//TODO: consider removing this
 		List<Currency> currencies = new LinkedList<>();
 		for (TransactionComponent component : components)
 			if (component.getAccount() != null && !currencies.contains(component.getAccount().getCurrency()))
