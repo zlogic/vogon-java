@@ -80,6 +80,7 @@ public class FinanceAccount implements Serializable {
 	 * @param currency the account currency
 	 */
 	public FinanceAccount(VogonUser owner, String name, Currency currency) {
+		//TODO: consider removing
 		this();
 		includeInTotal = true;
 		showInList = true;
@@ -96,6 +97,7 @@ public class FinanceAccount implements Serializable {
 	 * @param account the account from which to merge properties
 	 */
 	public FinanceAccount(VogonUser owner, FinanceAccount account) {
+		//TODO: consider removing or refactoring
 		this();
 		balance = 0L;
 		FinanceAccount.this.setOwner(owner);
@@ -130,9 +132,8 @@ public class FinanceAccount implements Serializable {
 	 * @param addAmount the amount to add (can be added)
 	 */
 	public void updateRawBalance(long addAmount) {
-		synchronized (this) {
-			balance += addAmount;
-		}
+		//TODO: consider hiding or removing
+		balance += addAmount;
 	}
 
 	/*

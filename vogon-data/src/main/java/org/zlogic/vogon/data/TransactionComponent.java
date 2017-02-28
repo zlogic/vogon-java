@@ -66,6 +66,7 @@ public class TransactionComponent implements Serializable {
 	 * be both negative and positive
 	 */
 	public TransactionComponent(FinanceAccount account, FinanceTransaction transaction, long amount) {
+		//TODO: consider removing this
 		this.account = account;
 		this.transaction = transaction;
 		this.amount = amount;

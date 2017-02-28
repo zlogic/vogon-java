@@ -9,6 +9,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
@@ -47,12 +48,12 @@ public class ModelTest {
 	}
 
 	@Test
-	public void createUser() throws Exception {
+	public void createUserWithData() throws Exception {
 		Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2016-01-02");
-		VogonUser user = new VogonUser("user01", "password");
-		FinanceAccount account = new FinanceAccount(user, "Account 1", Currency.getInstance("EUR"));
-		FinanceTransaction transaction = new FinanceTransaction(user,"Transaction 1", new String[]{"Tag1", "Tag2"}, date, FinanceTransaction.Type.EXPENSEINCOME);
-		TransactionComponent component = new TransactionComponent(account, transaction, 1000);
+		VogonUser user = new VogonUser(" User01 ", "password");
+		FinanceAccount account = new FinanceAccount(user, "test account 1", Currency.getInstance("RUB"));
+		FinanceTransaction transaction = new FinanceTransaction(user, "test transaction 1", new String[]{"hello", "world"}, date, FinanceTransaction.Type.EXPENSEINCOME);
+		TransactionComponent component = new TransactionComponent(account, transaction, 3);
 		transaction.addComponent(component);
 
 		entityManager.getTransaction().begin();
@@ -66,15 +67,20 @@ public class ModelTest {
 		assertEquals("user01", foundUser.getUsername());
 		assertEquals("password", foundUser.getPassword());
 		FinanceAccount foundAccount = entityManager.find(FinanceAccount.class, account.getId());
-		assertEquals("Account 1", foundAccount.getName());
-		assertEquals(Currency.getInstance("EUR"), foundAccount.getCurrency());
+		assertEquals("test account 1", foundAccount.getName());
+		assertEquals(Currency.getInstance("RUB"), foundAccount.getCurrency());
+		assertEquals(3, foundAccount.getRawBalance());
+		assertTrue(account.getIncludeInTotal());
+		assertTrue(account.getShowInList());
 		FinanceTransaction foundTransaction = entityManager.find(FinanceTransaction.class, transaction.getId());
-		assertEquals("Transaction 1", foundTransaction.getDescription());
-		assertArrayEquals(new String[]{"Tag1", "Tag2"}, transaction.getTags());
+		assertEquals("test transaction 1", foundTransaction.getDescription());
+		String[] tags = transaction.getTags();
+		Arrays.sort(tags);
+		assertArrayEquals(new String[]{"hello", "world"}, tags);
 		assertEquals(date, transaction.getDate());
 		assertEquals(1, transaction.getComponents().size());
 		assertEquals(account.getId(), transaction.getComponents().get(0).getAccount().getId());
-		assertEquals(Long.valueOf(1000), transaction.getComponents().get(0).getRawAmount());
+		assertEquals(Long.valueOf(3), transaction.getComponents().get(0).getRawAmount());
 	}
 
 }
