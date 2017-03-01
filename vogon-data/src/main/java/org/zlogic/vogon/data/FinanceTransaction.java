@@ -298,6 +298,7 @@ public class FinanceTransaction implements Serializable {
 	 * @param amount the new amount
 	 */
 	public void updateComponentRawAmount(TransactionComponent component, long amount) {
+		//TODO: move this into TransactionComponent?
 		if (!components.contains(component))
 			return;
 		long deltaAmount = amount - component.getRawAmount();
@@ -313,6 +314,7 @@ public class FinanceTransaction implements Serializable {
 	 * @param account the new account
 	 */
 	public void updateComponentAccount(TransactionComponent component, FinanceAccount account) {
+		//TODO: move this into TransactionComponent?
 		if (!components.contains(component))
 			return;
 		if (component.getAccount() != null)
