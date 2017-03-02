@@ -1,12 +1,9 @@
+/*
+ * Vogon personal finance/expense analyzer.
+ * Licensed under Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
+ * Author: Dmitry Zolotukhin <zlogic@gmail.com>
+ */
 package org.zlogic.vogon.data;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -14,28 +11,26 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import org.junit.After;
 import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 
+/**
+ * Tests for basic model operations
+ * @author Zlogic
+ */
 public class ModelBasicOperationsTest {
 
 	private EntityManagerFactory emf;
 	private EntityManager entityManager;
 
-	private Map<String, Object> getJpaProperties() {
-		Map<String, Object> jpaProperties = new HashMap<>();
-		String dbConnectionURL = "jdbc:h2:mem:test"; //NOI18N
-		jpaProperties.put("javax.persistence.jdbc.url", dbConnectionURL); //NOI18N
-		jpaProperties.put("javax.persistence.jdbc.user", ""); //NOI18N
-		jpaProperties.put("javax.persistence.jdbc.password", ""); //NOI18N
-		jpaProperties.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect"); //NOI18N
-		jpaProperties.put("hibernate.connection.driver_class", "org.h2.Driver"); //NOI18N
-		return jpaProperties;
-	}
-
 	@Before
 	public void setUp() throws Exception {
-		emf = Persistence.createEntityManagerFactory("VogonPU", getJpaProperties()); //NOI18N
+		emf = Persistence.createEntityManagerFactory("VogonPU", TestUtils.getJpaProperties()); //NOI18N
 		entityManager = emf.createEntityManager();
 	}
 
