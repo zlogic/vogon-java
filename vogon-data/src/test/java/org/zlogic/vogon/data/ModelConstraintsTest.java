@@ -5,7 +5,6 @@
  */
 package org.zlogic.vogon.data;
 
-import java.text.SimpleDateFormat;
 import java.util.Currency;
 import java.util.Date;
 import javax.persistence.EntityManager;
@@ -13,9 +12,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.RollbackException;
 import org.junit.After;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,7 +21,7 @@ import org.junit.rules.ExpectedException;
 /**
  * Tests for model constraints
  *
- * @author Zlogic
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class ModelConstraintsTest {
 
@@ -82,12 +79,10 @@ public class ModelConstraintsTest {
 
 	/**
 	 * Update the amount for an existing transaction
-	 *
-	 * @throws Exception
 	 */
 	@Test
-	public void updateTransactionComponentAccount() throws Exception {
-		Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2016-01-02"); //NOI18N
+	public void updateTransactionComponentAccount() {
+		Date date = TestUtils.parseJSONDate("2016-01-02"); //NOI18N
 		VogonUser user = new VogonUser("user01", "password"); //NOI18N
 		FinanceAccount account1 = new FinanceAccount(user, "test account 1", Currency.getInstance("RUB")); //NOI18N
 		FinanceAccount account2 = new FinanceAccount(user, "test account 2", Currency.getInstance("RUB")); //NOI18N
