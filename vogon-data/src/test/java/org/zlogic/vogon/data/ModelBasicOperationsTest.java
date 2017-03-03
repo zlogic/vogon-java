@@ -5,12 +5,9 @@
  */
 package org.zlogic.vogon.data;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Currency;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -21,7 +18,8 @@ import org.junit.Test;
 
 /**
  * Tests for basic model operations
- * @author Zlogic
+ *
+ * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 public class ModelBasicOperationsTest {
 
@@ -44,12 +42,10 @@ public class ModelBasicOperationsTest {
 
 	/**
 	 * Create a new user, account and transaction with one component
-	 *
-	 * @throws Exception
 	 */
 	@Test
-	public void createUserWithData() throws Exception {
-		Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2016-01-02"); //NOI18N
+	public void createUserWithData() {
+		Date date = TestUtils.parseJSONDate("2016-01-02"); //NOI18N
 		VogonUser user = new VogonUser(" User01 ", "password"); //NOI18N
 		FinanceAccount account = new FinanceAccount(user, "test account 1", Currency.getInstance("RUB")); //NOI18N
 		FinanceTransaction transaction = new FinanceTransaction(user, "test transaction 1", new String[]{"hello", "world"}, date, FinanceTransaction.Type.EXPENSEINCOME); //NOI18N
@@ -85,12 +81,10 @@ public class ModelBasicOperationsTest {
 
 	/**
 	 * Add a new transaction to an existing user account
-	 *
-	 * @throws Exception
 	 */
 	@Test
-	public void addTransaction() throws Exception {
-		Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2016-01-02"); //NOI18N
+	public void addTransaction() {
+		Date date = TestUtils.parseJSONDate("2016-01-02"); //NOI18N
 		VogonUser user = new VogonUser("user01", "password"); //NOI18N
 		FinanceAccount account1 = new FinanceAccount(user, "test account 1", Currency.getInstance("RUB")); //NOI18N
 		FinanceAccount account2 = new FinanceAccount(user, "test account 2", Currency.getInstance("RUB")); //NOI18N
@@ -133,12 +127,10 @@ public class ModelBasicOperationsTest {
 
 	/**
 	 * Update the amount for an existing transaction component
-	 *
-	 * @throws Exception
 	 */
 	@Test
-	public void updateTransactionComponentAmount() throws Exception {
-		Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2016-01-02"); //NOI18N
+	public void updateTransactionComponentAmount() {
+		Date date = TestUtils.parseJSONDate("2016-01-02"); //NOI18N
 		VogonUser user = new VogonUser("user01", "password"); //NOI18N
 		FinanceAccount account1 = new FinanceAccount(user, "test account 1", Currency.getInstance("RUB")); //NOI18N
 		FinanceAccount account2 = new FinanceAccount(user, "test account 2", Currency.getInstance("RUB")); //NOI18N
@@ -184,12 +176,10 @@ public class ModelBasicOperationsTest {
 
 	/**
 	 * Update the amount for an existing transaction
-	 *
-	 * @throws Exception
 	 */
 	@Test
-	public void updateTransactionComponentAccount() throws Exception {
-		Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2016-01-02"); //NOI18N
+	public void updateTransactionComponentAccount() {
+		Date date = TestUtils.parseJSONDate("2016-01-02"); //NOI18N
 		VogonUser user = new VogonUser("user01", "password"); //NOI18N
 		FinanceAccount account1 = new FinanceAccount(user, "test account 1", Currency.getInstance("RUB")); //NOI18N
 		FinanceAccount account2 = new FinanceAccount(user, "test account 2", Currency.getInstance("RUB")); //NOI18N
@@ -262,12 +252,10 @@ public class ModelBasicOperationsTest {
 
 	/**
 	 * Add a transaction component to an existing transaction
-	 *
-	 * @throws Exception
 	 */
 	@Test
-	public void addTransactionComponent() throws Exception {
-		Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2016-01-02"); //NOI18N
+	public void addTransactionComponent() {
+		Date date = TestUtils.parseJSONDate("2016-01-02"); //NOI18N
 		VogonUser user = new VogonUser("user01", "password"); //NOI18N
 		FinanceAccount account1 = new FinanceAccount(user, "test account 1", Currency.getInstance("RUB")); //NOI18N
 		FinanceAccount account2 = new FinanceAccount(user, "test account 2", Currency.getInstance("RUB")); //NOI18N
@@ -336,12 +324,10 @@ public class ModelBasicOperationsTest {
 
 	/**
 	 * Remove a transaction component from an existing transaction
-	 *
-	 * @throws Exception
 	 */
 	@Test
-	public void deleteTransactionComponent() throws Exception {
-		Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2016-01-02"); //NOI18N
+	public void deleteTransactionComponent() {
+		Date date = TestUtils.parseJSONDate("2016-01-02"); //NOI18N
 		VogonUser user = new VogonUser("user01", "password"); //NOI18N
 		FinanceAccount account1 = new FinanceAccount(user, "test account 1", Currency.getInstance("RUB")); //NOI18N
 		FinanceAccount account2 = new FinanceAccount(user, "test account 2", Currency.getInstance("RUB")); //NOI18N
@@ -415,12 +401,10 @@ public class ModelBasicOperationsTest {
 
 	/**
 	 * Remove a transaction
-	 *
-	 * @throws Exception
 	 */
 	@Test
-	public void deleteTransaction() throws Exception {
-		Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2016-01-02"); //NOI18N
+	public void deleteTransaction() {
+		Date date = TestUtils.parseJSONDate("2016-01-02"); //NOI18N
 		VogonUser user = new VogonUser("user01", "password"); //NOI18N
 		FinanceAccount account1 = new FinanceAccount(user, "test account 1", Currency.getInstance("RUB")); //NOI18N
 		FinanceAccount account2 = new FinanceAccount(user, "test account 2", Currency.getInstance("RUB")); //NOI18N
@@ -512,12 +496,10 @@ public class ModelBasicOperationsTest {
 
 	/**
 	 * Remove an account
-	 *
-	 * @throws Exception
 	 */
 	@Test
-	public void deleteAccount() throws Exception {
-		Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2016-01-02"); //NOI18N
+	public void deleteAccount() {
+		Date date = TestUtils.parseJSONDate("2016-01-02"); //NOI18N
 		VogonUser user = new VogonUser("user01", "password"); //NOI18N
 		FinanceAccount account1 = new FinanceAccount(user, "test account 1", Currency.getInstance("RUB")); //NOI18N
 		FinanceAccount account2 = new FinanceAccount(user, "test account 2", Currency.getInstance("RUB")); //NOI18N

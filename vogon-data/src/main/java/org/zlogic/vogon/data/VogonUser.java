@@ -6,11 +6,15 @@
 package org.zlogic.vogon.data;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Version;
 
 /**
@@ -45,6 +49,16 @@ public class VogonUser implements Serializable {
 	 * The password
 	 */
 	protected String password;
+	/**
+	 * The user's transactions
+	 */
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	protected Set<FinanceAccount> accounts;
+	/**
+	 * The user's transactions
+	 */
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	protected Set<FinanceTransaction> transactions;
 
 	/**
 	 * Creates a user
@@ -67,7 +81,12 @@ public class VogonUser implements Serializable {
 	/*
 	 * Getters/setters
 	 */
-
+	public Set<FinanceAccount> getAccounts(){
+		return accounts !=null ? Collections.unmodifiableSet(accounts) : Collections.emptySet();
+	}
+	public Set<FinanceTransaction> getTransactions(){
+		return transactions != null ? Collections.unmodifiableSet(transactions) : Collections.emptySet();
+	}
 	/**
 	 * Returns the username
 	 *
@@ -83,8 +102,9 @@ public class VogonUser implements Serializable {
 	 * @param username the username
 	 */
 	public void setUsername(String username) {
-		if (username.isEmpty())
+		if (username.isEmpty()) {
 			return;
+		}
 		this.username = username.trim().toLowerCase();
 	}
 
@@ -135,10 +155,11 @@ public class VogonUser implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof VogonUser)
+		if (obj instanceof VogonUser) {
 			return id == (((VogonUser) obj).id);
-		else
+		} else {
 			return this == obj;
+		}
 	}
 
 	@Override

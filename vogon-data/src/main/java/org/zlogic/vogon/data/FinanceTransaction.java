@@ -96,7 +96,7 @@ public class FinanceTransaction implements Serializable {
 	 * Contains the related accounts and the transaction's distribution into
 	 * them
 	 */
-	@OneToMany(cascade = CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@OrderBy("id ASC")
 	protected Set<TransactionComponent> components;
 	/**

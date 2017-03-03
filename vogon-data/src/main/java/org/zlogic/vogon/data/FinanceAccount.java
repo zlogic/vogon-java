@@ -6,13 +6,17 @@
 package org.zlogic.vogon.data;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.Locale;
+import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Version;
 
 /**
@@ -63,6 +67,12 @@ public class FinanceAccount implements Serializable {
 	 * If this account should be shown in the accounts list
 	 */
 	protected Boolean showInList;
+	
+	/**
+	 * The account's transaction components
+	 */
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	protected Set<TransactionComponent> transactionComponents;
 
 	/**
 	 * Creates an account
@@ -139,6 +149,13 @@ public class FinanceAccount implements Serializable {
 	/*
 	 * Getters/setters
 	 */
+	/**
+	 * Returns all associated TransactionComponent instances
+	 * @return all associated TransactionComponent instances
+	 */
+	public Set<TransactionComponent> getComponents(){
+		return transactionComponents != null ? Collections.unmodifiableSet(transactionComponents) : Collections.emptySet();
+	}
 	/**
 	 * Returns the account name
 	 *
