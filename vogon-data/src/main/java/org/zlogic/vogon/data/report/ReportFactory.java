@@ -397,8 +397,8 @@ public class ReportFactory {
 		Predicate userPredicate = criteriaBuilder.equal(tr.get(FinanceTransaction_.owner), owner.getId());
 
 		//Date filter
-		Predicate datePredicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), earliestDate),
-				criteriaBuilder.lessThanOrEqualTo(tr.get(FinanceTransaction_.transactionDate), latestDate));
+		Predicate datePredicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(tr.<Date>get(FinanceTransaction_.transactionDate), earliestDate),
+				criteriaBuilder.lessThanOrEqualTo(tr.<Date>get(FinanceTransaction_.transactionDate), latestDate));
 
 		//Transaction type filter
 		Predicate transactionTypePredicate = criteriaBuilder.disjunction();
