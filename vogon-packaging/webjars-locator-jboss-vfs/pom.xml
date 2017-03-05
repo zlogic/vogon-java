@@ -17,7 +17,7 @@
 		<dependency>
 			<groupId>org.jboss</groupId>
 			<artifactId>jboss-vfs</artifactId>
-			<version>3.2.7.Final</version>
+			<version>3.2.12.Final</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
