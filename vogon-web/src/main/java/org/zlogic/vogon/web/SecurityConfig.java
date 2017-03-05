@@ -34,6 +34,7 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.zlogic.vogon.web.configuration.VogonConfiguration;
 import org.zlogic.vogon.web.security.VogonSecurityUser;
 
 /**
@@ -49,7 +50,7 @@ public class SecurityConfig {
 	 * The accessed resource ID
 	 */
 	private static final String resourceId = "springsec"; //NOI18N
-
+	
 	/**
 	 * Spring ResourceServer configuration
 	 */
@@ -147,6 +148,12 @@ public class SecurityConfig {
 		 */
 		@Autowired
 		private TokenStore tokenStore;
+		
+		/**
+		 * The configuration handler
+		 */
+		@Autowired
+		private VogonConfiguration configuration;
 
 		/**
 		 * Configures the ClientDetailsService
@@ -163,7 +170,7 @@ public class SecurityConfig {
 					.authorities(VogonSecurityUser.AUTHORITY_USER)
 					.scopes("read", "write", "trust") //NOI18N
 					.resourceIds(resourceId)
-					.accessTokenValiditySeconds(60 * 60 * 24 * 30);
+					.accessTokenValiditySeconds(configuration.getTokenExpiresSeconds());
 		}
 
 		/**
