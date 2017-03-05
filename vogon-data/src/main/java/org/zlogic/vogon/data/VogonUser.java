@@ -43,11 +43,12 @@ public class VogonUser implements Serializable {
 	/**
 	 * The username
 	 */
-	@Column(unique = true)
+	@Column(unique = true, nullable = false)
 	protected String username;
 	/**
 	 * The password
 	 */
+	@Column(nullable = false)
 	protected String password;
 	/**
 	 * The user's transactions
@@ -102,7 +103,8 @@ public class VogonUser implements Serializable {
 	 * @param username the username
 	 */
 	public void setUsername(String username) {
-		if (username.isEmpty()) {
+		if (username == null || username.isEmpty()) {
+			this.username = null;
 			return;
 		}
 		this.username = username.trim().toLowerCase();
@@ -123,6 +125,10 @@ public class VogonUser implements Serializable {
 	 * @param password the password
 	 */
 	public void setPassword(String password) {
+		if (password == null || password.isEmpty()) {
+			this.password = null;
+			return;
+		}
 		this.password = password;
 	}
 

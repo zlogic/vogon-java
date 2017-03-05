@@ -126,9 +126,6 @@ public class TransactionsController {
 		Attribute sortAttribute = FinanceTransaction_.transactionDate;
 		if (sortColumn != null)
 			switch (sortColumn) {
-				case AMOUNT:
-					sortAttribute = FinanceTransaction_.amount;
-					break;
 				case DATE:
 					sortAttribute = FinanceTransaction_.transactionDate;
 					break;

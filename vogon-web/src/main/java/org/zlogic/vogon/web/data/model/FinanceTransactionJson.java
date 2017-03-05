@@ -39,7 +39,6 @@ public class FinanceTransactionJson extends FinanceTransaction {
 	 * @param transaction the wrapped FinanceTransaction instance
 	 */
 	public FinanceTransactionJson(FinanceTransaction transaction) {
-		this.amount = transaction.getRawAmount();
 		this.description = transaction.getDescription();
 		this.id = transaction.getId();
 		this.owner = transaction.getOwner();

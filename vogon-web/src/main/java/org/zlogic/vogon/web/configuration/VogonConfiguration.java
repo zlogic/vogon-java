@@ -5,11 +5,7 @@
  */
 package org.zlogic.vogon.web.configuration;
 
-import java.io.Serializable;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.zlogic.vogon.data.ConfigurationElement;
-import org.zlogic.vogon.web.data.ConfigurationRepository;
 
 /**
  * Various global configuration options
@@ -20,61 +16,9 @@ import org.zlogic.vogon.web.data.ConfigurationRepository;
 public class VogonConfiguration {
 
 	/**
-	 * The configuration elements repository
+	 * Allow registration
 	 */
-	@Autowired
-	private ConfigurationRepository configurationRepository;
-
-	/**
-	 * Finds or creates a ConfigurationElement
-	 *
-	 * @param name the ConfigurationElement name
-	 * @return the found or created ConfigurationElement
-	 */
-	protected ConfigurationElement findOrCreate(String name) {
-		ConfigurationElement element = configurationRepository.findOne(name);
-		if (element == null) {
-			element = new ConfigurationElement(name);
-			configurationRepository.saveAndFlush(element);
-		}
-		return element;
-	}
-
-	/**
-	 * Gets the value of a ConfigurationElement or the default value if the
-	 * ConfigurationElement does not exist
-	 *
-	 * @param <T> the ConfigurationElement type
-	 * @param name the ConfigurationElement name ConfigurationElement doesn't
-	 * exist
-	 * @return the value of a ConfigurationElement or the default value if the
-	 * ConfigurationElement does not exist
-	 */
-	protected <T extends Serializable> T getValue(String name) {
-		ConfigurationElement element = configurationRepository.findOne(name);
-		T defaultValue = null;
-		for (ConfigurationElement checkElement : ConfigurationKeys.DEFAULT_VALUES)
-			if (checkElement.getName().equals(name))
-				defaultValue = (T) checkElement.getValue();
-		if (element == null)
-			return defaultValue;
-		if (element.getValue() == null)
-			configurationRepository.delete(element);
-		return element.getValue() != null ? ((T) element.getValue()) : defaultValue;
-	}
-
-	/**
-	 * Sets the value of a ConfigurationElement
-	 *
-	 * @param <T> the ConfigurationElement type
-	 * @param name the ConfigurationElement name
-	 * @param value the value to set
-	 */
-	protected <T extends Serializable> void setValue(String name, T value) {
-		ConfigurationElement element = findOrCreate(name);
-		element.setValue(value);
-		configurationRepository.saveAndFlush(element);
-	}
+	private final static String ALLOW_REGISTRATION = "ALLOW_REGISTRATION";
 
 	/**
 	 * Returns true if registration is allowed
@@ -82,15 +26,9 @@ public class VogonConfiguration {
 	 * @return true if registration is allowed
 	 */
 	public boolean isAllowRegistration() {
-		return getValue(ConfigurationKeys.ALLOW_REGISTRATION);
-	}
-
-	/**
-	 * Sets if if registration is allowed
-	 *
-	 * @param allowRegistration true if registration is allowed
-	 */
-	public void setAllowRegistration(boolean allowRegistration) {
-		setValue(ConfigurationKeys.ALLOW_REGISTRATION, allowRegistration);
+		String allowRegistration = System.getenv(ALLOW_REGISTRATION);
+		if (allowRegistration == null)
+			return false;
+		return Boolean.parseBoolean(allowRegistration);
 	}
 }

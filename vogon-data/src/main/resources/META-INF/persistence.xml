@@ -6,7 +6,6 @@
 		<class>org.zlogic.vogon.data.FinanceTransaction</class>
 		<class>org.zlogic.vogon.data.TransactionComponent</class>
 		<class>org.zlogic.vogon.data.VogonUser</class>
-		<class>org.zlogic.vogon.data.ConfigurationElement</class>
 		<properties>
 			<property name="hibernate.hbm2ddl.auto" value="update"/>
 			<!--<property name="hibernate.hbm2ddl.auto" value="create-drop"/>-->

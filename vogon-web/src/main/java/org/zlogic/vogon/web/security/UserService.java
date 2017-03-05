@@ -7,7 +7,6 @@ package org.zlogic.vogon.web.security;
 
 import java.util.ResourceBundle;
 import javax.annotation.Resource;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -22,7 +21,6 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.zlogic.vogon.data.Constants;
 import org.zlogic.vogon.data.VogonUser;
 import org.zlogic.vogon.web.data.UserRepository;
 
@@ -32,7 +30,7 @@ import org.zlogic.vogon.web.data.UserRepository;
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 @Service
-public class UserService implements UserDetailsService, InitializingBean {
+public class UserService implements UserDetailsService {
 
 	/**
 	 * Localization messages
@@ -127,8 +125,7 @@ public class UserService implements UserDetailsService, InitializingBean {
 	 * username is already in use
 	 */
 	public VogonUser createUser(VogonUser createUser) throws UsernameExistsException {
-		VogonUser user = new VogonUser(createUser.getUsername(), passwordEncoder.encode(createUser.getPassword()));
-		user.setAuthorities(VogonSecurityUser.AUTHORITY_USER);
+		VogonUser user = new VogonUser(createUser.getUsername(), createUser.getPassword() != null ? passwordEncoder.encode(createUser.getPassword()) : null);
 		saveUser(user);
 		return user;
 	}
@@ -144,7 +141,6 @@ public class UserService implements UserDetailsService, InitializingBean {
 	 */
 	public VogonSecurityUser updateUser(VogonSecurityUser userPrincipal, VogonUser updatedUser) throws UsernameExistsException {
 		VogonUser user = userRepository.findByUsernameIgnoreCase(userPrincipal.getUsername());
-		user.setDefaultCurrency(updatedUser.getDefaultCurrency());
 		if (updatedUser.getUsername() != null && !updatedUser.getUsername().isEmpty() && !updatedUser.getUsername().equals(user.getUsername()))
 			user.setUsername(updatedUser.getUsername());
 		if (updatedUser.getPassword() != null)
@@ -162,19 +158,5 @@ public class UserService implements UserDetailsService, InitializingBean {
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
-	}
-
-	/**
-	 * Applies default properties and creates default user if needed
-	 *
-	 * @throws Exception in case of errors
-	 */
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		if (userRepository.count() == 0) {
-			VogonUser defaultUser = new VogonUser(Constants.DEFAULT_USERNAME, passwordEncoder.encode(Constants.DEFAULT_PASSWORD));
-			defaultUser.setAuthorities(VogonSecurityUser.AUTHORITY_ADMIN, VogonSecurityUser.AUTHORITY_USER);
-			userRepository.saveAndFlush(defaultUser);
-		}
 	}
 }

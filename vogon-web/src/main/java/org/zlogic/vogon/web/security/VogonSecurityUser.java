@@ -5,9 +5,8 @@
  */
 package org.zlogic.vogon.web.security;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -68,10 +67,7 @@ public class VogonSecurityUser implements UserDetails {
 	 */
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		Set<GrantedAuthority> authorities = new HashSet<>();
-		for (String authority : user.getAuthorities())
-			authorities.add(new SimpleGrantedAuthority(authority));
-		return authorities;
+		return Arrays.asList(new SimpleGrantedAuthority(AUTHORITY_USER));
 	}
 
 	/**

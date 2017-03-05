@@ -5,18 +5,10 @@
  */
 package org.zlogic.vogon.web.controller;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,15 +19,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.VogonUser;
-import org.zlogic.vogon.data.interop.ClassExporter;
-import org.zlogic.vogon.data.interop.ExportedData;
 import org.zlogic.vogon.data.tools.DatabaseMaintenance;
 import org.zlogic.vogon.web.controller.serialization.JSONMapper;
 import org.zlogic.vogon.web.data.AccountRepository;
 import org.zlogic.vogon.web.data.InitializationHelper;
 import org.zlogic.vogon.web.data.TransactionRepository;
 import org.zlogic.vogon.web.data.UserRepository;
-import org.zlogic.vogon.web.data.model.FinanceTransactionJson;
 import org.zlogic.vogon.web.security.VogonSecurityUser;
 
 /**
@@ -90,12 +79,15 @@ public class DataController {
 	public @ResponseBody
 	Boolean importData(@RequestParam("file") MultipartFile data, @AuthenticationPrincipal VogonSecurityUser userPrincipal) throws RuntimeException {
 		VogonUser user = userRepository.findByUsernameIgnoreCase(userPrincipal.getUsername());
+		//TODO: replace with JSON implementation
+		/*
 		try {
 			XmlImporter importer = new XmlImporter(data.getInputStream());
 			importer.importData(user, em);
 		} catch (IOException | VogonImportException | VogonImportLogicalException ex) {
 			throw new RuntimeException(ex);
 		}
+		*/
 		return true;
 	}
 
@@ -108,6 +100,9 @@ public class DataController {
 	@RequestMapping(value = "/export/xml", method = {RequestMethod.GET, RequestMethod.POST})
 	public HttpEntity<byte[]> exportDataXML(@AuthenticationPrincipal VogonSecurityUser userPrincipal) throws RuntimeException {
 		VogonUser user = userRepository.findByUsernameIgnoreCase(userPrincipal.getUsername());
+		return null;
+		//TODO: replace with JSON implementation
+		/*
 		try {
 			ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 			XmlExporter exporter = new XmlExporter(outStream);
@@ -126,6 +121,7 @@ public class DataController {
 		} catch (VogonExportException ex) {
 			throw new RuntimeException(ex);
 		}
+		*/
 	}
 
 	/**
@@ -137,6 +133,9 @@ public class DataController {
 	@RequestMapping(value = "/export/json", method = {RequestMethod.GET, RequestMethod.POST})
 	public HttpEntity<byte[]> exportDataJSON(@AuthenticationPrincipal VogonSecurityUser userPrincipal) throws RuntimeException {
 		VogonUser user = userRepository.findByUsernameIgnoreCase(userPrincipal.getUsername());
+		return null;
+		//TODO: replace with JSON implementation
+		/*
 		try {
 			ClassExporter exporter = new ClassExporter();
 			Sort accountSort = new Sort(new Sort.Order(Sort.Direction.ASC, "id"));//NOI18N
@@ -165,6 +164,7 @@ public class DataController {
 		} catch (VogonExportException | IOException ex) {
 			throw new RuntimeException(ex);
 		}
+		*/
 	}
 
 	/**
