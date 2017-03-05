@@ -5,6 +5,7 @@
  */
 package org.zlogic.vogon.web.controller;
 
+import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -56,6 +57,12 @@ public class RegistrationController {
 	VogonUser register(@RequestBody VogonUser registerUser) throws UsernameExistsException {
 		if (!configuration.isAllowRegistration())
 			throw new SecurityException(messages.getString("REGISTRATION_IS_NOT_ALLOWED"));
-		return userService.createUser(registerUser);
+		try {
+			return userService.createUser(registerUser);
+		} catch (UsernameExistsException ex) {
+			throw ex;
+		} catch (Exception ex) {
+			throw new RuntimeException(MessageFormat.format(messages.getString("CANNOT_REGISTER_USER_BECAUSE_OF_ERROR"), ex.getCause()));
+		}
 	}
 }

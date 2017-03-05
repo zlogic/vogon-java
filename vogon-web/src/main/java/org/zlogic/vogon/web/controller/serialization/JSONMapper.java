@@ -14,7 +14,6 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
-import org.zlogic.vogon.data.ConfigurationElement;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.VogonUser;
 import org.zlogic.vogon.web.data.model.FinanceTransactionJson;
@@ -83,6 +82,24 @@ public class JSONMapper extends ObjectMapper implements InitializingBean {
 	private interface VogonUserAnnotations {
 
 		/**
+		 * Disables getting of id (username is used instead)
+		 */
+		@JsonIgnore
+		public void getId();
+
+		/**
+		 * Disables getting of accounts
+		 */
+		@JsonIgnore
+		public void getAccounts();
+
+		/**
+		 * Disables getting of transactions
+		 */
+		@JsonIgnore
+		public void getTransactions();
+
+		/**
 		 * Disables getting of password
 		 */
 		@JsonIgnore
@@ -121,7 +138,6 @@ public class JSONMapper extends ObjectMapper implements InitializingBean {
 		this.addMixIn(FinanceTransactionJson.class, FinanceTransactionAnnotations.class);
 		this.addMixIn(FinanceAccount.class, FinanceAccountAnnotations.class);
 		this.addMixIn(VogonUser.class, VogonUserAnnotations.class);
-		this.addMixIn(ConfigurationElement.class, ConfigurationElementAnnotations.class);
 		this.setDateFormat(new SimpleDateFormat("yyyy-MM-dd")); //NOI18N
 	}
 }

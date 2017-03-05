@@ -28,6 +28,7 @@ import org.zlogic.vogon.data.tools.DatabaseMaintenance;
 public class MaintenanceTest {
 
 	private EntityManagerFactory emf;
+
 	private EntityManager entityManager;
 
 	@Before

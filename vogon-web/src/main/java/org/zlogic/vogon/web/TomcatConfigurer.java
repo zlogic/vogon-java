@@ -55,16 +55,6 @@ public class TomcatConfigurer implements EmbeddedServletContainerCustomizer {
 	 */
 	private void configureUriEncoding(ConfigurableEmbeddedServletContainer container) {
 		try {
-			log.debug(messages.getString("CONFIGURING_ENCODING_FOR_TOMCAT_7"));
-			container.getClass().getMethod("setUriEncoding", String.class).invoke(container, utf8Charset.name()); //NOI18N
-			return;
-		} catch (NoSuchMethodException ex) {
-			log.debug(messages.getString("SERVER_IS_NOT_TOMCAT_7"));
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-			throw new RuntimeException(messages.getString("CANNOT_CONFIGURE_ENCODING_FOR_TOMCAT_7"), ex);
-		}
-
-		try {
 			log.debug(messages.getString("CONFIGURING_ENCODING_FOR_TOMCAT_8"));
 			container.getClass().getMethod("setUriEncoding", Charset.class).invoke(container, utf8Charset); //NOI18N
 			return;
