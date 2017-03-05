@@ -1,6 +1,5 @@
 /vogon-data/target/
 /vogon-web/target/
-/vogon-web/vogon-web-service/target/
 /vogon-packaging/target/
 /vogon-packaging/vogon-web-wildfly/target/
 /vogon-packaging/vogon-web-tomcat/target/
