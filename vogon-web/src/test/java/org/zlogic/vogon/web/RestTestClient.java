@@ -17,12 +17,16 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.ssl.SSLContextBuilder;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -62,6 +66,38 @@ public class RestTestClient implements InitializingBean {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+		return headers;
+	}
+
+	/**
+	 * Performs authentication and returns the default HttpHeaders, including
+	 * the OAuth2 token
+	 */
+	public HttpHeaders authenticate() {
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.add("username", "user01");
+		map.add("password", "mypassword");
+		map.add("grant_type", "password");
+		map.add("client_id", "vogonweb");
+		String token;
+		try {
+			JSONObject result = new JSONObject(restTemplate.postForObject("https://localhost:8443/oauth/token", map, String.class));
+			token = result.getString("access_token");
+		} catch (JSONException ex) {
+			throw new RuntimeException(ex);
+		}
+
+		HttpHeaders headers = getDefaultHeaders();
+		headers.set("Authorization", "Bearer " + token);
+		return headers;
+	}
+
+	/**
+	 * Returns the default HttpHeaders, including a bad OAuth2 token
+	 */
+	public HttpHeaders badAuthenticate() {
+		HttpHeaders headers = getDefaultHeaders();
+		headers.set("Authorization", "Bearer bad_token");
 		return headers;
 	}
 
