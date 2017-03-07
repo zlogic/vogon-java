@@ -19,6 +19,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
+import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -31,10 +33,10 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.authentication.BearerTokenExtractor;
 import org.springframework.security.oauth2.provider.authentication.TokenExtractor;
 import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.zlogic.vogon.web.configuration.VogonConfiguration;
+import org.zlogic.vogon.web.security.JpaTokenStore;
 import org.zlogic.vogon.web.security.VogonSecurityUser;
 
 /**
@@ -101,16 +103,18 @@ public class SecurityConfig {
 				public void logout(HttpServletRequest request, HttpServletResponse response, Authentication auth) {
 					auth = tokenExtractor.extract(request);
 
-					if (auth.getPrincipal().getClass() != String.class)
-						return;
 					OAuth2Authentication oauth2 = tokenStore.readAuthentication((String) auth.getPrincipal());
 
 					if (oauth2 == null)
-						return;
+						throw new BadClientCredentialsException();
 					OAuth2AccessToken token = tokenStore.getAccessToken(oauth2);
 					if (token == null)
-						return;
-					tokenStore.removeAccessToken(token);//TODO: Remove refresh token as well?
+						 throw new BadClientCredentialsException();
+					tokenStore.removeAccessToken(token);
+					if(token.getRefreshToken() != null)
+						tokenStore.removeRefreshToken(token.getRefreshToken());
+					if (token.isExpired())
+						 throw new BadClientCredentialsException();
 				}
 			};
 			// The logout success handler
@@ -207,6 +211,6 @@ public class SecurityConfig {
 	 */
 	@Bean
 	public TokenStore tokenStore() {
-		return new InMemoryTokenStore();
+		return new JpaTokenStore();
 	}
 }
