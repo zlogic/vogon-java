@@ -103,18 +103,14 @@ public class SecurityConfig {
 				public void logout(HttpServletRequest request, HttpServletResponse response, Authentication auth) {
 					auth = tokenExtractor.extract(request);
 
-					OAuth2Authentication oauth2 = tokenStore.readAuthentication((String) auth.getPrincipal());
-
-					if (oauth2 == null)
-						throw new BadClientCredentialsException();
-					OAuth2AccessToken token = tokenStore.getAccessToken(oauth2);
+					OAuth2AccessToken token = tokenStore.readAccessToken((String) auth.getPrincipal());
 					if (token == null)
 						 throw new BadClientCredentialsException();
 					tokenStore.removeAccessToken(token);
 					if(token.getRefreshToken() != null)
 						tokenStore.removeRefreshToken(token.getRefreshToken());
 					if (token.isExpired())
-						 throw new BadClientCredentialsException();
+						throw new BadClientCredentialsException();
 				}
 			};
 			// The logout success handler
