@@ -58,7 +58,7 @@ public class AuthenticationTest {
 
 	@Autowired
 	private TokenStore tokenStore;
-	
+
 	@Resource
 	private ClientDetailsService clientDetailsService;
 
@@ -113,7 +113,7 @@ public class AuthenticationTest {
 		tokens = tokenStore.findTokensByClientId("vogonweb");
 		assertEquals(0, tokens.size());
 	}
-	
+
 	/**
 	 * Test that expired tokens are no longer accepted
 	 *
@@ -124,26 +124,29 @@ public class AuthenticationTest {
 		prepopulate.prepopulate();
 
 		ClientDetails vogonwebClientDetails = clientDetailsService.loadClientByClientId("vogonweb");
-		((BaseClientDetails)vogonwebClientDetails).setAccessTokenValiditySeconds(4);
-		
+		((BaseClientDetails) vogonwebClientDetails).setAccessTokenValiditySeconds(4);
+
 		HttpHeaders headers = restClient.authenticate();
 
 		Collection<OAuth2AccessToken> tokens = tokenStore.findTokensByClientId("vogonweb");
 		assertEquals(1, tokens.size());
 
 		Thread.sleep(4000);
-		
+
 		tokens = tokenStore.findTokensByClientId("vogonweb");
 		//TODO: uncomment once token maintenance is implemented
 		//assertEquals(0, tokens.size());
-		
+
 		HttpEntity<String> entity = new HttpEntity<>(headers);
-		ResponseEntity<String> responseEntity = restClient.getRestTemplate().exchange("https://localhost:8443/logout", HttpMethod.GET, entity, String.class);
-		//TODO: this should fail!
-		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-		assertNull(responseEntity.getBody());
+		try {
+			restClient.getRestTemplate().exchange("https://localhost:8443/logout", HttpMethod.GET, entity, String.class);
+		} catch (HttpClientErrorException ex) {
+			assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
+			String token = headers.getFirst("Authorization").substring("Bearer ".length());
+			jsonExpectationhelper.assertJsonEqual("{\"error\":\"invalid_token\",\"error_description\":\"Invalid access token: " + token + "\"}", ex.getResponseBodyAsString(), true);
+		}
 	}
-	
+
 	/**
 	 * Test that authentication with incorrect credentials is rejected
 	 *
@@ -158,16 +161,16 @@ public class AuthenticationTest {
 		map.add("password", "badpassword");
 		map.add("grant_type", "password");
 		map.add("client_id", "vogonweb");
-		try{
+		try {
 			restClient.getRestTemplate().postForEntity("https://localhost:8443/oauth/token", map, String.class);
-		}catch(HttpClientErrorException ex){
+		} catch (HttpClientErrorException ex) {
 			assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
 			jsonExpectationhelper.assertJsonEqual("{\"error\":\"invalid_grant\",\"error_description\":\"Bad credentials\"}", ex.getResponseBodyAsString(), true);
 		}
 		Collection<OAuth2AccessToken> tokens = tokenStore.findTokensByClientId("vogonweb");
 		assertEquals(0, tokens.size());
 	}
-	
+
 	/**
 	 * Test that logout with an incorrect token is rejected
 	 *
@@ -181,14 +184,14 @@ public class AuthenticationTest {
 
 		Collection<OAuth2AccessToken> tokens = tokenStore.findTokensByClientId("vogonweb");
 		assertEquals(1, tokens.size());
-		
+
 		HttpHeaders headers = restClient.badAuthenticate();
 		HttpEntity<String> entity = new HttpEntity<>(headers);
-		try{
+		try {
 			restClient.getRestTemplate().exchange("https://localhost:8443/logout", HttpMethod.GET, entity, String.class);
-		}catch(HttpClientErrorException ex){
+		} catch (HttpClientErrorException ex) {
 			assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
-			jsonExpectationhelper.assertJsonEqual("{\"error\":\"invalid_grant\",\"error_description\":\"Bad credentials\"}", ex.getResponseBodyAsString(), true);
+			jsonExpectationhelper.assertJsonEqual("{\"error\":\"invalid_token\",\"error_description\":\"Invalid access token: bad_token\"}", ex.getResponseBodyAsString(), true);
 		}
 		tokens = tokenStore.findTokensByClientId("vogonweb");
 		assertEquals(1, tokens.size());

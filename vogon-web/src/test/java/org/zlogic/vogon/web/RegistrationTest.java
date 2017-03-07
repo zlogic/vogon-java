@@ -23,6 +23,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -39,6 +40,7 @@ import org.zlogic.vogon.web.data.UserRepository;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = {Application.class, DatabaseConfiguration.class})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class RegistrationTest {
 
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/web/messages");
