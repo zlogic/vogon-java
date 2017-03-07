@@ -127,24 +127,27 @@ public class AuthenticationTest {
 		((BaseClientDetails) vogonwebClientDetails).setAccessTokenValiditySeconds(4);
 
 		HttpHeaders headers = restClient.authenticate();
-
 		Collection<OAuth2AccessToken> tokens = tokenStore.findTokensByClientId("vogonweb");
 		assertEquals(1, tokens.size());
-
 		Thread.sleep(4000);
 
+		HttpHeaders newHeaders = restClient.authenticate();
 		tokens = tokenStore.findTokensByClientId("vogonweb");
-		//TODO: uncomment once token maintenance is implemented
-		//assertEquals(0, tokens.size());
+		assertEquals(1, tokens.size());//Expired tokens are deleted once a new one is ussued
+		Thread.sleep(4000);
 
-		HttpEntity<String> entity = new HttpEntity<>(headers);
+		assertNotEquals(newHeaders.getFirst("Authorization"), headers.getFirst("Authorization"));
+
+		HttpEntity<String> entity = new HttpEntity<>(newHeaders);
 		try {
-			restClient.getRestTemplate().exchange("https://localhost:8443/logout", HttpMethod.GET, entity, String.class);
+			restClient.getRestTemplate().exchange("https://localhost:8443/logout", HttpMethod.POST, entity, String.class);
 		} catch (HttpClientErrorException ex) {
 			assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
-			String token = headers.getFirst("Authorization").substring("Bearer ".length());
+			String token = newHeaders.getFirst("Authorization").substring("Bearer ".length());
 			jsonExpectationhelper.assertJsonEqual("{\"error\":\"invalid_token\",\"error_description\":\"Invalid access token: " + token + "\"}", ex.getResponseBodyAsString(), true);
 		}
+		tokens = tokenStore.findTokensByClientId("vogonweb");
+		assertEquals(0, tokens.size());
 	}
 
 	/**
