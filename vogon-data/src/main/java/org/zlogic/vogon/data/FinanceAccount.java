@@ -7,8 +7,10 @@ package org.zlogic.vogon.data;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.Currency;
 import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -27,6 +29,11 @@ import javax.persistence.Version;
 @Entity
 public class FinanceAccount implements Serializable {
 
+	/**
+	 * Localization messages
+	 */
+	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/data/messages");
+	
 	/**
 	 * Version UID
 	 */
@@ -111,15 +118,28 @@ public class FinanceAccount implements Serializable {
 		this();
 		balance = 0L;
 		FinanceAccount.this.setOwner(owner);
-		FinanceAccount.this.merge(account);
+		FinanceAccount.this.merge(account, false);
 	}
 
 	/**
-	 * Merges properties from another FinanceAccount instance to this instance
+	 * Merges properties from another FinanceAccount instance to this instance;
+	 * only merges properties, and not components
 	 *
 	 * @param account the account from which to merge properties
 	 */
 	public void merge(FinanceAccount account) {
+		merge(account, true);
+	}
+	
+	/**
+	 * Merges properties from another FinanceAccount instance to this instance
+	 *
+	 * @param account the account from which to merge properties
+	 * @param verifyVersion true if a version mismatch would throw an exception
+	 */
+	public void merge(FinanceAccount account, boolean verifyVersion) {
+		if (verifyVersion && version != account.version)
+			throw new ConcurrentModificationException(messages.getString("ACCOUNT_WAS_ALREADY_UPDATED"));
 		includeInTotal = account.includeInTotal != null ? account.includeInTotal : includeInTotal;
 		showInList = account.showInList != null ? account.showInList : showInList;
 		name = account.name;

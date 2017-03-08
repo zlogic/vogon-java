@@ -83,7 +83,6 @@ public class AccountsController {
 		}
 		//Delete removed accounts
 		for (FinanceAccount removedAccount : removedAccounts) {
-			accountRepository.delete(removedAccount);
 			//Delete all related transaction components
 			for (FinanceTransaction transaction : transactionRepository.findByOwner(user.getUser())) {
 				boolean save = false;
@@ -94,6 +93,7 @@ public class AccountsController {
 				if (save)
 					transactionRepository.save(transaction);
 			}
+			accountRepository.delete(removedAccount);
 		}
 		accountRepository.flush();
 		transactionRepository.flush();
