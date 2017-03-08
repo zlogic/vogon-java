@@ -113,6 +113,7 @@ public class RegistrationTest {
 		HttpEntity<String> entity = new HttpEntity<>("{\"username\":\"user01\",\"password\":\"password\"}", restClient.getDefaultHeaders());
 		try {
 			restClient.getRestTemplate().postForObject("https://localhost:8443/register", entity, String.class);
+			fail("Expected an HttpServerErrorException to be thrown");
 		} catch (HttpStatusCodeException ex) {
 			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
 			jsonExpectationhelper.assertJsonEqual("{message:\"" + messages.getString("REGISTRATION_IS_NOT_ALLOWED") + "\"}", ex.getResponseBodyAsString());
@@ -135,6 +136,7 @@ public class RegistrationTest {
 		HttpEntity<String> entity = new HttpEntity<>("{\"username\":\"user01\",\"password\":\"anotherpassword\"}", restClient.getDefaultHeaders());
 		try {
 			restClient.getRestTemplate().postForObject("https://localhost:8443/register", entity, String.class);
+			fail("Expected an HttpServerErrorException to be thrown");
 		} catch (HttpStatusCodeException ex) {
 			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
 			jsonExpectationhelper.assertJsonEqual("{message:\"" + messages.getString("USER_ALREADY_EXISTS") + "\"}", ex.getResponseBodyAsString());
@@ -168,6 +170,7 @@ public class RegistrationTest {
 		HttpEntity<String> entity = new HttpEntity<>("{\"username\":\"\",\"password\":\"password\"}", restClient.getDefaultHeaders());
 		try {
 			restClient.getRestTemplate().postForObject("https://localhost:8443/register", entity, String.class);
+			fail("Expected an HttpServerErrorException to be thrown");
 		} catch (HttpStatusCodeException ex) {
 			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
 			jsonExpectationhelper.assertJsonEqual("{message:\"" + MessageFormat.format(messages.getString("CANNOT_REGISTER_USER_BECAUSE_OF_ERROR"), "javax.persistence.PersistenceException: org.hibernate.PropertyValueException: not-null property references a null or transient value : org.zlogic.vogon.data.VogonUser.username") + "\"}", ex.getResponseBodyAsString());
@@ -187,6 +190,7 @@ public class RegistrationTest {
 		HttpEntity<String> entity = new HttpEntity<>("{\"username\":\"user01\",\"password\":\"\"}", restClient.getDefaultHeaders());
 		try {
 			restClient.getRestTemplate().postForObject("https://localhost:8443/register", entity, String.class);
+			fail("Expected an HttpServerErrorException to be thrown");
 		} catch (HttpStatusCodeException ex) {
 			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
 			jsonExpectationhelper.assertJsonEqual("{message:\"" + MessageFormat.format(messages.getString("CANNOT_REGISTER_USER_BECAUSE_OF_ERROR"), "javax.persistence.PersistenceException: org.hibernate.PropertyValueException: not-null property references a null or transient value : org.zlogic.vogon.data.VogonUser.password") + "\"}", ex.getResponseBodyAsString());

@@ -146,7 +146,7 @@ public class VogonUser implements Serializable {
 	 *
 	 * @return the version for this class instance
 	 */
-	protected long getVersion() {
+	public long getVersion() {
 		return version;
 	}
 
