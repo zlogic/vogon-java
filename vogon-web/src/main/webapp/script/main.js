@@ -5,7 +5,6 @@ app.run(function ($templateRequest) {
 	$templateRequest("fragments/transactioneditor.fragment");
 	$templateRequest("fragments/usersettings.fragment");
 	$templateRequest("fragments/analytics.fragment");
-	$templateRequest("fragments/adminsettings.fragment");
 	$templateRequest("fragments/intro.fragment");
 });
 
@@ -26,10 +25,6 @@ app.config(function ($routeProvider, $locationProvider) {
 			.when('/usersettings', {
 				templateUrl: 'fragments/usersettings.fragment',
 				controller: 'UserSettingsController'
-			})
-			.when('/adminsettings', {
-				templateUrl: 'fragments/adminsettings.fragment',
-				controller: 'AdminSettingsController'
 			})
 			.otherwise({redirectTo: '/transactions'});
 	$locationProvider.html5Mode(false);
