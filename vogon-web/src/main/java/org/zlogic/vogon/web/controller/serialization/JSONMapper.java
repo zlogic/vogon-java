@@ -74,6 +74,12 @@ public class JSONMapper extends ObjectMapper implements InitializingBean {
 		 */
 		@JsonIgnore
 		public void setBalance();
+
+		/**
+		 * Disables getting of transaction components
+		 */
+		@JsonIgnore
+		public void getComponents();
 	}
 
 	/**

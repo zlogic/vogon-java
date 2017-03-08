@@ -72,9 +72,11 @@ public class UsersControllerTest {
 		VogonUser user01 = users.get(0);
 		assertEquals("user01", user01.getUsername());
 		assertTrue(passwordEncoder.matches("mypassword", user01.getPassword()));
+		assertEquals(0, user01.getVersion());
 		VogonUser user02 = users.get(1);
 		assertEquals("user02", user02.getUsername());
 		assertTrue(passwordEncoder.matches("mypassword2", user02.getPassword()));
+		assertEquals(0, user02.getVersion());
 	}
 
 	/**
