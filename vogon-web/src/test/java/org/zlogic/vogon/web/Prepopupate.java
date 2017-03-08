@@ -47,7 +47,7 @@ public class Prepopupate {
 	 * @param date the date string to parse
 	 * @return the parsed date
 	 */
-	public static Date parseJSONDate(String date) {
+	public Date parseJSONDate(String date) {
 		try {
 			return new SimpleDateFormat("yyyy-MM-dd").parse(date); //NOI18N
 		} catch (ParseException ex) {
@@ -89,7 +89,7 @@ public class Prepopupate {
 		transaction2.addComponent(component3);
 		transaction2.addComponent(component4);
 		transaction4.addComponent(component5);
-		transactionRepository.save(Arrays.asList(transaction1, transaction2, transaction3, transaction4));
+		transactionRepository.save(Arrays.asList(transaction1, transaction3, transaction2, transaction4));
 		accountRepository.save(Arrays.asList(account1, account2, account3));
 	}
 

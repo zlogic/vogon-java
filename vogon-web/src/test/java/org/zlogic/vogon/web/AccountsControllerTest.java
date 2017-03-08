@@ -55,6 +55,7 @@ public class AccountsControllerTest {
 
 	@Autowired
 	private UserRepository userRepository;
+	
 	@Autowired
 	private AccountRepository accountRepository;
 
