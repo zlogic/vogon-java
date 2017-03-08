@@ -37,8 +37,6 @@ import org.springframework.web.client.HttpStatusCodeException;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class CurrenciesTest {
 
-	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/web/messages");
-
 	private JsonExpectationsHelper jsonExpectationhelper = new JsonExpectationsHelper();
 
 	@Autowired
@@ -90,8 +88,8 @@ public class CurrenciesTest {
 	}
 
 	/**
-	 * Test that an unauthenticated user (no token) is not allowed to get the list of
-	 * all possible currencies
+	 * Test that an unauthenticated user (no token) is not allowed to get the
+	 * list of all possible currencies
 	 *
 	 * @throws Exception
 	 */
@@ -112,8 +110,8 @@ public class CurrenciesTest {
 	}
 
 	/**
-	 * Test that an unauthenticated user (bad token) is not allowed to get the list of
-	 * all possible currencies
+	 * Test that an unauthenticated user (bad token) is not allowed to get the
+	 * list of all possible currencies
 	 *
 	 * @throws Exception
 	 */
