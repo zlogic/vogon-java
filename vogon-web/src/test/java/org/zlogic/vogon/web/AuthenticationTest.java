@@ -36,8 +36,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 
 /**
- * Tests for Registration Controller
- * {@link org.zlogic.vogon.web.controller.RegistrationController}
+ * Tests for Authentication
  *
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
@@ -141,6 +140,7 @@ public class AuthenticationTest {
 		HttpEntity<String> entity = new HttpEntity<>(newHeaders);
 		try {
 			restClient.getRestTemplate().exchange("https://localhost:8443/logout", HttpMethod.POST, entity, String.class);
+			fail("Expected an HttpServerErrorException to be thrown");
 		} catch (HttpClientErrorException ex) {
 			assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
 			String token = newHeaders.getFirst("Authorization").substring("Bearer ".length());
@@ -166,6 +166,7 @@ public class AuthenticationTest {
 		map.add("client_id", "vogonweb");
 		try {
 			restClient.getRestTemplate().postForEntity("https://localhost:8443/oauth/token", map, String.class);
+			fail("Expected an HttpServerErrorException to be thrown");
 		} catch (HttpClientErrorException ex) {
 			assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
 			jsonExpectationhelper.assertJsonEqual("{\"error\":\"invalid_grant\",\"error_description\":\"Bad credentials\"}", ex.getResponseBodyAsString(), true);
@@ -192,6 +193,7 @@ public class AuthenticationTest {
 		HttpEntity<String> entity = new HttpEntity<>(headers);
 		try {
 			restClient.getRestTemplate().exchange("https://localhost:8443/logout", HttpMethod.GET, entity, String.class);
+			fail("Expected an HttpServerErrorException to be thrown");
 		} catch (HttpClientErrorException ex) {
 			assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
 			jsonExpectationhelper.assertJsonEqual("{\"error\":\"invalid_token\",\"error_description\":\"Invalid access token: bad_token\"}", ex.getResponseBodyAsString(), true);

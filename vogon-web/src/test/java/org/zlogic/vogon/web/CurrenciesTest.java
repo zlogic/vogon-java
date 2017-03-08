@@ -27,8 +27,8 @@ import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.web.client.HttpStatusCodeException;
 
 /**
- * Tests for Registration Controller
- * {@link org.zlogic.vogon.web.controller.RegistrationController}
+ * Tests for Currencies Controller
+ * {@link org.zlogic.vogon.web.controller.CurrenciesController}
  *
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
@@ -90,7 +90,7 @@ public class CurrenciesTest {
 	}
 
 	/**
-	 * Test that an unauthenticated user (no token) is not to get the list of
+	 * Test that an unauthenticated user (no token) is not allowed to get the list of
 	 * all possible currencies
 	 *
 	 * @throws Exception
@@ -104,6 +104,7 @@ public class CurrenciesTest {
 		HttpEntity<String> entity = new HttpEntity<>(headers);
 		try {
 			restClient.getRestTemplate().exchange("https://localhost:8443/service/currencies", HttpMethod.GET, entity, String.class);
+			fail("Expected an HttpServerErrorException to be thrown");
 		} catch (HttpStatusCodeException ex) {
 			assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
 			jsonExpectationhelper.assertJsonEqual("{\"error\":\"unauthorized\",\"error_description\":\"Full authentication is required to access this resource\"}", ex.getResponseBodyAsString(), true);
@@ -111,7 +112,7 @@ public class CurrenciesTest {
 	}
 
 	/**
-	 * Test that an unauthenticated user (bad token) is not to get the list of
+	 * Test that an unauthenticated user (bad token) is not allowed to get the list of
 	 * all possible currencies
 	 *
 	 * @throws Exception
@@ -125,6 +126,7 @@ public class CurrenciesTest {
 		HttpEntity<String> entity = new HttpEntity<>(headers);
 		try {
 			restClient.getRestTemplate().exchange("https://localhost:8443/service/currencies", HttpMethod.GET, entity, String.class);
+			fail("Expected an HttpServerErrorException to be thrown");
 		} catch (HttpStatusCodeException ex) {
 			assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
 			jsonExpectationhelper.assertJsonEqual("{\"error\":\"invalid_token\",\"error_description\":\"Invalid access token: bad_token\"}", ex.getResponseBodyAsString(), true);
