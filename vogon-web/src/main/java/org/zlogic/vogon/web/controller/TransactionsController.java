@@ -5,6 +5,7 @@
  */
 package org.zlogic.vogon.web.controller;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
@@ -13,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.metamodel.Attribute;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,11 +95,7 @@ public class TransactionsController {
 		/**
 		 * FinanceTransaction_.description
 		 */
-		DESCRIPTION,
-		/**
-		 * FinanceTransaction_.amount
-		 */
-		AMOUNT
+		DESCRIPTION
 	};
 
 	/**
@@ -116,7 +114,7 @@ public class TransactionsController {
 	@RequestMapping(method = RequestMethod.GET, produces = "application/json")
 	public @ResponseBody
 	Collection<FinanceTransactionJson> getTransactions(
-			@RequestParam("page") Integer page,
+			@RequestParam(value = "page", required = false) Integer page,
 			@RequestParam(value = "sortColumn", required = false) SortColumn sortColumn,
 			@RequestParam(value = "sortDirection", required = false) Sort.Direction sortDirection,
 			@RequestParam(value = "filterDescription", required = false) String filterDescription,
@@ -171,7 +169,10 @@ public class TransactionsController {
 	@RequestMapping(value = "/transaction/{id}", method = RequestMethod.GET, produces = "application/json")
 	public @ResponseBody
 	FinanceTransactionJson getTransaction(@PathVariable long id, @AuthenticationPrincipal VogonSecurityUser user) {
-		return initializationHelper.initializeTransaction(transactionRepository.findByOwnerAndId(user.getUser(), id));
+		FinanceTransaction transaction = transactionRepository.findByOwnerAndId(user.getUser(), id);
+		if (transaction == null)
+			throw new EntityNotFoundException(MessageFormat.format(messages.getString("TRANSACTION_DOES_NOT_EXIST"), id));
+		return initializationHelper.initializeTransaction(transaction);
 	}
 
 	/**

@@ -74,9 +74,20 @@ public class RestTestClient implements InitializingBean {
 	 * the OAuth2 token
 	 */
 	public HttpHeaders authenticate() {
+		return authenticate("user01", "mypassword");
+	}
+
+	/**
+	 * Performs authentication and returns the default HttpHeaders, including
+	 * the OAuth2 token
+	 *
+	 * @param username the authentication username
+	 * @param password the authentication password
+	 */
+	public HttpHeaders authenticate(String username, String password) {
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-		map.add("username", "user01");
-		map.add("password", "mypassword");
+		map.add("username", username);
+		map.add("password", password);
 		map.add("grant_type", "password");
 		map.add("client_id", "vogonweb");
 		String token;

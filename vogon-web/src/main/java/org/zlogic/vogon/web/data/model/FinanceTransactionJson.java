@@ -7,9 +7,9 @@ package org.zlogic.vogon.web.data.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TreeSet;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.TransactionComponent;
 
@@ -42,7 +42,7 @@ public class FinanceTransactionJson extends FinanceTransaction {
 		this.description = transaction.getDescription();
 		this.id = transaction.getId();
 		this.owner = transaction.getOwner();
-		this.tags = new HashSet<>(Arrays.asList(transaction.getTags()));
+		this.tags = new TreeSet<>(Arrays.asList(transaction.getTags()));
 		this.transactionDate = transaction.getDate();
 		this.type = transaction.getType();
 		this.setVersion(transaction.getVersion());
