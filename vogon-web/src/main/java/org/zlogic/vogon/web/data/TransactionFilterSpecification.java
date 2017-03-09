@@ -63,6 +63,7 @@ public class TransactionFilterSpecification implements Specification<FinanceTran
 	 */
 	@Override
 	public Predicate toPredicate(Root<FinanceTransaction> root, CriteriaQuery<?> cq, CriteriaBuilder cb) {
+		cq.distinct(true);
 		Predicate ownerPredicate = cb.equal(root.get(FinanceTransaction_.owner), owner);
 		Predicate descriptionPredicate = filterDescription != null
 				? cb.like(cb.lower(root.get(FinanceTransaction_.description)), filterDescription.toLowerCase())
