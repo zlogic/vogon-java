@@ -75,6 +75,37 @@
 			</plugin>
 		</plugins>
 	</build>
+	
+	<!-- Auto-clean on Heroku -->
+	<profiles>
+		<profile>
+			<id>heroku</id>
+			<activation>
+				<property>
+					<name>env.DYNO</name>
+				</property>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-clean-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>auto-clean</id>
+								<phase>install</phase>
+								<goals>
+									<goal>clean</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.zlogic.vogon</groupId>
