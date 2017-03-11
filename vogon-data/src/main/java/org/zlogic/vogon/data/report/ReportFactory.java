@@ -527,7 +527,9 @@ public class ReportFactory {
 		tagsCriteriaQuery.where(userPredicate);
 
 		tagsCriteriaQuery.select(tr.join(FinanceTransaction_.tags)).distinct(true);
-		return new HashSet<>(entityManager.createQuery(tagsCriteriaQuery).getResultList());
+		HashSet<String> result = new HashSet<>(entityManager.createQuery(tagsCriteriaQuery).getResultList());
+		result.add("");
+		return result;
 	}
 
 	/**

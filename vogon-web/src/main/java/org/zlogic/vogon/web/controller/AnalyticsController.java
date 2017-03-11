@@ -85,8 +85,7 @@ public class AnalyticsController {
 		//Process transactions for JSON
 		List<FinanceTransactionJson> processedTransactions = initializationHelper.initializeTransactions(report.getTransactions());
 		report.getTransactions().clear();
-		for (FinanceTransactionJson transaction : processedTransactions)
-			report.getTransactions().add(transaction);
+		report.getTransactions().addAll(processedTransactions);
 		return report;
 	}
 }

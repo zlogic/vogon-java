@@ -124,7 +124,7 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
 		reportConfiguration.selectedAccounts = [];
 		for (var accountId in $scope.accounts) {
 			if ($scope.accounts[accountId]) {
-				reportConfiguration.selectedAccounts.push(accountId);
+				reportConfiguration.selectedAccounts.push({id: accountId});
 			}
 		}
 		HTTPService.post("service/analytics", reportConfiguration).then(function (data) {
