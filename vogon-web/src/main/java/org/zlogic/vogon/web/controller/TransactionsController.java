@@ -194,6 +194,8 @@ public class TransactionsController {
 		List<TransactionComponent> removedComponents = new LinkedList<>(existingTransaction.getComponents());
 		for (TransactionComponentJson newComponent : transaction.getComponentsJson()) {
 			FinanceAccount existingAccount = accountRepository.findByOwnerAndId(user.getUser(), newComponent.getAccountId());
+			if(existingAccount == null)
+				throw new EntityNotFoundException(MessageFormat.format(messages.getString("CANNOT_SET_AN_INVALID_ACCOUNT_ID"), newComponent.getAccountId()));
 			if (!existingTransaction.getComponents().contains(newComponent)) {
 				TransactionComponent createdComponent = new TransactionComponent(existingAccount, existingTransaction, newComponent.getRawAmount());
 				em.persist(createdComponent);
@@ -228,12 +230,13 @@ public class TransactionsController {
 	public @ResponseBody
 	FinanceTransactionJson deleteTransaction(@PathVariable long id, @AuthenticationPrincipal VogonSecurityUser user) {
 		FinanceTransaction existingTransaction = transactionRepository.findByOwnerAndId(user.getUser(), id);
-		if (existingTransaction != null) {
-			existingTransaction.removeAllComponents();
-			transactionRepository.save(existingTransaction);
-			transactionRepository.delete(existingTransaction);
-			return initializationHelper.initializeTransaction(existingTransaction);
+		if (existingTransaction == null) {
+			throw new EntityNotFoundException(MessageFormat.format(messages.getString("CANNOT_DELETE_A_NON_EXISTING_TRANSACTION"), id));
 		}
-		return null;
+		FinanceTransactionJson deletedTransactionJson = initializationHelper.initializeTransaction(existingTransaction);
+		existingTransaction.removeAllComponents();
+		transactionRepository.save(existingTransaction);
+		transactionRepository.delete(existingTransaction);
+		return deletedTransactionJson;
 	}
 }
