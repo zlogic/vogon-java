@@ -178,7 +178,7 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
 	this.logout = function () {
 		if (that.access_token !== undefined) {
 			var params = {token: that.access_token};
-			return HTTPService.post("logout", encodeForm(params), postHeaders)
+			return HTTPService.post("oauth/logout", encodeForm(params), postHeaders)
 					.then(that.resetAuthorization, that.resetAuthorization);
 		} else {
 			var deferred = $q.defer();
