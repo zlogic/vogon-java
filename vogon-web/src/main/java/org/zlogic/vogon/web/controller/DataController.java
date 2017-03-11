@@ -5,10 +5,18 @@
  */
 package org.zlogic.vogon.web.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,14 +25,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.VogonUser;
-import org.zlogic.vogon.data.tools.DatabaseMaintenance;
 import org.zlogic.vogon.web.controller.serialization.JSONMapper;
 import org.zlogic.vogon.web.data.AccountRepository;
-import org.zlogic.vogon.web.data.InitializationHelper;
 import org.zlogic.vogon.web.data.TransactionRepository;
 import org.zlogic.vogon.web.data.UserRepository;
+import org.zlogic.vogon.web.data.model.importexport.ImportExportData;
 import org.zlogic.vogon.web.security.VogonSecurityUser;
 
 /**
@@ -58,11 +64,6 @@ public class DataController {
 	@Autowired
 	private AccountRepository accountRepository;
 	/**
-	 * InitializationHelper instance
-	 */
-	@Autowired
-	private InitializationHelper initializationHelper;
-	/**
 	 * JSONMapper instance
 	 */
 	@Autowired
@@ -79,15 +80,15 @@ public class DataController {
 	public @ResponseBody
 	Boolean importData(@RequestParam("file") MultipartFile data, @AuthenticationPrincipal VogonSecurityUser userPrincipal) throws RuntimeException {
 		VogonUser user = userRepository.findByUsernameIgnoreCase(userPrincipal.getUsername());
-		//TODO: replace with JSON implementation
-		/*
+		ImportExportData importData = null;
 		try {
-			XmlImporter importer = new XmlImporter(data.getInputStream());
-			importer.importData(user, em);
-		} catch (IOException | VogonImportException | VogonImportLogicalException ex) {
+			importData = jsonMapper.readValue(data.getInputStream(), ImportExportData.class);
+		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
-		*/
+		
+		importData.persist(user, em);
+
 		return true;
 	}
 
@@ -97,102 +98,29 @@ public class DataController {
 	 * @param userPrincipal the authenticated user
 	 * @return the HTTPEntity for the file download
 	 */
-	@RequestMapping(value = "/export/xml", method = {RequestMethod.GET, RequestMethod.POST})
-	public HttpEntity<byte[]> exportDataXML(@AuthenticationPrincipal VogonSecurityUser userPrincipal) throws RuntimeException {
-		VogonUser user = userRepository.findByUsernameIgnoreCase(userPrincipal.getUsername());
-		return null;
-		//TODO: replace with JSON implementation
-		/*
-		try {
-			ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-			XmlExporter exporter = new XmlExporter(outStream);
-			Sort accountSort = new Sort(new Sort.Order(Sort.Direction.ASC, "id"));//NOI18N
-			Sort transactionSort = new Sort(new Sort.Order(Sort.Direction.ASC, "id"));//NOI18N
-			exporter.exportData(user, accountRepository.findByOwner(user, accountSort), transactionRepository.findByOwner(user, transactionSort), null);
-
-			String date = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date()); //NOI18N
-
-			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.APPLICATION_XML);
-			headers.setContentLength(outStream.size());
-			headers.setContentDispositionFormData("attachment", "vogon-" + date + ".xml"); //NOI18N //NOI18N
-
-			return new HttpEntity<>(outStream.toByteArray(), headers);
-		} catch (VogonExportException ex) {
-			throw new RuntimeException(ex);
-		}
-		*/
-	}
-
-	/**
-	 * Returns all data
-	 *
-	 * @param userPrincipal the authenticated user
-	 * @return the HTTPEntity for the file download
-	 */
-	@RequestMapping(value = "/export/json", method = {RequestMethod.GET, RequestMethod.POST})
+	@RequestMapping(value = "/export", method = {RequestMethod.GET, RequestMethod.POST})
 	public HttpEntity<byte[]> exportDataJSON(@AuthenticationPrincipal VogonSecurityUser userPrincipal) throws RuntimeException {
 		VogonUser user = userRepository.findByUsernameIgnoreCase(userPrincipal.getUsername());
-		return null;
-		//TODO: replace with JSON implementation
-		/*
+
+		Sort accountSort = new Sort(new Sort.Order(Sort.Direction.ASC, "id"));//NOI18N
+		Sort transactionSort = new Sort(new Sort.Order(Sort.Direction.ASC, "id"));//NOI18N
+
+		ImportExportData data = new ImportExportData(accountRepository.findByOwner(user, accountSort), transactionRepository.findByOwner(user, transactionSort));
+		byte[] output = null;
 		try {
-			ClassExporter exporter = new ClassExporter();
-			Sort accountSort = new Sort(new Sort.Order(Sort.Direction.ASC, "id"));//NOI18N
-			Sort transactionSort = new Sort(new Sort.Order(Sort.Direction.ASC, "id"));//NOI18N
-
-			exporter.exportData(user, accountRepository.findByOwner(user, accountSort), transactionRepository.findByOwner(user, transactionSort), null);
-			ExportedData exportedData = exporter.getExportedData();
-
-			//Process transactions for JSON
-			List<FinanceTransactionJson> processedTransactions = initializationHelper.initializeTransactions(exportedData.getTransactions());
-			exportedData.getTransactions().clear();
-			for (FinanceTransactionJson transaction : processedTransactions)
-				exportedData.getTransactions().add(transaction);
-
 			//Convert to JSON
-			byte[] output = jsonMapper.writer().withDefaultPrettyPrinter().writeValueAsString(exportedData).getBytes("utf-8"); //NOI18N
-
-			String date = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date()); //NOI18N
-
-			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
-			headers.setContentLength(output.length);
-			headers.setContentDispositionFormData("attachment", "vogon-" + date + ".json"); //NOI18N //NOI18N
-
-			return new HttpEntity<>(output, headers);
-		} catch (VogonExportException | IOException ex) {
+			output = jsonMapper.writer().withDefaultPrettyPrinter().writeValueAsString(data).getBytes("utf-8"); //NOI18N
+		} catch (JsonProcessingException | UnsupportedEncodingException ex) {
 			throw new RuntimeException(ex);
 		}
-		*/
-	}
 
-	/**
-	 * Recalculates balance for all user's accounts
-	 *
-	 * @param userPrincipal the authenticated user
-	 * @return true on success
-	 */
-	@RequestMapping(value = "/recalculateBalance", method = RequestMethod.GET, produces = "application/json")
-	public @ResponseBody
-	Boolean recalculateBalance(@AuthenticationPrincipal VogonSecurityUser userPrincipal) {
-		VogonUser user = userRepository.findByUsernameIgnoreCase(userPrincipal.getUsername());
-		DatabaseMaintenance databaseMaintenance = new DatabaseMaintenance();
-		for (FinanceAccount account : accountRepository.findByOwner(user))
-			databaseMaintenance.refreshAccountBalance(account, em);
-		return true;
-	}
+		String date = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date()); //NOI18N
 
-	/**
-	 * Performs a DB cleanup operation
-	 *
-	 * @return true on success
-	 */
-	@RequestMapping(value = "/cleanup", method = RequestMethod.GET, produces = "application/json")
-	public @ResponseBody
-	Boolean cleanup() {
-		DatabaseMaintenance databaseMaintenance = new DatabaseMaintenance();
-		databaseMaintenance.cleanup(em);//TODO: allows this action only for administrative users?
-		return true;
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+		headers.setContentLength(output.length);
+		headers.setContentDispositionFormData("attachment", "vogon-" + date + ".json"); //NOI18N //NOI18N
+
+		return new HttpEntity<>(output, headers);
 	}
 }
