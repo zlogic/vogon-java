@@ -41,7 +41,7 @@ import org.zlogic.vogon.web.data.UserRepository;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = {Application.class, DatabaseConfiguration.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class RegistrationTest {
+public class RegistrationControllerTest {
 
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/web/messages");
 

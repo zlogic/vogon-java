@@ -34,7 +34,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = {Application.class, DatabaseConfiguration.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class CurrenciesTest {
+public class CurrenciesControllerTest {
 
 	private JsonExpectationsHelper jsonExpectationhelper = new JsonExpectationsHelper();
 
