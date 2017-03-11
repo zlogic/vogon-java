@@ -5,7 +5,6 @@
  */
 package org.zlogic.vogon.web;
 
-import java.util.ResourceBundle;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
