@@ -9,8 +9,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
@@ -29,7 +27,7 @@ public class JSONMapper extends ObjectMapper implements InitializingBean {
 	/**
 	 * Wrapper class for FinanceTransaction
 	 */
-	@JsonIgnoreProperties(value = {"owner", "accounts", "fromAccounts", "toAccounts", "amountOk", "currencies"})
+	@JsonIgnoreProperties(value = {"owner", "accounts"})
 	private interface FinanceTransactionAnnotations {
 
 		/**
@@ -118,20 +116,6 @@ public class JSONMapper extends ObjectMapper implements InitializingBean {
 		 */
 		@JsonProperty
 		public void setPassword(String password);
-	}
-
-	/**
-	 * Wrapper class for ConfigurationElement
-	 */
-	private interface ConfigurationElementAnnotations {
-
-		/**
-		 * Deserialize everything as strings
-		 *
-		 * @param configurationValue the value to deserialize
-		 */
-		@JsonDeserialize(as = String.class)
-		public void setValue(Serializable configurationValue);
 	}
 
 	/**
