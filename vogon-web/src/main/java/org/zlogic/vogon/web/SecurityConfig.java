@@ -5,10 +5,6 @@
  */
 package org.zlogic.vogon.web;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,10 +13,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.BadClientCredentialsException;
-import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -29,12 +21,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.authentication.BearerTokenExtractor;
-import org.springframework.security.oauth2.provider.authentication.TokenExtractor;
 import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.security.web.authentication.logout.LogoutHandler;
-import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.zlogic.vogon.web.configuration.VogonConfiguration;
 import org.zlogic.vogon.web.security.JpaTokenStore;
 import org.zlogic.vogon.web.security.VogonSecurityUser;
@@ -68,12 +55,6 @@ public class SecurityConfig {
 		private ServerTypeDetector serverTypeDetector;
 
 		/**
-		 * The TokenStore instance
-		 */
-		@Autowired
-		private TokenStore tokenStore;
-
-		/**
 		 * Configures ResourceServerSecurity
 		 *
 		 * @param resources the ResourceServerSecurityConfigurer instance to
@@ -92,41 +73,12 @@ public class SecurityConfig {
 		 */
 		@Override
 		public void configure(HttpSecurity http) throws Exception {
-			//The logout handler to delete tokens
-			LogoutHandler logoutHandler = new LogoutHandler() {
-				/**
-				 * The TokenExtractor instance
-				 */
-				private TokenExtractor tokenExtractor = new BearerTokenExtractor();
-
-				@Override
-				public void logout(HttpServletRequest request, HttpServletResponse response, Authentication auth) {
-					auth = tokenExtractor.extract(request);
-
-					OAuth2AccessToken token = tokenStore.readAccessToken((String) auth.getPrincipal());
-					if (token == null)
-						 throw new BadClientCredentialsException();
-					tokenStore.removeAccessToken(token);
-					if(token.getRefreshToken() != null)
-						tokenStore.removeRefreshToken(token.getRefreshToken());
-					if (token.isExpired())
-						throw new BadClientCredentialsException();
-				}
-			};
-			// The logout success handler
-			LogoutSuccessHandler logoutSuccessHandler = new LogoutSuccessHandler() {
-
-				@Override
-				public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication auth) throws IOException, ServletException {
-
-				}
-			};
 			(serverTypeDetector.isSslSupported() ? http.requiresChannel().anyRequest().requiresSecure().and() : http)
 					//.authorizeRequests().antMatchers("/oauth/token").fullyAuthenticated().and()
-					.authorizeRequests().antMatchers("/oauth/token").anonymous().and() //NOI18N
-					.authorizeRequests().antMatchers("/service/**").hasAuthority(VogonSecurityUser.AUTHORITY_USER).and() //NOI18N
-					.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-					.logout().addLogoutHandler(logoutHandler).logoutUrl("/logout").logoutSuccessHandler(logoutSuccessHandler); //NOI18N
+					.authorizeRequests()
+						.antMatchers("/oauth/token").anonymous() //NOI18N
+						.antMatchers("/service/**", "/oauth/logout").hasAuthority(VogonSecurityUser.AUTHORITY_USER).and() //NOI18N
+					.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		}
 	}
 

@@ -34,6 +34,7 @@ import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 
 /**
  * Tests for Authentication
@@ -106,7 +107,7 @@ public class AuthenticationTest {
 		assertEquals(1, tokens.size());
 
 		HttpEntity<String> entity = new HttpEntity<>(headers);
-		ResponseEntity<String> responseEntity = restClient.getRestTemplate().exchange("https://localhost:8443/logout", HttpMethod.GET, entity, String.class);
+		ResponseEntity<String> responseEntity = restClient.getRestTemplate().exchange("https://localhost:8443/oauth/logout", HttpMethod.POST, entity, String.class);
 		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 		assertNull(responseEntity.getBody());
 		tokens = tokenStore.findTokensByClientId("vogonweb");
@@ -139,12 +140,14 @@ public class AuthenticationTest {
 
 		HttpEntity<String> entity = new HttpEntity<>(newHeaders);
 		try {
-			restClient.getRestTemplate().exchange("https://localhost:8443/logout", HttpMethod.POST, entity, String.class);
+			restClient.getRestTemplate().exchange("https://localhost:8443/oauth/logout", HttpMethod.POST, entity, String.class);
 			fail("Expected an HttpServerErrorException to be thrown");
 		} catch (HttpClientErrorException ex) {
 			assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
 			String token = newHeaders.getFirst("Authorization").substring("Bearer ".length());
-			jsonExpectationhelper.assertJsonEqual("{\"error\":\"invalid_token\",\"error_description\":\"Invalid access token: " + token + "\"}", ex.getResponseBodyAsString(), true);
+			jsonExpectationhelper.assertJsonEqual("{\"error\":\"invalid_token\",\"error_description\":\"Access token expired: " + token + "\"}", ex.getResponseBodyAsString(), true);
+		} catch (HttpServerErrorException ex) {
+			System.out.println(ex.getResponseBodyAsString());
 		}
 		tokens = tokenStore.findTokensByClientId("vogonweb");
 		assertEquals(0, tokens.size());
@@ -192,7 +195,7 @@ public class AuthenticationTest {
 		HttpHeaders headers = restClient.badAuthenticate();
 		HttpEntity<String> entity = new HttpEntity<>(headers);
 		try {
-			restClient.getRestTemplate().exchange("https://localhost:8443/logout", HttpMethod.GET, entity, String.class);
+			restClient.getRestTemplate().exchange("https://localhost:8443/oauth/logout", HttpMethod.GET, entity, String.class);
 			fail("Expected an HttpServerErrorException to be thrown");
 		} catch (HttpClientErrorException ex) {
 			assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
