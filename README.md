@@ -1,15 +1,18 @@
-#Vogon personal finance tracker
+# Vogon personal finance tracker
 
-## This Java version is no longer under active development.
-### It works, it's stable and tested, and it will continue working for the forseeable future.
+## This Java version is currently going through a massive rewrite/refactoring in the [master](/../../tree/master) branch.
 
-Java and especially Spring Boot don't work too well with cloud environments, especially a hobby-level service is used (e.g. free or inexpensive tier).
+### The latest stable tag is [2.2](/../../tree/version_2.2).
 
-For example, Spring Boot takes up to a minute to start on Heroku after sleeping, and Hibernate creates so many join tables that my personal account takes almost 40K rows in a Postgres database. And as usual, memory usage even on light containers like Jetty is 400+ MB, which means that the application is unconfortably close to the 512MB limit on most service providers and sometimes crashes on OpenShift.
+The updated version will include automated tests, component upgrades and will have reduced
+resource requirements to work much better on Heroku (and other cloud enviromnent) free tiers.
 
-For this reason I decided to rewrite the server backend in Node.js and am extremely pleased with the progress so far. In just 10 days I rewrote almost all the Java code (and even added some much needed tests)!
+The update will also get rid of supporting some legacy environments such as Tomcat 7,
+since OpenShift Online 2.0 is no longer available for registration and all other cloud providers
+offer Tomcat 8.
 
-### The successor for Vogon is [Vogon-NJ] (https://github.com/zlogic/vogon-nj), which has the same basic user interface, but a Node.JS backend. It's under active development.
+Finally, best practices and features are being ported from the Node.js version of Vogon
+([Vogon-NJ](https://github.com/zlogic/vogon-nj)).
 
 ## Project description
 
