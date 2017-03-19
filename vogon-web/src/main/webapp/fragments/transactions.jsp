@@ -47,8 +47,8 @@
 								</div>
 							</div>
 						</div>
-						<div class="col-md-1 col-sm-4 text-right">
-							<label class="form-control-static"><fmt:message key="AMOUNT"/></label>
+						<div class="col-md-1 col-sm-12 text-right">
+							<label class="form-control-static"><fmt:message key="AMOUNT"/> &nbsp;</label>
 						</div>
 						<div class="col-md-1 col-sm-4">
 							<label class="form-control-static"><fmt:message key="ACCOUNT"/></label>
