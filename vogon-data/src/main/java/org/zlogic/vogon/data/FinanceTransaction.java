@@ -21,6 +21,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -78,6 +79,7 @@ public class FinanceTransaction implements Serializable {
 	 * The transaction owner
 	 */
 	@ManyToOne
+	@JoinColumn
 	protected VogonUser owner;
 	/**
 	 * The transaction type
@@ -98,6 +100,7 @@ public class FinanceTransaction implements Serializable {
 	 */
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@OrderBy("id ASC")
+	@JoinColumn
 	protected Set<TransactionComponent> components;
 	/**
 	 * Contains the transaction date

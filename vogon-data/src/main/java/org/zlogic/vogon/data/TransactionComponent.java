@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Version;
 
@@ -40,11 +41,13 @@ public class TransactionComponent implements Serializable {
 	 * The account
 	 */
 	@ManyToOne
+	@JoinColumn
 	protected FinanceAccount account;
 	/**
 	 * The transaction
 	 */
 	@ManyToOne
+	@JoinColumn
 	protected FinanceTransaction transaction;
 	/**
 	 * The amount this component changes the account's balance

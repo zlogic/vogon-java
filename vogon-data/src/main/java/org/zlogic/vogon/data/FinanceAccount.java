@@ -17,6 +17,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Version;
@@ -53,6 +54,7 @@ public class FinanceAccount implements Serializable {
 	 * The account owner
 	 */
 	@ManyToOne
+	@JoinColumn
 	protected VogonUser owner;
 	/**
 	 * The account name
@@ -79,6 +81,7 @@ public class FinanceAccount implements Serializable {
 	 * The account's transaction components
 	 */
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn
 	protected Set<TransactionComponent> transactionComponents;
 
 	/**
