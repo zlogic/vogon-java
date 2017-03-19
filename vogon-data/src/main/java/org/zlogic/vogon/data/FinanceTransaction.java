@@ -6,7 +6,6 @@
 package org.zlogic.vogon.data;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
@@ -15,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.TreeSet;
 import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -168,7 +168,7 @@ public class FinanceTransaction implements Serializable {
 			throw new ConcurrentModificationException(messages.getString("TRANSACTION_WAS_ALREADY_UPDATED"));
 		this.type = transaction.type;
 		this.description = transaction.description;
-		this.tags = new HashSet<>();
+		this.tags = new TreeSet<>();
 		for (String tag : transaction.tags)
 			this.tags.add(tag);
 		this.transactionDate = (Date) transaction.transactionDate.clone();
@@ -329,10 +329,8 @@ public class FinanceTransaction implements Serializable {
 	 */
 	void addTag(String tag) {
 		if (tags == null)
-			tags = new HashSet<>();
-		if (!tags.contains(tag))
-			tags.add(tag);
-		tags.remove("");
+			tags = new TreeSet<>();
+		tags.add(tag);
 	}
 
 	/**
@@ -359,10 +357,7 @@ public class FinanceTransaction implements Serializable {
 	 * @return the transaction's tags
 	 */
 	public String[] getTags() {
-		List<String> filteredTags = new ArrayList<>(tags);
-		filteredTags.remove("");
-		filteredTags.sort((tag1, tag2) -> tag1.compareTo(tag2));
-		return filteredTags.toArray(new String[0]);
+		return tags.toArray(new String[0]);
 	}
 
 	/**
@@ -371,9 +366,7 @@ public class FinanceTransaction implements Serializable {
 	 * @param tags the new transaction's tags
 	 */
 	public void setTags(String... tags) {
-		this.tags = new HashSet<>(Arrays.asList(tags));
-		if(this.tags.isEmpty())
-			this.tags.add("");
+		this.tags = new TreeSet<>(Arrays.asList(tags));
 	}
 
 	/**
