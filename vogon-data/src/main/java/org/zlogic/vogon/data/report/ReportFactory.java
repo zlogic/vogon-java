@@ -10,12 +10,12 @@ import java.util.Collection;
 import java.util.Currency;
 import java.util.Date;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.TreeMap;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -295,7 +295,7 @@ public class ReportFactory {
 				currencies.add(account.getCurrency());
 			}
 
-		Map<String, Report> reportsByCurrency = new HashMap<>();
+		Map<String, Report> reportsByCurrency = new TreeMap<>();
 
 		for (Currency currency : currencies) {
 			Collection<FinanceAccount> currencyAccounts = new HashSet<>();
@@ -303,7 +303,7 @@ public class ReportFactory {
 				if (account.getCurrency() == currency)
 					currencyAccounts.add(account);
 
-			Map<String, TagExpense> tagExpenses = new HashMap<>();
+			Map<String, TagExpense> tagExpenses = new TreeMap<>();
 			
 			List<ReportTransaction> reportTransactions = new ArrayList<>();
 			for (FinanceTransaction transaction : getTransactions(entityManager, currencyAccounts)){
@@ -314,10 +314,10 @@ public class ReportFactory {
 				if (transaction.getTags().length == 0)
 					addTagExpense("", reportTransaction.getRawAmount(), tagExpenses);
 			}
-			reportTransactions.sort((o1, o2) -> -Double.compare(o1.getAmount(), o2.getAmount()));
-			
+			reportTransactions.sort((tr1, tr2) -> -Double.compare(Math.abs(tr1.getAmount()), Math.abs(tr2.getAmount())));
+
 			List<TagExpense> tagExpenseList = new ArrayList<>(tagExpenses.values());
-			tagExpenseList.sort((o1, o2) -> -Double.compare(o1.getAmount(), o2.getAmount()));
+			tagExpenseList.sort((tag1, tag2) -> -Double.compare(Math.abs(tag1.getAmount()), Math.abs(tag2.getAmount())));
 
 			Report report = new Report();
 			report.setTransactions(reportTransactions);
@@ -552,7 +552,7 @@ public class ReportFactory {
 				entityManager,
 				accounts,
 				FinanceTransaction_.transactionDate, true, false,
-				EnumSet.of(FilterType.DATE, FilterType.ACCOUNTS, FilterType.TRANSACTION_TYPE, FilterType.TAGS));
+				EnumSet.of(FilterType.ACCOUNTS, FilterType.TRANSACTION_TYPE, FilterType.TAGS));
 
 		//Calculate sum for accounts/currencies for each transaction
 		long sumBalance = 0;
@@ -568,10 +568,11 @@ public class ReportFactory {
 		}
 
 		//Convert from long to double
-		Map<Date, Double> result = new HashMap<>();
-		for (Map.Entry<Date, Long> dateBalance : currentBalance.getData().entrySet()) {
-			result.put(dateBalance.getKey(), dateBalance.getValue() / Constants.RAW_AMOUNT_MULTIPLIER);
-		}
+		Map<Date, Double> result = new TreeMap<>();
+		for (Map.Entry<Date, Long> dateBalance : currentBalance.getData().entrySet())
+			if ((dateBalance.getKey().after(earliestDate) || dateBalance.getKey().equals(earliestDate))
+					&& (dateBalance.getKey().before(latestDate) || dateBalance.getKey().equals(latestDate)))
+				result.put(dateBalance.getKey(), dateBalance.getValue() / Constants.RAW_AMOUNT_MULTIPLIER);
 		return result;
 	}
 	

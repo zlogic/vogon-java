@@ -21,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.JsonExpectationsHelper;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 
 /**
@@ -145,7 +144,7 @@ public class AnalyticsControllerTest {
 				+ "accountsBalanceGraph:{\"2014-02-17\":42,\"2015-01-07\":44.72}"
 				+ "},EUR:{"
 				+ "transactions:[{description:\"test transaction 1\",date:\"2014-02-17\",type:\"EXPENSEINCOME\",amount:160}],"
-				+ "tagExpenses:[{tag:\"world\",amount:160},{tag:\"hello\",amount:160}],"
+				+ "tagExpenses:[{tag:\"hello\",amount:160},{tag:\"world\",amount:160}],"
 				+ "accountsBalanceGraph:{\"2014-02-17\":160}"
 				+ "}"
 				+ "}", responseEntity.getBody(), true);
@@ -172,7 +171,7 @@ public class AnalyticsControllerTest {
 				+ "RUB:{transactions:[],tagExpenses:[],accountsBalanceGraph:{}},"
 				+ "EUR:{"
 				+ "transactions:[{description:\"test transaction 2\",date:\"2015-01-07\",type:\"EXPENSEINCOME\",amount:-3.14}],"
-				+ "tagExpenses:[{tag:\"magic\",amount:-3.14},{tag:\"hello\",amount:-3.14}],"
+				+ "tagExpenses:[{tag:\"hello\",amount:-3.14},{tag:\"magic\",amount:-3.14}],"
 				+ "accountsBalanceGraph:{\"2015-01-07\":-3.14}"
 				+ "}"
 				+ "}", responseEntity.getBody(), true);
@@ -228,11 +227,11 @@ public class AnalyticsControllerTest {
 		jsonExpectationhelper.assertJsonEqual("{"
 				+ "RUB:{"
 				+ "transactions:[{description:\"test transaction 1\",date:\"2014-02-17\",type:\"EXPENSEINCOME\",amount:42}],"
-				+ "tagExpenses:[{tag:\"world\",amount:42},{tag:\"hello\",amount:42}],"
+				+ "tagExpenses:[{tag:\"hello\",amount:42},{tag:\"world\",amount:42}],"
 				+ "accountsBalanceGraph:{\"2014-02-17\":42}"
 				+ "},EUR:{"
 				+ "transactions:[{description:\"test transaction 1\",date:\"2014-02-17\",type:\"EXPENSEINCOME\",amount:160}],"
-				+ "tagExpenses:[{tag:\"world\",amount:160},{tag:\"hello\",amount:160}],"
+				+ "tagExpenses:[{tag:\"hello\",amount:160},{tag:\"world\",amount:160}],"
 				+ "accountsBalanceGraph:{\"2014-02-17\":160}"
 				+ "}"
 				+ "}", responseEntity.getBody(), true);
@@ -284,11 +283,11 @@ public class AnalyticsControllerTest {
 		jsonExpectationhelper.assertJsonEqual("{"
 				+ "RUB:{"
 				+ "transactions:[{description:\"test transaction 2\",date:\"2015-01-07\",type:\"EXPENSEINCOME\",amount:2.72}],"
-				+ "tagExpenses:[{tag:\"magic\",amount:2.72},{tag:\"hello\",amount:2.72}],"
+				+ "tagExpenses:[{tag:\"hello\",amount:2.72},{tag:\"magic\",amount:2.72}],"
 				+ "accountsBalanceGraph:{\"2015-01-07\":2.72}"
 				+ "},EUR:{"
 				+ "transactions: [{description:\"test transaction 2\",date:\"2015-01-07\",type:\"EXPENSEINCOME\",amount:-3.14}],"
-				+ "tagExpenses:[{tag:\"magic\",amount:-3.14},{tag:\"hello\",amount:-3.14}],"
+				+ "tagExpenses:[{tag:\"hello\",amount:-3.14},{tag:\"magic\",amount:-3.14}],"
 				+ "accountsBalanceGraph:{\"2015-01-07\":-3.14}"
 				+ "}"
 				+ "}", responseEntity.getBody(), true);
