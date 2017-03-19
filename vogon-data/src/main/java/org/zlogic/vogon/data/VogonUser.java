@@ -14,6 +14,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Version;
 
@@ -54,11 +55,13 @@ public class VogonUser implements Serializable {
 	 * The user's transactions
 	 */
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn
 	protected Set<FinanceAccount> accounts;
 	/**
 	 * The user's transactions
 	 */
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn
 	protected Set<FinanceTransaction> transactions;
 
 	/**
