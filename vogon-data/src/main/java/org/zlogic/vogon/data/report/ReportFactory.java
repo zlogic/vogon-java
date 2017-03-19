@@ -21,6 +21,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -428,8 +429,9 @@ public class ReportFactory {
 			transactionTypePredicate = criteriaBuilder.or(transactionTypePredicate, criteriaBuilder.equal(tr.get(FinanceTransaction_.type), FinanceTransaction.Type.TRANSFER));
 
 		//Tags join
-		Join<FinanceTransaction, String> tagsJoin = tr.join(FinanceTransaction_.tags);
+		Join<FinanceTransaction, String> tagsJoin = tr.join(FinanceTransaction_.tags, JoinType.LEFT);
 		Predicate tagsPredicate = (selectedTags != null && !selectedTags.isEmpty()) ? tagsJoin.in(criteriaBuilder.literal(selectedTags)) : criteriaBuilder.disjunction();
+		tagsPredicate = (selectedTags != null && selectedTags.contains("")) ? criteriaBuilder.or(tagsPredicate, criteriaBuilder.isNull(tagsJoin)) : tagsPredicate;
 
 		//Transaction components join
 		Join<FinanceTransaction, TransactionComponent> componentsJoin = tr.join(FinanceTransaction_.components);
