@@ -743,8 +743,6 @@ public class TransactionsControllerWriteTest {
 		} catch (HttpServerErrorException ex) {
 			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
 			jsonExpectationhelper.assertJsonEqual("{message:\"" + MessageFormat.format(messages.getString("CANNOT_DELETE_A_NON_EXISTING_TRANSACTION"), 13) + "\"}", ex.getResponseBodyAsString());
-		} catch (HttpClientErrorException ex) {
-			System.out.println(ex.getResponseBodyAsString());
 		}
 
 		validateDefaultTransactions();
@@ -793,8 +791,6 @@ public class TransactionsControllerWriteTest {
 		} catch (HttpServerErrorException ex) {
 			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
 			jsonExpectationhelper.assertJsonEqual("{message:\"" + MessageFormat.format(messages.getString("CANNOT_DELETE_A_NON_EXISTING_TRANSACTION"), 160) + "\"}", ex.getResponseBodyAsString());
-		} catch (HttpClientErrorException ex) {
-			System.out.println(ex.getResponseBodyAsString());
 		}
 
 		validateDefaultTransactions();

@@ -5,9 +5,9 @@
  */
 package org.zlogic.vogon.data.report;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.zlogic.vogon.data.FinanceTransaction;
 
 /**
  * Report results class
@@ -19,7 +19,7 @@ public class Report {
 	/**
 	 * List of transactions matching the filter
 	 */
-	private List<FinanceTransaction> transactions;
+	private List<ReportTransaction> transactions;
 	/**
 	 * Expenses grouped by tag
 	 */
@@ -27,7 +27,7 @@ public class Report {
 	/**
 	 * Accounts balance chart
 	 */
-	private Map<String, DateBalance<Double>> accountsBalanceGraph;
+	private Map<Date, Double> accountsBalanceGraph;
 
 	/**
 	 * Default constructor
@@ -44,7 +44,7 @@ public class Report {
 	 *
 	 * @return the list of transactions matching the report filter
 	 */
-	public List<FinanceTransaction> getTransactions() {
+	public List<ReportTransaction> getTransactions() {
 		return transactions;
 	}
 
@@ -53,7 +53,7 @@ public class Report {
 	 *
 	 * @param transactions the transactions to set
 	 */
-	protected void setTransactions(List<FinanceTransaction> transactions) {
+	protected void setTransactions(List<ReportTransaction> transactions) {
 		this.transactions = transactions;
 	}
 
@@ -80,7 +80,7 @@ public class Report {
 	 *
 	 * @return the accounts balance chart
 	 */
-	public Map<String, DateBalance<Double>> getAccountsBalanceGraph() {
+	public Map<Date, Double> getAccountsBalanceGraph() {
 		return accountsBalanceGraph;
 	}
 
@@ -89,7 +89,7 @@ public class Report {
 	 *
 	 * @param accountsBalanceGraph the accounts balance chart to set
 	 */
-	protected void setAccountsBalanceGraph(Map<String, DateBalance<Double>> accountsBalanceGraph) {
+	protected void setAccountsBalanceGraph(Map<Date, Double> accountsBalanceGraph) {
 		this.accountsBalanceGraph = accountsBalanceGraph;
 	}
 }

@@ -6,6 +6,7 @@
 package org.zlogic.vogon.data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
@@ -124,7 +125,7 @@ public class FinanceTransaction implements Serializable {
 		//TODO: consider removing this
 		this();
 		this.description = description;
-		this.tags = tags != null ? new HashSet<>(Arrays.asList(tags)) : new HashSet<String>();
+		FinanceTransaction.this.setTags(tags != null ? tags : new String[0]);
 		this.transactionDate = date;
 		this.components = new HashSet<>();
 		this.type = type;
@@ -139,7 +140,7 @@ public class FinanceTransaction implements Serializable {
 	 * @param transaction the transaction from which to merge properties
 	 */
 	public FinanceTransaction(VogonUser owner, FinanceTransaction transaction) {
-				//TODO: consider removing this
+		//TODO: consider removing this
 		this.components = new HashSet<>();
 		FinanceTransaction.this.merge(transaction, false);
 		FinanceTransaction.this.setOwner(owner);
@@ -331,6 +332,7 @@ public class FinanceTransaction implements Serializable {
 			tags = new HashSet<>();
 		if (!tags.contains(tag))
 			tags.add(tag);
+		tags.remove("");
 	}
 
 	/**
@@ -357,7 +359,10 @@ public class FinanceTransaction implements Serializable {
 	 * @return the transaction's tags
 	 */
 	public String[] getTags() {
-		return tags.toArray(new String[0]);
+		List<String> filteredTags = new ArrayList<>(tags);
+		filteredTags.remove("");
+		filteredTags.sort((tag1, tag2) -> tag1.compareTo(tag2));
+		return filteredTags.toArray(new String[0]);
 	}
 
 	/**
@@ -367,6 +372,8 @@ public class FinanceTransaction implements Serializable {
 	 */
 	public void setTags(String... tags) {
 		this.tags = new HashSet<>(Arrays.asList(tags));
+		if(this.tags.isEmpty())
+			this.tags.add("");
 	}
 
 	/**
