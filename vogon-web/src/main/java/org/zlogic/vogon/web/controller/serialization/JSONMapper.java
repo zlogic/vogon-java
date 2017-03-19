@@ -14,6 +14,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.VogonUser;
+import org.zlogic.vogon.data.report.ReportTransaction;
 import org.zlogic.vogon.web.data.model.FinanceTransactionJson;
 
 /**
@@ -119,6 +120,18 @@ public class JSONMapper extends ObjectMapper implements InitializingBean {
 	}
 
 	/**
+	 * Wrapper class for ReportTransaction
+	 */
+	private interface ReportTransactionAnnotations {
+
+		/**
+		 * Disables returning of raw amount
+		 */
+		@JsonIgnore
+		public void getRawAmount();
+	}
+
+	/**
 	 * Adds MixIn Annotations
 	 *
 	 * @throws Exception in case of errors
@@ -128,6 +141,7 @@ public class JSONMapper extends ObjectMapper implements InitializingBean {
 		this.addMixIn(FinanceTransactionJson.class, FinanceTransactionAnnotations.class);
 		this.addMixIn(FinanceAccount.class, FinanceAccountAnnotations.class);
 		this.addMixIn(VogonUser.class, VogonUserAnnotations.class);
+		this.addMixIn(ReportTransaction.class, ReportTransactionAnnotations.class);
 		this.setDateFormat(new SimpleDateFormat("yyyy-MM-dd")); //NOI18N
 	}
 }

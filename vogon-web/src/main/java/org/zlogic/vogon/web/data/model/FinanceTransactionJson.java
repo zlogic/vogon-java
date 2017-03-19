@@ -45,7 +45,7 @@ public class FinanceTransactionJson extends FinanceTransaction {
 		this.tags = new TreeSet<>(Arrays.asList(transaction.getTags()));
 		this.transactionDate = transaction.getDate();
 		this.type = transaction.getType();
-		this.setVersion(transaction.getVersion());
+		FinanceTransactionJson.this.setVersion(transaction.getVersion());
 		for (TransactionComponent component : transaction.getComponents())
 			componentsJson.add(new TransactionComponentJson(component));
 	}

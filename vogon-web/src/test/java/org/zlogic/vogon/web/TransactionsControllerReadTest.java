@@ -154,7 +154,6 @@ public class TransactionsControllerReadTest {
 			restClient.getRestTemplate().exchange("https://localhost:8443/service/transactions/transaction/160", HttpMethod.GET, entity, String.class);
 			fail("Expected an HttpServerErrorException to be thrown");
 		} catch (HttpStatusCodeException ex) {
-			System.out.println(ex.getResponseBodyAsString());
 			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
 			jsonExpectationhelper.assertJsonEqual("{message:\"" + MessageFormat.format(messages.getString("TRANSACTION_DOES_NOT_EXIST"), 160) + "\"}", ex.getResponseBodyAsString());
 		}
@@ -177,7 +176,6 @@ public class TransactionsControllerReadTest {
 			restClient.getRestTemplate().exchange("https://localhost:8443/service/transactions/transaction/6", HttpMethod.GET, entity, String.class);
 			fail("Expected an HttpServerErrorException to be thrown");
 		} catch (HttpStatusCodeException ex) {
-			System.out.println(ex.getResponseBodyAsString());
 			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
 			jsonExpectationhelper.assertJsonEqual("{message:\"" + MessageFormat.format(messages.getString("TRANSACTION_DOES_NOT_EXIST"), 6) + "\"}", ex.getResponseBodyAsString());
 		}

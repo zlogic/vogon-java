@@ -146,8 +146,6 @@ public class AuthenticationTest {
 			assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
 			String token = newHeaders.getFirst("Authorization").substring("Bearer ".length());
 			jsonExpectationhelper.assertJsonEqual("{\"error\":\"invalid_token\",\"error_description\":\"Access token expired: " + token + "\"}", ex.getResponseBodyAsString(), true);
-		} catch (HttpServerErrorException ex) {
-			System.out.println(ex.getResponseBodyAsString());
 		}
 		tokens = tokenStore.findTokensByClientId("vogonweb");
 		assertEquals(0, tokens.size());

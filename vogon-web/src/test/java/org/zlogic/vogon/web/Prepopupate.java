@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Currency;
 import java.util.Date;
+import java.util.List;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -91,6 +92,27 @@ public class Prepopupate {
 		transaction4.addComponent(component5);
 		transactionRepository.save(Arrays.asList(transaction1, transaction3, transaction2, transaction4));
 		accountRepository.save(Arrays.asList(account1, account2, account3));
+	}
+
+	/**
+	 * Prepopulate the database with default and additional test data
+	 */
+	public void prepopulateExtra() {
+		prepopulate();
+
+		VogonUser user01 = userRepository.findByUsernameIgnoreCase("user01");
+
+		List<FinanceAccount> accounts = accountRepository.findAll();
+		FinanceAccount account1 = accounts.get(0);
+		FinanceAccount account2 = accounts.get(1);
+
+		FinanceTransaction transaction4 = new FinanceTransaction(user01, "test transaction 4", null, parseJSONDate("2014-06-07"), FinanceTransaction.Type.TRANSFER);
+		TransactionComponent component41 = new TransactionComponent(account1, transaction4, -144 * 100);
+		TransactionComponent component42 = new TransactionComponent(account2, transaction4, 144 * 100);
+		transaction4.addComponent(component41);
+		transaction4.addComponent(component42);
+		transactionRepository.save(transaction4);
+		accountRepository.save(Arrays.asList(account1, account2));
 	}
 
 	/**

@@ -5,9 +5,7 @@
  */
 package org.zlogic.vogon.data.report;
 
-import java.util.Currency;
-import java.util.HashMap;
-import java.util.Map;
+import org.zlogic.vogon.data.Constants;
 
 /**
  * Class for storing expenses for a specific tag
@@ -19,11 +17,11 @@ public class TagExpense {
 	/**
 	 * The tag name
 	 */
-	protected String tag;
+	private final String tag;
 	/**
 	 * The tag's amount
 	 */
-	protected Map<Currency, Double> amounts = new HashMap<>();
+	private long amount;
 
 	/**
 	 * Default constructor
@@ -46,25 +44,19 @@ public class TagExpense {
 	/**
 	 * Adds an amount to this tag
 	 *
-	 * @param currency the currency to be updated
 	 * @param amount the amount to be added
 	 */
-	protected void addAmount(Currency currency, double amount) {
-		if (amounts.containsKey(currency))
-			amounts.put(currency, amounts.get(currency) + amount);
-		else
-			amounts.put(currency, amount);
+	protected void addRawAmount(long amount) {
+		this.amount += amount;
 	}
 
-	;
-	
 	/**
 	 * Returns the tag amount
 	 *
 	 * @return the tag amount
 	 */
-	public Map<Currency, Double> getAmounts() {
-		return amounts;
+	public double getAmount() {
+		return amount / Constants.RAW_AMOUNT_MULTIPLIER;
 	}
 
 }
