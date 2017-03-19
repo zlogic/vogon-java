@@ -112,7 +112,7 @@
 										<span ng-show="transactionsService.isTransferTransaction(transaction)">
 											&sum;
 										</span>
-										{{total| number:2}} {{report.selectedCurrency}}
+										{{transaction.amount| number:2}} {{report.selectedCurrency}}
 									</div>
 									<div class="col-md-3">{{transaction.date| date}}</div>
 								</div>
@@ -134,11 +134,7 @@
 								<div class="row" ng-repeat="tagExpense in report.tagExpenses">
 									<hr/>
 									<div class="col-md-9">{{tagExpense.tag}}</div>
-									<div class="col-md-3 text-right">
-										<div ng-repeat="(currencyCode, total) in tagExpense.amounts">
-											{{total| number:2}} {{report.selectedCurrency}}
-										</div>
-									</div>
+									<div class="col-md-3 text-right">{{tagExpense.amount| number:2}} {{report.selectedCurrency}}</div>
 								</div>
 							</div>
 						</div>

@@ -63,7 +63,9 @@
 						</div>
 						<div class="row">
 							<div class="form-inline col-md-1 col-sm-1">
-								<button ng-click="deleteAccount(account)" class="btn btn-danger" type="button"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> <fmt:message key="DELETE"/></button>
+								<p>
+									<button ng-click="deleteAccount(account)" class="btn btn-danger" type="button"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> <fmt:message key="DELETE"/></button>
+								</p>
 							</div>
 						</div>
 					</ng-form>
@@ -72,7 +74,7 @@
 					<hr/>
 					<div class="col-md-3 col-sm-4"><fmt:message key="TOTAL_FOR_CURRENCY"/></div>
 					<div class="col-md-2 col-sm-3 text-right">{{data.total| number:2}}</div>
-					<div class="col-md-7 col-xs-5">{{currency}}</div>
+					<div class="col-md-7 col-sm-5">{{currency}}</div>
 				</div>
 			</div>
 		</div>

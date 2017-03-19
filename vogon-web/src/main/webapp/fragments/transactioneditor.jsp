@@ -46,12 +46,12 @@
 						<div class="form-group">
 							<span ng-class="{ 'has-error': transactionForm.amount.$invalid }">
 								<div class="input-group">
-									<input type="text" ng-model="component.amount" placeholder="<fmt:message key="ENTER_AMOUNT"/>" class="text-right form-control" name="amount" ng-pattern="/^-?\\\d+(\\\.\\\d+)?$/" required/>
+									<input type="text" ng-model="component.amount" placeholder="<fmt:message key="ENTER_AMOUNT"/>" class="text-right form-control" name="amount" ng-pattern="/^-?\d+(\.\d+)?$/" required/>
 									<span class="input-group-addon">{{accountService.getAccount(component.accountId).currency}}</span>
 								</div>
 							</span>
 						</div>
-						<div class="form-control">
+						<div class="form-group">
 							<button ng-click="deleteTransactionComponent(component)" class="btn btn-default" type="button"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> <fmt:message key="DELETE"/></button>
 						</div>
 					</ng-form>
