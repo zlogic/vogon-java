@@ -1,7 +1,7 @@
 <%@ page session="false" trimDirectiveWhitespaces="true" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <fmt:setBundle basename="org.zlogic.vogon.web.webmessages" />
-<form name="accountEditorForm" novalidate>
+<form name="accountEditorForm" autocomplete="off" novalidate>
 	<div class="panel panel-default">
 		<div class="panel-body">
 			<div class="container-fluid">
@@ -36,7 +36,7 @@
 						<div class="col-md-2 col-sm-3 text-right">{{account.balance| number:2}}</div>
 						<div class="col-md-7 col-sm-5">{{account.currency}}</div>
 					</div>
-					<ng-form name="accountForm" ng-if="editingAccounts">
+					<ng-form name="accountForm" ng-if="editingAccounts" autocomplete="off">
 						<div class="row">
 							<hr/>
 							<div class="col-md-3 col-sm-4">

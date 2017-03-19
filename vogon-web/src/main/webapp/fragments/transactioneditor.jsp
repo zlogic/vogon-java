@@ -1,7 +1,7 @@
 	<%@ page session="false" trimDirectiveWhitespaces="true" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <fmt:setBundle basename="org.zlogic.vogon.web.webmessages" />
-<form name="transactionEditorForm" novalidate>
+<form name="transactionEditorForm" autocomplete="off" novalidate>
 	<div class="panel panel-default">
 		<div class="panel-heading">
 			<h3><fmt:message key="EDIT_TRANSACTION_TITLE"/></h3>
@@ -37,7 +37,7 @@
 			</div>
 			<div class="row form-control-static" ng-repeat="component in transaction.components">
 				<div class="form-inline col-md-12">
-					<ng-form name="transactionForm">
+					<ng-form name="transactionForm" autocomplete="off">
 						<div class="form-group">
 							<span ng-class="{ 'has-error': transactionForm.account.$invalid }">
 								<select ng-model="component.accountId" ng-options="account.id as account.name for account in accountService.accounts | filter:isAccountVisible" class="form-control" name="account" required></select>

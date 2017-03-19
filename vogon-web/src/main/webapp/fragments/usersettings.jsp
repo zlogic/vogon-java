@@ -1,7 +1,7 @@
 <%@ page session="false" trimDirectiveWhitespaces="true" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <fmt:setBundle basename="org.zlogic.vogon.web.webmessages" />
-<form name="userSettingsForm" novalidate>
+<form name="userSettingsForm" autocomplete="off" novalidate>
 	<div class="panel panel-default">
 		<div class="panel-body">
 			<div class="form-group" ng-class="{ 'has-error': userSettingsForm.username.$invalid }">
