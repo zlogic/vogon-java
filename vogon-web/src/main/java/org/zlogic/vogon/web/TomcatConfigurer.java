@@ -63,7 +63,7 @@ public class TomcatConfigurer implements EmbeddedServletContainerCustomizer {
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 			throw new RuntimeException(messages.getString("CANNOT_CONFIGURE_ENCODING_FOR_TOMCAT_8"), ex);
 		}
-		throw new RuntimeException(messages.getString("CANNOT_CONFIGURE_ENCODING_FOR_TOMCAT"));
+		throw new RuntimeException(messages.getString("CANNOT_CONFIGURE_ENCODING_FOR_TOMCAT_8"));
 	}
 
 	/**
@@ -80,7 +80,7 @@ public class TomcatConfigurer implements EmbeddedServletContainerCustomizer {
 
 		log.info(MessageFormat.format(messages.getString("USING_KEYSTORE_WITH_PASSWORD"), new Object[]{serverTypeDetector.getKeystoreFile(), serverTypeDetector.getKeystorePassword().replaceAll(".{1}", "*")})); //NOI18N
 		Object connector;
-		Class connectorClass = null;
+		Class<?> connectorClass = null;
 		try {
 			log.debug(messages.getString("CONFIGURING_CONNECTOR"));
 			connectorClass = getClass().getClassLoader().loadClass("org.apache.catalina.connector.Connector"); //NOI18N
@@ -97,7 +97,7 @@ public class TomcatConfigurer implements EmbeddedServletContainerCustomizer {
 		try {
 			log.debug(messages.getString("CONFIGURING_PROTOCOLHANDLER_PARAMETERS"));
 			proto = connectorClass.getMethod("getProtocolHandler").invoke(connector); //NOI18N
-			Class protoClass = proto.getClass();
+			Class<?> protoClass = proto.getClass();
 			log.debug(java.text.MessageFormat.format(messages.getString("CONFIGURING_PROTOCOLHANDLER_CLASS"), new Object[]{protoClass.getCanonicalName()}));
 			protoClass.getMethod("setSSLEnabled", Boolean.TYPE).invoke(proto, true); //NOI18N
 			protoClass.getMethod("setKeystorePass", String.class).invoke(proto, serverTypeDetector.getKeystorePassword()); //NOI18N

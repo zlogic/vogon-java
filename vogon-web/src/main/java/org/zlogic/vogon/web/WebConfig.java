@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.security.web.bind.support.AuthenticationPrincipalArgumentResolver;
+import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
@@ -69,8 +69,8 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 		//TODO: remove this and use "spring.resources.chain.enabled:true" in application.properties when upgrading Spring Boot
 		super.addResourceHandlers(registry);
 		registry
-				.addResourceHandler("/webjars/**")
-				.addResourceLocations("classpath:/META-INF/resources/webjars/")
+				.addResourceHandler("/webjars/**") //NOI18N
+				.addResourceLocations("classpath:/META-INF/resources/webjars/") //NOI18N
 				.resourceChain(true);
 	}
 

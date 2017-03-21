@@ -85,12 +85,24 @@ public class VogonUser implements Serializable {
 	/*
 	 * Getters/setters
 	 */
-	public Set<FinanceAccount> getAccounts(){
-		return accounts !=null ? Collections.unmodifiableSet(accounts) : Collections.emptySet();
+	/**
+	 * Returns all of the user's accounts
+	 *
+	 * @return all of the user's accounts
+	 */
+	public Set<FinanceAccount> getAccounts() {
+		return accounts != null ? Collections.unmodifiableSet(accounts) : Collections.emptySet();
 	}
-	public Set<FinanceTransaction> getTransactions(){
+
+	/**
+	 * Returns all of the user's transactions
+	 *
+	 * @return all of the user's transactions
+	 */
+	public Set<FinanceTransaction> getTransactions() {
 		return transactions != null ? Collections.unmodifiableSet(transactions) : Collections.emptySet();
 	}
+
 	/**
 	 * Returns the username
 	 *

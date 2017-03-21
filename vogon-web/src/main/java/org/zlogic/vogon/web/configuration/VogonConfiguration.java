@@ -18,12 +18,12 @@ public class VogonConfiguration {
 	/**
 	 * Allow registration
 	 */
-	private final static String ALLOW_REGISTRATION = "ALLOW_REGISTRATION";
+	private final static String ALLOW_REGISTRATION = "ALLOW_REGISTRATION"; //NOI18N
 
 	/**
 	 * Token expires days
 	 */
-	private final static String TOKEN_EXPIRES_DAYS = "TOKEN_EXPIRES_DAYS";
+	private final static String TOKEN_EXPIRES_DAYS = "TOKEN_EXPIRES_DAYS"; //NOI18N
 
 	/**
 	 * Returns true if registration is allowed
@@ -45,7 +45,7 @@ public class VogonConfiguration {
 	public int getTokenExpiresSeconds() {
 		String tokenExpiresDays = System.getenv(TOKEN_EXPIRES_DAYS);
 		if (tokenExpiresDays == null)
-			tokenExpiresDays = "14";
+			tokenExpiresDays = "14"; //NOI18N
 		return 60 * 60 * 24 * Integer.parseInt(tokenExpiresDays);
 	}
 }

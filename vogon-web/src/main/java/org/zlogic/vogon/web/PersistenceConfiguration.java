@@ -91,7 +91,7 @@ public class PersistenceConfiguration {
 				dbURL = System.getenv("OPENSHIFT_POSTGRESQL_DB_URL") + "/" + System.getenv("OPENSHIFT_APP_NAME"); //NOI18N
 			try {
 				URI dbUri = new URI(dbURL);
-				String dbConnectionURL = "jdbc:postgresql://" + dbUri.getHost() + ":" + dbUri.getPort() + dbUri.getPath(); //NOI18N //NOI18N
+				String dbConnectionURL = MessageFormat.format("jdbc:postgresql://{0}:{1}", dbUri.getHost(), dbUri.getPort(), dbUri.getPath()); //NOI18N
 				String[] usernamePassword = dbUri.getUserInfo().split(":", 2); //NOI18N
 				jpaProperties.put("javax.persistence.jdbc.url", dbConnectionURL); //NOI18N
 				jpaProperties.put("javax.persistence.jdbc.user", usernamePassword[0]); //NOI18N

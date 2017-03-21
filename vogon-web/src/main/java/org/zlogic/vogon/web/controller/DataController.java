@@ -8,6 +8,7 @@ package org.zlogic.vogon.web.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.persistence.EntityManager;
@@ -119,7 +120,7 @@ public class DataController {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
 		headers.setContentLength(output.length);
-		headers.setContentDispositionFormData("attachment", "vogon-" + date + ".json"); //NOI18N //NOI18N
+		headers.setContentDispositionFormData("attachment", MessageFormat.format("vogon-{0}.json", date)); //NOI18N //NOI18N
 
 		return new HttpEntity<>(output, headers);
 	}
