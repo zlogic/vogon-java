@@ -85,6 +85,7 @@ public class ImportExportData {
 	 * them to the specified user
 	 *
 	 * @param user user to whom Accounts and Transactions should be assigned
+	 * @param em EntityManager instance to use when persisting Entity classes
 	 */
 	public void persist(VogonUser user, EntityManager em) {
 

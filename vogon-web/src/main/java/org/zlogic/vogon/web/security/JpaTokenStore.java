@@ -105,8 +105,8 @@ public class JpaTokenStore implements TokenStore {
 	 * @return The access token to read.
 	 */
 	@Override
-	public OAuth2AccessToken readAccessToken(String token) {
-		AuthAccessToken accessToken = accessTokenRepository.findOne(token);
+	public OAuth2AccessToken readAccessToken(String tokenValue) {
+		AuthAccessToken accessToken = accessTokenRepository.findOne(tokenValue);
 		if (accessToken == null)
 			return null;
 		return SerializationUtils.deserialize(accessToken.getToken());
@@ -141,8 +141,8 @@ public class JpaTokenStore implements TokenStore {
 	 * @return The token.
 	 */
 	@Override
-	public OAuth2RefreshToken readRefreshToken(String token) {
-		AuthRefreshToken refreshToken = refreshTokenRepository.findOne(token);
+	public OAuth2RefreshToken readRefreshToken(String tokenValue) {
+		AuthRefreshToken refreshToken = refreshTokenRepository.findOne(tokenValue);
 		return SerializationUtils.deserialize(refreshToken.getToken());
 	}
 
@@ -177,8 +177,8 @@ public class JpaTokenStore implements TokenStore {
 	 * @param refreshToken The refresh token.
 	 */
 	@Override
-	public void removeAccessTokenUsingRefreshToken(OAuth2RefreshToken token) {
-		accessTokenRepository.deleteByRefreshToken(token.getValue());
+	public void removeAccessTokenUsingRefreshToken(OAuth2RefreshToken refreshToken) {
+		accessTokenRepository.deleteByRefreshToken(refreshToken.getValue());
 	}
 
 	/**
@@ -197,7 +197,12 @@ public class JpaTokenStore implements TokenStore {
 		return SerializationUtils.deserialize(token.getToken());
 	}
 
-	
+	/**
+	 * Converts AuthAccessTokens into OAuth2AccessTokens
+	 *
+	 * @param tokens AuthAccessTokens collection to convert
+	 * @return tokens converted to OAuth2AccessTokens
+	 */
 	private Collection<OAuth2AccessToken> convertTokens(Collection<AuthAccessToken> tokens) {
 		List<OAuth2AccessToken> convertedTokens = new ArrayList<>(tokens.size());
 		for (AuthAccessToken token : tokens) {
@@ -213,14 +218,14 @@ public class JpaTokenStore implements TokenStore {
 	 * @return a collection of access tokens
 	 */
 	@Override
-	public Collection<OAuth2AccessToken> findTokensByClientIdAndUserName(String clientId, String username) {
-		Collection<AuthAccessToken> tokens = accessTokenRepository.findTokensByClientIdAndUsername(clientId, username);
+	public Collection<OAuth2AccessToken> findTokensByClientIdAndUserName(String clientId, String userName) {
+		Collection<AuthAccessToken> tokens = accessTokenRepository.findTokensByClientIdAndUsername(clientId, userName);
 		return convertTokens(tokens);
 	}
 
 	/**
 	 * Finds tokens by their client id.
-	 * 
+	 *
 	 * @param clientId the client id to search
 	 * @return a collection of access tokens
 	 */

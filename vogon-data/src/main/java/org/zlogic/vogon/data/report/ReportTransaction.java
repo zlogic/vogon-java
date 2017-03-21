@@ -40,6 +40,13 @@ public class ReportTransaction {
 	 */
 	private long amount;
 
+	/**
+	 * Creates a ReportTransactions instance
+	 *
+	 * @param transaction the underlying FinanceTransaction to wrap
+	 * @param selectedAccounts accounts to use when calculating the transaction
+	 * amount amount
+	 */
 	public ReportTransaction(FinanceTransaction transaction, Collection<FinanceAccount> selectedAccounts) {
 		description = transaction.getDescription();
 		transactionDate = transaction.getDate();
@@ -47,6 +54,14 @@ public class ReportTransaction {
 		calculateAmount(transaction, selectedAccounts);
 	}
 
+	/**
+	 * Calculates the value of the amount field
+	 *
+	 * @param transaction the underlying FinanceTransaction to use when
+	 * calculating the amount
+	 * @param selectedAccounts accounts to use when calculating the transaction
+	 * amount
+	 */
 	private void calculateAmount(FinanceTransaction transaction, Collection<FinanceAccount> selectedAccounts) {
 		if (transaction.getType() == Type.TRANSFER) {
 			long amountPositive = 0L;

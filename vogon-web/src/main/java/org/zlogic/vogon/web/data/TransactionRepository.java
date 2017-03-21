@@ -21,7 +21,7 @@ import org.zlogic.vogon.data.VogonUser;
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 @Repository
-public interface TransactionRepository extends JpaRepository<FinanceTransaction, Long>, JpaSpecificationExecutor {
+public interface TransactionRepository extends JpaRepository<FinanceTransaction, Long>, JpaSpecificationExecutor<FinanceTransaction> {
 
 	/**
 	 * Finds a transaction by its VogonUser owner and ID

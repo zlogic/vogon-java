@@ -47,6 +47,10 @@ public class ReportFactory {
 	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/data/messages");
 	/**
+	 * Empty tag value (no tags assigned to transaction)
+	 */
+	private static final String EMPTY_TAG = "";
+	/**
 	 * The report owner user
 	 */
 	private VogonUser owner;
@@ -313,7 +317,7 @@ public class ReportFactory {
 				for (String tag : transaction.getTags())
 					addTagExpense(tag, reportTransaction.getRawAmount(), tagExpenses);
 				if (transaction.getTags().length == 0)
-					addTagExpense("", reportTransaction.getRawAmount(), tagExpenses);
+					addTagExpense(EMPTY_TAG, reportTransaction.getRawAmount(), tagExpenses);
 			}
 			reportTransactions.sort((tr1, tr2) -> -Double.compare(Math.abs(tr1.getAmount()), Math.abs(tr2.getAmount())));
 
@@ -537,7 +541,7 @@ public class ReportFactory {
 
 		tagsCriteriaQuery.select(tr.join(FinanceTransaction_.tags)).distinct(true);
 		HashSet<String> result = new HashSet<>(entityManager.createQuery(tagsCriteriaQuery).getResultList());
-		result.add("");
+		result.add(EMPTY_TAG);
 		return result;
 	}
 
@@ -546,6 +550,7 @@ public class ReportFactory {
 	 * Returns a graph for the total balance of accounts, sorted by date
 	 *
 	 * @param entityManager the EntityManager to be used for making queries
+	 * @param accounts the accounts for which the balance graph should be calculated
 	 * @return a graph for the total balance of accounts, sorted by date
 	 */
 	private Map<Date, Double> getAccountsBalanceGraph(EntityManager entityManager, Collection<FinanceAccount> accounts) {
