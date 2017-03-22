@@ -7,8 +7,10 @@ package org.zlogic.vogon.web.controller;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -82,17 +84,15 @@ public class AccountsController {
 			}
 		}
 		//Delete removed accounts
+		Set<FinanceTransaction> updatedTransactions = new HashSet<>();
 		for (FinanceAccount removedAccount : removedAccounts) {
 			//Delete all related transaction components
-			for (FinanceTransaction transaction : transactionRepository.findByOwner(user.getUser())) {
-				boolean save = false;
-				for (TransactionComponent component : transaction.getComponentsForAccount(removedAccount)) {
-					transaction.removeComponent(component);
-					save = true;
-				}
-				if (save)
-					transactionRepository.save(transaction);
+			for (TransactionComponent component : new ArrayList<>(removedAccount.getComponents())) {
+				updatedTransactions.add(component.getTransaction());
+				component.setAccount(null);
+				component.setTransaction(null);
 			}
+			transactionRepository.save(updatedTransactions);
 			accountRepository.delete(removedAccount);
 		}
 		accountRepository.flush();

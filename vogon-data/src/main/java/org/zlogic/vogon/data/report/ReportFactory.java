@@ -566,8 +566,8 @@ public class ReportFactory {
 		DateBalance<Long> currentBalance = new DateBalance<>(Long.class);
 		for (FinanceTransaction transaction : transactions) {
 			//Compute balance change for transaction
-			for (FinanceAccount account : accounts)
-				for (TransactionComponent component : transaction.getComponentsForAccount(account))
+			for (TransactionComponent component : transaction.getComponents())
+				if (accounts.contains(component.getAccount()))
 					sumBalance += component.getRawAmount();
 
 			//Update balance map

@@ -18,12 +18,12 @@ public class VogonConfiguration {
 	/**
 	 * Allow registration
 	 */
-	private final static String ALLOW_REGISTRATION = "ALLOW_REGISTRATION"; //NOI18N
+	private final static String ALLOW_REGISTRATION = "VOGON_ALLOW_REGISTRATION"; //NOI18N
 
 	/**
 	 * Token expires days
 	 */
-	private final static String TOKEN_EXPIRES_DAYS = "TOKEN_EXPIRES_DAYS"; //NOI18N
+	private final static String TOKEN_EXPIRES_DAYS = "VOGON_TOKEN_EXPIRES_DAYS"; //NOI18N
 
 	/**
 	 * Returns true if registration is allowed

@@ -70,9 +70,9 @@ public class TransactionComponent implements Serializable {
 	 */
 	public TransactionComponent(FinanceAccount account, FinanceTransaction transaction, long amount) {
 		//TODO: consider removing this
-		this.account = account;
-		this.transaction = transaction;
 		this.amount = amount;
+		TransactionComponent.this.setAccount(account);
+		TransactionComponent.this.setTransaction(transaction);
 	}
 
 	/*
@@ -93,7 +93,14 @@ public class TransactionComponent implements Serializable {
 	 * @param account the account to set
 	 */
 	public void setAccount(FinanceAccount account) {
+		if ((this.account != null && this.account.equals(account)) || (this.account == null && account == null))
+			return;
+		FinanceAccount savedAccount = this.account;
 		this.account = account;
+		if (savedAccount != null)
+			savedAccount.removeComponent(this);
+		if (account != null)
+			account.addComponent(this);
 	}
 
 	/**
@@ -111,7 +118,14 @@ public class TransactionComponent implements Serializable {
 	 * @param transaction the account to set
 	 */
 	public void setTransaction(FinanceTransaction transaction) {
+		if ((this.transaction != null && this.transaction.equals(transaction)) || (this.transaction == null && transaction == null))
+			return;
+		FinanceTransaction savedTransaction = this.transaction;
 		this.transaction = transaction;
+		if (savedTransaction != null)
+			savedTransaction.removeComponent(this);
+		if (transaction != null)
+			transaction.addComponent(this);
 	}
 
 	/**
@@ -126,12 +140,17 @@ public class TransactionComponent implements Serializable {
 
 	/**
 	 * Sets a new raw amount (should be divided by Constants.rawAmountMultiplier
-	 * to get the real amount) Also updates the account balance
+	 * to get the real amount); also updates the account balance
 	 *
 	 * @param amount the new raw amount
 	 */
 	public void setRawAmount(long amount) {
+		FinanceAccount savedAccount = account;
+		if (account != null)
+			account.removeComponent(this);
 		this.amount = amount;
+		if (savedAccount!= null)
+			savedAccount.addComponent(this);
 	}
 
 	/**

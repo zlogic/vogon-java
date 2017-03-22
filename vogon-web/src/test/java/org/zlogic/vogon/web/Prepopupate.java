@@ -85,11 +85,6 @@ public class Prepopupate {
 		TransactionComponent component3 = new TransactionComponent(account2, transaction2, -314);
 		TransactionComponent component4 = new TransactionComponent(account1, transaction2, 272);
 		TransactionComponent component5 = new TransactionComponent(account3, transaction4, 100 * 100);
-		transaction1.addComponent(component1);
-		transaction1.addComponent(component2);
-		transaction2.addComponent(component3);
-		transaction2.addComponent(component4);
-		transaction4.addComponent(component5);
 		transactionRepository.save(Arrays.asList(transaction1, transaction3, transaction2, transaction4));
 		accountRepository.save(Arrays.asList(account1, account2, account3));
 	}
@@ -109,8 +104,6 @@ public class Prepopupate {
 		FinanceTransaction transaction4 = new FinanceTransaction(user01, "test transaction 4", null, parseJSONDate("2014-06-07"), FinanceTransaction.Type.TRANSFER);
 		TransactionComponent component41 = new TransactionComponent(account1, transaction4, -144 * 100);
 		TransactionComponent component42 = new TransactionComponent(account2, transaction4, 144 * 100);
-		transaction4.addComponent(component41);
-		transaction4.addComponent(component42);
 		transactionRepository.save(transaction4);
 		accountRepository.save(Arrays.asList(account1, account2));
 	}
