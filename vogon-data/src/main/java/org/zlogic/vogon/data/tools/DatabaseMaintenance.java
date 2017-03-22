@@ -5,6 +5,7 @@
  */
 package org.zlogic.vogon.data.tools;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -41,7 +42,7 @@ public class DatabaseMaintenance {
 		accountsCriteriaQuery.where(account.get(FinanceAccount_.owner).isNull());
 		accountsCriteriaQuery.distinct(true);
 		for(FinanceAccount orphanedAccount : entityManager.createQuery(accountsCriteriaQuery).getResultList()){
-			for(TransactionComponent orphanedComponent : orphanedAccount.getComponents())
+			for(TransactionComponent orphanedComponent : new ArrayList<>(orphanedAccount.getComponents()))
 				orphanedComponent.setAccount(null);
 			entityManager.remove(orphanedAccount);
 		}
@@ -52,16 +53,20 @@ public class DatabaseMaintenance {
 		transactionCriteriaQuery.where(transaction.get(FinanceTransaction_.owner).isNull());
 		transactionCriteriaQuery.distinct(true);
 		for(FinanceTransaction orphanedTransaction : entityManager.createQuery(transactionCriteriaQuery).getResultList()){
-			for(TransactionComponent orphanedComponent : orphanedTransaction.getComponents())
+			for(TransactionComponent orphanedComponent : new ArrayList<>(orphanedTransaction.getComponents())){
 				orphanedComponent.setTransaction(null);
+			}
 			entityManager.remove(orphanedTransaction);
 		}
 		
 		CriteriaQuery<TransactionComponent> componentsCriteriaQuery = cb.createQuery(TransactionComponent.class);
 		Root<TransactionComponent> component = componentsCriteriaQuery.from(TransactionComponent.class);
 		componentsCriteriaQuery.where(component.get(TransactionComponent_.transaction).isNull());
-		for(TransactionComponent orphanedComponent : entityManager.createQuery(componentsCriteriaQuery).getResultList())
+		for(TransactionComponent orphanedComponent : entityManager.createQuery(componentsCriteriaQuery).getResultList()){
+			if (orphanedComponent.getAccount() != null)
+				orphanedComponent.setAccount(null);
 			entityManager.remove(orphanedComponent);
+		}
 	}
 
 	/**
@@ -73,20 +78,13 @@ public class DatabaseMaintenance {
 	 * function
 	 */
 	public void refreshAccountBalance(FinanceAccount account, EntityManager entityManager) {
-		//Request all transactions from database
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<FinanceTransaction> transactionsCriteriaQuery = criteriaBuilder.createQuery(FinanceTransaction.class);
-		transactionsCriteriaQuery.from(FinanceTransaction.class);
 		FinanceAccount tempAccount = entityManager.find(FinanceAccount.class, account.getId());
-
-		//Recalculate balance from related transactions
-		tempAccount.updateRawBalance(-tempAccount.getRawBalance());
-
-		TypedQuery<FinanceTransaction> transactionsBatchQuery = entityManager.createQuery(transactionsCriteriaQuery);
-
-		List<FinanceTransaction> transactions = transactionsBatchQuery.getResultList();
-		for (FinanceTransaction transaction : transactions)
-			for (TransactionComponent component : transaction.getComponentsForAccount(tempAccount))
-				tempAccount.updateRawBalance(component.getRawAmount());
+		List<TransactionComponent> accountComponents = new ArrayList(tempAccount.getComponents());
+		//Remove all components to force reset balance
+		for (TransactionComponent component : accountComponents)
+			component.setAccount(null);
+		//Restore all components
+		for (TransactionComponent component : accountComponents)
+			component.setAccount(tempAccount);
 	}
 }

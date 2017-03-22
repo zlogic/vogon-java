@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.Currency;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -102,12 +103,11 @@ public class FinanceAccount implements Serializable {
 	public FinanceAccount(VogonUser owner, String name, Currency currency) {
 		//TODO: consider removing
 		this();
-		includeInTotal = true;
-		showInList = true;
 		this.name = name;
 		this.balance = 0L;
 		this.currency = (currency != null ? currency : Currency.getInstance(Locale.getDefault())).getCurrencyCode();
 		FinanceAccount.this.setOwner(owner);
+		this.transactionComponents = new HashSet<>();
 	}
 
 	/**
@@ -120,6 +120,7 @@ public class FinanceAccount implements Serializable {
 		//TODO: consider removing or refactoring
 		this();
 		balance = 0L;
+		transactionComponents = new HashSet<>();
 		FinanceAccount.this.setOwner(owner);
 		FinanceAccount.this.merge(account, false);
 	}
@@ -150,23 +151,35 @@ public class FinanceAccount implements Serializable {
 	}
 
 	/**
-	 * Returns the raw balance (should be divided by
-	 * Constants.rawAmountMultiplier to get the real amount)
+	 * Adds a TransactionComponent to this account, updating the balance if it's
+	 * a new component
 	 *
-	 * @return the raw balance
+	 * @param component component to add
 	 */
-	public long getRawBalance() {
-		return balance;
+	void addComponent(TransactionComponent component) {
+		if (transactionComponents.add(component)) {
+			balance += component.getRawAmount();
+			component.setAccount(this);
+		}
+		//Reset balance if no components are remaining
+		if (transactionComponents.isEmpty())
+			balance = 0L;
 	}
 
 	/**
-	 * Updates the raw balance by adding a value
+	 * Removes a TransactionComponent fromm this account, updating the balance
+	 * if it's was assigned to this account
 	 *
-	 * @param addAmount the amount to add (can be added)
+	 * @param component component to remove
 	 */
-	public void updateRawBalance(long addAmount) {
-		//TODO: consider hiding or removing
-		balance += addAmount;
+	void removeComponent(TransactionComponent component) {
+		if (transactionComponents.remove(component)) {
+			balance -= component.getRawAmount();
+			component.setAccount(null);
+		}
+		//Reset balance if no components are remaining
+		if (transactionComponents.isEmpty())
+			balance = 0L;
 	}
 
 	/*
@@ -278,6 +291,16 @@ public class FinanceAccount implements Serializable {
 	}
 
 	/**
+	 * Returns the raw balance (should be divided by
+	 * Constants.rawAmountMultiplier to get the real amount)
+	 *
+	 * @return the raw balance
+	 */
+	public long getRawBalance() {
+		return balance;
+	}
+	
+	/**
 	 * Returns the balance as double
 	 *
 	 * @return the balance
@@ -316,7 +339,7 @@ public class FinanceAccount implements Serializable {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof FinanceAccount)
-			return id != null ? id.equals(((FinanceAccount) obj).id) : null;
+			return id != null ? id.equals(((FinanceAccount) obj).id) : false;
 		else
 			return this == obj;
 	}

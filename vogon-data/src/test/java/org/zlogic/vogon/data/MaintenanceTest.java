@@ -103,6 +103,10 @@ public class MaintenanceTest {
 		assertThat(transactions, IsCollectionContaining.hasItem(orphanedTransaction));
 		assertThat(transactionComponents, IsCollectionContaining.hasItems(orphanedComponent1, orphanedComponent2, orphanedComponent3, orphanedComponent4));
 
+		entityManager.refresh(account);//This is a trick to update the components hashSet hashcode
+		entityManager.refresh(orphanedAccount);//This is a trick to update the components hashSet hashcode
+		entityManager.refresh(orphanedTransaction);//This is a trick to update the components hashSet hashcode
+
 		entityManager.getTransaction().begin();
 		new DatabaseMaintenance().cleanup(entityManager);
 		entityManager.getTransaction().commit();
@@ -111,14 +115,14 @@ public class MaintenanceTest {
 		transactions = entityManager.createQuery(transactionQuery).getResultList();
 		transactionComponents = entityManager.createQuery(transactionComponentQuery).getResultList();
 
-		assertEquals(2, accounts.size());
+		assertEquals(1, accounts.size());
 		assertEquals(1, transactions.size());
 		assertEquals(2, transactionComponents.size());
 		assertThat(accounts, IsCollectionContaining.hasItem(account));
 		assertThat(transactions, IsCollectionContaining.hasItem(transaction));
 		assertThat(transactionComponents, IsCollectionContaining.hasItems(component1, component2));
 	}
-	
+
 	/**
 	 * Test that maintenance recalculates account balance
 	 */
@@ -150,13 +154,15 @@ public class MaintenanceTest {
 		FinanceAccount foundAccount = entityManager.find(FinanceAccount.class, account.getId());
 
 		assertEquals(11, foundAccount.getRawBalance());
-		
+
+		entityManager.refresh(account);//This is a trick to update the components hashSet hashcode
+
 		entityManager.getTransaction().begin();
 		new DatabaseMaintenance().refreshAccountBalance(account, entityManager);
 		entityManager.getTransaction().commit();
-		
+
 		entityManager.refresh(foundAccount);
-		
+
 		assertEquals(42 + 160, foundAccount.getRawBalance());
 	}
 }

@@ -6,11 +6,11 @@
 package org.zlogic.vogon.data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -33,7 +33,6 @@ import javax.persistence.Version;
  *
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
-//TODO: consider moving account modification code into TransactionComponents
 @Entity
 public class FinanceTransaction implements Serializable {
 
@@ -177,149 +176,35 @@ public class FinanceTransaction implements Serializable {
 		this.transactionDate = (Date) transaction.transactionDate.clone();
 	}
 
-	@Override
-	public FinanceTransaction clone() {
-		//TODO: consider removing this
-		FinanceTransaction cloneTransaction = new FinanceTransaction(this.owner, this);
-		for (TransactionComponent component : components)
-			cloneTransaction.addComponent(new TransactionComponent(component.getAccount(), cloneTransaction, component.getRawAmount()));
-		cloneTransaction.transactionDate = new Date();
-		return cloneTransaction;
-	}
-
-	/**
-	 * Adds component to this account
-	 *
-	 * @param component the component to add
-	 */
-	public void addComponent(TransactionComponent component) {
-		this.components.add(component);
-
-		if (component.getAccount() != null)
-			component.getAccount().updateRawBalance(component.getRawAmount());
-	}
-
-	/**
-	 * Adds components to this trabsaction
-	 *
-	 * @param components the components to add
-	 */
-	public void addComponents(List<TransactionComponent> components) {
-		this.components.addAll(components);
-
-		for (TransactionComponent component : components)
-			component.getAccount().updateRawBalance(component.getRawAmount());
-	}
-
-	/**
-	 * Removes a transaction component
-	 *
-	 * @param component the component to be removed
-	 */
-	public void removeComponent(TransactionComponent component) {
-		if (!components.contains(component))
-			return;
-		if (component.getAccount() != null)
-			component.getAccount().updateRawBalance(-component.getRawAmount());
-		component.setAccount(null);
-		component.setTransaction(null);
-		components.remove(component);
-	}
-
-	/**
-	 * Removes all transaction components
-	 *
-	 */
-	public void removeAllComponents() {
-		for (TransactionComponent component : components) {
-			if (component.getAccount() != null)
-				component.getAccount().updateRawBalance(-component.getRawAmount());
-			component.setAccount(null);
-			component.setTransaction(null);
-		}
-		components.clear();
-	}
-
-	/**
-	 * Returns a list of all components associated with an account
-	 *
-	 * @param account the account to search
-	 * @return the list of transaction components associated with the searched
-	 * account
-	 */
-	public List<TransactionComponent> getComponentsForAccount(FinanceAccount account) {
-		//TODO: consider removing this
-		List<TransactionComponent> foundComponents = new LinkedList<>();
-		for (TransactionComponent component : components)
-			if (component.getAccount().equals(account))
-				foundComponents.add(component);
-		return foundComponents;
-	}
-
 	/**
 	 * Returns a list of all components
 	 *
 	 * @return the list of all transaction components
 	 */
 	public List<TransactionComponent> getComponents() {
-		//TODO: do not copy, or return a non-modifiable wrapper?
-		List<TransactionComponent> foundComponents = new LinkedList<>();
-		foundComponents.addAll(components);
-		return foundComponents;
+		return new ArrayList<>(components);
 	}
 
 	/**
-	 * Sets a new amount for a component and updates the transaction and account
-	 * balance
+	 * Adds a TransactionComponent to this account, updating the balance if it's
+	 * a new component
 	 *
-	 * @param component the component to be updated
-	 * @param amount the new amount
+	 * @param component component to add
 	 */
-	public void updateComponentRawAmount(TransactionComponent component, double amount) {
-		updateComponentRawAmount(component, Math.round(amount * Constants.RAW_AMOUNT_MULTIPLIER));
+	void addComponent(TransactionComponent component) {
+		if (components.add(component))
+			component.setTransaction(this);
 	}
 
 	/**
-	 * Sets a new amount for a component and updates the transaction and account
-	 * balance
+	 * Removes a TransactionComponent fromm this account, updating the balance
+	 * if it's was assigned to this account
 	 *
-	 * @param component the component to be updated
-	 * @param amount the new amount
+	 * @param component component to remove
 	 */
-	public void updateComponentRawAmount(TransactionComponent component, long amount) {
-		//TODO: move this into TransactionComponent?
-		if (!components.contains(component))
-			return;
-		long deltaAmount = amount - component.getRawAmount();
-		component.setRawAmount(amount);
-		if (component.getAccount() != null)
-			component.getAccount().updateRawBalance(deltaAmount);
-	}
-
-	/**
-	 * Sets a new account for a component and updates the account balance
-	 *
-	 * @param component the component to be updated
-	 * @param account the new account
-	 */
-	public void updateComponentAccount(TransactionComponent component, FinanceAccount account) {
-		//TODO: move this into TransactionComponent?
-		if (!components.contains(component))
-			return;
-		if (component.getAccount() != null)
-			component.getAccount().updateRawBalance(-component.getRawAmount());
-		component.setAccount(account);
-		if (component.getAccount() != null)
-			component.getAccount().updateRawBalance(component.getRawAmount());
-	}
-
-	/**
-	 * Delete the listed components
-	 *
-	 * @param components the components to delete
-	 */
-	public void removeComponents(List<TransactionComponent> components) {
-		this.components.removeAll(components);
+	void removeComponent(TransactionComponent component) {
+		if (components.remove(component))
+			component.setTransaction(null);
 	}
 
 	/*

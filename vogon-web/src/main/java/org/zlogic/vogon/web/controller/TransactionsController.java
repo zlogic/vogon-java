@@ -199,21 +199,22 @@ public class TransactionsController {
 			if (!existingTransaction.getComponents().contains(newComponent)) {
 				TransactionComponent createdComponent = new TransactionComponent(existingAccount, existingTransaction, newComponent.getRawAmount());
 				em.persist(createdComponent);
-				existingTransaction.addComponent(createdComponent);
 			} else {
 				TransactionComponent existingComponent = existingTransaction.getComponents().get(existingTransaction.getComponents().indexOf(newComponent));
 				if (newComponent.getVersion() != existingComponent.getVersion())
 					throw new ConcurrentModificationException(messages.getString("TRANSACTION_WAS_ALREADY_UPDATED"));
-				existingTransaction.updateComponentAccount(existingComponent, existingAccount);
-				existingTransaction.updateComponentRawAmount(existingComponent, newComponent.getAmount());
+				existingComponent.setAccount(existingAccount);
+				existingComponent.setRawAmount(newComponent.getRawAmount());
 				removedComponents.remove(existingComponent);
 			}
 			existingTransaction = transactionRepository.save(existingTransaction);
 			accountRepository.save(existingAccount);
 		}
 		//Remove deleted components
-		for (TransactionComponent removedComponent : removedComponents)
-			existingTransaction.removeComponent(removedComponent);
+		for (TransactionComponent removedComponent : removedComponents) {
+			removedComponent.setAccount(null);
+			removedComponent.setTransaction(null);
+		}
 		existingTransaction = transactionRepository.saveAndFlush(existingTransaction);
 		accountRepository.flush();
 		return initializationHelper.initializeTransaction(existingTransaction);
@@ -234,7 +235,10 @@ public class TransactionsController {
 			throw new EntityNotFoundException(MessageFormat.format(messages.getString("CANNOT_DELETE_A_NON_EXISTING_TRANSACTION"), id));
 		}
 		FinanceTransactionJson deletedTransactionJson = initializationHelper.initializeTransaction(existingTransaction);
-		existingTransaction.removeAllComponents();
+		for (TransactionComponent component : existingTransaction.getComponents()) {
+			component.setAccount(null);
+			component.setTransaction(null);
+		}
 		transactionRepository.save(existingTransaction);
 		transactionRepository.delete(existingTransaction);
 		return deletedTransactionJson;

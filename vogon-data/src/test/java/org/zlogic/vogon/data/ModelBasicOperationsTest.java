@@ -50,7 +50,6 @@ public class ModelBasicOperationsTest {
 		FinanceAccount account = new FinanceAccount(user, "test account 1", Currency.getInstance("RUB")); //NOI18N
 		FinanceTransaction transaction = new FinanceTransaction(user, "test transaction 1", new String[]{"hello", "world"}, date, FinanceTransaction.Type.EXPENSEINCOME); //NOI18N
 		TransactionComponent component = new TransactionComponent(account, transaction, 3);
-		transaction.addComponent(component);
 
 		entityManager.getTransaction().begin();
 		entityManager.persist(user);
@@ -97,7 +96,6 @@ public class ModelBasicOperationsTest {
 
 		FinanceTransaction transaction = new FinanceTransaction(user, "test transaction 1", null, date, FinanceTransaction.Type.EXPENSEINCOME); //NOI18N
 		TransactionComponent component = new TransactionComponent(account1, transaction, 42);
-		transaction.addComponent(component);
 
 		entityManager.getTransaction().begin();
 		entityManager.persist(component);
@@ -136,7 +134,6 @@ public class ModelBasicOperationsTest {
 		FinanceAccount account2 = new FinanceAccount(user, "test account 2", Currency.getInstance("RUB")); //NOI18N
 		FinanceTransaction transaction = new FinanceTransaction(user, "test transaction 1", null, date, FinanceTransaction.Type.EXPENSEINCOME); //NOI18N
 		TransactionComponent component = new TransactionComponent(account1, transaction, 42);
-		transaction.addComponent(component);
 
 		entityManager.getTransaction().begin();
 		entityManager.persist(user);
@@ -146,8 +143,9 @@ public class ModelBasicOperationsTest {
 		entityManager.persist(transaction);
 		entityManager.getTransaction().commit();
 
+		entityManager.refresh(account1);//This is a trick to update the components hashSet hashcode
 		entityManager.refresh(transaction);//This is a trick to update the components hashSet hashcode
-		transaction.updateComponentRawAmount(component, 50L);
+		component.setRawAmount(50L);
 
 		entityManager.getTransaction().begin();
 		entityManager.persist(transaction);
@@ -186,8 +184,6 @@ public class ModelBasicOperationsTest {
 		FinanceTransaction transaction = new FinanceTransaction(user, "test transaction 1", null, date, FinanceTransaction.Type.EXPENSEINCOME); //NOI18N
 		TransactionComponent component1 = new TransactionComponent(account1, transaction, 42);
 		TransactionComponent component2 = new TransactionComponent(account1, transaction, 160);
-		transaction.addComponent(component1);
-		transaction.addComponent(component2);
 
 		entityManager.getTransaction().begin();
 		entityManager.persist(user);
@@ -220,8 +216,10 @@ public class ModelBasicOperationsTest {
 		assertEquals(Long.valueOf(42), foundTransaction.getComponents().get(0).getRawAmount());
 		assertEquals(Long.valueOf(160), foundTransaction.getComponents().get(1).getRawAmount());
 
+		entityManager.refresh(account1);//This is a trick to update the components hashSet hashcode
+		entityManager.refresh(account2);//This is a trick to update the components hashSet hashcode
 		entityManager.refresh(transaction);//This is a trick to update the components hashSet hashcode
-		transaction.updateComponentAccount(component2, account2);
+		component2.setAccount(account2);
 
 		entityManager.getTransaction().begin();
 		entityManager.persist(transaction);
@@ -261,7 +259,6 @@ public class ModelBasicOperationsTest {
 		FinanceAccount account2 = new FinanceAccount(user, "test account 2", Currency.getInstance("RUB")); //NOI18N
 		FinanceTransaction transaction = new FinanceTransaction(user, "test transaction 1", null, date, FinanceTransaction.Type.EXPENSEINCOME); //NOI18N
 		TransactionComponent component1 = new TransactionComponent(account1, transaction, 42);
-		transaction.addComponent(component1);
 
 		entityManager.getTransaction().begin();
 		entityManager.persist(user);
@@ -293,7 +290,6 @@ public class ModelBasicOperationsTest {
 
 		entityManager.refresh(transaction);//This is a trick to update the components hashSet hashcode
 		TransactionComponent component2 = new TransactionComponent(account1, transaction, 160);
-		transaction.addComponent(component2);
 
 		entityManager.getTransaction().begin();
 		entityManager.persist(transaction);
@@ -334,8 +330,6 @@ public class ModelBasicOperationsTest {
 		FinanceTransaction transaction = new FinanceTransaction(user, "test transaction 1", null, date, FinanceTransaction.Type.EXPENSEINCOME); //NOI18N
 		TransactionComponent component1 = new TransactionComponent(account1, transaction, 42);
 		TransactionComponent component2 = new TransactionComponent(account1, transaction, 160);
-		transaction.addComponent(component1);
-		transaction.addComponent(component2);
 
 		entityManager.getTransaction().begin();
 		entityManager.persist(user);
@@ -368,8 +362,10 @@ public class ModelBasicOperationsTest {
 		assertEquals(Long.valueOf(42), foundTransaction.getComponents().get(0).getRawAmount());
 		assertEquals(Long.valueOf(160), foundTransaction.getComponents().get(1).getRawAmount());
 
+		entityManager.refresh(account1);//This is a trick to update the components hashSet hashcode
 		entityManager.refresh(transaction);//This is a trick to update the components hashSet hashcode
-		transaction.removeComponent(component2);
+		component2.setTransaction(null);
+		component2.setAccount(null);
 
 		entityManager.getTransaction().begin();
 		entityManager.persist(transaction);
@@ -412,12 +408,8 @@ public class ModelBasicOperationsTest {
 		FinanceTransaction transaction2 = new FinanceTransaction(user, "test transaction 2", null, date, FinanceTransaction.Type.EXPENSEINCOME); //NOI18N
 		TransactionComponent component11 = new TransactionComponent(account1, transaction1, 42);
 		TransactionComponent component12 = new TransactionComponent(account2, transaction1, 160);
-		TransactionComponent component21 = new TransactionComponent(account1, transaction1, 7);
-		TransactionComponent component22 = new TransactionComponent(account2, transaction1, 13);
-		transaction1.addComponent(component11);
-		transaction1.addComponent(component12);
-		transaction2.addComponent(component21);
-		transaction2.addComponent(component22);
+		TransactionComponent component21 = new TransactionComponent(account1, transaction2, 7);
+		TransactionComponent component22 = new TransactionComponent(account2, transaction2, 13);
 
 		entityManager.getTransaction().begin();
 		entityManager.persist(user);
@@ -462,13 +454,22 @@ public class ModelBasicOperationsTest {
 		assertEquals(Long.valueOf(7), foundTransaction2.getComponents().get(0).getRawAmount());
 		assertEquals(Long.valueOf(13), foundTransaction2.getComponents().get(1).getRawAmount());
 
-		transaction2.removeAllComponents();
+		entityManager.refresh(account1);//This is a trick to update the components hashSet hashcode
+		entityManager.refresh(account2);//This is a trick to update the components hashSet hashcode
+		entityManager.refresh(transaction2);//This is a trick to update the components hashSet hashcode
+
+		for (TransactionComponent component : transaction2.getComponents()) {
+			component.setTransaction(null);
+			component.setAccount(null);
+		}
 
 		entityManager.getTransaction().begin();
 		entityManager.persist(transaction2);
 		entityManager.remove(transaction2);
 		entityManager.getTransaction().commit();
 
+		assertNull(entityManager.find(TransactionComponent.class, component21.getId()));
+		assertNull(entityManager.find(TransactionComponent.class, component22.getId()));
 		foundAccount1 = entityManager.find(FinanceAccount.class, account1.getId());
 		foundAccount2 = entityManager.find(FinanceAccount.class, account2.getId());
 		//TransactionComponent foundComponent2 = entityManager.find(TransactionComponent.class, component2.getId());
@@ -507,12 +508,8 @@ public class ModelBasicOperationsTest {
 		FinanceTransaction transaction2 = new FinanceTransaction(user, "test transaction 2", null, date, FinanceTransaction.Type.EXPENSEINCOME); //NOI18N
 		TransactionComponent component11 = new TransactionComponent(account1, transaction1, 42);
 		TransactionComponent component12 = new TransactionComponent(account2, transaction1, 160);
-		TransactionComponent component21 = new TransactionComponent(account1, transaction1, 7);
-		TransactionComponent component22 = new TransactionComponent(account2, transaction1, 13);
-		transaction1.addComponent(component11);
-		transaction1.addComponent(component12);
-		transaction2.addComponent(component21);
-		transaction2.addComponent(component22);
+		TransactionComponent component21 = new TransactionComponent(account1, transaction2, 7);
+		TransactionComponent component22 = new TransactionComponent(account2, transaction2, 13);
 
 		entityManager.getTransaction().begin();
 		entityManager.persist(user);

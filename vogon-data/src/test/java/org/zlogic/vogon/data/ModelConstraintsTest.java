@@ -124,12 +124,11 @@ public class ModelConstraintsTest {
 		assertEquals(Long.valueOf(160), foundTransaction.getComponents().get(1).getRawAmount());
 
 		EntityManager entityManagerOther = emf.createEntityManager();
-		FinanceTransaction transactionOther = entityManagerOther.find(FinanceTransaction.class, transaction.getId());
 		TransactionComponent component2Other = entityManagerOther.find(TransactionComponent.class, component2.getId());
 
 		entityManager.refresh(transaction);//This is a trick to update the components hashSet hashcode
-		transaction.updateComponentRawAmount(component1, 314);
-		transactionOther.updateComponentRawAmount(component2Other, 314);
+		component1.setRawAmount(314);
+		component2Other.setRawAmount(314);
 
 		entityManager.getTransaction().begin();
 		entityManagerOther.getTransaction().begin();

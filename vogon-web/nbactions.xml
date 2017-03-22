@@ -12,7 +12,7 @@
             <properties>
                 <exec.args>-Dcatalina.home=target -Dvogon.keystore.file=target/vogonweb.keystore -Dvogon.keystore.pass=password -Djava.io.tmpdir=target -classpath %classpath org.zlogic.vogon.web.Application</exec.args>
                 <exec.executable>java</exec.executable>
-                <Env.ALLOW_REGISTRATION>true</Env.ALLOW_REGISTRATION>
+                <Env.VOGON_ALLOW_REGISTRATION>true</Env.VOGON_ALLOW_REGISTRATION>
             </properties>
         </action>
         <action>
@@ -28,7 +28,7 @@
                 <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -Dcatalina.home=target -Dvogon.keystore.file=target/vogonweb.keystore -Dvogon.keystore.pass=password -Djava.io.tmpdir=target -classpath %classpath org.zlogic.vogon.web.Application</exec.args>
                 <exec.executable>java</exec.executable>
                 <jpda.listen>true</jpda.listen>
-                <Env.ALLOW_REGISTRATION>true</Env.ALLOW_REGISTRATION>
+                <Env.VOGON_ALLOW_REGISTRATION>true</Env.VOGON_ALLOW_REGISTRATION>
             </properties>
         </action>
         <action>
@@ -43,7 +43,7 @@
             <properties>
                 <exec.args>-Dcatalina.home=target -Dvogon.keystore.file=target/vogonweb.keystore -Dvogon.keystore.pass=password -Djava.io.tmpdir=target -classpath %classpath org.zlogic.vogon.web.Application</exec.args>
                 <exec.executable>java</exec.executable>
-                <Env.ALLOW_REGISTRATION>true</Env.ALLOW_REGISTRATION>
+                <Env.VOGON_ALLOW_REGISTRATION>true</Env.VOGON_ALLOW_REGISTRATION>
             </properties>
         </action>
     </actions>

@@ -103,7 +103,6 @@ public class ImportExportData {
 			for (TransactionComponent component : transaction.getComponentsJson()) {
 				TransactionComponent convertedComponent = new TransactionComponent(accountRemapping.get(((TransactionComponentJson) component).getAccountId()), convertedTransaction, component.getRawAmount());
 				em.persist(convertedComponent);
-				convertedTransaction.addComponent(convertedComponent);
 			}
 			em.merge(convertedTransaction);
 		}
