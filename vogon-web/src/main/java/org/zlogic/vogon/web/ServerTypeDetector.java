@@ -175,15 +175,4 @@ public class ServerTypeDetector {
 	public String getKeystorePassword() {
 		return keystorePass;
 	}
-
-	/**
-	 * Returns true if SSL can be used (and false if SSL is not supported or its
-	 * support cannot be verified)
-	 *
-	 * @return true if SSL can be used
-	 */
-	public boolean isSslSupported() {
-		return (getCloudType() != ServerTypeDetector.CloudType.HEROKU)
-				&& (getCloudType() != ServerTypeDetector.CloudType.AZURE);
-	}
 }

@@ -60,21 +60,6 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 	}
 
 	/**
-	 * Configures resource handlers by auto-enabling the WebJarsResourceResolver
-	 *
-	 * @param registry ResourceHandlerRegistry instance
-	 */
-	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		//TODO: remove this and use "spring.resources.chain.enabled:true" in application.properties when upgrading Spring Boot
-		super.addResourceHandlers(registry);
-		registry
-				.addResourceHandler("/webjars/**") //NOI18N
-				.addResourceLocations("classpath:/META-INF/resources/webjars/") //NOI18N
-				.resourceChain(true);
-	}
-
-	/**
 	 * Configures message converters and adds the customized JSON converter
 	 *
 	 * @param converters the converters list to use
