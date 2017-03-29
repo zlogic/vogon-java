@@ -21,6 +21,11 @@ public class VogonConfiguration {
 	private final static String ALLOW_REGISTRATION = "VOGON_ALLOW_REGISTRATION"; //NOI18N
 
 	/**
+	 * The transactions page size
+	 */
+	private static final String TRANSACTIONS_PAGE_SIZE = "VOGON_TRANSACTIONS_PAGE_SIZE"; //NOI18N
+	
+	/**
 	 * Token expires days
 	 */
 	private final static String TOKEN_EXPIRES_DAYS = "VOGON_TOKEN_EXPIRES_DAYS"; //NOI18N
@@ -37,6 +42,18 @@ public class VogonConfiguration {
 		return Boolean.parseBoolean(allowRegistration);
 	}
 
+	/**
+	 * Returns the transactions page size
+	 *
+	 * @return the transactions page size
+	 */
+	public int getTransactionsPageSize() {
+		String transactionsPageSize = System.getenv(TRANSACTIONS_PAGE_SIZE);
+		if (transactionsPageSize == null)
+			transactionsPageSize = "100"; //NOI18N
+		return Integer.parseInt(transactionsPageSize);
+	}
+	
 	/**
 	 * Returns the number of seconds a token lasts before it expires
 	 *

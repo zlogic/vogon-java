@@ -73,12 +73,12 @@ public class SecurityConfig {
 		 */
 		@Override
 		public void configure(HttpSecurity http) throws Exception {
-			(serverTypeDetector.isSslSupported() ? http.requiresChannel().anyRequest().requiresSecure().and() : http)
-					//.authorizeRequests().antMatchers("/oauth/token").fullyAuthenticated().and()
-					.authorizeRequests()
-						.antMatchers("/oauth/token").anonymous() //NOI18N
-						.antMatchers("/service/**", "/oauth/logout").hasAuthority(VogonSecurityUser.AUTHORITY_USER).and() //NOI18N
-					.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+			http.requiresChannel().anyRequest().requiresSecure().and()
+				//.authorizeRequests().antMatchers("/oauth/token").fullyAuthenticated().and()
+				.authorizeRequests()
+					.antMatchers("/oauth/token").anonymous() //NOI18N
+					.antMatchers("/service/**", "/oauth/logout").hasAuthority(VogonSecurityUser.AUTHORITY_USER).and() //NOI18N
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		}
 	}
 

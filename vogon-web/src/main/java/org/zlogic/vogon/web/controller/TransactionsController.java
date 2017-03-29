@@ -36,6 +36,7 @@ import org.zlogic.vogon.data.FinanceAccount;
 import org.zlogic.vogon.data.FinanceTransaction;
 import org.zlogic.vogon.data.FinanceTransaction_;
 import org.zlogic.vogon.data.TransactionComponent;
+import org.zlogic.vogon.web.configuration.VogonConfiguration;
 import org.zlogic.vogon.web.data.AccountRepository;
 import org.zlogic.vogon.web.data.InitializationHelper;
 import org.zlogic.vogon.web.data.TransactionFilterSpecification;
@@ -59,10 +60,6 @@ public class TransactionsController {
 	 */
 	private static final ResourceBundle messages = ResourceBundle.getBundle("org/zlogic/vogon/web/messages");
 	/**
-	 * The page size
-	 */
-	private static final int PAGE_SIZE = 100;//TODO: make this customizable
-	/**
 	 * The EntityManager instance
 	 */
 	@PersistenceContext
@@ -82,6 +79,11 @@ public class TransactionsController {
 	 */
 	@Autowired
 	private InitializationHelper initializationHelper;
+	/**
+	 * The configuration handler
+	 */
+	@Autowired
+	private VogonConfiguration configuration;
 
 	/**
 	 * Sort column options
@@ -142,7 +144,7 @@ public class TransactionsController {
 			filter.setFilterTags(new HashSet<>(filterTags));
 		if (page == null)
 			return initializationHelper.initializeTransactions(transactionRepository.findAll(filter, sort));
-		PageRequest pageRequest = new PageRequest(page, PAGE_SIZE, sort);
+		PageRequest pageRequest = new PageRequest(page, configuration.getTransactionsPageSize(), sort);
 		return initializationHelper.initializeTransactions(transactionRepository.findAll(filter, pageRequest).getContent());
 	}
 
@@ -155,7 +157,7 @@ public class TransactionsController {
 	@RequestMapping(value = "/pages", method = RequestMethod.GET, produces = "application/json")
 	public @ResponseBody
 	long getTransactionsCount(@AuthenticationPrincipal VogonSecurityUser user) {
-		PageRequest pageRequest = new PageRequest(0, PAGE_SIZE);
+		PageRequest pageRequest = new PageRequest(0, configuration.getTransactionsPageSize());
 		return transactionRepository.findByOwner(user.getUser(), pageRequest).getTotalPages();
 	}
 
