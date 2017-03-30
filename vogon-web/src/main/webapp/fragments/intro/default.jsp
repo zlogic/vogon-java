@@ -26,10 +26,8 @@
 		<h3>Private deployment</h3>
 		<p>This is a private Vogon deployment with registration disabled. You can try a public deployment at any of the following deployments:</p>
 		<ul>
-			<li><a href="http://vogon-zlogic42demo.rhcloud.com">OpenShift (WildFly)</a></li>
 			<li><a href="http://vogon-demo.herokuapp.com">Heroku</a> (may take a few minutes to load for the first time)</li>
-			<li><a href="http://vogon-tomcat.azurewebsites.net">Azure (Tomcat)</a> (may take a few minutes to load for the first time)</li>
-			<li><a href="http://vogon-jetty.azurewebsites.net">Azure (Jetty)</a> (may take a few minutes to load for the first time)</li>
+			<li><a href="http://vogon-demo.azurewebsites.net">Azure</a> (may take a few minutes to load for the first time)</li>
 		</ul>
 		<p>
 			<span class="label label-info">Warning</span>
