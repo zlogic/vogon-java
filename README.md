@@ -1,18 +1,8 @@
 # Vogon personal finance tracker
 
-## This Java version is currently going through a massive rewrite/refactoring in the [master](/../../tree/master) branch.
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-### The latest stable tag is [2.2](/../../tree/version_2.2).
-
-The updated version will include automated tests, component upgrades and will have reduced
-resource requirements to work much better on Heroku (and other cloud enviromnent) free tiers.
-
-The update will also get rid of supporting some legacy environments such as Tomcat 7,
-since OpenShift Online 2.0 is no longer available for registration and all other cloud providers
-offer Tomcat 8.
-
-Finally, best practices and features are being ported from the Node.js version of Vogon
-([Vogon-NJ](https://github.com/zlogic/vogon-nj)).
+See [details](#getting-started-on-heroku) below.
 
 ## Project description
 
@@ -28,25 +18,101 @@ Named after the Vogons (http://en.wikipedia.org/wiki/Vogon) race who were known 
 
 **Demos**
 
-Check out the demo deployments:
+Check out the demo deployments (may take a few minutes to load for the first time):
 
-* [OpenShift (WildFly)](http://vogon-zlogic42demo.rhcloud.com)
-* [Heroku](http://vogon-demo.herokuapp.com) (may take a few minutes to load for the first time)
-* [Azure (Tomcat)](http://vogon-tomcat.azurewebsites.net) (may take a few minutes to load for the first time)
-* [Azure (Jetty)](http://vogon-jetty.azurewebsites.net) (may take a few minutes to load for the first time)
+* [Heroku](http://vogon-demo.herokuapp.com)
+* [Azure](http://vogon-demo.azurewebsites.net)
 
-**Prepackaged releases are available on [Github](/../../releases).**
+**Prepackaged standalone versions are available on [Github](/../../releases).**
 
 Requires Java 8 to build. [Releases](/../../releases) contain prepackaged WAR files for:
 
-* WildFly (confirmed to run on the free [OpenShift](http://www.openshift.com/) Bronze account with *WildFly Application Server 9* cartridge installed. Just follow the [instructions](http://help.openshift.com/hc/en-us/articles/202399740) to deploy the WAR file).
-* Tomcat 7 (confirmed to run on the free [OpenShift](http://www.openshift.com/) Bronze account with *Tomcat 7 (JBoss EWS 2.0)* cartridge installed. Just follow the [instructions](http://help.openshift.com/hc/en-us/articles/202399740) to deploy the WAR file).
-* Heroku - just fork this repository and copy into a new Heroku app [through Github](http://devcenter.heroku.com/articles/github-integration)! Alternatively, you can commit a checked out copy of this project's git repository into a new Heroku app.
-* Azure (confirmed to work in the free web app tier) - create a Tomcat or Jetty web app from the marketplace and deploy the Tomcat war.
-
-Check out the readme for more details. Default username/password are Default/Default, make sure to change them to something more secure.
+* WildFly
+* Standalone version which works in Azure and on Heroku
 
 If all works well, the server should auto-redirect to HTTPS, however it's tricky and may not always work - some cloud environments require non-standard ports and/or unencrypted HTTP connections. Double-check that your deployment is redirecting to HTTPS by default!
+
+## Configuration
+
+If you do not want random people using your deployment, you may want to set the `VOGON_ALLOW_REGISTRATION` environment variable to `false`.
+
+See the [documentation](https://devcenter.heroku.com/articles/config-vars) for more details on how to change configuration variables.
+
+You should set `VOGON_ALLOW_REGISTRATION` to `false` only after registering yourself.
+
+Set the `VOGON_TOKEN_EXPIRES_DAYS` variable to the number of days before authorization expires and the user has to re-login (e.g. `14`);
+
+## Getting started on Heroku
+
+You can either
+- fork this repository and copy into a new Heroku app [through Github](http://devcenter.heroku.com/articles/github-integration)
+- or use the [deployment button](#vogon-personal-finance-tracker) above
+- or try the [demo version](https://vogon-demo.herokuapp.com) first
+
+This app requires a PostgreSQL database, the deployment button will automatically create a free database and configure it.
+
+Configuration of Vogon can be done via environment variables, as described in the [Configuration](#configuration) section above.
+
+See the [documentation](https://devcenter.heroku.com/articles/config-vars) for more details on how to change configuration variables.
+
+## Getting started on Azure
+
+You can create a new Web App in Azure and deploy the prepackaged standalone version
+as described in the [Azure documentation](https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-java-custom-upload):
+
+Create a new Web App, *without* selecting an application server like Tomcat or Jetty.
+
+Set the following environment variables ("App Settings") in Application Settings:
+
+Key | Value
+--- | ---
+`VOGON_JAVA_HOME` | `D:\Program Files (x86)\Java\jdk1.8.0_111`
+`VOGON_ALLOW_REGISTRATION` | `true`
+
+Upload the prepackaged standalone war to `site\wwwroot\webapps\ROOT.war`.
+
+Finally, create a `site\wwwroot\web.config file with the following contents:
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <system.webServer>
+    <handlers>
+      <add name="httpPlatformHandler" path="*" verb="*" modules="httpPlatformHandler" resourceType="Unspecified" />
+    </handlers>
+    <httpPlatform processPath="%VOGON_JAVA_HOME%\bin\java.exe"
+        arguments="-Djava.net.preferIPv4Stack=true -Dserver.port=%HTTP_PLATFORM_PORT% -jar &quot;%HOME%\site\wwwroot\webapps\ROOT.war&quot;">
+      <environmentVariables>
+        <environmentVariable name="VOGON_DATABASE_DIR" value="%HOME%\site" />
+      </environmentVariables>
+    </httpPlatform>
+    <rewrite>
+      <rules>
+        <rule name="Redirect to https">
+          <match url="(.*)"/>
+          <conditions>
+            <add input="{HTTPS}" pattern="Off"/>
+          </conditions>
+          <action type="Redirect" url="https://{HTTP_HOST}/{R:1}"/>
+        </rule>
+      </rules>
+    </rewrite>
+  </system.webServer>
+</configuration>
+```
+
+## Standalone deployment
+
+Vogon can also run locally. Download the war file from [Github](/../../releases) and run it from the console:
+
+```
+SET AZURE_MODE=true
+SET VOGON_DATABASE_DIR=%CD%
+SET ALLOW_REGISTRATION=true
+START java -jar ROOT.war
+```
+
+## Other info
 
 2.0 and earlier versions also include a standalone version using Java FX for UI. This version is no longer maintained and may be completely removed in future releases. Requires Java 8 to run.
 

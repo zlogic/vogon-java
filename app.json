@@ -1,0 +1,20 @@
+{
+  "name": "Vogon",
+  "description": "A simple personal finance tracker using Spring, JSP, JPA and AngularJS",
+  "repository": "https://github.com/zlogic/vogon",
+  "logo": "https://raw.githubusercontent.com/zlogic/vogon/master/vogon-web/src/main/webapp/images/vogon-logo-large.png",
+  "keywords": ["spring", "mvc", "jpa", "hibernate", "h2", "finance", "angular"],
+  "env": {
+    "VOGON_ALLOW_REGISTRATION": {
+      "description": "Allow anyone to register",
+      "value": "true"
+    },
+    "VOGON_TOKEN_EXPIRES_DAYS": {
+      "description": "Number of days before authorization expires and the user has to re-login",
+      "value": "14"
+    }
+  },
+  "addons": [
+    "heroku-postgresql"
+  ]
+}
