@@ -1,9 +1,3 @@
 /vogon-data/target/
 /vogon-web/target/
 /vogon-packaging/target/
-/vogon-packaging/vogon-web-wildfly/target/
-/vogon-packaging/vogon-web-tomcat/target/
-/vogon-packaging/vogon-web-standalone/target/
-/vogon-packaging/vogon-web-readme-openshift/target/
-/vogon-packaging/vogon-web-readme-heroku/target/
-/vogon-packaging/webjars-locator-jboss-vfs/target/
