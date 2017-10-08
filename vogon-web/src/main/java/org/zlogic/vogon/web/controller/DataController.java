@@ -103,8 +103,8 @@ public class DataController {
 	public HttpEntity<byte[]> exportDataJSON(@AuthenticationPrincipal VogonSecurityUser userPrincipal) throws RuntimeException {
 		VogonUser user = userRepository.findByUsernameIgnoreCase(userPrincipal.getUsername());
 
-		Sort accountSort = new Sort(new Sort.Order(Sort.Direction.ASC, "id"));//NOI18N
-		Sort transactionSort = new Sort(new Sort.Order(Sort.Direction.ASC, "id"));//NOI18N
+		Sort accountSort = new Sort(Sort.Direction.ASC, "id");//NOI18N
+		Sort transactionSort = new Sort(Sort.Direction.ASC, "id");//NOI18N
 
 		ImportExportData data = new ImportExportData(accountRepository.findByOwner(user, accountSort), transactionRepository.findByOwner(user, transactionSort));
 		byte[] output = null;

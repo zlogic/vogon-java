@@ -16,9 +16,8 @@ import org.springframework.security.web.method.annotation.AuthenticationPrincipa
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
@@ -27,7 +26,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 @Configuration
-public class WebConfig extends WebMvcConfigurerAdapter {
+public class WebConfig implements WebMvcConfigurer {
 
 	/**
 	 * The customized MappingJackson2HttpMessageConverter instance
@@ -42,7 +41,6 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 	 */
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
-		super.addViewControllers(registry);
 		registry.addViewController("/").setViewName("index"); //NOI18N
 	}
 
@@ -68,7 +66,6 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 		converters.add(jacksonMessageConverter);
 		converters.add(new ByteArrayHttpMessageConverter());
-		super.configureMessageConverters(converters);
 	}
 
 	/**
@@ -80,7 +77,6 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 	@Override
 	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 		argumentResolvers.add(new AuthenticationPrincipalArgumentResolver());
-		super.addArgumentResolvers(argumentResolvers);
 	}
 
 	/**

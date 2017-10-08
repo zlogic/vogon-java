@@ -84,7 +84,7 @@ public class TomcatConfigurer implements EmbeddedServletContainerCustomizer {
 		try {
 			log.debug(messages.getString("CONFIGURING_CONNECTOR"));
 			connectorClass = getClass().getClassLoader().loadClass("org.apache.catalina.connector.Connector"); //NOI18N
-			connector = connectorClass.newInstance();
+			connector = connectorClass.getDeclaredConstructor().newInstance();
 			connectorClass.getMethod("setPort", Integer.TYPE).invoke(connector, 8443); //NOI18N
 			connectorClass.getMethod("setSecure", Boolean.TYPE).invoke(connector, true); //NOI18N
 			connectorClass.getMethod("setScheme", String.class).invoke(connector, "https"); //NOI18N

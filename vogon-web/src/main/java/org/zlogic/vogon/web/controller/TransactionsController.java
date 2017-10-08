@@ -144,7 +144,7 @@ public class TransactionsController {
 			filter.setFilterTags(new HashSet<>(filterTags));
 		if (page == null)
 			return initializationHelper.initializeTransactions(transactionRepository.findAll(filter, sort));
-		PageRequest pageRequest = new PageRequest(page, configuration.getTransactionsPageSize(), sort);
+		PageRequest pageRequest = PageRequest.of(page, configuration.getTransactionsPageSize(), sort);
 		return initializationHelper.initializeTransactions(transactionRepository.findAll(filter, pageRequest).getContent());
 	}
 
@@ -157,7 +157,7 @@ public class TransactionsController {
 	@RequestMapping(value = "/pages", method = RequestMethod.GET, produces = "application/json")
 	public @ResponseBody
 	long getTransactionsCount(@AuthenticationPrincipal VogonSecurityUser user) {
-		PageRequest pageRequest = new PageRequest(0, configuration.getTransactionsPageSize());
+		PageRequest pageRequest = PageRequest.of(0, configuration.getTransactionsPageSize());
 		return transactionRepository.findByOwner(user.getUser(), pageRequest).getTotalPages();
 	}
 
