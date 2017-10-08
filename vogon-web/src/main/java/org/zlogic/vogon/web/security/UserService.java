@@ -68,14 +68,13 @@ public class UserService implements UserDetailsService {
 	}
 
 	/**
-	 * Updates user from database (e.g. to reflect
+	 * Updates user from database (e.g. to reflect changes)
 	 *
 	 * @param securityUser user to update
 	 */
 	public void refreshUser(VogonSecurityUser securityUser) {
 		if (securityUser.getUser() != null) {
-			VogonUser user = userRepository.findOne(securityUser.getUser().getId());
-			securityUser.setUser(user);
+			userRepository.findById(securityUser.getUser().getId()).ifPresent(securityUser::setUser);
 		}
 	}
 

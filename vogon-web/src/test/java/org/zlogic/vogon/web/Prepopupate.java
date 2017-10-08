@@ -63,7 +63,7 @@ public class Prepopupate {
 		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		VogonUser user01 = new VogonUser("user01", passwordEncoder.encode("mypassword"));
 		VogonUser user02 = new VogonUser("user02", passwordEncoder.encode("mypassword2"));
-		userRepository.save(Arrays.asList(user01, user02));
+		userRepository.saveAll(Arrays.asList(user01, user02));
 
 		FinanceAccount account1 = new FinanceAccount(user01, "test account 1", Currency.getInstance("RUB"));
 		account1.setIncludeInTotal(true);
@@ -74,7 +74,7 @@ public class Prepopupate {
 		FinanceAccount account3 = new FinanceAccount(user02, "test account 3", Currency.getInstance("RUB"));
 		account3.setIncludeInTotal(true);
 		account3.setShowInList(true);
-		accountRepository.save(Arrays.asList(account1, account2, account3));
+		accountRepository.saveAll(Arrays.asList(account1, account2, account3));
 
 		FinanceTransaction transaction1 = new FinanceTransaction(user01, "test transaction 1", new String[]{"hello", "world"}, parseJSONDate("2014-02-17"), FinanceTransaction.Type.EXPENSEINCOME);
 		FinanceTransaction transaction3 = new FinanceTransaction(user01, "test transaction 3", new String[]{}, parseJSONDate("2014-02-17"), FinanceTransaction.Type.TRANSFER);
@@ -85,8 +85,8 @@ public class Prepopupate {
 		TransactionComponent component3 = new TransactionComponent(account2, transaction2, -314);
 		TransactionComponent component4 = new TransactionComponent(account1, transaction2, 272);
 		TransactionComponent component5 = new TransactionComponent(account3, transaction4, 100 * 100);
-		transactionRepository.save(Arrays.asList(transaction1, transaction3, transaction2, transaction4));
-		accountRepository.save(Arrays.asList(account1, account2, account3));
+		transactionRepository.saveAll(Arrays.asList(transaction1, transaction3, transaction2, transaction4));
+		accountRepository.saveAll(Arrays.asList(account1, account2, account3));
 	}
 
 	/**
@@ -105,7 +105,7 @@ public class Prepopupate {
 		TransactionComponent component41 = new TransactionComponent(account1, transaction4, -144 * 100);
 		TransactionComponent component42 = new TransactionComponent(account2, transaction4, 144 * 100);
 		transactionRepository.save(transaction4);
-		accountRepository.save(Arrays.asList(account1, account2));
+		accountRepository.saveAll(Arrays.asList(account1, account2));
 	}
 
 	/**

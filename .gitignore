@@ -1,3 +1,7 @@
+# Compiler output
 /vogon-data/target/
 /vogon-web/target/
 /vogon-packaging/target/
+# IDEA files
+*.iml
+/.idea/

@@ -67,10 +67,9 @@ public class JpaTokenStore implements TokenStore {
 	 */
 	@Override
 	public OAuth2Authentication readAuthentication(String token) {
-		AuthAccessToken accessToken = accessTokenRepository.findOne(token);
-		if (accessToken == null)
-			return null;
-		return SerializationUtils.deserialize(accessToken.getAuthentication());
+		return accessTokenRepository.findById(token)
+				.map(accessToken -> SerializationUtils.<OAuth2Authentication>deserialize(accessToken.getAuthentication()))
+				.orElse(null);
 	}
 	
 	/**
@@ -106,10 +105,9 @@ public class JpaTokenStore implements TokenStore {
 	 */
 	@Override
 	public OAuth2AccessToken readAccessToken(String tokenValue) {
-		AuthAccessToken accessToken = accessTokenRepository.findOne(tokenValue);
-		if (accessToken == null)
-			return null;
-		return SerializationUtils.deserialize(accessToken.getToken());
+		return accessTokenRepository.findById(tokenValue)
+				.map(accessToken -> SerializationUtils.<OAuth2AccessToken>deserialize(accessToken.getToken()))
+				.orElse(null);
 	}
 
 	/**
@@ -119,7 +117,7 @@ public class JpaTokenStore implements TokenStore {
 	 */
 	@Override
 	public void removeAccessToken(OAuth2AccessToken token) {
-		accessTokenRepository.delete(token.getValue());
+		accessTokenRepository.deleteById(token.getValue());
 	}
 
 	/**
@@ -142,8 +140,9 @@ public class JpaTokenStore implements TokenStore {
 	 */
 	@Override
 	public OAuth2RefreshToken readRefreshToken(String tokenValue) {
-		AuthRefreshToken refreshToken = refreshTokenRepository.findOne(tokenValue);
-		return SerializationUtils.deserialize(refreshToken.getToken());
+		return refreshTokenRepository.findById(tokenValue)
+				.map(token -> SerializationUtils.<OAuth2RefreshToken>deserialize(token.getToken()))
+				.orElse(null);
 	}
 
 	/**
@@ -167,7 +166,7 @@ public class JpaTokenStore implements TokenStore {
 	 */
 	@Override
 	public void removeRefreshToken(OAuth2RefreshToken token) {
-		refreshTokenRepository.delete(token.getValue());
+		refreshTokenRepository.deleteById(token.getValue());
 	}
 
 	/**

@@ -1,0 +1,1 @@
+TODO Remove this directory once https://github.com/spring-projects/spring-boot/issues/10456 is fixed.

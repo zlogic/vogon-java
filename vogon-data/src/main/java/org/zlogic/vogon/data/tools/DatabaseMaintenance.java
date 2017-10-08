@@ -79,7 +79,7 @@ public class DatabaseMaintenance {
 	 */
 	public void refreshAccountBalance(FinanceAccount account, EntityManager entityManager) {
 		FinanceAccount tempAccount = entityManager.find(FinanceAccount.class, account.getId());
-		List<TransactionComponent> accountComponents = new ArrayList(tempAccount.getComponents());
+		List<TransactionComponent> accountComponents = new ArrayList<>(tempAccount.getComponents());
 		//Remove all components to force reset balance
 		for (TransactionComponent component : accountComponents)
 			component.setAccount(null);

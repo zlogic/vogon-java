@@ -58,9 +58,9 @@ public class ServerTypeDetector {
 		 */
 		HEROKU,
 		/**
-		 * Azure
+		 * Standalone
 		 */
-		AZURE
+		STANDALONE
 	}
 
 	/**
@@ -112,8 +112,8 @@ public class ServerTypeDetector {
 			return CloudType.HEROKU;
 		if (hasEnvironmentVariable(Pattern.compile("^OPENSHIFT_.*$"))) //NOI18N
 			return CloudType.OPENSHIFT;
-		if (hasEnvironmentVariable(Pattern.compile("^AZURE_.*$"))) //NOI18N
-			return CloudType.AZURE;
+		if (hasEnvironmentVariable(Pattern.compile("^STANDALONE$"))) //NOI18N
+			return CloudType.STANDALONE;
 		return CloudType.NONE;
 	}
 

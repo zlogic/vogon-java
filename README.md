@@ -106,7 +106,7 @@ Finally, create a `site\wwwroot\web.config file with the following contents:
 Vogon can also run locally. Download the war file from [Github](/../../releases) and run it from the console:
 
 ```
-SET AZURE_MODE=true
+SET STANDALONE=true
 SET VOGON_DATABASE_DIR=%CD%
 SET ALLOW_REGISTRATION=true
 START java -jar ROOT.war

@@ -134,7 +134,7 @@ public class TransactionsController {
 					break;
 			}
 		if (sortDirection == null)
-			sortDirection = Sort.Direction.fromStringOrNull(null);
+			sortDirection = Sort.Direction.fromOptionalString(null).orElse(null);
 		Sort sort = new JpaSort(sortDirection, sortAttribute, FinanceTransaction_.id);
 		//TODO: Optimize if https://jira.spring.io/browse/DATAJPA-209 gets implemented?
 		TransactionFilterSpecification filter = new TransactionFilterSpecification(user.getUser());

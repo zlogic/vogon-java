@@ -92,7 +92,7 @@ public class AccountsController {
 				component.setAccount(null);
 				component.setTransaction(null);
 			}
-			transactionRepository.save(updatedTransactions);
+			transactionRepository.saveAll(updatedTransactions);
 			accountRepository.delete(removedAccount);
 		}
 		accountRepository.flush();

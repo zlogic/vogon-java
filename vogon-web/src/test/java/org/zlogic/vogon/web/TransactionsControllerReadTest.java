@@ -377,7 +377,7 @@ public class TransactionsControllerReadTest {
 			FinanceTransaction generatedTransaction = new FinanceTransaction(user01, "page transaction " + i, null, new Date(), FinanceTransaction.Type.EXPENSEINCOME);
 			addTransactions.add(generatedTransaction);
 		}
-		transactionRepository.save(addTransactions);
+		transactionRepository.saveAll(addTransactions);
 
 		List<JSONObject> receivedTransactions = new ArrayList<>();
 
