@@ -108,7 +108,7 @@ Vogon can also run locally. Download the war file from [Github](/../../releases)
 ```
 SET STANDALONE=true
 SET VOGON_DATABASE_DIR=%CD%
-SET ALLOW_REGISTRATION=true
+SET VOGON_ALLOW_REGISTRATION=true
 START java -jar ROOT.war
 ```
 
