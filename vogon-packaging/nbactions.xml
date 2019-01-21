@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>CUSTOM-Build Tomcat package</actionName>
+            <displayName>Build Tomcat package</displayName>
+            <goals>
+                <goal>clean</goal>
+                <goal>install</goal>
+            </goals>
+            <activatedProfiles>
+                <activatedProfile>tomcat</activatedProfile>
+            </activatedProfiles>
+        </action>
+        <action>
+            <actionName>CUSTOM-Build WildFly package</actionName>
+            <displayName>Build WildFly package</displayName>
+            <goals>
+                <goal>clean</goal>
+                <goal>install</goal>
+            </goals>
+            <activatedProfiles>
+                <activatedProfile>wildfly</activatedProfile>
+            </activatedProfiles>
+        </action>
+    </actions>

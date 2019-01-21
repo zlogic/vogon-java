@@ -13,9 +13,9 @@ import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
-import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
-import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 @Configuration
-public class TomcatConfigurer implements EmbeddedServletContainerCustomizer {
+public class TomcatConfigurer implements WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
 
 	/**
 	 * The logger
@@ -50,13 +50,13 @@ public class TomcatConfigurer implements EmbeddedServletContainerCustomizer {
 	/**
 	 * Configures URI encoding for Tomcat container
 	 *
-	 * @param container ConfigurableEmbeddedServletContainer instance to
+	 * @param factory ConfigurableServletWebServerFactory instance to
 	 * configure
 	 */
-	private void configureUriEncoding(ConfigurableEmbeddedServletContainer container) {
+	private void configureUriEncoding(ConfigurableServletWebServerFactory factory) {
 		try {
 			log.debug(messages.getString("CONFIGURING_ENCODING_FOR_TOMCAT_8"));
-			container.getClass().getMethod("setUriEncoding", Charset.class).invoke(container, utf8Charset); //NOI18N
+			factory.getClass().getMethod("setUriEncoding", Charset.class).invoke(factory, utf8Charset); //NOI18N
 			return;
 		} catch (NoSuchMethodException ex) {
 			log.debug(messages.getString("SERVER_IS_NOT_TOMCAT_8"));
@@ -69,10 +69,10 @@ public class TomcatConfigurer implements EmbeddedServletContainerCustomizer {
 	/**
 	 * Configures SSL for Tomcat container
 	 *
-	 * @param container ConfigurableEmbeddedServletContainer instance to
+	 * @param factory ConfigurableServletWebServerFactory instance to
 	 * configure
 	 */
-	private void configureSSL(ConfigurableEmbeddedServletContainer container) {
+	private void configureSSL(ConfigurableServletWebServerFactory factory) {
 		if (serverTypeDetector.getKeystoreFile().isEmpty() || serverTypeDetector.getKeystorePassword().isEmpty()) {
 			log.debug(messages.getString("KEYSTORE_FILE_OR_PASSWORD_NOT_DEFINED"));
 			return;
@@ -112,7 +112,7 @@ public class TomcatConfigurer implements EmbeddedServletContainerCustomizer {
 			log.debug(messages.getString("ADDING_CONNECTOR_TO_TOMCATEMBEDDEDSERVLETCONTAINERFACTORY"));
 			Object connectors = Array.newInstance(connectorClass, 1);
 			Array.set(connectors, 0, connector);
-			container.getClass().getMethod("addAdditionalTomcatConnectors", connectors.getClass()).invoke(container, connectors); //NOI18N
+			factory.getClass().getMethod("addAdditionalTomcatConnectors", connectors.getClass()).invoke(factory, connectors); //NOI18N
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 			throw new RuntimeException(messages.getString("CANNOT_ADD_CONNECTOR_TO_TOMCATEMBEDDEDSERVLETCONTAINERFACTORY"), ex);
 		}
@@ -122,13 +122,13 @@ public class TomcatConfigurer implements EmbeddedServletContainerCustomizer {
 	 * Customizes the ConfigurableEmbeddedServletContainer by configuring Tomcat
 	 * options
 	 *
-	 * @param container the ConfigurableEmbeddedServletContainer to customize
+	 * @param factory the ConfigurableServletWebServerFactory to customize
 	 */
 	@Override
-	public void customize(ConfigurableEmbeddedServletContainer container) {
-		if (container instanceof TomcatEmbeddedServletContainerFactory) {
-			configureUriEncoding(container);
-			configureSSL(container);
+	public void customize(ConfigurableServletWebServerFactory factory) {
+		if (factory instanceof TomcatServletWebServerFactory) {
+			configureUriEncoding(factory);
+			configureSSL(factory);
 		}
 	}
 }

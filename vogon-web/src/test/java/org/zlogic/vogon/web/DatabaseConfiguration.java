@@ -9,7 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
 /**
  * Test-specific database configuration to use an in-memory database and replace {@link org.zlogic.vogon.web.DatabaseConfiguration#entityManagerFactory()}
@@ -38,11 +40,13 @@ public class DatabaseConfiguration {
 	 * @return the test-specific LocalContainerEntityManagerFactoryBean
 	 */
 	@Bean
+	@Primary
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(){
 		LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
 		entityManagerFactory.setPersistenceUnitName("VogonPU"); //NOI18N
 		entityManagerFactory.getJpaPropertyMap().putAll(getJpaProperties());
 		entityManagerFactory.setPersistenceXmlLocation("classpath:META-INF/persistence.xml"); //NOI18N
+		entityManagerFactory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 		return entityManagerFactory;
 	}
 }

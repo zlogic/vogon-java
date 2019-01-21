@@ -32,7 +32,7 @@ import org.springframework.web.client.HttpStatusCodeException;
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = {Application.class, DatabaseConfiguration.class})
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, properties = "spring.main.allow-bean-definition-overriding=true", classes = {Application.class, DatabaseConfiguration.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class CurrenciesControllerTest {
 

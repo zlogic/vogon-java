@@ -5,9 +5,9 @@
  */
 package org.zlogic.vogon.web;
 
-import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
-import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
-import org.springframework.boot.context.embedded.MimeMappings;
+import org.springframework.boot.web.server.MimeMappings;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -16,18 +16,18 @@ import org.springframework.context.annotation.Configuration;
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 @Configuration
-public class ServletConfiguration implements EmbeddedServletContainerCustomizer {
+public class ServletConfiguration implements WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
 	/**
 	 * Customizes the ConfigurableEmbeddedServletContainer by adding extra MIME
 	 * types
 	 *
-	 * @param container the ConfigurableEmbeddedServletContainer to customize
+	 * @param factory the ConfigurableServletWebServerFactory to customize
 	 */
 	@Override
-	public void customize(ConfigurableEmbeddedServletContainer container) {
+	public void customize(ConfigurableServletWebServerFactory factory) {
 		MimeMappings mappings = new MimeMappings(MimeMappings.DEFAULT);
 		mappings.add("woff", "application/font-woff"); //NOI18N
 		mappings.add("eot", "application/vnd.ms-fontobject"); //NOI18N
-		container.setMimeMappings(mappings);
+		factory.setMimeMappings(mappings);
 	}
 }

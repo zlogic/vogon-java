@@ -13,7 +13,7 @@ import java.util.Date;
 import java.util.List;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.zlogic.vogon.data.FinanceAccount;
@@ -60,7 +60,7 @@ public class Prepopupate {
 	 * Prepopulate the database with default test data
 	 */
 	public void prepopulate() {
-		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
 		VogonUser user01 = new VogonUser("user01", passwordEncoder.encode("mypassword"));
 		VogonUser user02 = new VogonUser("user02", passwordEncoder.encode("mypassword2"));
 		userRepository.saveAll(Arrays.asList(user01, user02));

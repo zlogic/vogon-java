@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -121,6 +122,7 @@ public class SecurityConfig {
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			clients.inMemory().withClient("vogonweb") //NOI18N
 					.authorizedGrantTypes("password", "authorization_code") //NOI18N
+					.secret("{noop}") //NOI18N
 					.authorities(VogonSecurityUser.AUTHORITY_USER)
 					.scopes("read", "write", "trust") //NOI18N
 					.resourceIds(resourceId)
@@ -151,6 +153,24 @@ public class SecurityConfig {
 		@Override
 		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
 			oauthServer.allowFormAuthenticationForClients();
+		}
+	}
+
+	/**
+	 * Configuration for AuthenticationManager
+	 */
+	@Configuration
+	public class AuthenticationMananagerProvider extends WebSecurityConfigurerAdapter {
+
+		/**
+		 * Creates the AuthenticationManager instance
+		 * @return the AuthenticationManager instance
+		 * @throws Exception if WebSecurityConfigurerAdapter throws an exception
+		 */
+		@Bean
+		@Override
+		public AuthenticationManager authenticationManagerBean() throws Exception {
+			return super.authenticationManagerBean();
 		}
 	}
 

@@ -21,8 +21,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -125,6 +127,7 @@ public class PersistenceConfiguration {
 		entityManagerFactory.setPersistenceUnitName("VogonPU"); //NOI18N
 		entityManagerFactory.getJpaPropertyMap().putAll(getDatabaseConfiguration());
 		entityManagerFactory.setPersistenceXmlLocation("classpath:META-INF/persistence.xml"); //NOI18N
+		entityManagerFactory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 		return entityManagerFactory;
 	}
 
@@ -139,6 +142,16 @@ public class PersistenceConfiguration {
 		JpaTransactionManager transactionManager = new JpaTransactionManager();
 		transactionManager.setEntityManagerFactory(emf);
 		return transactionManager;
+	}
+
+	/**
+	 * Creates the PersistenceExceptionTranslationPostProcessor to translate Hibernate exceptions into generic Spring exceptions
+	 *
+	 * @return the PersistenceExceptionTranslationPostProcessor
+	 */
+	@Bean
+	public PersistenceExceptionTranslationPostProcessor exceptionTranslation() {
+		return new PersistenceExceptionTranslationPostProcessor();
 	}
 
 	/**

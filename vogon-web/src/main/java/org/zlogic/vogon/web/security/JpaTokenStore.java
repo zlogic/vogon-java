@@ -90,11 +90,7 @@ public class JpaTokenStore implements TokenStore {
 		byte[] authenticationBytes = SerializationUtils.serialize(authentication);
 
 		AuthAccessToken storeToken = new AuthAccessToken(tokenId, clientId, authenticationId, username, refreshToken, expires, tokenBytes, authenticationBytes);
-		try {
-			accessTokenRepository.save(storeToken);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
+		accessTokenRepository.save(storeToken);
 	}
 
 	/**

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>CUSTOM-Remove artifacts</actionName>
+            <displayName>Remove artifacts</displayName>
+            <goals>
+                <goal>build-helper:remove-project-artifact</goal>
+            </goals>
+        </action>
+    </actions>

@@ -39,7 +39,7 @@ import org.zlogic.vogon.web.data.UserRepository;
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = {Application.class, DatabaseConfiguration.class})
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, properties = "spring.main.allow-bean-definition-overriding=true", classes = {Application.class, DatabaseConfiguration.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class RegistrationControllerTest {
 
@@ -173,7 +173,7 @@ public class RegistrationControllerTest {
 			fail("Expected an HttpServerErrorException to be thrown");
 		} catch (HttpStatusCodeException ex) {
 			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
-			jsonExpectationhelper.assertJsonEqual("{message:\"" + MessageFormat.format(messages.getString("CANNOT_REGISTER_USER_BECAUSE_OF_ERROR"), "javax.persistence.PersistenceException: org.hibernate.PropertyValueException: not-null property references a null or transient value : org.zlogic.vogon.data.VogonUser.username") + "\"}", ex.getResponseBodyAsString());
+			jsonExpectationhelper.assertJsonEqual("{message:\"" + MessageFormat.format(messages.getString("CANNOT_REGISTER_USER_BECAUSE_OF_ERROR"), "org.hibernate.PropertyValueException: not-null property references a null or transient value : org.zlogic.vogon.data.VogonUser.username") + "\"}", ex.getResponseBodyAsString());
 		}
 		assertEquals(0, userRepository.count());
 	}
@@ -193,7 +193,7 @@ public class RegistrationControllerTest {
 			fail("Expected an HttpServerErrorException to be thrown");
 		} catch (HttpStatusCodeException ex) {
 			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
-			jsonExpectationhelper.assertJsonEqual("{message:\"" + MessageFormat.format(messages.getString("CANNOT_REGISTER_USER_BECAUSE_OF_ERROR"), "javax.persistence.PersistenceException: org.hibernate.PropertyValueException: not-null property references a null or transient value : org.zlogic.vogon.data.VogonUser.password") + "\"}", ex.getResponseBodyAsString());
+			jsonExpectationhelper.assertJsonEqual("{message:\"" + MessageFormat.format(messages.getString("CANNOT_REGISTER_USER_BECAUSE_OF_ERROR"), "org.hibernate.PropertyValueException: not-null property references a null or transient value : org.zlogic.vogon.data.VogonUser.password") + "\"}", ex.getResponseBodyAsString());
 		}
 		assertEquals(0, userRepository.count());
 	}

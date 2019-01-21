@@ -28,7 +28,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.zlogic.vogon.data.FinanceAccount;
@@ -47,7 +46,7 @@ import org.zlogic.vogon.web.data.UserRepository;
  * @author Dmitry Zolotukhin [zlogic@gmail.com]
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes = {Application.class, DatabaseConfiguration.class})
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, properties = "spring.main.allow-bean-definition-overriding=true", classes = {Application.class, DatabaseConfiguration.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class TransactionsControllerWriteTest {
 
