@@ -34,11 +34,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-compiler-plugin</artifactId>
-						<configuration>
-							<excludes>
-								<exclude>**/WildFlyConfiguration.java</exclude>
-							</excludes>
-						</configuration>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -100,11 +95,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-compiler-plugin</artifactId>
-						<configuration>
-							<excludes>
-								<exclude>**/WildFlyConfiguration.java</exclude>
-							</excludes>
-						</configuration>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -267,10 +257,6 @@
 					</exclusions>
 				</dependency>
 				<dependency>
-					<groupId>commons-fileupload</groupId>
-					<artifactId>commons-fileupload</artifactId>
-				</dependency>
-				<dependency>
 					<groupId>org.webjars</groupId>
 					<artifactId>webjars-locator-jboss-vfs</artifactId>
 				</dependency>
@@ -294,11 +280,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-compiler-plugin</artifactId>
-						<configuration>
-							<excludes>
-								<exclude>**/WildFlyConfiguration.java</exclude>
-							</excludes>
-						</configuration>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
